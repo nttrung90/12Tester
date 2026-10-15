@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "938773440385",
+    "project_id": "cross-testers",
+    "storage_bucket": "cross-testers.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938773440385:android:741e822471ec599bf7ea80",
+        "android_client_info": {
+          "package_name": "com.ntt.crosstest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9XrJPaLI9tIytiPyY65yPrbk-MqBksVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

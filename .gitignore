@@ -1,0 +1,25 @@
+# Secrets — never commit
+local.properties
+*.jks
+*.keystore
+
+# Build outputs
+build/
+app/build/
+*.apk
+*.aab
+*.ap_
+
+# Gradle
+.gradle/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kotlin
+.kotlin/

@@ -1,0 +1,11 @@
+# Copy file này thành "local.properties" (cùng thư mục) rồi điền giá trị thật.
+# File local.properties đã nằm trong .gitignore — KHÔNG commit.
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_ANON_KEY=<anon public key — Supabase Dashboard > Project Settings > API>
+GOOGLE_WEB_CLIENT_ID=<Web OAuth Client ID — Google Cloud Console > Credentials>
+
+# Cấu hình Keystore ký số bản Release (để build file .aab tải lên Play Store):
+# KEYSTORE_FILE=release.jks
+# KEYSTORE_PASSWORD=your_keystore_password
+# KEY_ALIAS=your_key_alias
+# KEY_PASSWORD=your_key_password

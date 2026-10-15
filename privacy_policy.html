@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - 12 Cross Testers</title>
+  <meta name="description" content="Chính sách quyền riêng tư / Privacy Policy cho ứng dụng 12 Cross Testers (com.ntt.crosstest)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --warning-bg: #fffbeb;
+      --warning-border: #fcd34d;
+      --warning-text: #92400e;
+      --success-bg: #f0fdf4;
+      --success-border: #86efac;
+      --success-text: #166534;
+      --danger-bg: #fef2f2;
+      --danger-border: #fca5a5;
+      --danger-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 40px 36px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .lang-toggle {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .meta-info {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .meta-item strong {
+      color: var(--text);
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .callout {
+      padding: 18px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid;
+    }
+
+    .callout-info {
+      background: var(--primary-light);
+      border-left-color: var(--primary);
+      color: #1e40af;
+    }
+
+    .callout-warning {
+      background: var(--warning-bg);
+      border-left-color: var(--warning-border);
+      color: var(--warning-text);
+    }
+
+    .callout-danger {
+      background: var(--danger-bg);
+      border-left-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+
+    .callout-success {
+      background: var(--success-bg);
+      border-left-color: var(--success-border);
+      color: var(--success-text);
+    }
+
+    .callout-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-content {
+      display: block;
+    }
+
+    .lang-vi, .lang-en {
+      display: none;
+    }
+
+    .visible {
+      display: block;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .table-box {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.95rem;
+    }
+
+    .table-box th, .table-box td {
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    .table-box th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+      padding-top: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 24px 18px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <span class="app-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          12 Cross Testers
+        </span>
+        <div class="lang-toggle">
+          <button type="button" class="lang-btn active" id="btn-vi" onclick="switchLang('vi')">Tiếng Việt</button>
+          <button type="button" class="lang-btn" id="btn-en" onclick="switchLang('en')">English</button>
+        </div>
+      </div>
+      
+      <h1 id="page-title">Chính sách quyền riêng tư</h1>
+      
+      <div class="meta-info">
+        <span class="meta-item"><strong>Ứng dụng / App:</strong> 12 Cross Testers</span>
+        <span class="meta-item"><strong>Package:</strong> <code>com.ntt.crosstest</code></span>
+        <span class="meta-item"><strong>Cập nhật / Updated:</strong> 15/10/2026</span>
+      </div>
+    </header>
+
+    <!-- PHẦN TIẾNG VIỆT -->
+    <div id="content-vi" class="lang-vi visible">
+      <h2>1. Giới thiệu</h2>
+      <p>
+        Chào mừng bạn đến với <strong>12 Cross Testers</strong>. Ứng dụng được xây dựng như một nền tảng cộng đồng phi thương mại giúp các nhà phát triển ứng dụng Android độc lập cùng nhau kiểm thử chéo ứng dụng, đáp ứng yêu cầu <strong>Closed Testing 14 ngày với 20 người kiểm thử</strong> của Google Play Console trước khi phát hành chính thức lên Google Play Store.
+      </p>
+      <p>
+        Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn và minh bạch hoàn toàn về các loại dữ liệu được xử lý trong ứng dụng.
+      </p>
+
+      <h2>2. Dữ liệu và thông tin chúng tôi thu thập</h2>
+      <p>Khi bạn truy cập và sử dụng dịch vụ của 12 Cross Testers, chúng tôi có thể thu thập các danh mục thông tin sau:</p>
+      <ul>
+        <li><strong>Thông tin tài khoản:</strong> Địa chỉ email, tên hiển thị (display name) và đường dẫn ảnh đại diện (avatar) nhận được khi bạn đăng nhập qua Google Sign-In hoặc đăng ký qua tài khoản Email.</li>
+        <li><strong>Thông tin chiến dịch kiểm thử (Nội dung do người dùng đăng tải):</strong> Tên ứng dụng, package name, liên kết Google Play, link testing track, mô tả ứng dụng và tài khoản thử nghiệm mẫu (nếu bạn tự nguyện cung cấp cho người test).</li>
+        <li><strong>Dữ liệu báo cáo và đánh giá:</strong> Ảnh chụp màn hình ứng dụng kiểm thử (lưu trữ an toàn trên Firebase Storage), ý kiến đóng góp, báo cáo lỗi, điểm đánh giá 1-5 sao và lịch sử check-in ngày.</li>
+        <li><strong>Dữ liệu giao dịch Credit:</strong> Lịch sử tích lũy điểm thưởng Credit, mở thêm vị trí đăng app (Slot) và dữ liệu thanh toán thông qua Google Play In-App Billing. <em>Chúng tôi không thu thập hoặc lưu trữ thông tin thẻ tín dụng/ngân hàng của bạn.</em></li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          Quyền truy cập đặc biệt: QUERY_ALL_PACKAGES (Kiểm tra ứng dụng đã cài đặt)
+        </div>
+        <p>Ứng dụng có khai báo quyền <code>android.permission.QUERY_ALL_PACKAGES</code>. Quyền này được sử dụng giới hạn nghiêm ngặt cho mục đích:</p>
+        <ol style="margin-bottom: 8px;">
+          <li><strong>Xác thực cài đặt cục bộ:</strong> Đảm bảo người kiểm thử đã thực sự cài đặt ứng dụng mục tiêu trên máy trước khi hệ thống ghi nhận lượt check-in hôm nay (ngăn ngừa gian lận điểm danh ảo).</li>
+          <li><strong>Mở nhanh ứng dụng:</strong> Cho phép tester nhấn nút để mở ngay ứng dụng cần test từ chi tiết chiến dịch.</li>
+          <li><strong>Hỗ trợ điền thông tin nhanh:</strong> Cho phép chủ app chọn từ danh sách ứng dụng đang cài trên máy để tự động trích xuất tên app và icon khi tạo chiến dịch.</li>
+        </ol>
+        <p><strong>CAM KẾT BẢO MẬT:</strong> Thao tác quét này diễn ra <strong>100% CỤC BỘ TRÊN THIẾT BỊ (ON-DEVICE)</strong>. Chúng tôi <strong>KHÔNG</strong> tải danh sách ứng dụng đã cài đặt của bạn lên máy chủ, <strong>KHÔNG</strong> theo dõi hành vi sử dụng và <strong>KHÔNG BAO GIỜ</strong> chia sẻ dữ liệu này cho bên thứ ba hoặc mạng quảng cáo.</p>
+      </div>
+
+      <h2>3. Quyền thông báo (POST_NOTIFICATIONS)</h2>
+      <p>
+        Trên Android 13 trở lên, ứng dụng xin cấp quyền gửi thông báo để nhắc nhở bạn check-in lúc 20:00 hằng ngày nếu bạn có chiến dịch đang tham gia nhưng chưa test trong ngày. Bạn có thể bật hoặc tắt thông báo này bất kỳ lúc nào trong tab <strong>Hồ sơ -> Cài đặt</strong>.
+      </p>
+
+      <h2>4. Các dịch vụ của bên thứ ba</h2>
+      <p>Ứng dụng tích hợp các dịch vụ bên thứ ba uy tín để vận hành:</p>
+      <table class="table-box">
+        <thead>
+          <tr>
+            <th>Dịch vụ</th>
+            <th>Nhà cung cấp</th>
+            <th>Mục đích sử dụng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google Sign-In / Credential Manager</td>
+            <td>Google LLC</td>
+            <td>Xác thực đăng nhập tài khoản bảo mật</td>
+          </tr>
+          <tr>
+            <td>Supabase</td>
+            <td>Supabase Inc.</td>
+            <td>Lưu trữ cơ sở dữ liệu đám mây với bảo mật Row Level Security (RLS)</td>
+          </tr>
+          <tr>
+            <td>Firebase Storage</td>
+            <td>Google Cloud</td>
+            <td>Lưu trữ tệp hình ảnh chụp màn hình kiểm thử và biểu tượng app</td>
+          </tr>
+          <tr>
+            <td>Google Play In-App Billing</td>
+            <td>Google LLC</td>
+            <td>Xử lý các giao dịch nạp gói Credit an toàn</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>5. Bảo mật dữ liệu</h2>
+      <p>
+        Chúng tôi áp dụng các tiêu chuẩn an toàn kỹ thuật cao nhất: Toàn bộ đường truyền mạng được mã hóa qua giao thức SSL/TLS (HTTPS). Quyền truy cập cơ sở dữ liệu được kiểm soát chặt chẽ ở cấp độ từng dòng (Row Level Security - RLS), ngăn chặn người dùng này truy cập hay can thiệp trái phép vào dữ liệu của người dùng khác.
+      </p>
+
+      <div class="callout callout-danger">
+        <div class="callout-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Chính sách Xóa tài khoản và Dữ liệu người dùng (Account & Data Deletion)
+        </div>
+        <p>Tuân thủ nghiêm ngặt chính sách bảo vệ dữ liệu của Google Play, bạn có quyền yêu cầu xóa vĩnh viễn tài khoản và toàn bộ dữ liệu cá nhân liên quan bất cứ lúc nào:</p>
+        <p><strong>Cách thức gửi yêu cầu xóa:</strong></p>
+        <ul>
+          <li>Gửi email từ địa chỉ email đăng ký tài khoản của bạn đến: <a href="mailto:firstntt90@gmail.com"><strong>firstntt90@gmail.com</strong></a></li>
+          <li>Tiêu đề email: <code>[Yêu cầu xóa tài khoản] 12 Cross Testers</code></li>
+          <li>Nội dung: Nêu rõ email đăng ký và yêu cầu xóa vĩnh viễn tài khoản.</li>
+        </ul>
+        <p><strong>Thời hạn xử lý:</strong> Sau khi tiếp nhận, chúng tôi sẽ xác minh và xóa vĩnh viễn hồ sơ tài khoản, lịch sử chiến dịch, ảnh chụp màn hình và lịch sử credit trong vòng <strong>7 ngày làm việc</strong>.</p>
+      </div>
+
+      <h2>6. Quyền riêng tư của trẻ em</h2>
+      <p>
+        Ứng dụng hướng tới cộng đồng các nhà phát triển và kiểm thử viên phần mềm từ 13 tuổi trở lên. Chúng tôi không cố ý thu thập bất kỳ dữ liệu định danh nào của trẻ em dưới 13 tuổi. Nếu bạn phát hiện trẻ em dưới 13 tuổi đã gửi thông tin cá nhân cho chúng tôi, vui lòng liên hệ email hỗ trợ để chúng tôi xóa dữ liệu ngay lập tức.
+      </p>
+
+      <h2>7. Thông tin liên hệ</h2>
+      <p>Nếu bạn có bất kỳ câu hỏi, thắc mắc hoặc yêu cầu nào về chính sách quyền riêng tư này, vui lòng liên hệ:</p>
+      <ul>
+        <li><strong>Đơn vị phát triển:</strong> NTT Dev Team</li>
+        <li><strong>Email hỗ trợ:</strong> <a href="mailto:firstntt90@gmail.com">firstntt90@gmail.com</a></li>
+        <li><strong>Quốc gia:</strong> Việt Nam</li>
+      </ul>
+    </div>
+
+    <!-- PHẦN ENGLISH -->
+    <div id="content-en" class="lang-en">
+      <h2>1. Introduction</h2>
+      <p>
+        Welcome to <strong>12 Cross Testers</strong>. This application is an independent community platform created to help Android software developers mutually test apps and collectively satisfy Google Play's <strong>14-day / 20-tester Closed Testing requirement</strong> before publishing apps to production.
+      </p>
+      <p>
+        We take your privacy seriously and are committed to complete transparency regarding how data is processed within the application.
+      </p>
+
+      <h2>2. Information and Data We Collect</h2>
+      <p>When you access or use 12 Cross Testers, we may collect and process the following categories of data:</p>
+      <ul>
+        <li><strong>Account Information:</strong> Email address, display name, and avatar URL provided when signing in through Google Sign-In or creating an email-based account.</li>
+        <li><strong>Testing Campaign Data (User-Generated Content):</strong> Application title, Android package name, Google Play URL, testing track link, app description, and optional demo test credentials voluntarily shared with testers.</li>
+        <li><strong>Testing Proof and Feedback:</strong> Screenshots uploaded by testers (securely stored in Firebase Storage), review comments, bug issue reports, star ratings (1 to 5 stars), and daily check-in timestamps.</li>
+        <li><strong>Credit Logs & Purchases:</strong> Reward credit history, slot unlocks, and in-app credit purchase records via Google Play In-App Billing. <em>We do not collect or store credit card numbers or banking data.</em> All billing operations are handled exclusively by Google Play.</li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          Special Device Permission: QUERY_ALL_PACKAGES (Package Visibility)
+        </div>
+        <p>The Application declares <code>android.permission.QUERY_ALL_PACKAGES</code> solely for the following legitimate technical features:</p>
+        <ol style="margin-bottom: 8px;">
+          <li><strong>On-Device Installation Verification:</strong> To verify that the target closed-testing application is genuinely installed on the device before confirming a daily test check-in, preventing fraudulent check-ins.</li>
+          <li><strong>Direct App Launch:</strong> Providing a shortcut button to open the installed testing app directly from within the campaign detail view.</li>
+          <li><strong>Campaign Setup Autofill:</strong> Allowing developers to choose an installed app on their device to automatically extract the app title and launcher icon.</li>
+        </ol>
+        <p><strong>ZERO-TRANSMISSION COMMITMENT:</strong> All package checks are performed <strong>100% LOCALLY ON-DEVICE</strong>. We <strong>NEVER</strong> transmit or upload your installed applications list to any remote server, <strong>DO NOT</strong> profile user habits, and <strong>NEVER</strong> share or sell this inventory to advertisers or analytics brokers.</p>
+      </div>
+
+      <h2>3. Notification Permission (POST_NOTIFICATIONS)</h2>
+      <p>
+        On Android 13+, the app requests permission to post local reminder notifications at 20:00 every day if you have uncompleted check-ins for active campaigns. You can toggle this reminder on or off anytime under <strong>Profile -> Settings</strong>.
+      </p>
+
+      <h2>4. Third-Party Services</h2>
+      <p>We integrate trusted third-party providers:</p>
+      <table class="table-box">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Provider</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google Sign-In / Credential Manager</td>
+            <td>Google LLC</td>
+            <td>Secure one-tap authentication</td>
+          </tr>
+          <tr>
+            <td>Supabase</td>
+            <td>Supabase Inc.</td>
+            <td>Cloud PostgreSQL database with Row Level Security (RLS)</td>
+          </tr>
+          <tr>
+            <td>Firebase Storage</td>
+            <td>Google Cloud</td>
+            <td>Secure hosting for testing screenshots and icons</td>
+          </tr>
+          <tr>
+            <td>Google Play In-App Billing</td>
+            <td>Google LLC</td>
+            <td>Safe credit top-up purchase processing</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>5. Data Security</h2>
+      <p>
+        All network traffic between the app and backend services is protected via HTTPS/TLS encryption. Database access is strictly governed by Row Level Security (RLS) rules, ensuring users can only manage their own profile and campaign records.
+      </p>
+
+      <div class="callout callout-danger">
+        <div class="callout-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Account and Data Deletion Policy
+        </div>
+        <p>In accordance with Google Play developer policies, you have the right to request the permanent deletion of your account and all associated personal data:</p>
+        <p><strong>How to submit a deletion request:</strong></p>
+        <ul>
+          <li>Email us from your registered account address at: <a href="mailto:firstntt90@gmail.com"><strong>firstntt90@gmail.com</strong></a></li>
+          <li>Subject: <code>[Account Deletion Request] 12 Cross Testers</code></li>
+          <li>Body: State your registered email address and confirm your request for permanent deletion.</li>
+        </ul>
+        <p><strong>Processing Time:</strong> Upon receipt and verification, your account profile, test campaigns, uploaded screenshots, and credit history will be permanently wiped within <strong>7 business days</strong>.</p>
+      </div>
+
+      <h2>6. Children's Privacy</h2>
+      <p>
+        This application is intended for software developers and testers aged 13 and older. We do not intentionally collect personal data from children under 13. If you believe a child under 13 has submitted personal information, please contact us immediately for prompt removal.
+      </p>
+
+      <h2>7. Contact Information</h2>
+      <p>If you have any questions or feedback regarding this Privacy Policy, please reach out to:</p>
+      <ul>
+        <li><strong>Developer:</strong> NTT Dev Team</li>
+        <li><strong>Support Email:</strong> <a href="mailto:firstntt90@gmail.com">firstntt90@gmail.com</a></li>
+        <li><strong>Location:</strong> Vietnam</li>
+      </ul>
+    </div>
+
+    <footer>
+      &copy; 2026 12 Cross Testers &middot; NTT Dev Team &middot; All Rights Reserved
+    </footer>
+  </div>
+
+  <script>
+    function switchLang(lang) {
+      const viContent = document.getElementById('content-vi');
+      const enContent = document.getElementById('content-en');
+      const btnVi = document.getElementById('btn-vi');
+      const btnEn = document.getElementById('btn-en');
+      const pageTitle = document.getElementById('page-title');
+
+      if (lang === 'en') {
+        viContent.classList.remove('visible');
+        enContent.classList.add('visible');
+        btnVi.classList.remove('active');
+        btnEn.classList.add('active');
+        pageTitle.innerText = 'Privacy Policy';
+        document.documentElement.lang = 'en';
+      } else {
+        enContent.classList.remove('visible');
+        viContent.classList.add('visible');
+        btnEn.classList.remove('active');
+        btnVi.classList.add('active');
+        pageTitle.innerText = 'Chính sách quyền riêng tư';
+        document.documentElement.lang = 'vi';
+      }
+    }
+  </script>
+</body>
+</html>

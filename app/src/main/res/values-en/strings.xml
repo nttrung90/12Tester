@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">12 Cross Testers</string>
+
+    <!-- Auth -->
+    <string name="sign_in_title">Welcome to 12 Cross Testers</string>
+    <string name="sign_in_desc">Sign in to test apps together with the community and pass the 14-day Play Store closed testing.</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_guest">Continue as Guest</string>
+
+    <!-- Tabs -->
+    <string name="tab_discover">Home</string>
+    <string name="tab_quests">Quests</string>
+    <string name="tab_mine">My Apps</string>
+    <string name="tab_leaderboard">Leaderboard</string>
+    <string name="tab_profile">Profile</string>
+    <string name="post_app_btn">Post App</string>
+    <string name="post_app_title">Post My App</string>
+    <!-- Post App Guide & Banner -->
+    <string name="post_app_guide_banner_title">Testing App Setup Guide</string>
+    <string name="post_app_guide_banner_unconfirmed">Please view guide to unlock posting app</string>
+    <string name="post_app_guide_banner_confirmed">Google Group added (Tap to view again)</string>
+    <string name="post_app_guide_title">Testing App Setup Guide</string>
+    <string name="post_app_guide_intro">To support each other with cross-testing, please complete the following steps:</string>
+    <string name="post_app_guide_major_step_1_title">Step 1: Join Google Group</string>
+    <string name="post_app_guide_major_step_1_desc">Join Google group: https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_open_group_btn">Join Google Group</string>
+    <string name="post_app_guide_group_url">https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_major_step_2_title">Step 2: Setup on Google Play Console:</string>
+    <string name="post_app_guide_step_1">Go to Google Play Console dashboard</string>
+    <string name="post_app_guide_step_2">Select your app to test</string>
+    <string name="post_app_guide_step_3">Select Testing and release</string>
+    <string name="post_app_guide_step_4">Testing -&gt; Closed testing</string>
+    <string name="post_app_guide_step_5">Testers</string>
+    <string name="post_app_guide_step_6">Enter Google Group: testappLV@googlegroups.com</string>
+    <string name="post_app_guide_group_email">testappLV@googlegroups.com</string>
+    <string name="post_app_guide_confirm_btn">Tôi đã thêm Google Group: testappLV@googlegroups.com vào Play Console của tôi</string>
+    <string name="post_app_guide_copied_toast">Google Group email copied</string>
+    <string name="post_app_guide_cant_open_browser">Unable to open web browser</string>
+    <string name="post_app_slot_usage">Slots in use: %1$d/%2$d.</string>
+    <string name="post_app_slot_dialog_title">App Slot Policy</string>
+    <string name="post_app_slot_dialog_msg">Each account has 1 permanent default slot and can unlock up to 6 slots (each extra slot is valid for 16 days).\n\n• Slot 2: 50 Credits\n• Slot 3: 100 Credits\n• Slot 4 - 6: 200 Credits/slot\n\nYou can unlock extra slots to run multiple Closed Testing apps simultaneously or close finished apps to free up slots.</string>
+    <string name="slot_number_title">Slot %1$d</string>
+    <string name="slot_default_badge">Default · Permanent</string>
+    <string name="slot_active_days">%1$d days left</string>
+    <string name="slot_expired_badge">Expired</string>
+    <string name="slot_locked_badge">Locked</string>
+    <string name="slot_in_use">Running</string>
+    <string name="slot_empty">Empty</string>
+    <string name="slot_unlock_btn">Unlock (%1$d C)</string>
+    <string name="slot_renew_btn">Renew (+16 days)</string>
+    <string name="slot_unlock_dialog_title">Unlock Slot %1$d</string>
+    <string name="slot_renew_dialog_title">Renew Slot %1$d</string>
+    <string name="slot_unlock_dialog_desc">Unlock app posting slot #%1$d for 16 days for %2$d Credits. Would you like to proceed?</string>
+    <string name="slot_renew_dialog_desc">Extend Slot #%1$d by 16 days for %2$d Credits. Would you like to proceed?</string>
+    <string name="slot_unlock_confirm_btn">Unlock Now (%1$d Credits)</string>
+    <string name="slot_renew_confirm_btn">Renew Now (%1$d Credits)</string>
+    <string name="slot_unlock_success">Successfully unlocked Slot %1$d for 16 days!</string>
+    <string name="slot_renew_success">Successfully renewed Slot %1$d (+16 days)!</string>
+    <string name="slot_manage_title">Manage App Slots</string>
+    <string name="slot_manage_subtitle">Up to 6 slots. Each extra slot is active for 16 days.</string>
+    <string name="slot_select_label">Select Slot for this app:</string>
+    <string name="error_slot_previous_not_active">You must unlock/activate Slot %1$d before Slot %2$d.</string>
+    <string name="error_insufficient_credits_for_slot">You need %1$d Credits to unlock this slot (you have %2$d Credits).</string>
+    <string name="error_slot_full">All unlocked slots are in use. Close an existing app or unlock a new slot.</string>
+    <string name="label_play_store_link">Play Store Link</string>
+    <string name="hint_play_store_link">https://play.google.com/store/a...</string>
+    <string name="helper_play_store_link">Paste app link from Play Console / Play Store. App auto-fills package, name, icon below.</string>
+    <string name="section_app_info">App Info</string>
+    <string name="label_package_name">Package name</string>
+    <string name="helper_package_name">Auto-extracted from link. Matches applicationId in Play Console.</string>
+    <string name="label_app_name_optional">App name (optional)</string>
+    <string name="helper_app_name_optional">Optional: when you install this app on this device and open it in \"My Apps\", the app automatically fills in name + icon. Bot testers also fill in after &lt;= 1 hour.</string>
+    <string name="label_icon_link_optional">Icon link (optional)</string>
+    <string name="helper_icon_link_optional">Auto-extracted from Play / installed app / Play Store screenshot, or upload from device. Optional: bot testers fill in after &lt;= 1 hour.</string>
+    <string name="btn_upload_icon_from_device">Upload icon from device</string>
+    <string name="section_test_account_prefix">Test credentials </string>
+    <string name="section_test_account_required">required</string>
+    <string name="section_test_account_suffix"> if app requires login</string>
+    <string name="label_test_username">Username</string>
+    <string name="label_test_password">Password</string>
+    <string name="btn_post_app">Post App</string>
+    <string name="paste_clipboard">Paste</string>
+    <string name="slot_full_warning">You are using %1$d/%2$d slots. Close existing apps before posting a new one.</string>
+
+    <!-- Guest & Leaderboard -->
+    <string name="guest_mode_title">Guest Mode</string>
+    <string name="guest_mode_desc">Sign in with a Google account to create campaigns, save test history, and join the tester leaderboard.</string>
+    <string name="guest_my_apps_desc">Sign in to view and manage your created campaigns and joined test campaigns.</string>
+    <string name="require_login_title">Sign-in Required</string>
+    <string name="require_login_msg">Please sign in with Google to use this feature.</string>
+    <string name="login_now">Sign in now</string>
+    <string name="leaderboard_title">Credit Leaderboard</string>
+    <string name="leaderboard_subtitle">Top community members with the highest Credits</string>
+    <string name="leaderboard_empty">No members on the leaderboard yet.</string>
+    <string name="test_count_format">%1$d tests</string>
+    <string name="app_count_format">%1$d apps</string>
+    <string name="rank_format">#%1$d</string>
+
+    <!-- Home -->
+    <string name="search_hint">Search by app name…</string>
+    <string name="create_campaign">New campaign</string>
+    <string name="empty_list">No data yet.</string>
+    <string name="created_by_me">Campaigns I created</string>
+    <string name="joined_by_me">Campaigns I joined</string>
+    <string name="target_line">Goal: %1$d testers · %2$d days</string>
+    <string name="status_open">Open</string>
+    <string name="status_closed">Closed</string>
+
+    <!-- Detail -->
+    <string name="join">Join</string>
+    <string name="leave">Leave campaign</string>
+    <string name="leave_confirm">Are you sure you want to leave this campaign?</string>
+    <string name="checkin_today">Open App &amp; Check-in</string>
+    <string name="checked_in">Checked in today ✓</string>
+    <string name="app_not_installed_title">App Not Installed</string>
+    <string name="app_not_installed_msg">\"%1$s\" (%2$s) is not installed on this device. You need to install and launch the app to test before checking in.</string>
+    <string name="download_app_now">Download App Now</string>
+    <string name="progress_testers">Testers: %1$d/%2$d</string>
+    <string name="progress_days">Top streak: %1$d/%2$d days</string>
+    <string name="member_days">%1$d days</string>
+    <string name="joined_on">Joined %1$s</string>
+    <string name="section_members">Testers (%1$d)</string>
+    <string name="section_feedback">Ratings &amp; feedback (%1$d)</string>
+    <string name="your_rating">Your rating</string>
+    <string name="comment_hint">Feedback for the app owner…</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="open_play_link">Open Play link</string>
+    <string name="open_testing_link">Open testing link</string>
+    <string name="close_campaign">Close campaign</string>
+    <string name="close_confirm">Close this campaign? No new testers will be able to join.</string>
+
+    <!-- Create -->
+    <string name="label_app_name">App name *</string>
+    <string name="label_package">Package name *</string>
+    <string name="label_play_url">Play Store link</string>
+    <string name="label_testing_url">Testing track link</string>
+    <string name="label_description">Description</string>
+    <string name="label_start_date">Start date (yyyy-MM-dd)</string>
+    <string name="create">Create campaign</string>
+
+    <!-- Profile & Settings -->
+    <string name="logout">Sign out</string>
+    <string name="logout_confirm">Are you sure you want to sign out?</string>
+    <string name="reminder_setting">Daily check-in reminder (8:00 PM)</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_desc">Change display language</string>
+    <string name="language_system_default">System default</string>
+    <string name="language_system_desc">Follows device language (English if not Vietnamese)</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="language_english">English</string>
+    <string name="dialog_select_language">Select language</string>
+
+    <!-- Credit & Daily Quest -->
+    <string name="daily_quest_title">Daily Quest</string>
+    <string name="daily_quest_desc">Test at least 1 app today to keep your streak and earn rewards</string>
+    <string name="daily_quest_completed">✓ Daily quest completed</string>
+    <string name="daily_quest_completed_compact">Daily quest completed (%1$d app)</string>
+    <string name="daily_quest_pending">Quest pending</string>
+    <string name="daily_quest_warning">⚠️ Test at least 1 app before midnight to avoid inactivity Credit penalty!</string>
+    <string name="daily_quest_safe">Your Credits are protected for today.</string>
+    <string name="daily_quest_progress">%1$d/1 app</string>
+    <string name="daily_reward_progress">Rewarded %1$d/30 apps today (+%2$d Credits)</string>
+    <string name="daily_task_goal">Goal: Test at least 1 app today to protect your Credits from daily inactivity penalties.</string>
+    <string name="daily_penalty_info_btn">Penalty Rules</string>
+    <string name="daily_penalty_dialog_title">Daily Inactivity Penalty Policy</string>
+    <string name="daily_penalty_dialog_content">The system automatically checks at 00:05 daily. If you didn\'t test any app on the previous day, Credits are deducted based on consecutive missed days:\n\n• Day 1 missed: -1% Credits\n• Day 2 missed: -2% Credits\n• Day 3 missed: -5% Credits\n• Day 4+ missed: -10% Credits\n(Minimum deduction is 1 Credit if balance &gt; 0)\n\n💡 Testing at least 1 app before midnight immediately protects your Credits and resets your missed streak to 0!</string>
+    <string name="daily_task_test_now">Find App to Test 🚀</string>
+    <string name="daily_missed_streak_alert">Missed %1$d days in a row! You will lose %2$d%% Credits if you don\'t test today.</string>
+    <string name="daily_guest_prompt">Sign in to track your daily testing streak and protect your Credits from automatic penalties.</string>
+
+    <!-- Quests System -->
+    <string name="quest_section_title">Testing Quests</string>
+    <string name="quest_tab_daily">Daily Quests</string>
+    <string name="quest_tab_weekly">Weekly Quests</string>
+    <string name="quest_daily_progress_format">%1$d / 50 tests</string>
+    <string name="quest_weekly_progress_format">%1$d / 300 tests</string>
+    <string name="quest_daily_note">1-30 apps: +2 Credits/app | 31-50: +1 Credit/app | 51+: 0 Credits (counts towards quests)</string>
+    <string name="quest_weekly_note">Weekly cycle runs from Monday 00:00 to Sunday 23:59 (Resets weekly)</string>
+    <string name="quest_milestone_daily_10">Test 10 apps</string>
+    <string name="quest_milestone_daily_20">Test 20 apps</string>
+    <string name="quest_milestone_daily_50">Test 50+ apps</string>
+    <string name="quest_milestone_weekly_150">Test 150 apps</string>
+    <string name="quest_milestone_weekly_300">Test 300+ apps</string>
+    <string name="quest_reward_badge">+%1$d Credits</string>
+    <string name="quest_claim_btn">Claim %1$d Credits</string>
+    <string name="quest_claimed_btn">Claimed ✓</string>
+    <string name="quest_progress_text">%1$d/%2$d</string>
+    <string name="quest_collapse">Collapse</string>
+    <string name="quest_expand">Expand</string>
+    <string name="quest_congrats_title">Congratulations!</string>
+    <string name="quest_require_login">Please sign in to track and claim quest rewards</string>
+
+    <string name="credit_badge_format">%1$d Credits</string>
+    <string name="credit_title">Credit Balance</string>
+    <string name="credit_history_title">Credit History</string>
+    <string name="credit_history_empty">No credit transactions yet.</string>
+    <string name="missed_streak_warning">Warning: Missed %1$d days in a row!</string>
+    <string name="create_campaign_credit_warning">⚠️ You must have more than 10 Credits to create a campaign (Currently have %1$d Credits). Please test other apps to earn more Credits!</string>
+    <string name="insufficient_credits_error">You must have more than 10 Credits to create a campaign.</string>
+
+    <!-- Top-up Credits -->
+    <string name="topup_btn">Top-up</string>
+    <string name="topup_sheet_title">Top-up Credits</string>
+    <string name="topup_current_balance_format">Current balance: %1$d Credits</string>
+    <string name="topup_rate_banner_title">Fixed exchange rate: 1$ = 20 Credits</string>
+    <string name="topup_rate_banner_desc">Credits are used to unlock app slots (Slot 2-6), reward testers, and resolve penalties.</string>
+    <string name="topup_select_package_title">Select Credit Package</string>
+    <string name="topup_selected_package_label">Selected package</string>
+    <string name="topup_payment_method_label">Payment method</string>
+    <string name="topup_confirm_purchase_btn">Get %1$d Credits · %2$s</string>
+    <string name="topup_processing">Processing purchase…</string>
+    <string name="topup_disclaimer_note">Securely billed via Google Play Billing. Credits are credited instantly.</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="setup_missing_title">Supabase not configured</string>
+    <string name="setup_missing_desc">Create a local.properties file in the project root with SUPABASE_URL and SUPABASE_ANON_KEY (see README), then rebuild.</string>
+
+    <!-- Notification -->
+    <string name="notif_reminder_title">Check-in reminder today ⏰</string>
+    <string name="notif_reminder_text">You haven\'t checked in: %1$s</string>
+    <string name="notif_more_campaigns"> and %1$d other campaigns</string>
+    <string name="notif_reminder_big_text">Open %1$s and tap \"Tested today\" for: %2$s</string>
+    <string name="notif_channel_name">Check-in reminder</string>
+    <string name="notif_channel_desc">Reminds you to check in test apps daily at 20:00</string>
+
+    <!-- Auth & Email/Password -->
+    <string name="auth_or_divider">Or use Email &amp; Password</string>
+    <string name="tab_sign_in">Sign In</string>
+    <string name="tab_sign_up">Create Account</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_confirm_password">Confirm Password</string>
+    <string name="label_display_name_signup">Display Name</string>
+    <string name="btn_sign_in_email">Sign In with Email</string>
+    <string name="btn_sign_up_email">Create Account</string>
+    <string name="switch_to_sign_up">Don\'t have an account? Sign up</string>
+    <string name="switch_to_sign_in">Already have an account? Sign in</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="forgot_password_title">Reset Password</string>
+    <string name="forgot_password_desc">Enter your account email to receive a password reset link:</string>
+    <string name="forgot_password_success">Password reset email sent! Please check your inbox.</string>
+    <string name="btn_send_reset_email">Send Reset Email</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+
+    <!-- Change Password -->
+    <string name="change_password_title">Change Password</string>
+    <string name="change_password_desc">Update your account password</string>
+    <string name="label_new_password">New Password (min 6 chars)</string>
+    <string name="label_confirm_new_password">Confirm New Password</string>
+    <string name="change_password_success">Password changed successfully!</string>
+    <string name="change_password_error_match">Passwords do not match!</string>
+    <string name="change_password_error_short">Password must be at least 6 characters!</string>
+
+    <!-- Validation & Auth Errors -->
+    <string name="error_empty_email">Please enter an email address.</string>
+    <string name="error_invalid_email">Invalid email format.</string>
+    <string name="error_empty_password">Please enter a password.</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="account_locked_error">Your account has been locked by an administrator. Please contact Admin.</string>
+
+    <!-- Admin Panel -->
+    <string name="admin_panel_title">Admin Panel</string>
+    <string name="admin_panel_desc">Manage members, lock/unlock accounts &amp; adjust Credits</string>
+    <string name="admin_badge">Admin</string>
+    <string name="member_badge">Member</string>
+    <string name="admin_search_users_hint">Search by email, name…</string>
+    <string name="admin_filter_all">All</string>
+    <string name="admin_filter_active">Active</string>
+    <string name="admin_filter_locked">Locked</string>
+    <string name="admin_filter_admin">Admin</string>
+    <string name="admin_lock_user">Lock Account</string>
+    <string name="admin_unlock_user">Unlock</string>
+    <string name="admin_adjust_credits_btn">Grant / Deduct Credit</string>
+    <string name="admin_lock_confirm_title">Lock Account</string>
+    <string name="admin_lock_confirm_msg">Are you sure you want to lock \"%1$s\"? This user will not be able to sign in or perform any actions.</string>
+    <string name="admin_unlock_confirm_title">Unlock Account</string>
+    <string name="admin_unlock_confirm_msg">Unlock account \"%1$s\"? User will be able to sign in normally.</string>
+    <string name="admin_adjust_credits_dialog_title">Adjust Credits</string>
+    <string name="admin_type_grant">Grant Credit (+)</string>
+    <string name="admin_type_deduct">Deduct Credit (-)</string>
+    <string name="admin_credit_amount">Credit Amount</string>
+    <string name="admin_reason_hint">Reason (e.g. Active tester reward, penalty...)</string>
+    <string name="admin_action_success">Operation successful!</string>
+    <string name="status_active">Active</string>
+    <string name="status_locked">Locked</string>
+    <string name="admin_total_users_count">%1$d users</string>
+    <string name="admin_empty_users">No users match your criteria.</string>
+
+    <!-- Warnings, Account Lock & Auto-accept -->
+    <string name="account_locked_title">Account Temporarily Locked</string>
+    <string name="account_locked_reason_3_warnings">Your account has received 3 warnings in 1 week (or was locked by an Administrator).</string>
+    <string name="unlock_opt_email_admin">Contact Admin</string>
+    <string name="unlock_opt_100_credits">Deduct 100 Credits to Unlock</string>
+    <string name="admin_email_contact">firstntt90@gmail.com</string>
+    <string name="warning_tester_msg">Hệ thống ghi nhận bạn tham gia kiểm thử chưa nghiêm túc, đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
+    <string name="warning_owner_msg">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
+    <string name="auto_accept_24h_notice">App owners have up to 24 hours to review. After 24 hours, the system will auto-approve and award 2 Credits to the tester.</string>
+</resources>
