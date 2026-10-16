@@ -8,6 +8,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.ntt.crosstest.data.AppConfigRepository
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.SessionCacheManager
@@ -15,6 +16,7 @@ import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
 import com.ntt.crosstest.work.ReminderWorker
+import com.ntt.crosstest.work.UpdateCheckWorker
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -27,6 +29,8 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     lateinit var campaignRepository: CampaignRepository
         private set
     lateinit var settingsRepository: SettingsRepository
+        private set
+    lateinit var appConfigRepository: AppConfigRepository
         private set
 
     override fun newImageLoader(): ImageLoader {
@@ -60,10 +64,12 @@ class TestCheoApp : Application(), ImageLoaderFactory {
             val client = SupabaseHolder.init(url, key)
             authRepository = AuthRepository(client)
             campaignRepository = CampaignRepository(client)
+            appConfigRepository = AppConfigRepository(client)
         }
 
         settingsRepository = SettingsRepository(this)
         scheduleDailyReminder()
+        scheduleUpdateCheck()
     }
 
     /**
@@ -97,6 +103,24 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     }
 
     /**
+     * Checks the remote app config in the background (every 12h, first run after
+     * ~10 minutes) and notifies when a newer version is available. The in-app
+     * launch check (MainActivity) still handles blocking force updates.
+     */
+    fun scheduleUpdateCheck() {
+        val request = PeriodicWorkRequestBuilder<UpdateCheckWorker>(12, TimeUnit.HOURS)
+            .setInitialDelay(10, TimeUnit.MINUTES)
+            .addTag(UPDATE_CHECK_TAG)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            UPDATE_CHECK_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    }
+
+    /**
      * Single sign-out path used by every screen: clears the remote session
      * (best effort), the in-memory repository cache and the on-disk session
      * snapshot so the next user/guest never sees the previous account's data.
@@ -114,5 +138,7 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     companion object {
         const val REMINDER_WORK_NAME = "daily_checkin_reminder"
         const val REMINDER_TAG = "checkin_reminder"
+        const val UPDATE_CHECK_WORK_NAME = "app_update_check"
+        const val UPDATE_CHECK_TAG = "app_update_check"
     }
 }

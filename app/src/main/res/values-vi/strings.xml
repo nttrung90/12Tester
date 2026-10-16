@@ -33,9 +33,12 @@
     <string name="post_app_guide_title">Hướng dẫn đăng app kiểm thử</string>
     <string name="post_app_guide_intro">Để anh em có thể hỗ trợ Test chéo cho nhau, mọi người cần làm những bước sau đây:</string>
     <string name="post_app_guide_major_step_1_title">Bước 1: Vào (join) Google Group</string>
-    <string name="post_app_guide_major_step_1_desc">Vào (join) Google group: https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_major_step_1_desc">Vào (join) Google group để tham gia danh sách kiểm thử chéo:</string>
     <string name="post_app_guide_open_group_btn">Vào Google Group</string>
     <string name="post_app_guide_group_url">https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_group_link_label">Liên kết Google Group:</string>
+    <string name="post_app_guide_copy_link_btn">Sao chép link</string>
+    <string name="post_app_guide_copied_link_toast">Đã sao chép liên kết Google Group</string>
     <string name="post_app_guide_major_step_2_title">Bước 2: Thao tác trên Google Play Console:</string>
     <string name="post_app_guide_step_1">Vào trang quản trị của Google Play Console</string>
     <string name="post_app_guide_step_2">Chọn App cần test của bạn</string>
@@ -44,6 +47,8 @@
     <string name="post_app_guide_step_5">Nhân viên kiểm thử</string>
     <string name="post_app_guide_step_6">Nhập Google Group: testappLV@googlegroups.com</string>
     <string name="post_app_guide_group_email">testappLV@googlegroups.com</string>
+    <string name="post_app_guide_group_email_label">Email Google Group:</string>
+    <string name="post_app_guide_copy_email_btn">Sao chép email</string>
     <string name="post_app_guide_confirm_btn">Tôi đã thêm Google Group: testappLV@googlegroups.com vào Play Console của tôi</string>
     <string name="post_app_guide_copied_toast">Đã sao chép email Google Group</string>
     <string name="post_app_guide_cant_open_browser">Không thể mở trình duyệt</string>
@@ -312,4 +317,34 @@
     <string name="warning_tester_msg">Hệ thống ghi nhận bạn tham gia kiểm thử chưa nghiêm túc, đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="warning_owner_msg">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="auto_accept_24h_notice">Chủ app có tối đa 8 giờ để duyệt. Quá 8 giờ hệ thống sẽ tự động duyệt (không có thưởng duyệt). Nếu chủ app duyệt sẽ thưởng thêm +1 Credit.</string>
+
+    <!-- App Update -->
+    <string name="update_required_title">Yêu cầu cập nhật ứng dụng</string>
+    <string name="update_required_desc">Phiên bản hiện tại không còn được hỗ trợ. Vui lòng cập nhật lên phiên bản mới nhất để tiếp tục sử dụng ứng dụng.</string>
+    <string name="update_available_title">Đã có bản cập nhật mới</string>
+    <string name="update_current_version">Phiên bản hiện tại: %1$s (Build %2$d)</string>
+    <string name="update_new_version">Phiên bản mới: %1$s (Build %2$d)</string>
+    <string name="update_btn_now">Cập nhật ngay</string>
+    <string name="update_btn_later">Để sau</string>
+    <string name="update_check_setting">Kiểm tra bản cập nhật</string>
+    <string name="update_check_setting_desc">Phiên bản %1$s (Build %2$d)</string>
+    <string name="update_checking">Đang kiểm tra bản cập nhật…</string>
+    <string name="update_already_latest">Bạn đang sử dụng phiên bản mới nhất (%1$s).</string>
+    <string name="update_check_failed">Không thể kiểm tra bản cập nhật. Vui lòng thử lại sau.</string>
+    <string name="update_btn_exit">Thoát ứng dụng</string>
+    <string name="admin_update_config_title">Cấu hình cập nhật ứng dụng</string>
+    <string name="admin_update_config_desc">Quản lý phiên bản tối thiểu và phiên bản mới nhất hiển thị cho người dùng.</string>
+    <string name="admin_config_min_version_code">Build tối thiểu (min_version_code)</string>
+    <string name="admin_config_latest_version_code">Build mới nhất (latest_version_code)</string>
+    <string name="admin_config_latest_version_name">Tên phiên bản mới nhất</string>
+    <string name="admin_config_force_update">Bắt buộc cập nhật</string>
+    <string name="admin_config_title_label">Tiêu đề thông báo cập nhật</string>
+    <string name="admin_config_message_label">Nội dung thông báo cập nhật</string>
+    <string name="admin_config_store_url_label">Link cửa hàng (store URL)</string>
+    <string name="admin_config_save">Lưu cấu hình</string>
+    <string name="notif_update_channel_name">Cập nhật ứng dụng</string>
+    <string name="notif_update_channel_desc">Thông báo khi có phiên bản ứng dụng mới</string>
+    <string name="notif_update_title">Đã có bản cập nhật mới</string>
+    <string name="notif_update_text">Phiên bản %1$s đã sẵn sàng. Bấm để cập nhật.</string>
+    <string name="app_version_format">Phiên bản %1$s (Build %2$d)</string>
 </resources>

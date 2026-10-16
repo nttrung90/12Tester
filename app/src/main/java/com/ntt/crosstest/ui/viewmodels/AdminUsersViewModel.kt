@@ -2,6 +2,8 @@ package com.ntt.crosstest.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ntt.crosstest.data.AppConfig
+import com.ntt.crosstest.data.AppConfigRepository
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.Profile
@@ -25,11 +27,15 @@ data class AdminUsersUiState(
     val error: String? = null,
     val actionMessage: String? = null,
     val currentAdminId: String? = null,
+    val appConfig: AppConfig? = null,
+    val isConfigLoading: Boolean = false,
+    val configSaveSignal: Int = 0,
 )
 
 class AdminUsersViewModel(
     private val campaignRepository: CampaignRepository,
     private val authRepository: AuthRepository,
+    private val appConfigRepository: AppConfigRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminUsersUiState())
@@ -196,6 +202,64 @@ class AdminUsersViewModel(
                     it.copy(
                         isActionLoading = false,
                         error = "Gửi thông báo thất bại: ${friendlyError(e)}"
+                    )
+                }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------- app config
+
+    fun loadAppConfig() {
+        if (_uiState.value.isConfigLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isConfigLoading = true, error = null) }
+            val config = appConfigRepository.getAppConfig(forceRefresh = true)
+            _uiState.update {
+                it.copy(
+                    isConfigLoading = false,
+                    appConfig = config ?: it.appConfig,
+                    error = if (config == null) "Không thể tải cấu hình cập nhật. Vui lòng thử lại." else null,
+                )
+            }
+        }
+    }
+
+    fun saveAppConfig(
+        minVersionCode: Int,
+        latestVersionCode: Int,
+        latestVersionName: String,
+        forceUpdate: Boolean,
+        title: String?,
+        message: String?,
+        storeUrl: String?,
+    ) {
+        if (_uiState.value.isActionLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isActionLoading = true, error = null) }
+            try {
+                val updated = appConfigRepository.updateAppConfig(
+                    minVersionCode = minVersionCode,
+                    latestVersionCode = latestVersionCode,
+                    latestVersionName = latestVersionName,
+                    forceUpdate = forceUpdate,
+                    title = title,
+                    message = message,
+                    storeUrl = storeUrl,
+                )
+                _uiState.update {
+                    it.copy(
+                        isActionLoading = false,
+                        appConfig = updated,
+                        actionMessage = "Đã lưu cấu hình cập nhật thành công.",
+                        configSaveSignal = it.configSaveSignal + 1,
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isActionLoading = false,
+                        error = "Lưu cấu hình thất bại: ${friendlyError(e)}",
                     )
                 }
             }

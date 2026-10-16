@@ -14,6 +14,7 @@ import com.ntt.crosstest.util.ImageHashHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -307,6 +308,13 @@ class CampaignDetailViewModel(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isActionLoading = true, message = null, error = null) }
+            val nextCampDeferred = async {
+                try {
+                    repository.getNextUntestedCampaign(campaignId)
+                } catch (_: Exception) {
+                    null
+                }
+            }
             try {
                 if (!state.isMember) {
                     try {
@@ -347,11 +355,7 @@ class CampaignDetailViewModel(
                     else ->
                         "Đã gửi kết quả kiểm thử! Bạn tạm nhận +2 Credit. Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt)."
                 }
-                val nextCamp = try {
-                    repository.getNextUntestedCampaign(campaignId)
-                } catch (_: Exception) {
-                    null
-                }
+                val nextCamp = nextCampDeferred.await()
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,

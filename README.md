@@ -148,19 +148,27 @@ trên Google Cloud, rồi điền vào Supabase.
 
 ### Bước E — Thêm SHA-1 vào OAuth client (bắt buộc, nếu không đăng nhập Google sẽ lỗi)
 
-Google chỉ cấp ID token cho app có chữ ký (SHA-1) đã đăng ký.
+Google Play Services chỉ cấp ID token cho app có chữ ký (SHA-1) đã đăng ký **trong đúng
+Google Cloud project đang sở hữu client Web** (client dùng làm `GOOGLE_WEB_CLIENT_ID`).
+Đăng ký nhầm project khác là nguyên nhân phổ biến nhất khiến đăng nhập fail dù đã thêm SHA-1.
 
-1. Lấy SHA-1 của key debug trên máy Windows. Cách nhanh nhất trong Android Studio:
-   mở tab **Gradle** (bên phải) → `cross-test → app → Tasks → android → signingReport` → Run,
-   copy dòng **SHA1** của variant `debug`.
-   (Cách khác: `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android`)
-2. Vào Google Cloud Console → **APIs & Services → Credentials** → mở OAuth client
-   **Android** (nếu chưa có thì Create Credentials → OAuth client ID → **Android**):
+1. Lấy SHA-1 tương ứng với **bản build đang cài trên máy**:
+   - **Debug** (chạy từ Android Studio): tab **Gradle** → `app → Tasks → android → signingReport` →
+     copy dòng **SHA1** của variant `debug`.
+     (hoặc `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android`)
+   - **Bản cài từ Google Play**: Play Console → chọn app → **Test và phát hành → App integrity** →
+     copy **SHA-1** ở card **"App signing key certificate"** (KHÔNG phải "Upload key certificate").
+   - **APK release tự ký**: SHA-1 của file keystore release (`keytool -list -v -keystore <file>.jks`).
+2. Kiểm tra `GOOGLE_WEB_CLIENT_ID` trong `local.properties` thuộc project nào (số đầu của
+   Client ID = project number) → vào **đúng project đó** → **APIs & Services → Credentials** →
+   Create Credentials → OAuth client ID → **Android**:
    - Package name: `com.ntt.crosstest`
-   - SHA-1: dán SHA-1 vừa copy → Create.
-   > Lưu ý: đây là **thêm một OAuth client loại Android** bên cạnh client Web ở bước C.
-   > Client Web dùng cho Supabase + app, client Android dùng để Google Play Services
-   > tin chữ ký app. Khi release bản production, lặp lại bước này với SHA-1 của key release.
+   - SHA-1: dán giá trị vừa lấy (mỗi client Android chỉ nhận 1 SHA-1 → cần debug + Play thì tạo 2 client)
+3. Đợi vài phút rồi đăng nhập lại — **không cần build lại app**.
+
+> Dấu hiệu SHA-1 chưa đăng ký đúng: bảng chọn tài khoản Google hiện ra, chọn xong thì app
+> báo **"Bạn đã hủy đăng nhập"** (Credential Manager trả về cancellation dù bạn không hủy —
+> xem log tag `GoogleSignIn`/`AuthViewModel` để biết chi tiết).
 
 ### Bước F — Build & chạy, checklist kiểm thử
 
@@ -210,9 +218,10 @@ minSdk 26 / targetSdk 36 / compileSdk 36 / Java 17 theo yêu cầu.
   thêm nhanh (dùng chung form Create).
 - **Chưa realtime**: tiến độ cập nhật khi mở lại màn hình / kéo refresh. Muốn realtime thì
   dùng supabase-realtime — để dành bản sau.
-- Khi build bản **release** để đăng Play: tạo keystore riêng, lấy SHA-1 của key release
-  thêm vào OAuth client Android (bước E), và đổi `GOOGLE_WEB_CLIENT_ID` vẫn là client Web
-  (không đổi).
+- Khi build bản **release** để đăng Play: tạo keystore riêng (upload key). Nhưng máy người
+  dùng nhận bản do **Play App Signing** ký → phải thêm SHA-1 ở Play Console
+  (**App integrity → "App signing key certificate"**) vào OAuth client Android trong đúng
+  project của client Web (bước E). `GOOGLE_WEB_CLIENT_ID` giữ nguyên, không đổi.
 
 ## 7. Đổi tên app / package
 

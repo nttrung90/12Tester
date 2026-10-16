@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ntt.crosstest.R
 
@@ -64,7 +65,8 @@ fun PostAppGuideScreen(
 
     val groupEmail = stringResource(R.string.post_app_guide_group_email)
     val groupUrl = stringResource(R.string.post_app_guide_group_url)
-    val copiedToast = stringResource(R.string.post_app_guide_copied_toast)
+    val copiedLinkToast = stringResource(R.string.post_app_guide_copied_link_toast)
+    val copiedEmailToast = stringResource(R.string.post_app_guide_copied_toast)
     val cantOpenBrowserToast = stringResource(R.string.post_app_guide_cant_open_browser)
 
     val stepResources = listOf(
@@ -77,12 +79,37 @@ fun PostAppGuideScreen(
     )
 
     val openGroupInBrowser = {
+        val cleanUrl = groupUrl.trim()
+        val uri = Uri.parse(cleanUrl)
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(groupUrl))
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
             context.startActivity(intent)
         } catch (_: Exception) {
-            Toast.makeText(context, cantOpenBrowserToast, Toast.LENGTH_SHORT).show()
+            try {
+                val fallbackIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                val chooser = Intent.createChooser(fallbackIntent, null).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(chooser)
+            } catch (_: Exception) {
+                Toast.makeText(context, cantOpenBrowserToast, Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    val copyGroupLink = {
+        clipboardManager.setText(AnnotatedString(groupUrl.trim()))
+        Toast.makeText(context, copiedLinkToast, Toast.LENGTH_SHORT).show()
+    }
+
+    val copyGroupEmail = {
+        clipboardManager.setText(AnnotatedString(groupEmail.trim()))
+        Toast.makeText(context, copiedEmailToast, Toast.LENGTH_SHORT).show()
     }
 
     Scaffold(
@@ -141,12 +168,9 @@ fun PostAppGuideScreen(
                 }
             }
 
-            // Major Step 1: Join Google Group (Clickable to open browser)
+            // Major Step 1: Join Google Group
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { openGroupInBrowser() },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
@@ -192,15 +216,68 @@ fun PostAppGuideScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
+                    // Dedicated interactive Link Box: Tapping opens browser, has copy button
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { openGroupInBrowser() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.post_app_guide_group_link_label),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Text(
+                                    text = groupUrl,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            IconButton(
+                                onClick = copyGroupLink,
+                                modifier = Modifier.size(36.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ContentCopy,
+                                    contentDescription = stringResource(R.string.post_app_guide_copy_link_btn),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Button(
                             onClick = openGroupInBrowser,
+                            modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
@@ -215,12 +292,10 @@ fun PostAppGuideScreen(
                         }
 
                         FilledTonalButton(
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString(groupEmail))
-                                Toast.makeText(context, copiedToast, Toast.LENGTH_SHORT).show()
-                            },
+                            onClick = copyGroupLink,
+                            modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ContentCopy,
@@ -229,7 +304,7 @@ fun PostAppGuideScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Copy Email",
+                                text = stringResource(R.string.post_app_guide_copy_link_btn),
                                 fontWeight = FontWeight.Medium,
                             )
                         }
@@ -323,10 +398,7 @@ fun PostAppGuideScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        clipboardManager.setText(AnnotatedString(groupEmail))
-                        Toast.makeText(context, copiedToast, Toast.LENGTH_SHORT).show()
-                    },
+                    .clickable { copyGroupEmail() },
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
@@ -346,7 +418,7 @@ fun PostAppGuideScreen(
                     Spacer(Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Email Google Group:",
+                            text = stringResource(R.string.post_app_guide_group_email_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -358,14 +430,11 @@ fun PostAppGuideScreen(
                         )
                     }
                     IconButton(
-                        onClick = {
-                            clipboardManager.setText(AnnotatedString(groupEmail))
-                            Toast.makeText(context, copiedToast, Toast.LENGTH_SHORT).show()
-                        }
+                        onClick = copyGroupEmail
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.ContentCopy,
-                            contentDescription = "Copy",
+                            contentDescription = stringResource(R.string.post_app_guide_copy_email_btn),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }

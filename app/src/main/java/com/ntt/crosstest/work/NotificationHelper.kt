@@ -15,8 +15,16 @@ object NotificationHelper {
     private const val CHANNEL_ID = "checkin_reminder"
     private const val NOTIFICATION_ID = 1001
 
+    private const val UPDATE_CHANNEL_ID = "app_update"
+    private const val UPDATE_NOTIFICATION_ID = 1002
+
     fun showCheckinReminder(context: Context, campaignNames: List<String>) {
-        ensureChannel(context)
+        ensureChannel(
+            context,
+            channelId = CHANNEL_ID,
+            nameRes = R.string.notif_channel_name,
+            descriptionRes = R.string.notif_channel_desc,
+        )
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -48,14 +56,53 @@ object NotificationHelper {
         manager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun ensureChannel(context: Context) {
+    /**
+     * Notifies the user that a newer app version is available on the store.
+     * Tapping the notification opens the app (MainActivity), where the update
+     * dialog / force-update screen takes over.
+     */
+    fun showUpdateAvailable(context: Context, versionName: String) {
+        ensureChannel(
+            context,
+            channelId = UPDATE_CHANNEL_ID,
+            nameRes = R.string.notif_update_channel_name,
+            descriptionRes = R.string.notif_update_channel_desc,
+        )
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 1, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val notification = NotificationCompat.Builder(context, UPDATE_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.notif_update_title))
+            .setContentText(context.getString(R.string.notif_update_text, versionName))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(UPDATE_NOTIFICATION_ID, notification)
+    }
+
+    private fun ensureChannel(
+        context: Context,
+        channelId: String,
+        nameRes: Int,
+        descriptionRes: Int,
+    ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.notif_channel_name),
+                channelId,
+                context.getString(nameRes),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
-                description = context.getString(R.string.notif_channel_desc)
+                description = context.getString(descriptionRes)
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)

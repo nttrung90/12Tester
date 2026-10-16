@@ -18,19 +18,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ntt.crosstest.data.AppConfig
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
+import com.ntt.crosstest.data.UpdateStatus
 import com.ntt.crosstest.ui.navigation.NavGraph
 import com.ntt.crosstest.ui.navigation.Routes
+import com.ntt.crosstest.ui.screens.ForceUpdateScreen
 import com.ntt.crosstest.ui.screens.MissingConfigScreen
+import com.ntt.crosstest.ui.screens.OptionalUpdateDialog
 import com.ntt.crosstest.ui.theme.TestCheoTheme
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.auth
@@ -103,6 +109,32 @@ class MainActivity : ComponentActivity() {
                         MissingConfigScreen()
                         return@TestCheoTheme
                     }
+
+                    val currentVersionCode = BuildConfig.VERSION_CODE
+                    val currentVersionName = BuildConfig.VERSION_NAME
+
+                    var appConfig by remember { mutableStateOf<AppConfig?>(null) }
+                    var dismissOptionalUpdate by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        appConfig = app.appConfigRepository.getAppConfig()
+                    }
+
+                    val updateStatus = remember(appConfig) {
+                        appConfig?.checkUpdateStatus(currentVersionCode) ?: UpdateStatus.NO_UPDATE
+                    }
+
+                    // 1. Force update: Block app access completely until updated
+                    if (updateStatus == UpdateStatus.FORCE_UPDATE && appConfig != null) {
+                        ForceUpdateScreen(
+                            config = appConfig!!,
+                            currentVersionName = currentVersionName,
+                            currentVersionCode = currentVersionCode,
+                        )
+                        return@TestCheoTheme
+                    }
+
+                    // 2. Normal flow with NavGraph
                     val supabase = SupabaseHolder.get()
                     val sessionStatus by supabase.auth.sessionStatus.collectAsStateWithLifecycle()
                     // Read fresh on each recomposition: after a sign-out the
@@ -126,6 +158,16 @@ class MainActivity : ComponentActivity() {
                                 }
                             NavGraph(startDestination = startDestination)
                         }
+                    }
+
+                    // 3. Optional update prompt dialog
+                    if (updateStatus == UpdateStatus.OPTIONAL_UPDATE && !dismissOptionalUpdate && appConfig != null) {
+                        OptionalUpdateDialog(
+                            config = appConfig!!,
+                            currentVersionName = currentVersionName,
+                            currentVersionCode = currentVersionCode,
+                            onDismiss = { dismissOptionalUpdate = true },
+                        )
                     }
                 }
             }

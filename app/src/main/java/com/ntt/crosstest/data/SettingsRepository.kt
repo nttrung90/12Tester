@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -18,12 +19,24 @@ class SettingsRepository(private val context: Context) {
     private val reminderEnabledKey = booleanPreferencesKey("reminder_enabled")
     private val appLanguageKey = stringPreferencesKey("app_language")
     private val testingGuideConfirmedKey = booleanPreferencesKey("testing_guide_confirmed")
+    private val updateNotifiedVersionCodeKey = intPreferencesKey("update_notified_version_code")
 
     val reminderEnabled: Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[reminderEnabledKey] ?: true }
 
     suspend fun setReminderEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[reminderEnabledKey] = enabled }
+    }
+
+    /**
+     * latestVersionCode that a background update notification was already shown
+     * for. Used to avoid notifying about the same version repeatedly.
+     */
+    val updateNotifiedVersionCode: Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[updateNotifiedVersionCodeKey] ?: 0 }
+
+    suspend fun setUpdateNotifiedVersionCode(versionCode: Int) {
+        context.dataStore.edit { prefs -> prefs[updateNotifiedVersionCodeKey] = versionCode }
     }
 
     val isTestingGuideConfirmed: Flow<Boolean> =

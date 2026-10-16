@@ -1,5 +1,6 @@
 package com.ntt.crosstest.ui.screens
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,8 +62,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.SystemUpdate
+import android.widget.Toast
+import com.ntt.crosstest.BuildConfig
+import com.ntt.crosstest.data.AppConfig
+import com.ntt.crosstest.data.UpdateStatus
+import kotlinx.coroutines.launch
 import com.ntt.crosstest.data.SlotInfo
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,6 +98,7 @@ fun ProfileScreen(
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
     val app = context.applicationContext as TestCheoApp
     val viewModel: ProfileViewModel = viewModel(
         factory = viewModelFactory {
@@ -105,6 +114,37 @@ fun ProfileScreen(
     var showChangePasswordDialog by rememberSaveable { mutableStateOf(false) }
     var showSlotsDialog by rememberSaveable { mutableStateOf(false) }
     var slotToUnlock by remember { mutableStateOf<SlotInfo?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    var availableUpdateConfig by remember { mutableStateOf<AppConfig?>(null) }
+    var forceUpdateConfig by remember { mutableStateOf<AppConfig?>(null) }
+
+    val handleCheckUpdate: () -> Unit = {
+        if (!isCheckingUpdate) {
+            coroutineScope.launch {
+                isCheckingUpdate = true
+                val config = try {
+                    app.appConfigRepository.getAppConfig(forceRefresh = true)
+                } catch (_: Exception) {
+                    null
+                }
+                isCheckingUpdate = false
+                if (config == null) {
+                    Toast.makeText(context, context.getString(R.string.update_check_failed), Toast.LENGTH_SHORT).show()
+                } else {
+                    when (config.checkUpdateStatus(BuildConfig.VERSION_CODE)) {
+                        UpdateStatus.NO_UPDATE ->
+                            Toast.makeText(context, context.getString(R.string.update_already_latest, BuildConfig.VERSION_NAME), Toast.LENGTH_SHORT).show()
+                        UpdateStatus.OPTIONAL_UPDATE ->
+                            availableUpdateConfig = config
+                        UpdateStatus.FORCE_UPDATE ->
+                            forceUpdateConfig = config
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(uiState.signedOut) {
         if (uiState.signedOut) onSignedOut()
@@ -280,6 +320,26 @@ fun ProfileScreen(
         )
     }
 
+    availableUpdateConfig?.let { config ->
+        OptionalUpdateDialog(
+            config = config,
+            currentVersionName = BuildConfig.VERSION_NAME,
+            currentVersionCode = BuildConfig.VERSION_CODE,
+            onDismiss = { availableUpdateConfig = null },
+        )
+    }
+
+    // Mandatory update found by the manual check: block the whole tab,
+    // same behavior as the app-launch version gate in MainActivity.
+    forceUpdateConfig?.let { config ->
+        ForceUpdateScreen(
+            config = config,
+            currentVersionName = BuildConfig.VERSION_NAME,
+            currentVersionCode = BuildConfig.VERSION_CODE,
+        )
+        return
+    }
+
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
@@ -353,7 +413,7 @@ fun ProfileScreen(
                         )
                         Spacer(Modifier.height(20.dp))
                         Button(
-                            onClick = { viewModel.signIn(context) },
+                            onClick = { viewModel.signIn(activity ?: context) },
                             enabled = !uiState.isActionLoading,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
@@ -387,6 +447,8 @@ fun ProfileScreen(
                     onLanguageClick = { showLanguageDialog = true },
                     reminderEnabled = uiState.reminderEnabled,
                     onReminderChange = viewModel::setReminderEnabled,
+                    isCheckingUpdate = isCheckingUpdate,
+                    onCheckUpdateClick = handleCheckUpdate,
                 )
             }
         }
@@ -515,6 +577,8 @@ fun ProfileScreen(
                 reminderEnabled = uiState.reminderEnabled,
                 onReminderChange = viewModel::setReminderEnabled,
                 onChangePasswordClick = { showChangePasswordDialog = true },
+                isCheckingUpdate = isCheckingUpdate,
+                onCheckUpdateClick = handleCheckUpdate,
             )
         }
         item { HorizontalDivider() }
@@ -559,6 +623,14 @@ fun ProfileScreen(
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.logout))
             }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.app_version_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
             Spacer(Modifier.height(72.dp))
         }
     }
@@ -759,6 +831,8 @@ private fun SettingsSection(
     reminderEnabled: Boolean,
     onReminderChange: (Boolean) -> Unit,
     onChangePasswordClick: (() -> Unit)? = null,
+    isCheckingUpdate: Boolean = false,
+    onCheckUpdateClick: () -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -898,6 +972,59 @@ private fun SettingsSection(
                     checked = reminderEnabled,
                     onCheckedChange = onReminderChange,
                 )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+            // Check Update Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(enabled = !isCheckingUpdate) { onCheckUpdateClick() }
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.SystemUpdate,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.update_check_setting),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = if (isCheckingUpdate) {
+                            stringResource(R.string.update_checking)
+                        } else {
+                            stringResource(
+                                R.string.update_check_setting_desc,
+                                BuildConfig.VERSION_NAME,
+                                BuildConfig.VERSION_CODE
+                            )
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (isCheckingUpdate) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

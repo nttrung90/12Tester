@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,6 +50,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -75,6 +79,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.AppConfig
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.ui.viewmodels.AdminFilter
 import com.ntt.crosstest.ui.viewmodels.AdminUsersViewModel
@@ -89,7 +94,7 @@ fun AdminUsersScreen(
     val viewModel: AdminUsersViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                AdminUsersViewModel(app.campaignRepository, app.authRepository)
+                AdminUsersViewModel(app.campaignRepository, app.authRepository, app.appConfigRepository)
             }
         }
     )
@@ -100,6 +105,16 @@ fun AdminUsersScreen(
     var userToAdjustCredits by rememberSaveable { mutableStateOf<Profile?>(null) }
     var userToSendNotification by rememberSaveable { mutableStateOf<Profile?>(null) }
     var showBroadcastDialog by rememberSaveable { mutableStateOf(false) }
+    var showUpdateConfigDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showUpdateConfigDialog) {
+        if (showUpdateConfigDialog) viewModel.loadAppConfig()
+    }
+
+    // Close the config dialog once the save succeeded (signal from ViewModel).
+    LaunchedEffect(uiState.configSaveSignal) {
+        if (uiState.configSaveSignal > 0) showUpdateConfigDialog = false
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -284,6 +299,19 @@ fun AdminUsersScreen(
         )
     }
 
+    // Dialog: App update configuration (version gate for all clients)
+    if (showUpdateConfigDialog) {
+        AdminUpdateConfigDialog(
+            config = uiState.appConfig,
+            isLoading = uiState.isConfigLoading,
+            isSaving = uiState.isActionLoading,
+            onDismiss = { showUpdateConfigDialog = false },
+            onSave = { min, latest, name, force, title, message, storeUrl ->
+                viewModel.saveAppConfig(min, latest, name, force, title, message, storeUrl)
+            },
+        )
+    }
+
     // Dialog: Direct notification to 1 user
     userToSendNotification?.let { target ->
         AdminSendNotificationDialog(
@@ -307,6 +335,13 @@ fun AdminUsersScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showUpdateConfigDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.SystemUpdate,
+                            contentDescription = stringResource(R.string.admin_update_config_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     IconButton(onClick = { showBroadcastDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Campaign,
@@ -714,5 +749,169 @@ private fun AdminSendNotificationDialog(
                 Text(stringResource(R.string.cancel))
             }
         }
+    )
+}
+
+@Composable
+private fun AdminUpdateConfigDialog(
+    config: AppConfig?,
+    isLoading: Boolean,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (Int, Int, String, Boolean, String?, String?, String?) -> Unit,
+) {
+    var initialized by rememberSaveable { mutableStateOf(false) }
+    var minVersionCode by rememberSaveable { mutableStateOf("") }
+    var latestVersionCode by rememberSaveable { mutableStateOf("") }
+    var latestVersionName by rememberSaveable { mutableStateOf("") }
+    var forceUpdate by rememberSaveable { mutableStateOf(false) }
+    var title by rememberSaveable { mutableStateOf("") }
+    var message by rememberSaveable { mutableStateOf("") }
+    var storeUrl by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(config) {
+        if (config != null && !initialized) {
+            minVersionCode = config.minVersionCode.toString()
+            latestVersionCode = config.latestVersionCode.toString()
+            latestVersionName = config.latestVersionName
+            forceUpdate = config.forceUpdate
+            title = config.title.orEmpty()
+            message = config.message.orEmpty()
+            storeUrl = config.storeUrl.orEmpty()
+            initialized = true
+        }
+    }
+
+    val minVal = minVersionCode.toIntOrNull()
+    val latestVal = latestVersionCode.toIntOrNull()
+    val isValid = minVal != null && minVal >= 1 &&
+        latestVal != null && latestVal >= minVal &&
+        latestVersionName.isNotBlank()
+
+    AlertDialog(
+        onDismissRequest = { if (!isSaving) onDismiss() },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.SystemUpdate,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.admin_update_config_title), fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            if (isLoading && config == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 420.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.admin_update_config_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = minVersionCode,
+                        onValueChange = { minVersionCode = it.filter(Char::isDigit) },
+                        label = { Text(stringResource(R.string.admin_config_min_version_code)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = latestVersionCode,
+                        onValueChange = { latestVersionCode = it.filter(Char::isDigit) },
+                        label = { Text(stringResource(R.string.admin_config_latest_version_code)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = latestVersionName,
+                        onValueChange = { latestVersionName = it },
+                        label = { Text(stringResource(R.string.admin_config_latest_version_name)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.admin_config_force_update),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(
+                            checked = forceUpdate,
+                            onCheckedChange = { forceUpdate = it },
+                        )
+                    }
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text(stringResource(R.string.admin_config_title_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = message,
+                        onValueChange = { message = it },
+                        label = { Text(stringResource(R.string.admin_config_message_label)) },
+                        minLines = 3,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = storeUrl,
+                        onValueChange = { storeUrl = it },
+                        label = { Text(stringResource(R.string.admin_config_store_url_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onSave(
+                        minVal ?: return@Button,
+                        latestVal ?: return@Button,
+                        latestVersionName.trim(),
+                        forceUpdate,
+                        title.trim().ifBlank { null },
+                        message.trim().ifBlank { null },
+                        storeUrl.trim().ifBlank { null },
+                    )
+                },
+                enabled = !isSaving && !isLoading && isValid,
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(R.string.admin_config_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isSaving) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
     )
 }

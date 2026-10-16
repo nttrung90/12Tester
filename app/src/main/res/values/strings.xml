@@ -33,9 +33,12 @@
     <string name="post_app_guide_title">Testing App Setup Guide</string>
     <string name="post_app_guide_intro">To support each other with cross-testing, please complete the following steps:</string>
     <string name="post_app_guide_major_step_1_title">Step 1: Join Google Group</string>
-    <string name="post_app_guide_major_step_1_desc">Join Google group: https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_major_step_1_desc">Join Google group to participate in cross-testing:</string>
     <string name="post_app_guide_open_group_btn">Join Google Group</string>
     <string name="post_app_guide_group_url">https://groups.google.com/g/testappLV</string>
+    <string name="post_app_guide_group_link_label">Google Group Link:</string>
+    <string name="post_app_guide_copy_link_btn">Copy Link</string>
+    <string name="post_app_guide_copied_link_toast">Google Group link copied</string>
     <string name="post_app_guide_major_step_2_title">Step 2: Setup on Google Play Console:</string>
     <string name="post_app_guide_step_1">Go to Google Play Console dashboard</string>
     <string name="post_app_guide_step_2">Select your app to test</string>
@@ -44,7 +47,9 @@
     <string name="post_app_guide_step_5">Testers</string>
     <string name="post_app_guide_step_6">Enter Google Group: testappLV@googlegroups.com</string>
     <string name="post_app_guide_group_email">testappLV@googlegroups.com</string>
-    <string name="post_app_guide_confirm_btn">Tôi đã thêm Google Group: testappLV@googlegroups.com vào Play Console của tôi</string>
+    <string name="post_app_guide_group_email_label">Google Group Email:</string>
+    <string name="post_app_guide_copy_email_btn">Copy Email</string>
+    <string name="post_app_guide_confirm_btn">I have added Google Group: testappLV@googlegroups.com to my Play Console</string>
     <string name="post_app_guide_copied_toast">Google Group email copied</string>
     <string name="post_app_guide_cant_open_browser">Unable to open web browser</string>
     <string name="post_app_slot_usage">Slots in use: %1$d/%2$d.</string>
@@ -312,4 +317,34 @@
     <string name="warning_tester_msg">Hệ thống ghi nhận bạn tham gia kiểm thử chưa nghiêm túc, đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="warning_owner_msg">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="auto_accept_24h_notice">App owners have up to 8 hours to review. After 8 hours, the system will auto-approve (no bonus). Owner approval awards +1 bonus Credit.</string>
+
+    <!-- App Update -->
+    <string name="update_required_title">Update Required</string>
+    <string name="update_required_desc">This version is no longer supported. Please update to continue using the app.</string>
+    <string name="update_available_title">New Version Available</string>
+    <string name="update_current_version">Current version: %1$s (Build %2$d)</string>
+    <string name="update_new_version">New version: %1$s (Build %2$d)</string>
+    <string name="update_btn_now">Update Now</string>
+    <string name="update_btn_later">Later</string>
+    <string name="update_check_setting">Check for Updates</string>
+    <string name="update_check_setting_desc">Version %1$s (Build %2$d)</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_already_latest">You are using the latest version (%1$s).</string>
+    <string name="update_check_failed">Unable to check for updates. Please try again later.</string>
+    <string name="update_btn_exit">Exit App</string>
+    <string name="admin_update_config_title">App Update Config</string>
+    <string name="admin_update_config_desc">Manage the minimum and latest app versions shown to users.</string>
+    <string name="admin_config_min_version_code">Minimum build (min_version_code)</string>
+    <string name="admin_config_latest_version_code">Latest build (latest_version_code)</string>
+    <string name="admin_config_latest_version_name">Latest version name</string>
+    <string name="admin_config_force_update">Force update</string>
+    <string name="admin_config_title_label">Update dialog title</string>
+    <string name="admin_config_message_label">Update dialog message</string>
+    <string name="admin_config_store_url_label">Store URL</string>
+    <string name="admin_config_save">Save config</string>
+    <string name="notif_update_channel_name">App updates</string>
+    <string name="notif_update_channel_desc">Notifies when a new app version is available</string>
+    <string name="notif_update_title">New update available</string>
+    <string name="notif_update_text">Version %1$s is ready. Tap to update.</string>
+    <string name="app_version_format">Version %1$s (Build %2$d)</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.ntt.crosstest.ui.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.BuildConfig
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+private const val TAG = "AuthViewModel"
 
 data class AuthUiState(
     val isLoading: Boolean = false,
@@ -43,8 +46,20 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
             when (val outcome = requestGoogleSignIn(context, BuildConfig.GOOGLE_WEB_CLIENT_ID)) {
-                is GoogleSignInOutcome.Cancelled ->
-                    _uiState.update { it.copy(isLoading = false, error = "Bạn đã hủy đăng nhập.") }
+                is GoogleSignInOutcome.Cancelled -> {
+                    Log.w(
+                        TAG,
+                        "Credential Manager reported cancellation. Configuration problems " +
+                            "(SHA-1/package not registered in the project that owns the web " +
+                            "client ID) also surface as cancellation - see GoogleSignIn logs."
+                    )
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Bạn đã hủy đăng nhập. Nếu bạn không hủy, vui lòng thử lại.",
+                        )
+                    }
+                }
                 is GoogleSignInOutcome.Error ->
                     _uiState.update { it.copy(isLoading = false, error = outcome.message) }
                 is GoogleSignInOutcome.Success -> {

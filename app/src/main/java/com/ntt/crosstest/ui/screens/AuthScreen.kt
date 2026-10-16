@@ -1,5 +1,6 @@
 package com.ntt.crosstest.ui.screens
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,6 +78,7 @@ fun AuthScreen(
     onContinueAsGuest: () -> Unit,
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
     val app = context.applicationContext as TestCheoApp
     val viewModel: AuthViewModel = viewModel(
         factory = viewModelFactory {
@@ -209,7 +211,7 @@ fun AuthScreen(
 
             // 1. Google sign in
             Button(
-                onClick = { viewModel.signIn(context) },
+                onClick = { viewModel.signIn(activity ?: context) },
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(),
             ) {

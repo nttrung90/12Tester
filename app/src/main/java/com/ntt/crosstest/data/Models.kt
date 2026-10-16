@@ -620,6 +620,55 @@ data class GetOwnerReportsParams(
     @SerialName("p_campaign_id") val campaignId: String,
 )
 
+/**
+ * Remote app configuration from Supabase for version & update management.
+ */
+@Serializable
+data class AppConfig(
+    @SerialName("id") val id: String = "android_client",
+    @SerialName("min_version_code") val minVersionCode: Int = 1,
+    @SerialName("latest_version_code") val latestVersionCode: Int = 4,
+    @SerialName("latest_version_name") val latestVersionName: String = "0.2.0",
+    @SerialName("force_update") val forceUpdate: Boolean = false,
+    @SerialName("title") val title: String? = null,
+    @SerialName("message") val message: String? = null,
+    @SerialName("store_url") val storeUrl: String? = null,
+) {
+    fun checkUpdateStatus(currentVersionCode: Int): UpdateStatus {
+        return when {
+            currentVersionCode < minVersionCode || (forceUpdate && currentVersionCode < latestVersionCode) -> {
+                UpdateStatus.FORCE_UPDATE
+            }
+            currentVersionCode < latestVersionCode -> {
+                UpdateStatus.OPTIONAL_UPDATE
+            }
+            else -> {
+                UpdateStatus.NO_UPDATE
+            }
+        }
+    }
+}
+
+enum class UpdateStatus {
+    NO_UPDATE,
+    OPTIONAL_UPDATE,
+    FORCE_UPDATE,
+}
+
+/**
+ * RPC params for admin_update_app_config (migration 019).
+ */
+@Serializable
+data class AdminUpdateAppConfigParams(
+    @SerialName("p_min_version_code") val minVersionCode: Int,
+    @SerialName("p_latest_version_code") val latestVersionCode: Int,
+    @SerialName("p_latest_version_name") val latestVersionName: String,
+    @SerialName("p_force_update") val forceUpdate: Boolean,
+    @SerialName("p_title") val title: String? = null,
+    @SerialName("p_message") val message: String? = null,
+    @SerialName("p_store_url") val storeUrl: String? = null,
+)
+
 
 
 
