@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -57,8 +59,12 @@ import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -72,10 +78,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import com.ntt.crosstest.ui.components.AppIcon
+import com.ntt.crosstest.ui.components.FullscreenImageViewer
+import com.ntt.crosstest.util.ImageHashHelper
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -108,7 +117,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.ui.theme.AmberStar
+import com.ntt.crosstest.ui.viewmodels.CampaignDetailUiState
 import com.ntt.crosstest.ui.viewmodels.CampaignDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,7 +152,8 @@ fun CampaignDetailScreen(
     var showCannotDownloadDialog by rememberSaveable { mutableStateOf(false) }
     var showAdminDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var previewImageUrl by rememberSaveable { mutableStateOf<String?>(null) }
-    var isAppInstalled by remember { mutableStateOf(false) }
+
+    var isInstalledLocally by remember { mutableStateOf(false) }
 
     val pickScreenshotLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -150,20 +162,14 @@ fun CampaignDetailScreen(
     }
 
     LifecycleResumeEffect(campaignId, uiState.campaign?.packageName) {
-        com.ntt.crosstest.util.InstalledAppCache.refresh(context)
         val pkg = uiState.campaign?.packageName.orEmpty()
         if (pkg.isNotBlank()) {
-            isAppInstalled = com.ntt.crosstest.util.InstalledAppCache.isInstalled(context, pkg)
+            isInstalledLocally = try {
+                context.packageManager.getLaunchIntentForPackage(pkg) != null
+            } catch (_: Exception) { false }
         }
         viewModel.refresh()
         onPauseOrDispose { }
-    }
-
-    LaunchedEffect(uiState.campaign?.packageName) {
-        val pkg = uiState.campaign?.packageName.orEmpty()
-        if (pkg.isNotBlank()) {
-            isAppInstalled = com.ntt.crosstest.util.InstalledAppCache.isInstalled(context, pkg)
-        }
     }
 
     LaunchedEffect(uiState.message) {
@@ -598,238 +604,25 @@ fun CampaignDetailScreen(
         )
     }
 
-    // Dialog: Nộp báo cáo kiểm thử (+2 Credit khi duyệt)
+    // BottomSheet: Nộp báo cáo kiểm thử (+2 Credit khi gửi) - Rộng rãi, preview ảnh lớn, phát hiện trùng lặp
     if (showReportDialog && campaign != null) {
-        val alreadyRewarded = uiState.checkedInToday || uiState.myTodayReport?.isApproved == true
-        AlertDialog(
-            onDismissRequest = {
-                if (!uiState.isActionLoading) showReportDialog = false
-            },
-            title = {
-                Text(
-                    text = if (alreadyRewarded) "Gửi góp ý bổ sung cho nhà phát triển" else "Nộp kết quả kiểm thử (+2 Credit khi duyệt)",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium,
+        SubmitReportBottomSheet(
+            campaign = campaign,
+            uiState = uiState,
+            onDismiss = { if (!uiState.isActionLoading) showReportDialog = false },
+            onPickScreenshot = {
+                pickScreenshotLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = if (alreadyRewarded) Color(0xFFE8F5E9) else Color(0xFFF1F5F9)),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Text(
-                            text = if (alreadyRewarded)
-                                "💡 Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi (+2 Credit). Bạn có thể gửi thêm nhận xét hoặc ảnh chụp màn hình góp ý bổ sung để hỗ trợ chủ app (thao tác này không cộng thêm Credit)."
-                            else
-                                "💡 Lưu ý: Đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Điểm thưởng +2 Credit sẽ được cộng sau khi chủ app duyệt (hoặc tự động duyệt sau 24 giờ).",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (alreadyRewarded) Color(0xFF1B5E20) else Color(0xFF334155),
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "Chọn ảnh chụp màn hình ứng dụng đang chạy hoặc lỗi gặp phải:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    // Photo Picker
-                    if (uiState.selectedScreenshotUri != null) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            ),
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                AsyncImage(
-                                    model = uiState.selectedScreenshotUri,
-                                    contentDescription = "Ảnh chụp đính kèm",
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                                    contentScale = ContentScale.Crop,
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Đã chọn ảnh chụp màn hình",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(
-                                        text = "Ảnh sẽ được tự động nén và tải lên",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                IconButton(onClick = { viewModel.onScreenshotSelected(null) }) {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = "Gỡ ảnh",
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                            }
-                        }
-                    } else if (!uiState.myTodayReport?.screenshotUrl.isNullOrBlank()) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            ),
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                AsyncImage(
-                                    model = uiState.myTodayReport?.screenshotUrl,
-                                    contentDescription = "Ảnh đã nộp",
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .clickable { previewImageUrl = uiState.myTodayReport?.screenshotUrl },
-                                    contentScale = ContentScale.Crop,
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Ảnh bạn đã nộp hôm nay",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(
-                                        text = "Chạm vào ảnh để phóng to. Bấm nút dưới nếu muốn đổi ảnh khác.",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedButton(
-                            onClick = {
-                                pickScreenshotLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                        ) {
-                            Icon(
-                                Icons.Outlined.AddPhotoAlternate,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text("Chọn ảnh khác để thay thế")
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = {
-                                pickScreenshotLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                        ) {
-                            Icon(
-                                Icons.Outlined.AddPhotoAlternate,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text("Chọn ảnh từ thư viện")
-                        }
-                    }
-
-                    // Rating
-                    Text(
-                        text = "Đánh giá sao:",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        (1..5).forEach { star ->
-                            IconButton(onClick = { viewModel.onRatingChange(star) }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Star,
-                                    contentDescription = "$star sao",
-                                    tint = if (star <= uiState.myRating) AmberStar
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(32.dp),
-                                )
-                            }
-                        }
-                    }
-
-                    // Comment
-                    OutlinedTextField(
-                        value = uiState.myComment,
-                        onValueChange = viewModel::onCommentChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Nhận xét, mô tả lỗi hoặc góp ý (tùy chọn)...") },
-                        minLines = 2,
-                        maxLines = 4,
-                        shape = RoundedCornerShape(10.dp),
-                    )
-                }
+            onScreenshotSelected = viewModel::onScreenshotSelected,
+            onRatingChange = viewModel::onRatingChange,
+            onCommentChange = viewModel::onCommentChange,
+            onSubmit = {
+                viewModel.submitFeedback(context)
+                showReportDialog = false
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.submitFeedback(context)
-                        showReportDialog = false
-                    },
-                    enabled = !uiState.isActionLoading && (uiState.myComment.isNotBlank() || uiState.selectedScreenshotUri != null || !uiState.myTodayReport?.screenshotUrl.isNullOrBlank()),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
-                ) {
-                    if (uiState.isActionLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = Color.White
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Đang gửi...")
-                    } else {
-                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(if (alreadyRewarded) "Gửi góp ý bổ sung" else "Gửi kết quả (+2 Credit khi duyệt)")
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showReportDialog = false },
-                    enabled = !uiState.isActionLoading
-                ) {
-                    Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Hủy")
-                }
-            }
+            onPreviewImage = { url: String -> previewImageUrl = url },
         )
     }
 
@@ -1133,73 +926,14 @@ fun CampaignDetailScreen(
             }
 
             // -------------------------------------------------------------
-            // CARD 2: Cài app vào máy (Kiểm tra và dẫn link tải của chủ app)
+            // CARD 2: Cài app vào máy (Kiểm tra trạng thái cài đặt)
             // -------------------------------------------------------------
-            if (isAppInstalled) {
-                // Card 1 dòng gọn gàng khi ứng dụng đã cài đặt trên máy
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
-                    border = BorderStroke(1.dp, Color(0xFFA5D6A7)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = null,
-                                tint = Color(0xFF2E7D32),
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Đã cài đặt trên máy",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1B5E20),
-                            )
-                        }
-
-                        TextButton(
-                            onClick = {
-                                val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
-                                openUrlSafely(context, targetUrl, campaign.packageName)
-                            },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                        ) {
-                            Text(
-                                text = "Xem trên Play",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF1B5E20),
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = Color(0xFF1B5E20),
-                            )
-                        }
-                    }
-                }
-            } else {
-                // Card hướng dẫn khi chưa cài đặt
+            if (!isInstalledLocally) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
-                    border = BorderStroke(1.dp, Color(0xFFFFCC80)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
+                    border = BorderStroke(1.dp, Color(0xFFFED7AA)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
                     Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1212,48 +946,50 @@ fun CampaignDetailScreen(
                                 Icon(
                                     imageVector = Icons.Filled.FileDownload,
                                     contentDescription = null,
-                                    tint = Color(0xFFE65100),
+                                    tint = Color(0xFFC2410C),
                                     modifier = Modifier.size(20.dp),
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "Cài app vào máy",
+                                    text = "Bước 1: Cài đặt app vào máy",
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFFBF360C),
+                                    color = Color(0xFF9A3412),
                                 )
                             }
 
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFFFE0B2))
+                                    .background(Color(0xFFFFEDD5))
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
                                     text = "Chưa cài đặt",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = Color(0xFFBF360C),
+                                    fontSize = 11.sp,
+                                    color = Color(0xFFC2410C),
                                 )
                             }
                         }
 
                         Text(
-                            text = "Bạn cần tải và cài đặt ứng dụng vào máy trước khi thực hiện kiểm thử.",
+                            text = "Bạn cần vào link Google Play Closed Test để nhấn 'Chấp nhận tham gia' (Opt-in) và tải ứng dụng về máy.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF795548),
+                            color = Color(0xFF7C2D12),
                         )
 
                         Button(
                             onClick = {
-                                viewModel.ensureJoined()
+                                if (!uiState.isOwner) {
+                                    viewModel.ensureJoined()
+                                }
                                 val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
                                 openUrlSafely(context, targetUrl, campaign.packageName)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEA580C)),
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.FileDownload,
@@ -1262,9 +998,74 @@ fun CampaignDetailScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Cài app vào máy (Mở link tải)",
+                                text = "Mở link Closed Test & Tải app",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Đã cài đặt trên máy
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                    border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF16A34A),
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = "Đã cài đặt trên máy",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF14532D),
+                                )
+                                Text(
+                                    text = "Sẵn sàng mở trực tiếp để kiểm thử",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF166534),
+                                )
+                            }
+                        }
+
+                        TextButton(
+                            onClick = {
+                                val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
+                                openUrlSafely(context, targetUrl, campaign.packageName)
+                            },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        ) {
+                            Text(
+                                text = "Xem link test",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF15803D),
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = Color(0xFF15803D),
                             )
                         }
                     }
@@ -1272,7 +1073,70 @@ fun CampaignDetailScreen(
             }
 
             // -------------------------------------------------------------
-            // CARD 3: Khối thực hiện Test & Nộp báo cáo (Ảnh 2)
+            // Banner: trạng thái vòng đời (tạm dừng / đã hoàn thành kiểm thử)
+            // -------------------------------------------------------------
+            if (!campaign.isOpen) {
+                val bannerBg = when {
+                    campaign.isProduction -> Color(0xFFE8F5E9)
+                    campaign.isCompleted -> Color(0xFFE3F2FD)
+                    else -> Color(0xFFFFF8E1)
+                }
+                val bannerFg = when {
+                    campaign.isProduction -> Color(0xFF2E7D32)
+                    campaign.isCompleted -> Color(0xFF1565C0)
+                    else -> Color(0xFFB26A00)
+                }
+                val bannerTitle = when {
+                    campaign.isProduction -> "App đã lên production"
+                    campaign.isCompleted -> "Đã hoàn thành kiểm thử"
+                    else -> "App đang tạm dừng"
+                }
+                val bannerText = when {
+                    campaign.isProduction -> "App đã hoàn thành kiểm thử và không còn nhận báo cáo mới. Cảm ơn bạn đã đồng hành!"
+                    campaign.isCompleted -> "App đã hết 15 ngày hiển thị kiểm thử và không còn nhận báo cáo mới."
+                    else -> "App tạm dừng nên chưa thể nộp báo cáo. Chủ app có thể bật test lại bất cứ lúc nào."
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = bannerBg),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = when {
+                                campaign.isProduction -> Icons.Filled.RocketLaunch
+                                campaign.isCompleted -> Icons.Filled.CheckCircle
+                                else -> Icons.Filled.HourglassTop
+                            },
+                            contentDescription = null,
+                            tint = bannerFg,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = bannerTitle,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = bannerFg,
+                            )
+                            Text(
+                                text = bannerText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+
+            // -------------------------------------------------------------
+            // CARD 3: Khối thực hiện Test & Nộp báo cáo
             // -------------------------------------------------------------
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -1282,30 +1146,43 @@ fun CampaignDetailScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Blue pill button: Test app (mở app trên máy)
+                    // Blue pill button: Test app
                     Button(
                         onClick = {
                             if (!uiState.isOwner) {
                                 viewModel.ensureJoined()
                             }
                             val pkg = campaign.packageName
-                            val launchIntent = context.packageManager.getLaunchIntentForPackage(pkg)
+                            viewModel.recordTestStart()
+
+                            // 1. Phương pháp 1: Mở app trực tiếp (nhờ queries launcher, tìm thấy và mở ngay app đã cài)
+                            val launchIntent = try {
+                                context.packageManager.getLaunchIntentForPackage(pkg)
+                            } catch (_: Exception) { null }
+
                             if (launchIntent != null) {
-                                isAppInstalled = true
-                                // Đã cài -> Mở app và bắt đầu đếm ngầm thời gian test
-                                viewModel.recordTestStart()
                                 try {
                                     launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     context.startActivity(launchIntent)
+                                    return@Button
                                 } catch (_: Exception) {}
-                            } else {
-                                isAppInstalled = false
-                                // Chưa cài -> Báo cho tester và dẫn thẳng link tải của chủ app
-                                Toast.makeText(context, "Ứng dụng chưa được cài đặt. Đang mở liên kết tải...", Toast.LENGTH_SHORT).show()
-                                val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
-                                openUrlSafely(context, targetUrl, campaign.packageName)
                             }
+
+                            // 2. Phương pháp 2: Nếu Phương pháp 1 không mở được -> Mở thẳng app Google Play Store
+                            try {
+                                val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg")).apply {
+                                    setPackage("com.android.vending")
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(marketIntent)
+                                return@Button
+                            } catch (_: Exception) {}
+
+                            // 3. Dự phòng: Dẫn thẳng link Closed Test / Testing track để Opt-in & tải
+                            val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
+                            openUrlSafely(context, targetUrl, pkg)
                         },
+                        enabled = campaign.isOpen,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -1321,9 +1198,18 @@ fun CampaignDetailScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.isOwner) "Mở app trên máy (Tự test)" else "Test app (mở app trên máy)",
+                            text = if (uiState.isOwner) "Mở app (Tự test)" else if (isInstalledLocally) "Mở app kiểm thử" else "Tải & Cài đặt app",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
+                        )
+                    }
+
+                    if (!uiState.isOwner && isInstalledLocally) {
+                        Text(
+                            text = "💡 Mẹo: Bạn cũng có thể mở app trực tiếp từ Màn hình chính của điện thoại để test rồi quay lại nộp báo cáo.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 4.dp),
                         )
                     }
 
@@ -1374,7 +1260,8 @@ fun CampaignDetailScreen(
 
                         // Check status line
                         val todayReport = uiState.myTodayReport
-                        val isApprovedToday = uiState.checkedInToday || todayReport?.isApproved == true
+                        val isApprovedToday = (uiState.checkedInToday || todayReport?.isApproved == true) &&
+                            todayReport?.isPending != true && todayReport?.isRejected != true
                         val isPendingToday = todayReport?.isPending == true
                         val isRejectedToday = todayReport?.isRejected == true
 
@@ -1391,13 +1278,13 @@ fun CampaignDetailScreen(
                         val statusText = if (isApprovedToday) {
                             "✓ Đã duyệt hôm nay: Nhận +${if ((todayReport?.bonusAwarded ?: 0) > 0) todayReport?.bonusAwarded else 2} Credit."
                         } else if (isPendingToday) {
-                            "⏳ Đã nộp kết quả hôm nay. Đang chờ chủ app duyệt (+2 Credit) — Tự động duyệt sau ${todayReport?.remainingHoursUntilAutoAccept() ?: 24}h."
+                            "⏳ Đã nộp kết quả hôm nay (+2 Credit tạm nhận). Chờ chủ app duyệt (+1 C thưởng) — Tự động duyệt sau ${todayReport?.remainingHoursUntilAutoAccept() ?: 8}h."
                         } else if (isRejectedToday) {
                             val reason = todayReport?.rejectionReason?.ifBlank { null }
-                            if (reason != null) "✕ Bị từ chối hôm nay ($reason). Đề nghị test lại và chụp ảnh màn hình khác."
-                            else "✕ Bị từ chối hôm nay: Đề nghị test lại nghiêm túc và chụp ảnh tính năng khác của app."
+                            if (reason != null) "✕ Bị từ chối hôm nay ($reason). 2 Credit tạm nhận đã bị thu hồi. Đề nghị test lại và chụp ảnh khác."
+                            else "✕ Bị từ chối hôm nay: 2 Credit tạm nhận đã bị thu hồi. Đề nghị test lại nghiêm túc và chụp ảnh khác."
                         } else {
-                            "Đã cài. Dùng thử rồi nộp ảnh chụp màn hình (+2 Credit khi được duyệt)."
+                            "Đã cài. Dùng thử rồi nộp ảnh chụp màn hình (Tạm nhận +2 Credit ngay khi gửi)."
                         }
 
                         Row(
@@ -1463,7 +1350,14 @@ fun CampaignDetailScreen(
                         }
 
                         // Primary Action Button
-                        val buttonText = if (isApprovedToday) {
+                        val canSubmitNow = campaign.isOpen
+                        val buttonText = if (!canSubmitNow) {
+                            when {
+                                campaign.isProduction -> "App đã lên production 🎉"
+                                campaign.isCompleted -> "App đã hoàn thành kiểm thử"
+                                else -> "App đang tạm dừng — chưa thể nộp báo cáo"
+                            }
+                        } else if (isApprovedToday) {
                             "Đã duyệt hôm nay (Chạm để xem lại / góp ý)"
                         } else if (isPendingToday) {
                             "Cập nhật / Nộp lại ảnh khác hôm nay"
@@ -1474,6 +1368,7 @@ fun CampaignDetailScreen(
                         }
 
                         val actionIcon = when {
+                            !canSubmitNow -> Icons.Filled.Close
                             isApprovedToday -> Icons.Filled.CheckCircle
                             isPendingToday -> Icons.Filled.HourglassTop
                             isRejectedToday -> Icons.Filled.Replay
@@ -1489,6 +1384,7 @@ fun CampaignDetailScreen(
                                     showReportDialog = true
                                 }
                             },
+                            enabled = canSubmitNow,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -1654,47 +1550,15 @@ fun CampaignDetailScreen(
             Spacer(Modifier.height(16.dp))
         }
     }
+    }
 
     if (previewImageUrl != null) {
-        Dialog(onDismissRequest = { previewImageUrl = null }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Ảnh chụp màn hình của bạn",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        IconButton(onClick = { previewImageUrl = null }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Đóng")
-                        }
-                    }
-                    AsyncImage(
-                        model = previewImageUrl,
-                        contentDescription = "Full screenshot",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(440.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-            }
-        }
-        }
+        FullscreenImageViewer(
+            imageUrl = previewImageUrl,
+            onDismiss = { previewImageUrl = null },
+            title = "Ảnh chụp màn hình",
+            subtitle = campaign?.appName
+        )
     }
 }
 
@@ -1753,5 +1617,436 @@ private fun openUrlSafely(context: Context, rawUrl: String, packageName: String?
             } catch (_: Exception) {}
         }
         Toast.makeText(context, "Không thể mở liên kết này trên thiết bị.", Toast.LENGTH_SHORT).show()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SubmitReportBottomSheet(
+    campaign: Campaign,
+    uiState: CampaignDetailUiState,
+    onDismiss: () -> Unit,
+    onPickScreenshot: () -> Unit,
+    onScreenshotSelected: (Uri?) -> Unit,
+    onRatingChange: (Int) -> Unit,
+    onCommentChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onPreviewImage: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val todayReport = uiState.myTodayReport
+    val isPendingToday = todayReport?.isPending == true
+    val alreadyRewarded = (uiState.checkedInToday || todayReport?.isApproved == true) && todayReport?.isRejected != true
+
+    // Check for previous report from this tester to detect duplicate image
+    val previousReport = remember(uiState.myReports, uiState.myTodayReport) {
+        uiState.myReports.firstOrNull { it.id != uiState.myTodayReport?.id && !it.screenshotUrl.isNullOrBlank() }
+    }
+
+    var duplicateWarning by remember { mutableStateOf<String?>(null) }
+    var isCheckingDuplicate by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.selectedScreenshotUri, previousReport?.screenshotUrl) {
+        val uri = uiState.selectedScreenshotUri
+        val prevUrl = previousReport?.screenshotUrl
+        if (uri != null && !prevUrl.isNullOrBlank()) {
+            isCheckingDuplicate = true
+            val newHash = ImageHashHelper.computeDHashFromUri(context, uri)
+            val prevHash = ImageHashHelper.computeDHashFromUrl(context, prevUrl)
+            if (newHash != null && prevHash != null) {
+                val comp = ImageHashHelper.compare(newHash, prevHash)
+                if (comp.isSuspectDuplicate) {
+                    duplicateWarning = "⚠️ Cảnh báo tương đồng cao (${comp.similarity}%): Ảnh bạn vừa chọn rất giống với ảnh bạn đã nộp kiểm thử trước đó. Bạn nên chụp màn hình tính năng hoặc trang khác của ứng dụng để chắc chắn được chủ app duyệt thưởng và không bị từ chối nhé!"
+                } else {
+                    duplicateWarning = null
+                }
+            } else {
+                duplicateWarning = null
+            }
+            isCheckingDuplicate = false
+        } else {
+            duplicateWarning = null
+            isCheckingDuplicate = false
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = when {
+                            alreadyRewarded -> "Gửi góp ý bổ sung"
+                            isPendingToday -> "Cập nhật kết quả kiểm thử"
+                            else -> "Nộp kết quả kiểm thử"
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = campaign.appName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                IconButton(onClick = onDismiss, enabled = !uiState.isActionLoading) {
+                    Icon(Icons.Filled.Close, contentDescription = "Đóng")
+                }
+            }
+
+            // Reward Info Banner
+            Card(
+                colors = CardDefaults.cardColors(containerColor = if (alreadyRewarded) Color(0xFFE8F5E9) else Color(0xFFF0FDF4)),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, if (alreadyRewarded) Color(0xFFA5D6A7) else Color(0xFF86EFAC))
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = if (alreadyRewarded) "💡" else "🎁",
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = when {
+                            alreadyRewarded ->
+                                "Hôm nay bạn đã nhận thưởng kiểm thử cho app này. Bạn có thể gửi thêm nhận xét hoặc ảnh chụp màn hình góp ý bổ sung để hỗ trợ chủ app (thao tác này không cộng thêm Credit)."
+                            isPendingToday ->
+                                "Bạn đã tạm nhận 2 Credit cho kết quả hôm nay và đang chờ chủ app duyệt. Cập nhật thêm ảnh/nhận xét sẽ không cộng thêm Credit; chủ app vẫn có 8 giờ để duyệt."
+                            else ->
+                                "Bạn sẽ tạm nhận ngay 2 Credit sau khi gửi kết quả. Chủ app có 8 giờ để duyệt (+1 Credit thưởng thêm). Hãy chụp các tính năng khác nhau để được duyệt dễ dàng!"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (alreadyRewarded) Color(0xFF1B5E20) else Color(0xFF166534),
+                    )
+                }
+            }
+
+            // Screenshot Preview Area (Hero Size!)
+            Text(
+                text = "Ảnh chụp màn hình kiểm thử:",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+
+            if (uiState.selectedScreenshotUri != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.Black.copy(alpha = 0.05f))
+                                .clickable { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = uiState.selectedScreenshotUri,
+                                contentDescription = "Ảnh đã chọn",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                            // Overlay zoom badge
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xB3000000)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Chạm để phóng to", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+
+                        // Duplicate warning if detected
+                        if (isCheckingDuplicate) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Text("Đang đối chiếu ảnh với các ngày trước...", style = MaterialTheme.typography.labelSmall)
+                            }
+                        } else if (duplicateWarning != null) {
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFFFB74D))
+                            ) {
+                                Text(
+                                    text = duplicateWarning!!,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFE65100),
+                                    modifier = Modifier.padding(10.dp)
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = onPickScreenshot,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("Đổi ảnh khác")
+                            }
+                            OutlinedButton(
+                                onClick = { onScreenshotSelected(null) },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Gỡ")
+                            }
+                        }
+                    }
+                }
+            } else if (!uiState.myTodayReport?.screenshotUrl.isNullOrBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.Black.copy(alpha = 0.05f))
+                                .clickable { onPreviewImage(uiState.myTodayReport!!.screenshotUrl!!) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = uiState.myTodayReport!!.screenshotUrl,
+                                contentDescription = "Ảnh đã nộp",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xB3000000)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Ảnh đã nộp hôm nay · Phóng to", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = onPickScreenshot,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Chọn ảnh mới để thay thế")
+                        }
+                    }
+                }
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onPickScreenshot() },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 28.dp, horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.AddPhotoAlternate,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                        Text(
+                            text = "Chạm để tải ảnh chụp màn hình",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Chụp lại giao diện tính năng đang hoạt động trong app",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Rating
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Đánh giá ứng dụng:",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    val ratingLabel = when (uiState.myRating) {
+                        1 -> "Chưa đạt (1 sao)"
+                        2 -> "Tạm được (2 sao)"
+                        3 -> "Bình thường (3 sao)"
+                        4 -> "Khá tốt (4 sao)"
+                        else -> "Rất tốt (5 sao)"
+                    }
+                    Text(
+                        text = ratingLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AmberStar
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    (1..5).forEach { star ->
+                        IconButton(
+                            onClick = { onRatingChange(star) },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "$star sao",
+                                tint = if (star <= uiState.myRating) AmberStar
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+                                modifier = Modifier.size(36.dp),
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Comment
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Góp ý & nhận xét (tùy chọn):",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                OutlinedTextField(
+                    value = uiState.myComment,
+                    onValueChange = onCommentChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Mô tả lỗi gặp phải, góp ý giao diện hoặc tính năng cho nhà phát triển...") },
+                    minLines = 3,
+                    maxLines = 6,
+                    shape = RoundedCornerShape(12.dp),
+                )
+            }
+
+            // Submit Button
+            val canSubmit = !uiState.isActionLoading && (
+                uiState.myComment.isNotBlank() ||
+                uiState.selectedScreenshotUri != null ||
+                !uiState.myTodayReport?.screenshotUrl.isNullOrBlank()
+            )
+
+            Button(
+                onClick = onSubmit,
+                enabled = canSubmit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+            ) {
+                if (uiState.isActionLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Đang tải ảnh và gửi báo cáo...", fontSize = 15.sp)
+                } else {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = when {
+                            alreadyRewarded -> "Gửi góp ý bổ sung"
+                            isPendingToday -> "Cập nhật kết quả đã nộp"
+                            else -> "Gửi kết quả (Tạm nhận +2 Credit)"
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }

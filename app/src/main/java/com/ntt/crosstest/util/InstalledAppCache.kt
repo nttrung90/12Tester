@@ -21,6 +21,9 @@ object InstalledAppCache {
     private var installedPackages: Set<String> = emptySet()
 
     @Volatile
+    private var lastRefreshAt: Long = 0L
+
+    @Volatile
     private var cachedInstalledUserApps: List<PlayStoreHelper.InstalledAppItem> = emptyList()
 
     // Cache up to 120 app icons in memory
@@ -33,6 +36,14 @@ object InstalledAppCache {
     }
 
     fun refresh(context: Context) {
+        refreshPackages(context)
+        cachedInstalledUserApps = PlayStoreHelper.getInstalledUserApps(context)
+    }
+
+    /**
+     * Lightweight refresh of the installed-package set only (no app icons/labels).
+     */
+    fun refreshPackages(context: Context) {
         try {
             val pm = context.packageManager
             val packages = pm.getInstalledPackages(0)
@@ -42,9 +53,21 @@ object InstalledAppCache {
             }
             installedPackages = set
             isInitialized = true
-            cachedInstalledUserApps = PlayStoreHelper.getInstalledUserApps(context)
+            lastRefreshAt = System.currentTimeMillis()
         } catch (_: Exception) {
             // Keep previous set on failure
+        }
+    }
+
+    /**
+     * Refreshes the installed-package snapshot if it is missing or older than [maxAgeMs].
+     * Ensures uninstalled apps are detected promptly (the memory set alone goes stale).
+     * Call from a background thread (PackageManager enumeration is synchronous).
+     */
+    fun ensureFresh(context: Context, maxAgeMs: Long = 15_000L) {
+        val age = System.currentTimeMillis() - lastRefreshAt
+        if (!isInitialized || age > maxAgeMs) {
+            refreshPackages(context)
         }
     }
 
@@ -125,5 +148,6 @@ object InstalledAppCache {
         installedPackages = emptySet()
         cachedInstalledUserApps = emptyList()
         isInitialized = false
+        lastRefreshAt = 0L
     }
 }

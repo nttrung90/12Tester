@@ -114,7 +114,6 @@ fun CreateCampaignScreen(
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSlotInfoDialog by remember { mutableStateOf(false) }
-    var showInstalledAppsDialog by remember { mutableStateOf(false) }
     var slotToUnlock by remember { mutableStateOf<SlotInfo?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -261,102 +260,6 @@ fun CreateCampaignScreen(
                     enabled = !uiState.isUnlockingSlot,
                 ) {
                     Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-    if (showInstalledAppsDialog) {
-        LaunchedEffect(Unit) {
-            viewModel.loadInstalledApps(context)
-        }
-        AlertDialog(
-            onDismissRequest = { showInstalledAppsDialog = false },
-            title = {
-                Text(
-                    text = "Chọn ứng dụng trên máy",
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                if (uiState.isLoadingInstalledApps) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(36.dp))
-                    }
-                } else if (uiState.installedApps.isEmpty()) {
-                    Text("Không tìm thấy ứng dụng nào phù hợp trên máy.")
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(360.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        items(uiState.installedApps) { appItem ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
-                                        viewModel.selectInstalledApp(appItem)
-                                        showInstalledAppsDialog = false
-                                    }
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (appItem.iconDrawable != null) {
-                                    AsyncImage(
-                                        model = appItem.iconDrawable,
-                                        contentDescription = appItem.appName,
-                                        modifier = Modifier
-                                            .size(44.dp)
-                                            .clip(RoundedCornerShape(10.dp)),
-                                        contentScale = ContentScale.Crop,
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(44.dp)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(MaterialTheme.colorScheme.primaryContainer),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            text = appItem.appName.take(1).uppercase(),
-                                            fontWeight = FontWeight.Bold,
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.width(12.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = appItem.appName,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = appItem.packageName,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showInstalledAppsDialog = false }) {
-                    Text("Đóng")
                 }
             }
         )
@@ -710,28 +613,6 @@ fun CreateCampaignScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp),
-                    )
-                }
-
-                Button(
-                    onClick = { showInstalledAppsDialog = true },
-                    enabled = uiState.isGuideConfirmed,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.PhoneAndroid,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "📱 Chọn từ ứng dụng đã cài trên máy",
-                        fontWeight = FontWeight.SemiBold,
                     )
                 }
 

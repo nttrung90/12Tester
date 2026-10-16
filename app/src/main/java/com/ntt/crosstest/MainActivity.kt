@@ -105,7 +105,9 @@ class MainActivity : ComponentActivity() {
                     }
                     val supabase = SupabaseHolder.get()
                     val sessionStatus by supabase.auth.sessionStatus.collectAsStateWithLifecycle()
-                    val hasCachedSession = remember { SessionCacheManager.hasCachedSession(app) }
+                    // Read fresh on each recomposition: after a sign-out the
+                    // cache is cleared and the app must not keep routing HOME.
+                    val hasCachedSession = SessionCacheManager.hasCachedSession(app)
 
                     when (sessionStatus) {
                         is SessionStatus.Initializing -> {

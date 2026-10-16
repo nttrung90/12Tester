@@ -31,14 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
-import com.ntt.crosstest.util.InstalledAppCache
 
 @Composable
 fun CampaignCard(
@@ -52,6 +50,7 @@ fun CampaignCard(
         installedCount = item.installedCount,
         todayTestedCount = item.todayTestedCount,
         hasTestedToday = item.hasTestedToday,
+        isInstalledLocally = item.isInstalledLocally,
         onClick = onClick,
         modifier = modifier,
     )
@@ -66,11 +65,8 @@ fun CampaignCard(
     installedCount: Int = 0,
     todayTestedCount: Int = 0,
     hasTestedToday: Boolean = false,
+    isInstalledLocally: Boolean? = null,
 ) {
-    val context = LocalContext.current
-    val isInstalledOnDevice = remember(campaign.packageName) {
-        InstalledAppCache.isInstalled(context, campaign.packageName)
-    }
 
     Card(
         modifier = modifier
@@ -98,14 +94,27 @@ fun CampaignCard(
             Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // App Name
-                Text(
-                    text = campaign.appName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                // App Name (+ lifecycle badge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = campaign.appName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    val badge = when {
+                        campaign.isProduction -> Triple("Lên production", Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                        campaign.isCompleted -> Triple("Hoàn thành KT", Color(0xFFE3F2FD), Color(0xFF1565C0))
+                        campaign.isPaused -> Triple("Tạm dừng", Color(0xFFFFF8E1), Color(0xFFB26A00))
+                        else -> null
+                    }
+                    if (badge != null) {
+                        Spacer(Modifier.width(8.dp))
+                        StatusBadge(label = badge.first, background = badge.second, foreground = badge.third)
+                    }
+                }
 
                 // Owner Name
                 Text(
@@ -118,23 +127,31 @@ fun CampaignCard(
 
                 Spacer(Modifier.height(4.dp))
 
-                // Status & Stats Row: e.g. "⭳ Chưa cài   👥 13 hôm nay · 21 đã cài"
+                // Row 1: trạng thái cài trên máy + trạng thái test hôm nay
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    if (isInstalledOnDevice) {
+                    if (isInstalledLocally != null) {
+                        if (isInstalledLocally) {
+                            StatusBadge(label = "Đã cài", background = Color(0xFFE8F5E9), foreground = Color(0xFF2E7D32))
+                        } else {
+                            StatusBadge(label = "Chưa cài", background = Color(0xFFFFF8E1), foreground = Color(0xFFB26A00))
+                        }
+                    }
+
+                    if (hasTestedToday) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.size(13.dp),
-                            tint = if (hasTestedToday) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = Color(0xFF2E7D32),
                         )
                         Text(
-                            text = if (hasTestedToday) "Đã cài · đã nộp" else "Đã cài · chưa nộp",
+                            text = "Đã test hôm nay",
                             style = MaterialTheme.typography.labelSmall,
-                            color = if (hasTestedToday) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = if (hasTestedToday) FontWeight.SemiBold else FontWeight.Normal,
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.SemiBold,
                         )
                     } else {
                         Icon(
@@ -144,14 +161,18 @@ fun CampaignCard(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = "Chưa cài",
+                            text = "Chưa test hôm nay",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                }
 
-                    Spacer(Modifier.width(4.dp))
-
+                // Row 2: thống kê chung của campaign
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     val dailyTarget = campaign.dailyTarget
                     val isTargetReached = todayTestedCount >= dailyTarget
 
@@ -162,7 +183,12 @@ fun CampaignCard(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     )
                     Text(
-                        text = "$todayTestedCount/$dailyTarget hôm nay · $installedCount đã cài",
+                        text = buildString {
+                            append("$todayTestedCount/$dailyTarget hôm nay · $installedCount người đã cài")
+                            if (campaign.isOpen) {
+                                campaign.testingDaysRemaining?.let { append(" · Còn $it ngày") }
+                            }
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -177,5 +203,27 @@ fun CampaignCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StatusBadge(
+    label: String,
+    background: Color,
+    foreground: Color,
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(background)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = foreground,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+        )
     }
 }

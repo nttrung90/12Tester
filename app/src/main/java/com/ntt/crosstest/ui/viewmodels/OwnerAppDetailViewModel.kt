@@ -107,14 +107,36 @@ class OwnerAppDetailViewModel(
 
     fun togglePauseResume() {
         val camp = _uiState.value.campaign ?: return
-        val newStatus = if (camp.isPaused) "open" else "paused"
+        if (camp.isFinalized) return
         viewModelScope.launch {
             _uiState.update { it.copy(isActionLoading = true, error = null) }
             try {
-                repository.updateCampaignStatus(camp.id.orEmpty(), newStatus)
-                refresh()
+                if (camp.isPaused) {
+                    // Bật lại qua RPC: kiểm tra cửa sổ 15 ngày + chủ app đã hoạt động lại.
+                    val result = repository.resumeCampaign(camp.id.orEmpty())
+                    _uiState.update {
+                        it.copy(
+                            isActionLoading = false,
+                            message = if (result.status == "completed") {
+                                "App đã quá 15 ngày hiển thị và được chuyển sang mục Đã hoàn thành Kiểm thử."
+                            } else {
+                                "Đã bật lại app — app sẽ hiển thị trong mục App cần Test."
+                            },
+                        )
+                    }
+                    refresh()
+                } else {
+                    repository.updateCampaignStatus(camp.id.orEmpty(), "paused", pausedReason = "owner_manual")
+                    refresh()
+                }
             } catch (e: Exception) {
                 val msg = when {
+                    e.message?.contains("OWNER_INACTIVE") == true ->
+                        "Bạn đã vắng nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bật lại app này."
+                    e.message?.contains("CAMPAIGN_WINDOW_EXPIRED") == true ->
+                        "App đã hết 15 ngày hiển thị và được chuyển sang mục Đã hoàn thành Kiểm thử."
+                    e.message?.contains("CAMPAIGN_NOT_PAUSED") == true ->
+                        "App không ở trạng thái tạm dừng."
                     e.message?.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") == true ->
                         "Slot ${camp.slotNumber} đã hết hạn. Vui lòng gia hạn Slot để tiếp tục mở nhận tester."
                     e.message?.contains("SLOT_ALREADY_IN_USE") == true ->
@@ -122,6 +144,7 @@ class OwnerAppDetailViewModel(
                     else -> friendlyError(e)
                 }
                 _uiState.update { it.copy(isActionLoading = false, error = msg) }
+                if (e.message?.contains("CAMPAIGN_WINDOW_EXPIRED") == true) refresh()
             }
         }
     }
@@ -225,8 +248,13 @@ class OwnerAppDetailViewModel(
     fun approveReport(report: TesterReport, bonusCredits: Int = 0) {
         viewModelScope.launch {
             try {
-                repository.approveReport(report, bonusCredits)
-                _uiState.update { it.copy(message = "Đã duyệt kết quả kiểm thử (+2 Credit cho tester)") }
+                val result = repository.approveReport(report, bonusCredits)
+                val msg = if (result.creditsAwarded > 0) {
+                    "Đã duyệt kết quả kiểm thử (Thưởng thêm +${result.creditsAwarded} Credit cho tester)"
+                } else {
+                    "Đã duyệt kết quả kiểm thử."
+                }
+                _uiState.update { it.copy(message = msg) }
                 refresh()
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.localizedMessage) }

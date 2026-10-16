@@ -44,12 +44,18 @@ class AuthRepository(private val supabase: SupabaseClient) {
     }
 
     /**
-     * Signs in with the Google ID token and ensures a row exists in `profiles`.
+     * Signs in with the Google ID token, verifies lock status, and ensures a
+     * row exists in `profiles`.
      */
     suspend fun signInWithGoogle(idToken: String, displayName: String?, avatarUrl: String?) {
         supabase.auth.signInWith(IDToken) {
             this.idToken = idToken
             provider = Google
+        }
+        val uid = currentUserId()
+        if (uid != null && checkAccountLocked(uid)) {
+            signOutQuietly()
+            throw IllegalStateException("ACCOUNT_LOCKED")
         }
         upsertProfile(displayName, avatarUrl)
     }
@@ -64,7 +70,7 @@ class AuthRepository(private val supabase: SupabaseClient) {
         }
         val uid = currentUserId()
         if (uid != null && checkAccountLocked(uid)) {
-            signOut()
+            signOutQuietly()
             throw IllegalStateException("ACCOUNT_LOCKED")
         }
         upsertProfile(null, null)
@@ -123,5 +129,17 @@ class AuthRepository(private val supabase: SupabaseClient) {
 
     suspend fun signOut() {
         supabase.auth.signOut()
+    }
+
+    /**
+     * Best-effort sign-out: guaranteed to never throw so the locked-account
+     * branch always surfaces the correct error to the caller.
+     */
+    private suspend fun signOutQuietly() {
+        try {
+            signOut()
+        } catch (_: Exception) {
+            // The local session may already be cleared; ignore network failures.
+        }
     }
 }

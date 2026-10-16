@@ -51,7 +51,9 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow(
         run {
             val cached = SessionCacheManager.loadSync(app)
-            if (cached != null && cached.userProfile != null) {
+            // Only hydrate from disk when the snapshot belongs to the user who
+            // actually holds the current session (prevents cross-account leaks).
+            if (cached != null && cached.userProfile != null && cached.userId == authRepository.currentUserId()) {
                 ProfileUiState(
                     isLoading = false,
                     isBackgroundSyncing = true,
@@ -276,12 +278,8 @@ class ProfileViewModel(
 
     fun signOut() {
         viewModelScope.launch {
-            try {
-                authRepository.signOut()
-            } catch (_: Exception) {
-                // Even if sign-out fails remotely, treat as signed out locally.
-            }
-            SessionCacheManager.clear(app)
+            // Clears remote session (best effort), RAM caches and the disk snapshot.
+            app.performSignOut()
             _uiState.update {
                 it.copy(
                     signedOut = true,

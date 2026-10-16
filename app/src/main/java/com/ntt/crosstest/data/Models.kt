@@ -70,11 +70,24 @@ data class Campaign(
     @SerialName("tip_credits") val tipCredits: Int = 0,
     @SerialName("is_boosted") val isBoosted: Boolean = false,
     @SerialName("slot_number") val slotNumber: Int = 1,
+    @SerialName("paused_reason") val pausedReason: String? = null,
+    @SerialName("completed_at") val completedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
 ) {
     val isOpen: Boolean get() = status == "open"
     val isPaused: Boolean get() = status == "paused"
     val isProduction: Boolean get() = status == "production"
+    val isCompleted: Boolean get() = status == "completed"
+
+    /** App đã ở tab "Đã hoàn thành Kiểm thử" (lên production hoặc hết 15 ngày hiển thị). */
+    val isFinalized: Boolean get() = isProduction || isCompleted
+
+    /** App bị hệ thống tự tạm dừng vì chủ app vắng nhiệm vụ ngày 3 ngày liên tục. */
+    val isAutoPaused: Boolean get() = isPaused && pausedReason == "owner_inactive"
+
+    /** App bị tạm dừng do Slot đã hết hạn. */
+    val isSlotExpiredPause: Boolean get() = isPaused && pausedReason == "slot_expired"
+
     val safeIconUrl: String get() = iconUrl.orEmpty()
     val safeTestUsername: String get() = testUsername.orEmpty()
     val safeTestPassword: String get() = testPassword.orEmpty()
@@ -84,7 +97,60 @@ data class Campaign(
         20 -> 20
         else -> 0
     }
+
+    /** Ngày app được đăng lên (parse created_at). */
+    val postedDate: java.time.LocalDate?
+        get() {
+            val raw = createdAt ?: return null
+            return try {
+                java.time.OffsetDateTime.parse(raw).toLocalDate()
+            } catch (_: Exception) {
+                try {
+                    java.time.Instant.parse(raw)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
+                } catch (_: Exception) {
+                    try {
+                        java.time.LocalDate.parse(raw.take(10))
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+            }
+        }
+
+    /** Số ngày còn lại trong cửa sổ hiển thị [TESTING_WINDOW_DAYS] ngày kể từ lúc đăng. */
+    val testingDaysRemaining: Int?
+        get() {
+            val start = postedDate ?: return null
+            val today = java.time.LocalDate.now()
+            val remaining = java.time.temporal.ChronoUnit.DAYS
+                .between(today, start.plusDays(TESTING_WINDOW_DAYS.toLong()))
+            return remaining.toInt().coerceAtLeast(0)
+        }
+
+    companion object {
+        const val TESTING_WINDOW_DAYS = 15
+    }
 }
+
+@Serializable
+data class ResumeCampaignParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+)
+
+@Serializable
+data class ResumeCampaignResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("status") val status: String = "",
+)
+
+@Serializable
+data class LifecycleSyncResult(
+    @SerialName("completed") val completed: Int = 0,
+    @SerialName("paused") val paused: Int = 0,
+)
 
 @Serializable
 data class CampaignMember(
@@ -139,6 +205,7 @@ data class TesterReport(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("reviewed_at") val reviewedAt: String? = null,
     @SerialName("rejection_reason") val rejectionReason: String? = null,
+    @SerialName("image_hash") val imageHash: String? = null,
     @SerialName("tester_name") val testerName: String? = null,
     @SerialName("tester_avatar") val testerAvatar: String? = null,
     @SerialName("tester_credits") val testerCredits: Int? = null,
@@ -170,10 +237,10 @@ data class TesterReport(
     }
 
     fun remainingHoursUntilAutoAccept(): Int {
-        if (createdAt.isNullOrBlank()) return 24
+        if (createdAt.isNullOrBlank()) return 8
         return try {
             val created = java.time.Instant.parse(createdAt)
-            val deadline = created.plus(java.time.Duration.ofHours(24))
+            val deadline = created.plus(java.time.Duration.ofHours(8))
             val now = java.time.Instant.now()
             if (now.isAfter(deadline)) 0
             else {
@@ -181,7 +248,7 @@ data class TesterReport(
                 (hours + 1).coerceAtLeast(1)
             }
         } catch (_: Exception) {
-            24
+            8
         }
     }
 }
@@ -538,6 +605,7 @@ data class SubmitTesterReportParams(
     @SerialName("p_content") val content: String = "",
     @SerialName("p_screenshot_url") val screenshotUrl: String? = null,
     @SerialName("p_rating") val rating: Int = 5,
+    @SerialName("p_image_hash") val imageHash: String? = null,
 )
 
 @Serializable

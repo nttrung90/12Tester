@@ -10,6 +10,7 @@ import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.Feedback
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.util.FirebaseStorageHelper
+import com.ntt.crosstest.util.ImageHashHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -107,7 +108,9 @@ class CampaignDetailViewModel(
                     return@launch
                 }
                 val isMember = if (myUserId != null) repository.isMember(campaignId, myUserId) else false
-                val checkedIn = if (isMember && myUserId != null) repository.hasCheckedInToday(campaignId, myUserId) else false
+                // Chỉ coi là "đã check-in" khi check-in đã chính thức (được duyệt), KHÔNG tính
+                // dòng check-in tạm tính tạo lúc nộp báo cáo còn chờ chủ app duyệt.
+                val checkedIn = if (isMember && myUserId != null) repository.hasConfirmedCheckinToday(campaignId, myUserId) else false
                 val isOwner = myUserId != null && campaign.ownerId == myUserId
 
                 val members = repository.getMembers(campaignId)
@@ -312,8 +315,10 @@ class CampaignDetailViewModel(
                 }
 
                 var screenshotUrl: String? = null
+                var imageHash: String? = null
                 val uri = state.selectedScreenshotUri
                 if (uri != null) {
+                    imageHash = ImageHashHelper.computeDHashFromUri(context, uri)
                     screenshotUrl = FirebaseStorageHelper.uploadReportScreenshot(
                         context = context,
                         imageUri = uri,
@@ -322,19 +327,25 @@ class CampaignDetailViewModel(
                     )
                 } else {
                     screenshotUrl = state.myTodayReport?.screenshotUrl
+                    imageHash = state.myTodayReport?.imageHash
                 }
 
-                val alreadyRewarded = state.checkedInToday || state.myTodayReport?.isApproved == true
+                val pendingToday = state.myTodayReport?.isPending == true
+                val alreadyRewarded = (state.checkedInToday || state.myTodayReport?.isApproved == true) && state.myTodayReport?.isRejected != true
                 repository.submitFeedback(
                     campaignId = campaignId,
                     rating = state.myRating,
                     comment = state.myComment,
                     screenshotUrl = screenshotUrl,
+                    imageHash = imageHash,
                 )
-                val successMessage = if (alreadyRewarded) {
-                    "Đã gửi góp ý bổ sung! (Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi)."
-                } else {
-                    "Đã gửi kết quả kiểm thử! Bạn sẽ nhận +2 Credit sau khi chủ app duyệt (hoặc tự động duyệt sau 24h)."
+                val successMessage = when {
+                    alreadyRewarded ->
+                        "Đã gửi góp ý bổ sung! (Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi)."
+                    pendingToday ->
+                        "Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt)."
+                    else ->
+                        "Đã gửi kết quả kiểm thử! Bạn tạm nhận +2 Credit. Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt)."
                 }
                 val nextCamp = try {
                     repository.getNextUntestedCampaign(campaignId)

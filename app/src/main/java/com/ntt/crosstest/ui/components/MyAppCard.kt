@@ -128,6 +128,7 @@ fun MyAppCard(
                 // 1. Status pill
                 val (statusText, statusColor) = when {
                     campaign.isProduction -> "🚀 Production" to Color(0xFF1565C0)
+                    campaign.isCompleted -> "✅ Hoàn thành KT" to Color(0xFF1565C0)
                     campaign.isPaused -> "⏸ Tạm dừng" to Color(0xFFE65100)
                     else -> "▶ Đang test" to Color(0xFF2E7D32)
                 }
@@ -137,6 +138,20 @@ fun MyAppCard(
                     textColor = statusColor,
                     backgroundColor = statusColor.copy(alpha = 0.08f),
                 )
+
+                // 1b. Days remaining in the 15-day window (open apps only)
+                if (campaign.isOpen) {
+                    campaign.testingDaysRemaining?.let { days ->
+                        StatPill(
+                            icon = Icons.Filled.CalendarMonth,
+                            text = "Còn $days ngày",
+                            iconTint = Color(0xFF1976D2),
+                            borderColor = Color(0xFF1976D2).copy(alpha = 0.4f),
+                            textColor = Color(0xFF1976D2),
+                            backgroundColor = Color(0xFF1976D2).copy(alpha = 0.08f),
+                        )
+                    }
+                }
 
                 // 2. Installed count
                 val installedCount = stats?.installedTestersCount ?: campaign.targetTesters

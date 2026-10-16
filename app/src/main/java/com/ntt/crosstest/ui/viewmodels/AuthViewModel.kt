@@ -191,8 +191,10 @@ fun friendlyError(e: Exception): String {
     val msg = e.message.orEmpty()
     val lower = msg.lowercase()
     return when {
-        "account_locked" in msg ->
+        "account_locked" in lower ->
             "Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ Admin để được hỗ trợ."
+        "campaign_not_open" in lower ->
+            "App đang tạm dừng hoặc đã hoàn thành kiểm thử nên không thể nộp báo cáo mới."
         "email not confirmed" in lower || "email_not_confirmed" in lower || "not confirmed" in lower || "verified" in lower && "email" in lower ->
             "Tài khoản chưa được kích hoạt email. Vui lòng chạy lệnh kích hoạt trong Supabase SQL Editor."
         "unlock_or_renew_slot" in lower || ("pgrst202" in lower && "slot" in lower) ->

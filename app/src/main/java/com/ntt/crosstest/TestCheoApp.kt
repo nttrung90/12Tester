@@ -10,6 +10,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
@@ -93,6 +94,21 @@ class TestCheoApp : Application(), ImageLoaderFactory {
 
     fun cancelDailyReminder() {
         WorkManager.getInstance(this).cancelUniqueWork(REMINDER_WORK_NAME)
+    }
+
+    /**
+     * Single sign-out path used by every screen: clears the remote session
+     * (best effort), the in-memory repository cache and the on-disk session
+     * snapshot so the next user/guest never sees the previous account's data.
+     */
+    suspend fun performSignOut() {
+        try {
+            authRepository.signOut()
+        } catch (_: Exception) {
+            // Even if the remote sign-out fails (e.g. offline), clear local state.
+        }
+        campaignRepository.clearMemoryCache()
+        SessionCacheManager.clear(this)
     }
 
     companion object {

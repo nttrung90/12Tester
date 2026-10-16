@@ -14,6 +14,16 @@
     <string name="tab_mine">My Apps</string>
     <string name="tab_leaderboard">Leaderboard</string>
     <string name="tab_profile">Profile</string>
+    <!-- Home sub-tabs -->
+    <string name="home_tab_need_test">Need Test</string>
+    <string name="home_tab_paused">Paused</string>
+    <string name="home_tab_completed">Testing Done</string>
+    <string name="home_empty_open">No apps need testing yet.</string>
+    <string name="home_empty_paused">No paused apps.</string>
+    <string name="home_empty_completed">No apps completed testing yet.</string>
+    <string name="home_tested_progress_format">%1$d/%2$d apps</string>
+    <string name="home_paused_hint">Paused because the owner missed daily tasks 3 days in a row or paused manually. The owner can resume to move it back to Need Test.</string>
+    <string name="home_completed_hint">The app has gone to production or finished its 15-day testing window.</string>
     <string name="post_app_btn">Post App</string>
     <string name="post_app_title">Post My App</string>
     <!-- Post App Guide & Banner -->
@@ -301,5 +311,5 @@
     <string name="admin_email_contact">firstntt90@gmail.com</string>
     <string name="warning_tester_msg">Hệ thống ghi nhận bạn tham gia kiểm thử chưa nghiêm túc, đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="warning_owner_msg">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
-    <string name="auto_accept_24h_notice">App owners have up to 24 hours to review. After 24 hours, the system will auto-approve and award 2 Credits to the tester.</string>
+    <string name="auto_accept_24h_notice">App owners have up to 8 hours to review. After 8 hours, the system will auto-approve (no bonus). Owner approval awards +1 bonus Credit.</string>
 </resources>

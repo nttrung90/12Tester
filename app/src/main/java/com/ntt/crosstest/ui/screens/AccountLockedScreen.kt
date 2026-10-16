@@ -192,7 +192,7 @@ fun AccountLockedScreen(
                     IconButton(
                         onClick = {
                             coroutineScope.launch {
-                                app.authRepository.signOut()
+                                app.performSignOut()
                                 onSignedOut()
                             }
                         }
@@ -463,7 +463,7 @@ fun AccountLockedScreen(
             TextButton(
                 onClick = {
                     coroutineScope.launch {
-                        app.authRepository.signOut()
+                        app.performSignOut()
                         onSignedOut()
                     }
                 }

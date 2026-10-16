@@ -18,6 +18,8 @@ data class CachedSessionData(
     val userProfile: Profile? = null,
     val openCampaigns: List<Campaign> = emptyList(),
     val displayItems: List<CampaignDisplayItem> = emptyList(),
+    val pausedDisplayItems: List<CampaignDisplayItem> = emptyList(),
+    val completedDisplayItems: List<CampaignDisplayItem> = emptyList(),
     val myCampaigns: List<Campaign> = emptyList(),
     val joinedCampaigns: List<Campaign> = emptyList(),
     val leaderboard: List<LeaderboardUser> = emptyList(),
@@ -88,7 +90,10 @@ object SessionCacheManager {
             if (tempFile.renameTo(file) || (file.delete() && tempFile.renameTo(file))) {
                 context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .edit()
-                    .putBoolean(KEY_HAS_SESSION, true)
+                    // Guest snapshots (userId == null) must not mark an
+                    // authenticated session, otherwise cold start would skip
+                    // the login screen with no real session.
+                    .putBoolean(KEY_HAS_SESSION, data.userId != null)
                     .putString(KEY_LAST_USER_ID, data.userId)
                     .apply()
             }

@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +64,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -86,6 +89,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -557,21 +561,17 @@ fun HomeScreen(
                 0 -> DiscoverTab(
                     query = uiState.query,
                     onQueryChange = viewModel::onQueryChange,
-                    items = uiState.searchResults ?: uiState.displayItems,
+                    items = uiState.displayItems,
+                    pausedItems = uiState.pausedDisplayItems,
+                    completedItems = uiState.completedDisplayItems,
+                    searchResults = uiState.searchResults,
                     isLoading = uiState.isLoading,
                     error = uiState.error,
                     onRefresh = { viewModel.refresh(context, forceRefresh = true) },
-                    onCampaignClick = { item ->
-                        val campaign = item.campaign
-                        val id = campaign.id ?: return@DiscoverTab
-                        if (uiState.isAuthenticated && campaign.ownerId == uiState.userProfile?.id) {
-                            onOwnerAppClick(id)
-                        } else if (item.isTargetReached && !item.hasTestedToday) {
-                            appTargetReachedToConfirm = item
-                        } else {
-                            onCampaignClick(id)
-                        }
-                    },
+                    currentUserId = uiState.userProfile?.id,
+                    onCampaignClick = { id -> onCampaignClick(id) },
+                    onOwnerAppClick = { id -> onOwnerAppClick(id) },
+                    onTargetReached = { item -> appTargetReachedToConfirm = item },
                     isAuthenticated = uiState.isAuthenticated,
                     todayCheckinCount = uiState.todayCheckinCount,
                     userCredits = uiState.userCredits,
@@ -630,17 +630,23 @@ fun HomeScreen(
 }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun DiscoverTab(
     modifier: Modifier = Modifier,
     query: String,
     onQueryChange: (String) -> Unit,
     items: List<CampaignDisplayItem>,
+    pausedItems: List<CampaignDisplayItem>,
+    completedItems: List<CampaignDisplayItem>,
+    searchResults: List<CampaignDisplayItem>?,
     isLoading: Boolean,
     error: String?,
     onRefresh: () -> Unit,
-    onCampaignClick: (CampaignDisplayItem) -> Unit,
+    currentUserId: String?,
+    onCampaignClick: (String) -> Unit,
+    onOwnerAppClick: (String) -> Unit,
+    onTargetReached: (CampaignDisplayItem) -> Unit,
     isAuthenticated: Boolean,
     todayCheckinCount: Int,
     userCredits: Int,
@@ -649,86 +655,200 @@ private fun DiscoverTab(
 ) {
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
     val coroutineScope = rememberCoroutineScope()
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
+    val listsByTab = listOf(items, pausedItems, completedItems)
+    val activeItems: List<CampaignDisplayItem> = if (query.isBlank()) {
+        listsByTab[selectedTab]
+    } else {
+        query.let { q ->
+            listsByTab[selectedTab].filter {
+                it.campaign.appName.contains(q, ignoreCase = true) ||
+                    it.campaign.packageName.contains(q, ignoreCase = true) ||
+                    it.ownerName.contains(q, ignoreCase = true)
+            }
+        }
+    }
+
+    val onCardClick: (CampaignDisplayItem) -> Unit = { item ->
+        val campaign = item.campaign
+        val id = campaign.id
+        if (id != null) {
+            when {
+                currentUserId != null && campaign.ownerId == currentUserId -> onOwnerAppClick(id)
+                campaign.isOpen -> {
+                    if (item.isTargetReached && !item.hasTestedToday) onTargetReached(item)
+                    else onCampaignClick(id)
+                }
+                else -> onCampaignClick(id)
+            }
+        }
+    }
+
+    val allListsEmpty = items.isEmpty() && pausedItems.isEmpty() && completedItems.isEmpty()
 
     PullToRefreshBox(
         isRefreshing = isLoading,
         onRefresh = onRefresh,
         modifier = modifier.fillMaxSize(),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Header: App cần test ⚫🟡🟢                                 12/96 app
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+        if (error != null && allListsEmpty) {
+            ErrorBox(error, Modifier.fillMaxSize())
+        } else {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Text(
-                        text = "App cần test",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF263238)))
-                    Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFFFFC107)))
-                    Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
-                }
-                val testedCount = items.count { it.hasTestedToday }
-                val totalCount = items.size
-                Text(
-                    text = "$testedCount/$totalCount app",
-                    color = Color(0xFFD32F2F),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleSmall,
-                )
-            }
-
-            if (error != null && items.isEmpty()) {
-                ErrorBox(error, Modifier.fillMaxSize())
-            } else if (items.isEmpty() && !isLoading) {
-                EmptyBox(Modifier.fillMaxSize())
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (query.isBlank()) {
-                        item(key = "daily_task_card") {
-                            DailyTaskCard(
-                                todayCheckinCount = todayCheckinCount,
-                                userCredits = userCredits,
-                                missedStreak = missedStreak,
-                                isAuthenticated = isAuthenticated,
-                                onRequireLogin = onRequireLogin,
-                                onTestAppClick = {
-                                    coroutineScope.launch {
-                                        if (items.isNotEmpty()) {
-                                            listState.animateScrollToItem(1)
-                                        }
+                if (query.isBlank()) {
+                    item(key = "daily_task_card") {
+                        DailyTaskCard(
+                            todayCheckinCount = todayCheckinCount,
+                            userCredits = userCredits,
+                            missedStreak = missedStreak,
+                            isAuthenticated = isAuthenticated,
+                            onRequireLogin = onRequireLogin,
+                            onTestAppClick = {
+                                coroutineScope.launch {
+                                    selectedTab = 0
+                                    if (items.isNotEmpty()) {
+                                        listState.animateScrollToItem(2)
                                     }
-                                },
-                                modifier = Modifier.padding(bottom = 4.dp),
-                            )
-                        }
-                    }
-
-                    itemsIndexed(items, key = { index, item -> "disc_${item.campaign.id ?: item.campaign.packageName}_$index" }) { _, item ->
-                        CampaignCard(
-                            item = item,
-                            onClick = { onCampaignClick(item) },
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 4.dp),
                         )
                     }
-                    item { Spacer(Modifier.height(72.dp)) } // room for FAB
                 }
+
+                stickyHeader(key = "home_sub_tabs") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface),
+                    ) {
+                        TabRow(selectedTabIndex = selectedTab) {
+                            HomeSubTab(
+                                selected = selectedTab == 0,
+                                label = stringResource(R.string.home_tab_need_test),
+                                count = items.size,
+                                onClick = { selectedTab = 0 },
+                            )
+                            HomeSubTab(
+                                selected = selectedTab == 1,
+                                label = stringResource(R.string.home_tab_paused),
+                                count = pausedItems.size,
+                                onClick = { selectedTab = 1 },
+                            )
+                            HomeSubTab(
+                                selected = selectedTab == 2,
+                                label = stringResource(R.string.home_tab_completed),
+                                count = completedItems.size,
+                                onClick = { selectedTab = 2 },
+                            )
+                        }
+                        when (selectedTab) {
+                            0 -> {
+                                val testedCount = items.count { it.hasTestedToday }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    ) {
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF263238)))
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFFFFC107)))
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.home_tested_progress_format, testedCount, items.size),
+                                        color = Color(0xFFD32F2F),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleSmall,
+                                    )
+                                }
+                            }
+                            1 -> TabHint(stringResource(R.string.home_paused_hint))
+                            else -> TabHint(stringResource(R.string.home_completed_hint))
+                        }
+                    }
+                }
+
+                if (activeItems.isEmpty() && !isLoading) {
+                    item(key = "empty_$selectedTab") {
+                        EmptyBox(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 48.dp),
+                            text = when (selectedTab) {
+                                0 -> stringResource(R.string.home_empty_open)
+                                1 -> stringResource(R.string.home_empty_paused)
+                                else -> stringResource(R.string.home_empty_completed)
+                            },
+                        )
+                    }
+                } else {
+                    itemsIndexed(activeItems, key = { index, item -> "disc_${item.campaign.id ?: item.campaign.packageName}_$index" }) { _, item ->
+                        CampaignCard(
+                            item = item,
+                            onClick = { onCardClick(item) },
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
+                }
+                item { Spacer(Modifier.height(72.dp)) } // room for FAB
             }
         }
     }
+}
+
+@Composable
+private fun HomeSubTab(
+    selected: Boolean,
+    label: String,
+    count: Int,
+    onClick: () -> Unit,
+) {
+    Tab(
+        selected = selected,
+        onClick = onClick,
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                )
+                Text(
+                    text = count.toString(),
+                    fontSize = 10.sp,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun TabHint(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -848,7 +968,7 @@ private fun MyTab(
                                 )
                                 Spacer(Modifier.height(2.dp))
                                 Text(
-                                    text = "Không duyệt trong 24h = tự chấp nhận. Góp ý hay → tặng điểm.",
+                                    text = "Không duyệt trong 8h = tự chấp nhận. Duyệt để tặng +1 Credit cho tester.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFF6A1B9A),
                                 )
@@ -1096,10 +1216,10 @@ private fun LeaderboardUserCard(user: LeaderboardUser) {
 }
 
 @Composable
-private fun EmptyBox(modifier: Modifier = Modifier) {
+private fun EmptyBox(modifier: Modifier = Modifier, text: String = stringResource(R.string.empty_list)) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Text(
-            text = stringResource(R.string.empty_list),
+            text = text,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

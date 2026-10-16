@@ -24,6 +24,9 @@ import com.ntt.crosstest.data.UserNotification
 import com.ntt.crosstest.data.UserWarning
 import com.ntt.crosstest.data.QuestSummary
 import com.ntt.crosstest.util.NetworkMonitor
+import com.ntt.crosstest.util.InstalledAppCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,6 +36,8 @@ data class CampaignDisplayItem(
     val installedCount: Int = 0,
     val todayTestedCount: Int = 0,
     val hasTestedToday: Boolean = false,
+    /** App đang có sẵn trên máy của người test (kiểm tra qua PackageManager). */
+    val isInstalledLocally: Boolean = false,
 ) {
     val dailyTarget: Int get() = campaign.dailyTarget
     val isTargetReached: Boolean get() = todayTestedCount >= dailyTarget
@@ -45,6 +50,8 @@ data class HomeUiState(
     val isAuthenticated: Boolean = false,
     val openCampaigns: List<Campaign> = emptyList(),
     val displayItems: List<CampaignDisplayItem> = emptyList(),
+    val pausedDisplayItems: List<CampaignDisplayItem> = emptyList(),
+    val completedDisplayItems: List<CampaignDisplayItem> = emptyList(),
     /** null = not searching; non-null = search results for [query] */
     val searchResults: List<CampaignDisplayItem>? = null,
     val myCampaigns: List<Campaign> = emptyList(),
@@ -77,13 +84,21 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(
         run {
             val cached = context?.let { SessionCacheManager.loadSync(it) }
-            if (cached != null) {
+            // Ignore a snapshot that provably belongs to a different account.
+            // While the session is still loading (currentUid == null) the cache
+            // is kept to preserve the offline-first instant paint.
+            val currentUid = repository.currentUserId()
+            val cacheMatchesSession = cached != null &&
+                (cached.userId == null || currentUid == null || cached.userId == currentUid)
+            if (cached != null && cacheMatchesSession) {
                 HomeUiState(
                     isLoading = false,
                     isBackgroundSyncing = true,
                     isAuthenticated = cached.userId != null,
                     openCampaigns = cached.openCampaigns,
                     displayItems = cached.displayItems,
+                    pausedDisplayItems = cached.pausedDisplayItems,
+                    completedDisplayItems = cached.completedDisplayItems,
                     myCampaigns = cached.myCampaigns,
                     joinedCampaigns = cached.joinedCampaigns,
                     leaderboard = cached.leaderboard,
@@ -128,30 +143,50 @@ class HomeViewModel(
             }
             try {
                 val isAuthed = repository.isAuthenticated()
+
+                // Đồng bộ vòng đời: app quá 15 ngày → hoàn thành; chủ app vắng 3 ngày → app tạm dừng.
+                if (isAuthed) repository.syncCampaignLifecycle()
+
                 val open = repository.listOpenCampaigns(forceRefresh = forceRefresh)
-                val openIds = open.mapNotNull { it.id }
-                val statsMap = repository.getCampaignsStatsMap(openIds, forceRefresh = forceRefresh)
-                val ownerIds = open.mapNotNull { it.ownerId }.distinct()
+                val paused = if (isAuthed) repository.listPausedCampaigns(forceRefresh = forceRefresh) else emptyList()
+                val completed = if (isAuthed) repository.listCompletedCampaigns(forceRefresh = forceRefresh) else emptyList()
+
+                val allCampaigns = open + paused + completed
+                val allIds = allCampaigns.mapNotNull { it.id }
+                val statsMap = repository.getCampaignsStatsMap(allIds, forceRefresh = forceRefresh)
+                val ownerIds = allCampaigns.mapNotNull { it.ownerId }.distinct()
                 val ownerProfiles = repository.getProfiles(ownerIds, forceRefresh = forceRefresh)
 
-                val displayList = open.map { c ->
+                // Trạng thái cài đặt trên máy của người test (tính trên IO, tránh chặn main thread).
+                val installFlags = if (appContext != null) withContext(Dispatchers.IO) {
+                    InstalledAppCache.ensureFresh(appContext)
+                    allCampaigns.distinctBy { it.packageName }
+                        .associate { it.packageName to InstalledAppCache.isInstalled(appContext, it.packageName) }
+                } else emptyMap()
+
+                fun toDisplayItem(c: Campaign): CampaignDisplayItem {
                     val stats = statsMap[c.id] ?: CampaignStats()
                     val owner = ownerProfiles[c.ownerId]
                     val name = owner?.displayName?.ifBlank { null }
                         ?: owner?.email?.substringBefore("@")
                         ?: "Chủ app"
-                    CampaignDisplayItem(
+                    return CampaignDisplayItem(
                         campaign = c,
                         ownerName = name,
                         installedCount = stats.installedCount,
                         todayTestedCount = stats.todayTestedCount,
                         hasTestedToday = stats.hasTestedToday,
+                        isInstalledLocally = installFlags[c.packageName] ?: false,
                     )
-                }.sortedWith(
+                }
+
+                val displayList = open.map { toDisplayItem(it) }.sortedWith(
                     compareBy<CampaignDisplayItem> { it.isTargetReached }
                         .thenByDescending { it.campaign.isBoosted }
                         .thenByDescending { it.campaign.tipCredits }
                 )
+                val pausedList = paused.map { toDisplayItem(it) }
+                val completedList = completed.map { toDisplayItem(it) }
 
                 val mine = repository.myCampaigns(forceRefresh = forceRefresh)
                 val joined = repository.myJoinedCampaigns(forceRefresh = forceRefresh)
@@ -179,6 +214,8 @@ class HomeViewModel(
                         isAuthenticated = isAuthed,
                         openCampaigns = open,
                         displayItems = displayList,
+                        pausedDisplayItems = pausedList,
+                        completedDisplayItems = completedList,
                         myCampaigns = mine,
                         joinedCampaigns = joined,
                         leaderboard = topUsers,
@@ -206,6 +243,8 @@ class HomeViewModel(
                         userProfile = myProfile,
                         openCampaigns = open,
                         displayItems = displayList,
+                        pausedDisplayItems = pausedList,
+                        completedDisplayItems = completedList,
                         myCampaigns = mine,
                         joinedCampaigns = joined,
                         leaderboard = topUsers,
@@ -295,7 +334,9 @@ class HomeViewModel(
 
     private suspend fun runSearch(query: String) {
         val q = query.trim()
-        val filtered = _uiState.value.displayItems.filter {
+        val state = _uiState.value
+        val combined = state.displayItems + state.pausedDisplayItems + state.completedDisplayItems
+        val filtered = combined.filter {
             it.campaign.appName.contains(q, ignoreCase = true) ||
             it.campaign.packageName.contains(q, ignoreCase = true) ||
             it.ownerName.contains(q, ignoreCase = true)

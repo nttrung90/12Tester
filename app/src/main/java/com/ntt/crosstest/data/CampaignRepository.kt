@@ -22,6 +22,12 @@ class CampaignRepository(private val supabase: SupabaseClient) {
     private var cachedOpenCampaigns: List<Campaign>? = null
     private var openCampaignsTimestamp: Long = 0L
 
+    private var cachedPausedCampaigns: List<Campaign>? = null
+    private var pausedCampaignsTimestamp: Long = 0L
+
+    private var cachedCompletedCampaigns: List<Campaign>? = null
+    private var completedCampaignsTimestamp: Long = 0L
+
     private var cachedStatsMap: Map<String, CampaignStats>? = null
     private var statsMapTimestamp: Long = 0L
 
@@ -60,6 +66,10 @@ class CampaignRepository(private val supabase: SupabaseClient) {
     fun clearMemoryCache() {
         cachedOpenCampaigns = null
         openCampaignsTimestamp = 0L
+        cachedPausedCampaigns = null
+        pausedCampaignsTimestamp = 0L
+        cachedCompletedCampaigns = null
+        completedCampaignsTimestamp = 0L
         cachedStatsMap = null
         statsMapTimestamp = 0L
         profileCache.clear()
@@ -103,6 +113,82 @@ class CampaignRepository(private val supabase: SupabaseClient) {
         }.decodeList<Campaign>()
         cachedOpenCampaigns = result
         openCampaignsTimestamp = System.currentTimeMillis()
+        return result
+    }
+
+    /** Tab "App tạm dừng" trên Trang chủ. */
+    suspend fun listPausedCampaigns(forceRefresh: Boolean = false): List<Campaign> {
+        if (!forceRefresh && cachedPausedCampaigns != null && System.currentTimeMillis() - pausedCampaignsTimestamp < CACHE_TTL_MS) {
+            return cachedPausedCampaigns!!
+        }
+        val result = try {
+            supabase.from("campaigns").select {
+                filter { eq("status", "paused") }
+                order("created_at", Order.DESCENDING)
+            }.decodeList<Campaign>()
+        } catch (_: Exception) {
+            emptyList()
+        }
+        cachedPausedCampaigns = result
+        pausedCampaignsTimestamp = System.currentTimeMillis()
+        return result
+    }
+
+    /** Tab "Đã hoàn thành Kiểm thử" trên Trang chủ (lên production hoặc hết 15 ngày). */
+    suspend fun listCompletedCampaigns(forceRefresh: Boolean = false): List<Campaign> {
+        if (!forceRefresh && cachedCompletedCampaigns != null && System.currentTimeMillis() - completedCampaignsTimestamp < CACHE_TTL_MS) {
+            return cachedCompletedCampaigns!!
+        }
+        val result = try {
+            supabase.from("campaigns").select {
+                filter { isIn("status", listOf("production", "completed")) }
+                order("created_at", Order.DESCENDING)
+            }.decodeList<Campaign>()
+        } catch (_: Exception) {
+            emptyList()
+        }
+        cachedCompletedCampaigns = result
+        completedCampaignsTimestamp = System.currentTimeMillis()
+        return result
+    }
+
+    /** Xóa cache danh sách campaign theo trạng thái (dùng sau khi sync vòng đời). */
+    private fun invalidateCampaignLists() {
+        cachedOpenCampaigns = null
+        cachedPausedCampaigns = null
+        cachedCompletedCampaigns = null
+        cachedMyCampaigns = null
+        cachedStatsMap = null
+        cachedSlotsInfo = null
+    }
+
+    /**
+     * Đồng bộ vòng đời campaign phía server: hoàn thành app quá 15 ngày hiển thị,
+     * tạm dừng app của chủ app vắng nhiệm vụ ngày 3 ngày liên tục.
+     * Best-effort: bỏ qua nếu offline hoặc DB chưa chạy migration 017.
+     */
+    suspend fun syncCampaignLifecycle() {
+        if (supabase.auth.currentUserOrNull() == null) return
+        try {
+            val result = supabase.postgrest.rpc("sync_campaign_lifecycle")
+                .decodeAs<LifecycleSyncResult>()
+            if (result.completed > 0 || result.paused > 0) {
+                invalidateCampaignLists()
+            }
+        } catch (_: Exception) {
+            // Migration chưa chạy hoặc mạng lỗi — không chặn tải Trang chủ.
+        }
+    }
+
+    /** Chủ app bật test lại app đang tạm dừng (RPC kiểm tra cửa sổ 15 ngày + chủ app đã hoạt động lại). */
+    suspend fun resumeCampaign(campaignId: String): ResumeCampaignResult {
+        val result = supabase.postgrest.rpc(
+            "resume_campaign",
+            ResumeCampaignParams(campaignId = campaignId)
+        ).decodeAs<ResumeCampaignResult>()
+        invalidateCampaignLists()
+        campaignCache.remove(campaignId)
+        ownerStatsCache.remove(campaignId)
         return result
     }
 
@@ -179,8 +265,11 @@ class CampaignRepository(private val supabase: SupabaseClient) {
         val campId = requireNotNull(campaign.id) { "Campaign id is required" }
         supabase.from("campaigns").upsert(campaign.copy(ownerId = uid()))
         cachedOpenCampaigns = null
+        cachedPausedCampaigns = null
+        cachedCompletedCampaigns = null
         cachedMyCampaigns = null
         cachedStatsMap = null
+        campaignCache.remove(campId)
         ownerStatsCache.remove(campId)
     }
 
@@ -298,6 +387,28 @@ class CampaignRepository(private val supabase: SupabaseClient) {
     }
 
     /**
+     * True only when today's check-in is confirmed (owner approved / auto-accepted / plain check-in),
+     * NOT the provisional check-in created while a report is still pending review.
+     * Mirrors the database rule: provisional check-ins carry a note containing "tạm tính".
+     */
+    suspend fun hasConfirmedCheckinToday(campaignId: String, userId: String? = null): Boolean {
+        val uid = userId ?: supabase.auth.currentUserOrNull()?.id ?: return false
+        val today = LocalDate.now().toString()
+        return try {
+            supabase.from("checkins").select {
+                filter {
+                    eq("campaign_id", campaignId)
+                    eq("user_id", uid)
+                    eq("checkin_date", today)
+                }
+                limit(1)
+            }.decodeList<Checkin>().any { !it.note.orEmpty().contains("tạm tính") }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
      * One check-in per user per day. The UNIQUE(campaign_id, user_id, checkin_date)
      * constraint is the final guard; we pre-check first for a friendly message.
      * @throws IllegalStateException with message "ALREADY_CHECKED_IN" when duplicated.
@@ -344,10 +455,11 @@ class CampaignRepository(private val supabase: SupabaseClient) {
         rating: Int,
         comment: String,
         screenshotUrl: String? = null,
+        imageHash: String? = null,
     ) {
         val userId = uid()
         try {
-            // Priority 1: Use atomic security definer RPC (Migration 012)
+            // Priority 1: Use atomic security definer RPC (Migration 012 & 015)
             supabase.postgrest.rpc(
                 function = "submit_tester_report",
                 parameters = SubmitTesterReportParams(
@@ -355,6 +467,7 @@ class CampaignRepository(private val supabase: SupabaseClient) {
                     content = comment.trim(),
                     screenshotUrl = screenshotUrl,
                     rating = rating.coerceIn(1, 5),
+                    imageHash = imageHash,
                 )
             ).decodeAs<SubmitTesterReportResult>()
         } catch (rpcErr: Exception) {
@@ -371,32 +484,37 @@ class CampaignRepository(private val supabase: SupabaseClient) {
                 val existingTodayReport = getMyTodayReport(campaignId)
                 val alreadyCheckedIn = hasCheckedInToday(campaignId, userId)
 
+                val updateMap = mutableMapOf<String, Any?>(
+                    "content" to comment.trim(),
+                    "screenshot_url" to (screenshotUrl ?: existingTodayReport?.screenshotUrl),
+                    "rating" to rating.coerceIn(1, 5),
+                    "status" to if (existingTodayReport?.isApproved == true || alreadyCheckedIn) "approved" else "pending",
+                    "rejection_reason" to null,
+                )
+                if (imageHash != null) {
+                    updateMap["image_hash"] = imageHash
+                }
+
                 if (existingTodayReport?.id != null) {
-                    supabase.from("tester_reports").update(
-                        mapOf(
-                            "content" to comment.trim(),
-                            "screenshot_url" to (screenshotUrl ?: existingTodayReport.screenshotUrl),
-                            "rating" to rating.coerceIn(1, 5),
-                            "status" to if (existingTodayReport.isApproved || alreadyCheckedIn) "approved" else "pending",
-                            "rejection_reason" to null,
-                        )
-                    ) {
+                    supabase.from("tester_reports").update(updateMap) {
                         filter { eq("id", existingTodayReport.id) }
                     }
                 } else {
                     val initialStatus = if (alreadyCheckedIn) "approved" else "pending"
-                    supabase.from("tester_reports").insert(
-                        mapOf(
-                            "campaign_id" to campaignId,
-                            "user_id" to userId,
-                            "report_type" to "feedback",
-                            "content" to comment.trim(),
-                            "screenshot_url" to screenshotUrl,
-                            "rating" to rating.coerceIn(1, 5),
-                            "status" to initialStatus,
-                            "bonus_awarded" to if (alreadyCheckedIn) 2 else 0,
-                        )
+                    val insertMap = mutableMapOf<String, Any?>(
+                        "campaign_id" to campaignId,
+                        "user_id" to userId,
+                        "report_type" to "feedback",
+                        "content" to comment.trim(),
+                        "screenshot_url" to screenshotUrl,
+                        "rating" to rating.coerceIn(1, 5),
+                        "status" to initialStatus,
+                        "bonus_awarded" to if (alreadyCheckedIn) 2 else 0,
                     )
+                    if (imageHash != null) {
+                        insertMap["image_hash"] = imageHash
+                    }
+                    supabase.from("tester_reports").insert(insertMap)
                 }
             }
         }
@@ -405,6 +523,8 @@ class CampaignRepository(private val supabase: SupabaseClient) {
         cachedQuestSummary = null
         cachedMyProfile = null
         ownerStatsCache.remove(campaignId)
+        reportsCache.remove("${campaignId}_true")
+        reportsCache.remove("${campaignId}_false")
     }
 
     suspend fun getFeedbacks(campaignId: String): List<Feedback> =
@@ -728,10 +848,13 @@ class CampaignRepository(private val supabase: SupabaseClient) {
                 val profiles = getProfiles(userIds)
                 list.map { it.copy(testerProfile = profiles[it.userId]) }
             } else {
+                val viewerId = supabase.auth.currentUserOrNull()?.id
                 val checkinsWithNotes = supabase.from("checkins").select {
                     filter {
                         eq("campaign_id", campaignId)
                         neq("note", "")
+                        // Tester chỉ thấy check-in của chính mình; chủ app/admin thấy toàn bộ
+                        if (!isOwner && viewerId != null) eq("user_id", viewerId)
                     }
                     order("created_at", Order.DESCENDING)
                 }.decodeList<Checkin>()
@@ -804,14 +927,15 @@ class CampaignRepository(private val supabase: SupabaseClient) {
             ).decodeAs<ApproveReportResult>()
         } catch (e: Exception) {
             // Fallback for offline or legacy tables
+            val extraBonus = 1 + bonusCredits
             val updated = report.copy(
                 status = "approved",
-                bonusAwarded = 2 + bonusCredits,
+                bonusAwarded = report.bonusAwarded + extraBonus,
                 reviewedAt = LocalDate.now().toString(),
             )
             try {
                 supabase.from("tester_reports").upsert(updated)
-                addCredits(report.userId, 2 + bonusCredits, "test_approved", "Chủ app duyệt kết quả kiểm thử (+2 Credit)")
+                addCredits(report.userId, extraBonus, "test_approved_bonus", "Chủ app duyệt kết quả kiểm thử (Thưởng thêm +$extraBonus Credit)")
             } catch (_: Exception) {}
             ApproveReportResult(success = true, reportId = reportId, testerId = report.userId, status = "approved")
         }
@@ -833,10 +957,12 @@ class CampaignRepository(private val supabase: SupabaseClient) {
             val updated = report.copy(
                 status = "rejected",
                 rejectionReason = reason,
+                bonusAwarded = 0,
                 reviewedAt = LocalDate.now().toString(),
             )
             try {
                 supabase.from("tester_reports").upsert(updated)
+                addCredits(report.userId, -2, "test_rejected_clawback", "Thu hồi 2 Credit tạm nhận do chủ app từ chối kết quả")
             } catch (_: Exception) {}
             RejectReportResult(success = true, reportId = reportId, testerId = report.userId, status = "rejected")
         }
@@ -896,9 +1022,9 @@ class CampaignRepository(private val supabase: SupabaseClient) {
         }
     }
 
-    suspend fun updateCampaignStatus(campaignId: String, newStatus: String) {
+    suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedReason: String? = null) {
         val current = getCampaign(campaignId) ?: return
-        updateCampaign(current.copy(status = newStatus))
+        updateCampaign(current.copy(status = newStatus, pausedReason = pausedReason))
     }
 
     suspend fun updateCampaignTip(campaignId: String, tipCredits: Int, isBoosted: Boolean) {
