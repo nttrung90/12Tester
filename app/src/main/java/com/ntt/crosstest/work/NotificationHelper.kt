@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ntt.crosstest.MainActivity
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.SettingsRepository
 
 object NotificationHelper {
 
@@ -19,6 +20,9 @@ object NotificationHelper {
     private const val UPDATE_NOTIFICATION_ID = 1002
 
     fun showCheckinReminder(context: Context, campaignNames: List<String>) {
+        // Wrap with the in-app language so notifications match the UI language
+        // instead of the system language.
+        val context = SettingsRepository.wrap(context)
         ensureChannel(
             context,
             channelId = CHANNEL_ID,
@@ -62,6 +66,8 @@ object NotificationHelper {
      * dialog / force-update screen takes over.
      */
     fun showUpdateAvailable(context: Context, versionName: String) {
+        // Wrap with the in-app language so the notification matches the UI language.
+        val context = SettingsRepository.wrap(context)
         ensureChannel(
             context,
             channelId = UPDATE_CHANNEL_ID,

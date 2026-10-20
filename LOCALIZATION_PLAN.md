@@ -1,7 +1,7 @@
 # Kế hoạch đa ngôn ngữ (EN/VI) — 12 Cross Testers
 
 > Ngày lập kế hoạch: 2026-10-16
-> Trạng thái: CHƯA TRIỂN KHAI — thực hiện vào phiên sau
+> Trạng thái: ĐÃ TRIỂN KHAI XONG CLIENT (Phase 0–2 + xác minh Phase 3) — còn test thủ công trên máy
 > Phạm vi: full client (Phase 0–2) + giữ nguyên nội dung tiếng Việt từ Supabase (Phase 3)
 
 ## 1. Bối cảnh & vấn đề
@@ -76,83 +76,83 @@ class Localizer(private val appContext: Context) {
 
 ## 4. Phase 0 — Hạ tầng & lỗi luồng
 
-- [ ] Thêm `SettingsRepository.wrap(context)` + class `Localizer` (mục 3.1).
-- [ ] `MainActivity.attachBaseContext`: refactor dùng `SettingsRepository.wrap(newBase)` (giảm trùng lặp).
-- [ ] Tiêm `Localizer` vào các ViewModel chưa có context:
+- [x] Thêm `SettingsRepository.wrap(context)` + class `Localizer` (mục 3.1).
+- [x] `MainActivity.attachBaseContext`: refactor dùng `SettingsRepository.wrap(newBase)` (giảm trùng lặp).
+- [x] Tiêm `Localizer` vào các ViewModel chưa có context:
   - `AuthViewModel` (sửa factory trong `AuthScreen.kt:83`)
   - `CampaignDetailViewModel` (factory `CampaignDetailScreen.kt:137`)
   - `CreateCampaignViewModel` (factory `CreateCampaignScreen.kt:110`)
   - `AdminUsersViewModel` (factory `AdminUsersScreen.kt:94`)
   - `OwnerAppDetailViewModel` (factory `OwnerAppDetailScreen.kt:127`)
   - `HomeViewModel`/`ProfileViewModel` đã có sẵn `applicationContext`/`app` — dùng lại.
-- [ ] `AuthScreen.kt:116`: thay `contains("Đăng ký thành công")` bằng cờ `isSignUpSuccess: Boolean` trong `AuthUiState` (set trong `AuthViewModel.signUp`, reset khi đổi tab/nhập liệu).
-- [ ] `NotificationHelper.showCheckinReminder/showUpdateAvailable`: bọc context qua `SettingsRepository.wrap(context)` trước khi `getString`.
-- [ ] `PlayStoreHelper.kt:135`: strip cả `" - Apps on Google Play"` và `" - Ứng dụng trên Google Play"`.
-- [ ] Resource:
-  - [ ] Điền EN cho `warning_tester_msg`, `warning_owner_msg` trong `values/` + `values-en/` (viết lại; `values-vi` giữ VN).
-  - [ ] Sửa 5 key dead trong default `values/` sang EN: `checkin_today`, `checked_in`, `app_not_installed_title`, `app_not_installed_msg`, `download_app_now` (giữ để tái sử dụng ở Phase 1).
+- [x] `AuthScreen.kt:116`: thay `contains("Đăng ký thành công")` bằng cờ `isSignUpSuccess: Boolean` trong `AuthUiState` (set trong `AuthViewModel.signUp`, reset khi đổi tab/nhập liệu).
+- [x] `NotificationHelper.showCheckinReminder/showUpdateAvailable`: bọc context qua `SettingsRepository.wrap(context)` trước khi `getString`.
+- [x] `PlayStoreHelper.kt:135`: strip cả `" - Apps on Google Play"` và `" - Ứng dụng trên Google Play"`.
+- [x] Resource:
+  - [x] Điền EN cho `warning_tester_msg`, `warning_owner_msg` trong `values/` + `values-en/` (viết lại; `values-vi` giữ VN).
+  - [x] Sửa 5 key dead trong default `values/` sang EN: `checkin_today`, `checked_in`, `app_not_installed_title`, `app_not_installed_msg`, `download_app_now` (giữ để tái sử dụng ở Phase 1).
 
 ## 5. Phase 1 — Auth + Home + Campaign + Quests + Profile + components (~250 chuỗi)
 
 ### Components
 
-- [ ] `ui/components/CampaignCard.kt` — 11 chuỗi (L108–L197: trạng thái, `Chủ app`, `Đã cài`, tiến độ...)
-- [ ] `ui/components/DailyTaskCard.kt` — 6 chuỗi (L231–L424: `Khách`, `Vắng $n ngày`, yêu cầu, quy định phạt)
-- [ ] `ui/components/MyAppCard.kt` — 9 chuỗi (L118–L258: slot, trạng thái, `chờ duyệt`...)
-- [ ] `ui/components/NotificationBottomSheet.kt` — 16 chuỗi (L72–L447: filter tabs, empty state, time-ago `Vừa xong/$n phút trước`...)
-- [ ] `ui/components/QuestSection.kt` — 6 chuỗi (L140–L475: tiến độ ngày/tuần, claimable)
+- [x] `ui/components/CampaignCard.kt` — 11 chuỗi (L108–L197: trạng thái, `Chủ app`, `Đã cài`, tiến độ...)
+- [x] `ui/components/DailyTaskCard.kt` — 6 chuỗi (L231–L424: `Khách`, `Vắng $n ngày`, yêu cầu, quy định phạt)
+- [x] `ui/components/MyAppCard.kt` — 9 chuỗi (L118–L258: slot, trạng thái, `chờ duyệt`...)
+- [x] `ui/components/NotificationBottomSheet.kt` — 16 chuỗi (L72–L447: filter tabs, empty state, time-ago `Vừa xong/$n phút trước`...)
+- [x] `ui/components/QuestSection.kt` — 6 chuỗi (L140–L475: tiến độ ngày/tuần, claimable)
 
 ### Screens
 
-- [ ] `ui/screens/HomeScreen.kt` — 15 chuỗi (L178–L1010: banner cảnh báo, dialog đủ chỉ tiêu, cache, notification title, empty state)
-- [ ] `ui/screens/CampaignDetailScreen.kt` — ~136 chuỗi (file lớn nhất; L209–L2041: hướng dẫn cài, lịch sử test, form nộp báo cáo, dialog admin, trạng thái campaign). Tái sử dụng key `app_not_installed_*`, `checkin_today`, `warning_*` đã chuẩn bị ở Phase 0.
-- [ ] `ui/screens/QuestsScreen.kt` — 13 chuỗi (L148–L659)
-- [ ] `ui/screens/ProfileScreen.kt` — 13 chuỗi (L221–L1349; L1123 hardcode `"Tiếng Việt"` — xem lại có cần thiết vì đã có `R.string.language_vietnamese`)
-- [ ] `ui/screens/GoogleSignIn.kt` — 7 chuỗi (L51–L117)
+- [x] `ui/screens/HomeScreen.kt` — 15 chuỗi (L178–L1010: banner cảnh báo, dialog đủ chỉ tiêu, cache, notification title, empty state)
+- [x] `ui/screens/CampaignDetailScreen.kt` — ~136 chuỗi (file lớn nhất; L209–L2041: hướng dẫn cài, lịch sử test, form nộp báo cáo, dialog admin, trạng thái campaign). Tái sử dụng key `app_not_installed_*`, `checkin_today`, `warning_*` đã chuẩn bị ở Phase 0.
+- [x] `ui/screens/QuestsScreen.kt` — 13 chuỗi (L148–L659)
+- [x] `ui/screens/ProfileScreen.kt` — 13 chuỗi (L221–L1349; L1123 hardcode `"Tiếng Việt"` — xem lại có cần thiết vì đã có `R.string.language_vietnamese`)
+- [x] `ui/screens/GoogleSignIn.kt` — 7 chuỗi (L51–L117)
 
 ### ViewModels
 
-- [ ] `ui/viewmodels/AuthViewModel.kt` — ~25 chuỗi (bao gồm toàn bộ `friendlyError` L205–L231)
-- [ ] `ui/viewmodels/CampaignDetailViewModel.kt` — ~19 chuỗi (L108–L385)
-- [ ] `ui/viewmodels/HomeViewModel.kt` — 4 chuỗi (L172, L405, L436, L439)
-- [ ] `ui/viewmodels/ProfileViewModel.kt` — 10 chuỗi (L124–L268)
+- [x] `ui/viewmodels/AuthViewModel.kt` — ~25 chuỗi (bao gồm toàn bộ `friendlyError` L205–L231)
+- [x] `ui/viewmodels/CampaignDetailViewModel.kt` — ~19 chuỗi (L108–L385)
+- [x] `ui/viewmodels/HomeViewModel.kt` — 4 chuỗi (L172, L405, L436, L439)
+- [x] `ui/viewmodels/ProfileViewModel.kt` — 10 chuỗi (L124–L268)
 
 ## 6. Phase 2 — Owner/Admin + tiện ích (~350 chuỗi)
 
 ### Screens
 
-- [ ] `ui/screens/OwnerAppDetailScreen.kt` — ~141 chuỗi (L182–L2058: quản lý app, duyệt báo cáo, slot, boa, so sánh ảnh, dialog từ chối...)
-- [ ] `ui/screens/AccountLockedScreen.kt` — 32 chuỗi (L95–L479; gồm cả template email giải trình — cân nhắc giữ VN cho email gửi admin, hoặc dịch theo ngôn ngữ app)
-- [ ] `ui/screens/AdminUsersScreen.kt` — 15 chuỗi (L209–L741)
-- [ ] `ui/screens/CreateCampaignScreen.kt` — 25 chuỗi (L194–L1088)
+- [x] `ui/screens/OwnerAppDetailScreen.kt` — ~141 chuỗi (L182–L2058: quản lý app, duyệt báo cáo, slot, boa, so sánh ảnh, dialog từ chối...) — dùng tiền tố khóa `oad_*`
+- [x] `ui/screens/AccountLockedScreen.kt` — 32 chuỗi (L95–L479; template email giải trình L429–L436 giữ VN vì gửi cho admin)
+- [x] `ui/screens/AdminUsersScreen.kt` — 15 chuỗi (L209–L741)
+- [x] `ui/screens/CreateCampaignScreen.kt` — 25 chuỗi (L194–L1088)
 
 ### Components
 
-- [ ] `ui/components/ImageViewerComponents.kt` — ~33 chuỗi (L51–L745: viewer, so sánh ảnh, chớp đổi A/B, hash tương đồng)
-- [ ] `ui/components/CreditTopupBottomSheet.kt` — 5 chuỗi (L271–L399; feature flag `IS_TOPUP_FEATURE_ENABLED = false` nhưng vẫn làm)
+- [x] `ui/components/ImageViewerComponents.kt` — ~33 chuỗi (L51–L745: viewer, so sánh ảnh, chớp đổi A/B, hash tương đồng) — dùng tiền tố khóa `img_*`
+- [x] `ui/components/CreditTopupBottomSheet.kt` — 5 chuỗi (L271–L399; feature flag `IS_TOPUP_FEATURE_ENABLED = false` nhưng vẫn làm; ký hiệu tiền tệ `"đ"` giữ nguyên như `"$"`)
 
 ### ViewModels
 
-- [ ] `ui/viewmodels/CreateCampaignViewModel.kt` — ~17 chuỗi (L141–L481)
-- [ ] `ui/viewmodels/OwnerAppDetailViewModel.kt` — ~13 chuỗi (L121–L277)
-- [ ] `ui/viewmodels/AdminUsersViewModel.kt` — 10 chuỗi (L134–L262)
+- [x] `ui/viewmodels/CreateCampaignViewModel.kt` — ~17 chuỗi (L141–L481)
+- [x] `ui/viewmodels/OwnerAppDetailViewModel.kt` — ~13 chuỗi (L121–L277)
+- [x] `ui/viewmodels/AdminUsersViewModel.kt` — 10 chuỗi (L134–L262)
 
 ### Utils / data
 
-- [ ] `util/ImageHashHelper.kt` — 4 chuỗi (L177–L180: mức tương đồng)
-- [ ] `util/TopupConfig.kt` — 8 chuỗi (L27–L76: tên gói)
-- [ ] `data/SupabaseHolder.kt` — 2 exception (L24, L46; hiển thị qua MissingConfigScreen)
-- [ ] `util/FirebaseStorageHelper.kt` — 1 exception (L95)
-- [ ] `data/CampaignRepository.kt` — 2 exception (L102, L286) + 2 credit-log note client tự tạo (L938, L965) → tạo qua `Localizer` để đúng ngôn ngữ lúc phát sinh (lưu ý: dữ liệu đã ghi vào DB sẽ không đổi khi user đổi ngôn ngữ sau này).
+- [x] `util/ImageHashHelper.kt` — 4 chuỗi (L177–L180: mức tương đồng) — `compare()` nay nhận thêm `context`
+- [x] `util/TopupConfig.kt` — 8 chuỗi (L27–L76: tên gói) — **BỎ QUA có chủ đích**: tên gói phản chiếu dữ liệu bảng `topup_packages` trên server (chính sách VN) + feature flag đang tắt
+- [x] `data/SupabaseHolder.kt` — 2 exception (L24, L46; hiển thị qua MissingConfigScreen) — đổi sang **tiếng Anh chẩn đoán dev**; MissingConfigScreen đã localize đầy đủ nên không lộ ra người dùng
+- [x] `util/FirebaseStorageHelper.kt` — 1 exception (L95)
+- [x] `data/CampaignRepository.kt` — 2 exception (L102, L286) + 2 credit-log note client tự tạo (L938, L965) → tạo qua `Localizer` để đúng ngôn ngữ lúc phát sinh (lưu ý: dữ liệu đã ghi vào DB sẽ không đổi khi user đổi ngôn ngữ sau này). Constructor nay nhận `localizer`; 2 nơi khởi tạo cập nhật (`TestCheoApp.kt:66`, `ReminderWorker.kt:33`)
 
 ## 7. Phase 3 — Server-side
 
 - [x] Quyết định: **giữ nguyên tiếng Việt** — không sửa SQL migration.
-- [ ] Kiểm tra không làm vỡ luồng khi server trả VN:
-  - [ ] `friendlyError` (AuthViewModel) tiếp tục map theo error code EN nhúng trong message (`INSUFFICIENT_CREDITS:`, `PERMISSION_DENIED:`...).
-  - [ ] `HomeViewModel` L405/L436/L439 dùng `res.message` nguyên trạng, fallback đã localize.
-  - [ ] `AccountLockedScreen` L95/L152 hiển thị `e.localizedMessage` nguyên trạng.
-- [ ] `app_config.title/message` (migration 018 default VN): giữ fallback `config.title ?: stringResource(...)` — admin có thể tự nhập EN trong DB nếu muốn.
+- [x] Kiểm tra không làm vỡ luồng khi server trả VN:
+  - [x] `friendlyError` (AuthViewModel) tiếp tục map theo error code EN nhúng trong message (`INSUFFICIENT_CREDITS:`, `PERMISSION_DENIED:`...).
+  - [x] `HomeViewModel` L405/L436/L439 dùng `res.message` nguyên trạng, fallback đã localize.
+  - [x] `AccountLockedScreen` L95/L152 hiển thị `e.localizedMessage` nguyên trạng.
+- [x] `app_config.title/message` (migration 018 default VN): giữ fallback `config.title ?: stringResource(...)` — admin có thể tự nhập EN trong DB nếu muốn.
 
 ## 8. Kiểm tra & xác minh
 
@@ -176,7 +176,16 @@ Get-ChildItem -Recurse "app\src\main\java" -Filter *.kt |
   Where-Object { $_.Line -notmatch '^\s*(//|\*|/\*)' }
 ```
 
-Kết quả hợp lệ còn lại: `CampaignRepository.kt:405` (`"tạm tính"`), `PlayStoreHelper.kt:135`, SQL trong `supabase/`.
+Kết quả hợp lệ còn lại (sau sweep cuối):
+- Comment code (toàn bộ file) — không dịch.
+- `CampaignRepository.kt:409` — `"tạm tính"` (giá trị so khớp DB, phải giữ).
+- `CampaignRepository.kt` L123/L141/L159/L170–172/L183/L187/L396/L860 — comment.
+- `PlayStoreHelper.kt:135` — `" - Ứng dụng trên Google Play"` (hậu tố tiêu đề do Google Play sinh theo ngôn ngữ listing).
+- `AccountLockedScreen.kt:429–436` — template email giải trình gửi admin (chủ đích giữ VN).
+- `CampaignDetailScreen.kt:658` — `"Gỡ bỏ bởi Admin"` (giá trị lý do xóa lưu DB).
+- `CreditTopupBottomSheet.kt` — ký hiệu tiền tệ `"đ"` (tương tự `"$"`).
+- `util/TopupConfig.kt` — tên gói phản chiếu DB `topup_packages` (xem Ghi chú triển khai).
+- SQL trong `supabase/`.
 
 Test thủ công (không có test tự động trong repo — chỉ `app/src/main`):
 
@@ -199,3 +208,19 @@ Test thủ công (không có test tự động trong repo — chỉ `app/src/mai
 - Chuỗi format động phải giữ đúng positional args giữa 3 file strings.xml.
 - `OwnerAppDetailScreen.kt` (~2000 dòng) và `CampaignDetailScreen.kt` (~2000 dòng) là 2 file rủi ro cao nhất — làm sau cùng trong phase, cẩn thận từng khối UI.
 - Dữ liệu đã lưu DB (credit_logs.note, notification) luôn theo ngôn ngữ lúc tạo, đổi ngôn ngữ sau không cập nhật lại — chấp nhận.
+
+## 11. Ghi chú triển khai (khác biệt so với kế hoạch)
+
+- **Số key resource cuối cùng: 836 key** ở cả 3 file `strings.xml` (trước kế hoạch: 308). Đã kiểm tra parity + không trùng key bằng script.
+- **TopupConfig.kt (bỏ qua)**: tên gói + badge phản chiếu nội dung bảng `topup_packages` trên server (chính sách nội dung VN); khi bật lại feature topup nên lấy `title` từ server thay vì dịch cứng trong code. Feature flag đang tắt (`IS_TOPUP_FEATURE_ENABLED = false`).
+- **Ký hiệu tiền tệ `"đ"`** trong `CreditTopupBottomSheet.kt` giữ nguyên (analog với `"$"`, không phải câu dịch).
+- **SupabaseHolder.kt**: 2 exception đổi sang **tiếng Anh** dạng chẩn đoán dev (không dùng Localizer vì đây là lỗi cấu hình build; `MissingConfigScreen` phía người dùng đã localize đầy đủ).
+- **AccountLockedScreen.kt L429–436**: template email gửi admin giữ VN có chủ đích (người nhận là admin VN).
+- **ImageHashHelper.compare()** đổi chữ ký thành `compare(hash1, hash2, context)` — 3 call site đã cập nhật (`ImageViewerComponents`, `OwnerAppDetailScreen`, `CampaignDetailScreen`).
+- **CampaignRepository** constructor nhận `Localizer`; cập nhật 2 nơi khởi tạo `TestCheoApp.kt` và `ReminderWorker.kt`.
+- **Sự cố đã xử lý**: trùng key `error_password_too_short` khi nối block XML (đã xóa duplicate ở L600 cả 3 file); lỗi smart-cast `campaign.testingDaysRemaining` trong `OwnerAppDetailScreen` (sửa bằng `?: 0`).
+- Xác minh tự động đã chạy: `:app:compileDebugKotlin` EXIT 0 sau từng nhóm; sweep VN toàn bộ `app/src/main/java` chỉ còn comment + danh sách hợp lệ ở mục 8.
+- `:app:lintDebug` đã chạy (EXIT 0; project đặt `abortOnError = false`):
+  - Đã xử lý triệt để 20× `StringFormatInvalid` ở `daily_penalty_dialog_content` bằng thuộc tính `formatted="false"` ở cả 3 file `strings.xml`.
+  - 17× `LocalContextGetResourceValueCall` tại các điểm `context.getString(...)` trong lambda non-composable (AccountLockedScreen ×6, OwnerAppDetailScreen ×6, ProfileScreen ×2, HomeScreen ×1, CampaignDetailScreen ×2) — chấp nhận vì `LocalContext.current` trong app chính là context đã bọc locale và Activity được recreate khi đổi ngôn ngữ trong app (không stale).
+- Còn lại: **test thủ công 2 ngôn ngữ trên máy** (mục 8).

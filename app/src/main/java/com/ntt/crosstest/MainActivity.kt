@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
@@ -27,7 +28,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
 import com.ntt.crosstest.data.AppConfig
+import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.ReportSubmitManager
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
@@ -38,6 +42,7 @@ import com.ntt.crosstest.ui.screens.ForceUpdateScreen
 import com.ntt.crosstest.ui.screens.MissingConfigScreen
 import com.ntt.crosstest.ui.screens.OptionalUpdateDialog
 import com.ntt.crosstest.ui.theme.TestCheoTheme
+import com.ntt.crosstest.ui.viewmodels.friendlyError
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.auth
 import java.util.Locale
@@ -48,14 +53,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
 
     override fun attachBaseContext(newBase: Context) {
-        val savedLang = SettingsRepository.getSavedLanguageSync(newBase)
-        val locale = SettingsRepository.resolveLocale(savedLang)
-        val config = Configuration(newBase.resources.configuration).apply {
-            setLocale(locale)
-            setLayoutDirection(locale)
-        }
-        val localizedContext = newBase.createConfigurationContext(config)
-        super.attachBaseContext(localizedContext)
+        super.attachBaseContext(SettingsRepository.wrap(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,6 +108,22 @@ class MainActivity : ComponentActivity() {
                         return@TestCheoTheme
                     }
 
+                    // Nộp báo cáo chạy nền: thông báo toàn cục khi thất bại sau retry
+                    // (người dùng có thể đã rời màn chi tiết).
+                    LaunchedEffect(Unit) {
+                        val localizer = Localizer(app)
+                        app.reportSubmitManager.events.collect { event ->
+                            if (event is ReportSubmitManager.SubmitEvent.Failed) {
+                                val message = localizer.get(
+                                    R.string.campaign_submit_failed_toast_format,
+                                    event.appName,
+                                    friendlyError(event.error ?: Exception(), localizer),
+                                )
+                                Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+
                     val currentVersionCode = BuildConfig.VERSION_CODE
                     val currentVersionName = BuildConfig.VERSION_NAME
 
@@ -117,7 +131,10 @@ class MainActivity : ComponentActivity() {
                     var dismissOptionalUpdate by remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
+                        // Cache RAM/đĩa trả về tức thì để dialog cập nhật hiện ngay,
+                        // sau đó làm mới nền (không chặn UI).
                         appConfig = app.appConfigRepository.getAppConfig()
+                        app.appConfigRepository.getAppConfig(forceRefresh = true)?.let { appConfig = it }
                     }
 
                     val updateStatus = remember(appConfig) {
@@ -141,23 +158,56 @@ class MainActivity : ComponentActivity() {
                     // cache is cleared and the app must not keep routing HOME.
                     val hasCachedSession = SessionCacheManager.hasCachedSession(app)
 
-                    when (sessionStatus) {
-                        is SessionStatus.Initializing -> {
-                            if (hasCachedSession) {
-                                NavGraph(startDestination = Routes.HOME)
-                            } else {
-                                LoadingScreen()
+                    if (sessionStatus is SessionStatus.Initializing && !hasCachedSession) {
+                        LoadingScreen()
+                    } else {
+                        val navController = rememberNavController()
+                        // Chốt đích khởi đầu một lần duy nhất: các dao động tạm thời
+                        // (Initializing khi app vào nền, RefreshFailure khi mạng chập chờn)
+                        // KHÔNG được dựng lại NavGraph hay đá người dùng về màn đăng nhập.
+                        val startDestination = remember {
+                            when {
+                                sessionStatus is SessionStatus.Authenticated -> Routes.HOME
+                                sessionStatus is SessionStatus.NotAuthenticated -> Routes.AUTH
+                                hasCachedSession -> Routes.HOME
+                                else -> Routes.AUTH
                             }
                         }
-                        else -> {
-                            val startDestination =
-                                if (sessionStatus is SessionStatus.Authenticated || (sessionStatus is SessionStatus.NotAuthenticated && hasCachedSession)) {
-                                    Routes.HOME
-                                } else {
-                                    Routes.AUTH
-                                }
-                            NavGraph(startDestination = startDestination)
+                        var wasAuthenticated by remember {
+                            mutableStateOf(startDestination == Routes.HOME)
                         }
+                        LaunchedEffect(sessionStatus) {
+                            when (sessionStatus) {
+                                is SessionStatus.Authenticated -> {
+                                    wasAuthenticated = true
+                                    // Phiên hồi phục sau lỗi tạm thời (RefreshFailure):
+                                    // chỉ vào HOME khi app thực sự đang đứng ở màn đăng nhập.
+                                    if (startDestination == Routes.AUTH &&
+                                        navController.currentDestination?.route == Routes.AUTH
+                                    ) {
+                                        navController.navigate(Routes.HOME) {
+                                            popUpTo(Routes.AUTH) { inclusive = true }
+                                        }
+                                    }
+                                }
+                                is SessionStatus.NotAuthenticated -> {
+                                    // Xoá snapshot tập trung, tránh race giữa cache và routing.
+                                    if (SessionCacheManager.hasCachedSession(app)) {
+                                        SessionCacheManager.clear(app)
+                                    }
+                                    // Chỉ điều hướng khi trước đó đã đăng nhập thật; guest
+                                    // (chưa từng Authenticated) không bị đá về login.
+                                    if (wasAuthenticated) {
+                                        wasAuthenticated = false
+                                        if (navController.currentDestination?.route != Routes.AUTH) {
+                                            navController.navigate(Routes.AUTH) { popUpTo(0) }
+                                        }
+                                    }
+                                }
+                                else -> {}
+                            }
+                        }
+                        NavGraph(navController = navController, startDestination = startDestination)
                     }
 
                     // 3. Optional update prompt dialog

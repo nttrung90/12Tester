@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +63,7 @@ fun PostAppGuideScreen(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val uriHandler = LocalUriHandler.current
 
     val groupEmail = stringResource(R.string.post_app_guide_group_email)
     val groupUrl = stringResource(R.string.post_app_guide_group_url)
@@ -82,22 +84,26 @@ fun PostAppGuideScreen(
         val cleanUrl = groupUrl.trim()
         val uri = Uri.parse(cleanUrl)
         try {
-            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addCategory(Intent.CATEGORY_BROWSABLE)
-            }
-            context.startActivity(intent)
+            uriHandler.openUri(cleanUrl)
         } catch (_: Exception) {
             try {
-                val fallbackIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addCategory(Intent.CATEGORY_BROWSABLE)
                 }
-                val chooser = Intent.createChooser(fallbackIntent, null).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(chooser)
+                context.startActivity(intent)
             } catch (_: Exception) {
-                Toast.makeText(context, cantOpenBrowserToast, Toast.LENGTH_SHORT).show()
+                try {
+                    val fallbackIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    val chooser = Intent.createChooser(fallbackIntent, null).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(chooser)
+                } catch (_: Exception) {
+                    Toast.makeText(context, cantOpenBrowserToast, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

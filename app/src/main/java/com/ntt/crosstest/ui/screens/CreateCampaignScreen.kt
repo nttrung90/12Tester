@@ -95,6 +95,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.ui.viewmodels.CreateCampaignViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,7 +110,7 @@ fun CreateCampaignScreen(
     val app = context.applicationContext as TestCheoApp
     val viewModel: CreateCampaignViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { CreateCampaignViewModel(app.campaignRepository, app.settingsRepository) }
+            initializer { CreateCampaignViewModel(app.campaignRepository, app.settingsRepository, Localizer(app)) }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -191,14 +192,14 @@ fun CreateCampaignScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Thời hạn sử dụng:", style = MaterialTheme.typography.bodySmall)
-                                Text("16 ngày", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.create_slot_duration_label), style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.create_slot_duration_days), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Chi phí:", style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.create_slot_cost_label), style = MaterialTheme.typography.bodySmall)
                                 Text(
                                     "$cost Credit",
                                     fontWeight = FontWeight.Bold,
@@ -210,7 +211,7 @@ fun CreateCampaignScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Số dư hiện tại:", style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.create_current_balance_label), style = MaterialTheme.typography.bodySmall)
                                 Text("${uiState.userCredits} Credit", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                         }
@@ -357,7 +358,7 @@ fun CreateCampaignScreen(
                 }
             }
 
-            // 2. Slot Selector Section (Up to 6 slots, 16 days duration)
+            // 2. Slot Selector Section (Up to 6 slots, 30 days duration)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -389,7 +390,7 @@ fun CreateCampaignScreen(
                             modifier = Modifier.weight(1f),
                         )
                         Text(
-                            text = "${uiState.usedSlots}/${uiState.maxSlots} dùng",
+                            text = stringResource(R.string.create_slots_used_format, uiState.usedSlots, uiState.maxSlots),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Medium,
@@ -492,26 +493,26 @@ fun CreateCampaignScreen(
                                     when {
                                         slot.isPermanent -> {
                                             Text(
-                                                text = if (isOccupied) "Đang chạy" else "Sẵn sàng",
+                                                text = if (isOccupied) stringResource(R.string.create_slot_running) else stringResource(R.string.create_slot_ready),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF2E7D32),
                                                 fontWeight = FontWeight.SemiBold,
                                             )
                                             Text(
-                                                text = "Vĩnh viễn",
+                                                text = stringResource(R.string.create_slot_permanent),
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
                                         }
                                         slot.isUnlocked && !slot.isExpired -> {
                                             Text(
-                                                text = if (isOccupied) "Đang chạy" else "Sẵn sàng",
+                                                text = if (isOccupied) stringResource(R.string.create_slot_running) else stringResource(R.string.create_slot_ready),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF2E7D32),
                                                 fontWeight = FontWeight.SemiBold,
                                             )
                                             Text(
-                                                text = "Còn ${slot.remainingDays} ngày",
+                                                text = stringResource(R.string.create_slot_remaining_days_format, slot.remainingDays),
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                                                 color = Color(0xFF2E7D32),
                                                 fontWeight = FontWeight.Bold,
@@ -525,7 +526,7 @@ fun CreateCampaignScreen(
                                                 fontWeight = FontWeight.Bold,
                                             )
                                             Text(
-                                                text = "Mở khóa (16n)",
+                                                text = stringResource(R.string.create_slot_unlock_short),
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
                                                 color = MaterialTheme.colorScheme.primary,
                                             )
@@ -609,7 +610,7 @@ fun CreateCampaignScreen(
                         singleLine = true,
                     )
                     Text(
-                        text = "Link cho tester tham gia (tự động tạo theo package name)",
+                        text = stringResource(R.string.create_tester_link_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp),
@@ -858,12 +859,12 @@ fun CreateCampaignScreen(
                 // 6. Section: Mục tiêu Test
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Mục tiêu Test",
+                        text = stringResource(R.string.create_target_section_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "Số lượt test cần đạt mỗi ngày. Khi app đạt đủ số lượt test mục tiêu, app sẽ tự động chuyển xuống cuối danh sách Trang chủ để nhường vị trí cho các app khác.",
+                        text = stringResource(R.string.create_target_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -873,9 +874,9 @@ fun CreateCampaignScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         val targets = listOf(
-                            Triple(12, "12 Test/ngày", "Mặc định (0 C)"),
-                            Triple(15, "15 Test/ngày", "+10 Credit"),
-                            Triple(20, "20 Test/ngày", "+20 Credit"),
+                            Triple(12, stringResource(R.string.create_target_option_format, 12), stringResource(R.string.create_target_default_cost)),
+                            Triple(15, stringResource(R.string.create_target_option_format, 15), "+10 Credit"),
+                            Triple(20, stringResource(R.string.create_target_option_format, 20), "+20 Credit"),
                         )
 
                         targets.forEach { (targetValue, title, costLabel) ->
@@ -924,9 +925,9 @@ fun CreateCampaignScreen(
                         val hasEnoughForUpgrade = uiState.userCredits >= uiState.targetCost + 10
                         Text(
                             text = if (hasEnoughForUpgrade) {
-                                "Phí nâng mục tiêu: ${uiState.targetCost} Credit (Số dư hiện tại: ${uiState.userCredits} Credit)"
+                                stringResource(R.string.create_target_fee_format, uiState.targetCost, uiState.userCredits)
                             } else {
-                                "Bạn cần ít nhất ${uiState.targetCost + 10} Credit để chọn gói này (Số dư hiện tại: ${uiState.userCredits} Credit)"
+                                stringResource(R.string.create_target_insufficient_format, uiState.targetCost + 10, uiState.userCredits)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = if (hasEnoughForUpgrade) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -939,7 +940,7 @@ fun CreateCampaignScreen(
                 // 7. Section: Hướng dẫn thêm cho Tester (Tùy chọn)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = "Hướng dẫn thêm cho Tester (Tùy chọn)",
+                        text = stringResource(R.string.create_guide_section_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
@@ -947,8 +948,8 @@ fun CreateCampaignScreen(
                         value = uiState.description,
                         onValueChange = { viewModel.update(description = it) },
                         enabled = uiState.isGuideConfirmed,
-                        label = { Text("Hướng dẫn / Lưu ý cho tester") },
-                        placeholder = { Text("Ví dụ: Nhờ các bạn test giúp luồng đăng ký tài khoản, tính năng thanh toán...") },
+                        label = { Text(stringResource(R.string.create_guide_label)) },
+                        placeholder = { Text(stringResource(R.string.create_guide_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3,
                         maxLines = 5,
@@ -959,7 +960,7 @@ fun CreateCampaignScreen(
                         ),
                     )
                     Text(
-                        text = "Tester sẽ nhìn thấy hướng dẫn này khi mở xem chi tiết app để test.",
+                        text = stringResource(R.string.create_guide_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp),
@@ -987,7 +988,7 @@ fun CreateCampaignScreen(
                             )
                             Spacer(Modifier.width(12.dp))
                             val warningText = if (uiState.targetCost > 0) {
-                                "Bạn cần ít nhất ${uiState.targetCost + 10} Credit để đăng app với mục tiêu ${uiState.targetTesters} Test/ngày (hiện có ${uiState.userCredits} Credit)."
+                                stringResource(R.string.create_target_cost_format, uiState.targetCost + 10, uiState.targetTesters, uiState.targetCost, uiState.userCredits)
                             } else {
                                 stringResource(R.string.create_campaign_credit_warning, uiState.userCredits)
                             }
@@ -1045,7 +1046,7 @@ fun CreateCampaignScreen(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(Modifier.width(8.dp))
-                                    Text("Mở khóa Slot ${nextLockedSlot.slotNumber} (${nextLockedSlot.cost} Credit / 16 ngày)")
+                                    Text(stringResource(R.string.create_unlock_slot_btn_format, nextLockedSlot.slotNumber, nextLockedSlot.cost))
                                 }
                             }
                         }
@@ -1085,7 +1086,7 @@ fun CreateCampaignScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
-                                    contentDescription = "Đóng",
+                                    contentDescription = stringResource(R.string.close),
                                     tint = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.size(16.dp),
                                 )

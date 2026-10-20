@@ -67,6 +67,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.ui.viewmodels.AuthViewModel
 
 private const val TAB_SIGN_IN = 0
@@ -82,7 +83,7 @@ fun AuthScreen(
     val app = context.applicationContext as TestCheoApp
     val viewModel: AuthViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { AuthViewModel(app.authRepository) }
+            initializer { AuthViewModel(app.authRepository, Localizer(app)) }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,7 +114,7 @@ fun AuthScreen(
     }
     LaunchedEffect(uiState.infoMessage) {
         uiState.infoMessage?.let {
-            if (it.contains("Đăng ký thành công", ignoreCase = true)) {
+            if (uiState.isSignUpSuccess) {
                 selectedTab = TAB_SIGN_IN
             }
             snackbarHostState.showSnackbar(it)

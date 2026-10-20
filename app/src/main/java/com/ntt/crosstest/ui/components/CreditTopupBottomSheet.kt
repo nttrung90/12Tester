@@ -396,7 +396,7 @@ private fun TopupPackageCard(
                     if (pkg.bonusCredits > 0) {
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            text = "(Gốc ${pkg.credits} + ${pkg.bonusCredits} C)",
+                            text = stringResource(R.string.topup_bonus_breakdown_format, pkg.credits, pkg.bonusCredits),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.SemiBold,

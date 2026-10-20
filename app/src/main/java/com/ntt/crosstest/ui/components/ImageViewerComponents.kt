@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,9 +38,9 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.TesterReport
 import com.ntt.crosstest.util.ImageHashHelper
-import kotlinx.coroutines.launch
 
 /**
  * Fullscreen Zoomable Image Lightbox with Pinch-to-zoom, Pan, and Double-tap 2.5x zoom.
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 fun FullscreenImageViewer(
     imageUrl: String?,
     onDismiss: () -> Unit,
-    title: String = "Ảnh chụp màn hình",
+    title: String = stringResource(R.string.img_screenshot_title),
     subtitle: String? = null,
 ) {
     if (imageUrl.isNullOrBlank()) return
@@ -132,7 +133,7 @@ fun FullscreenImageViewer(
                         }
                         is AsyncImagePainter.State.Error -> {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Không thể tải ảnh", color = Color.White)
+                                Text(stringResource(R.string.img_load_failed), color = Color.White)
                             }
                         }
                         else -> {
@@ -181,7 +182,7 @@ fun FullscreenImageViewer(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ZoomOutMap,
-                                contentDescription = "Thu nhỏ 1x",
+                                contentDescription = stringResource(R.string.img_reset_zoom_cd),
                                 tint = Color.White
                             )
                         }
@@ -190,7 +191,7 @@ fun FullscreenImageViewer(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Đóng",
+                            contentDescription = stringResource(R.string.close),
                             tint = Color.White
                         )
                     }
@@ -206,7 +207,7 @@ fun FullscreenImageViewer(
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "Chạm 2 lần hoặc vuốt 2 ngón tay để phóng to / thu nhỏ",
+                    text = stringResource(R.string.img_zoom_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFFE2E8F0)
                 )
@@ -216,7 +217,8 @@ fun FullscreenImageViewer(
 }
 
 /**
- * Side-by-Side and Split Comparison Dialog between two reports (e.g., Today's report vs Previous day's report).
+ * Side-by-Side and Split Comparison Dialog between two reports
+ * (e.g., Today's report vs Previous day's report).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -228,26 +230,147 @@ fun ImageComparisonDialog(
     onReject: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     var comparisonResult by remember { mutableStateOf<ImageHashHelper.ComparisonResult?>(null) }
     var isCalculatingHash by remember { mutableStateOf(false) }
 
-    // Calculate dHash comparison asynchronously on load
-    LaunchedEffect(currentReport.screenshotUrl, previousReport?.screenshotUrl) {
+    // Calculate dHash comparison asynchronously on load.
+    // Ưu tiên image_hash đã lưu trong DB (cùng basis với ảnh đã upload), chỉ
+    // tải + decode ảnh khi hash trống — đồng bộ với badge trên OwnerAppDetailScreen.
+    LaunchedEffect(
+        currentReport.screenshotUrl,
+        previousReport?.screenshotUrl,
+        currentReport.imageHash,
+        previousReport?.imageHash,
+    ) {
         val url1 = currentReport.screenshotUrl
         val url2 = previousReport?.screenshotUrl
         if (!url1.isNullOrBlank() && !url2.isNullOrBlank()) {
             isCalculatingHash = true
-            val hash1 = ImageHashHelper.computeDHashFromUrl(context, url1)
-            val hash2 = ImageHashHelper.computeDHashFromUrl(context, url2)
+            comparisonResult = null
+            val hash1 = currentReport.imageHash?.takeIf { it.isNotBlank() }
+                ?: ImageHashHelper.computeDHashFromUrl(context, url1)
+            val hash2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
+                ?: ImageHashHelper.computeDHashFromUrl(context, url2)
             if (hash1 != null && hash2 != null) {
-                comparisonResult = ImageHashHelper.compare(hash1, hash2)
+                comparisonResult = ImageHashHelper.compare(hash1, hash2, context)
             }
             isCalculatingHash = false
         }
     }
 
+    ComparisonDialogScaffold(
+        title = stringResource(R.string.img_compare_title),
+        subtitle = stringResource(R.string.img_compare_tester_format, currentReport.resolvedTesterName),
+        currentImage = currentReport.screenshotUrl,
+        currentLabel = stringResource(R.string.img_today),
+        currentDate = currentReport.createdAt?.take(16)?.replace("T", " ").orEmpty(),
+        previousImage = previousReport?.screenshotUrl,
+        previousLabel = stringResource(R.string.img_previous_day),
+        previousDate = previousReport?.createdAt?.take(16)?.replace("T", " ")
+            ?: stringResource(R.string.img_none_yet),
+        comparisonResult = comparisonResult,
+        isCalculatingHash = isCalculatingHash,
+        onDismiss = onDismiss,
+        actions = {
+            // Quick Action Buttons if callbacks provided
+            if (currentReport.isPending && onApprove != null && onReject != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onReject,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.img_reject_photo))
+                    }
+                    Button(
+                        onClick = onApprove,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2E7D32)
+                        )
+                    ) {
+                        Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.img_approve_btn))
+                    }
+                }
+            } else {
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(stringResource(R.string.img_close_comparison))
+                }
+            }
+        }
+    )
+}
+
+/**
+ * Comparison dialog for testers: newly selected photo vs previous day's photo.
+ * Hỗ trợ cả Uri ảnh vừa chọn (local) và URL ảnh đã nộp hôm nay.
+ */
+@Composable
+fun TesterImageComparisonDialog(
+    currentImage: Any?,
+    previousImage: String?,
+    onDismiss: () -> Unit,
+    currentDate: String? = null,
+    previousDate: String? = null,
+    comparisonResult: ImageHashHelper.ComparisonResult? = null,
+    isCalculatingHash: Boolean = false,
+) {
+    ComparisonDialogScaffold(
+        title = stringResource(R.string.img_compare_title),
+        subtitle = null,
+        currentImage = currentImage,
+        currentLabel = stringResource(R.string.img_new_photo),
+        currentDate = currentDate.orEmpty(),
+        previousImage = previousImage,
+        previousLabel = stringResource(R.string.img_previous_day),
+        previousDate = previousDate ?: stringResource(R.string.img_none_yet),
+        comparisonResult = comparisonResult,
+        isCalculatingHash = isCalculatingHash,
+        onDismiss = onDismiss,
+        actions = {
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(stringResource(R.string.img_close_comparison))
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ComparisonDialogScaffold(
+    title: String,
+    subtitle: String?,
+    currentImage: Any?,
+    currentLabel: String,
+    currentDate: String,
+    previousImage: String?,
+    previousLabel: String,
+    previousDate: String,
+    comparisonResult: ImageHashHelper.ComparisonResult?,
+    isCalculatingHash: Boolean,
+    onDismiss: () -> Unit,
+    actions: @Composable () -> Unit,
+) {
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Song song, 1: So sánh đè (Slider), 2: Chớp ảnh (Blink)
     var sliderRatio by remember { mutableFloatStateOf(0.5f) }
     var blinkShowCurrent by remember { mutableStateOf(true) }
@@ -265,20 +388,22 @@ fun ImageComparisonDialog(
                     title = {
                         Column {
                             Text(
-                                "So sánh ảnh kiểm thử 🔍",
+                                text = title,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                "Tester: ${currentReport.resolvedTesterName}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            if (!subtitle.isNullOrBlank()) {
+                                Text(
+                                    text = subtitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Filled.Close, contentDescription = "Đóng")
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -298,46 +423,7 @@ fun ImageComparisonDialog(
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Quick Action Buttons if callbacks provided
-                        if (currentReport.isPending && onApprove != null && onReject != null) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = onReject,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.error
-                                    )
-                                ) {
-                                    Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("Từ chối ảnh này")
-                                }
-                                Button(
-                                    onClick = onApprove,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF2E7D32)
-                                    )
-                                ) {
-                                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("Duyệt (+1 C)")
-                                }
-                            }
-                        } else {
-                            Button(
-                                onClick = onDismiss,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("Đóng đối chiếu")
-                            }
-                        }
+                        actions()
                     }
                 }
             }
@@ -376,7 +462,7 @@ fun ImageComparisonDialog(
                         if (isCalculatingHash) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Text(
-                                "Đang phân tích cấu trúc 2 bức ảnh...",
+                                text = stringResource(R.string.img_analyzing),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         } else if (res != null) {
@@ -409,24 +495,24 @@ fun ImageComparisonDialog(
                                 )
                                 Text(
                                     text = if (res.isSuspectDuplicate) {
-                                        "Cảnh báo: Ảnh có độ tương đồng rất cao (${res.similarity}%). Đề nghị kiểm tra kỹ đồng hồ status bar, % pin, và giao diện xem tester có nộp lại ảnh cũ không."
+                                        stringResource(R.string.img_suspect_warning_format, res.similarity)
                                     } else {
-                                        "Độ tương đồng: ${res.similarity}%. Ảnh thể hiện tính năng/màn hình có sự khác biệt rõ rệt."
+                                        stringResource(R.string.img_similarity_ok_format, res.similarity)
                                     },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
-                        } else if (previousReport?.screenshotUrl.isNullOrBlank()) {
+                        } else if (previousImage.isNullOrBlank()) {
                             Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Text(
-                                "Tester này chưa có ảnh ngày trước để đối chiếu (đây là báo cáo đầu tiên).",
+                                text = stringResource(R.string.img_first_report_note),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         } else {
                             Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Text(
-                                "Không thể tính toán hash ảnh. Bạn vẫn có thể xem đối chiếu 2 ảnh bên dưới.",
+                                text = stringResource(R.string.img_hash_unavailable),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -442,19 +528,19 @@ fun ImageComparisonDialog(
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Song song", fontSize = 13.sp) },
+                        text = { Text(stringResource(R.string.img_tab_side_by_side), fontSize = 13.sp) },
                         icon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null, modifier = Modifier.size(18.dp)) }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("So sánh đè", fontSize = 13.sp) },
+                        text = { Text(stringResource(R.string.img_tab_slider), fontSize = 13.sp) },
                         icon = { Icon(Icons.Filled.Layers, contentDescription = null, modifier = Modifier.size(18.dp)) }
                     )
                     Tab(
                         selected = selectedTab == 2,
                         onClick = { selectedTab = 2 },
-                        text = { Text("Chớp đổi (A/B)", fontSize = 13.sp) },
+                        text = { Text(stringResource(R.string.img_tab_blink), fontSize = 13.sp) },
                         icon = { Icon(Icons.Filled.Visibility, contentDescription = null, modifier = Modifier.size(18.dp)) }
                     )
                 }
@@ -469,9 +555,16 @@ fun ImageComparisonDialog(
                         .padding(horizontal = 12.dp)
                 ) {
                     when (selectedTab) {
-                        0 -> SideBySideView(currentReport, previousReport)
-                        1 -> SplitSliderView(currentReport.screenshotUrl, previousReport?.screenshotUrl, sliderRatio) { sliderRatio = it }
-                        2 -> BlinkView(currentReport, previousReport, blinkShowCurrent) { blinkShowCurrent = !blinkShowCurrent }
+                        0 -> SideBySideView(
+                            currentImage = currentImage,
+                            currentLabel = currentLabel,
+                            currentDate = currentDate,
+                            previousImage = previousImage,
+                            previousLabel = previousLabel,
+                            previousDate = previousDate,
+                        )
+                        1 -> SplitSliderView(currentImage, previousImage, sliderRatio) { sliderRatio = it }
+                        2 -> BlinkView(currentImage, previousImage, blinkShowCurrent) { blinkShowCurrent = !blinkShowCurrent }
                     }
                 }
             }
@@ -481,14 +574,18 @@ fun ImageComparisonDialog(
 
 @Composable
 private fun SideBySideView(
-    currentReport: TesterReport,
-    previousReport: TesterReport?
+    currentImage: Any?,
+    currentLabel: String,
+    currentDate: String,
+    previousImage: String?,
+    previousLabel: String,
+    previousDate: String,
 ) {
     Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Left Column: Current Report
+        // Left Column: Current image
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -502,13 +599,13 @@ private fun SideBySideView(
             ) {
                 Column(Modifier.padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Hôm nay",
+                        text = currentLabel,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        currentReport.createdAt?.take(16)?.replace("T", " ") ?: "",
+                        text = currentDate,
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -524,15 +621,15 @@ private fun SideBySideView(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
                 AsyncImage(
-                    model = currentReport.screenshotUrl,
-                    contentDescription = "Ảnh hôm nay",
+                    model = currentImage,
+                    contentDescription = stringResource(R.string.img_today_photo_cd),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
             }
         }
 
-        // Right Column: Previous Report
+        // Right Column: Previous image
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -546,13 +643,13 @@ private fun SideBySideView(
             ) {
                 Column(Modifier.padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Ngày trước đó",
+                        text = previousLabel,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
-                        previousReport?.createdAt?.take(16)?.replace("T", " ") ?: "Chưa có",
+                        text = previousDate,
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -567,17 +664,17 @@ private fun SideBySideView(
                 shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
-                if (previousReport?.screenshotUrl != null) {
+                if (previousImage != null) {
                     AsyncImage(
-                        model = previousReport.screenshotUrl,
-                        contentDescription = "Ảnh ngày trước",
+                        model = previousImage,
+                        contentDescription = stringResource(R.string.img_prev_photo_cd),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )
                 } else {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            "Không có ảnh cũ",
+                            text = stringResource(R.string.img_no_old_photo),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -590,14 +687,14 @@ private fun SideBySideView(
 
 @Composable
 private fun SplitSliderView(
-    url1: String?,
-    url2: String?,
+    currentImage: Any?,
+    previousImage: String?,
     ratio: Float,
     onRatioChange: (Float) -> Unit,
 ) {
-    if (url1 == null || url2 == null) {
+    if (currentImage == null || previousImage == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Cần cả 2 ảnh để thực hiện so sánh đè.", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.img_need_two_photos_slider), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }
@@ -614,18 +711,15 @@ private fun SplitSliderView(
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            val width = maxWidth
-            val height = maxHeight
-
             // Bottom layer: Old image (full)
             AsyncImage(
-                model = url2,
-                contentDescription = "Ảnh cũ",
+                model = previousImage,
+                contentDescription = stringResource(R.string.img_old_photo_cd),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
 
-            // Top layer: New image (clipped horizontally based on ratio)
+            // Top layer: New image (fades in based on ratio)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -634,8 +728,8 @@ private fun SplitSliderView(
                     }
             ) {
                 AsyncImage(
-                    model = url1,
-                    contentDescription = "Ảnh mới",
+                    model = currentImage,
+                    contentDescription = stringResource(R.string.img_new_photo_cd),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
@@ -650,7 +744,7 @@ private fun SplitSliderView(
                 color = Color(0xB3000000)
             ) {
                 Text(
-                    text = "Độ phủ: ${ (ratio * 100).toInt() }% Ảnh mới · ${ ((1f - ratio) * 100).toInt() }% Ảnh cũ",
+                    text = stringResource(R.string.img_overlay_ratio_format, (ratio * 100).toInt(), ((1f - ratio) * 100).toInt()),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -667,7 +761,7 @@ private fun SplitSliderView(
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Ảnh cũ", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.img_old_photo), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
             Slider(
                 value = ratio,
                 onValueChange = onRatioChange,
@@ -675,21 +769,21 @@ private fun SplitSliderView(
                     .weight(1f)
                     .padding(horizontal = 8.dp),
             )
-            Text("Ảnh mới", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.img_new_photo), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
 private fun BlinkView(
-    currentReport: TesterReport,
-    previousReport: TesterReport?,
+    currentImage: Any?,
+    previousImage: String?,
     showCurrent: Boolean,
     onToggle: () -> Unit,
 ) {
-    if (previousReport?.screenshotUrl == null) {
+    if (previousImage == null || currentImage == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Không có ảnh cũ để chớp đổi.", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.img_no_old_photo_blink), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }
@@ -707,10 +801,10 @@ private fun BlinkView(
             colors = CardDefaults.cardColors(containerColor = Color.Black)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                val currentUrl = if (showCurrent) currentReport.screenshotUrl else previousReport.screenshotUrl
+                val model = if (showCurrent) currentImage else previousImage
                 AsyncImage(
-                    model = currentUrl,
-                    contentDescription = if (showCurrent) "Ảnh hôm nay" else "Ảnh hôm trước",
+                    model = model,
+                    contentDescription = if (showCurrent) stringResource(R.string.img_today_photo_cd) else stringResource(R.string.img_prev_photo_cd),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
@@ -723,7 +817,7 @@ private fun BlinkView(
                     color = if (showCurrent) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = if (showCurrent) "ĐANG HIỆN: ẢNH HÔM NAY" else "ĐANG HIỆN: ẢNH HÔM TRƯỚC",
+                        text = if (showCurrent) stringResource(R.string.img_showing_today) else stringResource(R.string.img_showing_previous),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (showCurrent) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
@@ -742,7 +836,8 @@ private fun BlinkView(
         ) {
             Icon(Icons.Filled.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Chạm để đổi ảnh (hoặc chạm trực tiếp vào hình)")
+            Text(stringResource(R.string.img_tap_to_swap))
         }
     }
 }
+

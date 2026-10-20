@@ -46,6 +46,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,23 +59,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.UserNotification
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private enum class NotificationFilter(val label: String) {
-    ALL("Tất cả"),
-    UNREAD("Chưa đọc"),
-    ACCOUNT_CREDIT("Tài khoản & Xu"),
-    REPORTS("Báo cáo test"),
-    ADMIN("Hệ thống & Admin"),
+private enum class NotificationFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.notif_filter_all),
+    UNREAD(R.string.notif_filter_unread),
+    ACCOUNT_CREDIT(R.string.notif_filter_account_credit),
+    REPORTS(R.string.notif_filter_reports),
+    ADMIN(R.string.notif_filter_admin),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,7 +136,7 @@ fun NotificationBottomSheet(
                         modifier = Modifier.size(24.dp),
                     )
                     Text(
-                        text = "Thông báo",
+                        text = stringResource(R.string.notif_sheet_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
@@ -161,11 +166,11 @@ fun NotificationBottomSheet(
                                 modifier = Modifier.size(16.dp),
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Đọc tất cả", fontSize = 12.sp)
+                            Text(stringResource(R.string.notif_mark_all_read), fontSize = 12.sp)
                         }
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "Đóng")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
                     }
                 }
             }
@@ -187,12 +192,13 @@ fun NotificationBottomSheet(
                         NotificationFilter.REPORTS -> notifications.count { it.isReport || it.isCampaign }
                         NotificationFilter.ADMIN -> notifications.count { it.isAdmin || it.isWarning }
                     }
+                    val filterLabel = stringResource(filter.labelRes)
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedFilter = filter },
                         label = {
                             Text(
-                                text = if (count > 0) "${filter.label} ($count)" else filter.label,
+                                text = if (count > 0) "$filterLabel ($count)" else filterLabel,
                                 fontSize = 12.sp,
                             )
                         },
@@ -222,16 +228,16 @@ fun NotificationBottomSheet(
                         )
                         Text(
                             text = if (selectedFilter == NotificationFilter.UNREAD) {
-                                "Bạn đã đọc hết tất cả thông báo!"
+                                stringResource(R.string.notif_empty_read_all)
                             } else {
-                                "Chưa có thông báo nào"
+                                stringResource(R.string.notif_empty_none)
                             },
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "Các cập nhật về biến động Credit, kết quả kiểm thử và thông báo từ Admin sẽ xuất hiện tại đây.",
+                            text = stringResource(R.string.notif_empty_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -374,7 +380,7 @@ private fun NotificationItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.DeleteOutline,
-                        contentDescription = "Xóa thông báo",
+                        contentDescription = stringResource(R.string.notif_delete),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.size(16.dp),
                     )
@@ -430,7 +436,13 @@ private fun resolveNotificationConfig(type: String): NotificationConfig {
     }
 }
 
+@Composable
 private fun formatRelativeTime(isoString: String?): String {
+    val context = LocalContext.current
+    return remember(isoString, context) { formatRelativeTime(context, isoString) }
+}
+
+private fun formatRelativeTime(context: Context, isoString: String?): String {
     if (isoString.isNullOrBlank()) return ""
     return try {
         val instant = Instant.parse(isoString)
@@ -441,10 +453,10 @@ private fun formatRelativeTime(isoString: String?): String {
         val days = duration.toDays()
 
         when {
-            minutes < 1 -> "Vừa xong"
-            minutes < 60 -> "$minutes phút trước"
-            hours < 24 -> "$hours giờ trước"
-            days < 7 -> "$days ngày trước"
+            minutes < 1 -> context.getString(R.string.time_just_now)
+            minutes < 60 -> context.getString(R.string.time_minutes_ago, minutes.toInt())
+            hours < 24 -> context.getString(R.string.time_hours_ago, hours.toInt())
+            days < 7 -> context.getString(R.string.time_days_ago, days.toInt())
             else -> {
                 val zonedDateTime = instant.atZone(ZoneId.systemDefault())
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").format(zonedDateTime)

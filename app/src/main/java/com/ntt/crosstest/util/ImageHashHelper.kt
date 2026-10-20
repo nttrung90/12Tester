@@ -2,22 +2,32 @@ package com.ntt.crosstest.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
+import android.util.LruCache
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.ntt.crosstest.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Utility for perceptual image hashing (dHash 64-bit) and duplicate detection.
  * Fast, lightweight (~10ms per bitmap), robust against JPEG compression & minor scale changes.
+ *
+ * Lưu ý: mọi hash dùng để so sánh phải được tính trên cùng một "basis" — ảnh đã
+ * nén & lưu trên Storage (xem FirebaseStorageHelper.prepareScreenshot), không
+ * tính trên ảnh gốc trước khi nén.
  */
 object ImageHashHelper {
 
-    private val hashCache = ConcurrentHashMap<String, String>()
+    private const val HASH_CACHE_SIZE = 128
+
+    private val hashCache = LruCache<String, String>(HASH_CACHE_SIZE)
+
+    /** Xoá cache hash (gọi khi đăng xuất để không giữ dữ liệu phiên cũ). */
+    fun clearCache() {
+        hashCache.evictAll()
+    }
 
     enum class SimilarityLevel {
         DUPLICATE,        // >= 92% similarity (Hamming <= 5): Likely the exact same screenshot re-uploaded
@@ -32,7 +42,10 @@ object ImageHashHelper {
         val level: SimilarityLevel,
         val label: String,
         val isSuspectDuplicate: Boolean,
-    )
+    ) {
+        /** Chỉ chặn nộp khi gần như trùng khít; HIGH_SIMILARITY chỉ cảnh báo. */
+        val isBlockingDuplicate: Boolean get() = level == SimilarityLevel.DUPLICATE
+    }
 
     /**
      * Computes a 64-bit difference hash (dHash) from a Bitmap.
@@ -68,54 +81,11 @@ object ImageHashHelper {
     }
 
     /**
-     * Decodes and computes dHash from a content Uri (e.g., from photo picker).
-     */
-    suspend fun computeDHashFromUri(context: Context, uri: Uri): String? = withContext(Dispatchers.IO) {
-        val uriStr = uri.toString()
-        hashCache[uriStr]?.let { return@withContext it }
-
-        try {
-            // First check bounds
-            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            context.contentResolver.openInputStream(uri)?.use { stream ->
-                BitmapFactory.decodeStream(stream, null, options)
-            }
-
-            var inSampleSize = 1
-            val maxDim = 256
-            val (w, h) = options.outWidth to options.outHeight
-            if (w > maxDim || h > maxDim) {
-                val halfW = w / 2
-                val halfH = h / 2
-                while ((halfW / inSampleSize) >= maxDim && (halfH / inSampleSize) >= maxDim) {
-                    inSampleSize *= 2
-                }
-            }
-
-            val decodeOptions = BitmapFactory.Options().apply {
-                this.inSampleSize = inSampleSize
-                inPreferredConfig = Bitmap.Config.RGB_565
-            }
-
-            val bitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
-                BitmapFactory.decodeStream(stream, null, decodeOptions)
-            } ?: return@withContext null
-
-            val hash = computeDHash(bitmap)
-            bitmap.recycle()
-            hashCache[uriStr] = hash
-            hash
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    /**
      * Downloads/fetches cached bitmap via Coil and computes dHash from image URL.
      */
     suspend fun computeDHashFromUrl(context: Context, imageUrl: String): String? = withContext(Dispatchers.IO) {
         if (imageUrl.isBlank()) return@withContext null
-        hashCache[imageUrl]?.let { return@withContext it }
+        hashCache.get(imageUrl)?.let { return@withContext it }
 
         try {
             val request = ImageRequest.Builder(context)
@@ -128,7 +98,7 @@ object ImageHashHelper {
                 val drawable = result.drawable
                 if (drawable is android.graphics.drawable.BitmapDrawable) {
                     val hash = computeDHash(drawable.bitmap)
-                    hashCache[imageUrl] = hash
+                    hashCache.put(imageUrl, hash)
                     return@withContext hash
                 }
             }
@@ -161,7 +131,7 @@ object ImageHashHelper {
     /**
      * Evaluates comparison result between two image hashes.
      */
-    fun compare(hash1: String?, hash2: String?): ComparisonResult {
+    fun compare(hash1: String?, hash2: String?, context: Context): ComparisonResult {
         val dist = hammingDistance(hash1, hash2)
         val sim = ((64 - dist) * 100) / 64
         val clampedSim = sim.coerceIn(0, 100)
@@ -174,10 +144,10 @@ object ImageHashHelper {
         }
 
         val label = when (level) {
-            SimilarityLevel.DUPLICATE -> "Trùng lặp cao ($clampedSim%)"
-            SimilarityLevel.HIGH_SIMILARITY -> "Rất giống nhau ($clampedSim%)"
-            SimilarityLevel.MODERATE -> "Tương đồng một phần ($clampedSim%)"
-            SimilarityLevel.DIFFERENT -> "Khác biệt ($clampedSim%)"
+            SimilarityLevel.DUPLICATE -> context.getString(R.string.similarity_duplicate_format, clampedSim)
+            SimilarityLevel.HIGH_SIMILARITY -> context.getString(R.string.similarity_high_format, clampedSim)
+            SimilarityLevel.MODERATE -> context.getString(R.string.similarity_moderate_format, clampedSim)
+            SimilarityLevel.DIFFERENT -> context.getString(R.string.similarity_different_format, clampedSim)
         }
 
         return ComparisonResult(

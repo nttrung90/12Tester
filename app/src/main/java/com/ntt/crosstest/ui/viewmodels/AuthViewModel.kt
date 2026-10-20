@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.BuildConfig
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.AuthRepository
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.ui.screens.GoogleSignInOutcome
 import com.ntt.crosstest.ui.screens.requestGoogleSignIn
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,10 +23,14 @@ data class AuthUiState(
     val isResetLoading: Boolean = false,
     val error: String? = null,
     val infoMessage: String? = null,
+    val isSignUpSuccess: Boolean = false,
     val signedIn: Boolean = false,
 )
 
-class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
+class AuthViewModel(
+    private val authRepository: AuthRepository,
+    private val localizer: Localizer,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -34,7 +40,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     fun clearInfoMessage() {
-        _uiState.update { it.copy(infoMessage = null) }
+        _uiState.update { it.copy(infoMessage = null, isSignUpSuccess = false) }
     }
 
     /**
@@ -56,7 +62,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = "Bạn đã hủy đăng nhập. Nếu bạn không hủy, vui lòng thử lại.",
+                            error = localizer.get(R.string.auth_google_cancelled),
                         )
                     }
                 }
@@ -74,7 +80,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                error = "Đăng nhập thất bại: ${friendlyError(e)}"
+                                error = localizer.get(R.string.auth_sign_in_failed_format, friendlyError(e, localizer))
                             )
                         }
                     }
@@ -89,11 +95,11 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun signInWithEmail(email: String, pass: String) {
         val trimmedEmail = email.trim()
         if (trimmedEmail.isBlank()) {
-            _uiState.update { it.copy(error = "Vui lòng nhập email.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_email_required)) }
             return
         }
         if (pass.isBlank()) {
-            _uiState.update { it.copy(error = "Vui lòng nhập mật khẩu.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_password_required)) }
             return
         }
 
@@ -106,7 +112,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Đăng nhập thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.auth_sign_in_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -120,19 +126,19 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun signUpWithEmail(email: String, pass: String, confirmPass: String, displayName: String?) {
         val trimmedEmail = email.trim()
         if (trimmedEmail.isBlank()) {
-            _uiState.update { it.copy(error = "Vui lòng nhập email.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_email_required)) }
             return
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
-            _uiState.update { it.copy(error = "Địa chỉ email không đúng định dạng.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_email_invalid)) }
             return
         }
         if (pass.length < 6) {
-            _uiState.update { it.copy(error = "Mật khẩu phải chứa ít nhất 6 ký tự.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_password_min_length)) }
             return
         }
         if (pass != confirmPass) {
-            _uiState.update { it.copy(error = "Mật khẩu xác nhận không khớp.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_password_mismatch)) }
             return
         }
 
@@ -152,7 +158,8 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                infoMessage = "Đăng ký thành công! Vui lòng chuyển sang tab Đăng nhập."
+                                isSignUpSuccess = true,
+                                infoMessage = localizer.get(R.string.auth_sign_up_success_info)
                             )
                         }
                     }
@@ -161,7 +168,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Đăng ký thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.auth_sign_up_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -174,7 +181,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun sendPasswordResetEmail(email: String, onSuccess: () -> Unit) {
         val trimmedEmail = email.trim()
         if (trimmedEmail.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
-            _uiState.update { it.copy(error = "Vui lòng nhập email hợp lệ để đặt lại mật khẩu.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_reset_email_invalid)) }
             return
         }
 
@@ -185,7 +192,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isResetLoading = false,
-                        infoMessage = "Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư của bạn."
+                        infoMessage = localizer.get(R.string.auth_reset_email_sent)
                     )
                 }
                 onSuccess()
@@ -193,7 +200,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isResetLoading = false,
-                        error = "Gửi yêu cầu thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.auth_reset_send_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -201,31 +208,41 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 }
 
-/** Short, user-friendly error text (Vietnamese). */
-fun friendlyError(e: Exception): String {
+/** Short, user-friendly error text, localized via [localizer]. */
+fun friendlyError(e: Exception, localizer: Localizer): String {
     val msg = e.message.orEmpty()
     val lower = msg.lowercase()
     return when {
         "account_locked" in lower ->
-            "Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ Admin để được hỗ trợ."
+            localizer.get(R.string.error_account_locked)
+        "same_screenshot_rejected" in lower ->
+            localizer.get(R.string.error_same_screenshot)
+        "report_already_reviewed" in lower ->
+            localizer.get(R.string.error_report_already_reviewed)
+        "report_not_found" in lower ->
+            localizer.get(R.string.error_report_not_found)
+        "permission_denied" in lower || "permission denied" in lower ->
+            localizer.get(R.string.error_permission_denied)
         "campaign_not_open" in lower ->
-            "App đang tạm dừng hoặc đã hoàn thành kiểm thử nên không thể nộp báo cáo mới."
+            localizer.get(R.string.error_campaign_not_open)
         "email not confirmed" in lower || "email_not_confirmed" in lower || "not confirmed" in lower || "verified" in lower && "email" in lower ->
-            "Tài khoản chưa được kích hoạt email. Vui lòng chạy lệnh kích hoạt trong Supabase SQL Editor."
+            localizer.get(R.string.error_email_not_confirmed)
         "unlock_or_renew_slot" in lower || ("pgrst202" in lower && "slot" in lower) ->
-            "Hệ thống Multi-Slot chưa được cấu hình trên Supabase. Vui lòng chạy file migration 005 trong Supabase SQL Editor."
+            localizer.get(R.string.error_multi_slot_not_configured)
         "pgrst202" in lower || "schema cache" in lower ->
-            "Hàm xử lý chưa được cài đặt trên Supabase hoặc đang làm mới cache. Vui lòng kiểm tra lại SQL migration."
+            localizer.get(R.string.error_rpc_not_available)
         "already registered" in lower || "user_already_exists" in lower ->
-            "Email này đã được đăng ký tài khoản. Vui lòng chuyển sang tab Đăng nhập."
+            localizer.get(R.string.error_email_already_registered)
         "invalid login credentials" in lower || "invalid_grant" in lower || "wrong password" in lower ->
-            "Email hoặc mật khẩu không chính xác."
+            localizer.get(R.string.error_invalid_credentials)
         "password should be at least" in lower ->
-            "Mật khẩu phải có ít nhất 6 ký tự."
+            localizer.get(R.string.error_password_too_short)
         "rate limit" in lower || "over_email_send_rate_limit" in lower ->
-            "Bạn đã gửi yêu cầu quá nhanh. Vui lòng đợi trong giây lát."
+            localizer.get(R.string.error_rate_limited)
+        "not_authenticated" in lower ->
+            localizer.get(R.string.campaign_login_required)
         "network" in lower || "unable to resolve host" in lower || "timeout" in lower ->
-            "Lỗi mạng. Kiểm tra kết nối Internet rồi thử lại."
-        else -> msg.ifBlank { "Đã có lỗi xảy ra." }.take(200)
+            localizer.get(R.string.error_network)
+        else -> msg.ifBlank { localizer.get(R.string.error_generic) }.take(200)
     }
 }

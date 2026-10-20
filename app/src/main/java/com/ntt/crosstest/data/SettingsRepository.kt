@@ -1,7 +1,9 @@
 package com.ntt.crosstest.data
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
+import androidx.annotation.StringRes
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -81,6 +83,20 @@ class SettingsRepository(private val context: Context) {
         }
 
         /**
+         * Returns a [Context] wrapped with the in-app language setting.
+         * Use for non-Compose callers (ViewModels, notifications, workers) so
+         * resource lookups follow the app language, not the system language.
+         */
+        fun wrap(context: Context): Context {
+            val locale = resolveLocale(getSavedLanguageSync(context))
+            val config = Configuration(context.resources.configuration).apply {
+                setLocale(locale)
+                setLayoutDirection(locale)
+            }
+            return context.createConfigurationContext(config)
+        }
+
+        /**
          * Resolves the effective [Locale] to use.
          * Default behavior:
          * - If "vi": returns Locale("vi")
@@ -107,5 +123,17 @@ class SettingsRepository(private val context: Context) {
                 }
             }
         }
+    }
+}
+
+/**
+ * Tiny helper for ViewModels without a Compose context: resolves strings using
+ * the current in-app language at call time (re-resolved on every [get], so it
+ * never goes stale after the user switches language).
+ */
+class Localizer(private val appContext: Context) {
+    fun get(@StringRes id: Int, vararg args: Any): String {
+        val context = SettingsRepository.wrap(appContext)
+        return if (args.isEmpty()) context.getString(id) else context.getString(id, *args)
     }
 }

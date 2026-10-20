@@ -37,11 +37,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignOwnerStats
 
@@ -115,7 +117,11 @@ fun MyAppCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 // 0. Slot number pill
-                val slotLabel = if (campaign.slotNumber == 1) "Slot 1 (Mặc định)" else "Slot ${campaign.slotNumber}"
+                val slotLabel = if (campaign.slotNumber == 1) {
+                    stringResource(R.string.my_app_slot_default)
+                } else {
+                    stringResource(R.string.slot_number_title, campaign.slotNumber)
+                }
                 StatPill(
                     icon = Icons.Filled.Apps,
                     text = slotLabel,
@@ -127,10 +133,10 @@ fun MyAppCard(
 
                 // 1. Status pill
                 val (statusText, statusColor) = when {
-                    campaign.isProduction -> "🚀 Production" to Color(0xFF1565C0)
-                    campaign.isCompleted -> "✅ Hoàn thành KT" to Color(0xFF1565C0)
-                    campaign.isPaused -> "⏸ Tạm dừng" to Color(0xFFE65100)
-                    else -> "▶ Đang test" to Color(0xFF2E7D32)
+                    campaign.isProduction -> stringResource(R.string.my_app_status_production) to Color(0xFF1565C0)
+                    campaign.isCompleted -> stringResource(R.string.my_app_status_completed) to Color(0xFF1565C0)
+                    campaign.isPaused -> stringResource(R.string.my_app_status_paused) to Color(0xFFE65100)
+                    else -> stringResource(R.string.my_app_status_testing) to Color(0xFF2E7D32)
                 }
                 StatPill(
                     text = statusText,
@@ -139,12 +145,12 @@ fun MyAppCard(
                     backgroundColor = statusColor.copy(alpha = 0.08f),
                 )
 
-                // 1b. Days remaining in the 15-day window (open apps only)
+                // 1b. Days remaining in the 30-day window (open apps only)
                 if (campaign.isOpen) {
                     campaign.testingDaysRemaining?.let { days ->
                         StatPill(
                             icon = Icons.Filled.CalendarMonth,
-                            text = "Còn $days ngày",
+                            text = stringResource(R.string.slot_active_days, days),
                             iconTint = Color(0xFF1976D2),
                             borderColor = Color(0xFF1976D2).copy(alpha = 0.4f),
                             textColor = Color(0xFF1976D2),
@@ -157,14 +163,14 @@ fun MyAppCard(
                 val installedCount = stats?.installedTestersCount ?: campaign.targetTesters
                 StatPill(
                     icon = Icons.Filled.Check,
-                    text = "$installedCount đã cài",
+                    text = stringResource(R.string.my_app_installed_count, installedCount),
                 )
 
                 // 3. Tested today
                 val testedToday = stats?.testedTodayCount ?: 0
                 StatPill(
                     icon = Icons.Filled.CalendarMonth,
-                    text = "$testedToday test hôm nay",
+                    text = stringResource(R.string.my_app_tested_today_count, testedToday),
                 )
 
                 // 4. Pending reviews
@@ -176,7 +182,7 @@ fun MyAppCard(
                 // 6. Tester badge
                 StatPill(
                     icon = Icons.Filled.Shield,
-                    text = "Nhân viên kiểm thử",
+                    text = stringResource(R.string.my_app_tester_badge),
                     iconTint = Color(0xFF1976D2),
                 )
             }
@@ -255,7 +261,7 @@ fun PendingReviewPill(count: Int) {
             )
         }
         Text(
-            text = "chờ duyệt",
+            text = stringResource(R.string.my_app_pending_review),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,

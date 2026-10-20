@@ -26,8 +26,8 @@ android {
         applicationId = "com.ntt.crosstest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.2.0"
+        versionCode = 10
+        versionName = "0.7"
 
         buildConfigField("String", "SUPABASE_URL", "\"${appSecret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${appSecret("SUPABASE_ANON_KEY")}\"")
@@ -93,6 +93,9 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.coil.compose)
 
+    // EXIF orientation for uploaded screenshots (BitmapFactory ignores it)
+    implementation(libs.exifinterface)
+
     // Google sign-in (Credential Manager + Google ID)
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
@@ -116,4 +119,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.storage)
     implementation(libs.coroutines.play.services)
+
+    // Play Store update detection for the manual "Check for updates" action
+    implementation(libs.play.app.update)
 }

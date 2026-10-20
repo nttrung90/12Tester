@@ -6,17 +6,25 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.annotation.ExperimentalCoilApi
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.ntt.crosstest.data.AppConfigRepository
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.PendingReportStore
+import com.ntt.crosstest.data.ReportSubmitManager
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
+import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.PreparedScreenshotCache
 import com.ntt.crosstest.work.ReminderWorker
 import com.ntt.crosstest.work.UpdateCheckWorker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -31,6 +39,8 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     lateinit var settingsRepository: SettingsRepository
         private set
     lateinit var appConfigRepository: AppConfigRepository
+        private set
+    lateinit var reportSubmitManager: ReportSubmitManager
         private set
 
     override fun newImageLoader(): ImageLoader {
@@ -63,11 +73,15 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         if (url.isNotBlank() && key.isNotBlank()) {
             val client = SupabaseHolder.init(url, key)
             authRepository = AuthRepository(client)
-            campaignRepository = CampaignRepository(client)
-            appConfigRepository = AppConfigRepository(client)
+            campaignRepository = CampaignRepository(client, Localizer(this))
+            appConfigRepository = AppConfigRepository(client, this)
+            reportSubmitManager = ReportSubmitManager(this)
         }
 
         settingsRepository = SettingsRepository(this)
+        // Dọn ảnh pending/prepared quá hạn sau khi process khởi động lại.
+        PreparedScreenshotCache.cleanup(this)
+        PendingReportStore.cleanup(this)
         scheduleDailyReminder()
         scheduleUpdateCheck()
     }
@@ -125,6 +139,7 @@ class TestCheoApp : Application(), ImageLoaderFactory {
      * (best effort), the in-memory repository cache and the on-disk session
      * snapshot so the next user/guest never sees the previous account's data.
      */
+    @OptIn(ExperimentalCoilApi::class)
     suspend fun performSignOut() {
         try {
             authRepository.signOut()
@@ -133,6 +148,19 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         }
         campaignRepository.clearMemoryCache()
         SessionCacheManager.clear(this)
+        ImageHashHelper.clearCache()
+        if (::reportSubmitManager.isInitialized) {
+            reportSubmitManager.cancelAllPendingWork()
+        }
+        withContext(Dispatchers.IO) {
+            // Ảnh remote (screenshot/icon) và ảnh đang chờ nộp không được
+            // tồn tại sau khi đổi tài khoản.
+            val loader = coil.Coil.imageLoader(this@TestCheoApp)
+            loader.memoryCache?.clear()
+            loader.diskCache?.clear()
+            PreparedScreenshotCache.clear(this@TestCheoApp)
+            PendingReportStore.clear(this@TestCheoApp)
+        }
     }
 
     companion object {

@@ -3,8 +3,10 @@ package com.ntt.crosstest.ui.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.util.FirebaseStorageHelper
@@ -39,7 +41,7 @@ data class CreateCampaignUiState(
     val isSaving: Boolean = false,
     val error: String? = null,
     val created: Boolean = false,
-    val userCredits: Int = 100,
+    val userCredits: Int = 0,
     val isLoadingCredits: Boolean = true,
     val isGuideConfirmed: Boolean = false,
     val installedApps: List<PlayStoreHelper.InstalledAppItem> = emptyList(),
@@ -55,6 +57,7 @@ data class CreateCampaignUiState(
 class CreateCampaignViewModel(
     private val repository: CampaignRepository,
     private val settingsRepository: SettingsRepository,
+    private val localizer: Localizer,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateCampaignUiState())
@@ -138,7 +141,7 @@ class CreateCampaignViewModel(
         val slotCost = SlotInfo.costForSlot(slotNumber)
         if (_uiState.value.userCredits < slotCost) {
             _uiState.update {
-                it.copy(error = "Bạn cần $slotCost Credit để mở khóa Slot $slotNumber (hiện có ${_uiState.value.userCredits} Credit).")
+                it.copy(error = localizer.get(R.string.create_slot_cost_format, slotCost, slotNumber, _uiState.value.userCredits))
             }
             return
         }
@@ -150,16 +153,16 @@ class CreateCampaignViewModel(
                 _uiState.update {
                     it.copy(
                         userCredits = result.balance,
-                        unlockSuccessMsg = "Mở khóa Slot $slotNumber thành công (+16 ngày)!",
+                        unlockSuccessMsg = localizer.get(R.string.create_slot_unlock_success_format, slotNumber),
                         selectedSlotNumber = slotNumber,
                     )
                 }
                 loadSlots()
             } catch (e: Exception) {
                 val msg = when {
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> "Bạn không đủ Credit để mở khóa slot này."
-                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> "Bạn cần mở khóa hoặc gia hạn Slot ${slotNumber - 1} trước."
-                    else -> friendlyError(e)
+                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.create_insufficient_credits_slot)
+                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
+                    else -> friendlyError(e, localizer)
                 }
                 _uiState.update { it.copy(error = msg) }
             } finally {
@@ -388,7 +391,7 @@ class CreateCampaignViewModel(
 
         if (s.isLoadingCredits || s.isLoadingSlots) {
             _uiState.update {
-                it.copy(error = "Đang tải dữ liệu tài khoản và slot, vui lòng đợi trong giây lát...")
+                it.copy(error = localizer.get(R.string.create_loading_data))
             }
             return
         }
@@ -396,14 +399,14 @@ class CreateCampaignViewModel(
         val targetUpgradeCost = s.targetCost
         if (s.userCredits <= 10) {
             _uiState.update {
-                it.copy(error = "Bạn cần có trên 10 Credit để đăng app (hiện có ${s.userCredits} Credit). Hãy tham gia test app để kiếm thêm Credit.")
+                it.copy(error = localizer.get(R.string.create_min_credits_format, s.userCredits))
             }
             return
         }
 
         if (targetUpgradeCost > 0 && s.userCredits < targetUpgradeCost + 10) {
             _uiState.update {
-                it.copy(error = "Bạn cần ít nhất ${targetUpgradeCost + 10} Credit để đăng app với mục tiêu ${s.targetTesters} Test/ngày (phí nâng mục tiêu: $targetUpgradeCost Credit, số dư hiện có: ${s.userCredits} Credit).")
+                it.copy(error = localizer.get(R.string.create_target_cost_format, targetUpgradeCost + 10, s.targetTesters, targetUpgradeCost, s.userCredits))
             }
             return
         }
@@ -412,11 +415,11 @@ class CreateCampaignViewModel(
         if (chosenSlot != null && !chosenSlot.isAvailable) {
             if (chosenSlot.isOccupied) {
                 _uiState.update {
-                    it.copy(error = "Slot ${chosenSlot.slotNumber} đang có ứng dụng chạy. Vui lòng chọn slot trống khác hoặc mở thêm slot mới.")
+                    it.copy(error = localizer.get(R.string.create_slot_in_use_format, chosenSlot.slotNumber))
                 }
             } else if (chosenSlot.canUnlock) {
                 _uiState.update {
-                    it.copy(error = "Slot ${chosenSlot.slotNumber} chưa mở hoặc đã hết hạn. Vui lòng mở khóa trước khi đăng app.")
+                    it.copy(error = localizer.get(R.string.create_slot_expired_format, chosenSlot.slotNumber))
                 }
             }
             return
@@ -424,19 +427,19 @@ class CreateCampaignViewModel(
 
         if (s.slots.isNotEmpty() && s.slots.none { it.isAvailable }) {
             _uiState.update {
-                it.copy(error = "Bạn đã dùng hết tất cả các slot hiện có. Hãy mở khóa thêm slot hoặc đóng app cũ.")
+                it.copy(error = localizer.get(R.string.create_all_slots_used))
             }
             return
         }
 
         val cleanPkg = PlayStoreHelper.extractPackageName(s.packageName) ?: s.packageName.trim()
         if (cleanPkg.isBlank()) {
-            _uiState.update { it.copy(error = "Vui lòng nhập Package name hoặc dán link Play Store.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.create_package_required)) }
             return
         }
 
         if (!cleanPkg.contains(".") || !PlayStoreHelper.isValidPackageName(cleanPkg)) {
-            _uiState.update { it.copy(error = "Package name không hợp lệ (Ví dụ đúng: com.example.myapp).") }
+            _uiState.update { it.copy(error = localizer.get(R.string.create_package_invalid)) }
             return
         }
 
@@ -444,7 +447,7 @@ class CreateCampaignViewModel(
         val alreadyActive = s.slots.any { it.currentCampaign?.packageName?.equals(cleanPkg, ignoreCase = true) == true }
         if (alreadyActive) {
             _uiState.update {
-                it.copy(error = "Ứng dụng với package \"$cleanPkg\" đang chạy trên một Slot khác của bạn.")
+                it.copy(error = localizer.get(R.string.create_package_duplicate_format, cleanPkg))
             }
             return
         }
@@ -475,11 +478,11 @@ class CreateCampaignViewModel(
             } catch (e: Exception) {
                 val errorMsg = when {
                     e.message?.contains("INSUFFICIENT_CREDITS_FOR_TARGET") == true ->
-                        "Bạn không đủ Credit để nâng cấp mục tiêu test này (cần $targetUpgradeCost Credit)."
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> "Bạn cần có trên 10 Credit để đăng app mới."
-                    e.message?.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") == true -> "Slot đăng app đã hết hạn hoặc chưa kích hoạt."
-                    e.message?.contains("SLOT_ALREADY_IN_USE") == true -> "Slot này đang có một app khác chạy."
-                    else -> friendlyError(e)
+                        localizer.get(R.string.create_insufficient_target_credits_format, targetUpgradeCost)
+                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.create_min_credits)
+                    e.message?.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") == true -> localizer.get(R.string.create_slot_not_active)
+                    e.message?.contains("SLOT_ALREADY_IN_USE") == true -> localizer.get(R.string.create_slot_busy)
+                    else -> friendlyError(e, localizer)
                 }
                 _uiState.update { it.copy(isSaving = false, error = errorMsg) }
             }

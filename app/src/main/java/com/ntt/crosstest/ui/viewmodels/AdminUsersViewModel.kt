@@ -2,10 +2,12 @@ package com.ntt.crosstest.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.AppConfig
 import com.ntt.crosstest.data.AppConfigRepository
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +38,7 @@ class AdminUsersViewModel(
     private val campaignRepository: CampaignRepository,
     private val authRepository: AuthRepository,
     private val appConfigRepository: AppConfigRepository,
+    private val localizer: Localizer,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminUsersUiState())
@@ -72,7 +75,7 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = if (_uiState.value.allUsers.isEmpty()) friendlyError(e) else null
+                        error = if (_uiState.value.allUsers.isEmpty()) friendlyError(e, localizer) else null
                     )
                 }
             }
@@ -131,7 +134,7 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        actionMessage = if (locked) "Đã khóa tài khoản thành công." else "Đã mở khóa tài khoản thành công."
+                        actionMessage = if (locked) localizer.get(R.string.admin_user_locked_success) else localizer.get(R.string.admin_user_unlocked_success)
                     )
                 }
                 refresh()
@@ -139,7 +142,7 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        error = "Thao tác thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.admin_action_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -155,15 +158,15 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        actionMessage = "Đã điều chỉnh Credit thành công! Số dư mới: ${res.newCredits} Credit."
+                        actionMessage = localizer.get(R.string.admin_credit_adjusted_format, res.newCredits)
                     )
                 }
-                refresh()
+                refresh(forceRefresh = true)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        error = "Điều chỉnh Credit thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.admin_credit_adjust_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -187,9 +190,9 @@ class AdminUsersViewModel(
                     type = type,
                 )
                 val msg = if (targetUserId == null) {
-                    "Đã gửi thông báo thành công tới toàn bộ ${res.sentCount} người dùng!"
+                    localizer.get(R.string.admin_notif_sent_all_format, res.sentCount)
                 } else {
-                    "Đã gửi thông báo thành công tới người dùng!"
+                    localizer.get(R.string.admin_notif_sent)
                 }
                 _uiState.update {
                     it.copy(
@@ -201,7 +204,7 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        error = "Gửi thông báo thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.admin_notif_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -219,7 +222,7 @@ class AdminUsersViewModel(
                 it.copy(
                     isConfigLoading = false,
                     appConfig = config ?: it.appConfig,
-                    error = if (config == null) "Không thể tải cấu hình cập nhật. Vui lòng thử lại." else null,
+                    error = if (config == null) localizer.get(R.string.admin_config_load_failed) else null,
                 )
             }
         }
@@ -251,7 +254,7 @@ class AdminUsersViewModel(
                     it.copy(
                         isActionLoading = false,
                         appConfig = updated,
-                        actionMessage = "Đã lưu cấu hình cập nhật thành công.",
+                        actionMessage = localizer.get(R.string.admin_config_saved),
                         configSaveSignal = it.configSaveSignal + 1,
                     )
                 }
@@ -259,7 +262,7 @@ class AdminUsersViewModel(
                 _uiState.update {
                     it.copy(
                         isActionLoading = false,
-                        error = "Lưu cấu hình thất bại: ${friendlyError(e)}",
+                        error = localizer.get(R.string.admin_config_save_failed_format, friendlyError(e, localizer)),
                     )
                 }
             }

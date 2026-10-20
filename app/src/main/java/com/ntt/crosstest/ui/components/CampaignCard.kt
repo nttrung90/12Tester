@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
 
@@ -105,9 +107,21 @@ fun CampaignCard(
                         modifier = Modifier.weight(1f, fill = false),
                     )
                     val badge = when {
-                        campaign.isProduction -> Triple("Lên production", Color(0xFFE8F5E9), Color(0xFF2E7D32))
-                        campaign.isCompleted -> Triple("Hoàn thành KT", Color(0xFFE3F2FD), Color(0xFF1565C0))
-                        campaign.isPaused -> Triple("Tạm dừng", Color(0xFFFFF8E1), Color(0xFFB26A00))
+                        campaign.isProduction -> Triple(
+                            stringResource(R.string.campaign_badge_production),
+                            Color(0xFFE8F5E9),
+                            Color(0xFF2E7D32),
+                        )
+                        campaign.isCompleted -> Triple(
+                            stringResource(R.string.campaign_badge_completed),
+                            Color(0xFFE3F2FD),
+                            Color(0xFF1565C0),
+                        )
+                        campaign.isPaused -> Triple(
+                            stringResource(R.string.campaign_badge_paused),
+                            Color(0xFFFFF8E1),
+                            Color(0xFFB26A00),
+                        )
                         else -> null
                     }
                     if (badge != null) {
@@ -118,7 +132,7 @@ fun CampaignCard(
 
                 // Owner Name
                 Text(
-                    text = ownerName.ifBlank { "Chủ app" },
+                    text = ownerName.ifBlank { stringResource(R.string.campaign_owner_fallback) },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -134,9 +148,17 @@ fun CampaignCard(
                 ) {
                     if (isInstalledLocally != null) {
                         if (isInstalledLocally) {
-                            StatusBadge(label = "Đã cài", background = Color(0xFFE8F5E9), foreground = Color(0xFF2E7D32))
+                            StatusBadge(
+                                label = stringResource(R.string.campaign_badge_installed),
+                                background = Color(0xFFE8F5E9),
+                                foreground = Color(0xFF2E7D32),
+                            )
                         } else {
-                            StatusBadge(label = "Chưa cài", background = Color(0xFFFFF8E1), foreground = Color(0xFFB26A00))
+                            StatusBadge(
+                                label = stringResource(R.string.campaign_badge_not_installed),
+                                background = Color(0xFFFFF8E1),
+                                foreground = Color(0xFFB26A00),
+                            )
                         }
                     }
 
@@ -148,7 +170,7 @@ fun CampaignCard(
                             tint = Color(0xFF2E7D32),
                         )
                         Text(
-                            text = "Đã test hôm nay",
+                            text = stringResource(R.string.campaign_tested_today),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.SemiBold,
@@ -161,7 +183,7 @@ fun CampaignCard(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = "Chưa test hôm nay",
+                            text = stringResource(R.string.campaign_not_tested_today),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -184,9 +206,18 @@ fun CampaignCard(
                     )
                     Text(
                         text = buildString {
-                            append("$todayTestedCount/$dailyTarget hôm nay · $installedCount người đã cài")
+                            append(
+                                stringResource(
+                                    R.string.campaign_stats_line_format,
+                                    todayTestedCount,
+                                    dailyTarget,
+                                    installedCount,
+                                )
+                            )
                             if (campaign.isOpen) {
-                                campaign.testingDaysRemaining?.let { append(" · Còn $it ngày") }
+                                campaign.testingDaysRemaining?.let {
+                                    append(stringResource(R.string.campaign_days_left_suffix, it))
+                                }
                             }
                         },
                         style = MaterialTheme.typography.labelSmall,
@@ -194,7 +225,7 @@ fun CampaignCard(
                     )
                     if (isTargetReached) {
                         Text(
-                            text = "· Đủ chỉ tiêu",
+                            text = stringResource(R.string.campaign_target_reached),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.Bold,

@@ -53,11 +53,10 @@ class AuthRepository(private val supabase: SupabaseClient) {
             provider = Google
         }
         val uid = currentUserId()
-        if (uid != null && checkAccountLocked(uid)) {
+        if (uid != null && ensureProfileRow(uid, displayName, avatarUrl)?.isLocked == true) {
             signOutQuietly()
             throw IllegalStateException("ACCOUNT_LOCKED")
         }
-        upsertProfile(displayName, avatarUrl)
     }
 
     /**
@@ -69,11 +68,10 @@ class AuthRepository(private val supabase: SupabaseClient) {
             this.password = password
         }
         val uid = currentUserId()
-        if (uid != null && checkAccountLocked(uid)) {
+        if (uid != null && ensureProfileRow(uid, null, null)?.isLocked == true) {
             signOutQuietly()
             throw IllegalStateException("ACCOUNT_LOCKED")
         }
-        upsertProfile(null, null)
     }
 
     /**
@@ -114,6 +112,40 @@ class AuthRepository(private val supabase: SupabaseClient) {
         supabase.auth.resetPasswordForEmail(email)
     }
 
+    /**
+     * Một vòng đọc profile duy nhất: kiểm tra khoá + chỉ ghi khi profile thiếu
+     * hoặc tên/avatar đổi (bỏ hẳn ghi vô điều kiện mỗi lần đăng nhập).
+     * Trả về profile hiện có (kể cả khi đang bị khoá) hoặc null nếu chưa đọc được.
+     */
+    private suspend fun ensureProfileRow(userId: String, displayName: String?, avatarUrl: String?): Profile? {
+        val existing = try {
+            supabase.from("profiles").select {
+                filter { eq("id", userId) }
+                limit(1)
+            }.decodeList<Profile>().firstOrNull()
+        } catch (_: Exception) {
+            null
+        }
+        if (existing?.isLocked == true) return existing
+
+        val user = supabase.auth.currentUserOrNull()
+        val needsWrite = existing == null ||
+            (!displayName.isNullOrBlank() && displayName != existing.displayName) ||
+            (!avatarUrl.isNullOrBlank() && avatarUrl != existing.avatarUrl)
+        if (needsWrite) {
+            val profile = ProfileUpsert(
+                id = userId,
+                email = user?.email ?: existing?.email,
+                displayName = displayName?.takeIf { it.isNotBlank() }
+                    ?: existing?.displayName
+                    ?: user?.email?.substringBefore("@"),
+                avatarUrl = avatarUrl?.takeIf { it.isNotBlank() } ?: existing?.avatarUrl,
+            )
+            supabase.from("profiles").upsert(profile)
+        }
+        return existing
+    }
+
     suspend fun upsertProfile(displayName: String?, avatarUrl: String?) {
         val user = supabase.auth.currentUserOrNull() ?: return
         val name = displayName?.takeIf { it.isNotBlank() }
@@ -128,7 +160,21 @@ class AuthRepository(private val supabase: SupabaseClient) {
     }
 
     suspend fun signOut() {
-        supabase.auth.signOut()
+        try {
+            supabase.auth.signOut()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Supabase chỉ tự xoá session cục bộ khi gặp RestException; khi mất mạng
+            // (IOException) nó ném lỗi mà vẫn giữ session trên máy → lần mở sau tự
+            // đăng nhập lại. Chủ động xoá để đăng xuất luôn dứt khoát.
+            try {
+                supabase.auth.clearSession()
+            } catch (_: Exception) {
+                // Local session có thể đã bị xoá; bỏ qua để không che lỗi gốc.
+            }
+            throw e
+        }
     }
 
     /**

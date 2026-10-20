@@ -33,17 +33,21 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -75,26 +79,45 @@ import com.ntt.crosstest.data.SlotInfo
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
+import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.SettingsRepository
-import com.ntt.crosstest.ui.components.CampaignCard
 import com.ntt.crosstest.ui.viewmodels.ProfileViewModel
+import com.ntt.crosstest.util.PlayStoreUpdateChecker
+import com.ntt.crosstest.util.PlayUpdateResult
+import com.ntt.crosstest.util.formatIsoUtcToLocal
+import kotlinx.coroutines.async
 
+private data class UpdatePrompt(
+    val config: AppConfig,
+    val latestVersionCode: Int,
+    val latestVersionName: String?,
+)
+
+private data class UpdateCheckResultUi(
+    val storeUrl: String?,
+    val isFailure: Boolean,
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    onCampaignClick: (String) -> Unit,
-    onOwnerAppClick: (String) -> Unit = onCampaignClick,
+    isActive: Boolean = false,
     onAdminPanelClick: () -> Unit = {},
+    onAdminReportsClick: () -> Unit = {},
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -103,44 +126,107 @@ fun ProfileScreen(
     val viewModel: ProfileViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                ProfileViewModel(app.authRepository, app.campaignRepository, app)
+                ProfileViewModel(app.authRepository, app.campaignRepository, app, Localizer(app))
             }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Quay lại app hoặc mở lại tab Hồ sơ: đồng bộ nền để số dư/slot/danh sách không bị cũ.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh(forceRefresh = false)
+        onPauseOrDispose { }
+    }
+    LaunchedEffect(isActive) {
+        if (isActive) viewModel.refresh(forceRefresh = false)
+    }
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     var showCreditHistoryDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
     var showChangePasswordDialog by rememberSaveable { mutableStateOf(false) }
+    var showContactDialog by rememberSaveable { mutableStateOf(false) }
     var showSlotsDialog by rememberSaveable { mutableStateOf(false) }
     var slotToUnlock by remember { mutableStateOf<SlotInfo?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
     var isCheckingUpdate by remember { mutableStateOf(false) }
-    var availableUpdateConfig by remember { mutableStateOf<AppConfig?>(null) }
+    var updatePrompt by remember { mutableStateOf<UpdatePrompt?>(null) }
+    var updateCheckResult by remember { mutableStateOf<UpdateCheckResultUi?>(null) }
     var forceUpdateConfig by remember { mutableStateOf<AppConfig?>(null) }
 
     val handleCheckUpdate: () -> Unit = {
         if (!isCheckingUpdate) {
             coroutineScope.launch {
                 isCheckingUpdate = true
-                val config = try {
-                    app.appConfigRepository.getAppConfig(forceRefresh = true)
-                } catch (_: Exception) {
-                    null
-                }
-                isCheckingUpdate = false
-                if (config == null) {
-                    Toast.makeText(context, context.getString(R.string.update_check_failed), Toast.LENGTH_SHORT).show()
-                } else {
-                    when (config.checkUpdateStatus(BuildConfig.VERSION_CODE)) {
-                        UpdateStatus.NO_UPDATE ->
-                            Toast.makeText(context, context.getString(R.string.update_already_latest, BuildConfig.VERSION_NAME), Toast.LENGTH_SHORT).show()
-                        UpdateStatus.OPTIONAL_UPDATE ->
-                            availableUpdateConfig = config
-                        UpdateStatus.FORCE_UPDATE ->
-                            forceUpdateConfig = config
+                updatePrompt = null
+                updateCheckResult = null
+                try {
+                    val configDeferred = async {
+                        try {
+                            app.appConfigRepository.getAppConfig(forceRefresh = true)
+                        } catch (_: Exception) {
+                            null
+                        }
                     }
+                    val playStoreDeferred = async {
+                        PlayStoreUpdateChecker.checkForUpdate(context)
+                    }
+                    val config = configDeferred.await()
+                    val playResult = playStoreDeferred.await()
+                    val configStatus = config?.checkUpdateStatus(BuildConfig.VERSION_CODE)
+
+                    if (configStatus == UpdateStatus.FORCE_UPDATE) {
+                        forceUpdateConfig = config
+                        return@launch
+                    }
+
+                    val playVersionCode = (playResult as? PlayUpdateResult.Available)
+                        ?.versionCode
+                        ?.takeIf { it > BuildConfig.VERSION_CODE }
+
+                    when {
+                        playVersionCode != null -> {
+                            val promptCode = maxOf(
+                                playVersionCode,
+                                config?.latestVersionCode ?: 0,
+                            )
+                            val configNameMatches = config
+                                ?.takeIf { it.latestVersionCode == promptCode }
+                                ?.latestVersionName
+                            updatePrompt = UpdatePrompt(
+                                config = config ?: AppConfig(),
+                                latestVersionCode = promptCode,
+                                latestVersionName = configNameMatches,
+                            )
+                        }
+                        configStatus == UpdateStatus.OPTIONAL_UPDATE -> {
+                            updatePrompt = UpdatePrompt(
+                                config = config,
+                                latestVersionCode = config.latestVersionCode,
+                                latestVersionName = config.latestVersionName,
+                            )
+                        }
+                        config != null && configStatus == UpdateStatus.NO_UPDATE -> {
+                            updateCheckResult = UpdateCheckResultUi(
+                                storeUrl = config.storeUrl,
+                                isFailure = false,
+                            )
+                        }
+                        playResult != PlayUpdateResult.Unknown -> {
+                            updateCheckResult = UpdateCheckResultUi(
+                                storeUrl = config?.storeUrl,
+                                isFailure = false,
+                            )
+                        }
+                        else -> {
+                            updateCheckResult = UpdateCheckResultUi(
+                                storeUrl = config?.storeUrl,
+                                isFailure = true,
+                            )
+                        }
+                    }
+                } finally {
+                    isCheckingUpdate = false
                 }
             }
         }
@@ -155,6 +241,14 @@ fun ProfileScreen(
             android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
             viewModel.clearChangePasswordSuccess()
             showChangePasswordDialog = false
+        }
+    }
+
+    LaunchedEffect(uiState.reportSuccessMsg) {
+        uiState.reportSuccessMsg?.let { msg ->
+            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+            viewModel.clearReportSuccess()
+            showContactDialog = false
         }
     }
 
@@ -218,14 +312,14 @@ fun ProfileScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Thời hạn sử dụng:", style = MaterialTheme.typography.bodySmall)
-                                Text("16 ngày", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.slot_duration_label), style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.slot_duration_value), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Chi phí:", style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.slot_cost_label), style = MaterialTheme.typography.bodySmall)
                                 Text(
                                     "$cost Credit",
                                     fontWeight = FontWeight.Bold,
@@ -237,7 +331,7 @@ fun ProfileScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("Số dư hiện tại:", style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.slot_current_balance_label), style = MaterialTheme.typography.bodySmall)
                                 Text("$userCredits Credit", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                         }
@@ -303,7 +397,8 @@ fun ProfileScreen(
     if (showCreditHistoryDialog) {
         CreditHistoryDialog(
             logs = uiState.creditLogs,
-            currentBalance = uiState.profile?.credits ?: 100,
+            currentBalance = uiState.profile?.credits,
+            showLoadError = uiState.creditLogs.isEmpty() && uiState.error != null,
             onDismiss = { showCreditHistoryDialog = false }
         )
     }
@@ -320,12 +415,41 @@ fun ProfileScreen(
         )
     }
 
-    availableUpdateConfig?.let { config ->
+    if (showContactDialog) {
+        ContactAdminDialog(
+            isLoading = uiState.isSendingReport,
+            errorText = uiState.error,
+            onSend = { category, message ->
+                viewModel.submitContactReport(category, message) { showContactDialog = false }
+            },
+            onDismiss = {
+                showContactDialog = false
+                viewModel.clearError()
+            }
+        )
+    }
+
+    updatePrompt?.let { prompt ->
         OptionalUpdateDialog(
-            config = config,
+            config = prompt.config,
             currentVersionName = BuildConfig.VERSION_NAME,
             currentVersionCode = BuildConfig.VERSION_CODE,
-            onDismiss = { availableUpdateConfig = null },
+            latestVersionCode = prompt.latestVersionCode,
+            latestVersionName = prompt.latestVersionName,
+            onDismiss = { updatePrompt = null },
+        )
+    }
+
+    updateCheckResult?.let { result ->
+        UpdateCheckResultDialog(
+            isFailure = result.isFailure,
+            currentVersionName = BuildConfig.VERSION_NAME,
+            currentVersionCode = BuildConfig.VERSION_CODE,
+            onOpenStore = {
+                openStore(context, result.storeUrl)
+                updateCheckResult = null
+            },
+            onDismiss = { updateCheckResult = null },
         )
     }
 
@@ -455,30 +579,96 @@ fun ProfileScreen(
         return
     }
 
-    LazyColumn(
+    PullToRefreshBox(
+        isRefreshing = uiState.isBackgroundSyncing,
+        onRefresh = { viewModel.refresh(forceRefresh = true) },
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            ProfileHeader(
-                displayName = uiState.profile?.displayName,
-                email = uiState.profile?.email ?: uiState.email,
-                credits = uiState.profile?.credits ?: 100,
-                missedStreak = uiState.profile?.missedStreak ?: 0,
-                isAdmin = uiState.profile?.isAdmin == true,
-                onCreditClick = { showCreditHistoryDialog = true },
-            )
-        }
-        if (uiState.profile?.isAdmin == true) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             item {
+                if (uiState.profile == null) {
+                    ProfileLoadErrorCard(
+                        message = uiState.error,
+                        onRetry = { viewModel.refresh(forceRefresh = true) },
+                    )
+                } else {
+                    ProfileHeader(
+                        displayName = uiState.profile?.displayName,
+                        email = uiState.profile?.email ?: uiState.email,
+                        avatarUrl = uiState.profile?.avatarUrl,
+                        credits = uiState.profile?.credits,
+                        missedStreak = uiState.profile?.missedStreak ?: 0,
+                        isAdmin = uiState.profile?.isAdmin == true,
+                        onCreditClick = { showCreditHistoryDialog = true },
+                    )
+                }
+            }
+            if (uiState.profile?.isAdmin == true) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .clickable { onAdminPanelClick() },
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        ),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AdminPanelSettings,
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(R.string.admin_panel_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("👑", fontSize = 16.sp)
+                                }
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = stringResource(R.string.admin_panel_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                val unlockedCount = uiState.slots.count { it.isPermanent || (it.isUnlocked && !it.isExpired) }.coerceAtLeast(1)
+                val inUseCount = uiState.slots.count { it.isOccupied }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .clickable { onAdminPanelClick() },
+                        .clickable { showSlotsDialog = true },
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
                     ),
                     shape = RoundedCornerShape(14.dp),
                 ) {
@@ -489,25 +679,25 @@ fun ProfileScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.AdminPanelSettings,
+                            imageVector = Icons.Filled.Apps,
                             contentDescription = null,
-                            modifier = Modifier.size(30.dp),
+                            modifier = Modifier.size(28.dp),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.admin_panel_title),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text("👑", fontSize = 16.sp)
-                            }
+                            Text(
+                                text = stringResource(R.string.slot_manage_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                            )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = stringResource(R.string.admin_panel_desc),
+                                text = stringResource(
+                                    R.string.slot_open_summary_format,
+                                    unlockedCount,
+                                    inUseCount,
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -521,117 +711,50 @@ fun ProfileScreen(
                     }
                 }
             }
-        }
-        item {
-            val unlockedCount = uiState.slots.count { it.isPermanent || (it.isUnlocked && !it.isExpired) }.coerceAtLeast(1)
-            val inUseCount = uiState.slots.count { it.isOccupied }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .clickable { showSlotsDialog = true },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
-                ),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            item {
+                SettingsSection(
+                    currentLanguage = uiState.appLanguage,
+                    onLanguageClick = { showLanguageDialog = true },
+                    reminderEnabled = uiState.reminderEnabled,
+                    onReminderChange = viewModel::setReminderEnabled,
+                    onChangePasswordClick = { showChangePasswordDialog = true },
+                    onContactClick = {
+                        if (uiState.profile?.isAdmin == true) {
+                            onAdminReportsClick()
+                        } else {
+                            viewModel.clearError()
+                            showContactDialog = true
+                        }
+                    },
+                    isCheckingUpdate = isCheckingUpdate,
+                    onCheckUpdateClick = handleCheckUpdate,
+                )
+            }
+            item { HorizontalDivider() }
+            item {
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Apps,
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.slot_manage_title),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = "Đang mở: $unlockedCount/6 slot ($inUseCount slot đang có app)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.logout))
                 }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.app_version_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(72.dp))
             }
-        }
-        item {
-            SettingsSection(
-                currentLanguage = uiState.appLanguage,
-                onLanguageClick = { showLanguageDialog = true },
-                reminderEnabled = uiState.reminderEnabled,
-                onReminderChange = viewModel::setReminderEnabled,
-                onChangePasswordClick = { showChangePasswordDialog = true },
-                isCheckingUpdate = isCheckingUpdate,
-                onCheckUpdateClick = handleCheckUpdate,
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            Text(
-                text = stringResource(R.string.created_by_me),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-        if (uiState.myCampaigns.isEmpty()) {
-            item { MutedText(stringResource(R.string.empty_list)) }
-        } else {
-            itemsIndexed(uiState.myCampaigns, key = { index, campaign -> "my_${campaign.id ?: campaign.packageName}_$index" }) { _, campaign ->
-                CampaignCard(campaign, onClick = { campaign.id?.let(onOwnerAppClick) })
-            }
-        }
-        item {
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.joined_by_me),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-        if (uiState.joinedCampaigns.isEmpty()) {
-            item { MutedText(stringResource(R.string.empty_list)) }
-        } else {
-            itemsIndexed(uiState.joinedCampaigns, key = { index, campaign -> "joined_${campaign.id ?: campaign.packageName}_$index" }) { _, campaign ->
-                CampaignCard(campaign, onClick = { campaign.id?.let(onCampaignClick) })
-            }
-        }
-        item {
-            Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = { showLogoutDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                ),
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.logout))
-            }
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.app_version_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(72.dp))
         }
     }
 }
@@ -640,28 +763,44 @@ fun ProfileScreen(
 private fun ProfileHeader(
     displayName: String?,
     email: String?,
-    credits: Int,
+    avatarUrl: String?,
+    credits: Int?,
     missedStreak: Int,
     isAdmin: Boolean = false,
     onCreditClick: () -> Unit,
 ) {
+    val resolvedName = displayName?.takeIf { it.isNotBlank() }
+        ?: email?.substringBefore("@")?.takeIf { it.isNotBlank() }
+        ?: stringResource(R.string.tab_profile)
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val initial = (displayName?.firstOrNull() ?: email?.firstOrNull() ?: '?').uppercaseChar()
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = initial.toString(),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+        if (!avatarUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
             )
+        } else {
+            val initial = (resolvedName.firstOrNull() ?: '?').uppercaseChar()
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = initial.toString(),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
         }
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -675,7 +814,7 @@ private fun ProfileHeader(
                     modifier = Modifier.weight(1f, fill = false),
                 ) {
                     Text(
-                        text = displayName ?: stringResource(R.string.tab_profile),
+                        text = resolvedName,
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -706,7 +845,8 @@ private fun ProfileHeader(
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Text(
-                        text = "🪙 ${stringResource(R.string.credit_badge_format, credits)}",
+                        text = credits?.let { "🪙 ${stringResource(R.string.credit_badge_format, it)}" }
+                            ?: stringResource(R.string.credit_unknown),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -734,10 +874,43 @@ private fun ProfileHeader(
 }
 
 @Composable
+private fun ProfileLoadErrorCard(
+    message: String?,
+    onRetry: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(14.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = message ?: stringResource(R.string.profile_load_failed),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = onRetry) {
+                Text(stringResource(R.string.campaign_submit_retry_btn))
+            }
+        }
+    }
+}
+
+@Composable
 internal fun CreditHistoryDialog(
     logs: List<com.ntt.crosstest.data.CreditLog>,
-    currentBalance: Int,
+    currentBalance: Int?,
     onDismiss: () -> Unit,
+    showLoadError: Boolean = false,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -749,7 +922,7 @@ internal fun CreditHistoryDialog(
             ) {
                 Text(stringResource(R.string.credit_history_title))
                 Text(
-                    text = "🪙 $currentBalance",
+                    text = currentBalance?.let { "🪙 $it" } ?: stringResource(R.string.credit_unknown),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -759,7 +932,10 @@ internal fun CreditHistoryDialog(
         text = {
             if (logs.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.credit_history_empty),
+                    text = stringResource(
+                        if (showLoadError) R.string.credit_history_load_failed
+                        else R.string.credit_history_empty
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -793,7 +969,7 @@ internal fun CreditHistoryDialog(
                                     )
                                     log.createdAt?.let { dateStr ->
                                         Text(
-                                            text = dateStr.take(16).replace("T", " "),
+                                            text = formatIsoUtcToLocal(dateStr),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -820,17 +996,13 @@ internal fun CreditHistoryDialog(
 }
 
 @Composable
-private fun MutedText(text: String) {
-    Text(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
-
-@Composable
 private fun SettingsSection(
     currentLanguage: String,
     onLanguageClick: () -> Unit,
     reminderEnabled: Boolean,
     onReminderChange: (Boolean) -> Unit,
     onChangePasswordClick: (() -> Unit)? = null,
+    onContactClick: (() -> Unit)? = null,
     isCheckingUpdate: Boolean = false,
     onCheckUpdateClick: () -> Unit = {},
 ) {
@@ -934,6 +1106,45 @@ private fun SettingsSection(
                         )
                         Text(
                             text = stringResource(R.string.change_password_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Contact & Bug Report Row (if logged in)
+            if (onContactClick != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onContactClick() }
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.SupportAgent,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.contact_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                        )
+                        Text(
+                            text = stringResource(R.string.contact_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1106,6 +1317,88 @@ private fun ChangePasswordDialog(
 }
 
 @Composable
+private fun ContactAdminDialog(
+    isLoading: Boolean,
+    errorText: String?,
+    onSend: (category: String, message: String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var selectedCategory by rememberSaveable { mutableStateOf("bug") }
+    var message by rememberSaveable { mutableStateOf("") }
+
+    val categories = listOf(
+        "bug" to stringResource(R.string.contact_category_bug),
+        "feedback" to stringResource(R.string.contact_category_feedback),
+        "other" to stringResource(R.string.contact_category_other),
+    )
+
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text(stringResource(R.string.contact_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = stringResource(R.string.contact_dialog_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    categories.forEach { (key, label) ->
+                        FilterChip(
+                            selected = selectedCategory == key,
+                            onClick = { selectedCategory = key },
+                            label = { Text(label, fontSize = 12.sp) },
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = message,
+                    onValueChange = { if (it.length <= 1000) message = it },
+                    label = { Text(stringResource(R.string.contact_message_hint)) },
+                    minLines = 3,
+                    maxLines = 6,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (errorText != null) {
+                    Text(
+                        text = errorText,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSend(selectedCategory, message) },
+                enabled = !isLoading && message.isNotBlank(),
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(R.string.contact_send))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
 private fun LanguageSelectionDialog(
     currentLanguage: String,
     onLanguageSelected: (String) -> Unit,
@@ -1120,12 +1413,12 @@ private fun LanguageSelectionDialog(
         Triple(
             SettingsRepository.LANGUAGE_VI,
             stringResource(R.string.language_vietnamese),
-            "Tiếng Việt",
+            stringResource(R.string.language_vietnamese),
         ),
         Triple(
             SettingsRepository.LANGUAGE_EN,
             stringResource(R.string.language_english),
-            "English",
+            stringResource(R.string.language_english),
         ),
     )
 
@@ -1268,7 +1561,7 @@ private fun SlotsManagementDialog(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = "Slot ${slot.slotNumber}",
+                                            text = stringResource(R.string.slot_number_title, slot.slotNumber),
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.bodyMedium,
                                         )
@@ -1276,7 +1569,7 @@ private fun SlotsManagementDialog(
                                         when {
                                             slot.isPermanent -> {
                                                 Text(
-                                                    text = "Mặc định",
+                                                    text = stringResource(R.string.slot_default_short),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = Color(0xFF2E7D32),
                                                     fontWeight = FontWeight.SemiBold,
@@ -1284,15 +1577,37 @@ private fun SlotsManagementDialog(
                                             }
                                             slot.isUnlocked && !slot.isExpired -> {
                                                 Text(
-                                                    text = "Còn ${slot.remainingDays} ngày",
+                                                    text = stringResource(R.string.slot_active_days, slot.remainingDays),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = Color(0xFF2E7D32),
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             }
+                                            slot.isExpired -> {
+                                                Text(
+                                                    text = stringResource(R.string.slot_expired_badge),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = Color(0xFFC62828),
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = stringResource(R.string.credit_badge_format, slot.cost),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                            }
                                             else -> {
                                                 Text(
-                                                    text = "${slot.cost} Credit",
+                                                    text = stringResource(R.string.slot_locked_badge),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                )
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = stringResource(R.string.credit_badge_format, slot.cost),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     fontWeight = FontWeight.Bold,
@@ -1305,7 +1620,7 @@ private fun SlotsManagementDialog(
 
                                     if (slot.currentCampaign != null) {
                                         Text(
-                                            text = "Đang chạy: ${slot.currentCampaign.appName}",
+                                            text = stringResource(R.string.slot_running_format, slot.currentCampaign.appName),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
@@ -1313,13 +1628,19 @@ private fun SlotsManagementDialog(
                                         )
                                     } else if (slot.isAvailable) {
                                         Text(
-                                            text = "Trống (Sẵn sàng đăng app)",
+                                            text = stringResource(R.string.slot_available_desc),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = Color(0xFF2E7D32),
                                         )
+                                    } else if (slot.isExpired) {
+                                        Text(
+                                            text = stringResource(R.string.slot_expired_desc, slot.cost),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFFC62828),
+                                        )
                                     } else {
                                         Text(
-                                            text = "Chưa mở (hiệu lực 16 ngày)",
+                                            text = stringResource(R.string.slot_locked_desc),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -1334,7 +1655,11 @@ private fun SlotsManagementDialog(
                                         modifier = Modifier.height(34.dp),
                                     ) {
                                         Text(
-                                            text = if (slot.isUnlocked && !slot.isExpired) "Gia hạn" else "Mở khóa",
+                                            text = if (slot.isUnlocked && !slot.isExpired) {
+                                                stringResource(R.string.slot_renew_short)
+                                            } else {
+                                                stringResource(R.string.slot_unlock_short)
+                                            },
                                             style = MaterialTheme.typography.labelSmall,
                                         )
                                     }
@@ -1346,7 +1671,7 @@ private fun SlotsManagementDialog(
                                         modifier = Modifier.height(34.dp),
                                     ) {
                                         Text(
-                                            text = "+16 ngày",
+                                            text = stringResource(R.string.slot_renew_plus_days),
                                             style = MaterialTheme.typography.labelSmall,
                                         )
                                     }

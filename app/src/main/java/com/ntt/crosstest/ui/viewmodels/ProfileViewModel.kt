@@ -4,16 +4,18 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.BuildConfig
+import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AuthRepository
-import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.CreditLog
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.ui.screens.GoogleSignInOutcome
 import com.ntt.crosstest.ui.screens.requestGoogleSignIn
+import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,10 +30,10 @@ data class ProfileUiState(
     val isActionLoading: Boolean = false,
     val isChangingPassword: Boolean = false,
     val changePasswordSuccessMsg: String? = null,
+    val isSendingReport: Boolean = false,
+    val reportSuccessMsg: String? = null,
     val profile: Profile? = null,
     val email: String? = null,
-    val myCampaigns: List<Campaign> = emptyList(),
-    val joinedCampaigns: List<Campaign> = emptyList(),
     val reminderEnabled: Boolean = true,
     val appLanguage: String = com.ntt.crosstest.data.SettingsRepository.LANGUAGE_SYSTEM,
     val signedOut: Boolean = false,
@@ -46,6 +48,7 @@ class ProfileViewModel(
     private val authRepository: AuthRepository,
     private val campaignRepository: CampaignRepository,
     private val app: TestCheoApp,
+    private val localizer: Localizer,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -53,15 +56,18 @@ class ProfileViewModel(
             val cached = SessionCacheManager.loadSync(app)
             // Only hydrate from disk when the snapshot belongs to the user who
             // actually holds the current session (prevents cross-account leaks).
-            if (cached != null && cached.userProfile != null && cached.userId == authRepository.currentUserId()) {
+            // While the session is still loading (currentUserId == null) the cache
+            // is kept to preserve the offline-first instant paint.
+            val currentUid = authRepository.currentUserId()
+            val cacheMatchesSession = cached != null && cached.userProfile != null &&
+                (cached.userId == null || currentUid == null || cached.userId == currentUid)
+            if (cached != null && cacheMatchesSession) {
                 ProfileUiState(
                     isLoading = false,
                     isBackgroundSyncing = true,
                     isAuthenticated = true,
                     profile = cached.userProfile,
                     email = cached.userProfile.email,
-                    myCampaigns = cached.myCampaigns,
-                    joinedCampaigns = cached.joinedCampaigns,
                 )
             } else {
                 ProfileUiState()
@@ -70,8 +76,18 @@ class ProfileViewModel(
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    /** uid đã đồng bộ xong — tránh refresh lặp mỗi lần token làm mới. */
+    private var lastSyncedUid: String? = null
+
+    /**
+     * refresh() đã bỏ dở vì phiên còn đang khôi phục. Khi phiên sẵn sàng trở lại
+     * (kể cả cùng uid — ẩn app rồi mở lại) sẽ refresh đúng một lần.
+     */
+    private var refreshWhenSessionReady = false
+
     init {
         refresh(forceRefresh = false)
+        observeSession()
         viewModelScope.launch {
             app.settingsRepository.reminderEnabled.collect { enabled ->
                 _uiState.update { it.copy(reminderEnabled = enabled) }
@@ -80,6 +96,38 @@ class ProfileViewModel(
         viewModelScope.launch {
             app.settingsRepository.appLanguage.collect { lang ->
                 _uiState.update { it.copy(appLanguage = lang) }
+            }
+        }
+    }
+
+    /** Session khôi phục bất đồng bộ: refresh một lần khi phiên sẵn sàng. */
+    private fun observeSession() {
+        viewModelScope.launch {
+            authRepository.sessionStatus.collect { status ->
+                when (status) {
+                    is SessionStatus.Authenticated -> {
+                        val uid = authRepository.currentUserId()
+                        if (uid != null && uid != lastSyncedUid) {
+                            lastSyncedUid = uid
+                            refreshWhenSessionReady = false
+                            refresh(forceRefresh = false)
+                        } else if (uid != null && refreshWhenSessionReady) {
+                            // Phiên khôi phục xong (ẩn app rồi mở lại, mạng có lại):
+                            // refresh đúng một lần dù uid không đổi.
+                            refreshWhenSessionReady = false
+                            refresh(forceRefresh = false)
+                        }
+                    }
+                    is SessionStatus.NotAuthenticated -> {
+                        refreshWhenSessionReady = false
+                        if (lastSyncedUid != null) {
+                            lastSyncedUid = null
+                            SessionCacheManager.clear(app)
+                            refresh(forceRefresh = false)
+                        }
+                    }
+                    else -> {}
+                }
             }
         }
     }
@@ -97,6 +145,13 @@ class ProfileViewModel(
             }
             try {
                 val isAuthed = authRepository.currentUserId() != null
+                if (!isAuthed && SessionCacheManager.hasCachedSession(app)) {
+                    // Phiên đang được khôi phục từ đĩa — giữ nguyên dữ liệu đang hiển thị
+                    // thay vì xoá sạch (tránh màn hình trắng ở cold start).
+                    refreshWhenSessionReady = true
+                    _uiState.update { it.copy(isLoading = false, isBackgroundSyncing = false) }
+                    return@launch
+                }
                 if (!isAuthed) {
                     _uiState.update {
                         it.copy(
@@ -105,15 +160,17 @@ class ProfileViewModel(
                             isAuthenticated = false,
                             profile = null,
                             email = null,
-                            myCampaigns = emptyList(),
-                            joinedCampaigns = emptyList(),
                             creditLogs = emptyList(),
+                            slots = emptyList(),
                             error = null,
                         )
                     }
                     return@launch
                 }
-                val profile = campaignRepository.getMyProfile(forceRefresh = forceRefresh)
+                lastSyncedUid = authRepository.currentUserId()
+                // Fast path: 1 RPC gộp (get_my_dashboard) phủ profile + logs + slots.
+                val dashboard = campaignRepository.getMyDashboard(forceRefresh = forceRefresh)
+                val profile = dashboard?.profile ?: campaignRepository.getMyProfile(forceRefresh = forceRefresh)
                 if (profile?.isLocked == true) {
                     _uiState.update {
                         it.copy(
@@ -121,15 +178,14 @@ class ProfileViewModel(
                             isBackgroundSyncing = false,
                             isAuthenticated = true,
                             profile = profile,
-                            error = "Tài khoản của bạn đang bị tạm khóa."
+                            error = localizer.get(R.string.profile_account_locked)
                         )
                     }
                     return@launch
                 }
-                val mine = campaignRepository.myCampaigns(forceRefresh = forceRefresh)
-                val joined = campaignRepository.myJoinedCampaigns(forceRefresh = forceRefresh)
-                val logs = campaignRepository.getMyCreditLogs()
+                val logs = dashboard?.creditLogs ?: campaignRepository.getMyCreditLogs()
                 val slots = campaignRepository.getMySlotsInfo(forceRefresh = forceRefresh)
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -137,8 +193,6 @@ class ProfileViewModel(
                         isAuthenticated = true,
                         profile = profile,
                         email = authRepository.currentUserEmail(),
-                        myCampaigns = mine,
-                        joinedCampaigns = joined,
                         creditLogs = logs,
                         slots = slots,
                         error = null,
@@ -149,7 +203,7 @@ class ProfileViewModel(
                     it.copy(
                         isLoading = false,
                         isBackgroundSyncing = false,
-                        error = if (_uiState.value.profile == null) friendlyError(e) else null
+                        error = if (_uiState.value.profile == null) friendlyError(e, localizer) else null
                     )
                 }
             }
@@ -162,7 +216,7 @@ class ProfileViewModel(
         val credits = _uiState.value.profile?.credits ?: 0
         if (credits < slotCost) {
             _uiState.update {
-                it.copy(error = "Bạn cần $slotCost Credit để mở khóa/gia hạn Slot $slotNumber (hiện có $credits Credit).")
+                it.copy(error = localizer.get(R.string.profile_slot_cost_format, slotCost, slotNumber, credits))
             }
             return
         }
@@ -173,15 +227,15 @@ class ProfileViewModel(
                 campaignRepository.unlockOrRenewSlot(slotNumber)
                 _uiState.update {
                     it.copy(
-                        unlockSuccessMsg = "Thao tác Slot $slotNumber thành công (+16 ngày)!",
+                        unlockSuccessMsg = localizer.get(R.string.profile_slot_success_format, slotNumber),
                     )
                 }
                 refresh()
             } catch (e: Exception) {
                 val msg = when {
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> "Bạn không đủ Credit."
-                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> "Bạn cần mở khóa hoặc gia hạn Slot ${slotNumber - 1} trước."
-                    else -> friendlyError(e)
+                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.profile_insufficient_credits)
+                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
+                    else -> friendlyError(e, localizer)
                 }
                 _uiState.update { it.copy(error = msg) }
             } finally {
@@ -218,7 +272,7 @@ class ProfileViewModel(
                         _uiState.update {
                             it.copy(
                                 isActionLoading = false,
-                                error = "Đăng nhập thất bại: ${friendlyError(e)}"
+                                error = localizer.get(R.string.auth_sign_in_failed_format, friendlyError(e, localizer))
                             )
                         }
                     }
@@ -242,11 +296,11 @@ class ProfileViewModel(
 
     fun changePassword(newPass: String, confirmPass: String, onSuccess: () -> Unit) {
         if (newPass.length < 6) {
-            _uiState.update { it.copy(error = "Mật khẩu phải chứa ít nhất 6 ký tự.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_password_min_length)) }
             return
         }
         if (newPass != confirmPass) {
-            _uiState.update { it.copy(error = "Mật khẩu xác nhận không khớp.") }
+            _uiState.update { it.copy(error = localizer.get(R.string.auth_password_mismatch)) }
             return
         }
 
@@ -257,7 +311,7 @@ class ProfileViewModel(
                 _uiState.update {
                     it.copy(
                         isChangingPassword = false,
-                        changePasswordSuccessMsg = "Đổi mật khẩu thành công!"
+                        changePasswordSuccessMsg = localizer.get(R.string.profile_password_changed)
                     )
                 }
                 onSuccess()
@@ -265,7 +319,7 @@ class ProfileViewModel(
                 _uiState.update {
                     it.copy(
                         isChangingPassword = false,
-                        error = "Đổi mật khẩu thất bại: ${friendlyError(e)}"
+                        error = localizer.get(R.string.profile_password_change_failed_format, friendlyError(e, localizer))
                     )
                 }
             }
@@ -274,6 +328,50 @@ class ProfileViewModel(
 
     fun clearChangePasswordSuccess() {
         _uiState.update { it.copy(changePasswordSuccessMsg = null) }
+    }
+
+    /**
+     * Gửi phản hồi liên hệ/báo lỗi cho Admin. Tự đính kèm phiên bản app và
+     * thông tin thiết bị để Admin dễ tái hiện lỗi.
+     */
+    fun submitContactReport(category: String, message: String, onSuccess: () -> Unit) {
+        val trimmed = message.trim()
+        if (trimmed.isEmpty()) {
+            _uiState.update { it.copy(error = localizer.get(R.string.contact_message_required)) }
+            return
+        }
+        if (_uiState.value.isSendingReport) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSendingReport = true, error = null) }
+            try {
+                campaignRepository.submitContactReport(
+                    category = category,
+                    message = trimmed,
+                    appVersion = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                    platform = "Android ${android.os.Build.VERSION.RELEASE}",
+                    deviceModel = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim(),
+                )
+                _uiState.update {
+                    it.copy(
+                        isSendingReport = false,
+                        reportSuccessMsg = localizer.get(R.string.contact_send_success),
+                    )
+                }
+                onSuccess()
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isSendingReport = false,
+                        error = localizer.get(R.string.contact_send_failed_format, friendlyError(e, localizer)),
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearReportSuccess() {
+        _uiState.update { it.copy(reportSuccessMsg = null) }
     }
 
     fun signOut() {
@@ -286,8 +384,6 @@ class ProfileViewModel(
                     isAuthenticated = false,
                     profile = null,
                     email = null,
-                    myCampaigns = emptyList(),
-                    joinedCampaigns = emptyList(),
                 )
             }
         }

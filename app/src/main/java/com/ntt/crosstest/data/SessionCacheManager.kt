@@ -24,7 +24,7 @@ data class CachedSessionData(
     val joinedCampaigns: List<Campaign> = emptyList(),
     val leaderboard: List<LeaderboardUser> = emptyList(),
     val ownerStatsMap: Map<String, CampaignOwnerStats> = emptyMap(),
-    val userCredits: Int = 100,
+    val userCredits: Int = 0,
     val todayCheckinCount: Int = 0,
     val missedStreak: Int = 0,
     val pendingReportsCount: Int = 0,

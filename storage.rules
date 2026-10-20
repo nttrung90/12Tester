@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Ảnh report/icon là public-read (app chưa dùng Firebase Auth), nhưng client
+// chỉ được CREATE object mới. Không cho update/delete để không thể xoá ảnh
+// đang được report tham chiếu.
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Path mới: reports/<campaignId>/<userId>/<clientSubmitId>.jpg
+    match /reports/{campaignId}/{userId}/{fileName} {
+      allow read: if true;
+      // Chỉ create. Client retry sẽ tái sử dụng URL của object đã upload
+      // (xem FirebaseStorageHelper), nên không cần quyền update.
+      allow create: if request.resource.size > 0
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/jpeg');
+      allow update, delete: if false;
+    }
+
+    // Path cũ: reports/<campaignId>/<userId>_<timestamp>.jpg
+    // Giữ create để app phiên bản trước vẫn nộp được trong giai đoạn chuyển tiếp.
+    match /reports/{campaignId}/{fileName} {
+      allow read: if true;
+      allow create: if request.resource.size > 0
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/jpeg');
+      allow update, delete: if false;
+    }
+
+    match /app_icons/{fileName} {
+      allow read: if true;
+      allow create: if request.resource.size > 0
+        && request.resource.size < 512 * 1024
+        && request.resource.contentType.matches('image/(webp|png|jpeg)');
+      allow update, delete: if false;
+    }
+  }
+}

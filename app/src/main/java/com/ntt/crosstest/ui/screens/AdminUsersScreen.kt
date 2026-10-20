@@ -80,6 +80,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AppConfig
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.ui.viewmodels.AdminFilter
 import com.ntt.crosstest.ui.viewmodels.AdminUsersViewModel
@@ -94,7 +95,7 @@ fun AdminUsersScreen(
     val viewModel: AdminUsersViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                AdminUsersViewModel(app.campaignRepository, app.authRepository, app.appConfigRepository)
+                AdminUsersViewModel(app.campaignRepository, app.authRepository, app.appConfigRepository, Localizer(app))
             }
         }
     )
@@ -206,7 +207,7 @@ fun AdminUsersScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = "Số dư hiện tại: 🪙 ${target.credits} Credit",
+                        text = stringResource(R.string.admin_current_balance_format, target.credits),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -345,7 +346,7 @@ fun AdminUsersScreen(
                     IconButton(onClick = { showBroadcastDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Campaign,
-                            contentDescription = "Gửi thông báo toàn hệ thống",
+                            contentDescription = stringResource(R.string.admin_send_broadcast_cd),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
@@ -500,7 +501,7 @@ private fun AdminUserCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = user.displayName ?: "Người dùng",
+                            text = user.displayName ?: stringResource(R.string.admin_user_fallback),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
@@ -582,7 +583,7 @@ private fun AdminUserCard(
 
                 user.createdAt?.take(10)?.let { date ->
                     Text(
-                        text = "Gia nhập: $date",
+                        text = stringResource(R.string.admin_joined_format, date),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -612,7 +613,7 @@ private fun AdminUserCard(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Campaign,
-                        contentDescription = "Gửi thông báo riêng",
+                        contentDescription = stringResource(R.string.admin_send_private_cd),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -656,10 +657,10 @@ private fun AdminSendNotificationDialog(
     var selectedType by rememberSaveable { mutableStateOf("admin") }
 
     val types = listOf(
-        "admin" to "Thông báo",
-        "system" to "Hệ thống",
-        "warning" to "Cảnh báo",
-        "credit" to "Tặng quà",
+        "admin" to stringResource(R.string.admin_type_notification),
+        "system" to stringResource(R.string.admin_type_system),
+        "warning" to stringResource(R.string.admin_type_warning),
+        "credit" to stringResource(R.string.admin_type_gift),
     )
 
     AlertDialog(
@@ -667,15 +668,15 @@ private fun AdminSendNotificationDialog(
         title = {
             Column {
                 Text(
-                    text = if (targetUser == null) "Gửi thông báo toàn hệ thống 📢"
-                    else "Gửi thông báo riêng ✉️",
+                    text = if (targetUser == null) stringResource(R.string.admin_broadcast_title)
+                    else stringResource(R.string.admin_private_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
                 if (targetUser != null) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Tới: ${targetUser.displayName ?: targetUser.email ?: targetUser.id}",
+                        text = stringResource(R.string.admin_notif_to_format, targetUser.displayName ?: targetUser.email ?: targetUser.id),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -703,7 +704,7 @@ private fun AdminSendNotificationDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Tiêu đề thông báo") },
+                    label = { Text(stringResource(R.string.admin_notif_title_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -711,7 +712,7 @@ private fun AdminSendNotificationDialog(
                 OutlinedTextField(
                     value = message,
                     onValueChange = { message = it },
-                    label = { Text("Nội dung thông báo") },
+                    label = { Text(stringResource(R.string.admin_notif_message_label)) },
                     minLines = 3,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth(),
@@ -738,7 +739,7 @@ private fun AdminSendNotificationDialog(
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                 }
-                Text("Gửi ngay")
+                Text(stringResource(R.string.admin_send_now))
             }
         },
         dismissButton = {

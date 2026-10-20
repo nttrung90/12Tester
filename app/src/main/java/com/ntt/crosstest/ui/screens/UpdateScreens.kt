@@ -245,6 +245,8 @@ fun OptionalUpdateDialog(
     config: AppConfig,
     currentVersionName: String,
     currentVersionCode: Int,
+    latestVersionCode: Int = config.latestVersionCode,
+    latestVersionName: String? = config.latestVersionName,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -268,11 +270,15 @@ fun OptionalUpdateDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = stringResource(
-                        R.string.update_new_version,
-                        config.latestVersionName,
-                        config.latestVersionCode
-                    ),
+                    text = if (!latestVersionName.isNullOrBlank()) {
+                        stringResource(
+                            R.string.update_new_version,
+                            latestVersionName,
+                            latestVersionCode
+                        )
+                    } else {
+                        stringResource(R.string.update_new_build, latestVersionCode)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -291,6 +297,11 @@ fun OptionalUpdateDialog(
                     text = config.message ?: stringResource(R.string.update_required_desc),
                     style = MaterialTheme.typography.bodySmall,
                 )
+                Text(
+                    text = stringResource(R.string.update_open_store_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         },
         confirmButton = {
@@ -300,12 +311,90 @@ fun OptionalUpdateDialog(
                     onDismiss()
                 }
             ) {
-                Text(stringResource(R.string.update_btn_now))
+                Text(stringResource(R.string.update_btn_open_store))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.update_btn_later))
+            }
+        }
+    )
+}
+
+/**
+ * Result of a manual "Check for updates" when no newer build is available or
+ * the remote check failed. Always offers a shortcut to Play Store.
+ */
+@Composable
+fun UpdateCheckResultDialog(
+    isFailure: Boolean,
+    currentVersionName: String,
+    currentVersionCode: Int,
+    onOpenStore: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.SystemUpdate,
+                contentDescription = null,
+                tint = if (isFailure) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp),
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(
+                    if (isFailure) R.string.update_check_failed_title else R.string.update_latest_title
+                ),
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = if (isFailure) {
+                        stringResource(R.string.update_check_failed)
+                    } else {
+                        stringResource(
+                            R.string.update_latest_desc,
+                            currentVersionName,
+                            currentVersionCode
+                        )
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (isFailure) {
+                    Text(
+                        text = stringResource(R.string.update_check_failed_store_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.update_open_store_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onOpenStore) {
+                Icon(
+                    imageVector = Icons.Filled.SystemUpdate,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.update_btn_open_store))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.update_btn_close))
             }
         }
     )

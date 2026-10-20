@@ -111,6 +111,7 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignOwnerStats
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.TesterItem
 import com.ntt.crosstest.data.TesterReport
 import com.ntt.crosstest.ui.viewmodels.OwnerAppDetailViewModel
@@ -120,6 +121,7 @@ import com.ntt.crosstest.ui.viewmodels.OwnerAppDetailViewModel
 fun OwnerAppDetailScreen(
     campaignId: String,
     onBack: () -> Unit,
+    openReports: Boolean = false,
     onAccountLocked: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: OwnerAppDetailViewModel = run {
@@ -131,6 +133,7 @@ fun OwnerAppDetailScreen(
                     OwnerAppDetailViewModel(
                         campaignId = campaignId,
                         repository = app.campaignRepository,
+                        localizer = Localizer(app),
                     )
                 }
             }
@@ -156,7 +159,7 @@ fun OwnerAppDetailScreen(
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showLinkDialog by rememberSaveable { mutableStateOf(false) }
     var showTestersDialog by rememberSaveable { mutableStateOf(false) }
-    var showReportsDialog by rememberSaveable { mutableStateOf(false) }
+    var showReportsDialog by rememberSaveable { mutableStateOf(openReports) }
     var showPauseConfirmDialog by rememberSaveable { mutableStateOf(false) }
     var showTipDialog by rememberSaveable { mutableStateOf(false) }
     var showProductionDialog by rememberSaveable { mutableStateOf(false) }
@@ -165,6 +168,11 @@ fun OwnerAppDetailScreen(
     var showRenewSlotDialog by rememberSaveable { mutableStateOf(false) }
 
     val campaign = uiState.campaign
+
+    // Mở dialog báo cáo: tải lại danh sách để không bị dữ liệu cũ (báo cáo đã duyệt/từ chối).
+    LaunchedEffect(showReportsDialog) {
+        if (showReportsDialog) viewModel.refresh(forceRefresh = true)
+    }
 
     if (uiState.warningMessage != null) {
         AlertDialog(
@@ -179,7 +187,7 @@ fun OwnerAppDetailScreen(
             },
             title = {
                 Text(
-                    text = "CẢNH BÁO DUYỆT BÁO CÁO ⚠️",
+                    text = stringResource(R.string.oad_warning_dialog_title),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFD32F2F),
                     textAlign = TextAlign.Center
@@ -202,7 +210,7 @@ fun OwnerAppDetailScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
                 ) {
-                    Text("Tôi đã hiểu")
+                    Text(stringResource(R.string.oad_understood))
                 }
             }
         )
@@ -213,7 +221,7 @@ fun OwnerAppDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = campaign?.appName ?: "Quản lý App",
+                        text = campaign?.appName ?: stringResource(R.string.oad_title_fallback),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
@@ -226,13 +234,13 @@ fun OwnerAppDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Chỉnh sửa")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.oad_edit_cd))
                     }
                     IconButton(onClick = { showLinkDialog = true }) {
-                        Icon(Icons.Filled.Link, contentDescription = "Liên kết")
+                        Icon(Icons.Filled.Link, contentDescription = stringResource(R.string.oad_link_cd))
                     }
                     IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Làm mới")
+                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.oad_refresh_cd))
                     }
                 }
             )
@@ -258,7 +266,7 @@ fun OwnerAppDetailScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = uiState.error ?: "Không tìm thấy thông tin ứng dụng.",
+                    text = uiState.error ?: stringResource(R.string.oad_not_found),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -320,7 +328,7 @@ fun OwnerAppDetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = "Đóng",
+                                contentDescription = stringResource(R.string.close),
                                 tint = MaterialTheme.colorScheme.onErrorContainer,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -352,16 +360,16 @@ fun OwnerAppDetailScreen(
                         Spacer(Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = if (isProduction) "App đã lên production" else "Đã hoàn thành kiểm thử",
+                                text = if (isProduction) stringResource(R.string.oad_production_title) else stringResource(R.string.oad_completed_title),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF2E7D32),
                             )
                             Text(
                                 text = if (isProduction) {
-                                    "App đã được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ. Cảm ơn bạn đã đồng hành cùng cộng đồng!"
+                                    stringResource(R.string.oad_production_desc)
                                 } else {
-                                    "App đã hết 15 ngày hiển thị kiểm thử và được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ."
+                                    stringResource(R.string.oad_completed_desc)
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -370,6 +378,16 @@ fun OwnerAppDetailScreen(
                     }
                 }
             } else if (campaign.isPaused) {
+                val adminNote = campaign.adminNote?.takeIf { it.isNotBlank() }
+                val adminNoteSuffix = adminNote?.let {
+                    "\n" + stringResource(R.string.oad_paused_admin_note_format, it)
+                }.orEmpty()
+                val pausedDescription = when {
+                    campaign.isAdminPaused -> stringResource(R.string.oad_paused_admin_desc) + adminNoteSuffix
+                    campaign.isAutoPaused -> stringResource(R.string.oad_paused_auto_desc)
+                    campaign.isSlotExpiredPause -> stringResource(R.string.oad_paused_slot_desc, campaign.slotNumber)
+                    else -> stringResource(R.string.oad_paused_manual_desc)
+                }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
@@ -390,19 +408,17 @@ fun OwnerAppDetailScreen(
                         Spacer(Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "App đang tạm dừng",
+                                text = if (campaign.isAdminPaused) {
+                                    stringResource(R.string.oad_paused_admin_title)
+                                } else {
+                                    stringResource(R.string.oad_paused_title)
+                                },
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFB26A00),
                             )
                             Text(
-                                text = if (campaign.isAutoPaused) {
-                                    "App bị tạm dừng vì bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bấm \"Tiếp tục nhận tester\"."
-                                } else if (campaign.isSlotExpiredPause) {
-                                    "App bị tạm dừng do Slot ${campaign.slotNumber} đã hết hạn. Gia hạn Slot rồi bấm \"Tiếp tục nhận tester\"."
-                                } else {
-                                    "App đang tạm dừng. Bấm \"Tiếp tục nhận tester\" để hiển thị lại trên Trang chủ."
-                                },
+                                text = pausedDescription,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -414,8 +430,8 @@ fun OwnerAppDetailScreen(
             // Top Summary Card
             OwnerSummaryCard(
                 campaign = campaign,
-                ownerName = uiState.ownerProfile?.displayName ?: "Bạn",
-                ownerCredits = uiState.ownerProfile?.credits ?: 100,
+                ownerName = uiState.ownerProfile?.displayName ?: stringResource(R.string.oad_owner_you),
+                ownerCredits = uiState.ownerProfile?.credits ?: 0,
                 stats = uiState.stats,
                 testers = uiState.testers,
                 slotInfo = uiState.slotInfo,
@@ -433,8 +449,8 @@ fun OwnerAppDetailScreen(
                     // Item 1: Người đang cài
                     OwnerActionItem(
                         icon = Icons.Filled.People,
-                        title = "Người đang cài",
-                        subtitle = "${uiState.stats.installedTestersCount} người đang cài · xem từng người và báo cáo của họ",
+                        title = stringResource(R.string.oad_installing_title),
+                        subtitle = stringResource(R.string.oad_installing_subtitle_format, uiState.stats.installedTestersCount),
                         onClick = { showTestersDialog = true },
                     )
 
@@ -443,8 +459,8 @@ fun OwnerAppDetailScreen(
                     // Item 2: Báo cáo của tester
                     OwnerActionItem(
                         icon = Icons.AutoMirrored.Filled.Assignment,
-                        title = "Báo cáo của tester",
-                        subtitle = "${uiState.stats.pendingReportsCount} chờ duyệt (tự chấp nhận sau 8h) · ${uiState.stats.totalReportsCount} báo cáo",
+                        title = stringResource(R.string.oad_reports_title),
+                        subtitle = stringResource(R.string.oad_reports_subtitle_format, uiState.stats.pendingReportsCount, uiState.stats.totalReportsCount),
                         badgeNumber = uiState.stats.pendingReportsCount,
                         onClick = { showReportsDialog = true },
                     )
@@ -452,29 +468,33 @@ fun OwnerAppDetailScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                     if (!campaign.isFinalized) {
-                        // Item 3: Tạm dừng / Tiếp tục nhận tester
-                        OwnerActionItem(
-                            icon = if (campaign.isPaused) Icons.Filled.PlayCircle else Icons.Filled.PauseCircle,
-                            title = if (campaign.isPaused) "Tiếp tục nhận tester" else "Tạm dừng nhận tester",
-                            subtitle = when {
-                                campaign.isPaused && campaign.isAutoPaused -> "Hãy test 1 app hôm nay trước khi mở lại."
-                                campaign.isPaused && campaign.isSlotExpiredPause -> "Slot ${campaign.slotNumber} đã hết hạn — gia hạn rồi mở lại."
-                                campaign.isPaused -> "Mở lại để hiển thị app trên Trang chủ."
-                                campaign.testingDaysRemaining != null -> "App sẽ không hiển thị. Còn ${campaign.testingDaysRemaining} ngày hiển thị."
-                                else -> "App sẽ không hiển thị."
-                            },
-                            onClick = { showPauseConfirmDialog = true },
-                        )
+                        // Item 3: Tạm dừng / Tiếp tục nhận tester.
+                        // App bị Admin tạm dừng: chủ app không được tự mở lại (chỉ Admin thấy nút).
+                        if (!campaign.isAdminPaused || uiState.isAdmin) {
+                            OwnerActionItem(
+                                icon = if (campaign.isPaused) Icons.Filled.PlayCircle else Icons.Filled.PauseCircle,
+                                title = if (campaign.isPaused) stringResource(R.string.oad_resume_title) else stringResource(R.string.oad_pause_title),
+                                subtitle = when {
+                                    campaign.isPaused && campaign.isAutoPaused -> stringResource(R.string.oad_resume_sub_auto)
+                                    campaign.isPaused && campaign.isSlotExpiredPause -> stringResource(R.string.oad_resume_sub_slot_format, campaign.slotNumber)
+                                    campaign.isPaused && campaign.isAdminPaused -> stringResource(R.string.oad_resume_sub_admin)
+                                    campaign.isPaused -> stringResource(R.string.oad_resume_sub_manual)
+                                    campaign.testingDaysRemaining != null -> stringResource(R.string.oad_pause_sub_days_format, campaign.testingDaysRemaining ?: 0)
+                                    else -> stringResource(R.string.oad_pause_sub_plain)
+                                },
+                                onClick = { showPauseConfirmDialog = true },
+                            )
 
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        }
 
                         // Item 4: Boa cho người test - tạm ẩn chưa dùng đến theo yêu cầu
 
                         // Item 5: App đã lên production
                         OwnerActionItem(
                             icon = Icons.Filled.RocketLaunch,
-                            title = "App đã lên production 🎉",
-                            subtitle = "Bấm khi app đã phát hành công khai trên Google Play — app chuyển sang mục Đã hoàn thành Kiểm thử. Bot cũng tự phát hiện.",
+                            title = stringResource(R.string.oad_production_item_title),
+                            subtitle = stringResource(R.string.oad_production_item_sub),
                             onClick = { showProductionDialog = true },
                         )
 
@@ -485,9 +505,9 @@ fun OwnerAppDetailScreen(
                     OwnerActionItem(
                         icon = Icons.Filled.Delete,
                         iconTint = MaterialTheme.colorScheme.error,
-                        title = "Xóa app",
+                        title = stringResource(R.string.oad_delete_title),
                         titleColor = MaterialTheme.colorScheme.error,
-                        subtitle = "Xóa vĩnh viễn app này khỏi Test chéo.",
+                        subtitle = stringResource(R.string.oad_delete_sub),
                         onClick = { showDeleteConfirmDialog = true },
                     )
                 }
@@ -508,12 +528,12 @@ fun OwnerAppDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = "Tự test app của bạn",
+                        text = stringResource(R.string.oad_self_test_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "Bạn có thể cài và nộp báo cáo để tự kiểm tra luồng test. Báo cáo tự test không được điểm, không tính vào quota ngày, chuỗi ngày hay xếp hạng.",
+                        text = stringResource(R.string.oad_self_test_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -537,7 +557,7 @@ fun OwnerAppDetailScreen(
                                             }
                                             context.startActivity(intent)
                                         } catch (_: Exception) {
-                                            Toast.makeText(context, "Không thể mở liên kết.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
@@ -559,7 +579,7 @@ fun OwnerAppDetailScreen(
                                             }
                                             context.startActivity(intent)
                                         } catch (_: Exception) {
-                                            Toast.makeText(context, "Không thể mở liên kết.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
@@ -568,7 +588,7 @@ fun OwnerAppDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                     ) {
-                        Text("Mở ứng dụng test (hoặc link Play)")
+                        Text(stringResource(R.string.oad_open_test_app))
                     }
                 }
             }
@@ -583,16 +603,16 @@ fun OwnerAppDetailScreen(
         val isPaused = campaign?.isPaused == true
         AlertDialog(
             onDismissRequest = { showPauseConfirmDialog = false },
-            title = { Text(if (isPaused) "Tiếp tục nhận tester?" else "Tạm dừng nhận tester?") },
+            title = { Text(if (isPaused) stringResource(R.string.oad_pause_confirm_resume_q) else stringResource(R.string.oad_pause_confirm_pause_q)) },
             text = {
                 Text(
                     if (isPaused) {
                         if (campaign.isAutoPaused) {
-                            "App bị tạm dừng do bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Nếu bạn đã test 1 app hôm nay, app sẽ hiển thị lại công khai để tester khác tham gia."
+                            stringResource(R.string.oad_resume_dialog_auto)
                         } else {
-                            "Chiến dịch sẽ hiển thị lại công khai để các tester khác có thể tham gia và cài đặt (nếu còn trong 15 ngày hiển thị)."
+                            stringResource(R.string.oad_resume_dialog_manual)
                         }
-                    } else "App sẽ tạm thời ẩn khỏi Trang chủ và tester mới sẽ không thể tham gia cho đến khi bạn mở lại."
+                    } else stringResource(R.string.oad_pause_dialog_desc)
                 )
             },
             confirmButton = {
@@ -602,12 +622,12 @@ fun OwnerAppDetailScreen(
                         viewModel.togglePauseResume()
                     }
                 ) {
-                    Text("Đồng ý")
+                    Text(stringResource(R.string.oad_agree))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPauseConfirmDialog = false }) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -616,9 +636,9 @@ fun OwnerAppDetailScreen(
     if (showProductionDialog) {
         AlertDialog(
             onDismissRequest = { showProductionDialog = false },
-            title = { Text("App đã lên Production 🎉") },
+            title = { Text(stringResource(R.string.oad_production_dialog_title)) },
             text = {
-                Text("Chúc mừng bạn! Xác nhận ứng dụng của bạn đã hoàn thành Closed Testing 14 ngày và đã được Google Play duyệt phát hành công khai?")
+                Text(stringResource(R.string.oad_production_dialog_desc))
             },
             confirmButton = {
                 Button(
@@ -627,12 +647,12 @@ fun OwnerAppDetailScreen(
                         viewModel.markProduction()
                     }
                 ) {
-                    Text("Xác nhận Production 🚀")
+                    Text(stringResource(R.string.oad_production_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showProductionDialog = false }) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -641,9 +661,9 @@ fun OwnerAppDetailScreen(
     if (showDeleteConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmDialog = false },
-            title = { Text("Xác nhận xóa app?") },
+            title = { Text(stringResource(R.string.oad_delete_dialog_title)) },
             text = {
-                Text("Hành động này sẽ xóa vĩnh viễn chiến dịch kiểm thử của ứng dụng \"${campaign?.appName}\" khỏi hệ thống Test Chéo và không thể hoàn tác.")
+                Text(stringResource(R.string.oad_delete_dialog_desc_format, campaign?.appName.orEmpty()))
             },
             confirmButton = {
                 Button(
@@ -653,12 +673,12 @@ fun OwnerAppDetailScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Xóa vĩnh viễn")
+                    Text(stringResource(R.string.oad_delete_forever))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmDialog = false }) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -667,6 +687,7 @@ fun OwnerAppDetailScreen(
     if (showTipDialog && campaign != null) {
         TipSettingsDialog(
             currentTip = campaign.tipCredits,
+            ownerCredits = uiState.ownerProfile?.credits ?: 0,
             onDismiss = { showTipDialog = false },
             onSave = { newTip ->
                 showTipDialog = false
@@ -703,6 +724,7 @@ fun OwnerAppDetailScreen(
     if (showReportsDialog) {
         TesterReportsDialog(
             reports = uiState.reports,
+            isActionLoading = uiState.isActionLoading,
             onDismiss = { showReportsDialog = false },
             onApprove = { report, bonus ->
                 viewModel.approveReport(report, bonus)
@@ -717,12 +739,12 @@ fun OwnerAppDetailScreen(
         val cost = com.ntt.crosstest.data.SlotInfo.costForSlot(campaign.slotNumber)
         AlertDialog(
             onDismissRequest = { if (!uiState.isActionLoading) showRenewSlotDialog = false },
-            title = { Text("Gia hạn Slot ${campaign.slotNumber}") },
+            title = { Text(stringResource(R.string.oad_renew_dialog_title_format, campaign.slotNumber)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Gia hạn thêm 16 ngày sử dụng cho Slot ${campaign.slotNumber} với chi phí $cost Credit.")
+                    Text(stringResource(R.string.oad_renew_dialog_desc_format, 16, campaign.slotNumber, cost))
                     Text(
-                        text = "Số dư hiện tại: ${uiState.ownerProfile?.credits ?: 0} Credit",
+                        text = stringResource(R.string.oad_renew_dialog_balance_format, uiState.ownerProfile?.credits ?: 0),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
@@ -737,7 +759,7 @@ fun OwnerAppDetailScreen(
                     },
                     enabled = !uiState.isActionLoading && (uiState.ownerProfile?.credits ?: 0) >= cost
                 ) {
-                    Text("Gia hạn ($cost Credit)")
+                    Text(stringResource(R.string.oad_renew_btn_format, cost))
                 }
             },
             dismissButton = {
@@ -745,7 +767,7 @@ fun OwnerAppDetailScreen(
                     onClick = { showRenewSlotDialog = false },
                     enabled = !uiState.isActionLoading
                 ) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -754,9 +776,9 @@ fun OwnerAppDetailScreen(
     if (showSelfTestNotInstalledDialog && campaign != null) {
         AlertDialog(
             onDismissRequest = { showSelfTestNotInstalledDialog = false },
-            title = { Text("Ứng dụng chưa được cài đặt") },
+            title = { Text(stringResource(R.string.oad_not_installed_title)) },
             text = {
-                Text("Ứng dụng \"${campaign.appName}\" (${campaign.packageName}) chưa được cài trên thiết bị này. Bạn có muốn mở link để cài đặt không?")
+                Text(stringResource(R.string.oad_not_installed_desc_format, campaign.appName, campaign.packageName))
             },
             confirmButton = {
                 Button(
@@ -769,17 +791,17 @@ fun OwnerAppDetailScreen(
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                                 context.startActivity(intent)
                             } catch (_: Exception) {
-                                Toast.makeText(context, "Không thể mở liên kết.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 ) {
-                    Text("Tải cài đặt")
+                    Text(stringResource(R.string.oad_install_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSelfTestNotInstalledDialog = false }) {
-                    Text("Đóng")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -833,9 +855,9 @@ private fun OwnerSummaryCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Spacer(Modifier.height(2.dp))
-                    val slotLabel = if (campaign.slotNumber == 1) "Slot 1 (Vĩnh viễn)" else "Slot ${campaign.slotNumber}"
+                    val slotLabel = if (campaign.slotNumber == 1) stringResource(R.string.oad_slot_permanent_label) else "Slot ${campaign.slotNumber}"
                     Text(
-                        text = "Chủ app: $ownerName · $ownerCredits điểm · $slotLabel · Mục tiêu ${campaign.dailyTarget} test/ngày",
+                        text = stringResource(R.string.oad_summary_line_format, ownerName, ownerCredits, slotLabel, campaign.dailyTarget),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -844,14 +866,14 @@ private fun OwnerSummaryCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (slotInfo.isExpired) {
                                 Text(
-                                    text = "⚠️ Slot đã hết hạn",
+                                    text = stringResource(R.string.oad_slot_expired_label),
                                     color = MaterialTheme.colorScheme.error,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "Gia hạn ngay",
+                                    text = stringResource(R.string.oad_renew_now),
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.labelSmall,
@@ -862,14 +884,14 @@ private fun OwnerSummaryCard(
                                 )
                             } else {
                                 Text(
-                                    text = "⏱ Còn ${slotInfo.remainingDays} ngày",
+                                    text = stringResource(R.string.oad_slot_remaining_days_format, slotInfo.remainingDays),
                                     color = Color(0xFF2E7D32),
                                     fontWeight = FontWeight.SemiBold,
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "Gia hạn thêm",
+                                    text = stringResource(R.string.oad_renew_more),
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Medium,
                                     style = MaterialTheme.typography.labelSmall,
@@ -897,22 +919,22 @@ private fun OwnerSummaryCard(
                 MetricColumn(
                     icon = Icons.Filled.Check,
                     value = "${stats.installedTestersCount}",
-                    label = "đã cài",
+                    label = stringResource(R.string.oad_metric_installed),
                 )
                 MetricColumn(
                     icon = Icons.Filled.CalendarMonth,
                     value = "${stats.testedTodayCount}/${campaign.dailyTarget}",
-                    label = "test hôm nay",
+                    label = stringResource(R.string.oad_metric_today),
                 )
                 MetricColumn(
                     icon = Icons.Filled.Description,
                     value = "${stats.totalReportsCount}",
-                    label = "báo cáo",
+                    label = stringResource(R.string.oad_metric_reports),
                 )
                 MetricColumn(
                     icon = Icons.Filled.Star,
                     value = stats.averageRating?.let { "%.1f".format(it) } ?: "—",
-                    label = "đánh giá",
+                    label = stringResource(R.string.oad_metric_rating),
                 )
             }
 
@@ -937,12 +959,12 @@ private fun OwnerSummaryCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Mục tiêu Closed Testing Google Play",
+                        text = stringResource(R.string.oad_ct_target_title),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = if (isTargetReached) "✓ Đã đủ $completed14Days/$targetTesters tester (14 ngày)" else "$completed14Days/$targetTesters tester đủ 14 ngày (Cao nhất: $maxDays ngày)",
+                        text = if (isTargetReached) stringResource(R.string.oad_ct_target_reached_format, completed14Days, targetTesters) else stringResource(R.string.oad_ct_target_progress_format, completed14Days, targetTesters, maxDays),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = if (isTargetReached) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary,
@@ -956,7 +978,7 @@ private fun OwnerSummaryCard(
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Đủ chuẩn duyệt Play 🚀",
+                            text = stringResource(R.string.oad_ct_qualified),
                             color = Color.White,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
@@ -1069,6 +1091,7 @@ private fun OwnerActionItem(
 @Composable
 private fun TipSettingsDialog(
     currentTip: Int,
+    ownerCredits: Int,
     onDismiss: () -> Unit,
     onSave: (Int) -> Unit,
 ) {
@@ -1077,13 +1100,19 @@ private fun TipSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Boa cho người test 🎁") },
+        title = { Text(stringResource(R.string.oad_tip_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "Tặng thêm Credit cho mỗi tester khi họ check-in kiểm thử app của bạn. App sẽ được đẩy lên vị trí nổi bật tại Trang chủ để thu hút tester nhanh chóng.",
+                    text = stringResource(R.string.oad_tip_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(R.string.oad_tip_balance_format, ownerCredits),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1100,20 +1129,31 @@ private fun TipSettingsDialog(
                                 )
                             } else ButtonDefaults.outlinedButtonColors()
                         ) {
-                            Text(if (tip == 0) "Tắt" else "+$tip")
+                            Text(if (tip == 0) stringResource(R.string.oad_tip_off) else "+$tip")
                         }
                     }
+                }
+                if (selectedTip > 0) {
+                    Text(
+                        text = stringResource(R.string.oad_tip_cost_format, selectedTip),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (ownerCredits >= selectedTip) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                    )
                 }
             }
         },
         confirmButton = {
             Button(onClick = { onSave(selectedTip) }) {
-                Text("Lưu thiết lập")
+                Text(stringResource(R.string.oad_tip_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -1134,7 +1174,7 @@ private fun EditAppDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Chỉnh sửa thông tin app") },
+        title = { Text(stringResource(R.string.oad_edit_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -1145,43 +1185,43 @@ private fun EditAppDialog(
                 OutlinedTextField(
                     value = appName,
                     onValueChange = { appName = it },
-                    label = { Text("Tên ứng dụng") },
+                    label = { Text(stringResource(R.string.oad_edit_name_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Hướng dẫn thêm cho Tester") },
-                    placeholder = { Text("Nhập lưu ý, tính năng cần test hoặc ghi chú cho tester...") },
+                    label = { Text(stringResource(R.string.oad_edit_guide_label)) },
+                    placeholder = { Text(stringResource(R.string.oad_edit_guide_placeholder)) },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = playUrl,
                     onValueChange = { playUrl = it },
-                    label = { Text("Link Google Play") },
+                    label = { Text(stringResource(R.string.oad_edit_play_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = testingUrl,
                     onValueChange = { testingUrl = it },
-                    label = { Text("Link tham gia Closed Test") },
+                    label = { Text(stringResource(R.string.oad_edit_testing_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = testUser,
                     onValueChange = { testUser = it },
-                    label = { Text("Tên đăng nhập test (nếu có)") },
+                    label = { Text(stringResource(R.string.oad_edit_user_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = testPass,
                     onValueChange = { testPass = it },
-                    label = { Text("Mật khẩu test (nếu có)") },
+                    label = { Text(stringResource(R.string.oad_edit_pass_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -1191,12 +1231,12 @@ private fun EditAppDialog(
             Button(onClick = {
                 onSave(appName, description, playUrl, testingUrl, testUser, testPass)
             }) {
-                Text("Lưu")
+                Text(stringResource(R.string.oad_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -1212,22 +1252,22 @@ private fun ShareLinkDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Liên kết ứng dụng 🔗") },
+        title = { Text(stringResource(R.string.oad_share_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (campaign.testingUrl.isNotBlank()) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Link tham gia Closed Test:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.oad_share_testing_label), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
                         Text(campaign.testingUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(
                                 onClick = {
                                     clipboard.setPrimaryClip(ClipData.newPlainText("Testing URL", campaign.testingUrl))
-                                    Toast.makeText(context, "Đã sao chép link Closed Test!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.oad_copied_testing), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Sao chép")
+                                Text(stringResource(R.string.oad_copy))
                             }
                             Button(
                                 onClick = {
@@ -1236,7 +1276,7 @@ private fun ShareLinkDialog(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Mở link")
+                                Text(stringResource(R.string.oad_open))
                             }
                         }
                     }
@@ -1244,17 +1284,17 @@ private fun ShareLinkDialog(
 
                 if (campaign.playUrl.isNotBlank()) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Link Google Play:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.oad_share_play_label), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
                         Text(campaign.playUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(
                                 onClick = {
                                     clipboard.setPrimaryClip(ClipData.newPlainText("Play URL", campaign.playUrl))
-                                    Toast.makeText(context, "Đã sao chép link Google Play!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.oad_copied_play), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Sao chép")
+                                Text(stringResource(R.string.oad_copy))
                             }
                             Button(
                                 onClick = {
@@ -1263,7 +1303,7 @@ private fun ShareLinkDialog(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Mở link")
+                                Text(stringResource(R.string.oad_open))
                             }
                         }
                     }
@@ -1272,7 +1312,7 @@ private fun ShareLinkDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Đóng")
+                Text(stringResource(R.string.close))
             }
         }
     )
@@ -1285,11 +1325,11 @@ private fun TestersListDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Người đang cài (${testers.size})") },
+        title = { Text(stringResource(R.string.oad_testers_dialog_title_format, testers.size)) },
         text = {
             if (testers.isEmpty()) {
                 Text(
-                    text = "Chưa có tester nào tham gia chiến dịch này.",
+                    text = stringResource(R.string.oad_no_testers),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1333,8 +1373,8 @@ private fun TestersListDialog(
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                     Text(
-                                        text = "Đã check-in: ${item.checkinCount} ngày" +
-                                                (item.lastCheckinDate?.let { " · Gần nhất: $it" } ?: ""),
+                                        text = stringResource(R.string.oad_checkin_days_format, item.checkinCount) +
+                                                (item.lastCheckinDate?.let { stringResource(R.string.oad_checkin_last_format, it) } ?: ""),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -1347,7 +1387,7 @@ private fun TestersListDialog(
                                             .padding(horizontal = 7.dp, vertical = 3.dp)
                                     ) {
                                         Text(
-                                            text = "✓ Đủ 14 ngày",
+                                            text = stringResource(R.string.oad_enough_14),
                                             color = Color(0xFF2E7D32),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
@@ -1361,7 +1401,7 @@ private fun TestersListDialog(
                                             .padding(horizontal = 7.dp, vertical = 3.dp)
                                     ) {
                                         Text(
-                                            text = "Còn ${14 - item.checkinCount} ngày",
+                                            text = stringResource(R.string.oad_remaining_14_format, 14 - item.checkinCount),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontSize = 11.sp,
                                         )
@@ -1375,7 +1415,7 @@ private fun TestersListDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Đóng")
+                Text(stringResource(R.string.close))
             }
         }
     )
@@ -1385,6 +1425,7 @@ private fun TestersListDialog(
 @Composable
 private fun TesterReportsDialog(
     reports: List<TesterReport>,
+    isActionLoading: Boolean,
     onDismiss: () -> Unit,
     onApprove: (TesterReport, Int) -> Unit,
     onReject: (TesterReport, String?) -> Unit,
@@ -1441,8 +1482,8 @@ private fun TesterReportsDialog(
         FullscreenImageViewer(
             imageUrl = previewImageUrl,
             onDismiss = { previewImageUrl = null },
-            title = "Ảnh chụp màn hình tester",
-            subtitle = "Chạm 2 lần hoặc vuốt 2 ngón tay để phóng to / thu nhỏ"
+            title = stringResource(R.string.oad_screenshot_tester_title),
+            subtitle = stringResource(R.string.img_zoom_hint)
         )
     }
 
@@ -1459,12 +1500,12 @@ private fun TesterReportsDialog(
                     title = {
                         Column {
                             Text(
-                                "Duyệt báo cáo kiểm thử",
+                                stringResource(R.string.oad_reports_dialog_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "${pendingReports.size} chờ duyệt · ${reports.size} tổng báo cáo",
+                                text = stringResource(R.string.oad_reports_dialog_sub_format, pendingReports.size, reports.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1472,7 +1513,7 @@ private fun TesterReportsDialog(
                     },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Filled.Close, contentDescription = "Đóng")
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -1498,7 +1539,7 @@ private fun TesterReportsDialog(
                         onClick = { selectedTab = 0 },
                         text = {
                             Text(
-                                text = "Chờ duyệt (${pendingReports.size})",
+                                text = stringResource(R.string.oad_tab_pending_format, pendingReports.size),
                                 fontSize = 12.sp,
                                 fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal
                             )
@@ -1509,7 +1550,7 @@ private fun TesterReportsDialog(
                         onClick = { selectedTab = 1 },
                         text = {
                             Text(
-                                text = "Đã duyệt (${approvedReports.size})",
+                                text = stringResource(R.string.oad_tab_approved_format, approvedReports.size),
                                 fontSize = 12.sp,
                                 fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal
                             )
@@ -1520,7 +1561,7 @@ private fun TesterReportsDialog(
                         onClick = { selectedTab = 2 },
                         text = {
                             Text(
-                                text = "Từ chối (${rejectedReports.size})",
+                                text = stringResource(R.string.oad_tab_rejected_format, rejectedReports.size),
                                 fontSize = 12.sp,
                                 fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal
                             )
@@ -1531,7 +1572,7 @@ private fun TesterReportsDialog(
                         onClick = { selectedTab = 3 },
                         text = {
                             Text(
-                                text = "Tất cả (${reports.size})",
+                                text = stringResource(R.string.oad_tab_all_format, reports.size),
                                 fontSize = 12.sp,
                                 fontWeight = if (selectedTab == 3) FontWeight.Bold else FontWeight.Normal
                             )
@@ -1556,7 +1597,7 @@ private fun TesterReportsDialog(
                         ) {
                             Text("⏱", fontSize = 16.sp)
                             Text(
-                                text = "Bạn có 8 giờ để duyệt bài test (+1 Credit cho tester nếu duyệt). Quá 8h hệ thống sẽ tự động duyệt (không có thưởng thêm). Hãy đối chiếu ảnh các ngày xem tester có nộp trùng lặp không.",
+                                text = stringResource(R.string.oad_review_reminder),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFFE65100)
                             )
@@ -1583,10 +1624,10 @@ private fun TesterReportsDialog(
                             )
                             Text(
                                 text = when (selectedTab) {
-                                    0 -> "Không có báo cáo nào đang chờ duyệt 🎉"
-                                    1 -> "Chưa có báo cáo nào được duyệt."
-                                    2 -> "Chưa có báo cáo nào bị từ chối."
-                                    else -> "Chưa có báo cáo nào từ tester."
+                                    0 -> stringResource(R.string.oad_empty_pending)
+                                    1 -> stringResource(R.string.oad_empty_approved)
+                                    2 -> stringResource(R.string.oad_empty_rejected)
+                                    else -> stringResource(R.string.oad_empty_all)
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1616,6 +1657,7 @@ private fun TesterReportsDialog(
                             ReportReviewCard(
                                 report = report,
                                 previousReport = previousReport,
+                                isActionLoading = isActionLoading,
                                 onPreviewImage = { url -> previewImageUrl = url },
                                 onCompare = { reportToCompare = Pair(report, previousReport) },
                                 onApprove = { onApprove(report, 0) },
@@ -1633,6 +1675,7 @@ private fun TesterReportsDialog(
 private fun ReportReviewCard(
     report: TesterReport,
     previousReport: TesterReport?,
+    isActionLoading: Boolean,
     onPreviewImage: (String) -> Unit,
     onCompare: () -> Unit,
     onApprove: () -> Unit,
@@ -1644,15 +1687,18 @@ private fun ReportReviewCard(
     }
     var isCheckingHash by remember { mutableStateOf(false) }
 
-    LaunchedEffect(report.screenshotUrl, previousReport?.screenshotUrl) {
+    LaunchedEffect(report.screenshotUrl, previousReport?.screenshotUrl, report.imageHash, previousReport?.imageHash) {
         val u1 = report.screenshotUrl
         val u2 = previousReport?.screenshotUrl
         if (!u1.isNullOrBlank() && !u2.isNullOrBlank()) {
             isCheckingHash = true
-            val h1 = ImageHashHelper.computeDHashFromUrl(context, u1)
-            val h2 = ImageHashHelper.computeDHashFromUrl(context, u2)
+            // Ưu tiên image_hash đã lưu trong DB — chỉ tải + decode ảnh khi hash trống.
+            val h1 = report.imageHash?.takeIf { it.isNotBlank() }
+                ?: ImageHashHelper.computeDHashFromUrl(context, u1)
+            val h2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
+                ?: ImageHashHelper.computeDHashFromUrl(context, u2)
             if (h1 != null && h2 != null) {
-                comparison = ImageHashHelper.compare(h1, h2)
+                comparison = ImageHashHelper.compare(h1, h2, context)
             }
             isCheckingHash = false
         }
@@ -1708,7 +1754,7 @@ private fun ReportReviewCard(
                         )
                         report.createdAt?.let {
                             Text(
-                                text = it.take(16).replace("T", " "),
+                                text = com.ntt.crosstest.util.formatIsoUtcToLocal(it),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1726,9 +1772,9 @@ private fun ReportReviewCard(
                     }
                 ) {
                     Text(
-                        text = if (report.status == "pending") "⏳ Còn ${report.remainingHoursUntilAutoAccept()}h"
-                               else if (report.status == "approved") "✓ Đã duyệt"
-                               else "✕ Từ chối",
+                        text = if (report.status == "pending") stringResource(R.string.oad_status_remaining_format, report.remainingHoursUntilAutoAccept())
+                               else if (report.status == "approved") stringResource(R.string.oad_status_approved)
+                               else stringResource(R.string.oad_status_rejected),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (report.status == "pending") Color(0xFFE65100)
@@ -1747,7 +1793,7 @@ private fun ReportReviewCard(
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                    Text("Đang phân tích độ tương đồng ảnh...", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.oad_analyzing), style = MaterialTheme.typography.labelSmall)
                 }
             } else if (comparison != null) {
                 val comp = comparison!!
@@ -1775,13 +1821,13 @@ private fun ReportReviewCard(
                             Text(text = if (isDup) "🔴" else "🟢", fontSize = 14.sp)
                             Column {
                                 Text(
-                                    text = if (isDup) "Cảnh báo trùng lặp: ${comp.similarity}%" else "Ảnh tính năng mới (Khác biệt ${100 - comp.similarity}%)",
+                                    text = if (isDup) stringResource(R.string.oad_dup_warning_format, comp.similarity) else stringResource(R.string.oad_new_feature_format, 100 - comp.similarity),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isDup) Color(0xFFC62828) else Color(0xFF2E7D32)
                                 )
                                 Text(
-                                    text = if (isDup) "Rất giống ảnh ngày ${previousReport?.createdAt?.take(10)}" else "Khác biệt rõ so với ngày ${previousReport?.createdAt?.take(10)}",
+                                    text = if (isDup) stringResource(R.string.oad_similar_to_format, previousReport?.createdAt?.take(10).orEmpty()) else stringResource(R.string.oad_differs_from_format, previousReport?.createdAt?.take(10).orEmpty()),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1795,7 +1841,7 @@ private fun ReportReviewCard(
                         ) {
                             Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("So sánh", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.oad_compare_short), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1806,7 +1852,7 @@ private fun ReportReviewCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Tester có ảnh ngày ${previousReport.createdAt?.take(10)}",
+                        text = stringResource(R.string.oad_has_photo_format, previousReport.createdAt?.take(10).orEmpty()),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1816,7 +1862,7 @@ private fun ReportReviewCard(
                     ) {
                         Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("So sánh với ngày trước", fontSize = 12.sp)
+                        Text(stringResource(R.string.oad_compare_prev), fontSize = 12.sp)
                     }
                 }
             }
@@ -1834,7 +1880,7 @@ private fun ReportReviewCard(
                     Box(Modifier.fillMaxSize()) {
                         AsyncImage(
                             model = report.screenshotUrl,
-                            contentDescription = "Ảnh chụp màn hình tester",
+                            contentDescription = stringResource(R.string.oad_screenshot_tester_title),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit,
                         )
@@ -1856,11 +1902,11 @@ private fun ReportReviewCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Chạm để phóng to ảnh 🔍", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(R.string.oad_tap_zoom), color = Color.White, style = MaterialTheme.typography.labelSmall)
                                 }
                                 if (previousReport != null) {
                                     Text(
-                                        text = "So sánh 2 ngày ⇋",
+                                        text = stringResource(R.string.oad_compare_2days),
                                         color = Color(0xFF90CAF9),
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
@@ -1889,7 +1935,7 @@ private fun ReportReviewCard(
                     }
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "$rating/5 sao",
+                        text = stringResource(R.string.oad_rating_out_of_5_format, rating),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1905,7 +1951,7 @@ private fun ReportReviewCard(
                 ) {
                     Column(Modifier.padding(10.dp)) {
                         Text(
-                            text = "Nhận xét của tester:",
+                            text = stringResource(R.string.oad_tester_comment),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -1927,7 +1973,7 @@ private fun ReportReviewCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Lý do từ chối: ${report.rejectionReason}",
+                        text = stringResource(R.string.oad_reject_reason_format, report.rejectionReason.orEmpty()),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(10.dp)
@@ -1944,23 +1990,25 @@ private fun ReportReviewCard(
                 ) {
                     OutlinedButton(
                         onClick = onReject,
+                        enabled = !isActionLoading,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
                         Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Từ chối")
+                        Text(stringResource(R.string.oad_reject))
                     }
                     Button(
                         onClick = onApprove,
+                        enabled = !isActionLoading,
                         modifier = Modifier.weight(1.3f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
                     ) {
                         Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Duyệt (+1 C)", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.img_approve_btn), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1974,11 +2022,12 @@ private fun RejectConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: (TesterReport, String) -> Unit,
 ) {
+    val context = LocalContext.current
     val predefinedReasons = listOf(
-        "Ảnh trùng lặp với ngày hôm trước",
-        "Ảnh không rõ ràng / không phải app này",
-        "Chưa mở ứng dụng hoặc chưa test thực tế",
-        "Lý do khác...",
+        stringResource(R.string.oad_reject_reason_1),
+        stringResource(R.string.oad_reject_reason_2),
+        stringResource(R.string.oad_reject_reason_3),
+        stringResource(R.string.oad_reject_reason_4),
     )
     var selectedReasonIndex by remember { mutableStateOf(0) }
     var customReason by remember { mutableStateOf("") }
@@ -1987,7 +2036,7 @@ private fun RejectConfirmDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Xác nhận từ chối báo cáo ⚠️",
+                text = stringResource(R.string.oad_reject_dialog_title),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -1995,7 +2044,7 @@ private fun RejectConfirmDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "Vui lòng chọn lý do từ chối để tester có thể rút kinh nghiệm và nộp lại:",
+                    text = stringResource(R.string.oad_reject_dialog_desc),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Card(
@@ -2003,7 +2052,7 @@ private fun RejectConfirmDialog(
                     shape = RoundedCornerShape(8.dp),
                 ) {
                     Text(
-                        text = "⚠ Lưu ý: Nếu tester bị từ chối 3 lần/ngày sẽ bị Cảnh báo. Ngược lại, nếu chủ app từ chối quá 5 lần/ngày cũng sẽ bị Cảnh báo từ hệ thống. Hãy đối chiếu kỹ ảnh trước khi từ chối.",
+                        text = stringResource(R.string.oad_reject_dialog_note),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFFC62828),
                         modifier = Modifier.padding(8.dp)
@@ -2030,7 +2079,7 @@ private fun RejectConfirmDialog(
                     OutlinedTextField(
                         value = customReason,
                         onValueChange = { customReason = it },
-                        placeholder = { Text("Nhập lý do cụ thể...") },
+                        placeholder = { Text(stringResource(R.string.oad_reject_custom_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 3,
                         shape = RoundedCornerShape(8.dp),
@@ -2042,7 +2091,7 @@ private fun RejectConfirmDialog(
             Button(
                 onClick = {
                     val finalReason = if (selectedReasonIndex == predefinedReasons.lastIndex) {
-                        customReason.trim().ifBlank { "Chưa đạt yêu cầu kiểm thử" }
+                        customReason.trim().ifBlank { context.getString(R.string.oad_reject_fallback_reason) }
                     } else {
                         predefinedReasons[selectedReasonIndex]
                     }
@@ -2050,12 +2099,12 @@ private fun RejectConfirmDialog(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text("Xác nhận từ chối")
+                Text(stringResource(R.string.oad_reject_confirm_btn))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

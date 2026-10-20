@@ -10,6 +10,8 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.ntt.crosstest.R
+import com.ntt.crosstest.data.SettingsRepository
 
 private const val TAG = "GoogleSignIn"
 
@@ -45,10 +47,11 @@ sealed interface GoogleSignInOutcome {
  */
 
 suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSignInOutcome {
+    val localizedContext = SettingsRepository.wrap(context)
     val cleanClientId = webClientId.trim()
     if (cleanClientId.isBlank()) {
         return GoogleSignInOutcome.Error(
-            "Thiếu GOOGLE_WEB_CLIENT_ID. Hãy điền vào local.properties rồi build lại (xem README)."
+            localizedContext.getString(R.string.google_signin_missing_client_id)
         )
     }
 
@@ -101,20 +104,22 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
         } catch (e: NoCredentialException) {
             Log.e(TAG, "No Google credential available on this device", e)
             GoogleSignInOutcome.Error(
-                "Không tìm thấy tài khoản Google phù hợp trên thiết bị. " +
-                    "Hãy chắc chắn máy đã đăng nhập ít nhất một tài khoản Google, " +
-                    "và SHA-1/package name đã đăng ký đúng trong Google Cloud Console."
+                localizedContext.getString(R.string.google_signin_no_account)
             )
         } catch (e: GetCredentialException) {
             val msg = e.message ?: e.javaClass.simpleName
             Log.e(TAG, "GetCredentialException: $msg", e)
             GoogleSignInOutcome.Error(
-                "Không lấy được tài khoản Google: $msg. " +
-                    "Kiểm tra: Package name (com.ntt.crosstest), SHA-1 trong Google Cloud Console."
+                localizedContext.getString(R.string.google_signin_fetch_error_format, msg)
             )
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error during Google sign-in", e)
-            GoogleSignInOutcome.Error("Lỗi không mong đợi: ${e.message ?: e.javaClass.simpleName}")
+            GoogleSignInOutcome.Error(
+                localizedContext.getString(
+                    R.string.google_signin_unexpected_error_format,
+                    e.message ?: e.javaClass.simpleName,
+                )
+            )
         }
     }
 }

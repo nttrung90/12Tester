@@ -1,12 +1,10 @@
 package com.ntt.crosstest.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,16 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,6 +44,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,17 +53,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.QuestSummary
-
-private val GoldStarColor = Color(0xFFF57F17)
-private val GoldBadgeBg = Color(0xFFFFF8E1)
-private val GreenDoneColor = Color(0xFF2E7D32)
-private val GreenDoneBg = Color(0xFFE8F5E9)
+import com.ntt.crosstest.ui.components.QuestHeroBanner
+import com.ntt.crosstest.ui.theme.QuestGoldBgDark
+import com.ntt.crosstest.ui.theme.QuestGoldBgLight
+import com.ntt.crosstest.ui.theme.QuestGoldTextDark
+import com.ntt.crosstest.ui.theme.QuestGoldTextLight
+import com.ntt.crosstest.ui.theme.QuestGreenBgDark
+import com.ntt.crosstest.ui.theme.QuestGreenBgLight
+import com.ntt.crosstest.ui.theme.QuestGreenTextDark
+import com.ntt.crosstest.ui.theme.QuestGreenTextLight
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +84,8 @@ fun QuestsScreen(
     modifier: Modifier = Modifier,
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) } // 0: Daily, 1: Weekly
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     val summary = questSummary ?: QuestSummary()
     val totalClaimable = if (isAuthenticated) summary.totalClaimableCount else 0
@@ -100,148 +103,37 @@ fun QuestsScreen(
         modifier = modifier.fillMaxSize(),
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // 1. Overview Hero Banner
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(46.dp)
-                                    .clip(CircleShape)
-                                    .background(GoldBadgeBg),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.EmojiEvents,
-                                    contentDescription = null,
-                                    tint = GoldStarColor,
-                                    modifier = Modifier.size(28.dp),
-                                )
-                            }
-                            Spacer(Modifier.width(14.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.quest_section_title),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = "Kiểm thử app để nhận thêm Credit thưởng",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                QuestHeroBanner(
+                    userCredits = userCredits,
+                    dailyCount = summary.dailyCount,
+                    weeklyCount = summary.weeklyCount,
+                    totalClaimable = totalClaimable,
+                    onClaimableClick = {
+                        val targetTab = if (dailyClaimable > 0) 0 else 1
+                        selectedTab = targetTab
+                        val milestones =
+                            if (targetTab == 0) summary.dailyMilestones else summary.weeklyMilestones
+                        val index = milestones.indexOfFirst { milestone ->
+                            if (targetTab == 0) {
+                                summary.canClaimDaily(milestone.milestone)
+                            } else {
+                                summary.canClaimWeekly(milestone.milestone)
                             }
                         }
-
-                        Spacer(Modifier.height(14.dp))
-
-                        // Stats Row: [Số dư] | [Hôm nay] | [Tuần này]
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-                                .padding(vertical = 10.dp, horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Số dư",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = "$userCredits 🪙",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .width(1.dp)
-                                    .height(24.dp)
-                                    .background(MaterialTheme.colorScheme.outlineVariant)
-                            )
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Hôm nay",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = "${summary.dailyCount} app",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFF2E7D32),
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .width(1.dp)
-                                    .height(24.dp)
-                                    .background(MaterialTheme.colorScheme.outlineVariant)
-                            )
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Tuần này",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = "${summary.weeklyCount} app",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFF1565C0),
-                                )
+                        if (index >= 0) {
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(3 + index)
                             }
                         }
-
-                        // Claimable notification banner
-                        if (totalClaimable > 0) {
-                            Spacer(Modifier.height(10.dp))
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFFE65100))
-                                    .padding(vertical = 8.dp, horizontal = 12.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = "🎉 Bạn có $totalClaimable mốc nhiệm vụ đã sẵn sàng nhận thưởng!",
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
-                        }
-                    }
-                }
+                    },
+                )
             }
 
             // 2. Segmented Tabs: [ Nhiệm vụ Ngày ] | [ Nhiệm vụ Tuần ]
@@ -337,7 +229,7 @@ fun QuestsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = "Tiến độ hôm nay",
+                                    text = stringResource(R.string.quest_progress_today),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -411,7 +303,7 @@ fun QuestsScreen(
                             Spacer(Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "Quy tắc điểm thưởng hàng ngày",
+                                    text = stringResource(R.string.quest_daily_rules_title),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -447,7 +339,7 @@ fun QuestsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = "Tiến độ tuần này",
+                                    text = stringResource(R.string.quest_progress_week),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -520,7 +412,7 @@ fun QuestsScreen(
                             Spacer(Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "Quy tắc nhiệm vụ tuần",
+                                    text = stringResource(R.string.quest_weekly_rules_title),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -558,13 +450,13 @@ fun QuestsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Bắt đầu làm nhiệm vụ ngay 🚀",
+                                text = stringResource(R.string.quest_cta_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "Cài đặt và test app của các thành viên khác tại Trang chủ để tích lũy lượt và nhận thưởng.",
+                                text = stringResource(R.string.quest_cta_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
@@ -595,14 +487,20 @@ private fun QuestItemCard(
     isClaiming: Boolean,
     onClaimClick: () -> Unit,
 ) {
+    val isDark = isSystemInDarkTheme()
+    val goldText = if (isDark) QuestGoldTextDark else QuestGoldTextLight
+    val goldBg = if (isDark) QuestGoldBgDark else QuestGoldBgLight
+    val greenText = if (isDark) QuestGreenTextDark else QuestGreenTextLight
+    val greenBg = if (isDark) QuestGreenBgDark else QuestGreenBgLight
+
     val containerBg = when {
-        isClaimed -> GreenDoneBg.copy(alpha = 0.35f)
-        canClaim -> GoldBadgeBg
+        isClaimed -> greenBg
+        canClaim -> goldBg
         else -> MaterialTheme.colorScheme.surface
     }
 
     val borderModifier = if (canClaim) {
-        Modifier.border(1.dp, GoldStarColor.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+        Modifier.border(1.dp, goldText.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
     } else {
         Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
     }
@@ -635,8 +533,8 @@ private fun QuestItemCard(
                     },
                     contentDescription = null,
                     tint = when {
-                        isClaimed -> GreenDoneColor
-                        canClaim -> GoldStarColor
+                        isClaimed -> greenText
+                        canClaim -> goldText
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     },
                     modifier = Modifier.size(24.dp),
@@ -654,12 +552,16 @@ private fun QuestItemCard(
                     Spacer(Modifier.height(2.dp))
                     Text(
                         text = if (isClaimed) {
-                            "Đã hoàn thành ($currentCount/$milestone lượt)"
+                            stringResource(R.string.quest_milestone_completed_tests_format, currentCount, milestone)
                         } else {
-                            "Tiến độ: ${currentCount.coerceAtMost(milestone)}/$milestone lượt"
+                            stringResource(
+                                R.string.quest_milestone_progress_format,
+                                currentCount.coerceAtMost(milestone),
+                                milestone,
+                            )
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (canClaim) GoldStarColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (canClaim) goldText else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = if (canClaim) FontWeight.Bold else FontWeight.Normal,
                     )
                 }
@@ -673,13 +575,13 @@ private fun QuestItemCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(GreenDoneColor.copy(alpha = 0.12f))
+                            .background(greenText.copy(alpha = 0.12f))
                             .padding(horizontal = 12.dp, vertical = 7.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = stringResource(R.string.quest_claimed_btn),
-                            color = GreenDoneColor,
+                            color = greenText,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                         )

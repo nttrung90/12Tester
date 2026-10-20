@@ -21,7 +21,7 @@ object SupabaseHolder {
     fun init(url: String, key: String): SupabaseClient {
         client?.let { return it }
         require(url.isNotBlank() && key.isNotBlank()) {
-            "Thiếu SUPABASE_URL hoặc SUPABASE_ANON_KEY trong local.properties"
+            "Missing SUPABASE_URL or SUPABASE_ANON_KEY in local.properties"
         }
         val created = createSupabaseClient(
             supabaseUrl = url,
@@ -35,7 +35,22 @@ object SupabaseHolder {
             }
             install(Postgrest)
             // Explicit engine: supabase-kt 3.x is built on Ktor 3.6.0.
-            httpEngine = OkHttp.create()
+            // Tuning: khi tải Trang chủ có nhiều truy vấn chạy song song → nâng giới hạn
+            // kết nối đồng thời (mặc định OkHttp chỉ 5 request/host) và đặt timeout hợp lý.
+            httpEngine = OkHttp.create {
+                config {
+                    dispatcher(
+                        okhttp3.Dispatcher().apply {
+                            maxRequests = 32
+                            maxRequestsPerHost = 16
+                        }
+                    )
+                    connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                    readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    retryOnConnectionFailure(true)
+                }
+            }
         }
         client = created
         return created
@@ -43,6 +58,6 @@ object SupabaseHolder {
 
     fun get(): SupabaseClient =
         client ?: throw IllegalStateException(
-            "Supabase chưa được khởi tạo. Hãy điền SUPABASE_URL và SUPABASE_ANON_KEY vào local.properties."
+            "Supabase isn't initialized yet. Add SUPABASE_URL and SUPABASE_ANON_KEY to local.properties."
         )
 }

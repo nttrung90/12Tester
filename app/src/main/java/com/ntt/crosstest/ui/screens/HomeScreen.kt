@@ -102,12 +102,16 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignOwnerStats
+import com.ntt.crosstest.data.CampaignStats
 import com.ntt.crosstest.data.LeaderboardUser
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.QuestSummary
 import com.ntt.crosstest.ui.components.CampaignCard
 import com.ntt.crosstest.ui.components.MyAppCard
@@ -124,8 +128,10 @@ import com.ntt.crosstest.ui.viewmodels.HomeViewModel
 fun HomeScreen(
     onCampaignClick: (String) -> Unit,
     onOwnerAppClick: (String) -> Unit = onCampaignClick,
+    onOwnerReportNotificationClick: (String) -> Unit = onOwnerAppClick,
     onCreateClick: () -> Unit,
     onAdminPanelClick: () -> Unit = {},
+    onAdminReportsClick: () -> Unit = {},
     onAccountLocked: () -> Unit = {},
     onSignedOut: () -> Unit,
 ) {
@@ -133,7 +139,7 @@ fun HomeScreen(
     val app = context.applicationContext as TestCheoApp
     val viewModel: HomeViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { HomeViewModel(app.campaignRepository, app.applicationContext) }
+            initializer { HomeViewModel(app.campaignRepository, app.applicationContext, Localizer(app)) }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -175,7 +181,7 @@ fun HomeScreen(
             },
             title = {
                 Text(
-                    text = "CẢNH BÁO TỪ HỆ THỐNG ⚠️",
+                    text = stringResource(R.string.warning_dialog_title),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFD32F2F),
                     textAlign = TextAlign.Center
@@ -193,7 +199,7 @@ fun HomeScreen(
                         shape = RoundedCornerShape(8.dp),
                     ) {
                         Text(
-                            text = "Lưu ý: Số lần bị cảnh báo trong tuần: ${uiState.weeklyWarningsCount}/3. Nếu bị 3 lần trong 1 tuần, tài khoản sẽ tự động bị tạm khóa.",
+                            text = stringResource(R.string.warning_quota_format, uiState.weeklyWarningsCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFC62828),
                             modifier = Modifier.padding(10.dp)
@@ -208,7 +214,7 @@ fun HomeScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
                 ) {
-                    Text("Tôi đã hiểu")
+                    Text(stringResource(R.string.warning_confirm_btn))
                 }
             }
         )
@@ -261,7 +267,8 @@ fun HomeScreen(
                     showNotificationBottomSheet = false
                     val isOwnerApp = uiState.myCampaigns.any { it.id == campId }
                     if (isOwnerApp) {
-                        onOwnerAppClick(campId)
+                        if (notif.isReport) onOwnerReportNotificationClick(campId)
+                        else onOwnerAppClick(campId)
                     } else {
                         onCampaignClick(campId)
                     }
@@ -277,6 +284,7 @@ fun HomeScreen(
         CreditHistoryDialog(
             logs = uiState.creditLogs,
             currentBalance = uiState.userCredits,
+            showLoadError = uiState.creditLogs.isEmpty() && uiState.creditLogsLoadFailed,
             onDismiss = { showCreditHistoryDialog = false }
         )
     }
@@ -307,13 +315,13 @@ fun HomeScreen(
             onDismissRequest = { appTargetReachedToConfirm = null },
             title = {
                 Text(
-                    text = "App đã đủ số lượng Test hôm nay",
+                    text = stringResource(R.string.home_target_dialog_title),
                     fontWeight = FontWeight.Bold,
                 )
             },
             text = {
                 Text(
-                    text = "Ứng dụng \"${item.campaign.appName}\" đã đạt mục tiêu ${item.dailyTarget} lượt test trong ngày hôm nay.\n\nBạn có muốn tiếp tục test không? (Nếu tiếp tục, bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit như bình thường).",
+                    text = stringResource(R.string.home_target_dialog_message_format, item.campaign.appName, item.dailyTarget),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             },
@@ -325,12 +333,12 @@ fun HomeScreen(
                         onCampaignClick(id)
                     }
                 ) {
-                    Text("Có, tiếp tục test")
+                    Text(stringResource(R.string.home_target_dialog_continue_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { appTargetReachedToConfirm = null }) {
-                    Text("Chọn app khác")
+                    Text(stringResource(R.string.home_target_dialog_other_btn))
                 }
             }
         )
@@ -374,11 +382,11 @@ fun HomeScreen(
                         )
                         IconButton(onClick = {
                             viewModel.clearCacheAndReload(context)
-                            Toast.makeText(context, "Đã dọn dẹp bộ nhớ đệm và làm mới dữ liệu!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.home_cache_cleared_toast), Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.CleaningServices,
-                                contentDescription = "Dọn dẹp bộ nhớ đệm",
+                                contentDescription = stringResource(R.string.home_clear_cache_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -393,7 +401,7 @@ fun HomeScreen(
                             Box(contentAlignment = Alignment.TopEnd) {
                                 Icon(
                                     imageVector = Icons.Filled.Notifications,
-                                    contentDescription = "Thông báo",
+                                    contentDescription = stringResource(R.string.notif_sheet_title),
                                 )
                                 if (unread > 0) {
                                     Box(
@@ -413,28 +421,39 @@ fun HomeScreen(
                                 }
                             }
                         }
-                        val initial = (uiState.userProfile?.displayName?.take(1)
-                            ?: uiState.userProfile?.email?.take(1)
+                        val avatarUrl = uiState.userProfile?.avatarUrl
+                        val initial = (uiState.userProfile?.displayName?.takeIf { it.isNotBlank() }?.take(1)
+                            ?: uiState.userProfile?.email?.takeIf { it.isNotBlank() }?.take(1)
                             ?: "N").uppercase()
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 12.dp)
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFC2185B))
-                                .clickable {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(4)
-                                    }
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = initial,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
+                        val avatarModifier = Modifier
+                            .padding(end = 12.dp)
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFC2185B))
+                            .clickable {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(4)
+                                }
+                            }
+                        if (!avatarUrl.isNullOrBlank()) {
+                            AsyncImage(
+                                model = avatarUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = avatarModifier,
                             )
+                        } else {
+                            Box(
+                                modifier = avatarModifier,
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = initial,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                )
+                            }
                         }
                     }
                 }
@@ -542,13 +561,18 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Bạn đang xem dữ liệu ngoại tuyến",
+                            text = stringResource(R.string.home_offline_banner),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             fontWeight = FontWeight.Medium,
                         )
                     }
                 }
+            }
+
+            // Bảng xếp hạng tải lazy khi người dùng mở tab (không chặn tải Trang chủ).
+            LaunchedEffect(pagerState.currentPage) {
+                if (pagerState.currentPage == 3) viewModel.ensureLeaderboardLoaded()
             }
 
             HorizontalPager(
@@ -607,6 +631,8 @@ fun HomeScreen(
                     myCampaigns = uiState.myCampaigns,
                     joinedCampaigns = uiState.joinedCampaigns,
                     ownerStatsMap = uiState.ownerStatsMap,
+                    joinedStatsMap = uiState.joinedStatsMap,
+                    ownerNameById = uiState.ownerNameById,
                     pendingReportsCount = uiState.pendingReportsCount,
                     isLoading = uiState.isLoading,
                     onRefresh = { viewModel.refresh(context, forceRefresh = true) },
@@ -615,13 +641,17 @@ fun HomeScreen(
                 )
                 3 -> LeaderboardTab(
                     leaderboard = uiState.leaderboard,
+                    testLeaderboard = uiState.testLeaderboard,
                     isLoading = uiState.isLeaderboardLoading,
+                    isTestLoading = uiState.isTestLeaderboardLoading,
                     onRefresh = { viewModel.refreshLeaderboard(forceRefresh = true) },
+                    onTestRefresh = { viewModel.refreshTestLeaderboard(forceRefresh = true) },
+                    onTestTabOpened = { viewModel.ensureTestLeaderboardLoaded() },
                 )
                 else -> ProfileScreen(
-                    onCampaignClick = onCampaignClick,
-                    onOwnerAppClick = onOwnerAppClick,
+                    isActive = pagerState.currentPage == 4,
                     onAdminPanelClick = onAdminPanelClick,
+                    onAdminReportsClick = onAdminReportsClick,
                     onSignedOut = onSignedOut,
                 )
             }
@@ -719,7 +749,7 @@ private fun DiscoverTab(
                             },
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
-                                .padding(bottom = 4.dp),
+                                .padding(top = 8.dp, bottom = 4.dp),
                         )
                     }
                 }
@@ -821,19 +851,33 @@ private fun HomeSubTab(
         selected = selected,
         onClick = onClick,
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = label,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
-                Text(
-                    text = count.toString(),
-                    fontSize = 10.sp,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(Modifier.width(4.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        .padding(horizontal = 5.dp, vertical = 1.dp),
+                ) {
+                    Text(
+                        text = count.toString(),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         },
     )
@@ -860,6 +904,8 @@ private fun MyTab(
     myCampaigns: List<Campaign>,
     joinedCampaigns: List<Campaign>,
     ownerStatsMap: Map<String, CampaignOwnerStats>,
+    joinedStatsMap: Map<String, CampaignStats>,
+    ownerNameById: Map<String, String>,
     pendingReportsCount: Int,
     isLoading: Boolean,
     onRefresh: () -> Unit,
@@ -961,14 +1007,14 @@ private fun MyTab(
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "$pendingReportsCount báo cáo chờ bạn duyệt",
+                                    text = stringResource(R.string.home_pending_reports_format, pendingReportsCount),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF4A148C),
                                 )
                                 Spacer(Modifier.height(2.dp))
                                 Text(
-                                    text = "Không duyệt trong 8h = tự chấp nhận. Duyệt để tặng +1 Credit cho tester.",
+                                    text = stringResource(R.string.home_pending_reports_hint),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFF6A1B9A),
                                 )
@@ -1001,13 +1047,13 @@ private fun MyTab(
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
-                                text = "Bạn chưa đăng ứng dụng nào",
+                                text = stringResource(R.string.home_owner_empty_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "Bấm \"+ Đăng app\" bên dưới để bắt đầu nhận 20 testers hỗ trợ kiểm thử chéo.",
+                                text = stringResource(R.string.home_owner_empty_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
@@ -1037,7 +1083,15 @@ private fun MyTab(
                     )
                 }
                 itemsIndexed(joinedCampaigns, key = { index, item -> "joined_${item.id ?: item.packageName}_$index" }) { _, campaign ->
-                    CampaignCard(campaign, onClick = { campaign.id?.let(onCampaignClick) })
+                    val stats = campaign.id?.let { joinedStatsMap[it] }
+                    CampaignCard(
+                        campaign = campaign,
+                        onClick = { campaign.id?.let(onCampaignClick) },
+                        ownerName = campaign.ownerId?.let { ownerNameById[it] }.orEmpty(),
+                        installedCount = stats?.installedCount ?: 0,
+                        todayTestedCount = stats?.todayTestedCount ?: 0,
+                        hasTestedToday = stats?.hasTestedToday ?: false,
+                    )
                 }
             }
 
@@ -1047,19 +1101,38 @@ private fun MyTab(
     }
 }
 
+// Tạm ẩn sub-tab "Top Test" trong tab Xếp hạng. Đổi thành true để bật lại.
+private const val SHOW_LEADERBOARD_TEST_TAB = false
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LeaderboardTab(
     modifier: Modifier = Modifier,
     leaderboard: List<LeaderboardUser>,
+    testLeaderboard: List<LeaderboardUser>,
     isLoading: Boolean,
+    isTestLoading: Boolean,
     onRefresh: () -> Unit,
+    onTestRefresh: () -> Unit,
+    onTestTabOpened: () -> Unit,
 ) {
-    val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    val isTestTab = SHOW_LEADERBOARD_TEST_TAB && selectedTab == 1
+    val activeList = if (isTestTab) testLeaderboard else leaderboard
+    val activeLoading = if (isTestTab) isTestLoading else isLoading
+
+    val creditListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val testListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val listState = if (isTestTab) testListState else creditListState
+
+    // Tải lazy bảng Top Test khi người dùng mở sub-tab.
+    LaunchedEffect(selectedTab) {
+        if (isTestTab) onTestTabOpened()
+    }
 
     PullToRefreshBox(
-        isRefreshing = isLoading,
-        onRefresh = onRefresh,
+        isRefreshing = activeLoading,
+        onRefresh = if (isTestTab) onTestRefresh else onRefresh,
         modifier = modifier.fillMaxSize(),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -1069,19 +1142,49 @@ private fun LeaderboardTab(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.leaderboard_title),
+                    text = stringResource(if (isTestTab) R.string.leaderboard_test_title else R.string.leaderboard_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.leaderboard_subtitle),
+                    text = stringResource(if (isTestTab) R.string.leaderboard_test_subtitle else R.string.leaderboard_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            if (leaderboard.isEmpty() && !isLoading) {
+            TabRow(
+                selectedTabIndex = if (SHOW_LEADERBOARD_TEST_TAB) selectedTab else 0,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                Tab(
+                    selected = !isTestTab,
+                    onClick = { selectedTab = 0 },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.leaderboard_tab_credit),
+                            fontWeight = if (!isTestTab) FontWeight.Bold else FontWeight.Medium,
+                        )
+                    },
+                )
+                if (SHOW_LEADERBOARD_TEST_TAB) {
+                    Tab(
+                        selected = isTestTab,
+                        onClick = { selectedTab = 1 },
+                        text = {
+                            Text(
+                                text = stringResource(R.string.leaderboard_tab_test),
+                                fontWeight = if (isTestTab) FontWeight.Bold else FontWeight.Medium,
+                            )
+                        },
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if (activeList.isEmpty() && !activeLoading) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -1089,7 +1192,7 @@ private fun LeaderboardTab(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = stringResource(R.string.leaderboard_empty),
+                        text = stringResource(if (isTestTab) R.string.leaderboard_test_empty else R.string.leaderboard_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -1102,7 +1205,7 @@ private fun LeaderboardTab(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    itemsIndexed(leaderboard, key = { index, user -> "lb_${user.userId}_$index" }) { _, user ->
+                    itemsIndexed(activeList, key = { index, user -> "lb_${selectedTab}_${user.userId}_$index" }) { _, user ->
                         LeaderboardUserCard(user = user)
                     }
                     item { Spacer(Modifier.height(24.dp)) }

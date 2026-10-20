@@ -4,9 +4,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
@@ -32,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,25 +43,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
-
-private val GreenDark = Color(0xFF2E7D32)
-private val GreenLightBg = Color(0xFFE8F5E9)
-private val GreenBorder = Color(0xFFA5D6A7)
-
-private val AmberDark = Color(0xFFE65100)
-private val AmberLightBg = Color(0xFFFFF8E1)
-private val AmberBorder = Color(0xFFFFCC80)
-
-private val RedDark = Color(0xFFC62828)
-private val RedLightBg = Color(0xFFFFEBEE)
-private val RedBorder = Color(0xFFEF9A9A)
+import com.ntt.crosstest.ui.theme.TaskAmberText
+import com.ntt.crosstest.ui.theme.TaskAmberTextDark
+import com.ntt.crosstest.ui.theme.TaskGreenText
+import com.ntt.crosstest.ui.theme.TaskGreenTextDark
+import com.ntt.crosstest.ui.theme.TaskRedText
+import com.ntt.crosstest.ui.theme.TaskRedTextDark
 
 @Composable
 fun DailyTaskCard(
@@ -75,18 +68,17 @@ fun DailyTaskCard(
 ) {
     var showPenaltyDialog by rememberSaveable { mutableStateOf(false) }
 
+    val isDark = isSystemInDarkTheme()
     val isCompleted = todayCheckinCount >= 1
-    val isPending = !isCompleted
 
-    val (containerBg, borderColor, iconTint) = when {
-        !isAuthenticated -> Triple(
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-            MaterialTheme.colorScheme.outlineVariant,
-            MaterialTheme.colorScheme.primary
-        )
-        isCompleted -> Triple(GreenLightBg, GreenBorder, GreenDark)
-        missedStreak > 0 -> Triple(RedLightBg, RedBorder, RedDark)
-        else -> Triple(AmberLightBg, AmberBorder, AmberDark)
+    val accentAmber = if (isDark) TaskAmberTextDark else TaskAmberText
+    val accentGreen = if (isDark) TaskGreenTextDark else TaskGreenText
+    val accentRed = if (isDark) TaskRedTextDark else TaskRedText
+
+    val accentColor = when {
+        !isAuthenticated -> MaterialTheme.colorScheme.primary
+        missedStreak > 0 -> accentRed
+        else -> accentAmber
     }
 
     if (showPenaltyDialog) {
@@ -126,12 +118,12 @@ fun DailyTaskCard(
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
                 .clickable { showPenaltyDialog = true },
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = containerBg),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         ) {
             Row(
                 modifier = Modifier
@@ -147,7 +139,7 @@ fun DailyTaskCard(
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = null,
-                        tint = GreenDark,
+                        tint = accentGreen,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(8.dp))
@@ -155,7 +147,7 @@ fun DailyTaskCard(
                         text = stringResource(R.string.daily_quest_completed_compact, todayCheckinCount),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = GreenDark,
+                        color = accentGreen,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -164,7 +156,7 @@ fun DailyTaskCard(
                 Icon(
                     imageVector = Icons.Filled.Info,
                     contentDescription = stringResource(R.string.daily_penalty_info_btn),
-                    tint = GreenDark.copy(alpha = 0.65f),
+                    tint = accentGreen.copy(alpha = 0.65f),
                     modifier = Modifier.size(16.dp),
                 )
             }
@@ -175,9 +167,9 @@ fun DailyTaskCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp)),
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = containerBg),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(
@@ -185,85 +177,36 @@ fun DailyTaskCard(
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            // Header Row: [Badge Icon + Title] ---------------- [Info Button]
+            // Row 1: [Badge Icon] --------- [Title] --------- [Info Button]
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f),
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(accentColor.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.8f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = when {
-                                !isAuthenticated -> Icons.Filled.Security
-                                isCompleted -> Icons.Filled.CheckCircle
-                                missedStreak > 0 -> Icons.Filled.Warning
-                                else -> Icons.Filled.Warning
-                            },
-                            contentDescription = null,
-                            tint = iconTint,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-
-                    Spacer(Modifier.width(10.dp))
-
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = stringResource(R.string.daily_quest_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            // Status Pill
-                            val (statusText, statusBg, statusColor) = when {
-                                !isAuthenticated -> Triple(
-                                    "Khách",
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                isCompleted -> Triple(
-                                    stringResource(R.string.daily_quest_completed),
-                                    GreenDark.copy(alpha = 0.15f),
-                                    GreenDark
-                                )
-                                missedStreak > 0 -> Triple(
-                                    "Vắng $missedStreak ngày ⚠️",
-                                    RedDark.copy(alpha = 0.15f),
-                                    RedDark
-                                )
-                                else -> Triple(
-                                    stringResource(R.string.daily_quest_pending),
-                                    AmberDark.copy(alpha = 0.15f),
-                                    AmberDark
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(statusBg)
-                                    .padding(horizontal = 7.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = statusText,
-                                    color = statusColor,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                        }
-                    }
+                    Icon(
+                        imageVector = if (!isAuthenticated) Icons.Filled.Security else Icons.Filled.Warning,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
+
+                Spacer(Modifier.width(10.dp))
+
+                Text(
+                    text = stringResource(R.string.daily_quest_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
 
                 IconButton(
                     onClick = { showPenaltyDialog = true },
@@ -280,42 +223,67 @@ fun DailyTaskCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Progress Row
-            val progressTarget = 1
-            val currentProgress = if (isCompleted) 1 else 0
-            val animatedProgress by animateFloatAsState(
-                targetValue = if (isCompleted) 1f else 0f,
-                label = "dailyProgress"
-            )
-
+            // Row 2: [Status Pill] --------------------- [Progress Count]
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val (statusText, statusBg, statusTextColor) = when {
+                    !isAuthenticated -> Triple(
+                        stringResource(R.string.daily_guest_badge),
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    missedStreak > 0 -> Triple(
+                        stringResource(R.string.daily_missed_badge, missedStreak),
+                        accentRed.copy(alpha = 0.12f),
+                        accentRed
+                    )
+                    else -> Triple(
+                        stringResource(R.string.daily_quest_pending),
+                        accentAmber.copy(alpha = 0.12f),
+                        accentAmber
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(statusBg)
+                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = statusText,
+                        color = statusTextColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                }
+
                 Text(
-                    text = "Yêu cầu: Test 1 app / ngày",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = stringResource(R.string.daily_quest_progress, currentProgress),
+                    text = stringResource(R.string.daily_quest_progress, if (isCompleted) 1 else 0),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    color = if (isCompleted) GreenDark else AmberDark,
+                    color = accentColor,
                 )
             }
 
-            Spacer(Modifier.height(5.dp))
+            Spacer(Modifier.height(6.dp))
+
+            val animatedProgress by animateFloatAsState(
+                targetValue = if (isCompleted) 1f else 0f,
+                label = "dailyProgress"
+            )
 
             LinearProgressIndicator(
                 progress = { animatedProgress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(7.dp)
+                    .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = if (isCompleted) GreenDark else if (missedStreak > 0) RedDark else AmberDark,
-                trackColor = Color.White.copy(alpha = 0.6f),
+                color = accentColor,
+                trackColor = accentColor.copy(alpha = 0.2f),
             )
 
             Spacer(Modifier.height(10.dp))
@@ -338,39 +306,7 @@ fun DailyTaskCard(
                         Text(stringResource(R.string.login_now), fontWeight = FontWeight.Bold)
                     }
                 }
-                isCompleted -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.daily_quest_safe),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = GreenDark,
-                            )
-                            Text(
-                                text = "Đã check-in $todayCheckinCount app · Số dư: $userCredits Credit an toàn hôm nay",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        TextButton(
-                            onClick = { showPenaltyDialog = true },
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 2.dp),
-                        ) {
-                            Text(
-                                text = "Xem quy định",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                }
                 else -> {
-                    // Pending state
                     val warningMsg = if (missedStreak > 0) {
                         val nextPct = when (missedStreak) {
                             1 -> 2
@@ -385,7 +321,7 @@ fun DailyTaskCard(
                     Text(
                         text = warningMsg,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (missedStreak > 0) RedDark else AmberDark,
+                        color = accentColor,
                         fontWeight = FontWeight.Medium,
                         lineHeight = 18.sp,
                     )
@@ -402,27 +338,28 @@ fun DailyTaskCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (missedStreak > 0) RedDark else AmberDark
+                                containerColor = if (missedStreak > 0) accentRed else MaterialTheme.colorScheme.primary
                             ),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         ) {
                             Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = stringResource(R.string.daily_task_test_now),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
 
-                        OutlinedButton(
+                        TextButton(
                             onClick = { showPenaltyDialog = true },
                             shape = RoundedCornerShape(10.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                         ) {
                             Text(
-                                text = "Quy định phạt",
-                                fontSize = 12.sp,
+                                text = stringResource(R.string.daily_penalty_info_btn),
+                                maxLines = 1,
                             )
                         }
                     }

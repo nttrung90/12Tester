@@ -3,13 +3,14 @@ package com.ntt.crosstest.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.ui.screens.AccountLockedScreen
+import com.ntt.crosstest.ui.screens.AdminReportsScreen
 import com.ntt.crosstest.ui.screens.AdminUsersScreen
 import com.ntt.crosstest.ui.screens.AuthScreen
 import com.ntt.crosstest.ui.screens.CampaignDetailScreen
@@ -23,30 +24,35 @@ object Routes {
     const val AUTH = "auth"
     const val HOME = "home"
     const val CAMPAIGN_DETAIL = "campaign/{campaignId}"
-    const val OWNER_APP_DETAIL = "owner_app/{campaignId}"
+    const val OWNER_APP_DETAIL = "owner_app/{campaignId}?openReports={openReports}"
     const val CREATE = "create"
     const val POST_APP_GUIDE = "post_app_guide"
     const val ADMIN_USERS = "admin_users"
+    const val ADMIN_REPORTS = "admin_reports"
     const val ACCOUNT_LOCKED = "account_locked"
 
     fun campaignDetail(campaignId: String) = "campaign/$campaignId"
-    fun ownerAppDetail(campaignId: String) = "owner_app/$campaignId"
+    fun ownerAppDetail(campaignId: String, openReports: Boolean = false) =
+        "owner_app/$campaignId?openReports=$openReports"
 }
 
 @Composable
-fun NavGraph(startDestination: String) {
-    val navController = rememberNavController()
+fun NavGraph(navController: NavHostController, startDestination: String) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.AUTH) {
             AuthScreen(
                 onSignedIn = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.AUTH) { inclusive = true }
+                    if (navController.currentDestination?.route == Routes.AUTH) {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.AUTH) { inclusive = true }
+                        }
                     }
                 },
                 onContinueAsGuest = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.AUTH) { inclusive = true }
+                    if (navController.currentDestination?.route == Routes.AUTH) {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.AUTH) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -55,15 +61,21 @@ fun NavGraph(startDestination: String) {
             HomeScreen(
                 onCampaignClick = { id -> navController.navigate(Routes.campaignDetail(id)) },
                 onOwnerAppClick = { id -> navController.navigate(Routes.ownerAppDetail(id)) },
+                onOwnerReportNotificationClick = { id ->
+                    navController.navigate(Routes.ownerAppDetail(id, openReports = true))
+                },
                 onCreateClick = { navController.navigate(Routes.CREATE) },
                 onAdminPanelClick = { navController.navigate(Routes.ADMIN_USERS) },
+                onAdminReportsClick = { navController.navigate(Routes.ADMIN_REPORTS) },
                 onAccountLocked = {
                     navController.navigate(Routes.ACCOUNT_LOCKED) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
                 },
                 onSignedOut = {
-                    navController.navigate(Routes.AUTH) { popUpTo(0) }
+                    if (navController.currentDestination?.route != Routes.AUTH) {
+                        navController.navigate(Routes.AUTH) { popUpTo(0) }
+                    }
                 },
             )
         }
@@ -94,11 +106,19 @@ fun NavGraph(startDestination: String) {
         }
         composable(
             route = Routes.OWNER_APP_DETAIL,
-            arguments = listOf(navArgument("campaignId") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("campaignId") { type = NavType.StringType },
+                navArgument("openReports") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+            ),
         ) { backStackEntry ->
             val campaignId = backStackEntry.arguments?.getString("campaignId").orEmpty()
+            val openReports = backStackEntry.arguments?.getBoolean("openReports") == true
             OwnerAppDetailScreen(
                 campaignId = campaignId,
+                openReports = openReports,
                 onBack = { navController.popBackStack() },
                 onAccountLocked = {
                     navController.navigate(Routes.ACCOUNT_LOCKED) {
@@ -132,6 +152,11 @@ fun NavGraph(startDestination: String) {
                 onBack = { navController.popBackStack() },
             )
         }
+        composable(Routes.ADMIN_REPORTS) {
+            AdminReportsScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
         composable(Routes.ACCOUNT_LOCKED) {
             AccountLockedScreen(
                 onUnlocked = {
@@ -140,7 +165,9 @@ fun NavGraph(startDestination: String) {
                     }
                 },
                 onSignedOut = {
-                    navController.navigate(Routes.AUTH) { popUpTo(0) }
+                    if (navController.currentDestination?.route != Routes.AUTH) {
+                        navController.navigate(Routes.AUTH) { popUpTo(0) }
+                    }
                 }
             )
         }

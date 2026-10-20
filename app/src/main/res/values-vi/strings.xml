@@ -17,13 +17,13 @@
     <!-- Home sub-tabs -->
     <string name="home_tab_need_test">App cần Test</string>
     <string name="home_tab_paused">App tạm dừng</string>
-    <string name="home_tab_completed">Đã hoàn thành KT</string>
+    <string name="home_tab_completed">Đã hoàn thành</string>
     <string name="home_empty_open">Chưa có app nào cần test.</string>
     <string name="home_empty_paused">Không có app nào đang tạm dừng.</string>
     <string name="home_empty_completed">Chưa có app nào hoàn thành kiểm thử.</string>
     <string name="home_tested_progress_format">%1$d/%2$d app</string>
     <string name="home_paused_hint">App tạm dừng do chủ app vắng nhiệm vụ ngày 3 ngày liên tục hoặc tự tạm dừng. Chủ app bật lại để app về tab App cần Test.</string>
-    <string name="home_completed_hint">App đã lên production hoặc đã hết 15 ngày hiển thị kiểm thử.</string>
+    <string name="home_completed_hint">App đã lên production hoặc đã hết 30 ngày hiển thị kiểm thử.</string>
     <string name="post_app_btn">Đăng APP</string>
     <string name="post_app_title">Đăng app của tôi</string>
     <!-- Post App Guide & Banner -->
@@ -45,7 +45,7 @@
     <string name="post_app_guide_step_3">Chọn Kiểm thử và phát hành</string>
     <string name="post_app_guide_step_4">Thử nghiệm -&gt; Thử nghiệm khép kín</string>
     <string name="post_app_guide_step_5">Nhân viên kiểm thử</string>
-    <string name="post_app_guide_step_6">Nhập Google Group: testappLV@googlegroups.com</string>
+    <string name="post_app_guide_step_6">Nhập Google Group (chú ý việc nhập này chỉ thêm nhóm để tham gia test, không ảnh hưởng đến nhóm hiện tại của bạn): testappLV@googlegroups.com</string>
     <string name="post_app_guide_group_email">testappLV@googlegroups.com</string>
     <string name="post_app_guide_group_email_label">Email Google Group:</string>
     <string name="post_app_guide_copy_email_btn">Sao chép email</string>
@@ -54,7 +54,7 @@
     <string name="post_app_guide_cant_open_browser">Không thể mở trình duyệt</string>
     <string name="post_app_slot_usage">Chỗ đang dùng: %1$d/%2$d.</string>
     <string name="post_app_slot_dialog_title">Quy định chỗ đăng app</string>
-    <string name="post_app_slot_dialog_msg">Mỗi tài khoản có sẵn 1 slot mặc định vĩnh viễn và có thể mở khóa thêm tối đa 6 slot (mỗi slot mở thêm hoạt động trong 16 ngày).\n\n• Slot 2: 50 Credit\n• Slot 3: 100 Credit\n• Slot 4 - 6: 200 Credit/slot\n\nBạn có thể mở khóa thêm để chạy đồng thời nhiều app Closed Testing hoặc đóng app đã xong để giải phóng slot.</string>
+    <string name="post_app_slot_dialog_msg">Mỗi tài khoản có sẵn 1 slot mặc định vĩnh viễn và có thể mở khóa thêm tối đa 6 slot (mỗi slot mở thêm hoạt động trong 30 ngày).\n\n• Slot 2: 50 Credit\n• Slot 3: 100 Credit\n• Slot 4 - 6: 200 Credit/slot\n\nBạn có thể mở khóa thêm để chạy đồng thời nhiều app Closed Testing hoặc đóng app đã xong để giải phóng slot.</string>
     <string name="slot_number_title">Slot %1$d</string>
     <string name="slot_default_badge">Mặc định · Vĩnh viễn</string>
     <string name="slot_active_days">Còn %1$d ngày</string>
@@ -63,17 +63,17 @@
     <string name="slot_in_use">Đang chạy</string>
     <string name="slot_empty">Còn trống</string>
     <string name="slot_unlock_btn">Mở khóa (%1$d C)</string>
-    <string name="slot_renew_btn">Gia hạn (+16 ngày)</string>
+    <string name="slot_renew_btn">Gia hạn (+30 ngày)</string>
     <string name="slot_unlock_dialog_title">Mở khóa Slot %1$d</string>
     <string name="slot_renew_dialog_title">Gia hạn Slot %1$d</string>
-    <string name="slot_unlock_dialog_desc">Mở khóa thêm chỗ đăng app thứ %1$d trong 16 ngày với chi phí %2$d Credit. Bạn có muốn mở khóa ngay?</string>
-    <string name="slot_renew_dialog_desc">Gia hạn thêm 16 ngày cho Slot %1$d với chi phí %2$d Credit. Bạn có muốn gia hạn ngay?</string>
+    <string name="slot_unlock_dialog_desc">Mở khóa thêm chỗ đăng app thứ %1$d trong 30 ngày với chi phí %2$d Credit. Bạn có muốn mở khóa ngay?</string>
+    <string name="slot_renew_dialog_desc">Gia hạn thêm 30 ngày cho Slot %1$d với chi phí %2$d Credit. Bạn có muốn gia hạn ngay?</string>
     <string name="slot_unlock_confirm_btn">Mở khóa ngay (%1$d Credit)</string>
     <string name="slot_renew_confirm_btn">Gia hạn ngay (%1$d Credit)</string>
-    <string name="slot_unlock_success">Mở khóa Slot %1$d thành công (thời hạn 16 ngày)!</string>
-    <string name="slot_renew_success">Gia hạn Slot %1$d thành công (+16 ngày)!</string>
+    <string name="slot_unlock_success">Mở khóa Slot %1$d thành công (thời hạn 30 ngày)!</string>
+    <string name="slot_renew_success">Gia hạn Slot %1$d thành công (+30 ngày)!</string>
     <string name="slot_manage_title">Quản lý Slot đăng app</string>
-    <string name="slot_manage_subtitle">Tối đa 6 slot. Mỗi slot mở thêm hoạt động trong 16 ngày.</string>
+    <string name="slot_manage_subtitle">Tối đa 6 slot. Mỗi slot mở thêm hoạt động trong 30 ngày.</string>
     <string name="slot_select_label">Chọn Slot để đăng app:</string>
     <string name="error_slot_previous_not_active">Bạn cần mở/kích hoạt Slot %1$d trước khi mở Slot %2$d.</string>
     <string name="error_insufficient_credits_for_slot">Bạn cần %1$d Credit để mở slot này (hiện có %2$d Credit).</string>
@@ -82,7 +82,7 @@
     <string name="hint_play_store_link">https://play.google.com/store/a...</string>
     <string name="helper_play_store_link">Dán link app từ Play Console / Play Store. App tự điền package, tên, icon bên dưới.</string>
     <string name="section_app_info">Thông tin app</string>
-    <string name="label_package_name">Package name</string>
+    <string name="label_package_name">Tên gói (Package name)</string>
     <string name="helper_package_name">Tự lấy từ link. Giống applicationId trong Play Console.</string>
     <string name="label_app_name_optional">Tên app (tùy chọn)</string>
     <string name="helper_app_name_optional">Để trống cũng được: khi bạn cài app lên máy này rồi mở nó trong \"App của tôi\", app tự lấy tên + icon điền vào. Bot tester cũng điền sau &lt;= 1 tiếng.</string>
@@ -108,6 +108,11 @@
     <string name="leaderboard_title">Bảng xếp hạng Credit</string>
     <string name="leaderboard_subtitle">Top thành viên có số dư Credit cao nhất cộng đồng</string>
     <string name="leaderboard_empty">Chưa có thành viên nào trên bảng xếp hạng.</string>
+    <string name="leaderboard_tab_credit">Top Credit</string>
+    <string name="leaderboard_tab_test">Top Test</string>
+    <string name="leaderboard_test_title">Bảng xếp hạng Test</string>
+    <string name="leaderboard_test_subtitle">Top thành viên thực hiện nhiều lượt test nhất cộng đồng</string>
+    <string name="leaderboard_test_empty">Chưa có lượt test nào trên bảng xếp hạng.</string>
     <string name="test_count_format">%1$d lượt test</string>
     <string name="app_count_format">%1$d app</string>
     <string name="rank_format">#%1$d</string>
@@ -116,7 +121,6 @@
     <string name="search_hint">Tìm theo tên app…</string>
     <string name="create_campaign">Tạo chiến dịch</string>
     <string name="empty_list">Chưa có dữ liệu.</string>
-    <string name="created_by_me">Chiến dịch tôi đã tạo</string>
     <string name="joined_by_me">Chiến dịch tôi đã tham gia</string>
     <string name="target_line">Mục tiêu: %1$d tester · %2$d ngày</string>
     <string name="status_open">Đang mở</string>
@@ -147,7 +151,7 @@
 
     <!-- Create -->
     <string name="label_app_name">Tên app *</string>
-    <string name="label_package">Package name *</string>
+    <string name="label_package">Tên gói (Package name) *</string>
     <string name="label_play_url">Link Play Store</string>
     <string name="label_testing_url">Link testing track</string>
     <string name="label_description">Mô tả</string>
@@ -170,18 +174,18 @@
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Nhiệm vụ hôm nay</string>
     <string name="daily_quest_desc">Test ít nhất 1 app hôm nay để duy trì chuỗi và nhận thưởng</string>
-    <string name="daily_quest_completed">✓ Đã hoàn thành nhiệm vụ</string>
+    <string name="daily_quest_completed">Đã hoàn thành nhiệm vụ</string>
     <string name="daily_quest_completed_compact">Đã hoàn thành nhiệm vụ ngày (%1$d app)</string>
     <string name="daily_quest_pending">Chưa hoàn thành</string>
-    <string name="daily_quest_warning">⚠️ Hãy test ít nhất 1 app trước 24:00 để tránh bị trừ %% Credit vắng mặt!</string>
+    <string name="daily_quest_warning">Hãy test ít nhất 1 app trước 24:00 để tránh bị trừ %% Credit vắng mặt!</string>
     <string name="daily_quest_safe">Điểm Credit của bạn hôm nay đã được bảo vệ an toàn.</string>
-    <string name="daily_quest_progress">%1$d/1 app</string>
+    <string name="daily_quest_progress">%1$d/1</string>
     <string name="daily_reward_progress">Đã nhận thưởng %1$d/30 app hôm nay (+%2$d Credit)</string>
     <string name="daily_task_goal">Mục tiêu: Test tối thiểu 1 app hôm nay để bảo vệ điểm Credit khỏi cơ chế phạt vắng mặt.</string>
     <string name="daily_penalty_info_btn">Cơ chế trừ điểm</string>
     <string name="daily_penalty_dialog_title">Cơ chế trừ điểm vắng mặt hàng ngày</string>
-    <string name="daily_penalty_dialog_content">Hệ thống quét tự động lúc 00:05 mỗi ngày (theo giờ Việt Nam). Nếu bạn không test app nào trong ngày hôm trước, tài khoản sẽ bị trừ Credit theo số ngày vắng mặt liên tiếp:\n\n• Ngày 1 vắng mặt: Trừ 1% Credit\n• Ngày 2 vắng mặt: Trừ 2% Credit\n• Ngày 3 vắng mặt: Trừ 5% Credit\n• Ngày 4 trở đi: Trừ 10% Credit\n(Tối thiểu trừ 1 Credit/ngày nếu số dư &gt; 0)\n\n💡 Chỉ cần mở và test ít nhất 1 app hợp lệ trước 24:00 mỗi ngày, điểm Credit của bạn sẽ được bảo vệ tuyệt đối và chuỗi vắng mặt sẽ được đặt lại về 0!</string>
-    <string name="daily_task_test_now">Tìm app test ngay 🚀</string>
+    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống quét tự động lúc 00:05 mỗi ngày (theo giờ Việt Nam). Nếu bạn không test app nào trong ngày hôm trước, tài khoản sẽ bị trừ Credit theo số ngày vắng mặt liên tiếp:\n\n• Ngày 1 vắng mặt: Trừ 1% Credit\n• Ngày 2 vắng mặt: Trừ 2% Credit\n• Ngày 3 vắng mặt: Trừ 5% Credit\n• Ngày 4 trở đi: Trừ 10% Credit\n(Tối thiểu trừ 1 Credit/ngày nếu số dư &gt; 0)\n\n💡 Chỉ cần mở và test ít nhất 1 app hợp lệ trước 24:00 mỗi ngày, điểm Credit của bạn sẽ được bảo vệ tuyệt đối và chuỗi vắng mặt sẽ được đặt lại về 0!</string>
+    <string name="daily_task_test_now">Tìm app test ngay</string>
     <string name="daily_missed_streak_alert">Đang bỏ lỡ %1$d ngày liên tiếp! Sẽ bị trừ %2$d%% Credit nếu không test hôm nay.</string>
     <string name="daily_guest_prompt">Đăng nhập để điểm danh test app hàng ngày và bảo vệ điểm Credit khỏi cơ chế phạt tự động.</string>
 
@@ -208,9 +212,11 @@
     <string name="quest_require_login">Vui lòng đăng nhập để theo dõi và nhận thưởng nhiệm vụ</string>
 
     <string name="credit_badge_format">%1$d Credit</string>
+    <string name="credit_unknown">—</string>
     <string name="credit_title">Số dư Credit</string>
     <string name="credit_history_title">Lịch sử Credit</string>
     <string name="credit_history_empty">Chưa có biến động điểm nào.</string>
+    <string name="credit_history_load_failed">Không tải được lịch sử Credit. Vui lòng thử lại.</string>
     <string name="missed_streak_warning">Cảnh báo: Bỏ lỡ %1$d ngày liên tiếp!</string>
     <string name="create_campaign_credit_warning">⚠️ Bạn cần có trên 10 Credit để tạo chiến dịch mới (Hiện có %1$d Credit). Vui lòng tham gia test app của người khác để kiếm thêm Credit!</string>
     <string name="insufficient_credits_error">Bạn cần có trên 10 Credit để tạo chiến dịch.</string>
@@ -272,6 +278,20 @@
     <string name="change_password_error_match">Mật khẩu xác nhận không khớp!</string>
     <string name="change_password_error_short">Mật khẩu phải có ít nhất 6 ký tự!</string>
 
+    <!-- Contact & Bug Report -->
+    <string name="contact_title">Liên hệ &amp; Báo cáo lỗi</string>
+    <string name="contact_desc">Gửi tin nhắn hoặc báo lỗi trực tiếp cho Admin</string>
+    <string name="contact_dialog_title">Liên hệ Admin</string>
+    <string name="contact_dialog_desc">Mô tả lỗi bạn gặp phải hoặc nội dung cần liên hệ. Phiên bản app và thông tin thiết bị sẽ được gửi kèm tự động.</string>
+    <string name="contact_category_bug">Báo lỗi</string>
+    <string name="contact_category_feedback">Góp ý</string>
+    <string name="contact_category_other">Khác</string>
+    <string name="contact_message_hint">Nội dung…</string>
+    <string name="contact_send">Gửi</string>
+    <string name="contact_message_required">Vui lòng nhập nội dung.</string>
+    <string name="contact_send_success">Đã gửi tới Admin. Cảm ơn bạn!</string>
+    <string name="contact_send_failed_format">Gửi thất bại: %1$s</string>
+
     <!-- Validation & Auth Errors -->
     <string name="error_empty_email">Vui lòng nhập địa chỉ email.</string>
     <string name="error_invalid_email">Địa chỉ email không đúng định dạng.</string>
@@ -331,6 +351,14 @@
     <string name="update_checking">Đang kiểm tra bản cập nhật…</string>
     <string name="update_already_latest">Bạn đang sử dụng phiên bản mới nhất (%1$s).</string>
     <string name="update_check_failed">Không thể kiểm tra bản cập nhật. Vui lòng thử lại sau.</string>
+    <string name="update_check_failed_title">Không thể kiểm tra bản cập nhật</string>
+    <string name="update_check_failed_store_hint">Bạn có thể thử lại sau hoặc mở Play Store để kiểm tra trực tiếp bản mới hơn.</string>
+    <string name="update_latest_title">Bạn đang dùng phiên bản mới nhất</string>
+    <string name="update_latest_desc">Bạn đang dùng phiên bản %1$s (Build %2$d). Nếu Play Store đã có bản mới hơn, hãy mở Play Store để cập nhật.</string>
+    <string name="update_open_store_hint">Bạn sẽ được chuyển đến Play Store để cập nhật.</string>
+    <string name="update_new_build">Bản mới trên Play Store (Build %1$d)</string>
+    <string name="update_btn_open_store">Mở Play Store</string>
+    <string name="update_btn_close">Đóng</string>
     <string name="update_btn_exit">Thoát ứng dụng</string>
     <string name="admin_update_config_title">Cấu hình cập nhật ứng dụng</string>
     <string name="admin_update_config_desc">Quản lý phiên bản tối thiểu và phiên bản mới nhất hiển thị cho người dùng.</string>
@@ -347,4 +375,658 @@
     <string name="notif_update_title">Đã có bản cập nhật mới</string>
     <string name="notif_update_text">Phiên bản %1$s đã sẵn sàng. Bấm để cập nhật.</string>
     <string name="app_version_format">Phiên bản %1$s (Build %2$d)</string>
+
+    <!-- Campaign card -->
+    <string name="campaign_badge_production">Lên production</string>
+    <string name="campaign_badge_completed">Hoàn thành KT</string>
+    <string name="campaign_badge_paused">Tạm dừng</string>
+    <string name="campaign_owner_fallback">Chủ app</string>
+    <string name="campaign_badge_installed">Đã cài</string>
+    <string name="campaign_badge_not_installed">Chưa cài</string>
+    <string name="campaign_tested_today">Đã test hôm nay</string>
+    <string name="campaign_not_tested_today">Chưa test hôm nay</string>
+    <string name="campaign_stats_line_format">%1$d/%2$d hôm nay · %3$d người đã cài</string>
+    <string name="campaign_days_left_suffix"> · Còn %1$d ngày</string>
+    <string name="campaign_target_reached">· Đủ chỉ tiêu</string>
+
+    <!-- My App card -->
+    <string name="my_app_slot_default">Slot 1 (Mặc định)</string>
+    <string name="my_app_status_production">🚀 Production</string>
+    <string name="my_app_status_completed">✅ Hoàn thành KT</string>
+    <string name="my_app_status_paused">⏸ Tạm dừng</string>
+    <string name="my_app_status_testing">▶ Đang test</string>
+    <string name="my_app_installed_count">%1$d đã cài</string>
+    <string name="my_app_tested_today_count">%1$d test hôm nay</string>
+    <string name="my_app_tester_badge">Nhân viên kiểm thử</string>
+    <string name="my_app_pending_review">chờ duyệt</string>
+
+    <!-- Daily task card -->
+    <string name="daily_guest_badge">Khách</string>
+    <string name="daily_missed_badge">Vắng %1$d ngày</string>
+    <string name="daily_checked_in_summary_format">Đã check-in %1$d app · Số dư: %2$d Credit an toàn hôm nay</string>
+    <string name="daily_view_rules">Xem quy định</string>
+
+    <!-- Notification bottom sheet -->
+    <string name="notif_filter_all">Tất cả</string>
+    <string name="notif_filter_unread">Chưa đọc</string>
+    <string name="notif_filter_account_credit">Tài khoản &amp; Xu</string>
+    <string name="notif_filter_reports">Báo cáo test</string>
+    <string name="notif_filter_admin">Hệ thống &amp; Admin</string>
+    <string name="notif_sheet_title">Thông báo</string>
+    <string name="notif_mark_all_read">Đọc tất cả</string>
+    <string name="close">Đóng</string>
+    <string name="notif_empty_read_all">Bạn đã đọc hết tất cả thông báo!</string>
+    <string name="notif_empty_none">Chưa có thông báo nào</string>
+    <string name="notif_empty_desc">Các cập nhật về biến động Credit, kết quả kiểm thử và thông báo từ Admin sẽ xuất hiện tại đây.</string>
+    <string name="notif_delete">Xóa thông báo</string>
+    <string name="time_just_now">Vừa xong</string>
+    <string name="time_minutes_ago">%1$d phút trước</string>
+    <string name="time_hours_ago">%1$d giờ trước</string>
+    <string name="time_days_ago">%1$d ngày trước</string>
+
+    <!-- Quest section -->
+    <string name="quest_claimable_badge">%1$d nhận ngay!</string>
+    <string name="quest_collapsed_summary_format">Hôm nay: %1$d/50 | Tuần này: %2$d/300 lượt</string>
+    <string name="quest_progress_today">Tiến độ hôm nay</string>
+    <string name="quest_progress_week">Tiến độ tuần này</string>
+    <string name="quest_milestone_completed_format">Đã hoàn thành (%1$d/%2$d)</string>
+    <string name="quest_milestone_progress_format">Tiến độ: %1$d/%2$d lượt</string>
+
+    <!-- Home screen -->
+    <string name="warning_dialog_title">CẢNH BÁO TỪ HỆ THỐNG ⚠️</string>
+    <string name="warning_confirm_btn">Tôi đã hiểu</string>
+    <string name="warning_quota_format">Lưu ý: Số lần bị cảnh báo trong tuần: %1$d/3. Nếu bị 3 lần trong 1 tuần, tài khoản sẽ tự động bị tạm khóa.</string>
+    <string name="home_target_dialog_title">App đã đủ số lượng Test hôm nay</string>
+    <string name="home_target_dialog_message_format">Ứng dụng \"%1$s\" đã đạt mục tiêu %2$d lượt test trong ngày hôm nay.\n\nBạn có muốn tiếp tục test không? (Nếu tiếp tục, bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit như bình thường).</string>
+    <string name="home_target_dialog_continue_btn">Có, tiếp tục test</string>
+    <string name="home_target_dialog_other_btn">Chọn app khác</string>
+    <string name="home_cache_cleared_toast">Đã dọn dẹp bộ nhớ đệm và làm mới dữ liệu!</string>
+    <string name="home_clear_cache_cd">Dọn dẹp bộ nhớ đệm</string>
+    <string name="home_offline_banner">Bạn đang xem dữ liệu ngoại tuyến</string>
+    <string name="home_pending_reports_format">%1$d báo cáo chờ bạn duyệt</string>
+    <string name="home_pending_reports_hint">Không duyệt trong 8h = tự chấp nhận. Duyệt để tặng +1 Credit cho tester.</string>
+    <string name="home_owner_empty_title">Bạn chưa đăng ứng dụng nào</string>
+    <string name="home_owner_empty_desc">Bấm \"+ Đăng app\" bên dưới để bắt đầu nhận 20 testers hỗ trợ kiểm thử chéo.</string>
+
+    <!-- Google Sign-In -->
+    <string name="google_signin_missing_client_id">Đăng nhập Google chưa được cấu hình (thiếu Client ID).</string>
+    <string name="google_signin_no_account">Không tìm thấy tài khoản Google nào trên thiết bị.</string>
+    <string name="google_signin_fetch_error_format">Không thể lấy thông tin tài khoản Google: %1$s</string>
+    <string name="google_signin_unexpected_error_format">Lỗi không xác định khi đăng nhập Google: %1$s</string>
+
+    <!-- Quests screen -->
+    <string name="quest_screen_subtitle">Hoàn thành nhiệm vụ để nhận Credit miễn phí</string>
+    <string name="quest_stat_balance">Số dư</string>
+    <string name="quest_stat_today">Hôm nay</string>
+    <string name="quest_stat_week">Tuần này</string>
+    <plurals name="quest_stat_apps_plural">
+        <item quantity="other">%1$d app</item>
+    </plurals>
+    <string name="quest_ready_banner_format">%1$d nhiệm vụ có thể nhận ngay!</string>
+    <string name="quest_daily_rules_title">Thể lệ nhiệm vụ Ngày</string>
+    <string name="quest_weekly_rules_title">Thể lệ nhiệm vụ Tuần</string>
+    <string name="quest_cta_title">Test thêm app để kiếm Credit</string>
+    <string name="quest_cta_desc">Khám phá các app đang cần tester và hoàn thành nhiệm vụ hằng ngày</string>
+    <string name="quest_milestone_completed_tests_format">Đã test %1$d/%2$d lượt</string>
+
+    <!-- Profile: slot manager -->
+    <string name="slot_duration_label">Thời hạn:</string>
+    <string name="slot_duration_value">30 ngày</string>
+    <string name="slot_cost_label">Chi phí:</string>
+    <string name="slot_current_balance_label">Số dư hiện tại:</string>
+    <string name="slot_open_summary_format">Đang mở: %1$d/6 slot (%2$d đang dùng)</string>
+    <string name="slot_default_short">Mặc định</string>
+    <string name="slot_running_format">Đang chạy: %1$s</string>
+    <string name="slot_available_desc">Sẵn sàng đăng app</string>
+    <string name="slot_locked_desc">Chưa mở khóa</string>
+    <string name="slot_expired_desc">Đã hết hạn · Mở lại %1$d Credit</string>
+    <string name="slot_renew_short">Gia hạn</string>
+    <string name="slot_unlock_short">Mở khóa</string>
+    <string name="slot_renew_plus_days">+30 ngày</string>
+
+    <!-- Generic -->
+    <string name="today">Hôm nay</string>
+    <string name="no">Không</string>
+    <string name="done">Xong</string>
+
+    <!-- Campaign detail: next app & install dialogs -->
+    <string name="campaign_next_dialog_title">Kiểm thử app tiếp theo? 🚀</string>
+    <string name="campaign_done_dialog_title">Hoàn thành kiểm thử! 🎉</string>
+    <string name="campaign_submitted_next_msg">Nộp báo cáo thành công! Bạn có muốn Test app tiếp theo không?</string>
+    <string name="campaign_reward_hint">Thưởng: +2 Credit khi hoàn thành</string>
+    <string name="campaign_all_done_msg">Tuyệt vời! Bạn đã hoàn thành kiểm thử tất cả các ứng dụng có sẵn hôm nay.</string>
+    <string name="campaign_test_now_btn">Có, test ngay</string>
+    <string name="campaign_next_prompt_msg">Bạn có muốn test app tiếp theo không?</string>
+    <string name="campaign_next_searching">Đang tìm app tiếp theo…</string>
+    <string name="campaign_finding_next_btn">Đang tìm…</string>
+    <string name="campaign_submit_sending_bg">Đang gửi kết quả test (chạy nền)…</string>
+    <string name="campaign_submit_retrying_format">Mạng yếu, đang thử lại lần %1$d…</string>
+    <string name="campaign_submit_sent_ok">Đã gửi kết quả thành công</string>
+    <string name="campaign_submit_failed_bg">Gửi kết quả thất bại</string>
+    <string name="campaign_submit_retry_btn">Thử lại</string>
+    <string name="campaign_submit_failed_toast_format">Không gửi được kết quả test cho %1$s: %2$s</string>
+    <string name="campaign_install_dialog_msg">Ứng dụng \"%1$s\" (%2$s) chưa có trên thiết bị này. Bạn có muốn mở link để cài đặt không?</string>
+    <string name="campaign_install_guide_title">Hướng dẫn cài đặt app</string>
+    <string name="campaign_install_guide_step1">1. Bạn hãy đảm bảo đã tham gia Google Group kiểm thử của cộng đồng (nếu app yêu cầu).</string>
+    <string name="campaign_install_guide_group_btn">Tham gia Google Group kiểm thử</string>
+    <string name="campaign_install_guide_step2">2. Mở link Closed Testing hoặc Google Play bên dưới để chấp nhận lời mời và tải app về máy.</string>
+    <string name="campaign_install_guide_step3">3. Sau khi cài xong, quay lại đây bấm \"Test app (mở app trên máy)\" và nộp báo cáo ảnh.</string>
+    <string name="campaign_install_guide_open_link_btn">Mở link tải app</string>
+    <string name="campaign_cant_download_title">Không tải được ứng dụng? ⚠</string>
+    <string name="campaign_cant_download_common_causes">Các nguyên nhân phổ biến:</string>
+    <string name="campaign_cant_download_cause1">• Chưa tham gia Google Group của cộng đồng kiểm thử.</string>
+    <string name="campaign_cant_download_group_btn">Mở tham gia Google Group</string>
+    <string name="campaign_cant_download_cause2">• Tài khoản Google Play trên điện thoại chưa khớp với email bạn dùng tham gia nhóm test.</string>
+    <string name="campaign_cant_download_cause3">• Chủ app chưa thêm email/group vào danh sách tester trên Google Play Console.</string>
+    <string name="campaign_cant_download_cause4">• Bạn chưa bấm \"Chấp nhận lời mời\" trên trang Closed Test của Google Play.</string>
+    <string name="campaign_cant_download_web_btn">Mở link web Closed Test</string>
+
+    <!-- Campaign detail: test history -->
+    <string name="campaign_history_title">Lịch sử kiểm thử của bạn 🕒</string>
+    <string name="campaign_history_empty">Bạn chưa thực hiện ngày test nào cho ứng dụng này. Hãy mở app và nộp báo cáo để tích lũy ngày test!</string>
+    <string name="campaign_history_date_format">Ngày: %1$s</string>
+    <string name="campaign_history_status_approved_format">✓ Đã duyệt (+%1$d C)</string>
+    <string name="campaign_history_status_pending_format">⏳ Chờ duyệt (còn %1$dh)</string>
+    <string name="campaign_history_status_rejected">✕ Từ chối</string>
+    <string name="campaign_history_reason_format">Lý do: %1$s</string>
+    <string name="campaign_history_test_day_format">Ngày test: %1$s</string>
+    <string name="campaign_view_submitted_photo">Xem ảnh đã nộp 🔍</string>
+    <string name="campaign_submitted_photo_cd">Ảnh đã nộp</string>
+
+    <!-- Campaign detail: admin delete & top bar -->
+    <string name="campaign_this_app">ứng dụng này</string>
+    <string name="campaign_admin_remove">Gỡ bỏ ứng dụng (Admin)</string>
+    <string name="campaign_admin_delete_confirm_format">Bạn có chắc chắn muốn gỡ bỏ app \"%1$s\" của %2$s?\n\nHành động này sẽ xóa vĩnh viễn chiến dịch cùng toàn bộ hồ sơ kiểm thử, check-in, đánh giá và báo cáo của app này khỏi hệ thống.</string>
+    <string name="campaign_admin_delete_btn">Gỡ bỏ &amp; Xóa toàn bộ hồ sơ</string>
+    <string name="campaign_admin_pause_btn">Tạm dừng nhận tester</string>
+    <string name="campaign_admin_resume_btn">Tiếp tục nhận tester</string>
+    <string name="campaign_admin_pause_dialog_title">Tạm dừng nhận tester?</string>
+    <string name="campaign_admin_pause_dialog_desc">Tạm dừng app \"%1$s\" của %2$s? App sẽ bị ẩn khỏi Trang chủ, tester không thể nộp báo cáo mới và chủ app không thể tự mở lại cho đến khi Admin mở.</string>
+    <string name="campaign_admin_pause_reason_label">Lý do (không bắt buộc)</string>
+    <string name="campaign_admin_pause_reason_hint">Sẽ hiển thị cho chủ app, ví dụ: vi phạm chính sách…</string>
+    <string name="campaign_admin_resume_dialog_title">Tiếp tục nhận tester?</string>
+    <string name="campaign_admin_resume_dialog_desc">Mở lại app \"%1$s\" của %2$s? App sẽ hiển thị lại trên Trang chủ. Luật 30 ngày hiển thị và hạn Slot vẫn được áp dụng.</string>
+    <string name="campaign_admin_pause_success">Đã tạm dừng app. Chủ app đã được thông báo.</string>
+    <string name="campaign_admin_resume_success">Đã mở lại app. Chủ app đã được thông báo.</string>
+    <string name="campaign_admin_resume_completed">Đã hết cửa sổ 30 ngày nên app được chuyển sang mục Đã hoàn thành Kiểm thử.</string>
+    <string name="campaign_admin_error_finalized">App đã hoàn thành kiểm thử, không thể tạm dừng hoặc mở lại.</string>
+    <string name="campaign_admin_error_slot_expired">Slot của chủ app đã hết hạn. Chủ app cần gia hạn Slot trước khi app có thể được mở lại.</string>
+    <string name="campaign_admin_error_window_expired">App đã vượt quá cửa sổ kiểm thử 30 ngày.</string>
+    <string name="campaign_admin_error_not_open">App không ở trạng thái đang nhận tester.</string>
+    <string name="campaign_admin_error_not_paused">App không ở trạng thái tạm dừng.</string>
+    <string name="campaign_history_cd">Lịch sử test</string>
+    <string name="campaign_refresh_cd">Làm mới</string>
+    <string name="campaign_not_found">Không tìm thấy thông tin app.</string>
+
+    <!-- Campaign detail: owner card & stats -->
+    <string name="campaign_owner_badge">Đây là ứng dụng của bạn</string>
+    <string name="campaign_owner_desc">Quản lý người cài, duyệt báo cáo và cài đặt app tại màn hình quản lý.</string>
+    <string name="campaign_manage_btn">Quản lý</string>
+    <string name="campaign_target_reached_msg_format">App đã đạt mục tiêu %1$d lượt test hôm nay. Bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit khi tham gia test!</string>
+    <string name="campaign_owner_line_format">Chủ app: %1$s</string>
+    <string name="campaign_stat_reports">báo cáo</string>
+    <string name="campaign_stat_rating">đánh giá</string>
+
+    <!-- Campaign detail: install card & lifecycle banner -->
+    <string name="campaign_step1_install_title">Bước 1: Cài đặt app vào máy</string>
+    <string name="campaign_install_hint">Bạn cần vào link Google Play Closed Test để nhấn \'Chấp nhận tham gia\' (Opt-in) và tải ứng dụng về máy.</string>
+    <string name="campaign_open_closed_test_btn">Mở link Closed Test &amp; Tải app</string>
+    <string name="campaign_installed_ready_desc">Sẵn sàng mở trực tiếp để kiểm thử</string>
+    <string name="campaign_view_test_link">Xem link test</string>
+    <string name="campaign_lifecycle_production_msg">App đã hoàn thành kiểm thử và không còn nhận báo cáo mới. Cảm ơn bạn đã đồng hành!</string>
+    <string name="campaign_lifecycle_completed_msg">App đã hết 30 ngày hiển thị kiểm thử và không còn nhận báo cáo mới.</string>
+    <string name="campaign_lifecycle_paused_msg">App tạm dừng nên chưa thể nộp báo cáo. Chủ app có thể bật test lại bất cứ lúc nào.</string>
+    <string name="campaign_lifecycle_admin_paused_msg">App đã bị Quản trị viên tạm dừng và hiện không nhận báo cáo mới.</string>
+
+    <!-- Campaign detail: test card -->
+    <string name="campaign_open_self_test_btn">Mở app (Tự test)</string>
+    <string name="campaign_open_test_btn">Mở app kiểm thử</string>
+    <string name="campaign_download_install_btn">Tải &amp; Cài đặt app</string>
+    <string name="campaign_tip_open_directly">💡 Mẹo: Bạn cũng có thể mở app trực tiếp từ Màn hình chính của điện thoại để test rồi quay lại nộp báo cáo.</string>
+    <string name="campaign_owner_self_test_note">Bạn là chủ ứng dụng. Thao tác tự test không tính điểm thưởng. Xem người cài và duyệt báo cáo từ các tester tại màn hình Quản lý.</string>
+    <string name="campaign_open_manage_btn">Mở trang quản lý ứng dụng</string>
+    <string name="campaign_your_progress">Tiến độ của bạn:</string>
+    <string name="campaign_progress_met_format">Đạt chuẩn %1$d/%2$d ngày ✓</string>
+    <string name="campaign_progress_days_format">%1$d/%2$d ngày test</string>
+    <string name="campaign_today_approved_format">✓ Đã duyệt hôm nay: Nhận +%1$d Credit.</string>
+    <string name="campaign_today_pending_format">⏳ Đã nộp kết quả hôm nay (tạm nhận Credit). Chờ chủ app duyệt (+1 C thưởng) — Tự động duyệt sau %1$dh.</string>
+    <string name="campaign_today_rejected_reason_format">✕ Bị từ chối hôm nay (%1$s). Credit tạm nhận (nếu có) đã bị thu hồi. Đề nghị test lại và chụp ảnh khác.</string>
+    <string name="campaign_today_rejected">✕ Bị từ chối hôm nay: Credit tạm nhận (nếu có) đã bị thu hồi. Đề nghị test lại nghiêm túc và chụp ảnh khác.</string>
+    <string name="campaign_today_ready">Đã cài. Dùng thử rồi nộp ảnh chụp màn hình (tạm nhận Credit ngay khi gửi).</string>
+    <string name="campaign_your_photo_cd">Ảnh bạn đã nộp</string>
+    <string name="campaign_today_photo_title">Ảnh bạn đã nộp hôm nay</string>
+    <string name="campaign_tap_to_zoom_long">Chạm để phóng to xem ảnh lớn 🔍</string>
+    <string name="campaign_overlay_production">App đã lên production 🎉</string>
+    <string name="campaign_overlay_paused">App đang tạm dừng — chưa thể nộp báo cáo</string>
+    <string name="campaign_action_approved">Đã duyệt hôm nay (Chạm để xem lại / góp ý)</string>
+    <string name="campaign_action_pending">Cập nhật / Nộp lại ảnh khác hôm nay</string>
+    <string name="campaign_action_rejected">Chụp lại &amp; Nộp lại kết quả hôm nay</string>
+    <string name="campaign_action_submit">Nộp kết quả kiểm thử (tạm nhận Credit)</string>
+    <string name="campaign_cant_download_short">Không tải được</string>
+
+    <!-- Campaign detail: owner note & admin area -->
+    <string name="campaign_owner_note_title">Hướng dẫn thêm từ chủ app</string>
+    <string name="campaign_note_copied_toast">Đã sao chép ghi chú!</string>
+    <string name="campaign_copy_note_cd">Sao chép ghi chú</string>
+    <string name="campaign_note_download_link_format">mình để link tải đây cho bạn nào không cài được theo cách thông thường nhé:\n%1$s</string>
+    <string name="campaign_test_account_format">Tài khoản test đăng nhập: %1$s / %2$s</string>
+    <string name="campaign_admin_area_title">Khu vực Quản trị viên (Admin)</string>
+    <string name="campaign_admin_area_desc">Admin có thể tạm dừng/tiếp tục nhận tester hoặc gỡ bỏ bất kỳ ứng dụng nào. Tạm dừng sẽ ẩn app khỏi Trang chủ và chặn báo cáo mới. Gỡ bỏ sẽ xóa vĩnh viễn app và toàn bộ hồ sơ kiểm thử liên quan.</string>
+    <string name="img_screenshot_title">Ảnh chụp màn hình</string>
+    <string name="campaign_cant_open_link_toast">Không thể mở liên kết này trên thiết bị.</string>
+    <string name="campaign_duplicate_warning_format">⚠️ Cảnh báo tương đồng cao (%1$d%%): Ảnh bạn vừa chọn rất giống với ảnh bạn đã nộp kiểm thử trước đó. Bạn nên chụp màn hình tính năng hoặc trang khác của ứng dụng để chắc chắn được chủ app duyệt thưởng và không bị từ chối nhé!</string>
+
+    <!-- Campaign detail: report bottom sheet -->
+    <string name="campaign_sheet_update_title">Cập nhật kết quả kiểm thử</string>
+    <string name="campaign_sheet_submit_title">Nộp kết quả kiểm thử</string>
+    <string name="campaign_sheet_note_extra">Hôm nay bạn đã nhận thưởng kiểm thử cho app này. Bạn có thể gửi thêm nhận xét hoặc ảnh chụp màn hình góp ý bổ sung để hỗ trợ chủ app (thao tác này không cộng thêm Credit).</string>
+    <string name="campaign_sheet_note_update">Bạn đã tạm nhận Credit cho kết quả hôm nay và đang chờ chủ app duyệt. Cập nhật thêm ảnh/nhận xét sẽ không cộng thêm Credit; chủ app vẫn có 8 giờ để duyệt.</string>
+    <string name="campaign_sheet_note_submit">Bạn sẽ tạm nhận ngay Credit sau khi gửi kết quả (nếu chưa nhận thưởng cho app này hôm nay). Chủ app có 8 giờ để duyệt (+1 Credit thưởng thêm). Hãy chụp các tính năng khác nhau để được duyệt dễ dàng!</string>
+    <string name="campaign_sheet_photo_label">Ảnh chụp màn hình kiểm thử:</string>
+    <string name="campaign_photo_selected_cd">Ảnh đã chọn</string>
+    <string name="campaign_tap_to_zoom">Chạm để phóng to</string>
+    <string name="campaign_comparing_photos">Đang đối chiếu ảnh với các ngày trước...</string>
+    <string name="campaign_change_photo_btn">Đổi ảnh khác</string>
+    <string name="campaign_remove_photo_btn">Gỡ</string>
+    <string name="campaign_today_photo_zoom_label">Ảnh đã nộp hôm nay · Phóng to</string>
+    <string name="campaign_choose_new_photo">Chọn ảnh mới để thay thế</string>
+    <string name="campaign_photo_new_label">Ảnh mới chọn</string>
+    <string name="campaign_photo_previous_label">Ảnh ngày %1$s</string>
+    <string name="campaign_compare_photos_btn">So sánh 2 ảnh</string>
+    <string name="campaign_tap_to_pick_photo">Chạm để tải ảnh chụp màn hình</string>
+    <string name="campaign_pick_photo_hint">Chụp lại giao diện tính năng đang hoạt động trong app</string>
+    <string name="campaign_rating_label">Đánh giá ứng dụng:</string>
+    <string name="campaign_rating_1">Chưa đạt (1 sao)</string>
+    <string name="campaign_rating_2">Tạm được (2 sao)</string>
+    <string name="campaign_rating_3">Bình thường (3 sao)</string>
+    <string name="campaign_rating_4">Khá tốt (4 sao)</string>
+    <string name="campaign_rating_5">Rất tốt (5 sao)</string>
+    <string name="campaign_rating_star_cd_format">%1$d sao</string>
+    <string name="campaign_comment_label">Góp ý &amp; nhận xét (tùy chọn):</string>
+    <string name="campaign_comment_hint">Mô tả lỗi gặp phải, góp ý giao diện hoặc tính năng cho nhà phát triển...</string>
+    <string name="campaign_submitting">Đang tải ảnh và gửi báo cáo...</string>
+    <string name="campaign_send_extra_btn">Gửi góp ý bổ sung</string>
+    <string name="campaign_send_update_btn">Cập nhật kết quả đã nộp</string>
+    <string name="campaign_send_submit_btn">Gửi kết quả (tạm nhận Credit)</string>
+    <string name="campaign_approved_locked_hint">Báo cáo đã được duyệt: ảnh chụp và số sao được khóa. Bạn chỉ có thể gửi góp ý bổ sung.</string>
+    <string name="campaign_resubmit_new_photo_required">Báo cáo đã bị từ chối: bắt buộc chụp ảnh MỚI khác ảnh đã bị từ chối để nộp lại.</string>
+
+    <!-- ViewModel messages: error mapping -->
+    <string name="error_account_locked">Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ Admin để được hỗ trợ.</string>
+    <string name="error_same_screenshot">Ảnh mới trùng với ảnh đã bị từ chối. Vui lòng chụp một màn hình/tính năng khác của ứng dụng.</string>
+    <string name="error_report_already_reviewed">Báo cáo vừa được duyệt hoặc từ chối. Vui lòng làm mới để xem trạng thái mới nhất.</string>
+    <string name="error_report_not_found">Báo cáo không còn tồn tại hoặc bạn không có quyền truy cập.</string>
+    <string name="error_permission_denied">Bạn không có quyền thực hiện thao tác này.</string>
+    <string name="error_campaign_not_open">App đang tạm dừng hoặc đã hoàn thành kiểm thử nên không thể nộp báo cáo mới.</string>
+    <string name="error_email_not_confirmed">Tài khoản chưa được kích hoạt email. Vui lòng chạy lệnh kích hoạt trong Supabase SQL Editor.</string>
+    <string name="error_multi_slot_not_configured">Hệ thống Multi-Slot chưa được cấu hình trên Supabase. Vui lòng chạy file migration 005 trong Supabase SQL Editor.</string>
+    <string name="error_rpc_not_available">Hàm xử lý chưa được cài đặt trên Supabase hoặc đang làm mới cache. Vui lòng kiểm tra lại SQL migration.</string>
+    <string name="error_email_already_registered">Email này đã được đăng ký tài khoản. Vui lòng chuyển sang tab Đăng nhập.</string>
+    <string name="error_invalid_credentials">Email hoặc mật khẩu không chính xác.</string>
+    <string name="error_rate_limited">Bạn đã gửi yêu cầu quá nhanh. Vui lòng đợi trong giây lát.</string>
+    <string name="error_network">Lỗi mạng. Kiểm tra kết nối Internet rồi thử lại.</string>
+    <string name="error_generic">Đã có lỗi xảy ra.</string>
+
+    <!-- ViewModel messages: auth -->
+    <string name="auth_google_cancelled">Bạn đã hủy đăng nhập. Nếu bạn không hủy, vui lòng thử lại.</string>
+    <string name="auth_sign_in_failed_format">Đăng nhập thất bại: %1$s</string>
+    <string name="auth_email_required">Vui lòng nhập email.</string>
+    <string name="auth_password_required">Vui lòng nhập mật khẩu.</string>
+    <string name="auth_email_invalid">Địa chỉ email không đúng định dạng.</string>
+    <string name="auth_password_min_length">Mật khẩu phải chứa ít nhất 6 ký tự.</string>
+    <string name="auth_password_mismatch">Mật khẩu xác nhận không khớp.</string>
+    <string name="auth_sign_up_success_info">Đăng ký thành công! Vui lòng chuyển sang tab Đăng nhập.</string>
+    <string name="auth_sign_up_failed_format">Đăng ký thất bại: %1$s</string>
+    <string name="auth_reset_email_invalid">Vui lòng nhập email hợp lệ để đặt lại mật khẩu.</string>
+    <string name="auth_reset_email_sent">Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư của bạn.</string>
+    <string name="auth_reset_send_failed_format">Gửi yêu cầu thất bại: %1$s</string>
+
+    <!-- ViewModel messages: profile -->
+    <string name="profile_account_locked">Tài khoản của bạn đang bị tạm khóa.</string>
+    <string name="profile_load_failed">Không tải được hồ sơ. Vui lòng kiểm tra kết nối và thử lại.</string>
+    <string name="profile_slot_cost_format">Bạn cần %1$d Credit để mở khóa/gia hạn Slot %2$d (hiện có %3$d Credit).</string>
+    <string name="profile_slot_success_format">Thao tác Slot %1$d thành công (+30 ngày)!</string>
+    <string name="profile_insufficient_credits">Bạn không đủ Credit.</string>
+    <string name="profile_prev_slot_required_format">Bạn cần mở khóa hoặc gia hạn Slot %1$d trước.</string>
+    <string name="profile_password_changed">Đổi mật khẩu thành công!</string>
+    <string name="profile_password_change_failed_format">Đổi mật khẩu thất bại: %1$s</string>
+
+    <!-- ViewModel messages: admin -->
+    <string name="admin_user_locked_success">Đã khóa tài khoản thành công.</string>
+    <string name="admin_user_unlocked_success">Đã mở khóa tài khoản thành công.</string>
+    <string name="admin_action_failed_format">Thao tác thất bại: %1$s</string>
+    <string name="admin_credit_adjusted_format">Đã điều chỉnh Credit thành công! Số dư mới: %1$d Credit.</string>
+    <string name="admin_credit_adjust_failed_format">Điều chỉnh Credit thất bại: %1$s</string>
+    <string name="admin_notif_sent_all_format">Đã gửi thông báo thành công tới toàn bộ %1$d người dùng!</string>
+    <string name="admin_notif_sent">Đã gửi thông báo thành công tới người dùng!</string>
+    <string name="admin_notif_failed_format">Gửi thông báo thất bại: %1$s</string>
+    <string name="admin_config_load_failed">Không thể tải cấu hình cập nhật. Vui lòng thử lại.</string>
+    <string name="admin_config_saved">Đã lưu cấu hình cập nhật thành công.</string>
+    <string name="admin_config_save_failed_format">Lưu cấu hình thất bại: %1$s</string>
+
+    <!-- ViewModel messages: home -->
+    <string name="home_topup_success_format">Nạp %1$d Credit thành công!</string>
+    <string name="home_daily_reward_success_format">Nhận thành công +%1$d Credit!</string>
+    <string name="home_daily_reward_failed">Không thể nhận thưởng lúc này.</string>
+
+    <!-- ViewModel messages: campaign detail -->
+    <string name="campaign_detail_not_found">Không tìm thấy chiến dịch.</string>
+    <string name="campaign_remove_success_msg">Đã gỡ bỏ ứng dụng thành công.</string>
+    <string name="campaign_remove_failed_format">Gỡ ứng dụng thất bại: %1$s</string>
+    <string name="campaign_need_open_app">Bạn cần bấm \'Test app\' để mở và trải nghiệm ứng dụng trước khi nộp kết quả.</string>
+    <string name="campaign_test_too_short">Thời gian bạn test quá ngắn, yêu cầu tiếp tục test ít nhất 10s</string>
+    <string name="campaign_owner_cant_join">Chủ app không thể tự tham gia làm tester cho app của chính mình.</string>
+    <string name="campaign_join_success">Đã tham gia chiến dịch!</string>
+    <string name="campaign_leave_success">Đã rời chiến dịch.</string>
+    <string name="campaign_login_required">Vui lòng đăng nhập bằng Google để thực hiện thao tác này.</string>
+    <string name="campaign_owner_cant_checkin">Chủ app không thể tự check-in app của mình để nhận Credit.</string>
+    <string name="campaign_checkin_success">Check-in thành công! Cảm ơn bạn.</string>
+    <string name="campaign_checkin_already">Hôm nay bạn đã check-in rồi. Quay lại ngày mai nhé!</string>
+    <string name="campaign_owner_cant_report">Chủ app không thể tự nộp báo cáo nhận Credit cho app của chính mình.</string>
+    <string name="campaign_report_extra_success">Đã gửi góp ý bổ sung! (Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi).</string>
+    <string name="campaign_report_update_success">Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt).</string>
+    <string name="campaign_report_resubmit_success">Đã nộp lại báo cáo! Ảnh mới sẽ được chủ app duyệt trong 8 giờ tới.</string>
+    <string name="campaign_report_submit_success_format">Đã gửi kết quả kiểm thử! Bạn tạm nhận +%1$d Credit. Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt).</string>
+    <string name="campaign_close_success">Đã đóng chiến dịch.</string>
+
+    <!-- ViewModel messages: create campaign -->
+    <string name="create_slot_cost_format">Bạn cần %1$d Credit để mở khóa Slot %2$d (hiện có %3$d Credit).</string>
+    <string name="create_slot_unlock_success_format">Mở khóa Slot %1$d thành công (+30 ngày)!</string>
+    <string name="create_insufficient_credits_slot">Bạn không đủ Credit để mở khóa slot này.</string>
+    <string name="create_loading_data">Đang tải dữ liệu tài khoản và slot, vui lòng đợi trong giây lát...</string>
+    <string name="create_min_credits_format">Bạn cần có trên 10 Credit để đăng app (hiện có %1$d Credit). Hãy tham gia test app để kiếm thêm Credit.</string>
+    <string name="create_target_cost_format">Bạn cần ít nhất %1$d Credit để đăng app với mục tiêu %2$d Test/ngày (phí nâng mục tiêu: %3$d Credit, số dư hiện có: %4$d Credit).</string>
+    <string name="create_slot_in_use_format">Slot %1$d đang có ứng dụng chạy. Vui lòng chọn slot trống khác hoặc mở thêm slot mới.</string>
+    <string name="create_slot_expired_format">Slot %1$d chưa mở hoặc đã hết hạn. Vui lòng mở khóa trước khi đăng app.</string>
+    <string name="create_all_slots_used">Bạn đã dùng hết tất cả các slot hiện có. Hãy mở khóa thêm slot hoặc đóng app cũ.</string>
+    <string name="create_package_required">Vui lòng nhập Package name hoặc dán link Play Store.</string>
+    <string name="create_package_invalid">Package name không hợp lệ (Ví dụ đúng: com.example.myapp).</string>
+    <string name="create_package_duplicate_format">Ứng dụng với package \"%1$s\" đang chạy trên một Slot khác của bạn.</string>
+    <string name="create_insufficient_target_credits_format">Bạn không đủ Credit để nâng cấp mục tiêu test này (cần %1$d Credit).</string>
+    <string name="create_min_credits">Bạn cần có trên 10 Credit để đăng app mới.</string>
+    <string name="create_slot_not_active">Slot đăng app đã hết hạn hoặc chưa kích hoạt.</string>
+    <string name="create_slot_busy">Slot này đang có một app khác chạy.</string>
+
+    <!-- ViewModel messages: owner app detail -->
+    <string name="owner_app_expired_completed">App đã quá 30 ngày hiển thị và được chuyển sang mục Đã hoàn thành Kiểm thử.</string>
+    <string name="owner_app_reactivated">Đã bật lại app — app sẽ hiển thị trong mục App cần Test.</string>
+    <string name="owner_app_inactive_3days">Bạn đã vắng nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bật lại app này.</string>
+    <string name="owner_app_not_paused">App không ở trạng thái tạm dừng.</string>
+    <string name="owner_slot_expired_format">Slot %1$d đã hết hạn. Vui lòng gia hạn Slot để tiếp tục mở nhận tester.</string>
+    <string name="owner_slot_renewed_format">Gia hạn Slot %1$d thành công (+30 ngày)!</string>
+    <string name="owner_renew_insufficient_format">Bạn không đủ Credit để gia hạn Slot (cần %1$d Credit).</string>
+    <string name="owner_approve_bonus_format">Đã duyệt kết quả kiểm thử (Thưởng thêm +%1$d Credit cho tester)</string>
+    <string name="owner_approve_tip_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester, trong đó %2$d Credit tip trừ từ số dư của bạn)</string>
+    <string name="owner_approve_success">Đã duyệt kết quả kiểm thử.</string>
+    <string name="owner_approve_warning_fallback">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
+    <string name="owner_reject_success_format">Đã từ chối báo cáo kiểm thử (thu hồi %1$d Credit từ tester)</string>
+    <string name="owner_reject_success">Đã từ chối báo cáo kiểm thử</string>
+    <string name="error_image_read_failed">Không thể đọc file ảnh.</string>
+    <string name="similarity_duplicate_format">Trùng lặp cao (%1$d%%)</string>
+    <string name="similarity_high_format">Rất giống nhau (%1$d%%)</string>
+    <string name="similarity_moderate_format">Tương đồng một phần (%1$d%%)</string>
+    <string name="similarity_different_format">Khác biệt (%1$d%%)</string>
+    <string name="topup_bonus_breakdown_format">(Gốc %1$d + %2$d C)</string>
+    <string name="admin_current_balance_format">Số dư hiện tại: 🪙 %1$d Credit</string>
+    <string name="admin_send_broadcast_cd">Gửi thông báo toàn hệ thống</string>
+    <string name="admin_send_private_cd">Gửi thông báo riêng</string>
+    <string name="admin_user_fallback">Người dùng</string>
+    <string name="admin_joined_format">Gia nhập: %1$s</string>
+    <string name="admin_type_notification">Thông báo</string>
+    <string name="admin_type_system">Hệ thống</string>
+    <string name="admin_type_warning">Cảnh báo</string>
+    <string name="admin_type_gift">Tặng quà</string>
+    <string name="admin_broadcast_title">Gửi thông báo toàn hệ thống 📢</string>
+    <string name="admin_private_title">Gửi thông báo riêng ✉️</string>
+    <string name="admin_notif_to_format">Tới: %1$s</string>
+    <string name="admin_notif_title_label">Tiêu đề thông báo</string>
+    <string name="admin_notif_message_label">Nội dung thông báo</string>
+    <string name="admin_send_now">Gửi ngay</string>
+
+    <!-- Admin: user contact reports -->
+    <string name="admin_reports_title">Phản hồi người dùng</string>
+    <string name="admin_reports_empty">Chưa có phản hồi nào</string>
+    <string name="admin_reports_filter_all">Tất cả</string>
+    <string name="admin_reports_filter_new">Mới</string>
+    <string name="admin_reports_filter_replied">Đã trả lời</string>
+    <string name="admin_reports_filter_resolved">Đã xử lý</string>
+    <string name="admin_report_status_new">Mới</string>
+    <string name="admin_report_status_replied">Đã trả lời</string>
+    <string name="admin_report_status_resolved">Đã xử lý</string>
+    <string name="admin_report_reply_admin_label">Phản hồi của Admin</string>
+    <string name="admin_report_reply_btn">Trả lời</string>
+    <string name="admin_report_reply_dialog_title">Trả lời người dùng</string>
+    <string name="admin_report_reply_hint">Nội dung trả lời…</string>
+    <string name="admin_report_reply_success">Đã gửi trả lời cho người dùng</string>
+    <string name="admin_report_mark_resolved">Đánh dấu đã xử lý</string>
+    <string name="admin_report_reopen">Mở lại</string>
+    <string name="admin_report_status_updated">Đã cập nhật trạng thái</string>
+    <string name="create_slot_duration_label">Thời hạn sử dụng:</string>
+    <string name="create_slot_duration_days">30 ngày</string>
+    <string name="create_slot_cost_label">Chi phí:</string>
+    <string name="create_current_balance_label">Số dư hiện tại:</string>
+    <string name="create_slots_used_format">%1$d/%2$d dùng</string>
+    <string name="create_slot_running">Đang chạy</string>
+    <string name="create_slot_ready">Sẵn sàng</string>
+    <string name="create_slot_permanent">Vĩnh viễn</string>
+    <string name="create_slot_remaining_days_format">Còn %1$d ngày</string>
+    <string name="create_slot_unlock_short">Mở khóa (16n)</string>
+    <string name="create_tester_link_hint">Link cho tester tham gia (tự động tạo theo package name)</string>
+    <string name="create_target_section_title">Mục tiêu Test</string>
+    <string name="create_target_desc">Số lượt test cần đạt mỗi ngày. Khi app đạt đủ số lượt test mục tiêu, app sẽ tự động chuyển xuống cuối danh sách Trang chủ để nhường vị trí cho các app khác.</string>
+    <string name="create_target_option_format">%1$d Test/ngày</string>
+    <string name="create_target_default_cost">Mặc định (0 C)</string>
+    <string name="create_target_fee_format">Phí nâng mục tiêu: %1$d Credit (Số dư hiện tại: %2$d Credit)</string>
+    <string name="create_target_insufficient_format">Bạn cần ít nhất %1$d Credit để chọn gói này (Số dư hiện tại: %2$d Credit)</string>
+    <string name="create_guide_section_title">Hướng dẫn thêm cho Tester (Tùy chọn)</string>
+    <string name="create_guide_label">Hướng dẫn / Lưu ý cho tester</string>
+    <string name="create_guide_placeholder">Ví dụ: Nhờ các bạn test giúp luồng đăng ký tài khoản, tính năng thanh toán...</string>
+    <string name="create_guide_note">Tester sẽ nhìn thấy hướng dẫn này khi mở xem chi tiết app để test.</string>
+    <string name="create_unlock_slot_btn_format">Mở khóa Slot %1$d (%2$d Credit / 30 ngày)</string>
+    <string name="account_locked_load_failed">Lỗi khi tải thông tin tài khoản.</string>
+    <string name="locked_confirm_title">Xác nhận mở khóa</string>
+    <string name="locked_confirm_desc">Bạn có chắc chắn muốn dùng 100 Credit để mở khóa tài khoản ngay lập tức?</string>
+    <string name="locked_confirm_balance_format">• Số dư hiện tại: %1$d Credit\n• Số dư sau khi mở khóa: %2$d Credit</string>
+    <string name="locked_unlock_success">Mở khóa tài khoản thành công!</string>
+    <string name="locked_unlock_failed">Không thể mở khóa tài khoản.</string>
+    <string name="locked_unlock_error">Lỗi khi mở khóa.</string>
+    <string name="locked_insufficient_credits">Số dư không đủ 100 Credit.</string>
+    <string name="locked_unlocking">Đang mở khóa...</string>
+    <string name="locked_unlock_deduct_btn">Trừ 100 Credit &amp; Mở khóa</string>
+    <string name="locked_screen_title">Trạng thái tài khoản</string>
+    <string name="locked_title">Tài khoản bị tạm khóa</string>
+    <string name="locked_subtitle">Hệ thống ghi nhận tài khoản của bạn nhận đủ 3 lần cảnh báo trong 1 tuần (hoặc bị khóa bởi Quản trị viên).</string>
+    <string name="locked_account_label">Tài khoản:</string>
+    <string name="locked_instruction">Để tiếp tục sử dụng ứng dụng và tham gia kiểm thử chéo, bạn có thể chọn 1 trong 2 hình thức mở khóa bên dưới:</string>
+    <string name="locked_option1_title">Lựa chọn 1: Tự mở khóa ngay</string>
+    <string name="locked_option1_desc">Trừ 100 Credit từ tài khoản để mở khóa ngay lập tức và đặt lại chu kỳ cảnh báo.</string>
+    <string name="locked_option1_btn">Trừ 100 Credit để mở khóa</string>
+    <string name="locked_option1_btn_insufficient_format">Không đủ 100 Credit (Cần thêm %1$d C)</string>
+    <string name="locked_insufficient_hint">💡 Số dư không đủ 100 Credit. Vui lòng chọn Lựa chọn 2 để gửi email tới Admin.</string>
+    <string name="locked_option2_title">Lựa chọn 2: Liên hệ Admin</string>
+    <string name="locked_option2_desc">Gửi email giải trình tới Quản trị viên tại %1$s để được hỗ trợ kiểm tra và mở khóa tài khoản thủ công.</string>
+    <string name="locked_no_email_app_format">Không tìm thấy ứng dụng email. Vui lòng gửi thư tới: %1$s</string>
+    <string name="locked_send_email_btn_format">Gửi email tới %1$s</string>
+    <string name="img_load_failed">Không thể tải ảnh</string>
+    <string name="img_reset_zoom_cd">Thu nhỏ 1x</string>
+    <string name="img_zoom_hint">Chạm 2 lần hoặc vuốt 2 ngón tay để phóng to / thu nhỏ</string>
+    <string name="img_compare_title">So sánh ảnh kiểm thử 🔍</string>
+    <string name="img_compare_tester_format">Tester: %1$s</string>
+    <string name="img_reject_photo">Từ chối ảnh này</string>
+    <string name="img_approve_btn">Duyệt (+1 C)</string>
+    <string name="img_close_comparison">Đóng đối chiếu</string>
+    <string name="img_analyzing">Đang phân tích cấu trúc 2 bức ảnh...</string>
+    <string name="img_suspect_warning_format">Cảnh báo: Ảnh có độ tương đồng rất cao (%1$d%%). Đề nghị kiểm tra kỹ đồng hồ status bar, %% pin, và giao diện xem tester có nộp lại ảnh cũ không.</string>
+    <string name="img_similarity_ok_format">Độ tương đồng: %1$d%%. Ảnh thể hiện tính năng/màn hình có sự khác biệt rõ rệt.</string>
+    <string name="img_first_report_note">Tester này chưa có ảnh ngày trước để đối chiếu (đây là báo cáo đầu tiên).</string>
+    <string name="img_hash_unavailable">Không thể tính toán hash ảnh. Bạn vẫn có thể xem đối chiếu 2 ảnh bên dưới.</string>
+    <string name="img_tab_side_by_side">Song song</string>
+    <string name="img_tab_slider">So sánh đè</string>
+    <string name="img_tab_blink">Chớp đổi (A/B)</string>
+    <string name="img_today">Hôm nay</string>
+    <string name="img_today_photo_cd">Ảnh hôm nay</string>
+    <string name="img_previous_day">Ngày trước đó</string>
+    <string name="img_none_yet">Chưa có</string>
+    <string name="img_prev_photo_cd">Ảnh hôm trước</string>
+    <string name="img_no_old_photo">Không có ảnh cũ</string>
+    <string name="img_need_two_photos_slider">Cần cả 2 ảnh để thực hiện so sánh đè.</string>
+    <string name="img_old_photo_cd">Ảnh cũ</string>
+    <string name="img_new_photo_cd">Ảnh mới</string>
+    <string name="img_overlay_ratio_format">Độ phủ: %1$d%% Ảnh mới · %2$d%% Ảnh cũ</string>
+    <string name="img_old_photo">Ảnh cũ</string>
+    <string name="img_new_photo">Ảnh mới</string>
+    <string name="img_no_old_photo_blink">Không có ảnh cũ để chớp đổi.</string>
+    <string name="img_showing_today">ĐANG HIỆN: ẢNH HÔM NAY</string>
+    <string name="img_showing_previous">ĐANG HIỆN: ẢNH HÔM TRƯỚC</string>
+    <string name="img_tap_to_swap">Chạm để đổi ảnh (hoặc chạm trực tiếp vào hình)</string>
+    <string name="oad_warning_dialog_title">CẢNH BÁO DUYỆT BÁO CÁO ⚠️</string>
+    <string name="oad_understood">Tôi đã hiểu</string>
+    <string name="oad_title_fallback">Quản lý App</string>
+    <string name="oad_edit_cd">Chỉnh sửa</string>
+    <string name="oad_link_cd">Liên kết</string>
+    <string name="oad_refresh_cd">Làm mới</string>
+    <string name="oad_not_found">Không tìm thấy thông tin ứng dụng.</string>
+    <string name="oad_production_title">App đã lên production</string>
+    <string name="oad_completed_title">Đã hoàn thành kiểm thử</string>
+    <string name="oad_production_desc">App đã được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ. Cảm ơn bạn đã đồng hành cùng cộng đồng!</string>
+    <string name="oad_completed_desc">App đã hết 30 ngày hiển thị kiểm thử và được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ.</string>
+    <string name="oad_paused_title">App đang tạm dừng</string>
+    <string name="oad_paused_auto_desc">App bị tạm dừng vì bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bấm \"Tiếp tục nhận tester\".</string>
+    <string name="oad_paused_slot_desc">App bị tạm dừng do Slot %1$d đã hết hạn. Gia hạn Slot rồi bấm \"Tiếp tục nhận tester\".</string>
+    <string name="oad_paused_manual_desc">App đang tạm dừng. Bấm \"Tiếp tục nhận tester\" để hiển thị lại trên Trang chủ.</string>
+    <string name="oad_paused_admin_title">App bị Admin tạm dừng</string>
+    <string name="oad_paused_admin_desc">App đã bị Quản trị viên tạm dừng. Vui lòng liên hệ Admin nếu bạn muốn mở lại.</string>
+    <string name="oad_paused_admin_note_format">Lý do: %1$s</string>
+    <string name="oad_paused_by_admin_error">App đang bị Admin tạm dừng. Vui lòng liên hệ Admin.</string>
+    <string name="oad_resume_sub_admin">Bị Admin tạm dừng — mở lại để hiển thị trên Trang chủ.</string>
+    <string name="oad_owner_you">Bạn</string>
+    <string name="oad_installing_title">Người đang cài</string>
+    <string name="oad_installing_subtitle_format">%1$d người đang cài · xem từng người và báo cáo của họ</string>
+    <string name="oad_reports_title">Báo cáo của tester</string>
+    <string name="oad_reports_subtitle_format">%1$d chờ duyệt (tự chấp nhận sau 8h) · %2$d báo cáo</string>
+    <string name="oad_resume_title">Tiếp tục nhận tester</string>
+    <string name="oad_pause_title">Tạm dừng nhận tester</string>
+    <string name="oad_resume_sub_auto">Hãy test 1 app hôm nay trước khi mở lại.</string>
+    <string name="oad_resume_sub_slot_format">Slot %1$d đã hết hạn — gia hạn rồi mở lại.</string>
+    <string name="oad_resume_sub_manual">Mở lại để hiển thị app trên Trang chủ.</string>
+    <string name="oad_pause_sub_days_format">App sẽ không hiển thị. Còn %1$d ngày hiển thị.</string>
+    <string name="oad_pause_sub_plain">App sẽ không hiển thị.</string>
+    <string name="oad_production_item_title">App đã lên production 🎉</string>
+    <string name="oad_production_item_sub">Bấm khi app đã phát hành công khai trên Google Play — app chuyển sang mục Đã hoàn thành Kiểm thử. Bot cũng tự phát hiện.</string>
+    <string name="oad_delete_title">Xóa app</string>
+    <string name="oad_delete_sub">Xóa vĩnh viễn app này khỏi Test chéo.</string>
+    <string name="oad_self_test_title">Tự test app của bạn</string>
+    <string name="oad_self_test_desc">Bạn có thể cài và nộp báo cáo để tự kiểm tra luồng test. Báo cáo tự test không được điểm, không tính vào quota ngày, chuỗi ngày hay xếp hạng.</string>
+    <string name="oad_open_test_app">Mở ứng dụng test (hoặc link Play)</string>
+    <string name="oad_open_link_failed">Không thể mở liên kết.</string>
+    <string name="oad_pause_confirm_resume_q">Tiếp tục nhận tester?</string>
+    <string name="oad_pause_confirm_pause_q">Tạm dừng nhận tester?</string>
+    <string name="oad_resume_dialog_auto">App bị tạm dừng do bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Nếu bạn đã test 1 app hôm nay, app sẽ hiển thị lại công khai để tester khác tham gia.</string>
+    <string name="oad_resume_dialog_manual">Chiến dịch sẽ hiển thị lại công khai để các tester khác có thể tham gia và cài đặt (nếu còn trong 30 ngày hiển thị).</string>
+    <string name="oad_pause_dialog_desc">App sẽ tạm thời ẩn khỏi Trang chủ và tester mới sẽ không thể tham gia cho đến khi bạn mở lại.</string>
+    <string name="oad_agree">Đồng ý</string>
+    <string name="oad_production_dialog_title">App đã lên Production 🎉</string>
+    <string name="oad_production_dialog_desc">Chúc mừng bạn! Xác nhận ứng dụng của bạn đã hoàn thành Closed Testing 14 ngày và đã được Google Play duyệt phát hành công khai?</string>
+    <string name="oad_production_confirm">Xác nhận Production 🚀</string>
+    <string name="oad_delete_dialog_title">Xác nhận xóa app?</string>
+    <string name="oad_delete_dialog_desc_format">Hành động này sẽ xóa vĩnh viễn chiến dịch kiểm thử của ứng dụng \"%1$s\" khỏi hệ thống Test Chéo và không thể hoàn tác.</string>
+    <string name="oad_delete_forever">Xóa vĩnh viễn</string>
+    <string name="oad_renew_dialog_title_format">Gia hạn Slot %1$d</string>
+    <string name="oad_renew_dialog_desc_format">Gia hạn thêm %1$d ngày sử dụng cho Slot %2$d với chi phí %3$d Credit.</string>
+    <string name="oad_renew_dialog_balance_format">Số dư hiện tại: %1$d Credit</string>
+    <string name="oad_renew_btn_format">Gia hạn (%1$d Credit)</string>
+    <string name="oad_not_installed_title">Ứng dụng chưa được cài đặt</string>
+    <string name="oad_not_installed_desc_format">Ứng dụng \"%1$s\" (%2$s) chưa được cài trên thiết bị này. Bạn có muốn mở link để cài đặt không?</string>
+    <string name="oad_install_btn">Tải cài đặt</string>
+    <string name="oad_slot_permanent_label">Slot 1 (Vĩnh viễn)</string>
+    <string name="oad_summary_line_format">Chủ app: %1$s · %2$d điểm · %3$s · Mục tiêu %4$d test/ngày</string>
+    <string name="oad_slot_expired_label">⚠️ Slot đã hết hạn</string>
+    <string name="oad_renew_now">Gia hạn ngay</string>
+    <string name="oad_slot_remaining_days_format">⏱ Còn %1$d ngày</string>
+    <string name="oad_renew_more">Gia hạn thêm</string>
+    <string name="oad_metric_installed">đã cài</string>
+    <string name="oad_metric_today">test hôm nay</string>
+    <string name="oad_metric_reports">báo cáo</string>
+    <string name="oad_metric_rating">đánh giá</string>
+    <string name="oad_ct_target_title">Mục tiêu Closed Testing Google Play</string>
+    <string name="oad_ct_target_reached_format">✓ Đã đủ %1$d/%2$d tester (14 ngày)</string>
+    <string name="oad_ct_target_progress_format">%1$d/%2$d tester đủ 14 ngày (Cao nhất: %3$d ngày)</string>
+    <string name="oad_ct_qualified">Đủ chuẩn duyệt Play 🚀</string>
+    <string name="oad_tip_title">Boa cho người test 🎁</string>
+    <string name="oad_tip_desc">Mỗi tester được duyệt sẽ nhận thêm Credit từ ví của bạn. App cũng được ưu tiên hiển thị nổi bật tại Trang chủ để thu hút tester nhanh hơn.</string>
+    <string name="oad_tip_balance_format">Số dư của bạn: %1$d Credit</string>
+    <string name="oad_tip_cost_format">Chi phí: %1$d Credit mỗi lượt duyệt</string>
+    <string name="oad_tip_insufficient_format">Số dư không đủ để duy trì mức boa này (số dư: %1$d Credit).</string>
+    <string name="oad_tip_saved_on_format">Đã đặt boa +%1$d Credit cho mỗi tester được duyệt (trừ từ ví của bạn).</string>
+    <string name="oad_tip_saved_off">Đã tắt boa.</string>
+    <string name="oad_tip_off">Tắt</string>
+    <string name="oad_tip_save">Lưu thiết lập</string>
+    <string name="oad_edit_title">Chỉnh sửa thông tin app</string>
+    <string name="oad_edit_name_label">Tên ứng dụng</string>
+    <string name="oad_edit_guide_label">Hướng dẫn thêm cho Tester</string>
+    <string name="oad_edit_guide_placeholder">Nhập lưu ý, tính năng cần test hoặc ghi chú cho tester...</string>
+    <string name="oad_edit_play_label">Link Google Play</string>
+    <string name="oad_edit_testing_label">Link tham gia Closed Test</string>
+    <string name="oad_edit_user_label">Tên đăng nhập test (nếu có)</string>
+    <string name="oad_edit_pass_label">Mật khẩu test (nếu có)</string>
+    <string name="oad_save">Lưu</string>
+    <string name="oad_share_title">Liên kết ứng dụng 🔗</string>
+    <string name="oad_share_testing_label">Link tham gia Closed Test:</string>
+    <string name="oad_copied_testing">Đã sao chép link Closed Test!</string>
+    <string name="oad_copy">Sao chép</string>
+    <string name="oad_open">Mở link</string>
+    <string name="oad_share_play_label">Link Google Play:</string>
+    <string name="oad_copied_play">Đã sao chép link Google Play!</string>
+    <string name="oad_testers_dialog_title_format">Người đang cài (%1$d)</string>
+    <string name="oad_no_testers">Chưa có tester nào tham gia chiến dịch này.</string>
+    <string name="oad_checkin_days_format">Đã check-in: %1$d ngày</string>
+    <string name="oad_checkin_last_format"> · Gần nhất: %1$s</string>
+    <string name="oad_enough_14">✓ Đủ 14 ngày</string>
+    <string name="oad_remaining_14_format">Còn %1$d ngày</string>
+    <string name="oad_screenshot_tester_title">Ảnh chụp màn hình tester</string>
+    <string name="oad_reports_dialog_title">Duyệt báo cáo kiểm thử</string>
+    <string name="oad_reports_dialog_sub_format">%1$d chờ duyệt · %2$d tổng báo cáo</string>
+    <string name="oad_tab_pending_format">Chờ duyệt (%1$d)</string>
+    <string name="oad_tab_approved_format">Đã duyệt (%1$d)</string>
+    <string name="oad_tab_rejected_format">Từ chối (%1$d)</string>
+    <string name="oad_tab_all_format">Tất cả (%1$d)</string>
+    <string name="oad_review_reminder">Bạn có 8 giờ để duyệt bài test (+1 Credit cho tester nếu duyệt). Quá 8h hệ thống sẽ tự động duyệt (không có thưởng thêm). Hãy đối chiếu ảnh các ngày xem tester có nộp trùng lặp không.</string>
+    <string name="oad_empty_pending">Không có báo cáo nào đang chờ duyệt 🎉</string>
+    <string name="oad_empty_approved">Chưa có báo cáo nào được duyệt.</string>
+    <string name="oad_empty_rejected">Chưa có báo cáo nào bị từ chối.</string>
+    <string name="oad_empty_all">Chưa có báo cáo nào từ tester.</string>
+    <string name="oad_status_remaining_format">⏳ Còn %1$dh</string>
+    <string name="oad_status_approved">✓ Đã duyệt</string>
+    <string name="oad_status_rejected">✕ Từ chối</string>
+    <string name="oad_analyzing">Đang phân tích độ tương đồng ảnh...</string>
+    <string name="oad_dup_warning_format">Cảnh báo trùng lặp: %1$d%%</string>
+    <string name="oad_new_feature_format">Ảnh tính năng mới (Khác biệt %1$d%%)</string>
+    <string name="oad_similar_to_format">Rất giống ảnh ngày %1$s</string>
+    <string name="oad_differs_from_format">Khác biệt rõ so với ngày %1$s</string>
+    <string name="oad_compare_short">So sánh</string>
+    <string name="oad_has_photo_format">Tester có ảnh ngày %1$s</string>
+    <string name="oad_compare_prev">So sánh với ngày trước</string>
+    <string name="oad_tap_zoom">Chạm để phóng to ảnh 🔍</string>
+    <string name="oad_compare_2days">So sánh 2 ngày ⇋</string>
+    <string name="oad_rating_out_of_5_format">%1$d/5 sao</string>
+    <string name="oad_tester_comment">Nhận xét của tester:</string>
+    <string name="oad_reject_reason_format">Lý do từ chối: %1$s</string>
+    <string name="oad_reject">Từ chối</string>
+    <string name="oad_reject_dialog_title">Xác nhận từ chối báo cáo ⚠️</string>
+    <string name="oad_reject_dialog_desc">Vui lòng chọn lý do từ chối để tester có thể rút kinh nghiệm và nộp lại:</string>
+    <string name="oad_reject_dialog_note">⚠ Lưu ý: Nếu tester bị từ chối 3 lần/ngày sẽ bị Cảnh báo. Ngược lại, nếu chủ app từ chối quá 5 lần/ngày cũng sẽ bị Cảnh báo từ hệ thống. Hãy đối chiếu kỹ ảnh trước khi từ chối.</string>
+    <string name="oad_reject_reason_1">Ảnh trùng lặp với ngày hôm trước</string>
+    <string name="oad_reject_reason_2">Ảnh không rõ ràng / không phải app này</string>
+    <string name="oad_reject_reason_3">Chưa mở ứng dụng hoặc chưa test thực tế</string>
+    <string name="oad_reject_reason_4">Lý do khác...</string>
+    <string name="oad_reject_custom_placeholder">Nhập lý do cụ thể...</string>
+    <string name="oad_reject_fallback_reason">Chưa đạt yêu cầu kiểm thử</string>
+    <string name="oad_reject_confirm_btn">Xác nhận từ chối</string>
+    <string name="repo_campaign_not_found">Không tìm thấy chiến dịch.</string>
+    <string name="repo_credit_note_approved_bonus_format">Chủ app duyệt kết quả kiểm thử (Thưởng thêm +%1$d Credit)</string>
+    <string name="repo_credit_note_rejected_clawback">Thu hồi Credit tạm nhận do chủ app từ chối kết quả</string>
+    <string name="repo_connection_failed">Không thể kết nối đến máy chủ.</string>
+    <string name="account_locked_email_subject">[12 Tester] Yêu cầu mở khóa tài khoản - %1$s</string>
+    <string name="account_locked_email_body_template">Chào Quản trị viên 12 Tester,\n\nTài khoản của tôi bị tạm khóa do nhận cảnh báo kiểm thử.\nEmail: %1$s\nLý do / Giải trình:\n[Vui lòng nhập lý do của bạn tại đây...]\n\nKính nhờ Admin hỗ trợ kiểm tra và mở khóa tài khoản giúp tôi.\nXin cảm ơn!</string>
+    <string name="campaign_history_reward_format">✓ +%1$d Credit</string>
 </resources>

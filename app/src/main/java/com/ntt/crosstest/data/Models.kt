@@ -71,6 +71,7 @@ data class Campaign(
     @SerialName("is_boosted") val isBoosted: Boolean = false,
     @SerialName("slot_number") val slotNumber: Int = 1,
     @SerialName("paused_reason") val pausedReason: String? = null,
+    @SerialName("admin_note") val adminNote: String? = null,
     @SerialName("completed_at") val completedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
 ) {
@@ -79,7 +80,7 @@ data class Campaign(
     val isProduction: Boolean get() = status == "production"
     val isCompleted: Boolean get() = status == "completed"
 
-    /** App đã ở tab "Đã hoàn thành Kiểm thử" (lên production hoặc hết 15 ngày hiển thị). */
+    /** App đã ở tab "Đã hoàn thành Kiểm thử" (lên production hoặc hết 30 ngày hiển thị). */
     val isFinalized: Boolean get() = isProduction || isCompleted
 
     /** App bị hệ thống tự tạm dừng vì chủ app vắng nhiệm vụ ngày 3 ngày liên tục. */
@@ -87,6 +88,9 @@ data class Campaign(
 
     /** App bị tạm dừng do Slot đã hết hạn. */
     val isSlotExpiredPause: Boolean get() = isPaused && pausedReason == "slot_expired"
+
+    /** App bị Admin tạm dừng; chủ app không được tự mở lại. */
+    val isAdminPaused: Boolean get() = isPaused && pausedReason == "admin_manual"
 
     val safeIconUrl: String get() = iconUrl.orEmpty()
     val safeTestUsername: String get() = testUsername.orEmpty()
@@ -130,7 +134,7 @@ data class Campaign(
         }
 
     companion object {
-        const val TESTING_WINDOW_DAYS = 15
+        const val TESTING_WINDOW_DAYS = 30
     }
 }
 
@@ -150,6 +154,7 @@ data class ResumeCampaignResult(
 data class LifecycleSyncResult(
     @SerialName("completed") val completed: Int = 0,
     @SerialName("paused") val paused: Int = 0,
+    @SerialName("slot_paused") val slotPaused: Int = 0,
 )
 
 @Serializable
@@ -185,7 +190,7 @@ data class LeaderboardUser(
     val userId: String,
     val displayName: String,
     val avatarUrl: String? = null,
-    val credits: Int = 100,
+    val credits: Int = 0,
     val checkinCount: Int = 0,
     val campaignsCount: Int = 0,
     val rank: Int = 0,
@@ -206,6 +211,7 @@ data class TesterReport(
     @SerialName("reviewed_at") val reviewedAt: String? = null,
     @SerialName("rejection_reason") val rejectionReason: String? = null,
     @SerialName("image_hash") val imageHash: String? = null,
+    @SerialName("client_submit_id") val clientSubmitId: String? = null,
     @SerialName("tester_name") val testerName: String? = null,
     @SerialName("tester_avatar") val testerAvatar: String? = null,
     @SerialName("tester_credits") val testerCredits: Int? = null,
@@ -399,6 +405,7 @@ data class ApproveReportResult(
     @SerialName("tester_id") val testerId: String = "",
     @SerialName("status") val status: String = "",
     @SerialName("credits_awarded") val creditsAwarded: Int = 0,
+    @SerialName("tip_awarded") val tipAwarded: Int = 0,
     @SerialName("tester_balance") val testerBalance: Int = 0,
 )
 
@@ -414,6 +421,8 @@ data class RejectReportResult(
     @SerialName("report_id") val reportId: String = "",
     @SerialName("tester_id") val testerId: String = "",
     @SerialName("status") val status: String = "",
+    @SerialName("credits_deducted") val creditsDeducted: Int = 0,
+    @SerialName("tester_balance") val testerBalance: Int = 0,
     @SerialName("tester_today_rejections") val testerTodayRejections: Int = 0,
     @SerialName("tester_warned") val testerWarned: Boolean = false,
     @SerialName("tester_warning_msg") val testerWarningMsg: String? = null,
@@ -431,6 +440,20 @@ data class SelfUnlockResult(
     @SerialName("previous_credits") val previousCredits: Int = 0,
     @SerialName("new_credits") val newCredits: Int = 0,
     @SerialName("is_locked") val isLocked: Boolean = false,
+)
+
+@Serializable
+data class SetCampaignTipParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_tip_credits") val tipCredits: Int,
+)
+
+@Serializable
+data class SetCampaignTipResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("tip_credits") val tipCredits: Int = 0,
+    @SerialName("is_boosted") val isBoosted: Boolean = false,
 )
 
 @Serializable
@@ -600,9 +623,40 @@ data class AdminDeleteCampaignResult(
 )
 
 @Serializable
+data class AdminPauseCampaignParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_reason") val reason: String? = null,
+)
+
+@Serializable
+data class AdminCampaignControlResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("previous_status") val previousStatus: String = "",
+    @SerialName("status") val status: String = "",
+    @SerialName("paused_reason") val pausedReason: String? = null,
+    @SerialName("app_name") val appName: String = "",
+    @SerialName("owner_id") val ownerId: String = "",
+    @SerialName("admin_note") val adminNote: String? = null,
+    @SerialName("admin_resumed") val adminResumed: Boolean = false,
+)
+
+@Serializable
 data class SubmitTesterReportParams(
     @SerialName("p_campaign_id") val campaignId: String,
-    @SerialName("p_content") val content: String = "",
+    // null = không sửa nội dung (server giữ nguyên comment cũ khi chỉ đổi ảnh)
+    @SerialName("p_content") val content: String? = null,
+    @SerialName("p_screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("p_rating") val rating: Int = 5,
+    @SerialName("p_image_hash") val imageHash: String? = null,
+    @SerialName("p_client_submit_id") val clientSubmitId: String? = null,
+)
+
+/** Fallback cho Supabase chưa deploy migration 033 (RPC chỉ có 5 tham số). */
+@Serializable
+data class SubmitTesterReportLegacyParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_content") val content: String? = null,
     @SerialName("p_screenshot_url") val screenshotUrl: String? = null,
     @SerialName("p_rating") val rating: Int = 5,
     @SerialName("p_image_hash") val imageHash: String? = null,
@@ -613,6 +667,32 @@ data class SubmitTesterReportResult(
     @SerialName("success") val success: Boolean = false,
     @SerialName("report_id") val reportId: String = "",
     @SerialName("status") val status: String = "pending",
+    @SerialName("provisional_granted") val provisionalGranted: Boolean = false,
+    @SerialName("provisional_amount") val provisionalAmount: Int = 0,
+    /** URL thực tế server đang giữ; dùng để tránh xoá nhầm ảnh cũ khi báo cáo đã duyệt. */
+    @SerialName("screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("image_hash") val imageHash: String? = null,
+)
+
+/**
+ * Tham số RPC `apply_report_credit` (migration 022) — cộng/trừ credit nguyên tử
+ * cho tester của một báo cáo; server tự kiểm tra quyền chủ app/admin.
+ */
+@Serializable
+data class ApplyReportCreditParams(
+    @SerialName("p_report_id") val reportId: String,
+    @SerialName("p_amount") val amount: Int,
+    @SerialName("p_action") val action: String = "",
+    @SerialName("p_note") val note: String? = null,
+)
+
+@Serializable
+data class ApplyReportCreditResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("user_id") val userId: String = "",
+    @SerialName("previous_credits") val previousCredits: Int = 0,
+    @SerialName("new_credits") val newCredits: Int = 0,
+    @SerialName("amount") val amount: Int = 0,
 )
 
 @Serializable
@@ -667,6 +747,170 @@ data class AdminUpdateAppConfigParams(
     @SerialName("p_title") val title: String? = null,
     @SerialName("p_message") val message: String? = null,
     @SerialName("p_store_url") val storeUrl: String? = null,
+)
+
+// ============================================================================
+// Phase 2 — Batched RPC results (migration 020_query_optimization.sql)
+// RPC-first, các hàm legacy vẫn giữ làm fallback khi chưa deploy migration.
+// ============================================================================
+
+/** Per-campaign counters used across Home/Detail screens. */
+@Serializable
+data class CampaignStats(
+    @SerialName("installed_count") val installedCount: Int = 0,
+    @SerialName("today_tested_count") val todayTestedCount: Int = 0,
+    @SerialName("has_tested_today") val hasTestedToday: Boolean = false,
+)
+
+/** Kết quả RPC `get_home_feed` — danh sách campaign 3 tab + tên chủ app + stats. */
+@Serializable
+data class HomeFeedResult(
+    @SerialName("open") val open: List<Campaign> = emptyList(),
+    @SerialName("paused") val paused: List<Campaign> = emptyList(),
+    @SerialName("completed") val completed: List<Campaign> = emptyList(),
+    @SerialName("owner_names") val ownerNames: Map<String, String> = emptyMap(),
+    @SerialName("stats") val stats: Map<String, CampaignStats> = emptyMap(),
+)
+
+/** Kết quả RPC `get_my_dashboard` — toàn bộ dữ liệu cá nhân của Trang chủ trong 1 query. */
+@Serializable
+data class MyDashboardResult(
+    @SerialName("profile") val profile: Profile? = null,
+    @SerialName("my_campaigns") val myCampaigns: List<Campaign> = emptyList(),
+    @SerialName("joined_campaigns") val joinedCampaigns: List<Campaign> = emptyList(),
+    @SerialName("leaderboard") val leaderboard: List<LeaderboardUser> = emptyList(),
+    @SerialName("today_checkin_count") val todayCheckinCount: Int = 0,
+    @SerialName("pending_reports_count") val pendingReportsCount: Int = 0,
+    @SerialName("unread_warnings") val unreadWarnings: List<UserWarning> = emptyList(),
+    @SerialName("weekly_warnings_count") val weeklyWarningsCount: Int = 0,
+    @SerialName("credit_logs") val creditLogs: List<CreditLog> = emptyList(),
+    @SerialName("topup_packages") val topupPackages: List<TopupPackage> = emptyList(),
+    @SerialName("notifications") val notifications: List<UserNotification> = emptyList(),
+    @SerialName("owner_stats") val ownerStats: Map<String, CampaignOwnerStats> = emptyMap(),
+    /** null khi RPC phiên bản cũ chưa trả về slots (migration 021). */
+    @SerialName("slots") val slots: List<UserSlot>? = null,
+    @SerialName("quest_summary") val questSummary: QuestSummary? = null,
+)
+
+/** Tham số RPC `get_my_dashboard` (migration 021). */
+@Serializable
+data class MyDashboardParams(
+    @SerialName("p_include_leaderboard") val includeLeaderboard: Boolean = false,
+)
+
+/** Tham số RPC `get_next_untested_campaign` (migration 021). */
+@Serializable
+data class NextCampaignParams(
+    @SerialName("p_current_id") val currentCampaignId: String,
+)
+
+/** Kết quả RPC `get_next_untested_campaign` — campaign null khi không còn app phù hợp. */
+@Serializable
+data class NextCampaignResult(
+    @SerialName("campaign") val campaign: Campaign? = null,
+)
+
+/** Một thành viên tester kèm thống kê check-in (RPC `get_campaign_detail`). */
+@Serializable
+data class CampaignDetailTester(
+    @SerialName("user_id") val userId: String,
+    @SerialName("joined_at") val joinedAt: String? = null,
+    @SerialName("days") val days: Int = 0,
+    @SerialName("checkin_count") val checkinCount: Int = 0,
+    @SerialName("last_checkin_date") val lastCheckinDate: String? = null,
+)
+
+/** Kết quả RPC `get_campaign_detail` — toàn bộ dữ liệu màn chi tiết trong 1 query. */
+@Serializable
+data class CampaignDetailResult(
+    @SerialName("campaign") val campaign: Campaign,
+    @SerialName("is_member") val isMember: Boolean = false,
+    @SerialName("is_owner") val isOwner: Boolean = false,
+    @SerialName("checked_in_confirmed_today") val checkedInConfirmedToday: Boolean = false,
+    @SerialName("testers") val testers: List<CampaignDetailTester> = emptyList(),
+    @SerialName("feedbacks") val feedbacks: List<Feedback> = emptyList(),
+    @SerialName("reports") val reports: List<TesterReport> = emptyList(),
+    @SerialName("profiles") val profiles: Map<String, Profile> = emptyMap(),
+    @SerialName("today_tested_count") val todayTestedCount: Int = 0,
+    @SerialName("reports_count") val reportsCount: Int = 0,
+    @SerialName("pending_reports_count") val pendingReportsCount: Int = 0,
+    @SerialName("avg_rating") val avgRating: Float? = null,
+    @SerialName("my_checkin_dates") val myCheckinDates: List<String> = emptyList(),
+    @SerialName("my_profile") val myProfile: Profile? = null,
+    @SerialName("unread_warnings") val unreadWarnings: List<UserWarning> = emptyList(),
+    @SerialName("weekly_warnings_count") val weeklyWarningsCount: Int = 0,
+)
+
+@Serializable
+data class CampaignIdParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+)
+
+@Serializable
+data class CampaignIdsParams(
+    @SerialName("p_campaign_ids") val campaignIds: List<String>,
+)
+
+@Serializable
+data class LeaderboardParams(
+    @SerialName("p_limit") val limit: Int = 100,
+    /** 'credit' = xếp theo Credits (mặc định) — 'test' = xếp theo tổng lượt test. */
+    @SerialName("p_sort") val sort: String = "credit",
+)
+
+// ============================================================================
+// Contact & Bug Reports (migration 025_contact_reports.sql)
+// ============================================================================
+
+/** Dữ liệu client gửi lên khi tạo phản hồi mới (status luôn là 'new' do server set). */
+@Serializable
+data class ContactReportInsert(
+    @SerialName("user_id") val userId: String,
+    @SerialName("category") val category: String = "bug",
+    @SerialName("message") val message: String,
+    @SerialName("app_version") val appVersion: String? = null,
+    @SerialName("platform") val platform: String? = null,
+    @SerialName("device_model") val deviceModel: String? = null,
+)
+
+/** Một phản hồi liên hệ/báo lỗi, kèm thông tin người gửi từ join profiles (RPC admin). */
+@Serializable
+data class ContactReport(
+    @SerialName("id") val id: String,
+    @SerialName("user_id") val userId: String,
+    @SerialName("category") val category: String = "bug",
+    @SerialName("message") val message: String = "",
+    @SerialName("app_version") val appVersion: String? = null,
+    @SerialName("platform") val platform: String? = null,
+    @SerialName("device_model") val deviceModel: String? = null,
+    @SerialName("status") val status: String = "new",
+    @SerialName("admin_reply") val adminReply: String? = null,
+    @SerialName("replied_at") val repliedAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+) {
+    val isNew: Boolean get() = status == "new"
+    val isReplied: Boolean get() = status == "replied"
+    val isResolved: Boolean get() = status == "resolved"
+}
+
+@Serializable
+data class AdminGetContactReportsParams(
+    @SerialName("p_status") val status: String? = null,
+)
+
+@Serializable
+data class AdminUpdateReportStatusParams(
+    @SerialName("p_report_id") val reportId: String,
+    @SerialName("p_resolved") val resolved: Boolean,
+)
+
+@Serializable
+data class AdminReplyContactReportParams(
+    @SerialName("p_report_id") val reportId: String,
+    @SerialName("p_message") val message: String,
 )
 
 

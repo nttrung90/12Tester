@@ -94,11 +94,25 @@ cross-test/
 ### Bước B — Chạy file SQL tạo database
 
 1. Trong Supabase Dashboard, mở **SQL Editor** → **New query**.
-2. Mở file `supabase/migrations/001_init.sql` trong project này, copy toàn bộ, paste vào
-   SQL Editor → **Run**.
-3. Kiểm tra: vào **Table Editor** phải thấy 6 bảng `profiles`, `campaigns`,
-   `campaign_members`, `checkins`, `feedbacks`, `credit_logs`.
-   *(Nếu bạn đã chạy `001_init.sql` phiên bản cũ trước đó, hãy mở tiếp `supabase/migrations/002_credit_system.sql` và Run để cập nhật hệ thống Credit).*
+2. Chạy lần lượt **tất cả** file trong `supabase/migrations/` theo thứ tự tăng dần
+   (`001_init.sql` → `033_media_integrity.sql`). Mỗi file: mở ra, copy toàn bộ,
+   paste vào một query mới rồi bấm **Run**.
+3. Kiểm tra: vào **Table Editor** phải thấy các bảng chính `profiles`, `campaigns`,
+   `campaign_members`, `checkins`, `feedbacks`, `credit_logs`, `tester_reports`,
+   `notifications`, `user_warnings`, `report_review_events`.
+
+> **Lưu ý quan trọng:**
+> - `supabase/full_schema_singapore.sql` chỉ gộp schema tới migration 014, **không** bao gồm
+>   các migration mới. Nếu dùng file này cho project mới, vẫn phải chạy tiếp các migration
+>   từ `015` → `033` theo đúng thứ tự.
+> - **Migration 030, 031, 032 và 033 là bắt buộc**: 030 chống lỗi hệ thống Credit (thu hồi Credit tạm,
+>   Tip, cron auto-duyệt), 031 chống gian lận luồng duyệt báo cáo (bắt buộc ảnh mới sau khi bị
+>   từ chối, khóa ảnh/rating sau khi duyệt, bộ đếm cảnh báo theo ngày Việt Nam), 032 bổ sung
+>   quyền Admin tạm dừng/tiếp tục nhận tester cho app của người khác (không đổi chủ sở hữu),
+>   033 chống nộp trùng khi retry (`client_submit_id`), bắt buộc `image_hash`/URL ảnh hợp lệ
+>   và chặn client ghi thẳng bảng `tester_reports`.
+> - Nếu chưa bật được `pg_cron` cho `auto_accept_expired_reports`, không sao: từ migration 031
+>   hệ thống tự auto-duyệt khi mở chi tiết app hoặc tải Trang chủ.
 
 File SQL làm những gì:
 - Tạo 6 bảng + index + ràng buộc `UNIQUE(campaign_id, user_id, checkin_date)` chống check-in trùng.
@@ -108,6 +122,22 @@ File SQL làm những gì:
 - Trigger `handle_new_user()`: tự tạo dòng `profiles` và thưởng khởi tạo **100 Credit** (ghi log vào `credit_logs`).
 - Trigger `handle_checkin_reward()`: thưởng **+2 Credit** cho mỗi app test (tối đa 30 app/ngày = max 60 Credit/ngày) và reset chuỗi vắng mặt.
 - Hàm `apply_daily_inactivity_penalty()`: tự động trừ phạt Credit theo chuỗi ngày không làm nhiệm vụ (1%, 2%, 5%, 10%).
+
+### Bước B2 — Deploy Firebase Storage rules
+
+App upload ảnh screenshot report + icon app lên Firebase Storage bucket
+`cross-testers.firebasestorage.app` (cấu hình trong `app/google-services.json`).
+Repo có sẵn `firebase.json` + `storage.rules`:
+
+1. Cài Firebase CLI: `npm install -g firebase-tools`.
+2. `firebase login`.
+3. `firebase use --add` → chọn project Firebase `cross-testers` (hoặc project đang dùng
+   trong `google-services.json`).
+4. `firebase deploy --only storage`.
+
+Rules cho phép **read** công khai nhưng chỉ **create/update** object ảnh đúng
+path/size/content-type và **không cho delete** — để client không thể xoá ảnh đang
+được report tham chiếu.
 
 ### Bước C — Bật đăng nhập Google (quan trọng, làm cẩn thận)
 

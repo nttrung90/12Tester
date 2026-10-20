@@ -258,11 +258,20 @@ object PlayStoreHelper {
     fun drawableToBase64(drawable: Drawable): String? {
         return try {
             val bitmap = drawableToBitmap(drawable)
-            val scaled = Bitmap.createScaledBitmap(bitmap, 128, 128, true)
-            val stream = ByteArrayOutputStream()
-            scaled.compress(Bitmap.CompressFormat.PNG, 90, stream)
-            val bytes = stream.toByteArray()
-            "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+            val scaled = if (bitmap.width == 128 && bitmap.height == 128) {
+                bitmap
+            } else {
+                Bitmap.createScaledBitmap(bitmap, 128, 128, true)
+            }
+            try {
+                val stream = ByteArrayOutputStream()
+                scaled.compress(Bitmap.CompressFormat.PNG, 90, stream)
+                val bytes = stream.toByteArray()
+                "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+            } finally {
+                // Không recycle bitmap gốc nếu nó thuộc BitmapDrawable.
+                if (scaled !== bitmap) scaled.recycle()
+            }
         } catch (_: Exception) {
             null
         }
@@ -270,16 +279,38 @@ object PlayStoreHelper {
 
     /**
      * Converts a user-selected image Uri into a compact Base64 PNG data URI.
+     * Sample trước khi decode để ảnh camera lớn không làm OOM khi chỉ cần icon 128px.
      */
     fun uriToBase64(context: Context, uri: Uri): String? {
         return try {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(uri)?.use { stream ->
-                val bitmap = BitmapFactory.decodeStream(stream) ?: return null
-                val scaled = Bitmap.createScaledBitmap(bitmap, 128, 128, true)
+                BitmapFactory.decodeStream(stream, null, bounds)
+            }
+            var sample = 1
+            while (bounds.outWidth / (sample * 2) >= 256 || bounds.outHeight / (sample * 2) >= 256) {
+                sample *= 2
+            }
+            val options = BitmapFactory.Options().apply {
+                inSampleSize = sample
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            }
+            val bitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, options)
+            } ?: return null
+            val scaled = if (bitmap.width == 128 && bitmap.height == 128) {
+                bitmap
+            } else {
+                Bitmap.createScaledBitmap(bitmap, 128, 128, true)
+            }
+            try {
                 val out = ByteArrayOutputStream()
                 scaled.compress(Bitmap.CompressFormat.PNG, 90, out)
                 val bytes = out.toByteArray()
                 "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+            } finally {
+                if (scaled !== bitmap) scaled.recycle()
+                bitmap.recycle()
             }
         } catch (_: Exception) {
             null

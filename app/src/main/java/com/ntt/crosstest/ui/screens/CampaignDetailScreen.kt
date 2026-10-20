@@ -35,6 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -52,6 +53,8 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Replay
@@ -79,7 +82,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import com.ntt.crosstest.ui.components.AppIcon
 import com.ntt.crosstest.ui.components.FullscreenImageViewer
+import com.ntt.crosstest.ui.components.TesterImageComparisonDialog
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.formatIsoUtcToLocal
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -106,6 +111,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -118,6 +124,9 @@ import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
+import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.ReportSubmitManager
+import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.ui.theme.AmberStar
 import com.ntt.crosstest.ui.viewmodels.CampaignDetailUiState
 import com.ntt.crosstest.ui.viewmodels.CampaignDetailViewModel
@@ -138,7 +147,13 @@ fun CampaignDetailScreen(
         key = campaignId,
         factory = viewModelFactory {
             initializer {
-                CampaignDetailViewModel(campaignId, app.campaignRepository, app.authRepository.currentUserId())
+                CampaignDetailViewModel(
+                    campaignId,
+                    app.campaignRepository,
+                    app.reportSubmitManager,
+                    app.authRepository.currentUserId(),
+                    Localizer(app),
+                )
             }
         }
     )
@@ -151,6 +166,9 @@ fun CampaignDetailScreen(
     var showHowToInstallDialog by rememberSaveable { mutableStateOf(false) }
     var showCannotDownloadDialog by rememberSaveable { mutableStateOf(false) }
     var showAdminDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showAdminPauseDialog by rememberSaveable { mutableStateOf(false) }
+    var showAdminResumeDialog by rememberSaveable { mutableStateOf(false) }
+    var adminPauseReason by rememberSaveable { mutableStateOf("") }
     var previewImageUrl by rememberSaveable { mutableStateOf<String?>(null) }
 
     var isInstalledLocally by remember { mutableStateOf(false) }
@@ -158,7 +176,7 @@ fun CampaignDetailScreen(
     val pickScreenshotLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        viewModel.onScreenshotSelected(uri)
+        viewModel.onScreenshotSelected(uri, context)
     }
 
     LifecycleResumeEffect(campaignId, uiState.campaign?.packageName) {
@@ -206,7 +224,7 @@ fun CampaignDetailScreen(
             },
             title = {
                 Text(
-                    text = "CẢNH BÁO TỪ HỆ THỐNG ⚠️",
+                    text = stringResource(R.string.warning_dialog_title),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFD32F2F),
                     textAlign = TextAlign.Center
@@ -224,7 +242,7 @@ fun CampaignDetailScreen(
                         shape = RoundedCornerShape(8.dp),
                     ) {
                         Text(
-                            text = "Lưu ý: Số lần bị cảnh báo trong tuần: ${uiState.weeklyWarningsCount}/3. Nếu bị 3 lần trong 1 tuần, tài khoản sẽ tự động bị tạm khóa.",
+                            text = stringResource(R.string.warning_quota_format, uiState.weeklyWarningsCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFC62828),
                             modifier = Modifier.padding(10.dp)
@@ -241,7 +259,7 @@ fun CampaignDetailScreen(
                 ) {
                     Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Tôi đã hiểu")
+                    Text(stringResource(R.string.warning_confirm_btn))
                 }
             }
         )
@@ -249,9 +267,10 @@ fun CampaignDetailScreen(
 
     val campaign = uiState.campaign
 
-    // Dialog: Gợi ý test app tiếp theo sau khi nộp báo cáo thành công
+    // Dialog: Gợi ý test app tiếp theo — hiện NGAY khi nộp; upload + RPC chạy nền
     if (uiState.showNextAppPrompt) {
         val nextCamp = uiState.nextCampaignToTest
+        val findingNext = uiState.nextSuggestionLoading && nextCamp == null
         AlertDialog(
             onDismissRequest = { viewModel.dismissNextAppPrompt() },
             icon = {
@@ -264,7 +283,7 @@ fun CampaignDetailScreen(
             },
             title = {
                 Text(
-                    text = if (nextCamp != null) "Kiểm thử app tiếp theo? 🚀" else "Hoàn thành kiểm thử! 🎉",
+                    text = stringResource(if (findingNext || nextCamp != null) R.string.campaign_next_dialog_title else R.string.campaign_done_dialog_title),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
@@ -272,87 +291,186 @@ fun CampaignDetailScreen(
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (nextCamp != null) {
-                        Text(
-                            text = "Nộp báo cáo thành công! Bạn có muốn Test app tiếp theo không?",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    // Trạng thái nộp báo cáo (chạy nền, không chặn thao tác)
+                    when (uiState.submitStage) {
+                        ReportSubmitManager.Stage.SENDING -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Text(
+                                text = stringResource(R.string.campaign_submit_sending_bg),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        ReportSubmitManager.Stage.RETRYING -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFFE65100))
+                            Text(
+                                text = stringResource(R.string.campaign_submit_retrying_format, uiState.submitAttempt),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFE65100),
+                            )
+                        }
+                        ReportSubmitManager.Stage.DONE -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF2E7D32),
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Text(
+                                text = stringResource(R.string.campaign_submit_sent_ok),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF2E7D32),
+                            )
+                        }
+                        ReportSubmitManager.Stage.FAILED -> Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                AppIcon(
-                                    iconUrl = nextCamp.safeIconUrl,
-                                    packageName = nextCamp.packageName,
-                                    appName = nextCamp.appName,
-                                    size = 46.dp,
-                                    shapeRadius = 10.dp,
+                                Icon(
+                                    imageVector = Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp),
                                 )
-                                Spacer(Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = nextCamp.appName,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
+                                Text(
+                                    text = uiState.submitError ?: stringResource(R.string.campaign_submit_failed_bg),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                            TextButton(onClick = { viewModel.retrySubmit() }) {
+                                Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.campaign_submit_retry_btn))
+                            }
+                        }
+                        null -> {}
+                    }
+
+                    when {
+                        nextCamp != null -> {
+                            Text(
+                                text = stringResource(
+                                    if (uiState.submitStage == ReportSubmitManager.Stage.DONE) {
+                                        R.string.campaign_submitted_next_msg
+                                    } else {
+                                        R.string.campaign_next_prompt_msg
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AppIcon(
+                                        iconUrl = nextCamp.safeIconUrl,
+                                        packageName = nextCamp.packageName,
+                                        appName = nextCamp.appName,
+                                        size = 46.dp,
+                                        shapeRadius = 10.dp,
                                     )
-                                    Text(
-                                        text = nextCamp.packageName,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                    Spacer(Modifier.height(2.dp))
-                                    Text(
-                                        text = "Thưởng: +2 Credit khi hoàn thành",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF2E7D32),
-                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = nextCamp.appName,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Text(
+                                            text = nextCamp.packageName,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Spacer(Modifier.height(2.dp))
+                                        Text(
+                                            text = stringResource(R.string.campaign_reward_hint),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color(0xFF2E7D32),
+                                        )
+                                    }
                                 }
                             }
                         }
-                    } else {
-                        Text(
-                            text = "Tuyệt vời! Bạn đã hoàn thành kiểm thử tất cả các ứng dụng có sẵn hôm nay.",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        findingNext -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFF1E88E5))
+                                Text(
+                                    text = stringResource(R.string.campaign_next_searching),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                        }
+                        else -> {
+                            Text(
+                                text = stringResource(R.string.campaign_all_done_msg),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
             },
             confirmButton = {
-                if (nextCamp != null) {
-                    Button(
-                        onClick = {
-                            val nextId = nextCamp.id.orEmpty()
-                            viewModel.dismissNextAppPrompt()
-                            if (nextId.isNotBlank() && onNavigateToCampaign != null) {
-                                onNavigateToCampaign(nextId)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
-                    ) {
-                        Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text("Có, test ngay")
+                when {
+                    nextCamp != null -> {
+                        Button(
+                            onClick = {
+                                val nextId = nextCamp.id.orEmpty()
+                                viewModel.dismissNextAppPrompt()
+                                if (nextId.isNotBlank() && onNavigateToCampaign != null) {
+                                    onNavigateToCampaign(nextId)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.campaign_test_now_btn))
+                        }
                     }
-                } else {
-                    Button(
-                        onClick = { viewModel.dismissNextAppPrompt() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
-                    ) {
-                        Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text("Xong")
+                    findingNext -> {
+                        Button(
+                            onClick = {},
+                            enabled = false,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                        ) {
+                            Text(stringResource(R.string.campaign_finding_next_btn))
+                        }
+                    }
+                    else -> {
+                        Button(
+                            onClick = { viewModel.dismissNextAppPrompt() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.done))
+                        }
                     }
                 }
             },
@@ -361,7 +479,13 @@ fun CampaignDetailScreen(
                     TextButton(onClick = { viewModel.dismissNextAppPrompt() }) {
                         Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Không")
+                        Text(stringResource(R.string.no))
+                    }
+                } else if (findingNext) {
+                    TextButton(onClick = { viewModel.dismissNextAppPrompt() }) {
+                        Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.close))
                     }
                 }
             }
@@ -372,8 +496,8 @@ fun CampaignDetailScreen(
     if (showNotInstalledDialog && campaign != null) {
         AlertDialog(
             onDismissRequest = { showNotInstalledDialog = false },
-            title = { Text("Ứng dụng chưa được cài") },
-            text = { Text("Ứng dụng \"${campaign.appName}\" (${campaign.packageName}) chưa có trên thiết bị này. Bạn có muốn mở link để cài đặt không?") },
+            title = { Text(stringResource(R.string.app_not_installed_title)) },
+            text = { Text(stringResource(R.string.campaign_install_dialog_msg, campaign.appName, campaign.packageName)) },
             confirmButton = {
                 Button(onClick = {
                     showNotInstalledDialog = false
@@ -383,14 +507,14 @@ fun CampaignDetailScreen(
                 }) {
                     Icon(Icons.Filled.FileDownload, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Cài đặt ngay")
+                    Text(stringResource(R.string.download_app_now))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNotInstalledDialog = false }) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Đóng")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -401,10 +525,10 @@ fun CampaignDetailScreen(
         val groupUrl = stringResource(R.string.post_app_guide_group_url)
         AlertDialog(
             onDismissRequest = { showHowToInstallDialog = false },
-            title = { Text("Hướng dẫn cài đặt app") },
+            title = { Text(stringResource(R.string.campaign_install_guide_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("1. Bạn hãy đảm bảo đã tham gia Google Group kiểm thử của cộng đồng (nếu app yêu cầu).")
+                    Text(stringResource(R.string.campaign_install_guide_step1))
                     OutlinedButton(
                         onClick = {
                             openUrlSafely(context, groupUrl)
@@ -414,10 +538,10 @@ fun CampaignDetailScreen(
                     ) {
                         Icon(Icons.Filled.Groups, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Tham gia Google Group kiểm thử", fontSize = 12.sp)
+                        Text(stringResource(R.string.campaign_install_guide_group_btn), fontSize = 12.sp)
                     }
-                    Text("2. Mở link Closed Testing hoặc Google Play bên dưới để chấp nhận lời mời và tải app về máy.")
-                    Text("3. Sau khi cài xong, quay lại đây bấm \"Test app (mở app trên máy)\" và nộp báo cáo ảnh.")
+                    Text(stringResource(R.string.campaign_install_guide_step2))
+                    Text(stringResource(R.string.campaign_install_guide_step3))
                 }
             },
             confirmButton = {
@@ -429,14 +553,14 @@ fun CampaignDetailScreen(
                 }) {
                     Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Mở link tải app")
+                    Text(stringResource(R.string.campaign_install_guide_open_link_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showHowToInstallDialog = false }) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Đóng")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -447,11 +571,11 @@ fun CampaignDetailScreen(
         val groupUrl = stringResource(R.string.post_app_guide_group_url)
         AlertDialog(
             onDismissRequest = { showCannotDownloadDialog = false },
-            title = { Text("Không tải được ứng dụng? ⚠") },
+            title = { Text(stringResource(R.string.campaign_cant_download_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Các nguyên nhân phổ biến:", fontWeight = FontWeight.Bold)
-                    Text("• Chưa tham gia Google Group của cộng đồng kiểm thử.")
+                    Text(stringResource(R.string.campaign_cant_download_common_causes), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.campaign_cant_download_cause1))
                     OutlinedButton(
                         onClick = {
                             openUrlSafely(context, groupUrl)
@@ -461,11 +585,11 @@ fun CampaignDetailScreen(
                     ) {
                         Icon(Icons.Filled.Groups, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Mở tham gia Google Group", fontSize = 12.sp)
+                        Text(stringResource(R.string.campaign_cant_download_group_btn), fontSize = 12.sp)
                     }
-                    Text("• Tài khoản Google Play trên điện thoại chưa khớp với email bạn dùng tham gia nhóm test.")
-                    Text("• Chủ app chưa thêm email/group vào danh sách tester trên Google Play Console.")
-                    Text("• Bạn chưa bấm \"Chấp nhận lời mời\" trên trang Closed Test của Google Play.")
+                    Text(stringResource(R.string.campaign_cant_download_cause2))
+                    Text(stringResource(R.string.campaign_cant_download_cause3))
+                    Text(stringResource(R.string.campaign_cant_download_cause4))
                 }
             },
             confirmButton = {
@@ -476,14 +600,14 @@ fun CampaignDetailScreen(
                 }) {
                     Icon(Icons.Filled.Public, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Mở link web Closed Test")
+                    Text(stringResource(R.string.campaign_cant_download_web_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCannotDownloadDialog = false }) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Đóng")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -493,12 +617,12 @@ fun CampaignDetailScreen(
     if (showHistoryDialog) {
         AlertDialog(
             onDismissRequest = { showHistoryDialog = false },
-            title = { Text("Lịch sử kiểm thử của bạn 🕒") },
+            title = { Text(stringResource(R.string.campaign_history_title)) },
             text = {
                 val reports = uiState.myReports
                 val checkinDates = uiState.myCheckinDates
                 if (reports.isEmpty() && checkinDates.isEmpty()) {
-                    Text("Bạn chưa thực hiện ngày test nào cho ứng dụng này. Hãy mở app và nộp báo cáo để tích lũy ngày test!")
+                    Text(stringResource(R.string.campaign_history_empty))
                 } else {
                     LazyColumn(
                         modifier = Modifier
@@ -520,14 +644,14 @@ fun CampaignDetailScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "Ngày: ${rep.createdAt?.take(10) ?: "Hôm nay"}",
+                                                text = stringResource(R.string.campaign_history_date_format, rep.createdAt?.take(10) ?: stringResource(R.string.today)),
                                                 fontWeight = FontWeight.Bold,
                                                 style = MaterialTheme.typography.bodyMedium,
                                             )
                                             val badgeText = when {
-                                                rep.isApproved -> "✓ Đã duyệt (+${if (rep.bonusAwarded > 0) rep.bonusAwarded else 2} C)"
-                                                rep.isPending -> "⏳ Chờ duyệt (còn ${rep.remainingHoursUntilAutoAccept()}h)"
-                                                else -> "✕ Từ chối"
+                                                rep.isApproved -> stringResource(R.string.campaign_history_status_approved_format, if (rep.bonusAwarded > 0) rep.bonusAwarded else 2)
+                                                rep.isPending -> stringResource(R.string.campaign_history_status_pending_format, rep.remainingHoursUntilAutoAccept())
+                                                else -> stringResource(R.string.campaign_history_status_rejected)
                                             }
                                             val badgeColor = when {
                                                 rep.isApproved -> Color(0xFF2E7D32)
@@ -540,7 +664,7 @@ fun CampaignDetailScreen(
                                             Text(text = rep.content, style = MaterialTheme.typography.bodySmall)
                                         }
                                         if (rep.isRejected && !rep.rejectionReason.isNullOrBlank()) {
-                                            Text(text = "Lý do: ${rep.rejectionReason}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                                            Text(text = stringResource(R.string.campaign_history_reason_format, rep.rejectionReason), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                                         }
                                         if (!rep.screenshotUrl.isNullOrBlank()) {
                                             Row(
@@ -554,14 +678,14 @@ fun CampaignDetailScreen(
                                             ) {
                                                 AsyncImage(
                                                     model = rep.screenshotUrl,
-                                                    contentDescription = "Ảnh chụp đã nộp",
+                                                    contentDescription = stringResource(R.string.campaign_submitted_photo_cd),
                                                     modifier = Modifier
                                                         .size(width = 60.dp, height = 42.dp)
                                                         .clip(RoundedCornerShape(4.dp)),
                                                     contentScale = ContentScale.Crop,
                                                 )
                                                 Text(
-                                                    text = "Xem ảnh đã nộp 🔍",
+                                                    text = stringResource(R.string.campaign_view_submitted_photo),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     fontWeight = FontWeight.SemiBold,
@@ -585,8 +709,8 @@ fun CampaignDetailScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("Ngày test: $date", fontWeight = FontWeight.SemiBold)
-                                        Text("✓ +2 Credit", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.campaign_history_test_day_format, date), fontWeight = FontWeight.SemiBold)
+                                        Text(stringResource(R.string.campaign_history_reward_format, 2), color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -598,7 +722,7 @@ fun CampaignDetailScreen(
                 TextButton(onClick = { showHistoryDialog = false }) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Đóng")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -615,22 +739,147 @@ fun CampaignDetailScreen(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             },
-            onScreenshotSelected = viewModel::onScreenshotSelected,
+            onScreenshotSelected = { uri -> viewModel.onScreenshotSelected(uri, context) },
             onRatingChange = viewModel::onRatingChange,
             onCommentChange = viewModel::onCommentChange,
             onSubmit = {
-                viewModel.submitFeedback(context)
+                viewModel.startSubmit()
                 showReportDialog = false
             },
             onPreviewImage = { url: String -> previewImageUrl = url },
         )
     }
 
-    if (showAdminDeleteDialog) {
-        val appName = uiState.campaign?.appName ?: "ứng dụng này"
+    if (showAdminPauseDialog) {
+        val appName = uiState.campaign?.appName ?: stringResource(R.string.campaign_this_app)
         val ownerName = uiState.ownerProfile?.displayName?.ifBlank { null }
             ?: uiState.ownerProfile?.email?.substringBefore("@")
-            ?: "chủ app"
+            ?: stringResource(R.string.campaign_owner_fallback)
+
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isActionLoading) showAdminPauseDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.PauseCircle,
+                    contentDescription = null,
+                    tint = Color(0xFFB26A00),
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = { Text(stringResource(R.string.campaign_admin_pause_dialog_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = stringResource(R.string.campaign_admin_pause_dialog_desc, appName, ownerName),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    OutlinedTextField(
+                        value = adminPauseReason,
+                        onValueChange = { if (it.length <= 200) adminPauseReason = it },
+                        label = { Text(stringResource(R.string.campaign_admin_pause_reason_label)) },
+                        placeholder = { Text(stringResource(R.string.campaign_admin_pause_reason_hint)) },
+                        minLines = 2,
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.adminPauseCampaign(adminPauseReason.ifBlank { null })
+                        showAdminPauseDialog = false
+                        adminPauseReason = ""
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB26A00)),
+                    enabled = !uiState.isActionLoading,
+                ) {
+                    if (uiState.isActionLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.White,
+                        )
+                        Spacer(Modifier.width(6.dp))
+                    } else {
+                        Icon(Icons.Filled.PauseCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    Text(stringResource(R.string.campaign_admin_pause_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAdminPauseDialog = false },
+                    enabled = !uiState.isActionLoading,
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showAdminResumeDialog) {
+        val appName = uiState.campaign?.appName ?: stringResource(R.string.campaign_this_app)
+        val ownerName = uiState.ownerProfile?.displayName?.ifBlank { null }
+            ?: uiState.ownerProfile?.email?.substringBefore("@")
+            ?: stringResource(R.string.campaign_owner_fallback)
+
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isActionLoading) showAdminResumeDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.PlayCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF2E7D32),
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = { Text(stringResource(R.string.campaign_admin_resume_dialog_title)) },
+            text = {
+                Text(
+                    text = stringResource(R.string.campaign_admin_resume_dialog_desc, appName, ownerName),
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.adminResumeCampaign()
+                        showAdminResumeDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                    enabled = !uiState.isActionLoading,
+                ) {
+                    if (uiState.isActionLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.White,
+                        )
+                        Spacer(Modifier.width(6.dp))
+                    } else {
+                        Icon(Icons.Filled.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    Text(stringResource(R.string.campaign_admin_resume_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAdminResumeDialog = false },
+                    enabled = !uiState.isActionLoading,
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showAdminDeleteDialog) {
+        val appName = uiState.campaign?.appName ?: stringResource(R.string.campaign_this_app)
+        val ownerName = uiState.ownerProfile?.displayName?.ifBlank { null }
+            ?: uiState.ownerProfile?.email?.substringBefore("@")
+            ?: stringResource(R.string.campaign_owner_fallback)
 
         AlertDialog(
             onDismissRequest = { if (!uiState.isActionLoading) showAdminDeleteDialog = false },
@@ -643,11 +892,11 @@ fun CampaignDetailScreen(
                 )
             },
             title = {
-                Text("Gỡ bỏ ứng dụng (Admin)")
+                Text(stringResource(R.string.campaign_admin_remove))
             },
             text = {
                 Text(
-                    text = "Bạn có chắc chắn muốn gỡ bỏ app \"$appName\" của $ownerName?\n\nHành động này sẽ xóa vĩnh viễn chiến dịch cùng toàn bộ hồ sơ kiểm thử, check-in, đánh giá và báo cáo của app này khỏi hệ thống."
+                    text = stringResource(R.string.campaign_admin_delete_confirm_format, appName, ownerName)
                 )
             },
             confirmButton = {
@@ -670,7 +919,7 @@ fun CampaignDetailScreen(
                         Icon(Icons.Filled.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                     }
-                    Text("Gỡ bỏ & Xóa toàn bộ hồ sơ")
+                    Text(stringResource(R.string.campaign_admin_delete_btn))
                 }
             },
             dismissButton = {
@@ -680,7 +929,7 @@ fun CampaignDetailScreen(
                 ) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -704,19 +953,19 @@ fun CampaignDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { showHistoryDialog = true }) {
-                        Icon(Icons.Filled.History, contentDescription = "Lịch sử test")
+                        Icon(Icons.Filled.History, contentDescription = stringResource(R.string.campaign_history_cd))
                     }
                     if (uiState.isAdmin) {
                         IconButton(onClick = { showAdminDeleteDialog = true }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Gỡ app (Admin)",
+                                contentDescription = stringResource(R.string.campaign_admin_remove),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
                     }
                     IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Làm mới")
+                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.campaign_refresh_cd))
                     }
                 }
             )
@@ -731,7 +980,7 @@ fun CampaignDetailScreen(
         }
         if (campaign == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text(uiState.error ?: "Không tìm thấy thông tin app.")
+                Text(uiState.error ?: stringResource(R.string.campaign_not_found))
             }
             return@Scaffold
         }
@@ -739,7 +988,6 @@ fun CampaignDetailScreen(
         val ownerName = uiState.ownerProfile?.displayName?.ifBlank { null }
             ?: uiState.ownerProfile?.email?.substringBefore("@")
             ?: "test app"
-        val ownerPoints = "${uiState.ownerProfile?.credits ?: 0}"
 
         Column(
             modifier = Modifier
@@ -787,14 +1035,14 @@ fun CampaignDetailScreen(
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Đây là ứng dụng của bạn",
+                                text = stringResource(R.string.campaign_owner_badge),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "Quản lý người cài, duyệt báo cáo và cài đặt app tại màn hình quản lý.",
+                                text = stringResource(R.string.campaign_owner_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -805,7 +1053,7 @@ fun CampaignDetailScreen(
                                 onClick = { onOwnerManageClick(campaign.id.orEmpty()) },
                                 shape = RoundedCornerShape(10.dp)
                             ) {
-                                Text("Quản lý")
+                                Text(stringResource(R.string.campaign_manage_btn))
                             }
                         }
                     }
@@ -832,7 +1080,7 @@ fun CampaignDetailScreen(
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
-                            text = "App đã đạt mục tiêu ${campaign.dailyTarget} lượt test hôm nay. Bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit khi tham gia test!",
+                            text = stringResource(R.string.campaign_target_reached_msg_format, campaign.dailyTarget),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF1B5E20),
                             fontWeight = FontWeight.Medium,
@@ -882,7 +1130,7 @@ fun CampaignDetailScreen(
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "Chủ app: $ownerName · $ownerPoints Credit",
+                                text = stringResource(R.string.campaign_owner_line_format, ownerName),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -904,22 +1152,22 @@ fun CampaignDetailScreen(
                         StatColumn(
                             icon = Icons.Filled.Check,
                             value = "${uiState.members.size}",
-                            label = "đã cài",
+                            label = stringResource(R.string.campaign_badge_installed),
                         )
                         StatColumn(
                             icon = Icons.Filled.CalendarMonth,
                             value = "${uiState.todayTestedCount}/${campaign.dailyTarget}",
-                            label = "test hôm nay",
+                            label = stringResource(R.string.campaign_tested_today),
                         )
                         StatColumn(
                             icon = Icons.AutoMirrored.Filled.Assignment,
                             value = "${uiState.reportsCount}",
-                            label = "báo cáo",
+                            label = stringResource(R.string.campaign_stat_reports),
                         )
                         StatColumn(
                             icon = Icons.Filled.Star,
                             value = if (uiState.avgRating > 0) "%.1f".format(uiState.avgRating) else "-",
-                            label = "đánh giá",
+                            label = stringResource(R.string.campaign_stat_rating),
                         )
                     }
                 }
@@ -951,7 +1199,7 @@ fun CampaignDetailScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "Bước 1: Cài đặt app vào máy",
+                                    text = stringResource(R.string.campaign_step1_install_title),
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleSmall,
                                     color = Color(0xFF9A3412),
@@ -965,7 +1213,7 @@ fun CampaignDetailScreen(
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
-                                    text = "Chưa cài đặt",
+                                    text = stringResource(R.string.campaign_badge_not_installed),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp,
                                     color = Color(0xFFC2410C),
@@ -974,7 +1222,7 @@ fun CampaignDetailScreen(
                         }
 
                         Text(
-                            text = "Bạn cần vào link Google Play Closed Test để nhấn 'Chấp nhận tham gia' (Opt-in) và tải ứng dụng về máy.",
+                            text = stringResource(R.string.campaign_install_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF7C2D12),
                         )
@@ -998,7 +1246,7 @@ fun CampaignDetailScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Mở link Closed Test & Tải app",
+                                text = stringResource(R.string.campaign_open_closed_test_btn),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp
                             )
@@ -1034,13 +1282,13 @@ fun CampaignDetailScreen(
                             Spacer(Modifier.width(8.dp))
                             Column {
                                 Text(
-                                    text = "Đã cài đặt trên máy",
+                                    text = stringResource(R.string.campaign_badge_installed),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF14532D),
                                 )
                                 Text(
-                                    text = "Sẵn sàng mở trực tiếp để kiểm thử",
+                                    text = stringResource(R.string.campaign_installed_ready_desc),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFF166534),
                                 )
@@ -1055,7 +1303,7 @@ fun CampaignDetailScreen(
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                         ) {
                             Text(
-                                text = "Xem link test",
+                                text = stringResource(R.string.campaign_view_test_link),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF15803D),
@@ -1087,14 +1335,24 @@ fun CampaignDetailScreen(
                     else -> Color(0xFFB26A00)
                 }
                 val bannerTitle = when {
-                    campaign.isProduction -> "App đã lên production"
-                    campaign.isCompleted -> "Đã hoàn thành kiểm thử"
-                    else -> "App đang tạm dừng"
+                    campaign.isProduction -> stringResource(R.string.campaign_badge_production)
+                    campaign.isCompleted -> stringResource(R.string.campaign_badge_completed)
+                    else -> stringResource(R.string.campaign_badge_paused)
+                }
+                val adminNoteSuffix = if (
+                    campaign.isAdminPaused &&
+                    (uiState.isOwner || uiState.isAdmin) &&
+                    !campaign.adminNote.isNullOrBlank()
+                ) {
+                    "\n" + stringResource(R.string.oad_paused_admin_note_format, campaign.adminNote.orEmpty())
+                } else {
+                    ""
                 }
                 val bannerText = when {
-                    campaign.isProduction -> "App đã hoàn thành kiểm thử và không còn nhận báo cáo mới. Cảm ơn bạn đã đồng hành!"
-                    campaign.isCompleted -> "App đã hết 15 ngày hiển thị kiểm thử và không còn nhận báo cáo mới."
-                    else -> "App tạm dừng nên chưa thể nộp báo cáo. Chủ app có thể bật test lại bất cứ lúc nào."
+                    campaign.isProduction -> stringResource(R.string.campaign_lifecycle_production_msg)
+                    campaign.isCompleted -> stringResource(R.string.campaign_lifecycle_completed_msg)
+                    campaign.isAdminPaused -> stringResource(R.string.campaign_lifecycle_admin_paused_msg) + adminNoteSuffix
+                    else -> stringResource(R.string.campaign_lifecycle_paused_msg)
                 }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -1198,7 +1456,7 @@ fun CampaignDetailScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.isOwner) "Mở app (Tự test)" else if (isInstalledLocally) "Mở app kiểm thử" else "Tải & Cài đặt app",
+                            text = stringResource(if (uiState.isOwner) R.string.campaign_open_self_test_btn else if (isInstalledLocally) R.string.campaign_open_test_btn else R.string.campaign_download_install_btn),
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                         )
@@ -1206,7 +1464,7 @@ fun CampaignDetailScreen(
 
                     if (!uiState.isOwner && isInstalledLocally) {
                         Text(
-                            text = "💡 Mẹo: Bạn cũng có thể mở app trực tiếp từ Màn hình chính của điện thoại để test rồi quay lại nộp báo cáo.",
+                            text = stringResource(R.string.campaign_tip_open_directly),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 4.dp),
@@ -1215,7 +1473,7 @@ fun CampaignDetailScreen(
 
                     if (uiState.isOwner) {
                         Text(
-                            text = "Bạn là chủ ứng dụng. Thao tác tự test không tính điểm thưởng. Xem người cài và duyệt báo cáo từ các tester tại màn hình Quản lý.",
+                            text = stringResource(R.string.campaign_owner_self_test_note),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 4.dp),
@@ -1229,7 +1487,7 @@ fun CampaignDetailScreen(
                             ) {
                                 Icon(Icons.Filled.Apps, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Mở trang quản lý ứng dụng", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.campaign_open_manage_btn), fontWeight = FontWeight.Bold)
                             }
                         }
                     } else {
@@ -1246,12 +1504,12 @@ fun CampaignDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Tiến độ của bạn:",
+                                text = stringResource(R.string.campaign_your_progress),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = if (myDays >= targetDays) "Đạt chuẩn $myDays/$targetDays ngày ✓" else "$myDays/$targetDays ngày test",
+                                text = if (myDays >= targetDays) stringResource(R.string.campaign_progress_met_format, myDays, targetDays) else stringResource(R.string.campaign_progress_days_format, myDays, targetDays),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = if (myDays >= targetDays) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary,
@@ -1276,15 +1534,15 @@ fun CampaignDetailScreen(
                             else MaterialTheme.colorScheme.onSurfaceVariant
 
                         val statusText = if (isApprovedToday) {
-                            "✓ Đã duyệt hôm nay: Nhận +${if ((todayReport?.bonusAwarded ?: 0) > 0) todayReport?.bonusAwarded else 2} Credit."
+                            stringResource(R.string.campaign_today_approved_format, todayReport?.bonusAwarded?.takeIf { it > 0 } ?: 2)
                         } else if (isPendingToday) {
-                            "⏳ Đã nộp kết quả hôm nay (+2 Credit tạm nhận). Chờ chủ app duyệt (+1 C thưởng) — Tự động duyệt sau ${todayReport?.remainingHoursUntilAutoAccept() ?: 8}h."
+                            stringResource(R.string.campaign_today_pending_format, todayReport?.remainingHoursUntilAutoAccept() ?: 8)
                         } else if (isRejectedToday) {
                             val reason = todayReport?.rejectionReason?.ifBlank { null }
-                            if (reason != null) "✕ Bị từ chối hôm nay ($reason). 2 Credit tạm nhận đã bị thu hồi. Đề nghị test lại và chụp ảnh khác."
-                            else "✕ Bị từ chối hôm nay: 2 Credit tạm nhận đã bị thu hồi. Đề nghị test lại nghiêm túc và chụp ảnh khác."
+                            if (reason != null) stringResource(R.string.campaign_today_rejected_reason_format, reason)
+                            else stringResource(R.string.campaign_today_rejected)
                         } else {
-                            "Đã cài. Dùng thử rồi nộp ảnh chụp màn hình (Tạm nhận +2 Credit ngay khi gửi)."
+                            stringResource(R.string.campaign_today_ready)
                         }
 
                         Row(
@@ -1327,7 +1585,7 @@ fun CampaignDetailScreen(
                                 ) {
                                     AsyncImage(
                                         model = todayReport.screenshotUrl,
-                                        contentDescription = "Ảnh bạn đã nộp",
+                                        contentDescription = stringResource(R.string.campaign_your_photo_cd),
                                         modifier = Modifier
                                             .size(width = 72.dp, height = 50.dp)
                                             .clip(RoundedCornerShape(6.dp)),
@@ -1335,12 +1593,12 @@ fun CampaignDetailScreen(
                                     )
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Ảnh bạn đã nộp hôm nay",
+                                            text = stringResource(R.string.campaign_today_photo_title),
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.SemiBold,
                                         )
                                         Text(
-                                            text = "Chạm để phóng to xem ảnh lớn 🔍",
+                                            text = stringResource(R.string.campaign_tap_to_zoom_long),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.primary,
                                         )
@@ -1353,18 +1611,18 @@ fun CampaignDetailScreen(
                         val canSubmitNow = campaign.isOpen
                         val buttonText = if (!canSubmitNow) {
                             when {
-                                campaign.isProduction -> "App đã lên production 🎉"
-                                campaign.isCompleted -> "App đã hoàn thành kiểm thử"
-                                else -> "App đang tạm dừng — chưa thể nộp báo cáo"
+                                campaign.isProduction -> stringResource(R.string.campaign_overlay_production)
+                                campaign.isCompleted -> stringResource(R.string.campaign_badge_completed)
+                                else -> stringResource(R.string.campaign_overlay_paused)
                             }
                         } else if (isApprovedToday) {
-                            "Đã duyệt hôm nay (Chạm để xem lại / góp ý)"
+                            stringResource(R.string.campaign_action_approved)
                         } else if (isPendingToday) {
-                            "Cập nhật / Nộp lại ảnh khác hôm nay"
+                            stringResource(R.string.campaign_action_pending)
                         } else if (isRejectedToday) {
-                            "Chụp lại & Nộp lại kết quả hôm nay"
+                            stringResource(R.string.campaign_action_rejected)
                         } else {
-                            "Nộp kết quả kiểm thử (+2 Credit)"
+                            stringResource(R.string.campaign_action_submit)
                         }
 
                         val actionIcon = when {
@@ -1381,6 +1639,7 @@ fun CampaignDetailScreen(
                                 if (!canSubmit && errorMsg != null) {
                                     Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
                                 } else {
+                                    viewModel.prefetchNextCampaign()
                                     showReportDialog = true
                                 }
                             },
@@ -1415,7 +1674,7 @@ fun CampaignDetailScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Chưa cài", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.campaign_badge_not_installed), style = MaterialTheme.typography.labelMedium)
                         }
 
                         TextButton(onClick = { showCannotDownloadDialog = true }) {
@@ -1426,7 +1685,7 @@ fun CampaignDetailScreen(
                                 tint = Color(0xFFD32F2F),
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Không tải được", style = MaterialTheme.typography.labelMedium, color = Color(0xFFD32F2F))
+                            Text(stringResource(R.string.campaign_cant_download_short), style = MaterialTheme.typography.labelMedium, color = Color(0xFFD32F2F))
                         }
                     }
                 }
@@ -1449,7 +1708,7 @@ fun CampaignDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Hướng dẫn thêm từ chủ app",
+                            text = stringResource(R.string.campaign_owner_note_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
@@ -1461,11 +1720,11 @@ fun CampaignDetailScreen(
                                 campaign.playUrl.takeIf { it.isNotBlank() },
                             ).joinToString("\n")
                             clipboard.setPrimaryClip(ClipData.newPlainText("App note", textToCopy))
-                            Toast.makeText(context, "Đã sao chép ghi chú!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.campaign_note_copied_toast), Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.ContentCopy,
-                                contentDescription = "Sao chép ghi chú",
+                                contentDescription = stringResource(R.string.campaign_copy_note_cd),
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1483,7 +1742,7 @@ fun CampaignDetailScreen(
                     val downloadLink = campaign.testingUrl.ifBlank { campaign.playUrl }
                     if (downloadLink.isNotBlank()) {
                         Text(
-                            text = "mình để link tải đây cho bạn nào không cài được theo cách thông thường nhé:\n$downloadLink",
+                            text = stringResource(R.string.campaign_note_download_link_format, downloadLink),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 18.sp,
@@ -1493,7 +1752,7 @@ fun CampaignDetailScreen(
                     if (campaign.safeTestUsername.isNotBlank() || campaign.safeTestPassword.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Tài khoản test đăng nhập: ${campaign.safeTestUsername} / ${campaign.safeTestPassword}",
+                            text = stringResource(R.string.campaign_test_account_format, campaign.safeTestUsername, campaign.safeTestPassword),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -1519,17 +1778,48 @@ fun CampaignDetailScreen(
                             Text("👑", fontSize = 18.sp)
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = "Khu vực Quản trị viên (Admin)",
+                                text = stringResource(R.string.campaign_admin_area_title),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
                         Text(
-                            text = "Admin có quyền gỡ bỏ bất kỳ ứng dụng nào. Thao tác này sẽ xóa vĩnh viễn app và toàn bộ hồ sơ kiểm thử liên quan.",
+                            text = stringResource(R.string.campaign_admin_area_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        if (campaign.isOpen) {
+                            Button(
+                                onClick = { showAdminPauseDialog = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFB26A00),
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = !uiState.isActionLoading,
+                            ) {
+                                Icon(Icons.Filled.PauseCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.campaign_admin_pause_btn), fontWeight = FontWeight.Bold)
+                            }
+                        } else if (campaign.isPaused) {
+                            Button(
+                                onClick = { showAdminResumeDialog = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF2E7D32),
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = !uiState.isActionLoading,
+                            ) {
+                                Icon(Icons.Filled.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.campaign_admin_resume_btn), fontWeight = FontWeight.Bold)
+                            }
+                        }
                         Button(
                             onClick = { showAdminDeleteDialog = true },
                             colors = ButtonDefaults.buttonColors(
@@ -1541,7 +1831,7 @@ fun CampaignDetailScreen(
                         ) {
                             Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Gỡ bỏ ứng dụng & Xóa toàn bộ hồ sơ", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.campaign_admin_delete_btn), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1556,7 +1846,7 @@ fun CampaignDetailScreen(
         FullscreenImageViewer(
             imageUrl = previewImageUrl,
             onDismiss = { previewImageUrl = null },
-            title = "Ảnh chụp màn hình",
+            title = stringResource(R.string.img_screenshot_title),
             subtitle = campaign?.appName
         )
     }
@@ -1616,7 +1906,7 @@ private fun openUrlSafely(context: Context, rawUrl: String, packageName: String?
                 return
             } catch (_: Exception) {}
         }
-        Toast.makeText(context, "Không thể mở liên kết này trên thiết bị.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, SettingsRepository.wrap(context).getString(R.string.campaign_cant_open_link_toast), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -1636,38 +1926,86 @@ private fun SubmitReportBottomSheet(
     val context = LocalContext.current
     val todayReport = uiState.myTodayReport
     val isPendingToday = todayReport?.isPending == true
-    val alreadyRewarded = (uiState.checkedInToday || todayReport?.isApproved == true) && todayReport?.isRejected != true
+    val isRejectedToday = todayReport?.isRejected == true
+    val alreadyRewarded = (uiState.checkedInToday || todayReport?.isApproved == true) && !isRejectedToday
 
-    // Check for previous report from this tester to detect duplicate image
+    // Khi báo cáo hôm nay bị từ chối, ảnh bị từ chối chính là mốc so sánh bắt buộc.
     val previousReport = remember(uiState.myReports, uiState.myTodayReport) {
-        uiState.myReports.firstOrNull { it.id != uiState.myTodayReport?.id && !it.screenshotUrl.isNullOrBlank() }
+        val rejectedToday = uiState.myTodayReport?.takeIf {
+            it.isRejected && !it.screenshotUrl.isNullOrBlank()
+        }
+        rejectedToday ?: uiState.myReports.firstOrNull {
+            it.id != uiState.myTodayReport?.id && !it.screenshotUrl.isNullOrBlank()
+        }
     }
 
     var duplicateWarning by remember { mutableStateOf<String?>(null) }
     var isCheckingDuplicate by remember { mutableStateOf(false) }
+    var comparisonResult by remember { mutableStateOf<ImageHashHelper.ComparisonResult?>(null) }
+    var showComparisonDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(uiState.selectedScreenshotUri, previousReport?.screenshotUrl) {
-        val uri = uiState.selectedScreenshotUri
-        val prevUrl = previousReport?.screenshotUrl
-        if (uri != null && !prevUrl.isNullOrBlank()) {
-            isCheckingDuplicate = true
-            val newHash = ImageHashHelper.computeDHashFromUri(context, uri)
-            val prevHash = ImageHashHelper.computeDHashFromUrl(context, prevUrl)
-            if (newHash != null && prevHash != null) {
-                val comp = ImageHashHelper.compare(newHash, prevHash)
-                if (comp.isSuspectDuplicate) {
-                    duplicateWarning = "⚠️ Cảnh báo tương đồng cao (${comp.similarity}%): Ảnh bạn vừa chọn rất giống với ảnh bạn đã nộp kiểm thử trước đó. Bạn nên chụp màn hình tính năng hoặc trang khác của ứng dụng để chắc chắn được chủ app duyệt thưởng và không bị từ chối nhé!"
-                } else {
-                    duplicateWarning = null
-                }
-            } else {
-                duplicateWarning = null
-            }
-            isCheckingDuplicate = false
-        } else {
+    LaunchedEffect(
+        uiState.selectedScreenshotUri,
+        uiState.preparedScreenshot?.imageHash,
+        uiState.isPreparingScreenshot,
+        uiState.myTodayReport?.status,
+        uiState.myTodayReport?.screenshotUrl,
+        uiState.myTodayReport?.imageHash,
+        previousReport?.screenshotUrl,
+        previousReport?.imageHash,
+    ) {
+        val currentUri = uiState.selectedScreenshotUri
+        val prepared = uiState.preparedScreenshot
+        val todayUrl = uiState.myTodayReport?.screenshotUrl
+        val previousUrl = previousReport?.screenshotUrl
+        if (uiState.isPreparingScreenshot) {
+            // Ảnh đang được nén một lần trong ViewModel; chưa có hash để so.
             duplicateWarning = null
-            isCheckingDuplicate = false
+            comparisonResult = null
+            isCheckingDuplicate = true
+            return@LaunchedEffect
         }
+        if (isRejectedToday && currentUri == null) {
+            // Chưa chọn ảnh mới: chỉ hiển thị nhắc bắt buộc chụp ảnh mới, không báo "trùng".
+            duplicateWarning = null
+            comparisonResult = null
+            isCheckingDuplicate = false
+            return@LaunchedEffect
+        }
+        if (previousUrl.isNullOrBlank() || (currentUri == null && todayUrl.isNullOrBlank())) {
+            duplicateWarning = null
+            comparisonResult = null
+            isCheckingDuplicate = false
+            return@LaunchedEffect
+        }
+        isCheckingDuplicate = true
+        // Hash được tính trong cùng pipeline nén với lúc upload (ViewModels
+        // chuẩn bị ảnh một lần), nên không nén lại ảnh ở đây.
+        val newHash = when {
+            prepared != null -> prepared.imageHash
+            currentUri != null -> null // ảnh đang lỗi/ chưa sẵn sàng
+            else -> {
+                // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh hôm nay khi hash trống.
+                uiState.myTodayReport?.imageHash?.takeIf { it.isNotBlank() }
+                    ?: ImageHashHelper.computeDHashFromUrl(context, todayUrl!!)
+            }
+        }
+        // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh cũ khi hash trống.
+        val prevHash = previousReport.imageHash?.takeIf { it.isNotBlank() }
+            ?: ImageHashHelper.computeDHashFromUrl(context, previousUrl)
+        if (newHash != null && prevHash != null) {
+            val comp = ImageHashHelper.compare(newHash, prevHash, context)
+            comparisonResult = comp
+            duplicateWarning = if (comp.isSuspectDuplicate) {
+                context.getString(R.string.campaign_duplicate_warning_format, comp.similarity)
+            } else {
+                null
+            }
+        } else {
+            comparisonResult = null
+            duplicateWarning = null
+        }
+        isCheckingDuplicate = false
     }
 
     ModalBottomSheet(
@@ -1694,9 +2032,9 @@ private fun SubmitReportBottomSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = when {
-                            alreadyRewarded -> "Gửi góp ý bổ sung"
-                            isPendingToday -> "Cập nhật kết quả kiểm thử"
-                            else -> "Nộp kết quả kiểm thử"
+                            alreadyRewarded -> stringResource(R.string.campaign_send_extra_btn)
+                            isPendingToday -> stringResource(R.string.campaign_sheet_update_title)
+                            else -> stringResource(R.string.campaign_sheet_submit_title)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
@@ -1709,7 +2047,7 @@ private fun SubmitReportBottomSheet(
                     )
                 }
                 IconButton(onClick = onDismiss, enabled = !uiState.isActionLoading) {
-                    Icon(Icons.Filled.Close, contentDescription = "Đóng")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
                 }
             }
 
@@ -1731,11 +2069,11 @@ private fun SubmitReportBottomSheet(
                     Text(
                         text = when {
                             alreadyRewarded ->
-                                "Hôm nay bạn đã nhận thưởng kiểm thử cho app này. Bạn có thể gửi thêm nhận xét hoặc ảnh chụp màn hình góp ý bổ sung để hỗ trợ chủ app (thao tác này không cộng thêm Credit)."
+                                stringResource(R.string.campaign_sheet_note_extra)
                             isPendingToday ->
-                                "Bạn đã tạm nhận 2 Credit cho kết quả hôm nay và đang chờ chủ app duyệt. Cập nhật thêm ảnh/nhận xét sẽ không cộng thêm Credit; chủ app vẫn có 8 giờ để duyệt."
+                                stringResource(R.string.campaign_sheet_note_update)
                             else ->
-                                "Bạn sẽ tạm nhận ngay 2 Credit sau khi gửi kết quả. Chủ app có 8 giờ để duyệt (+1 Credit thưởng thêm). Hãy chụp các tính năng khác nhau để được duyệt dễ dàng!"
+                                stringResource(R.string.campaign_sheet_note_submit)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = if (alreadyRewarded) Color(0xFF1B5E20) else Color(0xFF166534),
@@ -1745,10 +2083,24 @@ private fun SubmitReportBottomSheet(
 
             // Screenshot Preview Area (Hero Size!)
             Text(
-                text = "Ảnh chụp màn hình kiểm thử:",
+                text = stringResource(R.string.campaign_sheet_photo_label),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
+
+            if (alreadyRewarded) {
+                Text(
+                    text = stringResource(R.string.campaign_approved_locked_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else if (isRejectedToday) {
+                Text(
+                    text = stringResource(R.string.campaign_resubmit_new_photo_required),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             if (uiState.selectedScreenshotUri != null) {
                 Card(
@@ -1762,36 +2114,57 @@ private fun SubmitReportBottomSheet(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color.Black.copy(alpha = 0.05f))
-                                .clickable { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AsyncImage(
-                                model = uiState.selectedScreenshotUri,
-                                contentDescription = "Ảnh đã chọn",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
-                            )
-                            // Overlay zoom badge
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xB3000000)
+                        val previousImageUrl = previousReport?.screenshotUrl
+                        if (previousImageUrl != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                ComparisonPhotoCard(
+                                    model = uiState.selectedScreenshotUri,
+                                    label = stringResource(R.string.campaign_photo_new_label),
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
+                                )
+                                ComparisonPhotoCard(
+                                    model = previousImageUrl,
+                                    label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onPreviewImage(previousImageUrl) },
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(220.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color.Black.copy(alpha = 0.05f))
+                                    .clickable { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AsyncImage(
+                                    model = uiState.selectedScreenshotUri,
+                                    contentDescription = stringResource(R.string.campaign_photo_selected_cd),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                                // Overlay zoom badge
+                                Surface(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color(0xB3000000)
                                 ) {
-                                    Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Chạm để phóng to", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(stringResource(R.string.campaign_tap_to_zoom), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    }
                                 }
                             }
                         }
@@ -1800,7 +2173,7 @@ private fun SubmitReportBottomSheet(
                         if (isCheckingDuplicate) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text("Đang đối chiếu ảnh với các ngày trước...", style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(R.string.campaign_comparing_photos), style = MaterialTheme.typography.labelSmall)
                             }
                         } else if (duplicateWarning != null) {
                             Card(
@@ -1817,27 +2190,42 @@ private fun SubmitReportBottomSheet(
                             }
                         }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
+                        // Compare with previous day's photo in detail (side-by-side / slider / blink)
+                        if (previousReport?.screenshotUrl != null) {
                             OutlinedButton(
-                                onClick = onPickScreenshot,
-                                modifier = Modifier.weight(1f),
+                                onClick = { showComparisonDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("Đổi ảnh khác")
+                                Text(stringResource(R.string.campaign_compare_photos_btn))
                             }
-                            OutlinedButton(
-                                onClick = { onScreenshotSelected(null) },
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        }
+
+                        if (!alreadyRewarded) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Gỡ")
+                                OutlinedButton(
+                                    onClick = onPickScreenshot,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(R.string.campaign_change_photo_btn))
+                                }
+                                OutlinedButton(
+                                    onClick = { onScreenshotSelected(null) },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(stringResource(R.string.campaign_remove_photo_btn))
+                                }
                             }
                         }
                     }
@@ -1854,50 +2242,83 @@ private fun SubmitReportBottomSheet(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color.Black.copy(alpha = 0.05f))
-                                .clickable { onPreviewImage(uiState.myTodayReport!!.screenshotUrl!!) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AsyncImage(
-                                model = uiState.myTodayReport!!.screenshotUrl,
-                                contentDescription = "Ảnh đã nộp",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
-                            )
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xB3000000)
+                        val previousImageUrl = previousReport?.screenshotUrl
+                        val todayImageUrl = uiState.myTodayReport?.screenshotUrl
+                        if (previousImageUrl != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                ComparisonPhotoCard(
+                                    model = todayImageUrl,
+                                    label = stringResource(R.string.campaign_today_photo_title),
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { todayImageUrl?.let(onPreviewImage) },
+                                )
+                                ComparisonPhotoCard(
+                                    model = previousImageUrl,
+                                    label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onPreviewImage(previousImageUrl) },
+                                )
+                            }
+                            OutlinedButton(
+                                onClick = { showComparisonDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.campaign_compare_photos_btn))
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color.Black.copy(alpha = 0.05f))
+                                    .clickable { onPreviewImage(uiState.myTodayReport!!.screenshotUrl!!) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AsyncImage(
+                                    model = uiState.myTodayReport!!.screenshotUrl,
+                                    contentDescription = stringResource(R.string.campaign_submitted_photo_cd),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                                Surface(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color(0xB3000000)
                                 ) {
-                                    Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Ảnh đã nộp hôm nay · Phóng to", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(stringResource(R.string.campaign_today_photo_zoom_label), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    }
                                 }
                             }
                         }
-                        OutlinedButton(
-                            onClick = onPickScreenshot,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text("Chọn ảnh mới để thay thế")
+                        if (!alreadyRewarded) {
+                            OutlinedButton(
+                                onClick = onPickScreenshot,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.campaign_choose_new_photo))
+                            }
                         }
                     }
                 }
-            } else {
+            } else if (!alreadyRewarded) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1928,12 +2349,12 @@ private fun SubmitReportBottomSheet(
                             )
                         }
                         Text(
-                            text = "Chạm để tải ảnh chụp màn hình",
+                            text = stringResource(R.string.campaign_tap_to_pick_photo),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Chụp lại giao diện tính năng đang hoạt động trong app",
+                            text = stringResource(R.string.campaign_pick_photo_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1949,16 +2370,16 @@ private fun SubmitReportBottomSheet(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Đánh giá ứng dụng:",
+                        text = stringResource(R.string.campaign_rating_label),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
                     val ratingLabel = when (uiState.myRating) {
-                        1 -> "Chưa đạt (1 sao)"
-                        2 -> "Tạm được (2 sao)"
-                        3 -> "Bình thường (3 sao)"
-                        4 -> "Khá tốt (4 sao)"
-                        else -> "Rất tốt (5 sao)"
+                        1 -> stringResource(R.string.campaign_rating_1)
+                        2 -> stringResource(R.string.campaign_rating_2)
+                        3 -> stringResource(R.string.campaign_rating_3)
+                        4 -> stringResource(R.string.campaign_rating_4)
+                        else -> stringResource(R.string.campaign_rating_5)
                     }
                     Text(
                         text = ratingLabel,
@@ -1975,11 +2396,12 @@ private fun SubmitReportBottomSheet(
                     (1..5).forEach { star ->
                         IconButton(
                             onClick = { onRatingChange(star) },
+                            enabled = !alreadyRewarded,
                             modifier = Modifier.size(48.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Star,
-                                contentDescription = "$star sao",
+                                contentDescription = stringResource(R.string.campaign_rating_star_cd_format, star),
                                 tint = if (star <= uiState.myRating) AmberStar
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
                                 modifier = Modifier.size(36.dp),
@@ -1992,7 +2414,7 @@ private fun SubmitReportBottomSheet(
             // Comment
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Góp ý & nhận xét (tùy chọn):",
+                    text = stringResource(R.string.campaign_comment_label),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                 )
@@ -2000,7 +2422,7 @@ private fun SubmitReportBottomSheet(
                     value = uiState.myComment,
                     onValueChange = onCommentChange,
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Mô tả lỗi gặp phải, góp ý giao diện hoặc tính năng cho nhà phát triển...") },
+                    placeholder = { Text(stringResource(R.string.campaign_comment_hint)) },
                     minLines = 3,
                     maxLines = 6,
                     shape = RoundedCornerShape(12.dp),
@@ -2008,7 +2430,13 @@ private fun SubmitReportBottomSheet(
             }
 
             // Submit Button
-            val canSubmit = !uiState.isActionLoading && (
+            val missingNewScreenshot = isRejectedToday && uiState.preparedScreenshot == null
+            val rejectedImageDuplicate = isRejectedToday && comparisonResult?.isBlockingDuplicate == true
+            val canSubmit = !uiState.isActionLoading &&
+                !uiState.isPreparingScreenshot &&
+                !isCheckingDuplicate &&
+                !missingNewScreenshot &&
+                !rejectedImageDuplicate && (
                 uiState.myComment.isNotBlank() ||
                 uiState.selectedScreenshotUri != null ||
                 !uiState.myTodayReport?.screenshotUrl.isNullOrBlank()
@@ -2030,15 +2458,15 @@ private fun SubmitReportBottomSheet(
                         color = Color.White
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Đang tải ảnh và gửi báo cáo...", fontSize = 15.sp)
+                    Text(stringResource(R.string.campaign_submitting), fontSize = 15.sp)
                 } else {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = when {
-                            alreadyRewarded -> "Gửi góp ý bổ sung"
-                            isPendingToday -> "Cập nhật kết quả đã nộp"
-                            else -> "Gửi kết quả (Tạm nhận +2 Credit)"
+                            alreadyRewarded -> stringResource(R.string.campaign_send_extra_btn)
+                            isPendingToday -> stringResource(R.string.campaign_send_update_btn)
+                            else -> stringResource(R.string.campaign_send_submit_btn)
                         },
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
@@ -2047,6 +2475,72 @@ private fun SubmitReportBottomSheet(
             }
 
             Spacer(Modifier.height(16.dp))
+        }
+    }
+
+    if (showComparisonDialog) {
+        TesterImageComparisonDialog(
+            currentImage = uiState.selectedScreenshotUri ?: uiState.myTodayReport?.screenshotUrl,
+            previousImage = previousReport?.screenshotUrl,
+            currentDate = if (uiState.selectedScreenshotUri != null) null
+                else uiState.myTodayReport?.createdAt?.let { formatIsoUtcToLocal(it) },
+            previousDate = previousReport?.createdAt?.let { formatIsoUtcToLocal(it) },
+            comparisonResult = comparisonResult,
+            isCalculatingHash = isCheckingDuplicate,
+            onDismiss = { showComparisonDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun ComparisonPhotoCard(
+    model: Any?,
+    label: String,
+    modifier: Modifier = Modifier,
+    height: Dp = 160.dp,
+    onClick: () -> Unit,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Black.copy(alpha = 0.05f))
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            AsyncImage(
+                model = model,
+                contentDescription = label,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(6.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0xB3000000),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ZoomIn,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(14.dp),
+                )
+            }
         }
     }
 }

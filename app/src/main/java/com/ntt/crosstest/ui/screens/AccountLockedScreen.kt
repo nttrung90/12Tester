@@ -86,13 +86,13 @@ fun AccountLockedScreen(
         coroutineScope.launch {
             isLoading = true
             try {
-                profile = app.campaignRepository.getMyProfile()
+                profile = app.campaignRepository.getMyProfile(forceRefresh = true)
                 // If profile is already unlocked (e.g. by Admin), proceed
                 if (profile?.isLocked == false) {
                     onUnlocked()
                 }
             } catch (e: Exception) {
-                snackbarHostState.showSnackbar(e.localizedMessage ?: "Lỗi khi tải thông tin tài khoản.")
+                snackbarHostState.showSnackbar(e.localizedMessage ?: context.getString(R.string.account_locked_load_failed))
             } finally {
                 isLoading = false
             }
@@ -116,7 +116,7 @@ fun AccountLockedScreen(
             },
             title = {
                 Text(
-                    text = "Xác nhận mở khóa",
+                    text = stringResource(R.string.locked_confirm_title),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
@@ -124,11 +124,11 @@ fun AccountLockedScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Bạn có chắc chắn muốn dùng 100 Credit để mở khóa tài khoản ngay lập tức?",
+                        text = stringResource(R.string.locked_confirm_desc),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
-                        text = "• Số dư hiện tại: ${profile?.credits ?: 0} Credit\n• Số dư sau khi mở khóa: ${(profile?.credits ?: 0) - 100} Credit",
+                        text = stringResource(R.string.locked_confirm_balance_format, profile?.credits ?: 0, (profile?.credits ?: 0) - 100),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -143,15 +143,15 @@ fun AccountLockedScreen(
                                 val result = app.campaignRepository.selfUnlockAccount()
                                 if (result.success) {
                                     showConfirmDialog = false
-                                    Toast.makeText(context, "Mở khóa tài khoản thành công!", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, context.getString(R.string.locked_unlock_success), Toast.LENGTH_LONG).show()
                                     onUnlocked()
                                 } else {
-                                    snackbarHostState.showSnackbar("Không thể mở khóa tài khoản.")
+                                    snackbarHostState.showSnackbar(context.getString(R.string.locked_unlock_failed))
                                 }
                             } catch (e: Exception) {
-                                val msg = e.localizedMessage ?: "Lỗi khi mở khóa."
+                                val msg = e.localizedMessage ?: context.getString(R.string.locked_unlock_error)
                                 snackbarHostState.showSnackbar(
-                                    if ("INSUFFICIENT" in msg.uppercase()) "Số dư không đủ 100 Credit." else msg
+                                    if ("INSUFFICIENT" in msg.uppercase()) context.getString(R.string.locked_insufficient_credits) else msg
                                 )
                             } finally {
                                 isUnlocking = false
@@ -167,9 +167,9 @@ fun AccountLockedScreen(
                             color = MaterialTheme.colorScheme.onPrimary,
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Đang mở khóa...")
+                        Text(stringResource(R.string.locked_unlocking))
                     } else {
-                        Text("Trừ 100 Credit & Mở khóa")
+                        Text(stringResource(R.string.locked_unlock_deduct_btn))
                     }
                 }
             },
@@ -178,7 +178,7 @@ fun AccountLockedScreen(
                     onClick = { showConfirmDialog = false },
                     enabled = !isUnlocking,
                 ) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -187,7 +187,7 @@ fun AccountLockedScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trạng thái tài khoản", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.locked_screen_title), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(
                         onClick = {
@@ -199,7 +199,7 @@ fun AccountLockedScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Đăng xuất",
+                            contentDescription = stringResource(R.string.logout),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     }
@@ -251,14 +251,14 @@ fun AccountLockedScreen(
             // Title & Subtitle
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Tài khoản bị tạm khóa",
+                    text = stringResource(R.string.locked_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFD32F2F),
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Hệ thống ghi nhận tài khoản của bạn nhận đủ 3 lần cảnh báo trong 1 tuần (hoặc bị khóa bởi Quản trị viên).",
+                    text = stringResource(R.string.locked_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -281,7 +281,7 @@ fun AccountLockedScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Tài khoản:",
+                            text = stringResource(R.string.locked_account_label),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -297,7 +297,7 @@ fun AccountLockedScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Số dư hiện tại:",
+                            text = stringResource(R.string.create_current_balance_label),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -329,7 +329,7 @@ fun AccountLockedScreen(
                         modifier = Modifier.size(24.dp),
                     )
                     Text(
-                        text = "Để tiếp tục sử dụng ứng dụng và tham gia kiểm thử chéo, bạn có thể chọn 1 trong 2 hình thức mở khóa bên dưới:",
+                        text = stringResource(R.string.locked_instruction),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF5D4037),
                     )
@@ -358,13 +358,13 @@ fun AccountLockedScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Lựa chọn 1: Tự mở khóa ngay",
+                            text = stringResource(R.string.locked_option1_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
                     }
                     Text(
-                        text = "Trừ 100 Credit từ tài khoản để mở khóa ngay lập tức và đặt lại chu kỳ cảnh báo.",
+                        text = stringResource(R.string.locked_option1_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -378,13 +378,13 @@ fun AccountLockedScreen(
                         shape = RoundedCornerShape(10.dp),
                     ) {
                         Text(
-                            text = if (canUnlockWithCredits) "Trừ 100 Credit để mở khóa" else "Không đủ 100 Credit (Cần thêm ${100 - credits} C)",
+                            text = if (canUnlockWithCredits) stringResource(R.string.locked_option1_btn) else stringResource(R.string.locked_option1_btn_insufficient_format, 100 - credits),
                             fontWeight = FontWeight.Bold,
                         )
                     }
                     if (!canUnlockWithCredits) {
                         Text(
-                            text = "💡 Số dư không đủ 100 Credit. Vui lòng chọn Lựa chọn 2 để gửi email tới Admin.",
+                            text = stringResource(R.string.locked_insufficient_hint),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFD32F2F),
                         )
@@ -412,13 +412,13 @@ fun AccountLockedScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Lựa chọn 2: Liên hệ Admin",
+                            text = stringResource(R.string.locked_option2_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
                     }
                     Text(
-                        text = "Gửi email giải trình tới Quản trị viên tại firstntt90@gmail.com để được hỗ trợ kiểm tra và mở khóa tài khoản thủ công.",
+                        text = stringResource(R.string.locked_option2_desc, ADMIN_EMAIL),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -426,15 +426,9 @@ fun AccountLockedScreen(
                         onClick = {
                             val userEmail = profile?.email ?: "N/A"
                             val userId = profile?.id ?: "N/A"
-                            val subject = Uri.encode("[12 Tester] Yêu cầu mở khóa tài khoản - $userEmail")
-                            val body = Uri.encode(
-                                "Chào Quản trị viên 12 Tester,\n\n" +
-                                "Tài khoản của tôi bị tạm khóa do nhận cảnh báo kiểm thử.\n" +
-                                "- Email: $userEmail\n" +
-                                "- User ID: $userId\n\n" +
-                                "Lý do / Giải trình:\n[Vui lòng nhập lý do của bạn tại đây...]\n\n" +
-                                "Kính nhờ Admin hỗ trợ kiểm tra và mở khóa tài khoản giúp tôi.\nXin cảm ơn!"
-                            )
+                            val emailAndId = "$userEmail\n- User ID: $userId"
+                            val subject = Uri.encode(context.getString(R.string.account_locked_email_subject, userEmail))
+                            val body = Uri.encode(context.getString(R.string.account_locked_email_body_template, emailAndId))
                             val mailtoUri = Uri.parse("mailto:$ADMIN_EMAIL?subject=$subject&body=$body")
                             val emailIntent = Intent(Intent.ACTION_SENDTO, mailtoUri)
                             try {
@@ -442,7 +436,7 @@ fun AccountLockedScreen(
                             } catch (_: Exception) {
                                 Toast.makeText(
                                     context,
-                                    "Không tìm thấy ứng dụng email. Vui lòng gửi thư tới: $ADMIN_EMAIL",
+                                    context.getString(R.string.locked_no_email_app_format, ADMIN_EMAIL),
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
@@ -452,7 +446,7 @@ fun AccountLockedScreen(
                     ) {
                         Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Gửi email tới firstntt90@gmail.com", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.locked_send_email_btn_format, ADMIN_EMAIL), fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -476,7 +470,7 @@ fun AccountLockedScreen(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "Đăng xuất tài khoản",
+                    text = stringResource(R.string.logout),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
