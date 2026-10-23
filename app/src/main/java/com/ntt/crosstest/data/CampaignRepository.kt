@@ -287,7 +287,7 @@ class CampaignRepository(
 
     /**
      * Đồng bộ vòng đời campaign phía server: hoàn thành app quá 30 ngày hiển thị,
-     * tạm dừng app của chủ app vắng nhiệm vụ ngày 3 ngày liên tục.
+     * tạm dừng app của chủ app thiếu nhiệm vụ ngày 7 ngày liên tục.
      * Best-effort: bỏ qua nếu offline hoặc DB chưa chạy migration 017.
      */
     suspend fun syncCampaignLifecycle() {
@@ -883,7 +883,7 @@ class CampaignRepository(
                 feedbacks.map { it.rating }.average().toFloat()
             } else null
 
-            val reports = try { getCampaignReports(campaignId, isOwner = true) } catch (_: Exception) { emptyList() }
+            val reports = try { getCampaignReports(campaignId, canManage = true) } catch (_: Exception) { emptyList() }
             val todayCheckins = (
                 checkins.filter { it.checkinDate == today }.map { it.userId } +
                 reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
@@ -959,18 +959,18 @@ class CampaignRepository(
         return result
     }
 
-    suspend fun getCampaignReports(campaignId: String, isOwner: Boolean = false, forceRefresh: Boolean = false): List<TesterReport> {
-        val cacheKey = "${campaignId}_$isOwner"
+    suspend fun getCampaignReports(campaignId: String, canManage: Boolean = false, forceRefresh: Boolean = false): List<TesterReport> {
+        val cacheKey = "${campaignId}_$canManage"
         val isFresh = { reportsCache[cacheKey]?.let { System.currentTimeMillis() - it.second < CACHE_TTL_MS } == true }
         return deduped("reports:$cacheKey", forceRefresh, isFresh, { reportsCache[cacheKey]?.first }) {
             val now = System.currentTimeMillis()
             // Đường của tester: tự động duyệt báo cáo quá hạn (throttle 10 phút).
-            // Đường của chủ app dùng RPC vốn đã tự chạy auto-accept phía server.
-            if (!isOwner) {
+            // Đường của chủ app/admin/moderator dùng RPC vốn đã tự chạy auto-accept phía server.
+            if (!canManage) {
                 maybeAutoAcceptExpiredReports()
             }
 
-            val result = if (isOwner) {
+            val result = if (canManage) {
                 // Priority 1: Use security definer RPC for Owner (Migration 012)
                 try {
                     val rpcReports = supabase.postgrest.rpc(
@@ -1468,6 +1468,34 @@ class CampaignRepository(
     }
 
     /**
+     * Trạng thái nhiệm vụ ngày hiện tại (read-only). Dùng cho background worker:
+     * TUYỆT ĐỐI không gọi `getMyDashboard` ở đó vì RPC đó ghi nhận đăng nhập.
+     * Trả null khi server chưa deploy migration 036.
+     */
+    suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
+        if (supabase.auth.currentUserOrNull() == null) return null
+        return try {
+            supabase.postgrest.rpc("get_my_daily_task_status").decodeAs<DailyTaskStatus>()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Ghi nhận đăng nhập trong ngày (idempotent phía server). Chỉ gọi tối đa
+     * một lần mỗi ngày VN từ client.
+     */
+    suspend fun recordDailyLogin(): Boolean {
+        if (supabase.auth.currentUserOrNull() == null) return false
+        return try {
+            supabase.postgrest.rpc("record_daily_login")
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
      * Một round-trip lấy toàn bộ dữ liệu màn chi tiết (campaign, members, checkins,
      * feedbacks, reports, profiles, cảnh báo...). Trả null khi chưa deploy RPC.
      */
@@ -1489,7 +1517,7 @@ class CampaignRepository(
             val reportsWithProfiles = result.reports.map { report ->
                 report.copy(testerProfile = result.profiles[report.userId])
             }
-            if (result.isOwner) {
+            if (result.canManage) {
                 reportsCache["${campaignId}_true"] = Pair(reportsWithProfiles, now)
             } else {
                 reportsCache["${campaignId}_false"] = Pair(reportsWithProfiles, now)

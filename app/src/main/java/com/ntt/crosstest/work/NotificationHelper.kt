@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ntt.crosstest.MainActivity
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.data.SettingsRepository
 
 object NotificationHelper {
@@ -18,6 +19,9 @@ object NotificationHelper {
 
     private const val UPDATE_CHANNEL_ID = "app_update"
     private const val UPDATE_NOTIFICATION_ID = 1002
+
+    private const val DAILY_TASK_CHANNEL_ID = "daily_task_reminder"
+    private const val DAILY_TASK_NOTIFICATION_ID = 1003
 
     fun showCheckinReminder(context: Context, campaignNames: List<String>) {
         // Wrap with the in-app language so notifications match the UI language
@@ -58,6 +62,61 @@ object NotificationHelper {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Nhắc nhiệm vụ ngày mới (migration 036): chủ app phải test đủ chỉ tiêu,
+     * thành viên chỉ cần đăng nhập. Không gọi khi user đã đạt hoặc được miễn.
+     */
+    fun showDailyTaskReminder(context: Context, status: DailyTaskStatus) {
+        val context = SettingsRepository.wrap(context)
+        ensureChannel(
+            context,
+            channelId = DAILY_TASK_CHANNEL_ID,
+            nameRes = R.string.notif_daily_task_channel_name,
+            descriptionRes = R.string.notif_daily_task_channel_desc,
+        )
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 2, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val text = if (status.isOwner) {
+            context.getString(
+                R.string.notif_daily_owner_text,
+                status.completedTests,
+                status.effectiveRequiredTests,
+            )
+        } else {
+            context.getString(R.string.notif_daily_member_text)
+        }
+        val bigText = if (status.isOwner) {
+            context.getString(
+                R.string.notif_daily_owner_big_text,
+                status.completedTests,
+                status.effectiveRequiredTests,
+                status.activeAppCount,
+            )
+        } else {
+            context.getString(R.string.notif_daily_member_big_text)
+        }
+
+        val notification = NotificationCompat.Builder(context, DAILY_TASK_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.notif_daily_task_title))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(DAILY_TASK_NOTIFICATION_ID, notification)
     }
 
     /**

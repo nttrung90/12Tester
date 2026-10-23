@@ -107,6 +107,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.CampaignStats
@@ -597,9 +598,11 @@ fun HomeScreen(
                     onOwnerAppClick = { id -> onOwnerAppClick(id) },
                     onTargetReached = { item -> appTargetReachedToConfirm = item },
                     isAuthenticated = uiState.isAuthenticated,
+                    isPenaltyExempt = uiState.userProfile?.canModerate == true,
                     todayCheckinCount = uiState.todayCheckinCount,
                     userCredits = uiState.userCredits,
                     missedStreak = uiState.missedStreak,
+                    dailyTask = uiState.dailyTask,
                     onRequireLogin = { showLoginPromptDialog = true },
                 )
                 1 -> QuestsScreen(
@@ -678,9 +681,11 @@ private fun DiscoverTab(
     onOwnerAppClick: (String) -> Unit,
     onTargetReached: (CampaignDisplayItem) -> Unit,
     isAuthenticated: Boolean,
+    isPenaltyExempt: Boolean,
     todayCheckinCount: Int,
     userCredits: Int,
     missedStreak: Int,
+    dailyTask: DailyTaskStatus?,
     onRequireLogin: () -> Unit,
 ) {
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
@@ -738,6 +743,8 @@ private fun DiscoverTab(
                             userCredits = userCredits,
                             missedStreak = missedStreak,
                             isAuthenticated = isAuthenticated,
+                            isPenaltyExempt = isPenaltyExempt,
+                            dailyTask = dailyTask,
                             onRequireLogin = onRequireLogin,
                             onTestAppClick = {
                                 coroutineScope.launch {

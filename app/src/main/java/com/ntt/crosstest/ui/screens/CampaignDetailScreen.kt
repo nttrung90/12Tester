@@ -1058,6 +1058,54 @@ fun CampaignDetailScreen(
                         }
                     }
                 }
+            } else if (uiState.isAdmin) {
+                // Admin có thể test như tester nhưng vẫn mở được màn quản lý app.
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Groups,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.campaign_manager_badge),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.campaign_manager_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (onOwnerManageClick != null) {
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = { onOwnerManageClick(campaign.id.orEmpty()) },
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(stringResource(R.string.campaign_manage_btn))
+                            }
+                        }
+                    }
+                }
             } else if (uiState.todayTestedCount >= campaign.dailyTarget) {
                 // Info banner for testers when target is reached
                 Card(

@@ -22,7 +22,7 @@
     <string name="home_empty_paused">Không có app nào đang tạm dừng.</string>
     <string name="home_empty_completed">Chưa có app nào hoàn thành kiểm thử.</string>
     <string name="home_tested_progress_format">%1$d/%2$d app</string>
-    <string name="home_paused_hint">App tạm dừng do chủ app vắng nhiệm vụ ngày 3 ngày liên tục hoặc tự tạm dừng. Chủ app bật lại để app về tab App cần Test.</string>
+    <string name="home_paused_hint">App tạm dừng do chủ app vắng nhiệm vụ ngày 7 ngày liên tục hoặc tự tạm dừng. Chủ app bật lại để app về tab App cần Test.</string>
     <string name="home_completed_hint">App đã lên production hoặc đã hết 30 ngày hiển thị kiểm thử.</string>
     <string name="post_app_btn">Đăng APP</string>
     <string name="post_app_title">Đăng app của tôi</string>
@@ -173,21 +173,32 @@
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Nhiệm vụ hôm nay</string>
-    <string name="daily_quest_desc">Test ít nhất 1 app hôm nay để duy trì chuỗi và nhận thưởng</string>
+    <string name="daily_quest_desc">Chủ app: test 3 app cho mỗi app đang hoạt động. Thành viên: đăng nhập mỗi ngày.</string>
     <string name="daily_quest_completed">Đã hoàn thành nhiệm vụ</string>
     <string name="daily_quest_completed_compact">Đã hoàn thành nhiệm vụ ngày (%1$d app)</string>
     <string name="daily_quest_pending">Chưa hoàn thành</string>
-    <string name="daily_quest_warning">Hãy test ít nhất 1 app trước 24:00 để tránh bị trừ %% Credit vắng mặt!</string>
+    <string name="daily_quest_warning">Hoàn thành nhiệm vụ hôm nay trước 24:00 để tránh bị trừ Credit vắng mặt!</string>
     <string name="daily_quest_safe">Điểm Credit của bạn hôm nay đã được bảo vệ an toàn.</string>
     <string name="daily_quest_progress">%1$d/1</string>
     <string name="daily_reward_progress">Đã nhận thưởng %1$d/30 app hôm nay (+%2$d Credit)</string>
-    <string name="daily_task_goal">Mục tiêu: Test tối thiểu 1 app hôm nay để bảo vệ điểm Credit khỏi cơ chế phạt vắng mặt.</string>
+    <string name="daily_task_goal">Nhiệm vụ ngày: test 3 app khác nhau cho mỗi app đang hoạt động, hoặc đăng nhập nếu bạn không đăng app.</string>
     <string name="daily_penalty_info_btn">Cơ chế trừ điểm</string>
     <string name="daily_penalty_dialog_title">Cơ chế trừ điểm vắng mặt hàng ngày</string>
-    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống quét tự động lúc 00:05 mỗi ngày (theo giờ Việt Nam). Nếu bạn không test app nào trong ngày hôm trước, tài khoản sẽ bị trừ Credit theo số ngày vắng mặt liên tiếp:\n\n• Ngày 1 vắng mặt: Trừ 1% Credit\n• Ngày 2 vắng mặt: Trừ 2% Credit\n• Ngày 3 vắng mặt: Trừ 5% Credit\n• Ngày 4 trở đi: Trừ 10% Credit\n(Tối thiểu trừ 1 Credit/ngày nếu số dư &gt; 0)\n\n💡 Chỉ cần mở và test ít nhất 1 app hợp lệ trước 24:00 mỗi ngày, điểm Credit của bạn sẽ được bảo vệ tuyệt đối và chuỗi vắng mặt sẽ được đặt lại về 0!</string>
+    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống kiểm tra lúc 00:05 mỗi ngày (theo giờ Việt Nam).\n\n• Chủ app: test 3 app khác nhau cho mỗi app đang hoạt động (1 app → 3 lượt; 2 app → 6 lượt; 6 app → 18 lượt/ngày). Chỉ tiêu được giới hạn theo số app khác đang có.\n• Thành viên: mở app ít nhất 1 lần/ngày.\n• App mới bắt đầu tính từ ngày mai; tài khoản mới được miễn ngày đăng ký.\n• Admin/Moderator được miễn.\n\nMức phạt khi thiếu nhiệm vụ:\n• Ngày 1: -1% Credit\n• Ngày 2: -2% Credit\n• Ngày 3: -5% Credit\n• Ngày 4 trở đi: -10% Credit\nTỷ lệ được nhân với tỷ lệ thiếu (tối thiểu 1 Credit, không vượt quá số dư).\n\nThiếu 7 ngày liên tiếp: app của bạn tự động tạm dừng cho đến khi bạn hoàn thành chỉ tiêu hôm nay và bật lại.\n\n💡 Report đang chờ/đã duyệt được tính là đã test. Report bị từ chối không được tính.</string>
     <string name="daily_task_test_now">Tìm app test ngay</string>
-    <string name="daily_missed_streak_alert">Đang bỏ lỡ %1$d ngày liên tiếp! Sẽ bị trừ %2$d%% Credit nếu không test hôm nay.</string>
-    <string name="daily_guest_prompt">Đăng nhập để điểm danh test app hàng ngày và bảo vệ điểm Credit khỏi cơ chế phạt tự động.</string>
+    <string name="daily_browse_apps">Xem app</string>
+    <string name="daily_missed_streak_alert">Đang bỏ lỡ %1$d ngày liên tiếp! Sẽ bị trừ tối đa %2$d%% Credit nếu không hoàn thành nhiệm vụ hôm nay.</string>
+    <string name="daily_exempt_badge">Miễn phạt</string>
+    <string name="daily_exempt_note">Tài khoản Admin/Moderator được miễn phạt vắng mặt. Bạn vẫn có thể test để nhận Credit.</string>
+    <string name="daily_guest_prompt">Đăng nhập để theo dõi nhiệm vụ ngày và bảo vệ điểm Credit khỏi cơ chế phạt tự động.</string>
+    <string name="daily_task_completed_progress">Đã hoàn thành %1$d/%2$d app hôm nay</string>
+    <string name="daily_login_completed">Đã đăng nhập hôm nay</string>
+    <string name="daily_task_progress_format">%1$d/%2$d</string>
+    <string name="daily_task_waived_badge">Được miễn</string>
+    <string name="daily_task_waived_note">Hiện không có app nào khác để test nên chỉ tiêu hôm nay được miễn. Điểm Credit của bạn vẫn an toàn.</string>
+    <string name="daily_owner_goal_format">Bạn có %1$d app đang hoạt động. Hãy test %2$d app khác nhau hôm nay để bảo vệ Credit.</string>
+    <string name="daily_owner_missed_alert">Hôm nay bạn mới test %1$d/%2$d app. Đã bỏ lỡ %3$d ngày liên tiếp — hoàn thành chỉ tiêu hôm nay để đặt lại chuỗi và tránh mức phạt -%4$d%%.</string>
+    <string name="daily_member_goal">Mở app mỗi ngày để giữ tài khoản hoạt động. Việc test app là không bắt buộc.</string>
 
     <!-- Quests System -->
     <string name="quest_section_title">Nhiệm vụ Thử Nghiệm</string>
@@ -248,6 +259,13 @@
     <string name="notif_reminder_big_text">Mở %1$s và bấm \"Đã test hôm nay\" cho: %2$s</string>
     <string name="notif_channel_name">Nhắc check-in</string>
     <string name="notif_channel_desc">Nhắc bạn check-in test app mỗi ngày lúc 20:00</string>
+    <string name="notif_daily_task_channel_name">Nhắc nhiệm vụ ngày</string>
+    <string name="notif_daily_task_channel_desc">Nhắc bạn hoàn thành nhiệm vụ ngày lúc 20:00</string>
+    <string name="notif_daily_task_title">Nhắc nhiệm vụ hôm nay ⏰</string>
+    <string name="notif_daily_owner_text">Hôm nay bạn đã test %1$d/%2$d app. Hãy hoàn thành chỉ tiêu trước 24:00!</string>
+    <string name="notif_daily_owner_big_text">Bạn có %3$d app đang hoạt động. Hãy test %2$d app khác nhau hôm nay để bảo vệ Credit và tránh app bị tạm dừng sau 7 ngày thiếu nhiệm vụ.</string>
+    <string name="notif_daily_member_text">Mở app hôm nay để duy trì chuỗi đăng nhập.</string>
+    <string name="notif_daily_member_big_text">Đăng nhập mỗi ngày giúp tài khoản luôn hoạt động. Mở 12 Tester ngay.</string>
 
     <!-- Auth & Email/Password -->
     <string name="auth_or_divider">Hoặc sử dụng Email &amp; Mật khẩu</string>
@@ -561,6 +579,8 @@
     <!-- Campaign detail: owner card & stats -->
     <string name="campaign_owner_badge">Đây là ứng dụng của bạn</string>
     <string name="campaign_owner_desc">Quản lý người cài, duyệt báo cáo và cài đặt app tại màn hình quản lý.</string>
+    <string name="campaign_manager_badge">Quản lý</string>
+    <string name="campaign_manager_desc">Bạn có quyền quản lý ứng dụng này với vai trò Admin. Bạn vẫn có thể test như tester bình thường.</string>
     <string name="campaign_manage_btn">Quản lý</string>
     <string name="campaign_target_reached_msg_format">App đã đạt mục tiêu %1$d lượt test hôm nay. Bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit khi tham gia test!</string>
     <string name="campaign_owner_line_format">Chủ app: %1$s</string>
@@ -750,7 +770,7 @@
     <!-- ViewModel messages: owner app detail -->
     <string name="owner_app_expired_completed">App đã quá 30 ngày hiển thị và được chuyển sang mục Đã hoàn thành Kiểm thử.</string>
     <string name="owner_app_reactivated">Đã bật lại app — app sẽ hiển thị trong mục App cần Test.</string>
-    <string name="owner_app_inactive_3days">Bạn đã vắng nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bật lại app này.</string>
+    <string name="owner_app_inactive_3days">Bạn đã thiếu nhiệm vụ ngày 7 ngày liên tục. Hãy hoàn thành chỉ tiêu hôm nay rồi bật lại app này.</string>
     <string name="owner_app_not_paused">App không ở trạng thái tạm dừng.</string>
     <string name="owner_slot_expired_format">Slot %1$d đã hết hạn. Vui lòng gia hạn Slot để tiếp tục mở nhận tester.</string>
     <string name="owner_slot_renewed_format">Gia hạn Slot %1$d thành công (+30 ngày)!</string>
@@ -891,7 +911,7 @@
     <string name="oad_production_desc">App đã được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ. Cảm ơn bạn đã đồng hành cùng cộng đồng!</string>
     <string name="oad_completed_desc">App đã hết 30 ngày hiển thị kiểm thử và được chuyển sang mục \"Đã hoàn thành Kiểm thử\" trên Trang chủ.</string>
     <string name="oad_paused_title">App đang tạm dừng</string>
-    <string name="oad_paused_auto_desc">App bị tạm dừng vì bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Hãy test 1 app hôm nay rồi bấm \"Tiếp tục nhận tester\".</string>
+    <string name="oad_paused_auto_desc">App bị tạm dừng vì bạn không hoàn thành nhiệm vụ ngày 7 ngày liên tục. Hãy hoàn thành chỉ tiêu hôm nay rồi bấm \"Tiếp tục nhận tester\".</string>
     <string name="oad_paused_slot_desc">App bị tạm dừng do Slot %1$d đã hết hạn. Gia hạn Slot rồi bấm \"Tiếp tục nhận tester\".</string>
     <string name="oad_paused_manual_desc">App đang tạm dừng. Bấm \"Tiếp tục nhận tester\" để hiển thị lại trên Trang chủ.</string>
     <string name="oad_paused_admin_title">App bị Admin tạm dừng</string>
@@ -906,7 +926,7 @@
     <string name="oad_reports_subtitle_format">%1$d chờ duyệt (tự chấp nhận sau 8h) · %2$d báo cáo</string>
     <string name="oad_resume_title">Tiếp tục nhận tester</string>
     <string name="oad_pause_title">Tạm dừng nhận tester</string>
-    <string name="oad_resume_sub_auto">Hãy test 1 app hôm nay trước khi mở lại.</string>
+    <string name="oad_resume_sub_auto">Hãy hoàn thành chỉ tiêu ngày hôm nay trước khi mở lại.</string>
     <string name="oad_resume_sub_slot_format">Slot %1$d đã hết hạn — gia hạn rồi mở lại.</string>
     <string name="oad_resume_sub_manual">Mở lại để hiển thị app trên Trang chủ.</string>
     <string name="oad_pause_sub_days_format">App sẽ không hiển thị. Còn %1$d ngày hiển thị.</string>
@@ -921,7 +941,7 @@
     <string name="oad_open_link_failed">Không thể mở liên kết.</string>
     <string name="oad_pause_confirm_resume_q">Tiếp tục nhận tester?</string>
     <string name="oad_pause_confirm_pause_q">Tạm dừng nhận tester?</string>
-    <string name="oad_resume_dialog_auto">App bị tạm dừng do bạn không hoàn thành nhiệm vụ ngày 3 ngày liên tục. Nếu bạn đã test 1 app hôm nay, app sẽ hiển thị lại công khai để tester khác tham gia.</string>
+    <string name="oad_resume_dialog_auto">App bị tạm dừng do bạn không hoàn thành nhiệm vụ ngày 7 ngày liên tục. Nếu bạn đã hoàn thành chỉ tiêu hôm nay, app sẽ hiển thị lại công khai để tester khác tham gia.</string>
     <string name="oad_resume_dialog_manual">Chiến dịch sẽ hiển thị lại công khai để các tester khác có thể tham gia và cài đặt (nếu còn trong 30 ngày hiển thị).</string>
     <string name="oad_pause_dialog_desc">App sẽ tạm thời ẩn khỏi Trang chủ và tester mới sẽ không thể tham gia cho đến khi bạn mở lại.</string>
     <string name="oad_agree">Đồng ý</string>

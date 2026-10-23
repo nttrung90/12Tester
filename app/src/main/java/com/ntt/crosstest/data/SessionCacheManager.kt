@@ -27,6 +27,7 @@ data class CachedSessionData(
     val userCredits: Int = 0,
     val todayCheckinCount: Int = 0,
     val missedStreak: Int = 0,
+    val dailyTask: DailyTaskStatus? = null,
     val pendingReportsCount: Int = 0,
     val notifications: List<UserNotification> = emptyList(),
     val unreadNotificationsCount: Int = 0,

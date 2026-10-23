@@ -601,7 +601,11 @@ fun ProfileScreen(
                         email = uiState.profile?.email ?: uiState.email,
                         avatarUrl = uiState.profile?.avatarUrl,
                         credits = uiState.profile?.credits,
-                        missedStreak = uiState.profile?.missedStreak ?: 0,
+                        missedStreak = if (uiState.profile?.canModerate == true) {
+                            0
+                        } else {
+                            uiState.profile?.effectiveMissedStreak ?: 0
+                        },
                         isAdmin = uiState.profile?.isAdmin == true,
                         onCreditClick = { showCreditHistoryDialog = true },
                     )

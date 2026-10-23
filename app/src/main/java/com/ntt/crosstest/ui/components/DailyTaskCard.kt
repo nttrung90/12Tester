@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.ui.theme.TaskAmberText
 import com.ntt.crosstest.ui.theme.TaskAmberTextDark
 import com.ntt.crosstest.ui.theme.TaskGreenText
@@ -62,6 +63,8 @@ fun DailyTaskCard(
     userCredits: Int,
     missedStreak: Int,
     isAuthenticated: Boolean,
+    isPenaltyExempt: Boolean = false,
+    dailyTask: DailyTaskStatus? = null,
     onRequireLogin: () -> Unit,
     onTestAppClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -69,19 +72,50 @@ fun DailyTaskCard(
     var showPenaltyDialog by rememberSaveable { mutableStateOf(false) }
 
     val isDark = isSystemInDarkTheme()
-    val isCompleted = todayCheckinCount >= 1
-
     val accentAmber = if (isDark) TaskAmberTextDark else TaskAmberText
     val accentGreen = if (isDark) TaskGreenTextDark else TaskGreenText
     val accentRed = if (isDark) TaskRedTextDark else TaskRedText
 
+    val exempt = isPenaltyExempt || dailyTask?.isPenaltyExempt == true
+    val ownerMode = dailyTask?.isOwner == true
+    val memberMode = dailyTask?.isMember == true
+    val waived = ownerMode && dailyTask?.isWaived == true
+    val target = when {
+        exempt || waived -> 0
+        ownerMode -> dailyTask?.effectiveRequiredTests ?: 1
+        else -> 1
+    }
+    val completed = when {
+        memberMode -> if (dailyTask?.loggedInToday == true) 1 else 0
+        else -> dailyTask?.completedTests ?: todayCheckinCount
+    }
+    val met = when {
+        !isAuthenticated -> false
+        exempt || waived -> true
+        dailyTask != null -> dailyTask.met
+        else -> todayCheckinCount >= 1
+    }
+    val streak = dailyTask?.missedStreak ?: missedStreak
+    val nextPct = dailyTask?.nextPenaltyPercent ?: when (streak) {
+        1 -> 2
+        2 -> 5
+        else -> 10
+    }
+    val progress = when {
+        exempt || waived || met -> 1f
+        target > 0 -> (completed.toFloat() / target.toFloat()).coerceIn(0f, 1f)
+        else -> 0f
+    }
+
     val accentColor = when {
         !isAuthenticated -> MaterialTheme.colorScheme.primary
-        missedStreak > 0 -> accentRed
+        exempt -> accentAmber
+        waived -> accentGreen
+        streak > 0 -> accentRed
         else -> accentAmber
     }
 
-    if (showPenaltyDialog) {
+    if (showPenaltyDialog && !exempt) {
         AlertDialog(
             onDismissRequest = { showPenaltyDialog = false },
             icon = {
@@ -114,7 +148,18 @@ fun DailyTaskCard(
         )
     }
 
-    if (isAuthenticated && isCompleted) {
+    // Thẻ gọn khi đã đạt chỉ tiêu. Admin/Moderator và trường hợp miễn chỉ tiêu
+    // vẫn hiển thị thẻ đầy đủ để thấy rõ trạng thái miễn.
+    if (isAuthenticated && met && !exempt && !waived) {
+        val completedText = when {
+            ownerMode -> stringResource(
+                R.string.daily_task_completed_progress,
+                completed,
+                target,
+            )
+            memberMode -> stringResource(R.string.daily_login_completed)
+            else -> stringResource(R.string.daily_quest_completed_compact, completed)
+        }
         Card(
             modifier = modifier
                 .fillMaxWidth()
@@ -144,7 +189,7 @@ fun DailyTaskCard(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = stringResource(R.string.daily_quest_completed_compact, todayCheckinCount),
+                        text = completedText,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = accentGreen,
@@ -190,7 +235,11 @@ fun DailyTaskCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = if (!isAuthenticated) Icons.Filled.Security else Icons.Filled.Warning,
+                        imageVector = when {
+                            !isAuthenticated -> Icons.Filled.Security
+                            waived -> Icons.Filled.CheckCircle
+                            else -> Icons.Filled.Warning
+                        },
                         contentDescription = null,
                         tint = accentColor,
                         modifier = Modifier.size(20.dp),
@@ -208,16 +257,18 @@ fun DailyTaskCard(
                     modifier = Modifier.weight(1f),
                 )
 
-                IconButton(
-                    onClick = { showPenaltyDialog = true },
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = stringResource(R.string.daily_penalty_info_btn),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp),
-                    )
+                if (!exempt) {
+                    IconButton(
+                        onClick = { showPenaltyDialog = true },
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = stringResource(R.string.daily_penalty_info_btn),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
                 }
             }
 
@@ -235,8 +286,18 @@ fun DailyTaskCard(
                         MaterialTheme.colorScheme.surfaceVariant,
                         MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    missedStreak > 0 -> Triple(
-                        stringResource(R.string.daily_missed_badge, missedStreak),
+                    exempt -> Triple(
+                        stringResource(R.string.daily_exempt_badge),
+                        accentAmber.copy(alpha = 0.12f),
+                        accentAmber
+                    )
+                    waived -> Triple(
+                        stringResource(R.string.daily_task_waived_badge),
+                        accentGreen.copy(alpha = 0.12f),
+                        accentGreen
+                    )
+                    streak > 0 -> Triple(
+                        stringResource(R.string.daily_missed_badge, streak),
                         accentRed.copy(alpha = 0.12f),
                         accentRed
                     )
@@ -262,7 +323,21 @@ fun DailyTaskCard(
                 }
 
                 Text(
-                    text = stringResource(R.string.daily_quest_progress, if (isCompleted) 1 else 0),
+                    text = when {
+                        !isAuthenticated -> "—"
+                        exempt -> stringResource(R.string.daily_exempt_badge)
+                        waived -> "—"
+                        memberMode -> if (dailyTask?.loggedInToday == true) "1/1" else "0/1"
+                        ownerMode -> stringResource(
+                            R.string.daily_task_progress_format,
+                            completed,
+                            target,
+                        )
+                        else -> stringResource(
+                            R.string.daily_quest_progress,
+                            if (completed >= 1) 1 else 0,
+                        )
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = accentColor,
@@ -272,7 +347,7 @@ fun DailyTaskCard(
             Spacer(Modifier.height(6.dp))
 
             val animatedProgress by animateFloatAsState(
-                targetValue = if (isCompleted) 1f else 0f,
+                targetValue = progress,
                 label = "dailyProgress"
             )
 
@@ -289,69 +364,93 @@ fun DailyTaskCard(
             Spacer(Modifier.height(10.dp))
 
             // Explanatory Message
-            when {
-                !isAuthenticated -> {
-                    Text(
-                        text = stringResource(R.string.daily_guest_prompt),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp,
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Button(
-                        onClick = onRequireLogin,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                    ) {
-                        Text(stringResource(R.string.login_now), fontWeight = FontWeight.Bold)
-                    }
+            if (!isAuthenticated) {
+                Text(
+                    text = stringResource(R.string.daily_guest_prompt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 18.sp,
+                )
+                Spacer(Modifier.height(10.dp))
+                Button(
+                    onClick = onRequireLogin,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                ) {
+                    Text(stringResource(R.string.login_now), fontWeight = FontWeight.Bold)
                 }
-                else -> {
-                    val warningMsg = if (missedStreak > 0) {
-                        val nextPct = when (missedStreak) {
-                            1 -> 2
-                            2 -> 5
-                            else -> 10
-                        }
-                        stringResource(R.string.daily_missed_streak_alert, missedStreak, nextPct)
-                    } else {
-                        stringResource(R.string.daily_quest_warning)
-                    }
-
-                    Text(
-                        text = warningMsg,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = accentColor,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 18.sp,
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Button(
-                            onClick = onTestAppClick,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (missedStreak > 0) accentRed else MaterialTheme.colorScheme.primary
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        ) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.daily_task_test_now),
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+            } else {
+                val warningMsg = when {
+                    exempt -> stringResource(R.string.daily_exempt_note)
+                    waived -> stringResource(R.string.daily_task_waived_note)
+                    ownerMode -> {
+                        if (streak > 0) {
+                            stringResource(
+                                R.string.daily_owner_missed_alert,
+                                completed,
+                                target,
+                                streak,
+                                nextPct,
+                            )
+                        } else {
+                            stringResource(
+                                R.string.daily_owner_goal_format,
+                                dailyTask?.activeAppCount ?: 0,
+                                target,
                             )
                         }
+                    }
+                    memberMode -> stringResource(R.string.daily_member_goal)
+                    streak > 0 -> stringResource(
+                        R.string.daily_missed_streak_alert,
+                        streak,
+                        nextPct,
+                    )
+                    else -> stringResource(R.string.daily_quest_warning)
+                }
 
+                Text(
+                    text = warningMsg,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = accentColor,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 18.sp,
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button(
+                        onClick = onTestAppClick,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (!exempt && !waived && streak > 0) {
+                                accentRed
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            }
+                        ),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    ) {
+                        Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(
+                                if (memberMode) R.string.daily_browse_apps
+                                else R.string.daily_task_test_now
+                            ),
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    if (!exempt) {
                         TextButton(
                             onClick = { showPenaltyDialog = true },
                             shape = RoundedCornerShape(10.dp),

@@ -48,7 +48,10 @@ data class CampaignDetailUiState(
     val campaign: Campaign? = null,
     val ownerProfile: Profile? = null,
     val isMember: Boolean = false,
+    /** Chủ app thật (is_actual_owner). */
     val isOwner: Boolean = false,
+    /** Owner/admin/moderator: dùng cho dữ liệu báo cáo; không dùng cho banner quản lý. */
+    val canManage: Boolean = false,
     val checkedInToday: Boolean = false,
     val members: List<MemberProgress> = emptyList(),
     val feedbacks: List<FeedbackItem> = emptyList(),
@@ -181,6 +184,7 @@ class CampaignDetailViewModel(
                     it.copy(
                         campaign = cached,
                         isOwner = isOwner,
+                        canManage = isOwner,
                         isLoading = false,
                         isBackgroundSyncing = true,
                     )
@@ -230,11 +234,13 @@ class CampaignDetailViewModel(
                 // dòng check-in tạm tính tạo lúc nộp báo cáo còn chờ chủ app duyệt.
                 val checkedIn = if (isMember && myUserId != null) repository.hasConfirmedCheckinToday(campaignId, myUserId) else false
                 val isOwner = myUserId != null && campaign.ownerId == myUserId
+                val myProfile = if (myUserId != null) repository.getMyProfile(forceRefresh = forceRefresh) else null
+                val canManage = isOwner || myProfile?.canModerate == true
 
                 val members = repository.getMembers(campaignId)
                 val checkins = repository.getCheckins(campaignId)
                 val today = LocalDate.now().toString()
-                val reports = repository.getCampaignReports(campaignId, isOwner = isOwner, forceRefresh = forceRefresh)
+                val reports = repository.getCampaignReports(campaignId, canManage = canManage, forceRefresh = forceRefresh)
                 val todayTested = (
                     checkins.filter { it.checkinDate == today }.map { it.userId } +
                     reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
@@ -273,7 +279,6 @@ class CampaignDetailViewModel(
                 val myTodayReport = myReports.firstOrNull { it.isCreatedToday() } ?: repository.getMyTodayReport(campaignId)
                 val unreadWarnings = if (myUserId != null) repository.getUnreadWarnings() else emptyList()
                 val weeklyCount = if (myUserId != null) repository.getWeeklyWarningsCount() else 0
-                val myProfile = if (myUserId != null) repository.getMyProfile(forceRefresh = forceRefresh) else null
 
                 if (myTodayReport?.isApproved == true) {
                     _uiState.value.preparedScreenshot?.file?.delete()
@@ -286,6 +291,7 @@ class CampaignDetailViewModel(
                         ownerProfile = ownerProfile,
                         isMember = isMember,
                         isOwner = isOwner,
+                        canManage = canManage,
                         checkedInToday = checkedIn || (myTodayReport?.isApproved == true),
                         members = memberProgress,
                         feedbacks = feedbackItems,
@@ -341,7 +347,8 @@ class CampaignDetailViewModel(
                 campaign = campaign,
                 ownerProfile = ownerProfile,
                 isMember = detail.isMember,
-                isOwner = detail.isOwner,
+                isOwner = detail.isActualOwner,
+                canManage = detail.canManage,
                 checkedInToday = detail.checkedInConfirmedToday || (myTodayReport?.isApproved == true),
                 members = memberProgress,
                 feedbacks = feedbackItems,

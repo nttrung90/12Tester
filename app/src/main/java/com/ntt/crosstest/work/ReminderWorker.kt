@@ -32,6 +32,18 @@ class ReminderWorker(
             if (status !is SessionStatus.Authenticated) return Result.success()
 
             val repo = CampaignRepository(supabase, Localizer(applicationContext))
+
+            // Read-only RPC: không gọi getMyDashboard ở background vì RPC đó
+            // ghi nhận đăng nhập và sẽ làm sai nhiệm vụ ngày của user.
+            val daily = repo.getMyDailyTaskStatus()
+            if (daily != null) {
+                if (!daily.met && !daily.isPenaltyExempt) {
+                    NotificationHelper.showDailyTaskReminder(applicationContext, daily)
+                }
+                return Result.success()
+            }
+
+            // Server chưa deploy migration 036 — fallback luồng nhắc check-in cũ.
             val joined = repo.myJoinedCampaigns().filter { it.isOpen && it.id != null }
             // 1 RPC get_campaigns_stats thay cho 2 query × N app (checkin + report hôm nay).
             val stats = if (joined.isEmpty()) {

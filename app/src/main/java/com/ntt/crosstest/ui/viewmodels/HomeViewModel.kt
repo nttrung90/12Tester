@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 
 import com.ntt.crosstest.data.CachedSessionData
 import com.ntt.crosstest.data.CampaignStats
+import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.UserNotification
 import com.ntt.crosstest.data.UserWarning
@@ -33,6 +34,8 @@ import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Serializable
 data class CampaignDisplayItem(
@@ -46,6 +49,23 @@ data class CampaignDisplayItem(
 ) {
     val dailyTarget: Int get() = campaign.dailyTarget
     val isTargetReached: Boolean get() = todayTestedCount >= dailyTarget
+}
+
+private fun vnToday(): String =
+    LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")).toString()
+
+/**
+ * Chỉ dùng trạng thái của đúng ngày VN hiện tại. Member đang mở app nghĩa là
+ * đã đăng nhập, kể cả khi RPC trả về chậm hơn thao tác ghi nhận.
+ */
+private fun DailyTaskStatus?.forCurrentUi(): DailyTaskStatus? {
+    val task = this ?: return null
+    if (task.statusDate != null && task.statusDate != vnToday()) return null
+    return if (task.isMember && !task.loggedInToday) {
+        task.copy(loggedInToday = true, met = true)
+    } else {
+        task
+    }
 }
 
 data class HomeUiState(
@@ -71,6 +91,8 @@ data class HomeUiState(
     val todayCheckinCount: Int = 0,
     val userCredits: Int = 0,
     val missedStreak: Int = 0,
+    /** Nhiệm vụ ngày mới; null khi server chưa deploy migration 036. */
+    val dailyTask: DailyTaskStatus? = null,
     /** true khi lần tải lịch sử Credit gần nhất thất bại (mạng lỗi) — dialog báo tải lại. */
     val creditLogsLoadFailed: Boolean = false,
     val userProfile: Profile? = null,
@@ -136,6 +158,7 @@ class HomeViewModel(
                     userCredits = cached.userCredits,
                     todayCheckinCount = cached.todayCheckinCount,
                     missedStreak = cached.missedStreak,
+                    dailyTask = cached.dailyTask.forCurrentUi(),
                     userProfile = cached.userProfile,
                     pendingReportsCount = cached.pendingReportsCount,
                     notifications = cached.notifications,
@@ -150,6 +173,7 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var searchJob: Job? = null
+    private var dailyLoginJob: Job? = null
 
     /** Gom dữ liệu cá nhân của Trang chủ, dùng chung cho fast path (dashboard RPC) và legacy. */
     private data class PersonalData(
@@ -158,6 +182,7 @@ class HomeViewModel(
         val leaderboard: List<LeaderboardUser> = emptyList(),
         val todayCheckins: Int = 0,
         val myProfile: Profile? = null,
+        val dailyTask: DailyTaskStatus? = null,
         val pendingReports: Int = 0,
         val unreadWarnings: List<UserWarning> = emptyList(),
         val weeklyWarnings: Int = 0,
@@ -236,6 +261,29 @@ class HomeViewModel(
         if (_uiState.value.testLeaderboard.isEmpty()) refreshTestLeaderboard()
     }
 
+    /**
+     * Ghi nhận đăng nhập đúng một lần mỗi ngày VN. Dashboard cũng ghi nhận
+     * server-side, nhưng lời gọi này bảo đảm hoạt động cả khi dashboard lỗi/cũ.
+     */
+    private fun ensureDailyLoginRecorded(appContext: android.content.Context?) {
+        if (appContext == null) return
+        val uid = repository.currentUserId() ?: return
+        val prefs = appContext.getSharedPreferences("testcheo_sync", android.content.Context.MODE_PRIVATE)
+        val key = "daily_login_recorded_date_$uid"
+        val today = vnToday()
+        if (prefs.getString(key, null) == today) return
+        if (dailyLoginJob?.isActive == true) return
+        dailyLoginJob = viewModelScope.launch {
+            try {
+                if (repository.recordDailyLogin()) {
+                    prefs.edit().putString(key, today).apply()
+                }
+            } catch (_: Exception) {
+                // Server cũ chưa có RPC — dashboard vẫn tự ghi nhận.
+            }
+        }
+    }
+
     /** Đồng bộ vòng đời campaign tối đa 1 lần/giờ (pg_cron, nếu được bật, đã lo phần còn lại). */
     private fun maybeSyncCampaignLifecycle(appContext: android.content.Context?) {
         val now = System.currentTimeMillis()
@@ -279,6 +327,7 @@ class HomeViewModel(
 
                 // Đồng bộ vòng đời: throttle 1 lần/giờ, chạy nền để không chặn tải Trang chủ.
                 if (isAuthed) maybeSyncCampaignLifecycle(appContext)
+                if (isAuthed) ensureDailyLoginRecorded(appContext)
 
                 // Fast path: 2 RPC gộp chạy SONG SONG (get_home_feed + get_my_dashboard) thay cho ~25 round-trip.
                 val (feed, dashboard) = if (isAuthed) {
@@ -370,6 +419,7 @@ class HomeViewModel(
                         leaderboard = dashboard.leaderboard,
                         todayCheckins = dashboard.todayCheckinCount,
                         myProfile = dashboard.profile,
+                        dailyTask = dashboard.dailyTask.forCurrentUi(),
                         pendingReports = dashboard.pendingReportsCount,
                         unreadWarnings = dashboard.unreadWarnings,
                         weeklyWarnings = dashboard.weeklyWarningsCount,
@@ -392,12 +442,14 @@ class HomeViewModel(
                         val packagesDeferred = async { repository.getTopupPackages(forceRefresh = forceRefresh) }
                         val notificationsDeferred = async { repository.getMyNotifications(forceRefresh = forceRefresh) }
                         val questsDeferred = async { repository.getQuestSummary(forceRefresh = forceRefresh) }
+                        val dailyDeferred = async { repository.getMyDailyTaskStatus() }
                         PersonalData(
                             mine = mineDeferred.await(),
                             joined = joinedDeferred.await(),
                             leaderboard = leaderboardDeferred.await(),
                             todayCheckins = todayDeferred.await(),
                             myProfile = profileDeferred.await(),
+                            dailyTask = dailyDeferred.await().forCurrentUi(),
                             pendingReports = pendingDeferred.await(),
                             unreadWarnings = warningsDeferred.await(),
                             weeklyWarnings = weeklyDeferred.await(),
@@ -466,7 +518,9 @@ class HomeViewModel(
                         leaderboard = personal.leaderboard.ifEmpty { it.leaderboard },
                         todayCheckinCount = personal.todayCheckins,
                         userCredits = myProfile?.credits ?: it.userCredits,
-                        missedStreak = myProfile?.missedStreak ?: 0,
+                        missedStreak = personal.dailyTask?.missedStreak
+                            ?: myProfile?.effectiveMissedStreak ?: 0,
+                        dailyTask = personal.dailyTask,
                         userProfile = myProfile,
                         pendingReportsCount = personal.pendingReports,
                         ownerStatsMap = ownerStats,
@@ -499,7 +553,9 @@ class HomeViewModel(
                         ownerStatsMap = ownerStats,
                         userCredits = myProfile?.credits ?: _uiState.value.userCredits,
                         todayCheckinCount = personal.todayCheckins,
-                        missedStreak = myProfile?.missedStreak ?: 0,
+                        missedStreak = personal.dailyTask?.missedStreak
+                            ?: myProfile?.effectiveMissedStreak ?: 0,
+                        dailyTask = personal.dailyTask,
                         pendingReportsCount = personal.pendingReports,
                         notifications = notifs,
                         unreadNotificationsCount = unreadNotifsCount,

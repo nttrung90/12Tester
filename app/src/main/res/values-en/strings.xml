@@ -22,7 +22,7 @@
     <string name="home_empty_paused">No paused apps.</string>
     <string name="home_empty_completed">No apps completed testing yet.</string>
     <string name="home_tested_progress_format">%1$d/%2$d apps</string>
-    <string name="home_paused_hint">Paused because the owner missed daily tasks 3 days in a row or paused manually. The owner can resume to move it back to Need Test.</string>
+    <string name="home_paused_hint">Paused because the owner missed daily tasks 7 days in a row or paused manually. The owner can resume to move it back to Need Test.</string>
     <string name="home_completed_hint">The app has gone to production or finished its 30-day testing window.</string>
     <string name="post_app_btn">Post App</string>
     <string name="post_app_title">Post My App</string>
@@ -173,21 +173,32 @@
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Daily Quest</string>
-    <string name="daily_quest_desc">Test at least 1 app today to keep your streak and earn rewards</string>
-    <string name="daily_quest_completed">Daily quest completed</string>
-    <string name="daily_quest_completed_compact">Daily quest completed (%1$d app)</string>
-    <string name="daily_quest_pending">Quest pending</string>
-    <string name="daily_quest_warning">Test at least 1 app before midnight to avoid inactivity Credit penalty!</string>
+    <string name="daily_quest_desc">Owners: test 3 apps per active posted app. Members: log in daily.</string>
+    <string name="daily_quest_completed">Daily task completed</string>
+    <string name="daily_quest_completed_compact">Daily task completed (%1$d app)</string>
+    <string name="daily_quest_pending">Task pending</string>
+    <string name="daily_quest_warning">Complete today\'s task before midnight to avoid inactivity Credit penalties!</string>
     <string name="daily_quest_safe">Your Credits are protected for today.</string>
     <string name="daily_quest_progress">%1$d/1</string>
     <string name="daily_reward_progress">Rewarded %1$d/30 apps today (+%2$d Credits)</string>
-    <string name="daily_task_goal">Goal: Test at least 1 app today to protect your Credits from daily inactivity penalties.</string>
+    <string name="daily_task_goal">Daily task: test 3 different apps for each active posted app, or log in if you don\'t post apps.</string>
     <string name="daily_penalty_info_btn">Penalty Rules</string>
     <string name="daily_penalty_dialog_title">Daily Inactivity Penalty Policy</string>
-    <string name="daily_penalty_dialog_content" formatted="false">The system automatically checks at 00:05 daily. If you didn\'t test any app on the previous day, Credits are deducted based on consecutive missed days:\n\n• Day 1 missed: -1% Credits\n• Day 2 missed: -2% Credits\n• Day 3 missed: -5% Credits\n• Day 4+ missed: -10% Credits\n(Minimum deduction is 1 Credit if balance &gt; 0)\n\n💡 Testing at least 1 app before midnight immediately protects your Credits and resets your missed streak to 0!</string>
+    <string name="daily_penalty_dialog_content" formatted="false">The system checks at 00:05 daily.\n\n• App owners: test 3 different apps for each active posted app (1 app → 3 tests; 2 apps → 6 tests; 6 apps → 18 tests/day). The target is capped by the number of other apps available.\n• Members: open the app at least once a day.\n• A new app starts counting the next day; a new account is free on signup day.\n• Admin/Moderator accounts are exempt.\n\nMissed-day penalty:\n• Day 1: -1% Credits\n• Day 2: -2% Credits\n• Day 3: -5% Credits\n• Day 4+: -10% Credits\nThe percentage is multiplied by the shortfall ratio (minimum 1 Credit, never more than your balance).\n\n7 consecutive missed days: your posted apps are automatically paused until you complete today\'s target and resume them.\n\n💡 Pending/approved reports count as tests. Rejected reports do not.</string>
     <string name="daily_task_test_now">Find App to Test</string>
-    <string name="daily_missed_streak_alert">Missed %1$d days in a row! You will lose %2$d%% Credits if you don\'t test today.</string>
-    <string name="daily_guest_prompt">Sign in to track your daily testing streak and protect your Credits from automatic penalties.</string>
+    <string name="daily_browse_apps">Browse Apps</string>
+    <string name="daily_missed_streak_alert">Missed %1$d days in a row! You will lose up to %2$d%% Credits if you don\'t complete today\'s task.</string>
+    <string name="daily_exempt_badge">Exempt</string>
+    <string name="daily_exempt_note">Admin/Moderator accounts are exempt from inactivity penalties. You can still test to earn Credits.</string>
+    <string name="daily_guest_prompt">Sign in to track your daily task and protect your Credits from automatic penalties.</string>
+    <string name="daily_task_completed_progress">Completed %1$d/%2$d apps today</string>
+    <string name="daily_login_completed">Daily login completed</string>
+    <string name="daily_task_progress_format">%1$d/%2$d</string>
+    <string name="daily_task_waived_badge">Waived</string>
+    <string name="daily_task_waived_note">No other apps are available to test right now, so today\'s target is waived. Your Credits are safe.</string>
+    <string name="daily_owner_goal_format">You have %1$d active posted app(s). Test %2$d different apps today to protect your Credits.</string>
+    <string name="daily_owner_missed_alert">You tested %1$d/%2$d apps today. Missed %3$d days in a row — finish today\'s target to reset your streak and avoid a -%4$d%% penalty.</string>
+    <string name="daily_member_goal">Open the app every day to keep your account active. Testing apps is optional.</string>
 
     <!-- Quests System -->
     <string name="quest_section_title">Testing Quests</string>
@@ -248,6 +259,13 @@
     <string name="notif_reminder_big_text">Open %1$s and tap \"Tested today\" for: %2$s</string>
     <string name="notif_channel_name">Check-in reminder</string>
     <string name="notif_channel_desc">Reminds you to check in test apps daily at 20:00</string>
+    <string name="notif_daily_task_channel_name">Daily task reminder</string>
+    <string name="notif_daily_task_channel_desc">Reminds you to complete your daily task at 20:00</string>
+    <string name="notif_daily_task_title">Daily task reminder ⏰</string>
+    <string name="notif_daily_owner_text">You have tested %1$d/%2$d apps today. Complete your target before midnight!</string>
+    <string name="notif_daily_owner_big_text">You have %3$d active posted app(s). Test %2$d different apps today to protect your Credits and avoid having your apps paused after 7 missed days.</string>
+    <string name="notif_daily_member_text">Open the app today to keep your daily login streak.</string>
+    <string name="notif_daily_member_big_text">A daily login keeps your account active. Open 12 Tester now.</string>
 
     <!-- Auth & Email/Password -->
     <string name="auth_or_divider">Or use Email &amp; Password</string>
@@ -562,6 +580,8 @@
     <!-- Campaign detail: owner card & stats -->
     <string name="campaign_owner_badge">This is your app</string>
     <string name="campaign_owner_desc">Manage installers, approve reports and app settings in the Manage screen.</string>
+    <string name="campaign_manager_badge">Manager</string>
+    <string name="campaign_manager_desc">You can manage this app as an Admin. You can still test it like a normal tester.</string>
     <string name="campaign_manage_btn">Manage</string>
     <string name="campaign_target_reached_msg_format">This app reached its target of %1$d tests today. You still get full benefits and +2 Credits when you take part!</string>
     <string name="campaign_owner_line_format">App owner: %1$s</string>
@@ -751,7 +771,7 @@
     <!-- ViewModel messages: owner app detail -->
     <string name="owner_app_expired_completed">The app exceeded 30 display days and was moved to Completed Testing.</string>
     <string name="owner_app_reactivated">App re-activated — it will show under Apps to Test.</string>
-    <string name="owner_app_inactive_3days">You\'ve been inactive for 3 days straight. Test 1 app today, then re-activate this app.</string>
+    <string name="owner_app_inactive_3days">You\'ve missed your daily task 7 days in a row. Complete today\'s target, then re-activate this app.</string>
     <string name="owner_app_not_paused">The app isn\'t paused.</string>
     <string name="owner_slot_expired_format">Slot %1$d has expired. Please renew the Slot to keep receiving testers.</string>
     <string name="owner_slot_renewed_format">Slot %1$d renewed successfully (+30 days)!</string>
@@ -892,7 +912,7 @@
     <string name="oad_production_desc">The app has been moved to \"Testing Completed\" on Home. Thanks for being part of the community!</string>
     <string name="oad_completed_desc">The app reached 30 display days and was moved to \"Testing Completed\" on Home.</string>
     <string name="oad_paused_title">App is paused</string>
-    <string name="oad_paused_auto_desc">The app was paused because you missed daily tasks 3 days in a row. Test 1 app today, then tap \"Resume receiving testers\".</string>
+    <string name="oad_paused_auto_desc">The app was paused because you missed daily tasks 7 days in a row. Complete today\'s target, then tap \"Resume receiving testers\".</string>
     <string name="oad_paused_slot_desc">The app was paused because Slot %1$d expired. Renew the Slot, then tap \"Resume receiving testers\".</string>
     <string name="oad_paused_manual_desc">The app is paused. Tap \"Resume receiving testers\" to show it on Home again.</string>
     <string name="oad_paused_admin_title">App paused by Admin</string>
@@ -907,7 +927,7 @@
     <string name="oad_reports_subtitle_format">%1$d pending (auto-accepted after 8h) · %2$d reports</string>
     <string name="oad_resume_title">Resume receiving testers</string>
     <string name="oad_pause_title">Pause receiving testers</string>
-    <string name="oad_resume_sub_auto">Test 1 app today before resuming.</string>
+    <string name="oad_resume_sub_auto">Complete today\'s daily target before resuming.</string>
     <string name="oad_resume_sub_slot_format">Slot %1$d expired — renew it, then resume.</string>
     <string name="oad_resume_sub_manual">Resume to show the app on Home.</string>
     <string name="oad_pause_sub_days_format">The app won\'t be shown. %1$d display days left.</string>
@@ -922,7 +942,7 @@
     <string name="oad_open_link_failed">Unable to open the link.</string>
     <string name="oad_pause_confirm_resume_q">Resume receiving testers?</string>
     <string name="oad_pause_confirm_pause_q">Pause receiving testers?</string>
-    <string name="oad_resume_dialog_auto">The app was paused because you missed daily tasks 3 days in a row. If you\'ve tested 1 app today, the app will be shown publicly again for other testers to join.</string>
+    <string name="oad_resume_dialog_auto">The app was paused because you missed daily tasks 7 days in a row. If you\'ve completed today\'s target, the app will be shown publicly again for other testers to join.</string>
     <string name="oad_resume_dialog_manual">The campaign will be shown publicly again so other testers can join and install (if within the 30 display days).</string>
     <string name="oad_pause_dialog_desc">The app will be temporarily hidden from Home and new testers can\'t join until you resume it.</string>
     <string name="oad_agree">Agree</string>

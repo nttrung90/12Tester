@@ -17,6 +17,8 @@ data class Profile(
     @SerialName("credits") val credits: Int = 100,
     @SerialName("last_active_date") val lastActiveDate: String? = null,
     @SerialName("missed_streak") val missedStreak: Int = 0,
+    @SerialName("daily_missed_streak") val dailyMissedStreak: Int? = null,
+    @SerialName("last_login_date") val lastLoginDate: String? = null,
     @SerialName("role") val role: String = "member",
     @SerialName("is_locked") val isLocked: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null,
@@ -25,6 +27,9 @@ data class Profile(
     val isModerator: Boolean get() = role.equals("moderator", ignoreCase = true)
     val isMember: Boolean get() = !isAdmin && !isModerator
     val canModerate: Boolean get() = isAdmin || isModerator
+
+    /** Ưu tiên chuỗi nhiệm vụ ngày mới; fallback cột legacy cho server cũ. */
+    val effectiveMissedStreak: Int get() = dailyMissedStreak ?: missedStreak
 }
 
 /**
@@ -83,7 +88,7 @@ data class Campaign(
     /** App đã ở tab "Đã hoàn thành Kiểm thử" (lên production hoặc hết 30 ngày hiển thị). */
     val isFinalized: Boolean get() = isProduction || isCompleted
 
-    /** App bị hệ thống tự tạm dừng vì chủ app vắng nhiệm vụ ngày 3 ngày liên tục. */
+    /** App bị hệ thống tự tạm dừng vì chủ app thiếu nhiệm vụ ngày 7 ngày liên tục. */
     val isAutoPaused: Boolean get() = isPaused && pausedReason == "owner_inactive"
 
     /** App bị tạm dừng do Slot đã hết hạn. */
@@ -772,6 +777,33 @@ data class HomeFeedResult(
     @SerialName("stats") val stats: Map<String, CampaignStats> = emptyMap(),
 )
 
+/**
+ * Trạng thái nhiệm vụ ngày mới (migration 036).
+ * `mode`: owner = có app đang hoạt động, member = chỉ cần đăng nhập.
+ * Với owner, `effective_required_tests` đã được giới hạn theo số app open khả dụng.
+ */
+@Serializable
+data class DailyTaskStatus(
+    @SerialName("status_date") val statusDate: String? = null,
+    @SerialName("mode") val mode: String = "member",
+    @SerialName("active_app_count") val activeAppCount: Int = 0,
+    @SerialName("required_tests") val requiredTests: Int = 0,
+    @SerialName("available_apps") val availableApps: Int = 0,
+    @SerialName("effective_required_tests") val effectiveRequiredTests: Int = 0,
+    @SerialName("completed_tests") val completedTests: Int = 0,
+    @SerialName("logged_in_today") val loggedInToday: Boolean = false,
+    @SerialName("is_penalty_exempt") val isPenaltyExempt: Boolean = false,
+    @SerialName("missed_streak") val missedStreak: Int = 0,
+    @SerialName("next_penalty_percent") val nextPenaltyPercent: Int = 1,
+    @SerialName("met") val met: Boolean = false,
+) {
+    val isOwner: Boolean get() = mode == "owner"
+    val isMember: Boolean get() = mode == "member"
+
+    /** Owner không có app open nào để test -> chỉ tiêu ngày được miễn. */
+    val isWaived: Boolean get() = isOwner && effectiveRequiredTests <= 0
+}
+
 /** Kết quả RPC `get_my_dashboard` — toàn bộ dữ liệu cá nhân của Trang chủ trong 1 query. */
 @Serializable
 data class MyDashboardResult(
@@ -790,6 +822,8 @@ data class MyDashboardResult(
     /** null khi RPC phiên bản cũ chưa trả về slots (migration 021). */
     @SerialName("slots") val slots: List<UserSlot>? = null,
     @SerialName("quest_summary") val questSummary: QuestSummary? = null,
+    /** null khi server chưa deploy migration 036. */
+    @SerialName("daily_task") val dailyTask: DailyTaskStatus? = null,
 )
 
 /** Tham số RPC `get_my_dashboard` (migration 021). */
@@ -825,7 +859,10 @@ data class CampaignDetailTester(
 data class CampaignDetailResult(
     @SerialName("campaign") val campaign: Campaign,
     @SerialName("is_member") val isMember: Boolean = false,
+    /** Legacy: true với cả owner + admin/moderator. Dùng isActualOwner cho quyền test. */
     @SerialName("is_owner") val isOwner: Boolean = false,
+    @SerialName("is_actual_owner") val isActualOwner: Boolean = false,
+    @SerialName("can_manage") val canManage: Boolean = false,
     @SerialName("checked_in_confirmed_today") val checkedInConfirmedToday: Boolean = false,
     @SerialName("testers") val testers: List<CampaignDetailTester> = emptyList(),
     @SerialName("feedbacks") val feedbacks: List<Feedback> = emptyList(),

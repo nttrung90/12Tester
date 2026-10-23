@@ -51,7 +51,7 @@ class OwnerAppDetailViewModel(
         viewModelScope.launch {
             val cachedCamp = repository.getCampaign(campaignId, forceRefresh = false)
             val cachedStats = repository.getCampaignOwnerStats(campaignId, forceRefresh = false)
-            val cachedReports = repository.getCampaignReports(campaignId, isOwner = true, forceRefresh = false)
+            val cachedReports = repository.getCampaignReports(campaignId, canManage = true, forceRefresh = false)
             val cachedTesters = repository.getCampaignTesters(campaignId, forceRefresh = false)
             if (cachedCamp != null) {
                 _uiState.update {
@@ -86,7 +86,7 @@ class OwnerAppDetailViewModel(
                 val camp = repository.getCampaign(campaignId, forceRefresh = forceRefresh)
                 val stats = repository.getCampaignOwnerStats(campaignId, forceRefresh = forceRefresh)
                 val testers = repository.getCampaignTesters(campaignId, forceRefresh = forceRefresh)
-                val reports = repository.getCampaignReports(campaignId, isOwner = true, forceRefresh = forceRefresh)
+                val reports = repository.getCampaignReports(campaignId, canManage = true, forceRefresh = forceRefresh)
                 val myProfile = repository.getMyProfile(forceRefresh = forceRefresh)
                 val owner = camp?.ownerId?.let { id ->
                     repository.getProfiles(listOf(id), forceRefresh = forceRefresh)[id]
@@ -441,7 +441,7 @@ class OwnerAppDetailViewModel(
         if ("report_already_reviewed" !in raw && "report_not_found" !in raw) return
         viewModelScope.launch {
             try {
-                val reports = repository.getCampaignReports(campaignId, isOwner = true, forceRefresh = true)
+                val reports = repository.getCampaignReports(campaignId, canManage = true, forceRefresh = true)
                 _uiState.update {
                     it.copy(
                         reports = reports,
