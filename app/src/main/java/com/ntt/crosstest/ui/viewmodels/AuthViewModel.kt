@@ -219,6 +219,8 @@ fun friendlyError(e: Exception, localizer: Localizer): String {
             localizer.get(R.string.error_same_screenshot)
         "report_already_reviewed" in lower ->
             localizer.get(R.string.error_report_already_reviewed)
+        "report_expired" in lower ->
+            localizer.get(R.string.error_report_expired)
         "report_not_found" in lower ->
             localizer.get(R.string.error_report_not_found)
         "permission_denied" in lower || "permission denied" in lower ->

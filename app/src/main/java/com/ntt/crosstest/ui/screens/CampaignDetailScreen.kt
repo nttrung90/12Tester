@@ -728,7 +728,7 @@ fun CampaignDetailScreen(
         )
     }
 
-    // BottomSheet: Nộp báo cáo kiểm thử (+2 Credit khi gửi) - Rộng rãi, preview ảnh lớn, phát hiện trùng lặp
+    // BottomSheet: Nộp báo cáo kiểm thử (+10 Credit tạm nhận khi gửi) - Rộng rãi, preview ảnh lớn, phát hiện trùng lặp
     if (showReportDialog && campaign != null) {
         SubmitReportBottomSheet(
             campaign = campaign,

@@ -1062,6 +1062,10 @@ class CampaignRepository(
         ownerStatsCache.remove(report.campaignId)
         cachedPendingReports = null
         checkinsCache.remove(report.campaignId)
+        cachedMyProfile = null
+        cachedCreditLogs = null
+        creditLogsTimestamp = 0L
+        profileCache.clear()
         invalidateDetailCache(report.campaignId)
         invalidateDashboardCache()
         // RPC nguyên tử (migration 014+). Không fallback ghi thẳng DB: server thiếu RPC
@@ -1079,6 +1083,7 @@ class CampaignRepository(
         ownerStatsCache.remove(report.campaignId)
         cachedPendingReports = null
         checkinsCache.remove(report.campaignId)
+        profileCache.clear()
         invalidateDetailCache(report.campaignId)
         invalidateDashboardCache()
         // RPC nguyên tử (migration 014+). Không fallback ghi thẳng DB: server thiếu RPC

@@ -358,16 +358,29 @@ class OwnerAppDetailViewModel(
         viewModelScope.launch {
             try {
                 val result = repository.approveReport(report, bonusCredits)
-                val msg = if (result.tipAwarded > 0) {
-                    localizer.get(
-                        R.string.owner_approve_tip_format,
-                        result.creditsAwarded + result.tipAwarded,
-                        result.tipAwarded,
-                    )
-                } else if (result.creditsAwarded > 0) {
-                    localizer.get(R.string.owner_approve_bonus_format, result.creditsAwarded)
-                } else {
-                    localizer.get(R.string.owner_approve_success)
+                val msg = when {
+                    result.ownerCreditsAwarded > 0 && result.tipAwarded > 0 ->
+                        localizer.get(
+                            R.string.owner_approve_tip_format,
+                            result.creditsAwarded + result.tipAwarded,
+                            result.tipAwarded,
+                            result.ownerCreditsAwarded,
+                        )
+                    result.ownerCreditsAwarded > 0 ->
+                        localizer.get(
+                            R.string.owner_approve_bonus_format,
+                            result.creditsAwarded,
+                            result.ownerCreditsAwarded,
+                        )
+                    result.tipAwarded > 0 ->
+                        localizer.get(
+                            R.string.reviewer_approve_tip_format,
+                            result.creditsAwarded + result.tipAwarded,
+                            result.tipAwarded,
+                        )
+                    result.creditsAwarded > 0 ->
+                        localizer.get(R.string.reviewer_approve_bonus_format, result.creditsAwarded)
+                    else -> localizer.get(R.string.owner_approve_success)
                 }
                 _uiState.update { it.copy(message = msg) }
                 refresh()
@@ -438,7 +451,7 @@ class OwnerAppDetailViewModel(
      */
     private fun refreshReportsAfterConflict(e: Exception) {
         val raw = e.message.orEmpty().lowercase()
-        if ("report_already_reviewed" !in raw && "report_not_found" !in raw) return
+        if ("report_already_reviewed" !in raw && "report_not_found" !in raw && "report_expired" !in raw) return
         viewModelScope.launch {
             try {
                 val reports = repository.getCampaignReports(campaignId, canManage = true, forceRefresh = true)

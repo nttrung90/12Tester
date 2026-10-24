@@ -411,6 +411,7 @@ data class ApproveReportResult(
     @SerialName("status") val status: String = "",
     @SerialName("credits_awarded") val creditsAwarded: Int = 0,
     @SerialName("tip_awarded") val tipAwarded: Int = 0,
+    @SerialName("owner_credits_awarded") val ownerCreditsAwarded: Int = 0,
     @SerialName("tester_balance") val testerBalance: Int = 0,
 )
 

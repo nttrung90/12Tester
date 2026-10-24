@@ -206,7 +206,7 @@
     <string name="quest_tab_weekly">Weekly Quests</string>
     <string name="quest_daily_progress_format">%1$d / 50 tests</string>
     <string name="quest_weekly_progress_format">%1$d / 300 tests</string>
-    <string name="quest_daily_note">1-30 apps: +2 Credits/app | 31-50: +1 Credit/app | 51+: 0 Credits (counts towards quests)</string>
+    <string name="quest_daily_note">Each successful app test: +10 Credits (provisional). Owner approval within 8h: tester +2, owner +2. After 8h: keep 10, no extra bonus.</string>
     <string name="quest_weekly_note">Weekly cycle runs from Monday 00:00 to Sunday 23:59 (Resets weekly)</string>
     <string name="quest_milestone_daily_10">Test 10 apps</string>
     <string name="quest_milestone_daily_20">Test 20 apps</string>
@@ -354,7 +354,7 @@
     <string name="admin_email_contact">firstntt90@gmail.com</string>
     <string name="warning_tester_msg">The system has noted that you are not testing seriously. Please test apps properly and take screenshots that do not duplicate previous days\' screenshots (prefer capturing different features of the app under test). If you receive 3 warnings like this within 1 week, your account will be temporarily locked.</string>
     <string name="warning_owner_msg">The system has noted that you approved testers\' results without proper review. Please carefully compare screenshots taken on different days before approving. If you receive 3 warnings like this within 1 week, your account will be temporarily locked.</string>
-    <string name="auto_accept_24h_notice">App owners have up to 8 hours to review. After 8 hours, the system will auto-approve (no bonus). Owner approval awards +1 bonus Credit.</string>
+    <string name="auto_accept_24h_notice">App owners have up to 8 hours to review. After 8 hours, the system auto-approves (tester keeps the provisional Credits, no extra bonus). If the owner approves: tester +2 and owner +2 Credits.</string>
 
     <!-- App Update -->
     <string name="update_required_title">Update Required</string>
@@ -455,14 +455,14 @@
     <string name="warning_confirm_btn">I understand</string>
     <string name="warning_quota_format">Note: Warnings this week: %1$d/3. If you receive 3 warnings within 1 week, your account will be temporarily locked.</string>
     <string name="home_target_dialog_title">This app reached today\'s test target</string>
-    <string name="home_target_dialog_message_format">The app \"%1$s\" reached its target of %2$d tests today.\n\nDo you want to keep testing? (If you continue, you still receive full benefits and +2 Credits as usual).</string>
+    <string name="home_target_dialog_message_format">The app \"%1$s\" reached its target of %2$d tests today.\n\nDo you want to keep testing? (If you continue, you still receive full benefits and +10 Credits as usual).</string>
     <string name="home_target_dialog_continue_btn">Yes, keep testing</string>
     <string name="home_target_dialog_other_btn">Choose another app</string>
     <string name="home_cache_cleared_toast">Cache cleared and data refreshed!</string>
     <string name="home_clear_cache_cd">Clear cache</string>
     <string name="home_offline_banner">You are viewing offline data</string>
     <string name="home_pending_reports_format">%1$d reports awaiting your review</string>
-    <string name="home_pending_reports_hint">Not reviewed within 8h = auto-accepted. Approve to gift +1 Credit to the tester.</string>
+    <string name="home_pending_reports_hint">Not reviewed within 8h = auto-accepted. Approve to gift +2 Credits to the tester and receive +2 Credits for yourself.</string>
     <string name="home_owner_empty_title">You haven\'t posted any apps yet</string>
     <string name="home_owner_empty_desc">Tap \"+ Post app\" below to start getting 20 testers for cross-testing.</string>
 
@@ -512,7 +512,7 @@
     <string name="campaign_next_dialog_title">Test the next app? 🚀</string>
     <string name="campaign_done_dialog_title">Testing complete! 🎉</string>
     <string name="campaign_submitted_next_msg">Report submitted successfully! Do you want to test the next app?</string>
-    <string name="campaign_reward_hint">Reward: +2 Credits on completion</string>
+    <string name="campaign_reward_hint">Reward: +10 Credits on completion (+2 if the owner approves within 8h)</string>
     <string name="campaign_all_done_msg">Awesome! You completed testing all apps available today.</string>
     <string name="campaign_test_now_btn">Yes, test now</string>
     <string name="campaign_next_prompt_msg">Do you want to test the next app?</string>
@@ -583,7 +583,7 @@
     <string name="campaign_manager_badge">Manager</string>
     <string name="campaign_manager_desc">You can manage this app as an Admin. You can still test it like a normal tester.</string>
     <string name="campaign_manage_btn">Manage</string>
-    <string name="campaign_target_reached_msg_format">This app reached its target of %1$d tests today. You still get full benefits and +2 Credits when you take part!</string>
+    <string name="campaign_target_reached_msg_format">This app reached its target of %1$d tests today. You still get full benefits and +10 Credits when you take part!</string>
     <string name="campaign_owner_line_format">App owner: %1$s</string>
     <string name="campaign_stat_reports">reports</string>
     <string name="campaign_stat_rating">rating</string>
@@ -610,7 +610,7 @@
     <string name="campaign_progress_met_format">Target met %1$d/%2$d days ✓</string>
     <string name="campaign_progress_days_format">%1$d/%2$d test days</string>
     <string name="campaign_today_approved_format">✓ Approved today: received +%1$d Credits.</string>
-    <string name="campaign_today_pending_format">⏳ Result submitted today (provisional Credits). Waiting for owner approval (+1 bonus C) — auto-approved in %1$dh.</string>
+    <string name="campaign_today_pending_format">⏳ Result submitted today (provisional Credits). Waiting for owner approval (+2 bonus C) — auto-approved in %1$dh.</string>
     <string name="campaign_today_rejected_reason_format">✕ Rejected today (%1$s). Provisional Credits (if any) were revoked. Please test again and take different screenshots.</string>
     <string name="campaign_today_rejected">✕ Rejected today: provisional Credits (if any) were revoked. Please test again seriously and take different screenshots.</string>
     <string name="campaign_today_ready">Installed. Try it out then submit a screenshot (provisionally receive Credits right after sending).</string>
@@ -642,7 +642,7 @@
     <string name="campaign_sheet_submit_title">Submit test result</string>
     <string name="campaign_sheet_note_extra">You already received the testing reward for this app today. You can send extra comments or screenshots to support the app owner (this won\'t add Credits).</string>
     <string name="campaign_sheet_note_update">You provisionally received Credits for today\'s result and it\'s waiting for owner approval. Extra photos/comments won\'t add Credits; the owner still has 8 hours to approve.</string>
-    <string name="campaign_sheet_note_submit">You\'ll provisionally receive Credits right after submitting (if you haven\'t earned the reward for this app today). The owner has 8 hours to approve (+1 bonus Credit). Capture different features to get approved easily!</string>
+    <string name="campaign_sheet_note_submit">You\'ll provisionally receive 10 Credits right after submitting (if you haven\'t earned the reward for this app today). The owner has 8 hours to approve (+2 bonus Credits). Capture different features to get approved easily!</string>
     <string name="campaign_sheet_photo_label">Testing screenshot:</string>
     <string name="campaign_photo_selected_cd">Selected photo</string>
     <string name="campaign_tap_to_zoom">Tap to zoom in</string>
@@ -676,6 +676,7 @@
     <string name="error_account_locked">Your account has been locked by the Admin. Please contact Admin for support.</string>
     <string name="error_same_screenshot">The new screenshot is the same as the rejected one. Please capture a different screen/feature of the app.</string>
     <string name="error_report_already_reviewed">This report has just been approved or rejected. Please refresh to see the latest status.</string>
+    <string name="error_report_expired">This report is past the 8-hour review window and has been auto-approved. No extra approval bonus applies.</string>
     <string name="error_report_not_found">This report no longer exists or you don\'t have access to it.</string>
     <string name="error_permission_denied">You don\'t have permission to perform this action.</string>
     <string name="error_campaign_not_open">The app is paused or testing is completed, so new reports can\'t be submitted.</string>
@@ -745,9 +746,9 @@
     <string name="campaign_checkin_already">You\'ve already checked in today. Come back tomorrow!</string>
     <string name="campaign_owner_cant_report">App owners can\'t submit reports for Credit on their own app.</string>
     <string name="campaign_report_extra_success">Extra feedback sent! (You\'ve already received the test reward for this app today).</string>
-    <string name="campaign_report_update_success">Test result updated! The owner has 8 hours to review (+1 Credit bonus if approved).</string>
+    <string name="campaign_report_update_success">Test result updated! The owner has 8 hours to review (+2 Credits bonus if approved).</string>
     <string name="campaign_report_resubmit_success">Resubmitted! Your new photo will be reviewed by the owner within 8 hours.</string>
-    <string name="campaign_report_submit_success_format">Test result sent! You receive +%1$d provisional Credits. The owner has 8 hours to review (+1 bonus Credit if approved).</string>
+    <string name="campaign_report_submit_success_format">Test result sent! You receive +%1$d provisional Credits. The owner has 8 hours to review (+2 bonus Credits if approved).</string>
     <string name="campaign_close_success">Campaign closed.</string>
 
     <!-- ViewModel messages: create campaign -->
@@ -776,9 +777,11 @@
     <string name="owner_slot_expired_format">Slot %1$d has expired. Please renew the Slot to keep receiving testers.</string>
     <string name="owner_slot_renewed_format">Slot %1$d renewed successfully (+30 days)!</string>
     <string name="owner_renew_insufficient_format">You don\'t have enough Credit to renew the Slot (need %1$d Credit).</string>
-    <string name="owner_approve_bonus_format">Test result approved (extra +%1$d Credit bonus for the tester)</string>
-    <string name="owner_approve_tip_format">Test result approved (+%1$d Credits to the tester, incl. %2$d Credit tip deducted from your balance)</string>
+    <string name="owner_approve_bonus_format">Test result approved (+%1$d Credits to the tester, +%2$d Credits to you)</string>
+    <string name="owner_approve_tip_format">Test result approved (+%1$d Credits to the tester, incl. %2$d Credit tip deducted from your balance; +%3$d Credits to you)</string>
     <string name="owner_approve_success">Test result approved.</string>
+    <string name="reviewer_approve_bonus_format">Test result approved (+%1$d Credits to the tester)</string>
+    <string name="reviewer_approve_tip_format">Test result approved (+%1$d Credits to the tester, incl. %2$d Credit tip deducted from the owner\'s balance)</string>
     <string name="owner_approve_warning_fallback">The system notes that you confirmed a tester\'s result that wasn\'t done seriously. Please compare the tester\'s screenshots from different days carefully before approving. If you get 3 warnings like this within a week, your account will be temporarily locked.</string>
     <string name="owner_reject_success_format">Test report rejected (%1$d Credit clawed back from the tester)</string>
     <string name="owner_reject_success">Test report rejected.</string>
@@ -874,7 +877,7 @@
     <string name="img_compare_title">Test photo comparison 🔍</string>
     <string name="img_compare_tester_format">Tester: %1$s</string>
     <string name="img_reject_photo">Reject this photo</string>
-    <string name="img_approve_btn">Approve (+1 C)</string>
+    <string name="img_approve_btn">Approve (+2 C)</string>
     <string name="img_close_comparison">Close comparison</string>
     <string name="img_analyzing">Analyzing the structure of both photos…</string>
     <string name="img_suspect_warning_format">Warning: The photos are highly similar (%1$d%%). Please check the status bar clock, battery %%, and UI to see if the tester re-submitted an old photo.</string>
@@ -1011,7 +1014,7 @@
     <string name="oad_tab_approved_format">Approved (%1$d)</string>
     <string name="oad_tab_rejected_format">Rejected (%1$d)</string>
     <string name="oad_tab_all_format">All (%1$d)</string>
-    <string name="oad_review_reminder">You have 8 hours to review each test (+1 Credit for the tester if approved). After 8h the system auto-approves (without the extra bonus). Compare the photos across days to check for duplicate submissions.</string>
+    <string name="oad_review_reminder">You have 8 hours to review each test. If the owner approves: tester +2 Credits and owner +2 Credits. If an Admin/Moderator approves: tester +2 Credits only. After 8h the system auto-approves (no extra bonus). Compare the photos across days to check for duplicate submissions.</string>
     <string name="oad_empty_pending">No reports pending review 🎉</string>
     <string name="oad_empty_approved">No approved reports yet.</string>
     <string name="oad_empty_rejected">No rejected reports yet.</string>

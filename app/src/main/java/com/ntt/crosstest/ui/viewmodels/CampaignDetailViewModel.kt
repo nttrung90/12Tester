@@ -145,7 +145,8 @@ class CampaignDetailViewModel(
                     (previousStage == ReportSubmitManager.Stage.SENDING ||
                         previousStage == ReportSubmitManager.Stage.RETRYING)
                 ) {
-                    // Thông báo theo kết quả THẬT từ server: có thể cấp 0/1/2 Credit tạm nhận.
+                    // Thông báo theo kết quả THẬT từ server: 10 Credit cho báo cáo mới,
+                    // 2 Credit cho báo cáo cũ, hoặc 0 nếu đã có checkin xác nhận hôm nay.
                     val submitResult = submitState.result
                     val successMessage = when {
                         submitResult == null -> pendingSuccessMessage
@@ -630,7 +631,7 @@ class CampaignDetailViewModel(
             alreadyRewarded -> localizer.get(R.string.campaign_report_extra_success)
             pendingToday -> localizer.get(R.string.campaign_report_update_success)
             rejectedToday -> localizer.get(R.string.campaign_report_resubmit_success)
-            else -> localizer.get(R.string.campaign_report_submit_success_format, 2)
+            else -> localizer.get(R.string.campaign_report_submit_success_format, 10)
         }
 
         _uiState.update {

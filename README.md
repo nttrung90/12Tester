@@ -33,7 +33,7 @@ các developer khác tham gia test chéo lẫn nhau. Mỗi ngày mỗi người 
 - **Hệ thống Credit & Nhiệm vụ ngày**:
   - Mặc định tặng **100 Credit** khi tạo tài khoản (hiển thị cạnh tài khoản ở tab "Hồ sơ").
   - Thanh nhiệm vụ ở tab "Khám phá": Mỗi ngày cần test ít nhất 1 app.
-  - Thưởng **+2 Credit** cho mỗi app test thành công (giới hạn trần thưởng tối đa 30 app/ngày = max 60 Credit/ngày).
+  - Thưởng **+10 Credit tạm nhận** ngay khi nộp báo cáo test. Chủ app thật duyệt trong 8h: tester **+2** (tổng 12), chủ app **+2**. Admin/Moderator duyệt: tester **+2**, chủ app **0**. Quá 8h hệ thống tự duyệt: tester giữ **10**, không thưởng thêm. Tip vẫn trả khi duyệt tay và auto-duyệt.
   - Phạt vắng mặt lũy tiến nếu không làm nhiệm vụ: ngày 1 trừ 1%, ngày 2 trừ 2%, ngày 3 trừ 5%, từ ngày 4+ trừ 10%/ngày.
   - Điều kiện đăng app: Người dùng phải có **trên 10 Credit** mới được tạo chiến dịch.
 - **Hồ sơ cá nhân**: xem số dư Credit, xem lịch sử biến động điểm, chiến dịch tôi tạo, chiến dịch tôi đã tham gia, bật/tắt nhắc giờ, đăng xuất
@@ -95,7 +95,7 @@ cross-test/
 
 1. Trong Supabase Dashboard, mở **SQL Editor** → **New query**.
 2. Chạy lần lượt **tất cả** file trong `supabase/migrations/` theo thứ tự tăng dần
-   (`001_init.sql` → `033_media_integrity.sql`). Mỗi file: mở ra, copy toàn bộ,
+   (`001_init.sql` → `037_reward_10_credits.sql`). Mỗi file: mở ra, copy toàn bộ,
    paste vào một query mới rồi bấm **Run**.
 3. Kiểm tra: vào **Table Editor** phải thấy các bảng chính `profiles`, `campaigns`,
    `campaign_members`, `checkins`, `feedbacks`, `credit_logs`, `tester_reports`,
@@ -104,13 +104,15 @@ cross-test/
 > **Lưu ý quan trọng:**
 > - `supabase/full_schema_singapore.sql` chỉ gộp schema tới migration 014, **không** bao gồm
 >   các migration mới. Nếu dùng file này cho project mới, vẫn phải chạy tiếp các migration
->   từ `015` → `033` theo đúng thứ tự.
-> - **Migration 030, 031, 032 và 033 là bắt buộc**: 030 chống lỗi hệ thống Credit (thu hồi Credit tạm,
+>   từ `015` → `037` theo đúng thứ tự.
+> - **Migration 030 → 037 là bắt buộc**: 030 chống lỗi hệ thống Credit (thu hồi Credit tạm,
 >   Tip, cron auto-duyệt), 031 chống gian lận luồng duyệt báo cáo (bắt buộc ảnh mới sau khi bị
 >   từ chối, khóa ảnh/rating sau khi duyệt, bộ đếm cảnh báo theo ngày Việt Nam), 032 bổ sung
 >   quyền Admin tạm dừng/tiếp tục nhận tester cho app của người khác (không đổi chủ sở hữu),
 >   033 chống nộp trùng khi retry (`client_submit_id`), bắt buộc `image_hash`/URL ảnh hợp lệ
->   và chặn client ghi thẳng bảng `tester_reports`.
+>   và chặn client ghi thẳng bảng `tester_reports`; 034-036 bổ sung quyền Admin/Moderator và
+>   nhiệm vụ ngày; 037 đổi cơ chế thưởng test (10 Credit tạm nhận, +2 khi chủ app duyệt,
+>   +2 cho chủ app, auto 8h không thưởng, chặn duyệt sau 8h).
 > - Nếu chưa bật được `pg_cron` cho `auto_accept_expired_reports`, không sao: từ migration 031
 >   hệ thống tự auto-duyệt khi mở chi tiết app hoặc tải Trang chủ.
 
@@ -120,7 +122,8 @@ File SQL làm những gì:
   cũng xem được; chỉ chủ có `credits > 10` mới tạo được chiến dịch; chỉ chủ mới sửa/đóng chiến dịch của mình; mỗi người chỉ ghi
   check-in/feedback/tham gia của chính mình.
 - Trigger `handle_new_user()`: tự tạo dòng `profiles` và thưởng khởi tạo **100 Credit** (ghi log vào `credit_logs`).
-- Trigger `handle_checkin_reward()`: thưởng **+2 Credit** cho mỗi app test (tối đa 30 app/ngày = max 60 Credit/ngày) và reset chuỗi vắng mặt.
+- Hàm `submit_tester_report()`: tạm nhận **10 Credit** khi nộp báo cáo test; chủ app duyệt trong 8h cộng thêm **+2** cho tester và **+2** cho chủ app; quá 8h auto-duyệt giữ nguyên 10. Báo cáo cũ đang pending vẫn giữ mức 2.
+- Trigger `handle_checkin_reward()`: vẫn xử lý check-in cũ (**+2 Credit**/app, tối đa 30 app/ngày) và reset chuỗi vắng mặt; check-in do report tạo được đánh dấu "tạm tính" nên không cộng trùng.
 - Hàm `apply_daily_inactivity_penalty()`: tự động trừ phạt Credit theo chuỗi ngày không làm nhiệm vụ (1%, 2%, 5%, 10%).
 
 ### Bước B2 — Deploy Firebase Storage rules

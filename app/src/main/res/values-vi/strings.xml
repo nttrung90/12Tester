@@ -206,7 +206,7 @@
     <string name="quest_tab_weekly">Nhiệm vụ Tuần</string>
     <string name="quest_daily_progress_format">%1$d / 50 lượt</string>
     <string name="quest_weekly_progress_format">%1$d / 300 lượt</string>
-    <string name="quest_daily_note">Test 1-30 app: +2 Credit/app | Test 31-50: +1 Credit/app | Từ 51: 0 Credit (vẫn tính nhiệm vụ)</string>
+    <string name="quest_daily_note">Mỗi app test thành công: +10 Credit (tạm nhận khi nộp). Chủ app duyệt trong 8h: tester +2, chủ app +2. Quá 8h: giữ 10, không thưởng thêm.</string>
     <string name="quest_weekly_note">Chu kỳ tuần tính từ 00:00 Thứ Hai đến 23:59 Chủ Nhật (Reset hàng tuần)</string>
     <string name="quest_milestone_daily_10">Test 10 ứng dụng</string>
     <string name="quest_milestone_daily_20">Test 20 ứng dụng</string>
@@ -354,7 +354,7 @@
     <string name="admin_email_contact">firstntt90@gmail.com</string>
     <string name="warning_tester_msg">Hệ thống ghi nhận bạn tham gia kiểm thử chưa nghiêm túc, đề nghị test app nghiêm túc và chụp ảnh màn hình không trùng với ảnh đã chụp hôm trước (nên chụp các tính năng khác của ứng dụng kiểm thử). Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="warning_owner_msg">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
-    <string name="auto_accept_24h_notice">Chủ app có tối đa 8 giờ để duyệt. Quá 8 giờ hệ thống sẽ tự động duyệt (không có thưởng duyệt). Nếu chủ app duyệt sẽ thưởng thêm +1 Credit.</string>
+    <string name="auto_accept_24h_notice">Chủ app có tối đa 8 giờ để duyệt. Quá 8 giờ hệ thống tự động duyệt (tester giữ nguyên Credit tạm nhận, không thưởng thêm). Nếu chủ app duyệt: tester +2 Credit, chủ app +2 Credit.</string>
 
     <!-- App Update -->
     <string name="update_required_title">Yêu cầu cập nhật ứng dụng</string>
@@ -455,14 +455,14 @@
     <string name="warning_confirm_btn">Tôi đã hiểu</string>
     <string name="warning_quota_format">Lưu ý: Số lần bị cảnh báo trong tuần: %1$d/3. Nếu bị 3 lần trong 1 tuần, tài khoản sẽ tự động bị tạm khóa.</string>
     <string name="home_target_dialog_title">App đã đủ số lượng Test hôm nay</string>
-    <string name="home_target_dialog_message_format">Ứng dụng \"%1$s\" đã đạt mục tiêu %2$d lượt test trong ngày hôm nay.\n\nBạn có muốn tiếp tục test không? (Nếu tiếp tục, bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit như bình thường).</string>
+    <string name="home_target_dialog_message_format">Ứng dụng \"%1$s\" đã đạt mục tiêu %2$d lượt test trong ngày hôm nay.\n\nBạn có muốn tiếp tục test không? (Nếu tiếp tục, bạn vẫn được hưởng đầy đủ quyền lợi và nhận +10 Credit như bình thường).</string>
     <string name="home_target_dialog_continue_btn">Có, tiếp tục test</string>
     <string name="home_target_dialog_other_btn">Chọn app khác</string>
     <string name="home_cache_cleared_toast">Đã dọn dẹp bộ nhớ đệm và làm mới dữ liệu!</string>
     <string name="home_clear_cache_cd">Dọn dẹp bộ nhớ đệm</string>
     <string name="home_offline_banner">Bạn đang xem dữ liệu ngoại tuyến</string>
     <string name="home_pending_reports_format">%1$d báo cáo chờ bạn duyệt</string>
-    <string name="home_pending_reports_hint">Không duyệt trong 8h = tự chấp nhận. Duyệt để tặng +1 Credit cho tester.</string>
+    <string name="home_pending_reports_hint">Không duyệt trong 8h = tự chấp nhận. Duyệt để tặng +2 Credit cho tester và nhận +2 Credit cho bạn.</string>
     <string name="home_owner_empty_title">Bạn chưa đăng ứng dụng nào</string>
     <string name="home_owner_empty_desc">Bấm \"+ Đăng app\" bên dưới để bắt đầu nhận 20 testers hỗ trợ kiểm thử chéo.</string>
 
@@ -511,7 +511,7 @@
     <string name="campaign_next_dialog_title">Kiểm thử app tiếp theo? 🚀</string>
     <string name="campaign_done_dialog_title">Hoàn thành kiểm thử! 🎉</string>
     <string name="campaign_submitted_next_msg">Nộp báo cáo thành công! Bạn có muốn Test app tiếp theo không?</string>
-    <string name="campaign_reward_hint">Thưởng: +2 Credit khi hoàn thành</string>
+    <string name="campaign_reward_hint">Thưởng: +10 Credit khi hoàn thành (+2 nếu chủ app duyệt trong 8h)</string>
     <string name="campaign_all_done_msg">Tuyệt vời! Bạn đã hoàn thành kiểm thử tất cả các ứng dụng có sẵn hôm nay.</string>
     <string name="campaign_test_now_btn">Có, test ngay</string>
     <string name="campaign_next_prompt_msg">Bạn có muốn test app tiếp theo không?</string>
@@ -582,7 +582,7 @@
     <string name="campaign_manager_badge">Quản lý</string>
     <string name="campaign_manager_desc">Bạn có quyền quản lý ứng dụng này với vai trò Admin. Bạn vẫn có thể test như tester bình thường.</string>
     <string name="campaign_manage_btn">Quản lý</string>
-    <string name="campaign_target_reached_msg_format">App đã đạt mục tiêu %1$d lượt test hôm nay. Bạn vẫn được hưởng đầy đủ quyền lợi và nhận +2 Credit khi tham gia test!</string>
+    <string name="campaign_target_reached_msg_format">App đã đạt mục tiêu %1$d lượt test hôm nay. Bạn vẫn được hưởng đầy đủ quyền lợi và nhận +10 Credit khi tham gia test!</string>
     <string name="campaign_owner_line_format">Chủ app: %1$s</string>
     <string name="campaign_stat_reports">báo cáo</string>
     <string name="campaign_stat_rating">đánh giá</string>
@@ -609,7 +609,7 @@
     <string name="campaign_progress_met_format">Đạt chuẩn %1$d/%2$d ngày ✓</string>
     <string name="campaign_progress_days_format">%1$d/%2$d ngày test</string>
     <string name="campaign_today_approved_format">✓ Đã duyệt hôm nay: Nhận +%1$d Credit.</string>
-    <string name="campaign_today_pending_format">⏳ Đã nộp kết quả hôm nay (tạm nhận Credit). Chờ chủ app duyệt (+1 C thưởng) — Tự động duyệt sau %1$dh.</string>
+    <string name="campaign_today_pending_format">⏳ Đã nộp kết quả hôm nay (tạm nhận Credit). Chờ chủ app duyệt (+2 C thưởng) — Tự động duyệt sau %1$dh.</string>
     <string name="campaign_today_rejected_reason_format">✕ Bị từ chối hôm nay (%1$s). Credit tạm nhận (nếu có) đã bị thu hồi. Đề nghị test lại và chụp ảnh khác.</string>
     <string name="campaign_today_rejected">✕ Bị từ chối hôm nay: Credit tạm nhận (nếu có) đã bị thu hồi. Đề nghị test lại nghiêm túc và chụp ảnh khác.</string>
     <string name="campaign_today_ready">Đã cài. Dùng thử rồi nộp ảnh chụp màn hình (tạm nhận Credit ngay khi gửi).</string>
@@ -641,7 +641,7 @@
     <string name="campaign_sheet_submit_title">Nộp kết quả kiểm thử</string>
     <string name="campaign_sheet_note_extra">Hôm nay bạn đã nhận thưởng kiểm thử cho app này. Bạn có thể gửi thêm nhận xét hoặc ảnh chụp màn hình góp ý bổ sung để hỗ trợ chủ app (thao tác này không cộng thêm Credit).</string>
     <string name="campaign_sheet_note_update">Bạn đã tạm nhận Credit cho kết quả hôm nay và đang chờ chủ app duyệt. Cập nhật thêm ảnh/nhận xét sẽ không cộng thêm Credit; chủ app vẫn có 8 giờ để duyệt.</string>
-    <string name="campaign_sheet_note_submit">Bạn sẽ tạm nhận ngay Credit sau khi gửi kết quả (nếu chưa nhận thưởng cho app này hôm nay). Chủ app có 8 giờ để duyệt (+1 Credit thưởng thêm). Hãy chụp các tính năng khác nhau để được duyệt dễ dàng!</string>
+    <string name="campaign_sheet_note_submit">Bạn sẽ tạm nhận ngay 10 Credit sau khi gửi kết quả (nếu chưa nhận thưởng cho app này hôm nay). Chủ app có 8 giờ để duyệt (+2 Credit thưởng thêm). Hãy chụp các tính năng khác nhau để được duyệt dễ dàng!</string>
     <string name="campaign_sheet_photo_label">Ảnh chụp màn hình kiểm thử:</string>
     <string name="campaign_photo_selected_cd">Ảnh đã chọn</string>
     <string name="campaign_tap_to_zoom">Chạm để phóng to</string>
@@ -675,6 +675,7 @@
     <string name="error_account_locked">Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ Admin để được hỗ trợ.</string>
     <string name="error_same_screenshot">Ảnh mới trùng với ảnh đã bị từ chối. Vui lòng chụp một màn hình/tính năng khác của ứng dụng.</string>
     <string name="error_report_already_reviewed">Báo cáo vừa được duyệt hoặc từ chối. Vui lòng làm mới để xem trạng thái mới nhất.</string>
+    <string name="error_report_expired">Báo cáo đã quá 8 giờ nên hệ thống đã tự động duyệt. Không có thưởng duyệt thêm.</string>
     <string name="error_report_not_found">Báo cáo không còn tồn tại hoặc bạn không có quyền truy cập.</string>
     <string name="error_permission_denied">Bạn không có quyền thực hiện thao tác này.</string>
     <string name="error_campaign_not_open">App đang tạm dừng hoặc đã hoàn thành kiểm thử nên không thể nộp báo cáo mới.</string>
@@ -744,9 +745,9 @@
     <string name="campaign_checkin_already">Hôm nay bạn đã check-in rồi. Quay lại ngày mai nhé!</string>
     <string name="campaign_owner_cant_report">Chủ app không thể tự nộp báo cáo nhận Credit cho app của chính mình.</string>
     <string name="campaign_report_extra_success">Đã gửi góp ý bổ sung! (Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi).</string>
-    <string name="campaign_report_update_success">Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt).</string>
+    <string name="campaign_report_update_success">Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
     <string name="campaign_report_resubmit_success">Đã nộp lại báo cáo! Ảnh mới sẽ được chủ app duyệt trong 8 giờ tới.</string>
-    <string name="campaign_report_submit_success_format">Đã gửi kết quả kiểm thử! Bạn tạm nhận +%1$d Credit. Chủ app có 8 giờ để duyệt (+1 Credit thưởng nếu được duyệt).</string>
+    <string name="campaign_report_submit_success_format">Đã gửi kết quả kiểm thử! Bạn tạm nhận +%1$d Credit. Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
     <string name="campaign_close_success">Đã đóng chiến dịch.</string>
 
     <!-- ViewModel messages: create campaign -->
@@ -775,9 +776,11 @@
     <string name="owner_slot_expired_format">Slot %1$d đã hết hạn. Vui lòng gia hạn Slot để tiếp tục mở nhận tester.</string>
     <string name="owner_slot_renewed_format">Gia hạn Slot %1$d thành công (+30 ngày)!</string>
     <string name="owner_renew_insufficient_format">Bạn không đủ Credit để gia hạn Slot (cần %1$d Credit).</string>
-    <string name="owner_approve_bonus_format">Đã duyệt kết quả kiểm thử (Thưởng thêm +%1$d Credit cho tester)</string>
-    <string name="owner_approve_tip_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester, trong đó %2$d Credit tip trừ từ số dư của bạn)</string>
+    <string name="owner_approve_bonus_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester, +%2$d Credit cho bạn)</string>
+    <string name="owner_approve_tip_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester, trong đó %2$d Credit tip trừ từ số dư của bạn; +%3$d Credit cho bạn)</string>
     <string name="owner_approve_success">Đã duyệt kết quả kiểm thử.</string>
+    <string name="reviewer_approve_bonus_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester)</string>
+    <string name="reviewer_approve_tip_format">Đã duyệt kết quả kiểm thử (+%1$d Credit cho tester, trong đó %2$d Credit tip trừ từ số dư chủ app)</string>
     <string name="owner_approve_warning_fallback">Hệ thống ghi nhận bạn xác nhận kết quả của người kiểm thử chưa nghiêm túc, đề nghị đối chiếu kỹ ảnh chụp của người kiểm thử chụp các ngày khác nhau để duyệt cho chính xác. Nếu trong 1 tuần bạn bị 3 lần cảnh báo như thế này thì tài khoản của bạn sẽ bị tạm khóa</string>
     <string name="owner_reject_success_format">Đã từ chối báo cáo kiểm thử (thu hồi %1$d Credit từ tester)</string>
     <string name="owner_reject_success">Đã từ chối báo cáo kiểm thử</string>
@@ -873,7 +876,7 @@
     <string name="img_compare_title">So sánh ảnh kiểm thử 🔍</string>
     <string name="img_compare_tester_format">Tester: %1$s</string>
     <string name="img_reject_photo">Từ chối ảnh này</string>
-    <string name="img_approve_btn">Duyệt (+1 C)</string>
+    <string name="img_approve_btn">Duyệt (+2 C)</string>
     <string name="img_close_comparison">Đóng đối chiếu</string>
     <string name="img_analyzing">Đang phân tích cấu trúc 2 bức ảnh...</string>
     <string name="img_suspect_warning_format">Cảnh báo: Ảnh có độ tương đồng rất cao (%1$d%%). Đề nghị kiểm tra kỹ đồng hồ status bar, %% pin, và giao diện xem tester có nộp lại ảnh cũ không.</string>
@@ -1010,7 +1013,7 @@
     <string name="oad_tab_approved_format">Đã duyệt (%1$d)</string>
     <string name="oad_tab_rejected_format">Từ chối (%1$d)</string>
     <string name="oad_tab_all_format">Tất cả (%1$d)</string>
-    <string name="oad_review_reminder">Bạn có 8 giờ để duyệt bài test (+1 Credit cho tester nếu duyệt). Quá 8h hệ thống sẽ tự động duyệt (không có thưởng thêm). Hãy đối chiếu ảnh các ngày xem tester có nộp trùng lặp không.</string>
+    <string name="oad_review_reminder">Bạn có 8 giờ để duyệt bài test. Chủ app duyệt: tester +2 Credit và chủ app +2 Credit. Admin/Moderator duyệt: chỉ tester +2 Credit. Quá 8h hệ thống sẽ tự động duyệt (không có thưởng thêm). Hãy đối chiếu ảnh các ngày xem tester có nộp trùng lặp không.</string>
     <string name="oad_empty_pending">Không có báo cáo nào đang chờ duyệt 🎉</string>
     <string name="oad_empty_approved">Chưa có báo cáo nào được duyệt.</string>
     <string name="oad_empty_rejected">Chưa có báo cáo nào bị từ chối.</string>
