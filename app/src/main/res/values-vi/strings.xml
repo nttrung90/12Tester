@@ -180,7 +180,6 @@
     <string name="daily_quest_warning">Hoàn thành nhiệm vụ hôm nay trước 24:00 để tránh bị trừ Credit vắng mặt!</string>
     <string name="daily_quest_safe">Điểm Credit của bạn hôm nay đã được bảo vệ an toàn.</string>
     <string name="daily_quest_progress">%1$d/1</string>
-    <string name="daily_reward_progress">Đã nhận thưởng %1$d/30 app hôm nay (+%2$d Credit)</string>
     <string name="daily_task_goal">Nhiệm vụ ngày: test 3 app khác nhau cho mỗi app đang hoạt động, hoặc đăng nhập nếu bạn không đăng app.</string>
     <string name="daily_penalty_info_btn">Cơ chế trừ điểm</string>
     <string name="daily_penalty_dialog_title">Cơ chế trừ điểm vắng mặt hàng ngày</string>
@@ -746,7 +745,7 @@
     <string name="campaign_owner_cant_report">Chủ app không thể tự nộp báo cáo nhận Credit cho app của chính mình.</string>
     <string name="campaign_report_extra_success">Đã gửi góp ý bổ sung! (Hôm nay bạn đã nhận thưởng kiểm thử cho app này rồi).</string>
     <string name="campaign_report_update_success">Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
-    <string name="campaign_report_resubmit_success">Đã nộp lại báo cáo! Ảnh mới sẽ được chủ app duyệt trong 8 giờ tới.</string>
+    <string name="campaign_report_resubmit_success">Đã nộp lại báo cáo! Credit tạm nhận sẽ được cấp lại nếu trước đó đã bị thu hồi. Chủ app có 8 giờ để duyệt (+2 Credit nếu được duyệt).</string>
     <string name="campaign_report_submit_success_format">Đã gửi kết quả kiểm thử! Bạn tạm nhận +%1$d Credit. Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
     <string name="campaign_close_success">Đã đóng chiến dịch.</string>
 

@@ -838,9 +838,9 @@ begin
             'Báo cáo kiểm thử tự động duyệt ⏱️',
             case
                 when v_tip > 0 then
-                    format('Báo cáo của bạn cho ứng dụng "%s" đã được hệ thống tự động duyệt sau 8 giờ (giữ nguyên %s Credit đã nhận + %s Credit boa từ chủ app). Cảm ơn bạn!', coalesce(v_camp_name, 'ứng dụng'), v_base, v_tip)
+                    format('Báo cáo của bạn cho ứng dụng "%s" đã được hệ thống tự động duyệt sau 8 giờ (giữ nguyên %s Credit của lượt test này + %s Credit boa từ chủ app). Cảm ơn bạn!', coalesce(v_camp_name, 'ứng dụng'), v_base, v_tip)
                 else
-                    format('Báo cáo của bạn cho ứng dụng "%s" đã được hệ thống tự động duyệt sau 8 giờ (giữ nguyên %s Credit đã nhận). Cảm ơn bạn!', coalesce(v_camp_name, 'ứng dụng'), v_base)
+                    format('Báo cáo của bạn cho ứng dụng "%s" đã được hệ thống tự động duyệt sau 8 giờ (giữ nguyên %s Credit của lượt test này). Cảm ơn bạn!', coalesce(v_camp_name, 'ứng dụng'), v_base)
             end,
             'report',
             jsonb_build_object('campaign_id', v_report.campaign_id, 'report_id', v_report.id, 'status', 'approved', 'auto_accepted', true, 'tip_awarded', v_tip)
@@ -872,6 +872,7 @@ declare
     v_owner_id uuid;
     v_camp_name text;
     v_clawed int;
+    v_extra int;
 begin
     if coalesce(current_setting('app.suppress_report_notify', true), '') = '1' then
         return new;
@@ -938,13 +939,17 @@ begin
         where id = new.campaign_id;
 
         if new.status = 'approved' then
+            -- Chỉ báo phần tăng thêm của lượt duyệt này (thường +2, cộng tip nếu có),
+            -- tránh ghi "tổng cộng" sai khi báo cáo từng bị clawback một phần.
+            v_extra := greatest(0, coalesce(new.bonus_awarded, 0) - coalesce(old.bonus_awarded, 0));
+
             insert into public.notifications (user_id, title, message, type, data)
             values (
                 new.user_id,
                 'Báo cáo kiểm thử được phê duyệt! 🎉',
-                format('Báo cáo của bạn cho ứng dụng "%s" đã được duyệt thành công! Tổng cộng bạn nhận được %s Credit cho lượt test này. Cảm ơn bạn!',
+                format('Báo cáo của bạn cho ứng dụng "%s" đã được duyệt thành công! Bạn nhận thêm %s Credit cho lượt test này. Cảm ơn bạn!',
                     coalesce(v_camp_name, 'ứng dụng'),
-                    coalesce(new.bonus_awarded, 0)
+                    v_extra
                 ),
                 'report',
                 jsonb_build_object('campaign_id', new.campaign_id, 'report_id', new.id, 'status', 'approved')

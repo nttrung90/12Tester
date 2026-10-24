@@ -212,6 +212,7 @@ data class TesterReport(
     @SerialName("rating") val rating: Int? = null,
     @SerialName("status") val status: String = "pending", // pending, approved, rejected
     @SerialName("bonus_awarded") val bonusAwarded: Int = 0,
+    @SerialName("provisional_granted_credits") val provisionalGrantedCredits: Int = 0,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("reviewed_at") val reviewedAt: String? = null,
     @SerialName("rejection_reason") val rejectionReason: String? = null,
@@ -225,6 +226,19 @@ data class TesterReport(
     val isPending: Boolean get() = status == "pending"
     val isApproved: Boolean get() = status == "approved"
     val isRejected: Boolean get() = status == "rejected"
+
+    /**
+     * Số Credit hiển thị cho báo cáo đã duyệt.
+     * - Báo cáo mới: bonus_awarded (10/12/... + tip).
+     * - Báo cáo cũ chưa có bonus_awarded: provisional_granted_credits (mặc định 2).
+     * - Báo cáo mới bị clawback toàn bộ rồi regrant 0: 0 (không còn fallback 2 sai).
+     */
+    val approvedReward: Int
+        get() = when {
+            bonusAwarded > 0 -> bonusAwarded
+            provisionalGrantedCredits > 0 -> provisionalGrantedCredits
+            else -> 0
+        }
 
     val resolvedTesterName: String
         get() = testerProfile?.displayName ?: testerName?.ifBlank { null } ?: "Tester"

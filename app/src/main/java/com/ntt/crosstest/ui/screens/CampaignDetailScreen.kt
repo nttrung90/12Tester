@@ -649,7 +649,7 @@ fun CampaignDetailScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                             )
                                             val badgeText = when {
-                                                rep.isApproved -> stringResource(R.string.campaign_history_status_approved_format, if (rep.bonusAwarded > 0) rep.bonusAwarded else 2)
+                                                rep.isApproved -> stringResource(R.string.campaign_history_status_approved_format, rep.approvedReward)
                                                 rep.isPending -> stringResource(R.string.campaign_history_status_pending_format, rep.remainingHoursUntilAutoAccept())
                                                 else -> stringResource(R.string.campaign_history_status_rejected)
                                             }
@@ -1582,7 +1582,7 @@ fun CampaignDetailScreen(
                             else MaterialTheme.colorScheme.onSurfaceVariant
 
                         val statusText = if (isApprovedToday) {
-                            stringResource(R.string.campaign_today_approved_format, todayReport?.bonusAwarded?.takeIf { it > 0 } ?: 2)
+                            stringResource(R.string.campaign_today_approved_format, todayReport?.approvedReward ?: 2)
                         } else if (isPendingToday) {
                             stringResource(R.string.campaign_today_pending_format, todayReport?.remainingHoursUntilAutoAccept() ?: 8)
                         } else if (isRejectedToday) {

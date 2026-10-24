@@ -180,7 +180,6 @@
     <string name="daily_quest_warning">Complete today\'s task before midnight to avoid inactivity Credit penalties!</string>
     <string name="daily_quest_safe">Your Credits are protected for today.</string>
     <string name="daily_quest_progress">%1$d/1</string>
-    <string name="daily_reward_progress">Rewarded %1$d/30 apps today (+%2$d Credits)</string>
     <string name="daily_task_goal">Daily task: test 3 different apps for each active posted app, or log in if you don\'t post apps.</string>
     <string name="daily_penalty_info_btn">Penalty Rules</string>
     <string name="daily_penalty_dialog_title">Daily Inactivity Penalty Policy</string>
@@ -747,7 +746,7 @@
     <string name="campaign_owner_cant_report">App owners can\'t submit reports for Credit on their own app.</string>
     <string name="campaign_report_extra_success">Extra feedback sent! (You\'ve already received the test reward for this app today).</string>
     <string name="campaign_report_update_success">Test result updated! The owner has 8 hours to review (+2 Credits bonus if approved).</string>
-    <string name="campaign_report_resubmit_success">Resubmitted! Your new photo will be reviewed by the owner within 8 hours.</string>
+    <string name="campaign_report_resubmit_success">Resubmitted! Any provisional Credits that were clawed back will be regranted. The owner has 8 hours to review (+2 bonus Credits if approved).</string>
     <string name="campaign_report_submit_success_format">Test result sent! You receive +%1$d provisional Credits. The owner has 8 hours to review (+2 bonus Credits if approved).</string>
     <string name="campaign_close_success">Campaign closed.</string>
 
