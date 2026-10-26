@@ -20,6 +20,7 @@ class SettingsRepository(private val context: Context) {
 
     private val reminderEnabledKey = booleanPreferencesKey("reminder_enabled")
     private val appLanguageKey = stringPreferencesKey("app_language")
+    private val appThemeKey = stringPreferencesKey("app_theme")
     private val testingGuideConfirmedKey = booleanPreferencesKey("testing_guide_confirmed")
     private val updateNotifiedVersionCodeKey = intPreferencesKey("update_notified_version_code")
 
@@ -68,18 +69,58 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { prefs -> prefs[appLanguageKey] = languageCode }
     }
 
+    /**
+     * Stored theme setting:
+     * - "system": follow the device light/dark mode (default)
+     * - "light": force light theme
+     * - "dark": force dark theme
+     */
+    val appTheme: Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[appThemeKey] ?: THEME_SYSTEM }
+
+    suspend fun setAppTheme(theme: String) {
+        // Mirrored to SharedPreferences so MainActivity can apply the theme to
+        // system bars before the DataStore flow emits on a cold start.
+        context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_APP_THEME, theme)
+            .apply()
+
+        context.dataStore.edit { prefs -> prefs[appThemeKey] = theme }
+    }
+
     companion object {
         const val LANGUAGE_SYSTEM = "system"
         const val LANGUAGE_VI = "vi"
         const val LANGUAGE_EN = "en"
 
+        const val THEME_SYSTEM = "system"
+        const val THEME_LIGHT = "light"
+        const val THEME_DARK = "dark"
+
         private const val PREFS_SYNC_NAME = "testcheo_settings_sync"
         private const val KEY_APP_LANGUAGE = "app_language"
+        private const val KEY_APP_THEME = "app_theme"
 
         /** Read saved language synchronously for base context configuration. */
         fun getSavedLanguageSync(context: Context): String {
             return context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
                 .getString(KEY_APP_LANGUAGE, LANGUAGE_SYSTEM) ?: LANGUAGE_SYSTEM
+        }
+
+        /** Read the saved theme synchronously for the first frame / system bars. */
+        fun getSavedThemeSync(context: Context): String {
+            return context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_APP_THEME, THEME_SYSTEM) ?: THEME_SYSTEM
+        }
+
+        /** Resolves whether the app should render in dark mode. */
+        fun resolveDarkTheme(themeSetting: String, systemDark: Boolean): Boolean {
+            return when (themeSetting) {
+                THEME_LIGHT -> false
+                THEME_DARK -> true
+                else -> systemDark
+            }
         }
 
         /**

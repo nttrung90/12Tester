@@ -96,9 +96,11 @@ fun DailyTaskCard(
         else -> todayCheckinCount >= 1
     }
     val streak = dailyTask?.missedStreak ?: missedStreak
+    // Fallback khớp server (migration 036: 1%/2%/5%/10% theo streak 1/2/3/4+).
     val nextPct = dailyTask?.nextPenaltyPercent ?: when (streak) {
-        1 -> 2
-        2 -> 5
+        1 -> 1
+        2 -> 2
+        3 -> 5
         else -> 10
     }
     val progress = when {

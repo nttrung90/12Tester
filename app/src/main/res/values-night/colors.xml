@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches GreenBackgroundDark so the launch window does not flash white. -->
+    <color name="window_background">#101511</color>
+</resources>

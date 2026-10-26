@@ -144,6 +144,24 @@ object PendingReportStore {
         }
     }
 
+    /**
+     * Campaign id của các báo cáo đang chờ upload (chưa lên server).
+     * Dùng để không gợi ý lại app vừa test trong lúc báo cáo còn trong hàng đợi.
+     */
+    @Synchronized
+    fun pendingCampaignIds(context: Context): Set<String> {
+        val files = directory(context).listFiles { file ->
+            file.isFile && file.name.endsWith(".json")
+        } ?: return emptySet()
+        return files.mapNotNull { file ->
+            try {
+                json.decodeFromString<PendingReport>(file.readText()).campaignId
+            } catch (_: Exception) {
+                null
+            }
+        }.toSet()
+    }
+
     @Synchronized
     fun clear(context: Context) {
         directory(context).deleteRecursively()

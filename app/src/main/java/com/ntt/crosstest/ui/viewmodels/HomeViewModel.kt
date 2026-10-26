@@ -7,9 +7,12 @@ import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.LeaderboardUser
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.Mission
+import com.ntt.crosstest.data.MyRank
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.CreditLog
+import com.ntt.crosstest.data.ReportSubmitManager
 import com.ntt.crosstest.data.TopupPackage
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -28,6 +31,8 @@ import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.UserNotification
 import com.ntt.crosstest.data.UserWarning
 import com.ntt.crosstest.data.QuestSummary
+import com.ntt.crosstest.ui.components.CreditReward
+import com.ntt.crosstest.ui.components.CreditRewardType
 import com.ntt.crosstest.util.NetworkMonitor
 import com.ntt.crosstest.util.InstalledAppCache
 import io.github.jan.supabase.auth.status.SessionStatus
@@ -83,6 +88,8 @@ data class HomeUiState(
     val joinedCampaigns: List<Campaign> = emptyList(),
     val leaderboard: List<LeaderboardUser> = emptyList(),
     val isLeaderboardLoading: Boolean = false,
+    /** Hạng của người dùng hiện tại theo bảng Top Credit (thẻ ghim trong tab Xếp hạng). */
+    val myRank: MyRank? = null,
     /** Bảng xếp hạng theo tổng lượt test (sub-tab "Top Test"). */
     val testLeaderboard: List<LeaderboardUser> = emptyList(),
     val isTestLeaderboardLoading: Boolean = false,
@@ -110,12 +117,19 @@ data class HomeUiState(
     val unreadNotificationsCount: Int = 0,
     val questSummary: QuestSummary? = null,
     val claimingMilestone: String? = null,
+    /** Danh sách nhiệm vụ do người dùng tạo cho sub-tab "Nhiệm vụ App" (migration 039). */
+    val missions: List<Mission> = emptyList(),
+    val isMissionsLoading: Boolean = false,
+    val joiningMissionId: String? = null,
+    /** Quest claim / top-up reward shown above the Home screen. */
+    val reward: CreditReward? = null,
 )
 
 class HomeViewModel(
     private val repository: CampaignRepository,
     private val context: android.content.Context? = null,
     private val localizer: Localizer,
+    private val reportSubmitManager: ReportSubmitManager? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -132,13 +146,14 @@ class HomeViewModel(
                     isLoading = false,
                     isBackgroundSyncing = true,
                     isAuthenticated = cached.userId != null,
-                    openCampaigns = cached.openCampaigns,
+                    openCampaigns = cached.displayItems.map { it.campaign },
                     displayItems = cached.displayItems,
                     pausedDisplayItems = cached.pausedDisplayItems,
                     completedDisplayItems = cached.completedDisplayItems,
                     myCampaigns = cached.myCampaigns,
                     joinedCampaigns = cached.joinedCampaigns,
                     leaderboard = cached.leaderboard,
+                    myRank = cached.myRank,
                     ownerStatsMap = cached.ownerStatsMap,
                     ownerNameById = (cached.displayItems + cached.pausedDisplayItems + cached.completedDisplayItems)
                         .filter { it.ownerName.isNotBlank() }
@@ -180,6 +195,7 @@ class HomeViewModel(
         val mine: List<Campaign> = emptyList(),
         val joined: List<Campaign> = emptyList(),
         val leaderboard: List<LeaderboardUser> = emptyList(),
+        val myRank: MyRank? = null,
         val todayCheckins: Int = 0,
         val myProfile: Profile? = null,
         val dailyTask: DailyTaskStatus? = null,
@@ -207,6 +223,46 @@ class HomeViewModel(
     init {
         refresh(context = context, forceRefresh = false)
         observeSession()
+        observeSubmittedReports()
+    }
+
+    /**
+     * RPC nộp báo cáo chạy nền ở [ReportSubmitManager]. Khi server đã commit, đánh
+     * dấu campaign là "Đã test hôm nay" ngay (optimistic) rồi force-refresh Trang
+     * chủ để lấy số dư Credit + stats thật. Nếu Home đang ở back stack, sự kiện
+     * vẫn được nhận và trạng thái sẵn sàng trước khi người dùng quay lại.
+     */
+    private fun observeSubmittedReports() {
+        val manager = reportSubmitManager ?: return
+        viewModelScope.launch {
+            manager.events.collect { event ->
+                if (event is ReportSubmitManager.SubmitEvent.Success &&
+                    event.campaignId.isNotBlank() &&
+                    repository.isAuthenticated()
+                ) {
+                    markCampaignTestedToday(event.campaignId)
+                    refresh(forceRefresh = true)
+                }
+            }
+        }
+    }
+
+    /** Cập nhật ngay chip "Đã test hôm nay" trong lúc chờ request làm mới feed. */
+    private fun markCampaignTestedToday(campaignId: String) {
+        fun List<CampaignDisplayItem>.markTested(): List<CampaignDisplayItem> = map { item ->
+            if (item.campaign.id == campaignId) item.copy(hasTestedToday = true) else item
+        }
+        _uiState.update { state ->
+            state.copy(
+                displayItems = state.displayItems.markTested(),
+                pausedDisplayItems = state.pausedDisplayItems.markTested(),
+                completedDisplayItems = state.completedDisplayItems.markTested(),
+                searchResults = state.searchResults?.markTested(),
+                joinedStatsMap = state.joinedStatsMap[campaignId]?.let { stats ->
+                    state.joinedStatsMap + (campaignId to stats.copy(hasTestedToday = true))
+                } ?: state.joinedStatsMap,
+            )
+        }
     }
 
     /**
@@ -341,6 +397,22 @@ class HomeViewModel(
                 }
                 if (isAuthed) lastSyncedUid = repository.currentUserId()
 
+                // Nhiệm vụ App: tải nền, không chặn Trang chủ. Server chưa deploy
+                // migration 039 thì RPC lỗi — giữ danh sách rỗng, không ảnh hưởng phần khác.
+                if (isAuthed) {
+                    _uiState.update { it.copy(isMissionsLoading = true) }
+                    viewModelScope.launch {
+                        try {
+                            val missions = repository.getOpenMissions(forceRefresh = forceRefresh)
+                            _uiState.update { it.copy(missions = missions, isMissionsLoading = false) }
+                        } catch (_: Exception) {
+                            _uiState.update { it.copy(isMissionsLoading = false) }
+                        }
+                    }
+                } else {
+                    _uiState.update { it.copy(missions = emptyList(), isMissionsLoading = false) }
+                }
+
                 val open: List<Campaign>
                 val paused: List<Campaign>
                 val completed: List<Campaign>
@@ -433,6 +505,7 @@ class HomeViewModel(
                         val mineDeferred = async { repository.myCampaigns(forceRefresh = forceRefresh) }
                         val joinedDeferred = async { repository.myJoinedCampaigns(forceRefresh = forceRefresh) }
                         val leaderboardDeferred = async { repository.getLeaderboard(forceRefresh = forceRefresh) }
+                        val myRankDeferred = async { repository.getMyRank(forceRefresh = forceRefresh) }
                         val todayDeferred = async { repository.getTodayCheckinCount(forceRefresh = forceRefresh) }
                         val profileDeferred = async { repository.getMyProfile(forceRefresh = forceRefresh) }
                         val pendingDeferred = async { repository.getPendingReportsCountForOwner(forceRefresh = forceRefresh) }
@@ -447,6 +520,11 @@ class HomeViewModel(
                             mine = mineDeferred.await(),
                             joined = joinedDeferred.await(),
                             leaderboard = leaderboardDeferred.await(),
+                            myRank = try {
+                                myRankDeferred.await()
+                            } catch (_: Exception) {
+                                null
+                            },
                             todayCheckins = todayDeferred.await(),
                             myProfile = profileDeferred.await(),
                             dailyTask = dailyDeferred.await().forCurrentUi(),
@@ -516,6 +594,7 @@ class HomeViewModel(
                         joinedCampaigns = personal.joined,
                         // Dashboard không còn trả leaderboard (tải lazy theo tab) — giữ bảng đang hiển thị.
                         leaderboard = personal.leaderboard.ifEmpty { it.leaderboard },
+                        myRank = personal.myRank ?: it.myRank,
                         todayCheckinCount = personal.todayCheckins,
                         userCredits = myProfile?.credits ?: it.userCredits,
                         missedStreak = personal.dailyTask?.missedStreak
@@ -543,13 +622,13 @@ class HomeViewModel(
                     val snapshot = CachedSessionData(
                         userId = repository.currentUserId(),
                         userProfile = myProfile,
-                        openCampaigns = open,
                         displayItems = displayList,
                         pausedDisplayItems = pausedList,
                         completedDisplayItems = completedList,
                         myCampaigns = personal.mine,
                         joinedCampaigns = personal.joined,
                         leaderboard = personal.leaderboard,
+                        myRank = personal.myRank ?: _uiState.value.myRank,
                         ownerStatsMap = ownerStats,
                         userCredits = myProfile?.credits ?: _uiState.value.userCredits,
                         todayCheckinCount = personal.todayCheckins,
@@ -615,8 +694,19 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLeaderboardLoading = true) }
             try {
-                val topUsers = repository.getLeaderboard(sort = "credit", forceRefresh = forceRefresh)
-                _uiState.update { it.copy(isLeaderboardLoading = false, leaderboard = topUsers) }
+                coroutineScope {
+                    val topDeferred = async { repository.getLeaderboard(sort = "credit", forceRefresh = forceRefresh) }
+                    val myRankDeferred = async { repository.getMyRank(sort = "credit", forceRefresh = forceRefresh) }
+                    val topUsers = topDeferred.await()
+                    val myRank = try {
+                        myRankDeferred.await()
+                    } catch (_: Exception) {
+                        null
+                    }
+                    _uiState.update {
+                        it.copy(isLeaderboardLoading = false, leaderboard = topUsers, myRank = myRank)
+                    }
+                }
             } catch (_: Exception) {
                 _uiState.update { it.copy(isLeaderboardLoading = false) }
             }
@@ -752,6 +842,31 @@ class HomeViewModel(
                     orderRef = "GPA-${System.currentTimeMillis()}",
                     paymentMethod = "google_play",
                 )
+                // RPC có thể trả kết quả thất bại (status != success) mà không ném
+                // exception — khi đó không được cộng dương tính số dư hay hiện
+                // overlay thành công. "already_processed" là outcome idempotent
+                // (credit đã cộng từ lần gọi trước cùng token) — vẫn tính là thành công.
+                val isGranted = res.status.equals("success", ignoreCase = true) ||
+                    res.status.equals("already_processed", ignoreCase = true)
+                if (!isGranted) {
+                    onResult(false, res.message.ifBlank { localizer.get(R.string.home_daily_reward_failed) })
+                    return@launch
+                }
+                val amount = res.creditsAwarded.takeIf { it > 0 } ?: pkg.totalCredits
+                val newBalance = res.currentBalance.takeIf { it > 0 }
+                    ?: (_uiState.value.userCredits + amount)
+                // Paint the new balance + receipt immediately; refresh() runs in
+                // the background and keeps the reward card intact.
+                _uiState.update {
+                    it.copy(
+                        userCredits = newBalance,
+                        reward = CreditReward(
+                            type = CreditRewardType.TOPUP,
+                            amount = amount,
+                            newBalance = newBalance,
+                        ),
+                    )
+                }
                 refresh()
                 val msg = if (res.message.isNotBlank()) res.message else localizer.get(R.string.home_topup_success_format, pkg.totalCredits)
                 onResult(true, msg)
@@ -778,10 +893,23 @@ class HomeViewModel(
                             claimingMilestone = null,
                             questSummary = updatedSummary,
                             userProfile = updatedProfile,
-                            userCredits = res.newBalance,
+                            // RPC cũ có thể không trả new_balance (decode = 0):
+                            // fallback về profile mới thay vì hiển thị số dư 0.
+                            userCredits = res.newBalance.takeIf { it > 0 }
+                                ?: updatedProfile?.credits
+                                ?: state.userCredits,
                             creditLogs = updatedLogs,
                             notifications = updatedNotifs,
                             unreadNotificationsCount = updatedNotifs.count { !it.isRead },
+                            reward = if (res.reward > 0) {
+                                CreditReward(
+                                    type = CreditRewardType.QUEST_CLAIMED,
+                                    amount = res.reward,
+                                    newBalance = res.newBalance.takeIf { it > 0 },
+                                )
+                            } else {
+                                state.reward
+                            },
                         )
                     }
                     onResult(true, res.message.ifBlank { localizer.get(R.string.home_daily_reward_success_format, res.reward) })
@@ -792,6 +920,62 @@ class HomeViewModel(
             } catch (e: Exception) {
                 _uiState.update { it.copy(claimingMilestone = null) }
                 onResult(false, friendlyError(e, localizer))
+            }
+        }
+    }
+
+    /** Hide the current reward card (auto-dismiss or navigation). */
+    fun clearReward() {
+        _uiState.update { it.copy(reward = null) }
+    }
+
+    /**
+     * Người dùng nhận nhiệm vụ trong tab "Nhiệm vụ App". Thành công: cập nhật
+     * trạng thái mission local (joined, count, status) để UI phản ánh ngay.
+     */
+    fun joinMission(missionId: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(joiningMissionId = missionId) }
+            try {
+                val result = repository.joinMission(missionId)
+                if (result.success) {
+                    _uiState.update { state ->
+                        state.copy(
+                            joiningMissionId = null,
+                            missions = state.missions.map { m ->
+                                if (m.id == missionId) {
+                                    m.copy(
+                                        hasJoined = true,
+                                        participantCount = m.participantCount + 1,
+                                        status = result.status,
+                                    )
+                                } else {
+                                    m
+                                }
+                            },
+                        )
+                    }
+                    onResult(true, "")
+                } else {
+                    _uiState.update { it.copy(joiningMissionId = null) }
+                    onResult(false, localizer.get(R.string.repo_connection_failed))
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(joiningMissionId = null) }
+                val msg = when {
+                    e.message?.contains("MISSION_FULL") == true ->
+                        localizer.get(R.string.mission_status_full)
+                    e.message?.contains("MISSION_EXPIRED") == true ->
+                        localizer.get(R.string.mission_status_expired)
+                    e.message?.contains("ALREADY_JOINED") == true ->
+                        localizer.get(R.string.mission_joined_cta)
+                    e.message?.contains("MISSION_NOT_OPEN") == true ->
+                        localizer.get(R.string.mission_status_stopped)
+                    e.message?.contains("CANNOT_JOIN_OWN_MISSION") == true ->
+                        localizer.get(R.string.mission_mine_badge)
+                    else -> friendlyError(e, localizer)
+                }
+                onResult(false, msg)
             }
         }
     }

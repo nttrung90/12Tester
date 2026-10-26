@@ -16,6 +16,7 @@ import com.ntt.crosstest.ui.screens.AuthScreen
 import com.ntt.crosstest.ui.screens.CampaignDetailScreen
 import com.ntt.crosstest.ui.screens.CreateCampaignScreen
 import com.ntt.crosstest.ui.screens.HomeScreen
+import com.ntt.crosstest.ui.screens.MissionCreateScreen
 import com.ntt.crosstest.ui.screens.OwnerAppDetailScreen
 import com.ntt.crosstest.ui.screens.PostAppGuideScreen
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ object Routes {
     const val CAMPAIGN_DETAIL = "campaign/{campaignId}"
     const val OWNER_APP_DETAIL = "owner_app/{campaignId}?openReports={openReports}"
     const val CREATE = "create"
+    const val MISSION_CREATE = "mission_create"
     const val POST_APP_GUIDE = "post_app_guide"
     const val ADMIN_USERS = "admin_users"
     const val ADMIN_REPORTS = "admin_reports"
@@ -65,6 +67,7 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
                     navController.navigate(Routes.ownerAppDetail(id, openReports = true))
                 },
                 onCreateClick = { navController.navigate(Routes.CREATE) },
+                onCreateMissionClick = { navController.navigate(Routes.MISSION_CREATE) },
                 onAdminPanelClick = { navController.navigate(Routes.ADMIN_USERS) },
                 onAdminReportsClick = { navController.navigate(Routes.ADMIN_REPORTS) },
                 onAccountLocked = {
@@ -132,6 +135,12 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
                 onBack = { navController.popBackStack() },
                 onCreated = { navController.popBackStack() },
                 onNavigateToGuide = { navController.navigate(Routes.POST_APP_GUIDE) },
+            )
+        }
+        composable(Routes.MISSION_CREATE) {
+            MissionCreateScreen(
+                onBack = { navController.popBackStack() },
+                onCreated = { navController.popBackStack() },
             )
         }
         composable(Routes.POST_APP_GUIDE) {

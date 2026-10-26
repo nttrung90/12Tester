@@ -20,6 +20,7 @@ import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.CoinSoundPlayer
 import com.ntt.crosstest.util.PreparedScreenshotCache
 import com.ntt.crosstest.work.ReminderWorker
 import com.ntt.crosstest.work.UpdateCheckWorker
@@ -65,6 +66,10 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         super.onCreate()
 
         InstalledAppCache.init(this)
+        CoinSoundPlayer.preload(this)
+        // Làm nóng snapshot session trên IO để loadSync trong constructor
+        // ViewModel (main thread) gần như chỉ đọc bản trong RAM.
+        SessionCacheManager.preload(this)
 
         // Secrets come from local.properties (see README). Without them the app
         // shows a setup screen instead of crashing (checked in MainActivity).

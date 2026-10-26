@@ -11,20 +11,27 @@ import com.ntt.crosstest.data.CampaignMember
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.Feedback
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.NextCampaignCandidate
+import com.ntt.crosstest.data.PendingReportStore
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.data.ReportSubmitManager
+import com.ntt.crosstest.util.InstalledAppCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import java.time.LocalDate
+import kotlinx.coroutines.withContext
 
 import com.ntt.crosstest.data.TesterReport
 import com.ntt.crosstest.data.UserWarning
+import com.ntt.crosstest.ui.components.CreditReward
+import com.ntt.crosstest.ui.components.CreditRewardType
 import com.ntt.crosstest.util.FirebaseStorageHelper
 import com.ntt.crosstest.util.PreparedScreenshot
+import com.ntt.crosstest.util.VnTime
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -85,6 +92,8 @@ data class CampaignDetailUiState(
     val submitStage: ReportSubmitManager.Stage? = null,
     val submitAttempt: Int = 0,
     val submitError: String? = null,
+    /** Remote approval banner (pending → approved for the same report in this session). */
+    val reward: CreditReward? = null,
 )
 
 class CampaignDetailViewModel(
@@ -93,13 +102,64 @@ class CampaignDetailViewModel(
     private val reportSubmitManager: ReportSubmitManager,
     private val myUserId: String?,
     private val localizer: Localizer,
+    private val appContext: Context? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CampaignDetailUiState())
     val uiState: StateFlow<CampaignDetailUiState> = _uiState.asStateFlow()
 
+    /**
+     * Chốt trạng thái "chưa từng test" ngay khi mở màn, trước khi bài nộp đầu tiên
+     * hoàn tất. Nhờ vậy dialog gợi ý sau bài test đầu vẫn nhận đúng ưu tiên
+     * lượt cài thấp cho tài khoản mới, không bị race với RPC nộp báo cáo.
+     * Báo cáo đang chờ upload cục bộ cũng tính là "đã từng test".
+     */
+    private val firstTimeTester = viewModelScope.async {
+        val hasPendingUpload = appContext?.let { ctx ->
+            try {
+                withContext(Dispatchers.IO) {
+                    PendingReportStore.pendingCampaignIds(ctx).isNotEmpty()
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                false
+            }
+        } ?: false
+        if (hasPendingUpload) return@async false
+        try {
+            !repository.hasTestedBefore()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            true
+        }
+    }
+
+    /**
+     * Đã nộp xong ít nhất một báo cáo trong ViewModel này.
+     * Chỉ lần gợi ý của bài nộp ĐẦU TIÊN mới được hưởng ưu tiên lượt cài thấp;
+     * các lần nộp cập nhật sau đó (dù vẫn ở cùng màn) dùng quy tắc thường.
+     */
+    private var testedInThisViewModel = false
+
+    /**
+     * [myUserId] được chốt một lần lúc tạo ViewModel; nếu lúc đó phiên còn đang
+     * khôi phục (Initializing) thì nó là null mãi. Đọc lại uid hiện tại từ
+     * repository để không kẹt trạng thái "chưa đăng nhập" sau khi session sẵn sàng.
+     */
+    private fun effectiveUserId(): String? = myUserId ?: repository.currentUserId()
+
     /** Chỉ giữ 1 tác vụ nén ảnh tại một thời điểm (user đổi ảnh liên tục). */
     private var prepareScreenshotJob: Job? = null
+
+    /**
+     * Trạng thái báo cáo của tester đã thấy trong phiên này, theo report id.
+     * Dùng để chỉ hiện banner "+2" khi đúng báo cáo đó chuyển pending → approved,
+     * không hiện lại cho báo cáo đã duyệt từ trước.
+     */
+    private val observedReportStatuses = mutableMapOf<String, String>()
+    private var reportBaselineCaptured = false
 
     /** Thông báo thành công tương ứng trạng thái nộp (extra/update/mới) — hiển thị khi ở lại màn. */
     private var pendingSuccessMessage: String? = null
@@ -145,6 +205,7 @@ class CampaignDetailViewModel(
                     (previousStage == ReportSubmitManager.Stage.SENDING ||
                         previousStage == ReportSubmitManager.Stage.RETRYING)
                 ) {
+                    testedInThisViewModel = true
                     // Thông báo theo kết quả THẬT từ server: 10 Credit cho báo cáo mới,
                     // 2 Credit cho báo cáo cũ, hoặc 0 nếu đã có checkin xác nhận hôm nay.
                     val submitResult = submitState.result
@@ -156,6 +217,11 @@ class CampaignDetailViewModel(
                             localizer.get(R.string.campaign_report_submit_success_format, submitResult.provisionalAmount)
                         else -> localizer.get(R.string.campaign_report_update_success)
                     }
+                    // The global overlay already communicates the provisional
+                    // Credits; don't repeat the same copy in a snackbar.
+                    val hasCreditOverlay = submitResult != null &&
+                        submitResult.provisionalGranted &&
+                        submitResult.provisionalAmount > 0
                     _uiState.value.preparedScreenshot?.file?.delete()
                     _uiState.update { state ->
                         state.copy(
@@ -166,7 +232,13 @@ class CampaignDetailViewModel(
                             preparedScreenshot = null,
                             isPreparingScreenshot = false,
                             // Dialog đang mở thì đã có dòng trạng thái "đã gửi" — khỏi snackbar trùng.
-                            message = if (state.showNextAppPrompt) state.message else successMessage,
+                            message = if (state.showNextAppPrompt) {
+                                state.message
+                            } else if (hasCreditOverlay) {
+                                null
+                            } else {
+                                successMessage
+                            },
                         )
                     }
                     refresh()
@@ -180,7 +252,7 @@ class CampaignDetailViewModel(
             }
             val cached = repository.getCampaign(campaignId, forceRefresh = false)
             if (cached != null) {
-                val isOwner = myUserId != null && cached.ownerId == myUserId
+                val isOwner = effectiveUserId() != null && cached.ownerId == effectiveUserId()
                 _uiState.update {
                     it.copy(
                         campaign = cached,
@@ -230,24 +302,25 @@ class CampaignDetailViewModel(
                     _uiState.update { it.copy(isLoading = false, isBackgroundSyncing = false, error = localizer.get(R.string.campaign_detail_not_found)) }
                     return@launch
                 }
-                val isMember = if (myUserId != null) repository.isMember(campaignId, myUserId) else false
+                val uid = effectiveUserId()
+                val isMember = if (uid != null) repository.isMember(campaignId, uid) else false
                 // Chỉ coi là "đã check-in" khi check-in đã chính thức (được duyệt), KHÔNG tính
                 // dòng check-in tạm tính tạo lúc nộp báo cáo còn chờ chủ app duyệt.
-                val checkedIn = if (isMember && myUserId != null) repository.hasConfirmedCheckinToday(campaignId, myUserId) else false
-                val isOwner = myUserId != null && campaign.ownerId == myUserId
-                val myProfile = if (myUserId != null) repository.getMyProfile(forceRefresh = forceRefresh) else null
+                val checkedIn = if (isMember && uid != null) repository.hasConfirmedCheckinToday(campaignId, uid) else false
+                val isOwner = uid != null && campaign.ownerId == uid
+                val myProfile = if (uid != null) repository.getMyProfile(forceRefresh = forceRefresh) else null
                 val canManage = isOwner || myProfile?.canModerate == true
 
                 val members = repository.getMembers(campaignId)
                 val checkins = repository.getCheckins(campaignId)
-                val today = LocalDate.now().toString()
+                val today = VnTime.today().toString()
                 val reports = repository.getCampaignReports(campaignId, canManage = canManage, forceRefresh = forceRefresh)
                 val todayTested = (
                     checkins.filter { it.checkinDate == today }.map { it.userId } +
                     reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
                 ).distinct().size
-                val myDates = if (myUserId != null) {
-                    checkins.filter { it.userId == myUserId }.mapNotNull { it.checkinDate }.distinct()
+                val myDates = if (uid != null) {
+                    checkins.filter { it.userId == uid }.mapNotNull { it.checkinDate }.distinct()
                 } else emptyList()
 
                 val daysByUser = checkins.groupBy { it.userId }
@@ -275,11 +348,12 @@ class CampaignDetailViewModel(
                 val avgRating = if (feedbacks.isNotEmpty()) feedbacks.map { it.rating }.average().toFloat() else 0f
                 val reportsCount = reports.size.coerceAtLeast(feedbacks.size)
                 // Ưu tiên suy ra từ danh sách reports đã tải; chỉ gọi thêm khi RLS không trả về báo cáo của mình.
-                val myReports = if (myUserId != null) reports.filter { it.userId == myUserId } else emptyList()
+                val myReports = if (uid != null) reports.filter { it.userId == uid } else emptyList()
+                val remoteReward = detectRemoteApprovalReward(myReports)
                 val myLatestReport = myReports.firstOrNull() ?: repository.getMyLatestReport(campaignId)
                 val myTodayReport = myReports.firstOrNull { it.isCreatedToday() } ?: repository.getMyTodayReport(campaignId)
-                val unreadWarnings = if (myUserId != null) repository.getUnreadWarnings() else emptyList()
-                val weeklyCount = if (myUserId != null) repository.getWeeklyWarningsCount() else 0
+                val unreadWarnings = if (uid != null) repository.getUnreadWarnings() else emptyList()
+                val weeklyCount = if (uid != null) repository.getWeeklyWarningsCount() else 0
 
                 if (myTodayReport?.isApproved == true) {
                     _uiState.value.preparedScreenshot?.file?.delete()
@@ -307,6 +381,7 @@ class CampaignDetailViewModel(
                         weeklyWarningsCount = weeklyCount,
                         isUserLocked = myProfile?.isLocked == true,
                         isAdmin = myProfile?.isAdmin == true,
+                        reward = remoteReward ?: it.reward,
                         error = null,
                     ).withReportPrefill(myTodayReport)
                 }
@@ -336,7 +411,10 @@ class CampaignDetailViewModel(
         val feedbackItems = detail.feedbacks.map { feedback ->
             FeedbackItem(feedback, detail.profiles[feedback.userId])
         }
-        val myReports = if (myUserId != null) detail.reports.filter { it.userId == myUserId } else emptyList()
+        val myReports = if (effectiveUserId() != null) {
+            detail.reports.filter { it.userId == effectiveUserId() }
+        } else emptyList()
+        val remoteReward = detectRemoteApprovalReward(myReports)
         val myTodayReport = myReports.firstOrNull { it.isCreatedToday() }
         if (myTodayReport?.isApproved == true) {
             _uiState.value.preparedScreenshot?.file?.delete()
@@ -364,6 +442,7 @@ class CampaignDetailViewModel(
                 weeklyWarningsCount = detail.weeklyWarningsCount,
                 isUserLocked = detail.myProfile?.isLocked == true,
                 isAdmin = detail.myProfile?.isAdmin == true,
+                reward = remoteReward ?: it.reward,
                 error = null,
             ).withReportPrefill(myTodayReport)
         }
@@ -467,7 +546,8 @@ class CampaignDetailViewModel(
     }
 
     fun ensureJoined() {
-        if (myUserId == null || _uiState.value.isMember || _uiState.value.isOwner) return
+        val uid = effectiveUserId() ?: return
+        if (_uiState.value.isMember || _uiState.value.isOwner) return
         viewModelScope.launch {
             try {
                 repository.joinCampaign(campaignId)
@@ -579,14 +659,49 @@ class CampaignDetailViewModel(
         }
     }
 
-    /** Tìm trước app kế tiếp khi người dùng mở form nộp để hộp thoại gợi ý hiện tức thì. */
+    /**
+     * Tìm trước app kế tiếp khi người dùng mở form nộp để hộp thoại gợi ý hiện tức thì.
+     *
+     * Thứ tự ưu tiên:
+     * 1. App đã cài trên máy (chọn ngẫu nhiên).
+     * 2. Khi hết app đã cài chưa test hôm nay mới xét app chưa cài.
+     * Với tài khoản chưa từng test: trong nhóm đang được ưu tiên, chọn các app
+     * có lượt cài thấp nhất; bằng nhau thì random.
+     */
     fun prefetchNextCampaign() {
         val state = _uiState.value
         if (state.nextSuggestionLoading || state.nextCampaignToTest != null) return
+        // Chụp tại thời điểm gọi: prefetch lúc mở form (trước khi nộp) phải giữ
+        // đúng ưu tiên "bài đầu tiên" dù callback DONE có về trước khi coroutine chạy xong.
+        val alreadyTestedHere = testedInThisViewModel
         viewModelScope.launch {
             _uiState.update { it.copy(nextSuggestionLoading = true) }
             val next = try {
-                repository.getNextUntestedCampaign(campaignId)
+                val isFirstTest = firstTimeTester.await() && !alreadyTestedHere
+                val ctx = appContext
+                // Báo cáo đang chờ upload chưa được server ghi nhận là "đã test hôm nay",
+                // nên loại cục bộ để không gợi ý lại app vừa nộp.
+                val pendingCampaignIds = if (ctx == null) {
+                    emptySet()
+                } else withContext(Dispatchers.IO) {
+                    PendingReportStore.pendingCampaignIds(ctx)
+                }
+                val candidates = repository.getNextCampaignCandidates(campaignId)
+                    .filterNot { it.campaign.id in pendingCampaignIds }
+                val installedPackages = if (candidates.isEmpty() || ctx == null) {
+                    emptySet()
+                } else withContext(Dispatchers.IO) {
+                    // Làm mới danh sách package để tránh cache âm 15 giây khi
+                    // người dùng vừa cài app từ Play Store rồi quay lại nộp bài.
+                    InstalledAppCache.refreshPackages(ctx)
+                    candidates.mapNotNull { candidate ->
+                        val pkg = candidate.campaign.packageName
+                        pkg.takeIf { it.isNotBlank() && InstalledAppCache.isInstalled(ctx, it) }
+                    }.toSet()
+                }
+                chooseNextCampaign(candidates, installedPackages, isFirstTest)
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 null
             }
@@ -595,11 +710,40 @@ class CampaignDetailViewModel(
     }
 
     /**
+     * Chọn app kế tiếp từ danh sách đủ điều kiện.
+     * Tách riêng để logic ưu tiên dễ đọc: app đã cài luôn thắng; tiêu chí
+     * lượt cài thấp chỉ dùng để lọc trong nhóm đang được ưu tiên.
+     */
+    private fun chooseNextCampaign(
+        candidates: List<NextCampaignCandidate>,
+        installedPackages: Set<String>,
+        isFirstTest: Boolean,
+    ): Campaign? {
+        if (candidates.isEmpty()) return null
+
+        val installedCandidates = candidates.filter { candidate ->
+            val pkg = candidate.campaign.packageName
+            pkg.isNotBlank() && pkg in installedPackages
+        }
+        val pool = installedCandidates.ifEmpty { candidates }
+
+        val shortlist = if (isFirstTest) {
+            val minInstalledCount = pool.minOf { it.installedCount }
+            pool.filter { it.installedCount == minInstalledCount }
+        } else {
+            pool
+        }
+
+        return shortlist.randomOrNull()?.campaign
+    }
+
+    /**
      * Nộp báo cáo: hộp thoại gợi ý app kế tiếp hiện NGAY, còn upload ảnh + RPC
      * chạy nền ở [ReportSubmitManager] (không bị hủy khi chuyển màn).
      */
     fun startSubmit() {
-        if (myUserId == null) {
+        val uid = effectiveUserId()
+        if (uid == null) {
             _uiState.update { it.copy(error = localizer.get(R.string.campaign_login_required)) }
             return
         }
@@ -631,7 +775,10 @@ class CampaignDetailViewModel(
             alreadyRewarded -> localizer.get(R.string.campaign_report_extra_success)
             pendingToday -> localizer.get(R.string.campaign_report_update_success)
             rejectedToday -> localizer.get(R.string.campaign_report_resubmit_success)
-            else -> localizer.get(R.string.campaign_report_submit_success_format, 10)
+            else -> localizer.get(
+                R.string.campaign_report_submit_success_format,
+                ReportSubmitManager.PROVISIONAL_CREDITS,
+            )
         }
 
         _uiState.update {
@@ -645,7 +792,7 @@ class CampaignDetailViewModel(
             ReportSubmitManager.SubmitRequest(
                 campaignId = campaignId,
                 appName = state.campaign?.appName.orEmpty(),
-                userId = myUserId,
+                userId = uid,
                 rating = state.myRating,
                 comment = state.myComment,
                 preparedScreenshot = if (alreadyRewarded) null else state.preparedScreenshot,
@@ -673,10 +820,6 @@ class CampaignDetailViewModel(
         }
     }
 
-    fun closeCampaign() = runAction(localizer.get(R.string.campaign_close_success)) {
-        repository.closeCampaign(campaignId)
-    }
-
     fun clearMessage() {
         _uiState.update { it.copy(message = null, error = null) }
     }
@@ -685,8 +828,44 @@ class CampaignDetailViewModel(
         _uiState.update { it.copy(showNextAppPrompt = false, nextCampaignToTest = null) }
     }
 
+    fun clearReward() {
+        _uiState.update { it.copy(reward = null) }
+    }
+
+    /**
+     * So sánh trạng thái báo cáo giữa các lần refresh để phát hiện báo cáo
+     * vừa được duyệt từ xa (cùng report id: pending → approved).
+     *
+     * Phần thưởng thực tế là chênh lệch giữa tổng Credit của báo cáo đã duyệt
+     * và Credit tạm nhận. Auto-approve sau 8h không cộng thêm nên chênh lệch
+     * bằng 0 và sẽ không hiện banner.
+     */
+    private fun detectRemoteApprovalReward(reports: List<TesterReport>): CreditReward? {
+        if (!reportBaselineCaptured) {
+            reports.forEach { report -> report.id?.let { observedReportStatuses[it] = report.status } }
+            reportBaselineCaptured = true
+            return null
+        }
+        var bonus = 0
+        reports.forEach { report ->
+            val id = report.id ?: return@forEach
+            val previous = observedReportStatuses[id]
+            if (previous == "pending" && report.status == "approved") {
+                val delta = (report.approvedReward - report.provisionalGrantedCredits).coerceAtLeast(0)
+                bonus += delta
+            }
+            observedReportStatuses[id] = report.status
+        }
+        if (bonus <= 0) return null
+        return CreditReward(
+            type = CreditRewardType.REPORT_APPROVED_REMOTE,
+            amount = bonus,
+            appName = _uiState.value.campaign?.appName.orEmpty(),
+        )
+    }
+
     private fun runAction(successMessage: String, block: suspend () -> Unit) {
-        if (myUserId == null) {
+        if (effectiveUserId() == null) {
             _uiState.update { it.copy(error = localizer.get(R.string.campaign_login_required)) }
             return
         }

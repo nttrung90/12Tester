@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -57,7 +59,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.Mission
 import com.ntt.crosstest.data.QuestSummary
+import com.ntt.crosstest.ui.components.AppIcon
 import com.ntt.crosstest.ui.components.QuestHeroBanner
 import com.ntt.crosstest.ui.theme.QuestGoldBgDark
 import com.ntt.crosstest.ui.theme.QuestGoldBgLight
@@ -75,6 +79,11 @@ fun QuestsScreen(
     questSummary: QuestSummary?,
     userCredits: Int,
     claimingMilestone: String?,
+    missions: List<Mission> = emptyList(),
+    isMissionsLoading: Boolean = false,
+    joiningMissionId: String? = null,
+    onJoinMission: (String) -> Unit = {},
+    onMissionAppClick: (String) -> Unit = {},
     isAuthenticated: Boolean,
     isLoading: Boolean,
     onRefresh: () -> Unit,
@@ -83,7 +92,7 @@ fun QuestsScreen(
     onNavigateToDiscover: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedTab by rememberSaveable { mutableIntStateOf(0) } // 0: Daily, 1: Weekly
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) } // 0: Daily, 1: Weekly, 2: App missions
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -204,6 +213,18 @@ fun QuestsScreen(
                             }
                         }
                     )
+                    Tab(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        text = {
+                            Text(
+                                text = stringResource(R.string.quest_tab_missions),
+                                fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    )
                 }
             }
 
@@ -318,7 +339,7 @@ fun QuestsScreen(
                         }
                     }
                 }
-            } else {
+            } else if (selectedTab == 1) {
                 // ================= WEEKLY QUESTS =================
                 val weeklyCount = summary.weeklyCount
 
@@ -425,6 +446,61 @@ fun QuestsScreen(
                                 )
                             }
                         }
+                    }
+                }
+            } else {
+                // ================= APP MISSIONS (migration 039) =================
+                if (isMissionsLoading && missions.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                        }
+                    }
+                } else if (missions.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                            ),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.mission_list_empty),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(R.string.mission_list_empty_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(missions, key = { mission -> "mission_${mission.id}" }) { mission ->
+                        MissionCard(
+                            mission = mission,
+                            isJoining = joiningMissionId == mission.id,
+                            isAuthenticated = isAuthenticated,
+                            onJoin = { onJoinMission(mission.id) },
+                            onOpenApp = { onMissionAppClick(mission.campaignId) },
+                            onRequireLogin = onRequireLogin,
+                        )
                     }
                 }
             }
@@ -639,5 +715,254 @@ private fun QuestItemCard(
                 }
             }
         }
+    }
+}
+
+/**
+ * Thẻ nhiệm vụ do người dùng tạo (sub-tab "Nhiệm vụ App"): hiển thị tên, mô tả,
+ * Credit người tham gia được nhận, app liên kết, số chỗ còn lại. Người tham gia
+ * bấm "Nhận nhiệm vụ" rồi nộp báo cáo test app; Credit được chuyển khi báo cáo
+ * được duyệt.
+ */
+@Composable
+private fun MissionCard(
+    mission: Mission,
+    isJoining: Boolean,
+    isAuthenticated: Boolean,
+    onJoin: () -> Unit,
+    onOpenApp: () -> Unit,
+    onRequireLogin: () -> Unit,
+) {
+    val ended = mission.isStopped || mission.isExpired
+    // Nhiệm vụ đang dừng (paused_by_creator): hiển thị mờ kèm nhãn, không cho nhận/đi test.
+    val dimmed = ended || mission.isPaused
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (dimmed) 0.65f else 1f),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (dimmed) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (dimmed) 0.dp else 1.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // Tiêu đề + Credit thưởng
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = mission.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.mission_reward_badge_format, mission.rewardCredits),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            // Mô tả nhiệm vụ
+            if (mission.description.isNotBlank()) {
+                Text(
+                    text = mission.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp,
+                )
+            }
+
+            // App liên kết + người mở nhiệm vụ
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppIcon(
+                    iconUrl = mission.iconUrl.orEmpty(),
+                    packageName = mission.packageName,
+                    appName = mission.appName,
+                    size = 34.dp,
+                    shapeRadius = 8.dp,
+                )
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text(
+                        text = mission.appName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (mission.creatorName.isNotBlank()) {
+                        Text(
+                            text = stringResource(R.string.mission_by_format, mission.creatorName),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+
+            // Chỗ còn lại + số ngày nhận nhiệm vụ
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        R.string.mission_slots_format,
+                        mission.slotsRemaining,
+                        mission.maxParticipants,
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "•",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                mission.daysRemaining?.let { days ->
+                    Text(
+                        text = stringResource(R.string.mission_days_remaining_format, days),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Hành động / trạng thái
+            when {
+                mission.hasCompleted -> {
+                    StatusBadge(
+                        text = stringResource(R.string.mission_completed_badge),
+                        container = Color(0xFF2E7D32).copy(alpha = 0.12f),
+                        content = Color(0xFF2E7D32),
+                    )
+                }
+                mission.isMine -> {
+                    StatusBadge(
+                        text = stringResource(R.string.mission_mine_badge),
+                        container = MaterialTheme.colorScheme.secondaryContainer,
+                        content = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+                mission.isPaused -> {
+                    Text(
+                        text = stringResource(R.string.mission_status_paused),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                ended -> {
+                    val label = when {
+                        mission.isStopped -> stringResource(R.string.mission_status_stopped)
+                        else -> stringResource(R.string.mission_status_expired)
+                    }
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                mission.isFull -> {
+                    Text(
+                        text = stringResource(R.string.mission_status_full),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                mission.hasJoined -> {
+                    Button(
+                        onClick = onOpenApp,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2C4A73),
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.mission_joined_cta),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                else -> {
+                    Button(
+                        onClick = { if (isAuthenticated) onJoin() else onRequireLogin() },
+                        enabled = !isJoining,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2E7D32),
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                    ) {
+                        if (isJoining) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.mission_join_btn),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusBadge(text: String, container: Color, content: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(container)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = content,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }

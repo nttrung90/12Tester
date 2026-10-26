@@ -5,11 +5,27 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Count
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.rpc
 import com.ntt.crosstest.R
+import com.ntt.crosstest.util.VnTime
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.time.LocalDate
+
+/**
+ * Một app đủ điều kiện để gợi ý làm bài test kế tiếp.
+ * [installedCount] là số người đã cài app (campaign_members) — dùng để ưu tiên
+ * app có lượt cài thấp cho tài khoản mới.
+ */
+data class NextCampaignCandidate(
+    val campaign: Campaign,
+    val installedCount: Int = 0,
+)
 
 /**
  * All database access for campaigns, members, check-ins and feedback.
@@ -39,74 +55,131 @@ class CampaignRepository(
         )
     }
 
+    // Cache RAM có TTL. Các biến vô hướng đều @Volatile vì repository được gọi
+    // từ cả main thread (ViewModel) lẫn thread nền (WorkManager nộp báo cáo).
+    // Hợp đồng ghi: luôn ghi GIÁ TRỊ trước, TIMESTAMP sau — nhờ happens-before
+    // của volatile, reader thấy timestamp mới thì chắc chắn thấy cả giá trị mới.
+    @Volatile
     private var cachedOpenCampaigns: List<Campaign>? = null
+    @Volatile
     private var openCampaignsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedPausedCampaigns: List<Campaign>? = null
+    @Volatile
     private var pausedCampaignsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedCompletedCampaigns: List<Campaign>? = null
+    @Volatile
     private var completedCampaignsTimestamp: Long = 0L
 
-    private var cachedStatsMap: Map<String, CampaignStats>? = null
-    private var statsMapTimestamp: Long = 0L
+    /** Stats theo từng campaign id, mỗi entry mang timestamp riêng (TTL độc lập). */
+    private val statsCache = java.util.concurrent.ConcurrentHashMap<String, Pair<CampaignStats, Long>>()
 
     private val profileCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Profile, Long>>()
 
+    @Volatile
     private var cachedMyCampaigns: List<Campaign>? = null
+    @Volatile
     private var myCampaignsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedMyJoinedCampaigns: List<Campaign>? = null
+    @Volatile
     private var myJoinedCampaignsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedLeaderboard: List<LeaderboardUser>? = null
+    @Volatile
     private var leaderboardTimestamp: Long = 0L
+    @Volatile
     private var cachedTestLeaderboard: List<LeaderboardUser>? = null
+    @Volatile
     private var testLeaderboardTimestamp: Long = 0L
 
+    /** Hạng của tôi theo từng loại bảng ("credit"/"test") — cache riêng từng sort. */
+    private val myRankCache = java.util.concurrent.ConcurrentHashMap<String, Pair<MyRank, Long>>()
+
+    @Volatile
     private var cachedMyProfile: Profile? = null
+    @Volatile
     private var myProfileTimestamp: Long = 0L
 
+    @Volatile
     private var cachedTodayCheckins: Int? = null
+    @Volatile
     private var todayCheckinsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedPendingReports: Int? = null
+    @Volatile
     private var pendingReportsTimestamp: Long = 0L
 
+    @Volatile
     private var cachedQuestSummary: QuestSummary? = null
+    @Volatile
     private var questSummaryTimestamp: Long = 0L
 
     private val ownerStatsCache = java.util.concurrent.ConcurrentHashMap<String, Pair<CampaignOwnerStats, Long>>()
     private val campaignCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Campaign, Long>>()
+    @Volatile
     private var cachedSlotsInfo: List<SlotInfo>? = null
+    @Volatile
     private var slotsInfoTimestamp: Long = 0L
     private val reportsCache = java.util.concurrent.ConcurrentHashMap<String, Pair<List<TesterReport>, Long>>()
     private val testersCache = java.util.concurrent.ConcurrentHashMap<String, Pair<List<TesterItem>, Long>>()
+    @Volatile
     private var cachedAllProfiles: List<Profile>? = null
+    @Volatile
     private var allProfilesTimestamp: Long = 0L
 
     private val membersCache = java.util.concurrent.ConcurrentHashMap<String, Pair<List<CampaignMember>, Long>>()
     private val checkinsCache = java.util.concurrent.ConcurrentHashMap<String, Pair<List<Checkin>, Long>>()
     private val feedbacksCache = java.util.concurrent.ConcurrentHashMap<String, Pair<List<Feedback>, Long>>()
     private val detailCache = java.util.concurrent.ConcurrentHashMap<String, Pair<CampaignDetailResult, Long>>()
+    @Volatile
     private var cachedUnreadWarnings: List<UserWarning>? = null
+    @Volatile
     private var unreadWarningsTimestamp: Long = 0L
+    @Volatile
     private var cachedWeeklyWarnings: Int? = null
+    @Volatile
     private var weeklyWarningsTimestamp: Long = 0L
+    @Volatile
     private var cachedCreditLogs: List<CreditLog>? = null
+    @Volatile
     private var creditLogsTimestamp: Long = 0L
+    @Volatile
     private var cachedTopupPackages: List<TopupPackage>? = null
+    @Volatile
     private var topupPackagesTimestamp: Long = 0L
+    @Volatile
     private var cachedNotifications: List<UserNotification>? = null
+    @Volatile
     private var notificationsTimestamp: Long = 0L
+    @Volatile
     private var cachedHomeFeed: HomeFeedResult? = null
+    @Volatile
     private var homeFeedTimestamp: Long = 0L
+    @Volatile
     private var cachedDashboard: MyDashboardResult? = null
+    @Volatile
     private var dashboardCacheUid: String? = null
+    @Volatile
+    private var dashboardHasLeaderboard = false
+    @Volatile
     private var dashboardTimestamp: Long = 0L
+    @Volatile
     private var lastAutoAcceptRunMs: Long = 0L
+    @Volatile
     private var cachedUserSlots: List<UserSlot>? = null
+    @Volatile
     private var userSlotsTimestamp: Long = 0L
+    @Volatile
+    private var cachedOpenMissions: List<Mission>? = null
+    @Volatile
+    private var openMissionsTimestamp: Long = 0L
 
     /**
      * Single-flight: nhiều caller cùng khoá gọi song song chỉ chạy 1 truy vấn.
@@ -147,8 +220,7 @@ class CampaignRepository(
         pausedCampaignsTimestamp = 0L
         cachedCompletedCampaigns = null
         completedCampaignsTimestamp = 0L
-        cachedStatsMap = null
-        statsMapTimestamp = 0L
+        statsCache.clear()
         profileCache.clear()
         cachedMyCampaigns = null
         myCampaignsTimestamp = 0L
@@ -158,6 +230,7 @@ class CampaignRepository(
         leaderboardTimestamp = 0L
         cachedTestLeaderboard = null
         testLeaderboardTimestamp = 0L
+        myRankCache.clear()
         cachedMyProfile = null
         myProfileTimestamp = 0L
         cachedTodayCheckins = null
@@ -172,6 +245,8 @@ class CampaignRepository(
         slotsInfoTimestamp = 0L
         cachedUserSlots = null
         userSlotsTimestamp = 0L
+        cachedOpenMissions = null
+        openMissionsTimestamp = 0L
         reportsCache.clear()
         testersCache.clear()
         cachedAllProfiles = null
@@ -258,7 +333,7 @@ class CampaignRepository(
         cachedPausedCampaigns = null
         cachedCompletedCampaigns = null
         cachedMyCampaigns = null
-        cachedStatsMap = null
+        statsCache.clear()
         cachedSlotsInfo = null
         cachedHomeFeed = null
     }
@@ -320,9 +395,20 @@ class CampaignRepository(
     suspend fun getCampaign(id: String, forceRefresh: Boolean = false): Campaign? {
         val now = System.currentTimeMillis()
         if (!forceRefresh) {
-            cachedOpenCampaigns?.find { it.id == id }?.let { return it }
-            cachedMyCampaigns?.find { it.id == id }?.let { return it }
-            cachedMyJoinedCampaigns?.find { it.id == id }?.let { return it }
+            // Fast-path từ danh sách chỉ tin khi danh sách còn trong TTL;
+            // cũ hơn TTL thì rơi xuống campaignCache / truy vấn mới.
+            val openList = cachedOpenCampaigns
+            if (openList != null && now - openCampaignsTimestamp < CACHE_TTL_MS) {
+                openList.find { it.id == id }?.let { return it }
+            }
+            val myList = cachedMyCampaigns
+            if (myList != null && now - myCampaignsTimestamp < CACHE_TTL_MS) {
+                myList.find { it.id == id }?.let { return it }
+            }
+            val joinedList = cachedMyJoinedCampaigns
+            if (joinedList != null && now - myJoinedCampaignsTimestamp < CACHE_TTL_MS) {
+                joinedList.find { it.id == id }?.let { return it }
+            }
             val cached = campaignCache[id]
             if (cached != null && now - cached.second < CACHE_TTL_MS) {
                 return cached.first
@@ -339,49 +425,78 @@ class CampaignRepository(
     }
 
     /**
-     * Finds the next open campaign on the Home screen that the current user has NOT tested today,
-     * excluding the current campaign and any apps owned by the user.
-     * RPC-first (migration 021, 1 round-trip nhỏ); fallback: feed Trang chủ đã cache; cuối cùng là legacy.
+     * Trả về TOÀN BỘ app đủ điều kiện để gợi ý làm bài test kế tiếp, kèm số người đã cài.
+     *
+     * Việc ưu tiên app đã cài trên máy / app có lượt cài thấp được quyết định ở client
+     * vì chỉ client mới biết package nào đang có trên thiết bị của tester.
+     *
+     * Điều kiện giữ nguyên như RPC cũ: app open, không phải app hiện tại, không phải
+     * app của chính tester và chưa được tester đó test hôm nay.
      */
-    suspend fun getNextUntestedCampaign(currentCampaignId: String): Campaign? {
-        try {
-            val rpc = supabase.postgrest.rpc(
-                "get_next_untested_campaign",
-                NextCampaignParams(currentCampaignId = currentCampaignId)
-            ).decodeAs<NextCampaignResult>()
-            return rpc.campaign
-        } catch (_: Exception) {
-            // Migration 021 chưa deploy — rơi xuống đường dưới.
-        }
-
-        val feed = getHomeFeed()
+    suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampaignCandidate> {
+        // Prefetch chỉ chạy khi người dùng mở form nộp bài, nên lấy dữ liệu mới
+        // để trạng thái "đã test hôm nay" không bị cũ theo TTL 3 phút.
+        val feed = getHomeFeed(forceRefresh = true)
+        // Đọc uid sau khi gọi feed: nếu phiên vừa khôi phục xong thì vẫn lọc
+        // đúng app của chính tester.
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val open: List<Campaign>
+        val stats: Map<String, CampaignStats>
         if (feed != null) {
-            val currentUid = supabase.auth.currentUserOrNull()?.id
-            return feed.open.firstOrNull { camp ->
-                camp.id != null && camp.id != currentCampaignId &&
-                    (currentUid == null || camp.ownerId != currentUid) &&
-                    feed.stats[camp.id]?.hasTestedToday != true
-            }
+            open = feed.open
+            stats = feed.stats
+        } else {
+            open = listOpenCampaigns(forceRefresh = true)
+            stats = getCampaignsStatsMap(
+                open.mapNotNull { it.id },
+                forceRefresh = true,
+            )
         }
 
-        return getNextUntestedCampaignLegacy(currentCampaignId)
+        return open.mapNotNull { camp ->
+            val id = camp.id ?: return@mapNotNull null
+            if (id == currentCampaignId) return@mapNotNull null
+            if (currentUid != null && camp.ownerId == currentUid) return@mapNotNull null
+            // Thiếu stats nghĩa là chưa chắc chắn trạng thái hôm nay — bỏ qua
+            // còn hơn gợi ý lại một app người dùng đã test.
+            val stat = stats[id] ?: return@mapNotNull null
+            if (stat.hasTestedToday) return@mapNotNull null
+            NextCampaignCandidate(campaign = camp, installedCount = stat.installedCount)
+        }
     }
 
-    private suspend fun getNextUntestedCampaignLegacy(currentCampaignId: String): Campaign? {
-        val currentUid = supabase.auth.currentUserOrNull()?.id
-        val openCamps = listOpenCampaigns(forceRefresh = true)
-        val candidates = openCamps.filter { camp ->
-            camp.id != null && camp.id != currentCampaignId && (currentUid == null || camp.ownerId != currentUid)
+    /**
+     * Người dùng đã từng test trước phiên hiện tại chưa.
+     * Dùng HEAD + count để payload tối thiểu; ưu tiên checkins vì mọi bài test
+     * đều tạo check-in (kể cả check-in tạm tính), sau đó mới xét báo cáo legacy.
+     */
+    suspend fun hasTestedBefore(): Boolean {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: return false
+        val checkinCount = try {
+            supabase.from("checkins").select {
+                head = true
+                count(Count.EXACT)
+                filter { eq("user_id", uid) }
+            }.countOrNull() ?: 0L
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            return false
         }
-        if (candidates.isEmpty()) return null
+        if (checkinCount > 0) return true
 
-        val candidateIds = candidates.mapNotNull { it.id }
-        val statsMap = getCampaignsStatsMap(candidateIds, forceRefresh = true)
-
-        return candidates.firstOrNull { camp ->
-            val stats = statsMap[camp.id]
-            stats?.hasTestedToday != true
+        val reportCount = try {
+            supabase.from("tester_reports").select {
+                head = true
+                count(Count.EXACT)
+                filter { eq("user_id", uid) }
+            }.countOrNull() ?: 0L
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            return false
         }
+        return reportCount > 0
     }
 
     suspend fun createCampaign(campaign: Campaign) {
@@ -406,22 +521,28 @@ class CampaignRepository(
     }
 
     /**
-     * Owner-only: update any field (used for closing a campaign).
+     * Owner/Admin update CHỈ các cột chỉ định. Trước đây đây là read-modify-write
+     * upsert cả row: admin pause / lifecycle sync chạy xen giữa lúc đọc và ghi sẽ bị
+     * ghi đè mất. Update cột mục tiêu không có cửa sổ đua đó; lỗi mạng ném lên caller.
+     * Body dùng [JsonObject] + overload `update(body: JsonElement)` của postgrest-kt:
+     * Map<String, Any?> qua serializer reified sẽ lỗi runtime ("Serializer for class
+     * 'Any' is not found") vì Any? không có serializer builtin.
      * Không ép owner_id = uid(): Admin cũng được RLS phép cập nhật campaign của người khác,
      * nếu ép owner_id thì thao tác của Admin sẽ vô tình chuyển quyền sở hữu app.
      */
-    suspend fun updateCampaign(campaign: Campaign) {
-        val campId = requireNotNull(campaign.id) { "Campaign id is required" }
-        supabase.from("campaigns").upsert(campaign)
+    private suspend fun updateCampaignFields(campaignId: String, fields: JsonObject) {
+        supabase.from("campaigns").update(fields) {
+            filter { eq("id", campaignId) }
+        }
         cachedOpenCampaigns = null
         cachedPausedCampaigns = null
         cachedCompletedCampaigns = null
         cachedMyCampaigns = null
-        cachedStatsMap = null
+        statsCache.clear()
         cachedHomeFeed = null
-        campaignCache.remove(campId)
-        ownerStatsCache.remove(campId)
-        invalidateDetailCache(campId)
+        campaignCache.remove(campaignId)
+        ownerStatsCache.remove(campaignId)
+        invalidateDetailCache(campaignId)
         invalidateDashboardCache()
     }
 
@@ -429,18 +550,11 @@ class CampaignRepository(
         val user = supabase.auth.currentUserOrNull() ?: return
         val current = getCampaign(campaignId) ?: return
         if (current.ownerId == user.id) {
-            updateCampaign(current.copy(iconUrl = iconUrl))
+            updateCampaignFields(
+                campaignId,
+                buildJsonObject { put("icon_url", iconUrl) },
+            )
         }
-    }
-
-    suspend fun closeCampaign(campaignId: String) {
-        val current = getCampaign(campaignId)
-            ?: throw IllegalStateException(localizer.get(R.string.repo_campaign_not_found))
-        updateCampaign(current.copy(status = "closed"))
-        cachedOpenCampaigns = null
-        cachedMyCampaigns = null
-        cachedStatsMap = null
-        ownerStatsCache.remove(campaignId)
     }
 
     fun isAuthenticated(): Boolean = supabase.auth.currentUserOrNull() != null
@@ -543,7 +657,7 @@ class CampaignRepository(
 
     suspend fun hasCheckedInToday(campaignId: String, userId: String? = null): Boolean {
         val uid = userId ?: supabase.auth.currentUserOrNull()?.id ?: return false
-        val today = LocalDate.now().toString()
+        val today = VnTime.today().toString()
         return supabase.from("checkins").select {
             filter {
                 eq("campaign_id", campaignId)
@@ -561,7 +675,7 @@ class CampaignRepository(
      */
     suspend fun hasConfirmedCheckinToday(campaignId: String, userId: String? = null): Boolean {
         val uid = userId ?: supabase.auth.currentUserOrNull()?.id ?: return false
-        val today = LocalDate.now().toString()
+        val today = VnTime.today().toString()
         return try {
             supabase.from("checkins").select {
                 filter {
@@ -632,11 +746,15 @@ class CampaignRepository(
                 ),
             ).decodeAs<SubmitTesterReportResult>()
         }
-        cachedStatsMap = null
+        statsCache.clear()
         cachedTodayCheckins = null
         cachedQuestSummary = null
         cachedMyProfile = null
         cachedCreditLogs = null
+        // get_home_feed chứa has_tested_today của chính user. Không xoá cache này
+        // thì quay lại Trang chủ trong 3 phút vẫn thấy "Chưa test hôm nay".
+        cachedHomeFeed = null
+        homeFeedTimestamp = 0L
         ownerStatsCache.remove(campaignId)
         membersCache.remove(campaignId)
         checkinsCache.remove(campaignId)
@@ -720,7 +838,7 @@ class CampaignRepository(
         val uid = supabase.auth.currentUserOrNull()?.id ?: return 0
         val isFresh = { cachedTodayCheckins != null && System.currentTimeMillis() - todayCheckinsTimestamp < CACHE_TTL_MS }
         return deduped("todayCheckins", forceRefresh, isFresh, { cachedTodayCheckins }) {
-            val today = LocalDate.now().toString()
+            val today = VnTime.today().toString()
             val count = try {
                 val checkins = supabase.from("checkins").select {
                     filter {
@@ -865,6 +983,74 @@ class CampaignRepository(
         }
     }
 
+    /**
+     * Hạng của người dùng hiện tại theo cùng thứ tự sắp xếp của [getLeaderboard].
+     * RPC-first (get_my_rank_v1) — chính xác kể cả khi ngoài top 100, kèm tổng
+     * số thành viên. Nếu migration chưa deploy thì fallback theo tầng: quét
+     * leaderboard đã tải, rồi đếm xấp xỉ qua PostgREST (bỏ qua tie-break
+     * checkins/apps nên có thể lệch vài hạng khi đồng hạng credits).
+     */
+    suspend fun getMyRank(sort: String = "credit", forceRefresh: Boolean = false): MyRank? {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        // Cache riêng theo sort: dùng chung một biến sẽ trả hạng credit cho
+        // bảng Top Test (hoặc ngược lại) khi hai sort gọi gần nhau trong TTL.
+        val isFresh = { myRankCache[sort]?.let { System.currentTimeMillis() - it.second < CACHE_TTL_MS } == true }
+        val writeCache: (MyRank) -> MyRank = { result ->
+            myRankCache[sort] = Pair(result, System.currentTimeMillis())
+            result
+        }
+        return deduped("myRank:$sort", forceRefresh, isFresh, { myRankCache[sort]?.first }) {
+            // RPC-first: hạng chính xác + tổng số thành viên trong 1 round-trip.
+            try {
+                val rpcResult = supabase.postgrest.rpc("get_my_rank_v1", MyRankParams(sort)).decodeAs<MyRank>()
+                if (rpcResult.rank > 0) {
+                    return@deduped writeCache(rpcResult)
+                }
+            } catch (_: Exception) {
+                // Migration chưa deploy — thử các đường fallback bên dưới.
+            }
+
+            // Fallback 1: mình đang nằm trong top đã tải của bảng xếp hạng.
+            val fromList = try {
+                getLeaderboard(sort, forceRefresh).firstOrNull { it.userId == uid }
+            } catch (_: Exception) {
+                null
+            }
+            if (fromList != null && fromList.rank > 0) {
+                return@deduped writeCache(
+                    MyRank(
+                        rank = fromList.rank,
+                        credits = fromList.credits,
+                        checkinCount = fromList.checkinCount,
+                        campaignsCount = fromList.campaignsCount,
+                    )
+                )
+            }
+
+            // Fallback 2: đếm số người có credits cao hơn mình (xấp xỉ).
+            val approx = try {
+                val myProfile = getMyProfile(forceRefresh) ?: return@deduped null
+                val above = supabase.from("profiles").select {
+                    head = true
+                    count(Count.EXACT)
+                    filter { gt("credits", myProfile.credits) }
+                }.countOrNull() ?: 0L
+                val total = supabase.from("profiles").select {
+                    head = true
+                    count(Count.EXACT)
+                }.countOrNull() ?: 0L
+                MyRank(
+                    rank = above.toInt() + 1,
+                    credits = myProfile.credits,
+                    totalUsers = total.toInt(),
+                )
+            } catch (_: Exception) {
+                null
+            }
+            if (approx != null && approx.rank > 0) writeCache(approx) else approx
+        }
+    }
+
     // ---------------------------------------------------------------- owner app management
 
     suspend fun getCampaignOwnerStats(campaignId: String, forceRefresh: Boolean = false): CampaignOwnerStats {
@@ -872,7 +1058,7 @@ class CampaignRepository(
         return deduped("ownerStats:$campaignId", forceRefresh, isFresh, { ownerStatsCache[campaignId]?.first }) {
             val now = System.currentTimeMillis()
             val members = try { getMembers(campaignId, forceRefresh) } catch (_: Exception) { emptyList() }
-            val today = LocalDate.now().toString()
+            val today = VnTime.today().toString()
             val checkins = try { getCheckins(campaignId, forceRefresh) } catch (_: Exception) { emptyList() }
             val feedbacks = try {
                 getFeedbacks(campaignId, forceRefresh)
@@ -889,7 +1075,9 @@ class CampaignRepository(
                 reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
             ).distinct().size
             val pendingCount = reports.count { it.status == "pending" }
-            val totalReports = reports.size.coerceAtLeast(checkins.size)
+            // Khớp đường fast-path (detail.reportsCount): đếm báo cáo thật, không lấy
+            // check-in làm sàn để tránh hai đường tải hiển thị hai con số khác nhau.
+            val totalReports = reports.size
 
             val stats = CampaignOwnerStats(
                 installedTestersCount = members.size,
@@ -970,55 +1158,51 @@ class CampaignRepository(
                 maybeAutoAcceptExpiredReports()
             }
 
-            val result = if (canManage) {
-                // Priority 1: Use security definer RPC for Owner (Migration 012)
-                try {
+            // Đường của chủ app: RPC security definer. RPC THÀNH CÔNG (kể cả danh sách
+            // rỗng — campaign mới) là kết quả cuối: cache và trả về, không chạy fallback
+            // làm trông. RPC LỖI mới rơi xuống truy vấn bảng trực tiếp; cả hai lỗi thì ném
+            // lên UI thay vì nuốt rồi cache danh sách rỗng gây hiểu "không có báo cáo".
+            if (canManage) {
+                val rpcResult = try {
                     val rpcReports = supabase.postgrest.rpc(
                         function = "get_campaign_reports_for_owner",
                         parameters = GetOwnerReportsParams(campaignId = campaignId)
                     ).decodeAs<List<TesterReport>>()
-                    if (rpcReports.isNotEmpty()) {
-                        val userIds = rpcReports.map { it.userId }.distinct()
-                        val profiles = getProfiles(userIds)
-                        rpcReports.map { rep ->
-                            rep.copy(testerProfile = profiles[rep.userId])
-                        }
-                    } else {
-                        emptyList()
-                    }
-                } catch (_: Exception) {
-                    emptyList()
-                }
-            } else {
-                emptyList()
-            }
-
-            if (result.isNotEmpty()) {
-                reportsCache[cacheKey] = Pair(result, now)
-                return@deduped result
-            }
-
-            // Direct table query (works for tester querying own reports, or fallback).
-            // Không tổng hợp báo cáo giả từ check-in nữa: trước đây fallback tạo các
-            // TesterReport "approved" từ note checkin khiến chủ app thấy báo cáo ảo.
-            val finalResult = try {
-                val list = supabase.from("tester_reports").select {
-                    filter { eq("campaign_id", campaignId) }
-                    order("created_at", Order.DESCENDING)
-                }.decodeList<TesterReport>()
-                if (list.isNotEmpty()) {
-                    val userIds = list.map { it.userId }.distinct()
+                    val userIds = rpcReports.map { it.userId }.distinct()
                     val profiles = getProfiles(userIds)
-                    list.map { it.copy(testerProfile = profiles[it.userId]) }
-                } else {
-                    emptyList()
+                    rpcReports.map { rep ->
+                        rep.copy(testerProfile = profiles[rep.userId])
+                    }
+                } catch (rpcError: Exception) {
+                    try {
+                        fetchReportsDirect(campaignId)
+                    } catch (fallbackError: Exception) {
+                        fallbackError.addSuppressed(rpcError)
+                        throw fallbackError
+                    }
                 }
-            } catch (_: Exception) {
-                emptyList()
+                reportsCache[cacheKey] = Pair(rpcResult, now)
+                return@deduped rpcResult
             }
+
+            // Đường của tester: truy vấn trực tiếp (RLS chỉ trả báo cáo của chính mình).
+            // Lỗi mạng ném lên để UI báo tải thất bại thay vì hiển thị rỗng.
+            val finalResult = fetchReportsDirect(campaignId)
             reportsCache[cacheKey] = Pair(finalResult, now)
             finalResult
         }
+    }
+
+    /** Truy vấn thẳng bảng `tester_reports` (theo RLS) + gắn profile tester. */
+    private suspend fun fetchReportsDirect(campaignId: String): List<TesterReport> {
+        val list = supabase.from("tester_reports").select {
+            filter { eq("campaign_id", campaignId) }
+            order("created_at", Order.DESCENDING)
+        }.decodeList<TesterReport>()
+        if (list.isEmpty()) return emptyList()
+        val userIds = list.map { it.userId }.distinct()
+        val profiles = getProfiles(userIds)
+        return list.map { it.copy(testerProfile = profiles[it.userId]) }
     }
 
     suspend fun getMyLatestReport(campaignId: String): TesterReport? {
@@ -1134,7 +1318,7 @@ class CampaignRepository(
     /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun acknowledgeWarning(warningId: String) {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return
-        supabase.from("user_warnings").update(mapOf("acknowledged" to true)) {
+        supabase.from("user_warnings").update(buildJsonObject { put("acknowledged", true) }) {
             filter {
                 eq("id", warningId)
                 eq("user_id", uid)
@@ -1149,7 +1333,7 @@ class CampaignRepository(
         val isFresh = { cachedWeeklyWarnings != null && System.currentTimeMillis() - weeklyWarningsTimestamp < SHORT_CACHE_TTL_MS }
         return deduped("weeklyWarnings", forceRefresh, isFresh, { cachedWeeklyWarnings }) {
             val result = try {
-                val sevenDaysAgo = LocalDate.now().minusDays(6).toString()
+                val sevenDaysAgo = VnTime.today().minusDays(6).toString()
                 supabase.from("user_warnings").select {
                     filter {
                         eq("user_id", uid)
@@ -1166,8 +1350,15 @@ class CampaignRepository(
     }
 
     suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedReason: String? = null) {
-        val current = getCampaign(campaignId) ?: return
-        updateCampaign(current.copy(status = newStatus, pausedReason = pausedReason))
+        // put(key, value: String?) ghi JsonNull khi null — pause_reason được xoá đúng
+        // khi chuyển trạng thái không phải paused (giữ semantics của code cũ).
+        updateCampaignFields(
+            campaignId,
+            buildJsonObject {
+                put("status", newStatus)
+                put("paused_reason", pausedReason)
+            },
+        )
     }
 
     /**
@@ -1198,16 +1389,16 @@ class CampaignRepository(
         testUsername: String,
         testPassword: String,
     ) {
-        val current = getCampaign(campaignId) ?: return
-        updateCampaign(
-            current.copy(
-                appName = appName,
-                description = description,
-                playUrl = playUrl,
-                testingUrl = testingUrl,
-                testUsername = testUsername,
-                testPassword = testPassword,
-            )
+        updateCampaignFields(
+            campaignId,
+            buildJsonObject {
+                put("app_name", appName)
+                put("description", description)
+                put("play_url", playUrl)
+                put("testing_url", testingUrl)
+                put("test_username", testUsername)
+                put("test_password", testPassword)
+            },
         )
     }
 
@@ -1218,7 +1409,7 @@ class CampaignRepository(
         ).decodeAs<AdminDeleteCampaignResult>()
         cachedOpenCampaigns = null
         cachedMyCampaigns = null
-        cachedStatsMap = null
+        statsCache.clear()
         cachedHomeFeed = null
         ownerStatsCache.remove(campaignId)
         invalidateDetailCache(campaignId)
@@ -1276,7 +1467,7 @@ class CampaignRepository(
         }
         cachedOpenCampaigns = null
         cachedMyCampaigns = null
-        cachedStatsMap = null
+        statsCache.clear()
         cachedHomeFeed = null
         ownerStatsCache.remove(campaignId)
         invalidateDetailCache(campaignId)
@@ -1285,13 +1476,24 @@ class CampaignRepository(
 
     suspend fun getCampaignsStatsMap(campaignIds: List<String>, forceRefresh: Boolean = false): Map<String, CampaignStats> {
         if (campaignIds.isEmpty()) return emptyMap()
+        // Khoá single-flight cố định (không nối danh sách id vào key để map lock
+        // không phình vô hạn); isFresh đã tự kiểm tra đủ id được yêu cầu.
         val isFresh = {
-            cachedStatsMap != null && System.currentTimeMillis() - statsMapTimestamp < CACHE_TTL_MS &&
-                campaignIds.all { cachedStatsMap!!.containsKey(it) }
+            val now = System.currentTimeMillis()
+            campaignIds.all { id -> statsCache[id]?.let { now - it.second < CACHE_TTL_MS } == true }
         }
-        return deduped("statsMap:${campaignIds.sorted().joinToString(",")}", forceRefresh, isFresh, {
-            cachedStatsMap?.filterKeys { it in campaignIds }
-        }) {
+        return deduped(
+            "statsMap",
+            forceRefresh,
+            isFresh,
+            { campaignIds.mapNotNull { id -> statsCache[id]?.let { id to it.first } }.toMap() },
+        ) {
+            fun cacheAll(stats: Map<String, CampaignStats>) {
+                val at = System.currentTimeMillis()
+                for ((statId, stat) in stats) {
+                    statsCache[statId] = Pair(stat, at)
+                }
+            }
             // RPC-first: 1 round-trip thay vì 3 (members + checkins + reports).
             try {
                 val rpcStats = supabase.postgrest.rpc(
@@ -1299,15 +1501,14 @@ class CampaignRepository(
                     CampaignIdsParams(campaignIds = campaignIds)
                 ).decodeAs<Map<String, CampaignStats>>()
                 if (rpcStats.isNotEmpty()) {
-                    cachedStatsMap = (cachedStatsMap ?: emptyMap()) + rpcStats
-                    statsMapTimestamp = System.currentTimeMillis()
+                    cacheAll(rpcStats)
                     return@deduped rpcStats
                 }
             } catch (_: Exception) {
                 // Migration chưa deploy — rơi xuống đường legacy bên dưới.
             }
             val uid = supabase.auth.currentUserOrNull()?.id
-            val today = LocalDate.now().toString()
+            val today = VnTime.today().toString()
 
             val membersMap = try {
                 val members = supabase.from("campaign_members").select {
@@ -1358,8 +1559,7 @@ class CampaignRepository(
                     hasTestedToday = testedTodayIds.contains(id),
                 )
             }
-            cachedStatsMap = resultMap
-            statsMapTimestamp = System.currentTimeMillis()
+            cacheAll(resultMap)
             resultMap
         }
     }
@@ -1388,8 +1588,9 @@ class CampaignRepository(
             cachedCompletedCampaigns = result.completed
             completedCampaignsTimestamp = now
             if (result.stats.isNotEmpty()) {
-                cachedStatsMap = (cachedStatsMap ?: emptyMap()) + result.stats
-                statsMapTimestamp = now
+                for ((statId, stat) in result.stats) {
+                    statsCache[statId] = Pair(stat, now)
+                }
             }
             result
         }
@@ -1404,7 +1605,10 @@ class CampaignRepository(
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
         val isFresh = {
             cachedDashboard != null && dashboardCacheUid == uid &&
-                System.currentTimeMillis() - dashboardTimestamp < CACHE_TTL_MS
+                System.currentTimeMillis() - dashboardTimestamp < CACHE_TTL_MS &&
+                // Snapshot cache không leaderboard không được phục vụ cho
+                // caller yêu cầu có leaderboard (và ngược lại thì vô hại).
+                (!includeLeaderboard || dashboardHasLeaderboard)
         }
         return deduped("dashboard", forceRefresh, isFresh, { cachedDashboard }) {
             // Báo cáo quá 8h cần được tự động duyệt trước khi đếm số chờ duyệt trên Trang chủ.
@@ -1425,6 +1629,7 @@ class CampaignRepository(
             }
             cachedDashboard = result
             dashboardCacheUid = uid
+            dashboardHasLeaderboard = includeLeaderboard && result.leaderboard.isNotEmpty()
             dashboardTimestamp = now
             result.profile?.let {
                 cachedMyProfile = it
@@ -1788,7 +1993,7 @@ class CampaignRepository(
     /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun markNotificationAsRead(id: String) {
         val currentUid = supabase.auth.currentUserOrNull()?.id ?: return
-        supabase.from("notifications").update(mapOf("is_read" to true)) {
+        supabase.from("notifications").update(buildJsonObject { put("is_read", true) }) {
             filter {
                 eq("id", id)
                 eq("user_id", currentUid)
@@ -1801,7 +2006,7 @@ class CampaignRepository(
     /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun markAllNotificationsAsRead() {
         val currentUid = supabase.auth.currentUserOrNull()?.id ?: return
-        supabase.from("notifications").update(mapOf("is_read" to true)) {
+        supabase.from("notifications").update(buildJsonObject { put("is_read", true) }) {
             filter {
                 eq("user_id", currentUid)
                 eq("is_read", false)
@@ -1848,7 +2053,7 @@ class CampaignRepository(
                 supabase.postgrest.rpc("get_user_quest_summary").decodeAs<QuestSummary>()
             } catch (_: Exception) {
                 val uid = supabase.auth.currentUserOrNull()?.id
-                val today = LocalDate.now().toString()
+                val today = VnTime.today().toString()
                 val dailyCount = if (uid != null) {
                     try {
                         supabase.from("checkins").select {
@@ -1890,5 +2095,71 @@ class CampaignRepository(
                 message = e.message ?: localizer.get(R.string.repo_connection_failed)
             )
         }
+    }
+
+    // ---------------------------------------------------------------- missions (migration 039)
+
+    /** Danh sách nhiệm vụ cho tab "Nhiệm vụ App"; RPC tự expire nhiệm vụ quá hạn. */
+    suspend fun getOpenMissions(forceRefresh: Boolean = false): List<Mission> {
+        val isFresh = { cachedOpenMissions != null && System.currentTimeMillis() - openMissionsTimestamp < CACHE_TTL_MS }
+        return deduped("openMissions", forceRefresh, isFresh, { cachedOpenMissions }) {
+            val result = supabase.postgrest.rpc("get_open_missions").decodeAs<OpenMissionsResult>()
+            cachedOpenMissions = result.missions
+            openMissionsTimestamp = System.currentTimeMillis()
+            result.missions
+        }
+    }
+
+    /** Chủ app mở nhiệm vụ: server trừ phí 50 Credit × số ngày và kiểm tra số dư ≥ 300. */
+    suspend fun createMission(params: CreateMissionParams): CreateMissionResult {
+        val result = supabase.postgrest.rpc("create_mission", params).decodeAs<CreateMissionResult>()
+        cachedMyProfile = null
+        cachedCreditLogs = null
+        cachedOpenMissions = null
+        openMissionsTimestamp = 0L
+        invalidateDashboardCache()
+        return result
+    }
+
+    /** Người tham gia nhận nhiệm vụ (server kiểm tra còn chỗ, chưa tham gia, còn hạn). */
+    suspend fun joinMission(missionId: String): JoinMissionResult {
+        val result = supabase.postgrest.rpc(
+            "join_mission",
+            JoinMissionParams(missionId = missionId)
+        ).decodeAs<JoinMissionResult>()
+        cachedOpenMissions = null
+        openMissionsTimestamp = 0L
+        return result
+    }
+
+    /** Nhiệm vụ hiện tại của 1 app cho màn quản lý của chủ nhiệm vụ (migration 040). */
+    suspend fun getCampaignMission(campaignId: String): Mission? {
+        val result = supabase.postgrest.rpc(
+            "get_campaign_mission",
+            CampaignIdParams(campaignId = campaignId)
+        ).decodeAs<CampaignMissionResult>()
+        return result.mission
+    }
+
+    /** Chủ nhiệm vụ dừng hẳn nhiệm vụ: không nhận người mới, không trả thưởng trong lúc dừng. */
+    suspend fun pauseMission(missionId: String): MissionActionResult =
+        missionAction("pause_mission", missionId)
+
+    /** Mở lại nhiệm vụ đã dừng; thời hạn gốc giữ nguyên. */
+    suspend fun resumeMission(missionId: String): MissionActionResult =
+        missionAction("resume_mission", missionId)
+
+    /** Xóa mềm nhiệm vụ (ẩn khỏi danh sách, không hoàn phí). */
+    suspend fun deleteMission(missionId: String): MissionActionResult =
+        missionAction("delete_mission", missionId)
+
+    private suspend fun missionAction(function: String, missionId: String): MissionActionResult {
+        val result = supabase.postgrest.rpc(
+            function,
+            MissionIdParams(missionId = missionId)
+        ).decodeAs<MissionActionResult>()
+        cachedOpenMissions = null
+        openMissionsTimestamp = 0L
+        return result
     }
 }

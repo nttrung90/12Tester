@@ -110,6 +110,9 @@
     <string name="leaderboard_empty">No members on the leaderboard yet.</string>
     <string name="leaderboard_tab_credit">Top Credit</string>
     <string name="leaderboard_tab_test">Top Test</string>
+    <string name="leaderboard_you">You</string>
+    <string name="leaderboard_my_rank_title">Your rank</string>
+    <string name="leaderboard_rank_of_total">#%1$d / %2$d</string>
     <string name="leaderboard_test_title">Test Leaderboard</string>
     <string name="leaderboard_test_subtitle">Top community members with the most test turns</string>
     <string name="leaderboard_test_empty">No test turns on the leaderboard yet.</string>
@@ -170,6 +173,17 @@
     <string name="language_vietnamese">Tiếng Việt</string>
     <string name="language_english">English</string>
     <string name="dialog_select_language">Select language</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system_default">System default</string>
+    <string name="theme_system_desc">Follow your device light/dark setting</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_light_desc">Always use the light theme</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_dark_desc">Always use the dark theme</string>
+    <string name="dialog_select_theme">Select theme</string>
+    <string name="social_link_website">Website</string>
+    <string name="social_link_zalo">Zalo</string>
+    <string name="social_link_facebook">Facebook</string>
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Daily Quest</string>
@@ -748,7 +762,24 @@
     <string name="campaign_report_update_success">Test result updated! The owner has 8 hours to review (+2 Credits bonus if approved).</string>
     <string name="campaign_report_resubmit_success">Resubmitted! Any provisional Credits that were clawed back will be regranted. The owner has 8 hours to review (+2 bonus Credits if approved).</string>
     <string name="campaign_report_submit_success_format">Test result sent! You receive +%1$d provisional Credits. The owner has 8 hours to review (+2 bonus Credits if approved).</string>
-    <string name="campaign_close_success">Campaign closed.</string>
+
+    <!-- Credit reward overlay -->
+    <string name="credit_unit">Credit</string>
+    <string name="credit_reward_amount_format">+%1$d</string>
+    <string name="credit_reward_test_submitted_title">Test result sent</string>
+    <string name="credit_reward_test_submitted_subtitle_format">%1$s · provisional Credit</string>
+    <string name="credit_reward_provisional_label">Provisional Credit</string>
+    <string name="credit_reward_owner_approved_title">Test result approved</string>
+    <string name="credit_reward_tester_amount_format">Tester +%1$d Credit</string>
+    <string name="credit_reward_you_amount_format">You +%1$d Credit</string>
+    <string name="credit_reward_tip_amount_format">Tip +%1$d Credit</string>
+    <string name="credit_reward_remote_title">Report approved</string>
+    <string name="credit_reward_remote_subtitle">The owner approved your test result</string>
+    <string name="credit_reward_quest_title">Quest reward claimed</string>
+    <string name="credit_reward_quest_subtitle">Keep testing to reach the next milestone</string>
+    <string name="credit_reward_topup_title">Top-up successful</string>
+    <string name="credit_reward_topup_subtitle">Your new balance is ready</string>
+    <string name="credit_reward_balance_format">New balance: %1$d Credit</string>
 
     <!-- ViewModel messages: create campaign -->
     <string name="create_slot_cost_format">You need %1$d Credit to unlock Slot %2$d (currently %3$d Credit).</string>
@@ -922,7 +953,7 @@
     <string name="oad_paused_admin_note_format">Reason: %1$s</string>
     <string name="oad_paused_by_admin_error">This app is paused by an Admin. Please contact an Admin.</string>
     <string name="oad_resume_sub_admin">Paused by Admin — resume to show it on Home.</string>
-    <string name="oad_owner_you">You</string>
+    <string name="oad_owner_unknown">App owner</string>
     <string name="oad_installing_title">Currently installing</string>
     <string name="oad_installing_subtitle_format">%1$d installing · view each person and their reports</string>
     <string name="oad_reports_title">Tester reports</string>
@@ -958,8 +989,6 @@
     <string name="oad_renew_dialog_desc_format">Renew %1$d more days for Slot %2$d at a cost of %3$d Credit.</string>
     <string name="oad_renew_dialog_balance_format">Current balance: %1$d Credit</string>
     <string name="oad_renew_btn_format">Renew (%1$d Credit)</string>
-    <string name="oad_not_installed_title">The app isn\'t installed</string>
-    <string name="oad_not_installed_desc_format">The app \"%1$s\" (%2$s) isn\'t installed on this device. Do you want to open the link to install it?</string>
     <string name="oad_install_btn">Download &amp; install</string>
     <string name="oad_slot_permanent_label">Slot 1 (Permanent)</string>
     <string name="oad_summary_line_format">Owner: %1$s · %2$d points · %3$s · Target %4$d tests/day</string>
@@ -1021,6 +1050,7 @@
     <string name="oad_status_remaining_format">⏳ %1$dh left</string>
     <string name="oad_status_approved">✓ Approved</string>
     <string name="oad_status_rejected">✕ Rejected</string>
+    <string name="oad_status_unknown">• %1$s</string>
     <string name="oad_analyzing">Analyzing photo similarity...</string>
     <string name="oad_dup_warning_format">Duplicate warning: %1$d%%</string>
     <string name="oad_new_feature_format">New feature photo (different by %1$d%%)</string>
@@ -1045,11 +1075,72 @@
     <string name="oad_reject_custom_placeholder">Enter a specific reason...</string>
     <string name="oad_reject_fallback_reason">Did not meet testing requirements</string>
     <string name="oad_reject_confirm_btn">Confirm rejection</string>
-    <string name="repo_campaign_not_found">Campaign not found.</string>
     <string name="repo_credit_note_approved_bonus_format">App owner approved the test result (extra bonus +%1$d Credit)</string>
     <string name="repo_credit_note_rejected_clawback">Provisional Credits clawed back because the app owner rejected the result</string>
     <string name="repo_connection_failed">Unable to connect to the server.</string>
     <string name="account_locked_email_subject">[12 Tester] Account Unlock Request - %1$s</string>
     <string name="account_locked_email_body_template">Dear 12 Tester Administrator,\n\nMy account has been suspended due to testing alerts.\nEmail: %1$s\nReason / Explanation:\n[Please enter your explanation here...]\n\nPlease help review and unlock my account.\nThank you!</string>
     <string name="campaign_history_reward_format">✓ +%1$d Credits</string>
+
+    <!-- Missions (user-created app missions) -->
+    <string name="mission_create_btn">Open Mission</string>
+    <string name="mission_create_title">Open Mission</string>
+    <string name="mission_create_app_label">Choose one of your posted apps</string>
+    <string name="mission_create_no_apps">You have no active posted app. Post an app first, then open a mission for it.</string>
+    <string name="mission_title_label">Mission name</string>
+    <string name="mission_desc_label">Mission description</string>
+    <string name="mission_participants_label">Number of participants</string>
+    <string name="mission_days_label">Mission duration (days)</string>
+    <string name="mission_reward_label">Credit reward per participant</string>
+    <string name="mission_reward_hint">Minimum 10 Credits per participation</string>
+    <string name="mission_fee_summary_format">Platform fee: 50 Credits × %1$d day(s) = %2$d Credits (deducted immediately when opening)</string>
+    <string name="mission_min_balance_note">You need at least 300 Credits to open a mission. The reward for participants is paid from your remaining balance each time they complete.</string>
+    <string name="mission_balance_format">Current balance: %1$d Credits</string>
+    <string name="mission_create_cta">Open mission</string>
+    <string name="mission_create_success">Mission opened</string>
+    <string name="mission_err_title_required">Please enter a mission name</string>
+    <string name="mission_err_desc_required">Please enter a mission description</string>
+    <string name="mission_err_app_required">Please choose one of your apps</string>
+    <string name="mission_err_reward_min">Reward must be at least 10 Credits per participation</string>
+    <string name="mission_err_min_balance_format">You need at least 300 Credits to open a mission (you have %1$d)</string>
+    <string name="mission_err_fee_format">Not enough Credits to pay the platform fee of %1$d Credits (you have %2$d)</string>
+    <string name="quest_tab_missions">App Missions</string>
+    <string name="mission_list_empty">No missions are open yet</string>
+    <string name="mission_list_empty_hint">App owners can open missions from the My Apps tab</string>
+    <string name="mission_reward_badge_format">🪙 +%1$d Credits/turn</string>
+    <string name="mission_slots_format">%1$d/%2$d slots left</string>
+    <string name="mission_days_remaining_format">%1$d day(s) left to join</string>
+    <string name="mission_join_btn">Join mission</string>
+    <string name="mission_joined_cta">Joined — test the app to earn</string>
+    <string name="mission_completed_badge">Completed ✓</string>
+    <string name="mission_mine_badge">Your mission</string>
+    <string name="mission_join_success">Mission joined! Test the app and submit a report to get Credits.</string>
+    <string name="mission_status_full">Full</string>
+    <string name="mission_status_stopped">Stopped (out of Credits)</string>
+    <string name="mission_status_expired">Expired</string>
+    <string name="mission_by_format">by %1$s</string>
+    <!-- Mission management (owner) -->
+    <string name="mission_manage_title">Mission Management</string>
+    <string name="mission_manage_sub_format">Mission: %1$s</string>
+    <string name="mission_manage_reward_format">Reward: %1$d Credits/turn</string>
+    <string name="mission_manage_joined_format">Joined: %1$d/%2$d participants</string>
+    <string name="mission_manage_days_left_format">Time left: %1$d day(s)</string>
+    <string name="mission_manage_status_label">Status: %1$s</string>
+    <string name="mission_manage_pause_btn">Pause mission</string>
+    <string name="mission_manage_resume_btn">Resume mission</string>
+    <string name="mission_manage_delete_btn">Delete mission</string>
+    <string name="mission_manage_pause_confirm_q">Pause this mission?</string>
+    <string name="mission_manage_pause_confirm_desc">While paused: no new participants can join and no mission reward is paid when reports are approved, until you resume it. The deadline keeps running normally.</string>
+    <string name="mission_manage_delete_confirm_q">Delete this mission?</string>
+    <string name="mission_manage_delete_confirm_desc">The mission will be permanently removed from the list. The platform fee already paid is NOT refunded. Participants who joined but have not completed will lose their chance to earn the reward.</string>
+    <string name="mission_manage_paused_toast">Mission paused</string>
+    <string name="mission_manage_resumed_toast">Mission resumed</string>
+    <string name="mission_manage_deleted_toast">Mission deleted</string>
+    <string name="mission_manage_not_paused">Mission is not paused</string>
+    <string name="mission_manage_campaign_closed">The app is no longer open; the mission cannot be resumed</string>
+    <string name="mission_err_already_exists">This app already has an open mission</string>
+    <string name="mission_err_not_found">Mission no longer exists</string>
+    <string name="mission_manage_status_active">Active</string>
+    <string name="mission_status_paused">Paused</string>
+
 </resources>

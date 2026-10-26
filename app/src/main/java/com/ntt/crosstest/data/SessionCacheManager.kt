@@ -2,7 +2,9 @@ package com.ntt.crosstest.data
 
 import android.content.Context
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -11,18 +13,22 @@ import java.io.File
 
 /**
  * Snapshot of the user's latest session data for instant, offline-first app opening.
+ *
+ * Campaign của tab "Đang mở" không được lưu riêng — mỗi [CampaignDisplayItem]
+ * đã chứa sẵn campaign, lưu thêm list song song sẽ làm file JSON phình gần
+ * gấp đôi; bên đọc derive lại qua `displayItems.map { it.campaign }`.
  */
 @Serializable
 data class CachedSessionData(
     val userId: String? = null,
     val userProfile: Profile? = null,
-    val openCampaigns: List<Campaign> = emptyList(),
     val displayItems: List<CampaignDisplayItem> = emptyList(),
     val pausedDisplayItems: List<CampaignDisplayItem> = emptyList(),
     val completedDisplayItems: List<CampaignDisplayItem> = emptyList(),
     val myCampaigns: List<Campaign> = emptyList(),
     val joinedCampaigns: List<Campaign> = emptyList(),
     val leaderboard: List<LeaderboardUser> = emptyList(),
+    val myRank: MyRank? = null,
     val ownerStatsMap: Map<String, CampaignOwnerStats> = emptyMap(),
     val userCredits: Int = 0,
     val todayCheckinCount: Int = 0,
@@ -76,6 +82,15 @@ object SessionCacheManager {
         } catch (_: Exception) {
             null
         }
+    }
+
+    /**
+     * Làm nóng bản RAM từ đĩa trên thread IO ngay khi process khởi động.
+     * Constructor ViewModel sau đó gọi [loadSync] trên main thread chỉ đọc RAM,
+     * không phải chịu I/O đĩa + decode JSON ở lần đầu process.
+     */
+    fun preload(context: Context, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+        scope.launch(Dispatchers.IO) { loadSync(context) }
     }
 
     /**

@@ -110,6 +110,9 @@
     <string name="leaderboard_empty">Chưa có thành viên nào trên bảng xếp hạng.</string>
     <string name="leaderboard_tab_credit">Top Credit</string>
     <string name="leaderboard_tab_test">Top Test</string>
+    <string name="leaderboard_you">Bạn</string>
+    <string name="leaderboard_my_rank_title">Hạng của bạn</string>
+    <string name="leaderboard_rank_of_total">#%1$d / %2$d</string>
     <string name="leaderboard_test_title">Bảng xếp hạng Test</string>
     <string name="leaderboard_test_subtitle">Top thành viên thực hiện nhiều lượt test nhất cộng đồng</string>
     <string name="leaderboard_test_empty">Chưa có lượt test nào trên bảng xếp hạng.</string>
@@ -170,6 +173,17 @@
     <string name="language_vietnamese">Tiếng Việt</string>
     <string name="language_english">English</string>
     <string name="dialog_select_language">Chọn ngôn ngữ</string>
+    <string name="settings_theme">Giao diện</string>
+    <string name="theme_system_default">Theo hệ thống</string>
+    <string name="theme_system_desc">Theo chế độ sáng/tối của thiết bị</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_light_desc">Luôn dùng giao diện sáng</string>
+    <string name="theme_dark">Tối</string>
+    <string name="theme_dark_desc">Luôn dùng giao diện tối</string>
+    <string name="dialog_select_theme">Chọn giao diện</string>
+    <string name="social_link_website">Website</string>
+    <string name="social_link_zalo">Zalo</string>
+    <string name="social_link_facebook">Facebook</string>
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Nhiệm vụ hôm nay</string>
@@ -747,7 +761,24 @@
     <string name="campaign_report_update_success">Đã cập nhật kết quả kiểm thử! Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
     <string name="campaign_report_resubmit_success">Đã nộp lại báo cáo! Credit tạm nhận sẽ được cấp lại nếu trước đó đã bị thu hồi. Chủ app có 8 giờ để duyệt (+2 Credit nếu được duyệt).</string>
     <string name="campaign_report_submit_success_format">Đã gửi kết quả kiểm thử! Bạn tạm nhận +%1$d Credit. Chủ app có 8 giờ để duyệt (+2 Credit thưởng nếu được duyệt).</string>
-    <string name="campaign_close_success">Đã đóng chiến dịch.</string>
+
+    <!-- Credit reward overlay -->
+    <string name="credit_unit">Credit</string>
+    <string name="credit_reward_amount_format">+%1$d</string>
+    <string name="credit_reward_test_submitted_title">Đã gửi kết quả kiểm thử</string>
+    <string name="credit_reward_test_submitted_subtitle_format">%1$s · Credit tạm nhận</string>
+    <string name="credit_reward_provisional_label">Credit tạm nhận</string>
+    <string name="credit_reward_owner_approved_title">Đã duyệt kết quả kiểm thử</string>
+    <string name="credit_reward_tester_amount_format">Tester +%1$d Credit</string>
+    <string name="credit_reward_you_amount_format">Bạn +%1$d Credit</string>
+    <string name="credit_reward_tip_amount_format">Tip +%1$d Credit</string>
+    <string name="credit_reward_remote_title">Báo cáo đã được duyệt</string>
+    <string name="credit_reward_remote_subtitle">Chủ app đã duyệt kết quả kiểm thử của bạn</string>
+    <string name="credit_reward_quest_title">Đã nhận thưởng nhiệm vụ</string>
+    <string name="credit_reward_quest_subtitle">Tiếp tục test để đạt mốc tiếp theo</string>
+    <string name="credit_reward_topup_title">Nạp Credit thành công</string>
+    <string name="credit_reward_topup_subtitle">Số dư mới đã sẵn sàng</string>
+    <string name="credit_reward_balance_format">Số dư mới: %1$d Credit</string>
 
     <!-- ViewModel messages: create campaign -->
     <string name="create_slot_cost_format">Bạn cần %1$d Credit để mở khóa Slot %2$d (hiện có %3$d Credit).</string>
@@ -921,7 +952,7 @@
     <string name="oad_paused_admin_note_format">Lý do: %1$s</string>
     <string name="oad_paused_by_admin_error">App đang bị Admin tạm dừng. Vui lòng liên hệ Admin.</string>
     <string name="oad_resume_sub_admin">Bị Admin tạm dừng — mở lại để hiển thị trên Trang chủ.</string>
-    <string name="oad_owner_you">Bạn</string>
+    <string name="oad_owner_unknown">Chủ app</string>
     <string name="oad_installing_title">Người đang cài</string>
     <string name="oad_installing_subtitle_format">%1$d người đang cài · xem từng người và báo cáo của họ</string>
     <string name="oad_reports_title">Báo cáo của tester</string>
@@ -957,8 +988,6 @@
     <string name="oad_renew_dialog_desc_format">Gia hạn thêm %1$d ngày sử dụng cho Slot %2$d với chi phí %3$d Credit.</string>
     <string name="oad_renew_dialog_balance_format">Số dư hiện tại: %1$d Credit</string>
     <string name="oad_renew_btn_format">Gia hạn (%1$d Credit)</string>
-    <string name="oad_not_installed_title">Ứng dụng chưa được cài đặt</string>
-    <string name="oad_not_installed_desc_format">Ứng dụng \"%1$s\" (%2$s) chưa được cài trên thiết bị này. Bạn có muốn mở link để cài đặt không?</string>
     <string name="oad_install_btn">Tải cài đặt</string>
     <string name="oad_slot_permanent_label">Slot 1 (Vĩnh viễn)</string>
     <string name="oad_summary_line_format">Chủ app: %1$s · %2$d điểm · %3$s · Mục tiêu %4$d test/ngày</string>
@@ -1020,6 +1049,7 @@
     <string name="oad_status_remaining_format">⏳ Còn %1$dh</string>
     <string name="oad_status_approved">✓ Đã duyệt</string>
     <string name="oad_status_rejected">✕ Từ chối</string>
+    <string name="oad_status_unknown">• %1$s</string>
     <string name="oad_analyzing">Đang phân tích độ tương đồng ảnh...</string>
     <string name="oad_dup_warning_format">Cảnh báo trùng lặp: %1$d%%</string>
     <string name="oad_new_feature_format">Ảnh tính năng mới (Khác biệt %1$d%%)</string>
@@ -1044,11 +1074,72 @@
     <string name="oad_reject_custom_placeholder">Nhập lý do cụ thể...</string>
     <string name="oad_reject_fallback_reason">Chưa đạt yêu cầu kiểm thử</string>
     <string name="oad_reject_confirm_btn">Xác nhận từ chối</string>
-    <string name="repo_campaign_not_found">Không tìm thấy chiến dịch.</string>
     <string name="repo_credit_note_approved_bonus_format">Chủ app duyệt kết quả kiểm thử (Thưởng thêm +%1$d Credit)</string>
     <string name="repo_credit_note_rejected_clawback">Thu hồi Credit tạm nhận do chủ app từ chối kết quả</string>
     <string name="repo_connection_failed">Không thể kết nối đến máy chủ.</string>
     <string name="account_locked_email_subject">[12 Tester] Yêu cầu mở khóa tài khoản - %1$s</string>
     <string name="account_locked_email_body_template">Chào Quản trị viên 12 Tester,\n\nTài khoản của tôi bị tạm khóa do nhận cảnh báo kiểm thử.\nEmail: %1$s\nLý do / Giải trình:\n[Vui lòng nhập lý do của bạn tại đây...]\n\nKính nhờ Admin hỗ trợ kiểm tra và mở khóa tài khoản giúp tôi.\nXin cảm ơn!</string>
     <string name="campaign_history_reward_format">✓ +%1$d Credit</string>
+
+    <!-- Missions (nhiệm vụ do người dùng tạo) -->
+    <string name="mission_create_btn">Mở nhiệm vụ</string>
+    <string name="mission_create_title">Mở nhiệm vụ</string>
+    <string name="mission_create_app_label">Chọn 1 app đang đăng của bạn</string>
+    <string name="mission_create_no_apps">Bạn chưa có app nào đang đăng. Hãy đăng app trước rồi mở nhiệm vụ cho app đó.</string>
+    <string name="mission_title_label">Đặt tên nhiệm vụ</string>
+    <string name="mission_desc_label">Mô tả nhiệm vụ</string>
+    <string name="mission_participants_label">Số người tham gia</string>
+    <string name="mission_days_label">Số ngày nhận nhiệm vụ</string>
+    <string name="mission_reward_label">Số Credit trả cho người tham gia</string>
+    <string name="mission_reward_hint">Tối thiểu 10 Credit/1 lần tham gia</string>
+    <string name="mission_fee_summary_format">Phí nền tảng: 50 Credit × %1$d ngày = %2$d Credit (trừ ngay khi mở nhiệm vụ)</string>
+    <string name="mission_min_balance_note">Bạn cần có tối thiểu 300 Credit để mở nhiệm vụ. Thưởng cho người tham gia sẽ được trừ từ số dư của bạn mỗi khi họ hoàn thành.</string>
+    <string name="mission_balance_format">Số dư hiện tại: %1$d Credit</string>
+    <string name="mission_create_cta">Mở nhiệm vụ</string>
+    <string name="mission_create_success">Đã mở nhiệm vụ</string>
+    <string name="mission_err_title_required">Vui lòng nhập tên nhiệm vụ</string>
+    <string name="mission_err_desc_required">Vui lòng nhập mô tả nhiệm vụ</string>
+    <string name="mission_err_app_required">Vui lòng chọn 1 app của bạn</string>
+    <string name="mission_err_reward_min">Thưởng tối thiểu 10 Credit/1 lần tham gia</string>
+    <string name="mission_err_min_balance_format">Cần tối thiểu 300 Credit để mở nhiệm vụ (bạn đang có %1$d)</string>
+    <string name="mission_err_fee_format">Không đủ Credit trả phí nền tảng %1$d Credit (bạn đang có %2$d)</string>
+    <string name="quest_tab_missions">Nhiệm vụ App</string>
+    <string name="mission_list_empty">Chưa có nhiệm vụ nào đang mở</string>
+    <string name="mission_list_empty_hint">Chủ app có thể mở nhiệm vụ từ tab App của tôi</string>
+    <string name="mission_reward_badge_format">🪙 +%1$d Credit/lượt</string>
+    <string name="mission_slots_format">Còn %1$d/%2$d chỗ</string>
+    <string name="mission_days_remaining_format">Còn %1$d ngày nhận nhiệm vụ</string>
+    <string name="mission_join_btn">Nhận nhiệm vụ</string>
+    <string name="mission_joined_cta">Đã nhận — đi test app để nhận Credit</string>
+    <string name="mission_completed_badge">Hoàn thành ✓</string>
+    <string name="mission_mine_badge">Nhiệm vụ của bạn</string>
+    <string name="mission_join_success">Đã nhận nhiệm vụ! Hãy test app và nộp báo cáo để nhận Credit.</string>
+    <string name="mission_status_full">Đã đủ người</string>
+    <string name="mission_status_stopped">Đã dừng (hết Credit)</string>
+    <string name="mission_status_expired">Đã hết hạn</string>
+    <string name="mission_by_format">bởi %1$s</string>
+    <!-- Quản lý nhiệm vụ (chủ nhiệm vụ) -->
+    <string name="mission_manage_title">Quản lý nhiệm vụ</string>
+    <string name="mission_manage_sub_format">Nhiệm vụ: %1$s</string>
+    <string name="mission_manage_reward_format">Thưởng: %1$d Credit/lượt</string>
+    <string name="mission_manage_joined_format">Đã nhận: %1$d/%2$d người</string>
+    <string name="mission_manage_days_left_format">Thời hạn còn: %1$d ngày</string>
+    <string name="mission_manage_status_label">Trạng thái: %1$s</string>
+    <string name="mission_manage_pause_btn">Dừng nhiệm vụ</string>
+    <string name="mission_manage_resume_btn">Tiếp tục nhiệm vụ</string>
+    <string name="mission_manage_delete_btn">Xóa nhiệm vụ</string>
+    <string name="mission_manage_pause_confirm_q">Dừng nhiệm vụ này?</string>
+    <string name="mission_manage_pause_confirm_desc">Khi dừng: không nhận người mới và không trả thưởng nhiệm vụ khi duyệt báo cáo, cho đến khi bạn bấm tiếp tục. Thời hạn vẫn trôi bình thường.</string>
+    <string name="mission_manage_delete_confirm_q">Xóa nhiệm vụ này?</string>
+    <string name="mission_manage_delete_confirm_desc">Nhiệm vụ sẽ bị xóa vĩnh viễn khỏi danh sách. Phí nền tảng đã trả KHÔNG được hoàn lại. Người đã nhận nhưng chưa hoàn thành sẽ mất cơ hội nhận thưởng.</string>
+    <string name="mission_manage_paused_toast">Đã dừng nhiệm vụ</string>
+    <string name="mission_manage_resumed_toast">Đã tiếp tục nhiệm vụ</string>
+    <string name="mission_manage_deleted_toast">Đã xóa nhiệm vụ</string>
+    <string name="mission_manage_not_paused">Nhiệm vụ không đang dừng</string>
+    <string name="mission_manage_campaign_closed">App đã không còn nhận tester, không thể tiếp tục nhiệm vụ</string>
+    <string name="mission_err_already_exists">App này đã có nhiệm vụ đang mở</string>
+    <string name="mission_err_not_found">Nhiệm vụ không còn tồn tại</string>
+    <string name="mission_manage_status_active">Đang hoạt động</string>
+    <string name="mission_status_paused">Tạm dừng</string>
+
 </resources>

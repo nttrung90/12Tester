@@ -60,11 +60,12 @@ fun CreditTopupBadge(
                 fontSize = 14.sp,
             )
             Spacer(Modifier.width(4.dp))
-            Text(
-                text = "$credits",
+            AnimatedCreditBalance(
+                balance = credits,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                accessibilityLabel = stringResource(R.string.credit_badge_format, credits),
             )
         }
 

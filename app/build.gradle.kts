@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -26,8 +27,8 @@ android {
         applicationId = "com.ntt.crosstest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "0.8"
+        versionCode = 17
+        versionName = "0.9.7"
 
         buildConfigField("String", "SUPABASE_URL", "\"${appSecret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${appSecret("SUPABASE_ANON_KEY")}\"")
@@ -38,9 +39,11 @@ android {
         create("release") {
             val keystorePath = appSecret("KEYSTORE_FILE")
             if (keystorePath.isNotEmpty()) {
-                val keystoreFile = file(keystorePath).let {
-                    if (it.isAbsolute) it else rootProject.file(keystorePath)
-                }
+                // Check the raw string: Project.file() already resolves to an
+                // absolute path, so testing the resolved file would always be true.
+                val keystoreFile =
+                    if (File(keystorePath).isAbsolute) file(keystorePath)
+                    else rootProject.file(keystorePath)
                 if (keystoreFile.exists()) {
                     storeFile = keystoreFile
                     storePassword = appSecret("KEYSTORE_PASSWORD")
@@ -53,7 +56,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 shrinks the app and embeds mapping.txt inside the AAB,
+            // so Play Console gets the deobfuscation file automatically
+            // (clears the "missing deobfuscation file" warning).
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

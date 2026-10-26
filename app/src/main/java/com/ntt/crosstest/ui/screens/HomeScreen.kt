@@ -7,6 +7,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -112,12 +113,15 @@ import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.CampaignStats
 import com.ntt.crosstest.data.LeaderboardUser
+import com.ntt.crosstest.data.MyRank
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.Mission
 import com.ntt.crosstest.data.QuestSummary
 import com.ntt.crosstest.ui.components.CampaignCard
 import com.ntt.crosstest.ui.components.MyAppCard
 import com.ntt.crosstest.ui.components.CreditTopupBadge
 import com.ntt.crosstest.ui.components.CreditTopupBottomSheet
+import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.DailyTaskCard
 import com.ntt.crosstest.ui.components.NotificationBottomSheet
 import com.ntt.crosstest.ui.screens.QuestsScreen
@@ -131,6 +135,7 @@ fun HomeScreen(
     onOwnerAppClick: (String) -> Unit = onCampaignClick,
     onOwnerReportNotificationClick: (String) -> Unit = onOwnerAppClick,
     onCreateClick: () -> Unit,
+    onCreateMissionClick: () -> Unit = {},
     onAdminPanelClick: () -> Unit = {},
     onAdminReportsClick: () -> Unit = {},
     onAccountLocked: () -> Unit = {},
@@ -140,7 +145,14 @@ fun HomeScreen(
     val app = context.applicationContext as TestCheoApp
     val viewModel: HomeViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { HomeViewModel(app.campaignRepository, app.applicationContext, Localizer(app)) }
+            initializer {
+                HomeViewModel(
+                    repository = app.campaignRepository,
+                    context = app.applicationContext,
+                    localizer = Localizer(app),
+                    reportSubmitManager = app.reportSubmitManager,
+                )
+            }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -299,9 +311,12 @@ fun HomeScreen(
                 isTopupProcessing = true
                 viewModel.processTopup(pkg) { success, msg ->
                     isTopupProcessing = false
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     if (success) {
+                        // The reward overlay is the success feedback and shows
+                        // the receipt + updated balance; avoid a duplicate Toast.
                         showTopupBottomSheet = false
+                    } else {
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }
                 }
             },
@@ -496,19 +511,45 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (pagerState.currentPage == 2) {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        if (uiState.isAuthenticated) {
-                            onCreateClick()
-                        } else {
-                            showLoginPromptDialog = true
-                        }
-                    },
-                ) {
-                    Text(
-                        text = stringResource(R.string.post_app_btn),
-                        fontWeight = FontWeight.Bold,
-                    )
+                // 2 FAB chồng nhau: "Đăng APP" + "Mở nhiệm vụ" (MyTab chừa sẵn 130dp)
+                Column(horizontalAlignment = Alignment.End) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            if (uiState.isAuthenticated) {
+                                onCreateClick()
+                            } else {
+                                showLoginPromptDialog = true
+                            }
+                        },
+                    ) {
+                        Text(
+                            text = stringResource(R.string.post_app_btn),
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    ExtendedFloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        onClick = {
+                            if (uiState.isAuthenticated) {
+                                onCreateMissionClick()
+                            } else {
+                                showLoginPromptDialog = true
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.AddTask,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.mission_create_btn),
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             } else if (pagerState.currentPage == 0) {
                 FloatingActionButton(
@@ -609,12 +650,28 @@ fun HomeScreen(
                     questSummary = uiState.questSummary,
                     userCredits = uiState.userCredits,
                     claimingMilestone = uiState.claimingMilestone,
+                    missions = uiState.missions,
+                    isMissionsLoading = uiState.isMissionsLoading,
+                    joiningMissionId = uiState.joiningMissionId,
+                    onJoinMission = { missionId ->
+                        viewModel.joinMission(missionId) { success, msg ->
+                            if (success) {
+                                Toast.makeText(context, context.getString(R.string.mission_join_success), Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    onMissionAppClick = { campaignId -> onCampaignClick(campaignId) },
                     isAuthenticated = uiState.isAuthenticated,
                     isLoading = uiState.isLoading,
                     onRefresh = { viewModel.refresh(context, forceRefresh = true) },
                     onClaimReward = { type, milestone ->
-                        viewModel.claimQuestReward(type, milestone) { _, msg ->
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        viewModel.claimQuestReward(type, milestone) { success, msg ->
+                            // Success is announced by the reward overlay.
+                            if (!success) {
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     },
                     onRequireLogin = { showLoginPromptDialog = true },
@@ -647,6 +704,9 @@ fun HomeScreen(
                     testLeaderboard = uiState.testLeaderboard,
                     isLoading = uiState.isLeaderboardLoading,
                     isTestLoading = uiState.isTestLeaderboardLoading,
+                    myRank = uiState.myRank,
+                    currentUserId = uiState.userProfile?.id,
+                    myDisplayName = uiState.userProfile?.displayName,
                     onRefresh = { viewModel.refreshLeaderboard(forceRefresh = true) },
                     onTestRefresh = { viewModel.refreshTestLeaderboard(forceRefresh = true) },
                     onTestTabOpened = { viewModel.ensureTestLeaderboardLoaded() },
@@ -661,6 +721,15 @@ fun HomeScreen(
         }
     }
 }
+
+    // Overlays the Scaffold so quest/top-up rewards stay visible above the
+    // bottom sheet while it dismisses. Offset below the TopAppBar so the
+    // count-up in CreditTopupBadge remains visible during the animation.
+    CreditRewardOverlay(
+        reward = uiState.reward,
+        onDismiss = viewModel::clearReward,
+        modifier = Modifier.padding(top = 64.dp),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -1119,6 +1188,9 @@ private fun LeaderboardTab(
     testLeaderboard: List<LeaderboardUser>,
     isLoading: Boolean,
     isTestLoading: Boolean,
+    myRank: MyRank?,
+    currentUserId: String?,
+    myDisplayName: String?,
     onRefresh: () -> Unit,
     onTestRefresh: () -> Unit,
     onTestTabOpened: () -> Unit,
@@ -1143,23 +1215,7 @@ private fun LeaderboardTab(
         modifier = modifier.fillMaxSize(),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = stringResource(if (isTestTab) R.string.leaderboard_test_title else R.string.leaderboard_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(if (isTestTab) R.string.leaderboard_test_subtitle else R.string.leaderboard_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Spacer(Modifier.height(8.dp))
 
             TabRow(
                 selectedTabIndex = if (SHOW_LEADERBOARD_TEST_TAB) selectedTab else 0,
@@ -1191,6 +1247,16 @@ private fun LeaderboardTab(
 
             Spacer(Modifier.height(8.dp))
 
+            // Thẻ ghim hạng của người dùng hiện tại (chỉ tab Top Credit, đã đăng nhập).
+            if (!isTestTab && currentUserId != null && myRank != null && myRank.rank > 0) {
+                MyRankCard(
+                    myRank = myRank,
+                    displayName = myDisplayName,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
             if (activeList.isEmpty() && !activeLoading) {
                 Box(
                     modifier = Modifier
@@ -1213,7 +1279,10 @@ private fun LeaderboardTab(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     itemsIndexed(activeList, key = { index, user -> "lb_${selectedTab}_${user.userId}_$index" }) { _, user ->
-                        LeaderboardUserCard(user = user)
+                        LeaderboardUserCard(
+                            user = user,
+                            isCurrentUser = currentUserId != null && user.userId == currentUserId,
+                        )
                     }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
@@ -1223,7 +1292,7 @@ private fun LeaderboardTab(
 }
 
 @Composable
-private fun LeaderboardUserCard(user: LeaderboardUser) {
+private fun LeaderboardUserCard(user: LeaderboardUser, isCurrentUser: Boolean = false) {
     val rankBadge = when (user.rank) {
         1 -> "🥇"
         2 -> "🥈"
@@ -1236,12 +1305,17 @@ private fun LeaderboardUserCard(user: LeaderboardUser) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isTop3) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            containerColor = when {
+                isCurrentUser -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
+                isTop3 -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
             }
         ),
+        border = if (isCurrentUser) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+        } else {
+            null
+        },
         shape = RoundedCornerShape(12.dp),
     ) {
         Row(
@@ -1273,13 +1347,20 @@ private fun LeaderboardUserCard(user: LeaderboardUser) {
 
             // User Info
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = user.displayName.ifBlank { "Tester #${user.rank}" },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (isTop3) FontWeight.Bold else FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = user.displayName.ifBlank { "Tester #${user.rank}" },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (isTop3) FontWeight.Bold else FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (isCurrentUser) {
+                        Spacer(Modifier.width(8.dp))
+                        YouBadge()
+                    }
+                }
                 Spacer(Modifier.height(2.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
@@ -1323,6 +1404,115 @@ private fun LeaderboardUserCard(user: LeaderboardUser) {
             }
         }
     }
+}
+
+/** Thẻ ghim "Hạng của bạn" đầu tab Xếp hạng — hạng chính xác kể cả khi ngoài Top 100. */
+@Composable
+private fun MyRankCard(myRank: MyRank, displayName: String?, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.leaderboard_my_rank_title),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = if (myRank.totalUsers > 0) {
+                        stringResource(R.string.leaderboard_rank_of_total, myRank.rank, myRank.totalUsers)
+                    } else {
+                        "#${myRank.rank}"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = displayName?.takeIf { it.isNotBlank() }
+                                ?: stringResource(R.string.leaderboard_you),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        YouBadge()
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.test_count_format, myRank.checkinCount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = stringResource(R.string.app_count_format, myRank.campaignsCount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                // Credit Badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "🪙 ${stringResource(R.string.credit_badge_format, myRank.credits)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun YouBadge() {
+    Text(
+        text = stringResource(R.string.leaderboard_you),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    )
 }
 
 @Composable

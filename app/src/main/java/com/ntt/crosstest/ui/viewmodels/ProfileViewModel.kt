@@ -12,6 +12,7 @@ import com.ntt.crosstest.data.CreditLog
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.data.SessionCacheManager
+import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.ui.screens.GoogleSignInOutcome
 import com.ntt.crosstest.ui.screens.requestGoogleSignIn
@@ -35,7 +36,8 @@ data class ProfileUiState(
     val profile: Profile? = null,
     val email: String? = null,
     val reminderEnabled: Boolean = true,
-    val appLanguage: String = com.ntt.crosstest.data.SettingsRepository.LANGUAGE_SYSTEM,
+    val appLanguage: String = SettingsRepository.LANGUAGE_SYSTEM,
+    val appTheme: String = SettingsRepository.THEME_SYSTEM,
     val signedOut: Boolean = false,
     val error: String? = null,
     val creditLogs: List<CreditLog> = emptyList(),
@@ -96,6 +98,11 @@ class ProfileViewModel(
         viewModelScope.launch {
             app.settingsRepository.appLanguage.collect { lang ->
                 _uiState.update { it.copy(appLanguage = lang) }
+            }
+        }
+        viewModelScope.launch {
+            app.settingsRepository.appTheme.collect { theme ->
+                _uiState.update { it.copy(appTheme = theme) }
             }
         }
     }
@@ -291,6 +298,12 @@ class ProfileViewModel(
     fun setAppLanguage(languageCode: String) {
         viewModelScope.launch {
             app.settingsRepository.setAppLanguage(languageCode)
+        }
+    }
+
+    fun setAppTheme(theme: String) {
+        viewModelScope.launch {
+            app.settingsRepository.setAppTheme(theme)
         }
     }
 

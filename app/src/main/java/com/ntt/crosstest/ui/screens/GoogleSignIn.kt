@@ -1,6 +1,8 @@
 package com.ntt.crosstest.ui.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
@@ -14,6 +16,16 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.data.SettingsRepository
 
 private const val TAG = "GoogleSignIn"
+
+/** Walks the context chain to find the hosting Activity, if any. */
+private fun Context.findActivity(): Activity? {
+    var current: Context = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
 
 /**
  * Result of the Credential Manager Google flow. Display name / avatar come
@@ -48,6 +60,17 @@ sealed interface GoogleSignInOutcome {
 
 suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSignInOutcome {
     val localizedContext = SettingsRepository.wrap(context)
+    val activityContext = context.findActivity()
+    if (activityContext == null) {
+        Log.w(
+            TAG,
+            "No Activity context (${context.javaClass.name}); the Google selector UI " +
+                "fails on the Play Services backend (Android 13 and below)"
+        )
+    }
+    // Play Services launches its selector UI via startActivity on this context,
+    // which requires a real Activity on Android 13 and below.
+    val credentialContext = activityContext ?: context
     val cleanClientId = webClientId.trim()
     if (cleanClientId.isBlank()) {
         return GoogleSignInOutcome.Error(
@@ -55,7 +78,7 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
         )
     }
 
-    val credentialManager = CredentialManager.create(context)
+    val credentialManager = CredentialManager.create(credentialContext)
 
     // Flow 1: Explicit button click flow (GetSignInWithGoogleOption) - recommended by Google for button taps
     try {
@@ -64,7 +87,7 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
             .addCredentialOption(signInOption)
             .build()
 
-        val response = credentialManager.getCredential(context, request)
+        val response = credentialManager.getCredential(credentialContext, request)
         val googleCredential = GoogleIdTokenCredential.createFrom(response.credential.data)
         return GoogleSignInOutcome.Success(
             GoogleSignInResult(
@@ -89,7 +112,7 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
                 .addCredentialOption(googleIdOption)
                 .build()
 
-            val response = credentialManager.getCredential(context, request)
+            val response = credentialManager.getCredential(credentialContext, request)
             val googleCredential = GoogleIdTokenCredential.createFrom(response.credential.data)
             GoogleSignInOutcome.Success(
                 GoogleSignInResult(
@@ -108,7 +131,7 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
             )
         } catch (e: GetCredentialException) {
             val msg = e.message ?: e.javaClass.simpleName
-            Log.e(TAG, "GetCredentialException: $msg", e)
+            Log.e(TAG, "GetCredentialException: $msg (flow 1: ${eFirst.message})", e)
             GoogleSignInOutcome.Error(
                 localizedContext.getString(R.string.google_signin_fetch_error_format, msg)
             )

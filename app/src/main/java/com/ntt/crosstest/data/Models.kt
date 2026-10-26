@@ -201,6 +201,16 @@ data class LeaderboardUser(
     val rank: Int = 0,
 )
 
+/** Hạng của người dùng hiện tại (RPC get_my_rank_v1) — rank 0 = chưa xác định. */
+@Serializable
+data class MyRank(
+    val rank: Int = 0,
+    val credits: Int = 0,
+    val checkinCount: Int = 0,
+    val campaignsCount: Int = 0,
+    val totalUsers: Int = 0,
+)
+
 @Serializable
 data class TesterReport(
     @SerialName("id") val id: String? = null,
@@ -253,7 +263,7 @@ data class TesterReport(
             createdDate == today
         } catch (_: Exception) {
             try {
-                val todayStr = java.time.LocalDate.now().toString()
+                val todayStr = com.ntt.crosstest.util.VnTime.today().toString()
                 createdAt.take(10) == todayStr
             } catch (_: Exception) {
                 false
@@ -847,18 +857,6 @@ data class MyDashboardParams(
     @SerialName("p_include_leaderboard") val includeLeaderboard: Boolean = false,
 )
 
-/** Tham số RPC `get_next_untested_campaign` (migration 021). */
-@Serializable
-data class NextCampaignParams(
-    @SerialName("p_current_id") val currentCampaignId: String,
-)
-
-/** Kết quả RPC `get_next_untested_campaign` — campaign null khi không còn app phù hợp. */
-@Serializable
-data class NextCampaignResult(
-    @SerialName("campaign") val campaign: Campaign? = null,
-)
-
 /** Một thành viên tester kèm thống kê check-in (RPC `get_campaign_detail`). */
 @Serializable
 data class CampaignDetailTester(
@@ -907,6 +905,11 @@ data class CampaignIdsParams(
 data class LeaderboardParams(
     @SerialName("p_limit") val limit: Int = 100,
     /** 'credit' = xếp theo Credits (mặc định) — 'test' = xếp theo tổng lượt test. */
+    @SerialName("p_sort") val sort: String = "credit",
+)
+
+@Serializable
+data class MyRankParams(
     @SerialName("p_sort") val sort: String = "credit",
 )
 
@@ -963,6 +966,114 @@ data class AdminUpdateReportStatusParams(
 data class AdminReplyContactReportParams(
     @SerialName("p_report_id") val reportId: String,
     @SerialName("p_message") val message: String,
+)
+
+// ============================================================================
+// Missions — nhiệm vụ do người dùng tạo (migration 039)
+// ============================================================================
+
+/** Một nhiệm vụ trong tab "Nhiệm vụ App" (kết quả RPC `get_open_missions`). */
+@Serializable
+data class Mission(
+    @SerialName("id") val id: String = "",
+    @SerialName("title") val title: String = "",
+    @SerialName("description") val description: String = "",
+    @SerialName("reward_credits") val rewardCredits: Int = 0,
+    @SerialName("max_participants") val maxParticipants: Int = 0,
+    @SerialName("participant_count") val participantCount: Int = 0,
+    /** open | full | stopped_no_credits | expired | paused_by_creator | deleted */
+    @SerialName("status") val status: String = "open",
+    @SerialName("ends_at") val endsAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("app_name") val appName: String = "",
+    @SerialName("icon_url") val iconUrl: String? = null,
+    @SerialName("package_name") val packageName: String = "",
+    @SerialName("creator_id") val creatorId: String = "",
+    @SerialName("creator_name") val creatorName: String = "",
+    @SerialName("is_mine") val isMine: Boolean = false,
+    @SerialName("has_joined") val hasJoined: Boolean = false,
+    @SerialName("has_completed") val hasCompleted: Boolean = false,
+) {
+    val isActive: Boolean get() = status == "open" || status == "full"
+    val isFull: Boolean get() = status == "full"
+    val isPaused: Boolean get() = status == "paused_by_creator"
+    val isDeleted: Boolean get() = status == "deleted"
+    val isStopped: Boolean get() = status == "stopped_no_credits"
+    val isExpired: Boolean get() = status == "expired"
+    val slotsRemaining: Int get() = (maxParticipants - participantCount).coerceAtLeast(0)
+
+    /** Số ngày nhận nhiệm vụ còn lại (làm tròn lên); null khi không parse được. */
+    val daysRemaining: Int?
+        get() {
+            val raw = endsAt ?: return null
+            return try {
+                val end = java.time.OffsetDateTime.parse(raw)
+                val remaining = java.time.temporal.ChronoUnit.SECONDS.between(
+                    java.time.OffsetDateTime.now(),
+                    end,
+                )
+                Math.ceil(remaining / 86400.0).toInt().coerceAtLeast(0)
+            } catch (_: Exception) {
+                null
+            }
+        }
+}
+
+@Serializable
+data class CreateMissionParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_title") val title: String,
+    @SerialName("p_description") val description: String,
+    @SerialName("p_max_participants") val maxParticipants: Int,
+    @SerialName("p_duration_days") val durationDays: Int,
+    @SerialName("p_reward_credits") val rewardCredits: Int,
+)
+
+@Serializable
+data class CreateMissionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("fee") val fee: Int = 0,
+    @SerialName("balance") val balance: Int = 0,
+    @SerialName("ends_at") val endsAt: String? = null,
+)
+
+@Serializable
+data class JoinMissionParams(
+    @SerialName("p_mission_id") val missionId: String,
+)
+
+@Serializable
+data class JoinMissionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("status") val status: String = "open",
+)
+
+@Serializable
+data class OpenMissionsResult(
+    @SerialName("missions") val missions: List<Mission> = emptyList(),
+)
+
+/** Kết quả RPC `get_campaign_mission` — mission hiện tại của 1 app (null nếu chưa có/đã xóa). */
+@Serializable
+data class CampaignMissionResult(
+    @SerialName("mission") val mission: Mission? = null,
+)
+
+@Serializable
+data class MissionIdParams(
+    @SerialName("p_mission_id") val missionId: String,
+)
+
+/** Kết quả chung cho pause_mission / resume_mission / delete_mission. */
+@Serializable
+data class MissionActionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("status") val status: String = "",
 )
 
 

@@ -1,6 +1,9 @@
 package com.ntt.crosstest.ui.screens
 
 import androidx.activity.compose.LocalActivity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,9 +32,12 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Facebook
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.AlertDialog
@@ -81,7 +87,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -94,11 +102,30 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.SettingsRepository
+import com.ntt.crosstest.ui.components.AnimatedCreditBalance
 import com.ntt.crosstest.ui.viewmodels.ProfileViewModel
 import com.ntt.crosstest.util.PlayStoreUpdateChecker
 import com.ntt.crosstest.util.PlayUpdateResult
 import com.ntt.crosstest.util.formatIsoUtcToLocal
 import kotlinx.coroutines.async
+
+private const val WEBSITE_URL = "https://app.netvn.net/vi/apps/12-cross-testers"
+private const val ZALO_URL = "https://zalo.me/g/cc0vbi7igt77w10yikch"
+private const val FACEBOOK_URL = "https://www.facebook.com/groups/1661150262357027"
+
+private fun openExternalLink(context: Context, url: String) {
+    try {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                // LocalContext is a localized wrapper (not an Activity), so the
+                // intent needs NEW_TASK just like openStore().
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+    } catch (_: Exception) {
+        Toast.makeText(context, R.string.oad_open_link_failed, Toast.LENGTH_SHORT).show()
+    }
+}
 
 private data class UpdatePrompt(
     val config: AppConfig,
@@ -143,6 +170,7 @@ fun ProfileScreen(
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     var showCreditHistoryDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    var showThemeDialog by rememberSaveable { mutableStateOf(false) }
     var showChangePasswordDialog by rememberSaveable { mutableStateOf(false) }
     var showContactDialog by rememberSaveable { mutableStateOf(false) }
     var showSlotsDialog by rememberSaveable { mutableStateOf(false) }
@@ -394,6 +422,14 @@ fun ProfileScreen(
         )
     }
 
+    if (showThemeDialog) {
+        ThemeSelectionDialog(
+            currentTheme = uiState.appTheme,
+            onThemeSelected = viewModel::setAppTheme,
+            onDismiss = { showThemeDialog = false },
+        )
+    }
+
     if (showCreditHistoryDialog) {
         CreditHistoryDialog(
             logs = uiState.creditLogs,
@@ -568,7 +604,9 @@ fun ProfileScreen(
             item {
                 SettingsSection(
                     currentLanguage = uiState.appLanguage,
+                    currentTheme = uiState.appTheme,
                     onLanguageClick = { showLanguageDialog = true },
+                    onThemeClick = { showThemeDialog = true },
                     reminderEnabled = uiState.reminderEnabled,
                     onReminderChange = viewModel::setReminderEnabled,
                     isCheckingUpdate = isCheckingUpdate,
@@ -718,7 +756,9 @@ fun ProfileScreen(
             item {
                 SettingsSection(
                     currentLanguage = uiState.appLanguage,
+                    currentTheme = uiState.appTheme,
                     onLanguageClick = { showLanguageDialog = true },
+                    onThemeClick = { showThemeDialog = true },
                     reminderEnabled = uiState.reminderEnabled,
                     onReminderChange = viewModel::setReminderEnabled,
                     onChangePasswordClick = { showChangePasswordDialog = true },
@@ -848,13 +888,29 @@ private fun ProfileHeader(
                         .clickable { onCreditClick() }
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
-                    Text(
-                        text = credits?.let { "🪙 ${stringResource(R.string.credit_badge_format, it)}" }
-                            ?: stringResource(R.string.credit_unknown),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
+                    if (credits != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "🪙",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            AnimatedCreditBalance(
+                                balance = credits,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                accessibilityLabel = stringResource(R.string.credit_badge_format, credits),
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = stringResource(R.string.credit_unknown),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
                 }
             }
             email?.let {
@@ -1002,7 +1058,9 @@ internal fun CreditHistoryDialog(
 @Composable
 private fun SettingsSection(
     currentLanguage: String,
+    currentTheme: String,
     onLanguageClick: () -> Unit,
+    onThemeClick: () -> Unit,
     reminderEnabled: Boolean,
     onReminderChange: (Boolean) -> Unit,
     onChangePasswordClick: (() -> Unit)? = null,
@@ -1010,6 +1068,13 @@ private fun SettingsSection(
     isCheckingUpdate: Boolean = false,
     onCheckUpdateClick: () -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val themeLabel = when (currentTheme) {
+        SettingsRepository.THEME_LIGHT -> stringResource(R.string.theme_light)
+        SettingsRepository.THEME_DARK -> stringResource(R.string.theme_dark)
+        else -> stringResource(R.string.theme_system_default)
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -1072,6 +1137,44 @@ private fun SettingsSection(
                     }
                     Text(
                         text = langText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+            // Theme Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onThemeClick() }
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.DarkMode,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.settings_theme),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = themeLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -1241,7 +1344,94 @@ private fun SettingsSection(
                     )
                 }
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+            // Community links
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val websiteAccent = MaterialTheme.colorScheme.primary
+                SocialLinkItem(
+                    label = stringResource(R.string.social_link_website),
+                    accent = websiteAccent,
+                    onClick = { openExternalLink(context, WEBSITE_URL) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Public,
+                        contentDescription = null,
+                        tint = websiteAccent,
+                        modifier = Modifier.size(26.dp),
+                    )
+                }
+
+                val zaloAccent = Color(0xFF0068FF)
+                SocialLinkItem(
+                    label = stringResource(R.string.social_link_zalo),
+                    accent = zaloAccent,
+                    onClick = { openExternalLink(context, ZALO_URL) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_zalo),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(26.dp),
+                    )
+                }
+
+                val facebookAccent = Color(0xFF1877F2)
+                SocialLinkItem(
+                    label = stringResource(R.string.social_link_facebook),
+                    accent = facebookAccent,
+                    onClick = { openExternalLink(context, FACEBOOK_URL) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Facebook,
+                        contentDescription = null,
+                        tint = facebookAccent,
+                        modifier = Modifier.size(26.dp),
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun SocialLinkItem(
+    label: String,
+    accent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(accent.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            icon()
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+        )
     }
 }
 
@@ -1479,6 +1669,98 @@ private fun LanguageSelectionDialog(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ThemeSelectionDialog(
+    currentTheme: String,
+    onThemeSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        Triple(
+            SettingsRepository.THEME_SYSTEM,
+            stringResource(R.string.theme_system_default),
+            stringResource(R.string.theme_system_desc),
+        ),
+        Triple(
+            SettingsRepository.THEME_LIGHT,
+            stringResource(R.string.theme_light),
+            stringResource(R.string.theme_light_desc),
+        ),
+        Triple(
+            SettingsRepository.THEME_DARK,
+            stringResource(R.string.theme_dark),
+            stringResource(R.string.theme_dark_desc),
+        ),
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.DarkMode,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.dialog_select_theme))
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                options.forEach { (code, title, desc) ->
+                    val isSelected = currentTheme == code
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                onThemeSelected(code)
+                                onDismiss()
+                            }
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = {
+                                onThemeSelected(code)
+                                onDismiss()
+                            },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            )
+                            Text(
+                                text = desc,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }

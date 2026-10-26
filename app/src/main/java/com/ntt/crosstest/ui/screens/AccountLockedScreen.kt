@@ -430,7 +430,10 @@ fun AccountLockedScreen(
                             val subject = Uri.encode(context.getString(R.string.account_locked_email_subject, userEmail))
                             val body = Uri.encode(context.getString(R.string.account_locked_email_body_template, emailAndId))
                             val mailtoUri = Uri.parse("mailto:$ADMIN_EMAIL?subject=$subject&body=$body")
-                            val emailIntent = Intent(Intent.ACTION_SENDTO, mailtoUri)
+                            val emailIntent = Intent(Intent.ACTION_SENDTO, mailtoUri).apply {
+                                // LocalContext is a localized wrapper (not an Activity).
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
                             try {
                                 context.startActivity(emailIntent)
                             } catch (_: Exception) {

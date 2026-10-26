@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
  */
 object InstalledAppCache {
 
+    private const val NEGATIVE_TTL_MS = 15_000L
+
     @Volatile
     private var isInitialized = false
 
@@ -25,6 +27,10 @@ object InstalledAppCache {
 
     @Volatile
     private var cachedInstalledUserApps: List<PlayStoreHelper.InstalledAppItem> = emptyList()
+
+    /** Gói đã xác nhận là CHƯA cài (pkg -> thời điểm kiểm tra) — cùng cửa sổ
+     *  15s với [ensureFresh] để tránh lặp IPC PackageManager mỗi lần refresh. */
+    private val notInstalledCache = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
     // Cache up to 120 app icons in memory
     private val iconCache = object : LruCache<String, Drawable>(120) {}
@@ -52,6 +58,8 @@ object InstalledAppCache {
                 set.add(pkg.packageName)
             }
             installedPackages = set
+            // Trạng thái cài/không cài có thể đã đổi — bỏ mọi kết quả âm cũ.
+            notInstalledCache.clear()
             isInitialized = true
             lastRefreshAt = System.currentTimeMillis()
         } catch (_: Exception) {
@@ -93,30 +101,32 @@ object InstalledAppCache {
         if (isInitialized && installedPackages.contains(cleanPkg)) {
             return true
         }
-        // 2. Official Android PackageManager query for the specific package (bypasses list filters)
+        // 2. Negative cache ngắn hạn — kết quả "chưa cài" mới kiểm tra trong
+        //    15s thì khỏi lặp lại IPC bên dưới cho cùng một package.
+        val now = System.currentTimeMillis()
+        if (notInstalledCache[cleanPkg]?.let { now - it < NEGATIVE_TTL_MS } == true) {
+            return false
+        }
+        // 3. Official Android PackageManager query for the specific package (bypasses list filters)
         val byPackageInfo = try {
             context.packageManager.getPackageInfo(cleanPkg, 0) != null
         } catch (_: Exception) {
             false
         }
-        if (byPackageInfo) {
-            synchronized(this) {
-                installedPackages = installedPackages + cleanPkg
-            }
-            return true
-        }
-        // 3. Launch intent verification
+        // 4. Launch intent verification
         val byLaunchIntent = try {
             context.packageManager.getLaunchIntentForPackage(cleanPkg) != null
         } catch (_: Exception) {
             false
         }
-        if (byLaunchIntent) {
+        if (byPackageInfo || byLaunchIntent) {
             synchronized(this) {
                 installedPackages = installedPackages + cleanPkg
             }
+            notInstalledCache.remove(cleanPkg)
             return true
         }
+        notInstalledCache[cleanPkg] = now
         return false
     }
 
@@ -147,6 +157,7 @@ object InstalledAppCache {
         }
         installedPackages = emptySet()
         cachedInstalledUserApps = emptyList()
+        notInstalledCache.clear()
         isInitialized = false
         lastRefreshAt = 0L
     }

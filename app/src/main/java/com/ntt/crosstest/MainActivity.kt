@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,12 +22,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.ntt.crosstest.data.AppConfig
@@ -38,6 +41,9 @@ import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.data.UpdateStatus
 import com.ntt.crosstest.ui.navigation.NavGraph
 import com.ntt.crosstest.ui.navigation.Routes
+import com.ntt.crosstest.ui.components.CreditReward
+import com.ntt.crosstest.ui.components.CreditRewardOverlay
+import com.ntt.crosstest.ui.components.CreditRewardType
 import com.ntt.crosstest.ui.screens.ForceUpdateScreen
 import com.ntt.crosstest.ui.screens.MissingConfigScreen
 import com.ntt.crosstest.ui.screens.OptionalUpdateDialog
@@ -59,6 +65,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val initialTheme = SettingsRepository.getSavedThemeSync(this)
+        val systemDark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+        applySystemBarIconAppearance(SettingsRepository.resolveDarkTheme(initialTheme, systemDark))
         askNotificationPermissionIfNeeded()
 
         val app = applicationContext as TestCheoApp
@@ -67,7 +78,19 @@ class MainActivity : ComponentActivity() {
             val languageSetting by app.settingsRepository.appLanguage.collectAsStateWithLifecycle(
                 initialValue = SettingsRepository.getSavedLanguageSync(this)
             )
+            val themeSetting by app.settingsRepository.appTheme.collectAsStateWithLifecycle(
+                initialValue = SettingsRepository.getSavedThemeSync(this)
+            )
             val configuration = LocalConfiguration.current
+            val systemDarkTheme =
+                (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES
+            val isDarkTheme = SettingsRepository.resolveDarkTheme(themeSetting, systemDarkTheme)
+
+            SideEffect {
+                applySystemBarIconAppearance(isDarkTheme)
+            }
+
             val currentLocale = remember(languageSetting, configuration) {
                 if (languageSetting == SettingsRepository.LANGUAGE_SYSTEM) {
                     val sysLoc = try {
@@ -85,10 +108,16 @@ class MainActivity : ComponentActivity() {
                 Locale.setDefault(currentLocale)
             }
 
-            val localizedConfig = remember(configuration, currentLocale) {
+            val localizedConfig = remember(configuration, currentLocale, isDarkTheme) {
                 Configuration(configuration).apply {
                     setLocale(currentLocale)
                     setLayoutDirection(currentLocale)
+                    uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                        (if (isDarkTheme) {
+                            Configuration.UI_MODE_NIGHT_YES
+                        } else {
+                            Configuration.UI_MODE_NIGHT_NO
+                        })
                 }
             }
             val context = LocalContext.current
@@ -96,12 +125,20 @@ class MainActivity : ComponentActivity() {
                 context.createConfigurationContext(localizedConfig)
             }
 
+            // Reward overlay for the tester's +10 provisional Credit. Kept at
+            // Activity level so it survives navigation away from the campaign.
+            var creditReward by remember { mutableStateOf<CreditReward?>(null) }
+
             CompositionLocalProvider(
                 LocalConfiguration provides localizedConfig,
                 LocalContext provides localizedContext,
+                // LocalContext above is a localized ContextImpl, so LocalActivity
+                // cannot be derived from it. Provide the real Activity explicitly
+                // for APIs that require one (Credential Manager, finishAffinity...).
+                LocalActivity provides this@MainActivity,
                 LocalActivityResultRegistryOwner provides this,
             ) {
-                TestCheoTheme {
+                TestCheoTheme(darkTheme = isDarkTheme) {
                     if (!SupabaseHolder.isInitialized()) {
                         // local.properties is missing the Supabase secrets.
                         MissingConfigScreen()
@@ -113,13 +150,26 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         val localizer = Localizer(app)
                         app.reportSubmitManager.events.collect { event ->
-                            if (event is ReportSubmitManager.SubmitEvent.Failed) {
-                                val message = localizer.get(
-                                    R.string.campaign_submit_failed_toast_format,
-                                    event.appName,
-                                    friendlyError(event.error ?: Exception(), localizer),
-                                )
-                                Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                            when (event) {
+                                is ReportSubmitManager.SubmitEvent.Failed -> {
+                                    val message = localizer.get(
+                                        R.string.campaign_submit_failed_toast_format,
+                                        event.appName,
+                                        friendlyError(event.error ?: Exception(), localizer),
+                                    )
+                                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                                }
+                                is ReportSubmitManager.SubmitEvent.Success -> {
+                                    // Extra feedback / update that earns 0 Credit
+                                    // must not show a reward overlay.
+                                    if (event.provisionalAmount > 0) {
+                                        creditReward = CreditReward(
+                                            type = CreditRewardType.TEST_SUBMITTED,
+                                            amount = event.provisionalAmount,
+                                            appName = event.appName,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -208,6 +258,12 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         NavGraph(navController = navController, startDestination = startDestination)
+
+                        // Drawn after the NavHost so it stays above every screen.
+                        CreditRewardOverlay(
+                            reward = creditReward,
+                            onDismiss = { creditReward = null },
+                        )
                     }
 
                     // 3. Optional update prompt dialog
@@ -221,6 +277,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun applySystemBarIconAppearance(isDarkTheme: Boolean) {
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !isDarkTheme
+            isAppearanceLightNavigationBars = !isDarkTheme
         }
     }
 

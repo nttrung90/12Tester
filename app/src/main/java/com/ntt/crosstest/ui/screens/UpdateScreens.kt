@@ -1,10 +1,10 @@
 package com.ntt.crosstest.ui.screens
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,10 +87,11 @@ fun ForceUpdateScreen(
     currentVersionCode: Int,
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
 
     // Block back button from bypassing update requirement
     BackHandler(enabled = true) {
-        (context as? Activity)?.finishAffinity()
+        activity?.finishAffinity()
     }
 
     Surface(
@@ -221,7 +222,7 @@ fun ForceUpdateScreen(
 
             // Exit App Button
             OutlinedButton(
-                onClick = { (context as? Activity)?.finishAffinity() },
+                onClick = { activity?.finishAffinity() },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
             ) {

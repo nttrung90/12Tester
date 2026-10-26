@@ -81,6 +81,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import com.ntt.crosstest.ui.components.AppIcon
+import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.TesterImageComparisonDialog
 import com.ntt.crosstest.util.ImageHashHelper
@@ -153,6 +154,7 @@ fun CampaignDetailScreen(
                     app.reportSubmitManager,
                     app.authRepository.currentUserId(),
                     Localizer(app),
+                    app,
                 )
             }
         }
@@ -1889,6 +1891,12 @@ fun CampaignDetailScreen(
         }
     }
     }
+
+    CreditRewardOverlay(
+        reward = uiState.reward,
+        onDismiss = viewModel::clearReward,
+        compact = true,
+    )
 
     if (previewImageUrl != null) {
         FullscreenImageViewer(

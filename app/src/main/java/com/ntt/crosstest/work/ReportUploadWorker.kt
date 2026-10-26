@@ -6,8 +6,7 @@ import androidx.work.Data
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.ntt.crosstest.data.CampaignRepository
-import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.PendingReportStore
 import com.ntt.crosstest.data.ReportSubmitPolicy
 import com.ntt.crosstest.data.SupabaseHolder
@@ -42,7 +41,10 @@ class ReportUploadWorker(
             }
         }
 
-        val repository = CampaignRepository(SupabaseHolder.get(), Localizer(applicationContext))
+        // Dùng repository chung của app: submitFeedback() invalidate các cache
+        // (dashboard, profile, detail...) mà Home/CampaignDetail đang đọc;
+        // tạo instance riêng ở đây khiến badge Credit bị cũ tới hết TTL cache.
+        val repository = (applicationContext as TestCheoApp).campaignRepository
         var uploadedUrl = request.uploadedUrl
         var uploadedHash = request.uploadedHash
 

@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -68,6 +69,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import com.ntt.crosstest.ui.components.AppIcon
+import com.ntt.crosstest.ui.components.CreditReward
+import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.ImageComparisonDialog
 import com.ntt.crosstest.ui.theme.AmberStar
@@ -164,8 +167,19 @@ fun OwnerAppDetailScreen(
     var showTipDialog by rememberSaveable { mutableStateOf(false) }
     var showProductionDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteConfirmDialog by rememberSaveable { mutableStateOf(false) }
-    var showSelfTestNotInstalledDialog by rememberSaveable { mutableStateOf(false) }
     var showRenewSlotDialog by rememberSaveable { mutableStateOf(false) }
+    var showMissionManageDialog by rememberSaveable { mutableStateOf(false) }
+    var showMissionPauseConfirm by rememberSaveable { mutableStateOf(false) }
+    var showMissionDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+
+    // Nhiệm vụ bị xóa / biến mất: tự đóng các dialog liên quan.
+    LaunchedEffect(uiState.mission) {
+        if (uiState.mission == null) {
+            showMissionManageDialog = false
+            showMissionPauseConfirm = false
+            showMissionDeleteConfirm = false
+        }
+    }
 
     val campaign = uiState.campaign
 
@@ -430,7 +444,8 @@ fun OwnerAppDetailScreen(
             // Top Summary Card
             OwnerSummaryCard(
                 campaign = campaign,
-                ownerName = uiState.ownerProfile?.displayName ?: stringResource(R.string.oad_owner_you),
+                ownerName = uiState.ownerProfile?.displayName?.takeIf { it.isNotBlank() }
+                    ?: stringResource(R.string.oad_owner_unknown),
                 ownerCredits = uiState.ownerProfile?.credits ?: 0,
                 stats = uiState.stats,
                 testers = uiState.testers,
@@ -483,6 +498,22 @@ fun OwnerAppDetailScreen(
                                     else -> stringResource(R.string.oad_pause_sub_plain)
                                 },
                                 onClick = { showPauseConfirmDialog = true },
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        }
+
+                        // Item 3.5: Quản lý nhiệm vụ (chỉ CHỦ app có nhiệm vụ chưa xóa; Admin xem app
+                        // người khác không thấy vì RPC chỉ cho phép chủ nhiệm vụ thao tác).
+                        if (uiState.mission != null && uiState.isActualOwner) {
+                            OwnerActionItem(
+                                icon = Icons.Filled.EmojiEvents,
+                                title = stringResource(R.string.mission_manage_title),
+                                subtitle = stringResource(
+                                    R.string.mission_manage_sub_format,
+                                    uiState.mission?.title.orEmpty(),
+                                ),
+                                onClick = { showMissionManageDialog = true },
                             )
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -684,6 +715,164 @@ fun OwnerAppDetailScreen(
         )
     }
 
+    // Quản lý nhiệm vụ: thông tin + Dừng/Tiếp tục + Xóa (chỉ chủ nhiệm vụ thấy item mở dialog này).
+    if (showMissionManageDialog && uiState.mission != null && uiState.isActualOwner) {
+        val mission = uiState.mission!!
+        val statusLabel = when {
+            mission.isActive -> stringResource(R.string.mission_manage_status_active)
+            mission.isPaused -> stringResource(R.string.mission_status_paused)
+            mission.isFull -> stringResource(R.string.mission_status_full)
+            mission.isStopped -> stringResource(R.string.mission_status_stopped)
+            else -> stringResource(R.string.mission_status_expired)
+        }
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isMissionActionLoading) showMissionManageDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.mission_manage_title),
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = mission.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    if (mission.description.isNotBlank()) {
+                        Text(
+                            text = mission.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.mission_manage_reward_format, mission.rewardCredits),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.mission_manage_joined_format,
+                            mission.participantCount,
+                            mission.maxParticipants,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    mission.daysRemaining?.let { days ->
+                        Text(
+                            text = stringResource(R.string.mission_manage_days_left_format, days),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.mission_manage_status_label, statusLabel),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            },
+            confirmButton = {
+                if (mission.isActive || mission.isPaused) {
+                    if (mission.isPaused) {
+                        // Tiếp tục: không cần xác nhận, thực hiện ngay.
+                        Button(
+                            onClick = {
+                                viewModel.togglePauseResumeMission { success, msg ->
+                                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            enabled = !uiState.isMissionActionLoading,
+                        ) {
+                            Text(stringResource(R.string.mission_manage_resume_btn))
+                        }
+                    } else {
+                        Button(
+                            onClick = { showMissionPauseConfirm = true },
+                            enabled = !uiState.isMissionActionLoading,
+                        ) {
+                            Text(stringResource(R.string.mission_manage_pause_btn))
+                        }
+                    }
+                } else {
+                    TextButton(onClick = { showMissionManageDialog = false }) {
+                        Text(stringResource(R.string.close))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showMissionDeleteConfirm = true },
+                    enabled = !uiState.isMissionActionLoading,
+                ) {
+                    Text(
+                        text = stringResource(R.string.mission_manage_delete_btn),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+        )
+    }
+
+    if (showMissionPauseConfirm) {
+        AlertDialog(
+            onDismissRequest = { showMissionPauseConfirm = false },
+            title = { Text(stringResource(R.string.mission_manage_pause_confirm_q)) },
+            text = { Text(stringResource(R.string.mission_manage_pause_confirm_desc)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showMissionPauseConfirm = false
+                        viewModel.togglePauseResumeMission { success, msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.mission_manage_pause_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMissionPauseConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showMissionDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showMissionDeleteConfirm = false },
+            title = { Text(stringResource(R.string.mission_manage_delete_confirm_q)) },
+            text = { Text(stringResource(R.string.mission_manage_delete_confirm_desc)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showMissionDeleteConfirm = false
+                        viewModel.deleteMission(onDeleted = {
+                            showMissionManageDialog = false
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.mission_manage_deleted_toast),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        })
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.mission_manage_delete_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMissionDeleteConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     if (showTipDialog && campaign != null) {
         TipSettingsDialog(
             currentTip = campaign.tipCredits,
@@ -725,7 +914,12 @@ fun OwnerAppDetailScreen(
         TesterReportsDialog(
             reports = uiState.reports,
             isActionLoading = uiState.isActionLoading,
-            onDismiss = { showReportsDialog = false },
+            reward = uiState.reward,
+            onDismiss = {
+                showReportsDialog = false
+                viewModel.clearReward()
+            },
+            onRewardDismiss = viewModel::clearReward,
             onApprove = { report, bonus ->
                 viewModel.approveReport(report, bonus)
             },
@@ -768,40 +962,6 @@ fun OwnerAppDetailScreen(
                     enabled = !uiState.isActionLoading
                 ) {
                     Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-    if (showSelfTestNotInstalledDialog && campaign != null) {
-        AlertDialog(
-            onDismissRequest = { showSelfTestNotInstalledDialog = false },
-            title = { Text(stringResource(R.string.oad_not_installed_title)) },
-            text = {
-                Text(stringResource(R.string.oad_not_installed_desc_format, campaign.appName, campaign.packageName))
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showSelfTestNotInstalledDialog = false
-                        val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
-                            .ifBlank { "https://play.google.com/store/apps/details?id=${campaign.packageName}" }
-                        if (targetUrl.isNotBlank()) {
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
-                                context.startActivity(intent)
-                            } catch (_: Exception) {
-                                Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.oad_install_btn))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSelfTestNotInstalledDialog = false }) {
-                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -1271,8 +1431,15 @@ private fun ShareLinkDialog(
                             }
                             Button(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(campaign.testingUrl))
-                                    context.startActivity(intent)
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(campaign.testingUrl)).apply {
+                                        // LocalContext is a localized wrapper (not an Activity).
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {
+                                        Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                    }
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -1298,8 +1465,15 @@ private fun ShareLinkDialog(
                             }
                             Button(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(campaign.playUrl))
-                                    context.startActivity(intent)
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(campaign.playUrl)).apply {
+                                        // LocalContext is a localized wrapper (not an Activity).
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {
+                                        Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                    }
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -1426,7 +1600,9 @@ private fun TestersListDialog(
 private fun TesterReportsDialog(
     reports: List<TesterReport>,
     isActionLoading: Boolean,
+    reward: CreditReward?,
     onDismiss: () -> Unit,
+    onRewardDismiss: () -> Unit,
     onApprove: (TesterReport, Int) -> Unit,
     onReject: (TesterReport, String?) -> Unit,
 ) {
@@ -1668,6 +1844,13 @@ private fun TesterReportsDialog(
                 }
             }
         }
+
+        // Drawn after the Scaffold so the reward card stays above the report list.
+        CreditRewardOverlay(
+            reward = reward,
+            onDismiss = onRewardDismiss,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -1762,24 +1945,32 @@ private fun ReportReviewCard(
                     }
                 }
 
-                // Status Chip
+                // Status Chip — dùng helper của model; status lạ (server thêm mới)
+                // hiển thị nhãn trung tính thay vì bị gán nhầm "Đã từ chối".
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = when (report.status) {
-                        "pending" -> Color(0xFFFFF3E0)
-                        "approved" -> Color(0xFFE8F5E9)
-                        else -> Color(0xFFFFEBEE)
+                    color = when {
+                        report.isPending -> Color(0xFFFFF3E0)
+                        report.isApproved -> Color(0xFFE8F5E9)
+                        report.isRejected -> Color(0xFFFFEBEE)
+                        else -> MaterialTheme.colorScheme.surfaceVariant
                     }
                 ) {
                     Text(
-                        text = if (report.status == "pending") stringResource(R.string.oad_status_remaining_format, report.remainingHoursUntilAutoAccept())
-                               else if (report.status == "approved") stringResource(R.string.oad_status_approved)
-                               else stringResource(R.string.oad_status_rejected),
+                        text = when {
+                            report.isPending -> stringResource(R.string.oad_status_remaining_format, report.remainingHoursUntilAutoAccept())
+                            report.isApproved -> stringResource(R.string.oad_status_approved)
+                            report.isRejected -> stringResource(R.string.oad_status_rejected)
+                            else -> stringResource(R.string.oad_status_unknown, report.status)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = if (report.status == "pending") Color(0xFFE65100)
-                                else if (report.status == "approved") Color(0xFF2E7D32)
-                                else Color(0xFFC62828),
+                        color = when {
+                            report.isPending -> Color(0xFFE65100)
+                            report.isApproved -> Color(0xFF2E7D32)
+                            report.isRejected -> Color(0xFFC62828)
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }

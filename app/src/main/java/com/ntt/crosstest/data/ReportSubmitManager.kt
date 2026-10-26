@@ -66,7 +66,12 @@ class ReportSubmitManager(
     )
 
     sealed interface SubmitEvent {
-        data class Success(val campaignId: String) : SubmitEvent
+        data class Success(
+            val campaignId: String,
+            val appName: String,
+            val provisionalAmount: Int,
+        ) : SubmitEvent
+
         data class Failed(val campaignId: String, val appName: String, val error: Exception?) : SubmitEvent
     }
 
@@ -295,7 +300,6 @@ class ReportSubmitManager(
             withContext(Dispatchers.IO) { PendingReportStore.delete(appContext, report.id) }
         }
 
-        if (!isCurrentRequest(report.id)) return
         val result = SubmitTesterReportResult(
             success = data.getBoolean(ReportUploadWorker.KEY_SUCCESS, true),
             reportId = data.getString(ReportUploadWorker.KEY_REPORT_ID).orEmpty(),
@@ -305,6 +309,16 @@ class ReportSubmitManager(
             screenshotUrl = data.getString(ReportUploadWorker.KEY_SCREENSHOT_URL),
             imageHash = data.getString(ReportUploadWorker.KEY_IMAGE_HASH),
         )
+        // Phát event TRƯỚC khi guard request hiện tại: khi tester nộp 2 app liên tiếp,
+        // success của app đầu không được nuốt (Credit server vẫn cộng, overlay phải hiện).
+        _events.tryEmit(
+            SubmitEvent.Success(
+                campaignId = report.campaignId,
+                appName = report.appName,
+                provisionalAmount = if (result.provisionalGranted) result.provisionalAmount else 0,
+            )
+        )
+        if (!isCurrentRequest(report.id)) return
         lastFailedRequestId = null
         _state.value = SubmitState(
             campaignId = report.campaignId,
@@ -313,7 +327,6 @@ class ReportSubmitManager(
             result = result,
             requestId = report.id,
         )
-        _events.tryEmit(SubmitEvent.Success(report.campaignId))
     }
 
     private fun handleFailure(
@@ -344,5 +357,8 @@ class ReportSubmitManager(
     companion object {
         const val TAG = "report_submit"
         private const val OBSERVE_INTERVAL_MS = 500L
+
+        /** Credit tạm nhận cho báo cáo mới, khớp migration 037 (submit_tester_report). */
+        const val PROVISIONAL_CREDITS = 10
     }
 }
