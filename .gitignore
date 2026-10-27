@@ -23,3 +23,7 @@ Thumbs.db
 
 # Kotlin
 .kotlin/
+
+# Local database test dependencies and scratch output
+node_modules/
+.tmp/

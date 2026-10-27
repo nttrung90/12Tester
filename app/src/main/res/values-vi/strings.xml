@@ -187,17 +187,17 @@
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Nhiệm vụ hôm nay</string>
-    <string name="daily_quest_desc">Chủ app: test 3 app cho mỗi app đang hoạt động. Thành viên: đăng nhập mỗi ngày.</string>
+    <string name="daily_quest_desc">Chủ app: hoàn thành chỉ tiêu test hiển thị hôm nay. Thành viên: đăng nhập mỗi ngày.</string>
     <string name="daily_quest_completed">Đã hoàn thành nhiệm vụ</string>
     <string name="daily_quest_completed_compact">Đã hoàn thành nhiệm vụ ngày (%1$d app)</string>
     <string name="daily_quest_pending">Chưa hoàn thành</string>
     <string name="daily_quest_warning">Hoàn thành nhiệm vụ hôm nay trước 24:00 để tránh bị trừ Credit vắng mặt!</string>
     <string name="daily_quest_safe">Điểm Credit của bạn hôm nay đã được bảo vệ an toàn.</string>
     <string name="daily_quest_progress">%1$d/1</string>
-    <string name="daily_task_goal">Nhiệm vụ ngày: test 3 app khác nhau cho mỗi app đang hoạt động, hoặc đăng nhập nếu bạn không đăng app.</string>
+    <string name="daily_task_goal">Nhiệm vụ ngày: test đủ số app khác nhau theo chỉ tiêu hôm nay, hoặc đăng nhập nếu bạn không đăng app.</string>
     <string name="daily_penalty_info_btn">Cơ chế trừ điểm</string>
     <string name="daily_penalty_dialog_title">Cơ chế trừ điểm vắng mặt hàng ngày</string>
-    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống kiểm tra lúc 00:05 mỗi ngày (theo giờ Việt Nam).\n\n• Chủ app: test 3 app khác nhau cho mỗi app đang hoạt động (1 app → 3 lượt; 2 app → 6 lượt; 6 app → 18 lượt/ngày). Chỉ tiêu được giới hạn theo số app khác đang có.\n• Thành viên: mở app ít nhất 1 lần/ngày.\n• App mới bắt đầu tính từ ngày mai; tài khoản mới được miễn ngày đăng ký.\n• Admin/Moderator được miễn.\n\nMức phạt khi thiếu nhiệm vụ:\n• Ngày 1: -1% Credit\n• Ngày 2: -2% Credit\n• Ngày 3: -5% Credit\n• Ngày 4 trở đi: -10% Credit\nTỷ lệ được nhân với tỷ lệ thiếu (tối thiểu 1 Credit, không vượt quá số dư).\n\nThiếu 7 ngày liên tiếp: app của bạn tự động tạm dừng cho đến khi bạn hoàn thành chỉ tiêu hôm nay và bật lại.\n\n💡 Report đang chờ/đã duyệt được tính là đã test. Report bị từ chối không được tính.</string>
+    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống kiểm tra lúc 00:05 mỗi ngày (theo giờ Việt Nam).\n\n• Chủ app: test đủ số app khác nhau theo chỉ tiêu trên thẻ nhiệm vụ hôm nay. Chỉ tiêu tùy thuộc số app đang hoạt động, chính sách hiện hành và số app khác đang có.\n• Thành viên: mở app ít nhất 1 lần/ngày.\n• App mới bắt đầu tính từ ngày mai; tài khoản mới được miễn ngày đăng ký.\n• Admin/Moderator được miễn.\n\nMức phạt khi thiếu nhiệm vụ:\n• Ngày 1: -1% Credit\n• Ngày 2: -2% Credit\n• Ngày 3: -5% Credit\n• Ngày 4 trở đi: -10% Credit\nTỷ lệ được nhân với tỷ lệ thiếu (tối thiểu 1 Credit, không vượt quá số dư).\n\nThiếu 7 ngày liên tiếp: app của bạn tự động tạm dừng cho đến khi bạn hoàn thành chỉ tiêu hôm nay và bật lại.\n\n💡 Report đang chờ/đã duyệt được tính là đã test. Report bị từ chối không được tính.</string>
     <string name="daily_task_test_now">Tìm app test ngay</string>
     <string name="daily_browse_apps">Xem app</string>
     <string name="daily_missed_streak_alert">Đang bỏ lỡ %1$d ngày liên tiếp! Sẽ bị trừ tối đa %2$d%% Credit nếu không hoàn thành nhiệm vụ hôm nay.</string>

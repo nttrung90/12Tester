@@ -1,0 +1,11 @@
+{
+  "name": "crosstest-database-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run-daily-task-ratio.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.12"
+  }
+}

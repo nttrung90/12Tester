@@ -8,6 +8,12 @@ các developer khác tham gia test chéo lẫn nhau. Mỗi ngày mỗi người 
 **"Đã test hôm nay"** (mỗi người 1 lần/ngày — chống trùng ngay ở database), có thể để lại
 đánh giá sao + góp ý. App tự tính tiến độ: đủ 14 ngày và đủ 20 tester thì sẵn sàng nộp Play duyệt.
 
+**Cấu hình tỷ lệ test bằng Supabase:** migration `042_configurable_daily_task_ratio.sql`
+giữ mức mặc định 3 app test / app đang hoạt động / ngày và cho phép đặt lịch tỷ lệ mới
+mà không phát hành lại Android. Xem [hướng dẫn vận hành](supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md).
+Source Android hiện dùng hướng dẫn theo chỉ tiêu hôm nay, không cố định số 3.
+Cần build và cập nhật app một lần để người dùng nhận hướng dẫn này; những lần đổi tỷ lệ sau chỉ thao tác Supabase.
+
 > ⚠️ **Lưu ý quan trọng:** project này được viết trên máy không có Android SDK nên
 > **CHƯA được compile**. Bạn build lần đầu trên máy Windows của mình bằng Android Studio.
 > Mọi version thư viện đã được tra cứu và pin (xem mục "Phiên bản thư viện" bên dưới),

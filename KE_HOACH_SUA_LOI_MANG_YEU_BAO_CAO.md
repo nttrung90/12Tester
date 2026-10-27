@@ -1,199 +1,210 @@
-# KẾ HOẠCH & BÁO CÁO PHÂN TÍCH: SỬA LỖI HIỂN THỊ "MẠNG YẾU, ĐANG THỬ LẠI LẦN..." KHI NỘP BÁO CÁO
+# KẾ HOẠCH & BÁO CÁO PHÂN TÍCH: THÔNG BÁO “MẠNG YẾU…” KHI NỘP BÁO CÁO
 
-> **Ngày lập:** 26/10/2026  
-> **Trạng thái:** Đã tìm ra nguyên nhân gốc rễ (Root Cause Identified) - Lập kế hoạch, **chưa sửa code**.  
-> **Mục tiêu:** Khắc phục triệt để hiện tượng mỗi khi người test gửi báo cáo (feedback + screenshot), màn hình gợi ý app tiếp theo luôn hiện thông báo: *"Mạng yếu, đang thử lại lần 2…"* dù sau đó báo cáo vẫn nộp thành công và cộng điểm bình thường.
+> **Ngày lập:** 26/10/2026
+> **Rà soát, hiệu chỉnh:** 27/10/2026, đối chiếu checkout `a115bba`.
+> **Trạng thái:** Hoàn thiện kế hoạch; **chưa sửa mã nguồn ứng dụng**. Có lỗi ánh xạ trạng thái cần ưu tiên kiểm chứng; chưa có bằng chứng runtime để kết luận Firebase là nguyên nhân gốc.
+> **Mục tiêu:** Hiển thị đúng tiến trình và số lần nộp; giảm retry không cần thiết nếu có; giữ khả năng gửi nền, khôi phục sau process death và không cộng Credit trùng.
 
----
+## 1. Hiện tượng và giới hạn bằng chứng
 
-## 1. MÔ TẢ HIỆN TƯỢNG (SYMPTOMS)
+Theo báo cáo ban đầu: người dùng nộp feedback kèm ảnh, hộp thoại gợi ý app kế tiếp sớm hiện “Mạng yếu, đang thử lại lần 2…”, sau khoảng 10–15 giây vẫn thành công và nhận Credit.
 
-1. Người dùng kiểm thử bấm **"Nộp báo cáo"** (Submit feedback kèm ảnh chụp màn hình).
-2. Hộp thoại hoặc màn hình gợi ý ứng dụng tiếp theo (`NextAppPrompt` trong `CampaignDetailScreen`) xuất hiện.
-3. Thay vì hoàn tất nhanh chóng trong 1-3 giây, thanh trạng thái hoặc thông báo lập tức chuyển sang:
-   > **"Mạng yếu, đang thử lại lần 2…"** (kèm vòng tròn xoay - progress spinner).
-4. Khoảng 10 - 15 giây sau, trạng thái bất ngờ chuyển thành **"Nộp báo cáo thành công! +10 điểm"** và mở khóa ứng dụng tiếp theo bình thường.
-5. Kiểm tra thực tế trên Database Supabase (`tester_campaign_reports`, `tester_campaign_checkins`) và Firebase Storage (`cross-testers.firebasestorage.app/reports/...`): Toàn bộ dữ liệu bài nộp và ảnh chụp màn hình **đều được tạo đầy đủ, không hề bị mất dữ liệu**.
+**Chưa tái hiện trên thiết bị trong lần rà soát này.** Thông tin dữ liệu đã có trên Supabase/Firebase là mô tả của báo cáo cũ, chưa được kiểm tra lại bằng Console hay truy vấn live. Không suy ra “đã retry thật” hoặc “đã chờ backoff 10 giây” chỉ từ nội dung UI và tổng thời gian nộp.
 
----
+Đã đọc đường đi màn hình → ViewModel → manager → pending store → Worker → Storage/RPC, chuỗi Việt/Anh, Storage rules và migrations liên quan. Chưa chạy build/test ứng dụng trong bước sửa tài liệu.
 
-## 2. NGUYÊN NHÂN GỐC RỄ (ROOT CAUSE ANALYSIS)
+## 2. Các kết luận cần sửa so với kế hoạch ban đầu
 
-Sau khi đối chiếu mã nguồn giữa `CampaignDetailScreen.kt`, `ReportSubmitManager.kt`, `ReportUploadWorker.kt`, `FirebaseStorageHelper.kt` và `CampaignDetailViewModel.kt`, nguyên nhân được chia thành **3 tầng**:
-
-### 🔴 Nguyên nhân 1 (Trọng tâm nhất): Lỗi xử lý bất đồng bộ trong `FirebaseStorageHelper.uploadReportScreenshot`
-- **Vị trí code:** `app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt` (dòng 136 - 150):
-  ```kotlin
-  // Đoạn code hiện tại:
-  try {
-      storageRef.putFile(Uri.fromFile(prepared.file), metadata).await()
-  } catch (e: CancellationException) {
-      throw e
-  } catch (e: Exception) {
-      val existingUrl = runCatching { storageRef.downloadUrl.await().toString() }.getOrNull()
-      if (existingUrl != null) return@withContext existingUrl
-      throw e
-  }
-
-  // LỖI NẰM TẠI ĐÂY:
-  storageRef.downloadUrl.await().toString()
-  ```
-- **Cơ chế phát sinh lỗi:**
-  1. `storageRef.putFile(...).await()` tải các byte của ảnh lên Google Cloud Storage thành công.
-  2. Tuy nhiên, metadata của file trên hạ tầng Firebase Storage / GCS đôi khi có **độ trễ lan truyền (propagation delay)** từ vài chục đến vài trăm mili-giây.
-  3. Lời gọi `storageRef.downloadUrl.await()` được đặt **BÊN NGOÀI** khối `try-catch`! Khi Firebase ném ra ngoại lệ (ví dụ: `StorageException` do object chưa kịp index metadata, hoặc timeout tạm thời khi lấy token download), ngoại lệ này **thoát ra ngoài hàm mà không được bắt**.
-  4. Trong `ReportUploadWorker.kt`:
-     ```kotlin
-     } catch (e: Exception) {
-         if (ReportSubmitPolicy.isRetryable(e)) {
-             return Result.retry() // <--- WORKER BỊ BUỘC PHẢI RETRY
-         }
-         return Result.failure(...)
-     }
-     ```
-     Vì ngoại lệ Firebase Storage không thuộc danh sách đen vĩnh viễn (như 400, 401, 403 của Supabase), `ReportSubmitPolicy.isRetryable(e)` trả về `true`.
-  5. WorkManager thiết lập thời gian backoff tối thiểu là **10 giây**:
-     ```kotlin
-     .setBackoffCriteria(
-         BackoffPolicy.EXPONENTIAL,
-         WorkRequest.MIN_BACKOFF_MILLIS.coerceAtLeast(10_000L),
-         TimeUnit.MILLISECONDS
-     )
-     ```
-     WorkManager đưa tác vụ vào hàng đợi chờ 10 giây sau mới chạy lại. Trong suốt 10 giây này, `runAttemptCount = 1`, `attempt = 2`.
-  6. `ReportSubmitManager.kt` (dòng 291):
-     ```kotlin
-     val stage = when {
-         attempt > 1 -> Stage.RETRYING // <--- GÁN STAGE RETRYING
-         ...
-     }
-     ```
-     Giao diện `CampaignDetailScreen.kt` lập tức hiển thị `R.string.campaign_submit_retrying_format`:
-     `"Mạng yếu, đang thử lại lần 2…"` cho người dùng nhìn thấy!
-  7. **Tại sao lần 2 lại thành công?**
-     Sau 10 giây, Worker chạy lại lần 2. Do ảnh đã được upload ở lần 1, luật bảo mật Firebase (`storage.rules`) không cho phép ghi đè (`allow create;` nhưng không có `allow update;`). Lệnh `putFile` ở lần 2 sẽ văng vào khối `catch (e: Exception)`.
-     Bên trong `catch`, hàm chạy dòng:
-     ```kotlin
-     val existingUrl = runCatching { storageRef.downloadUrl.await().toString() }.getOrNull()
-     if (existingUrl != null) return@withContext existingUrl
-     ```
-     Vì đã qua 10 giây, file đã hoàn tất 100% trên Firebase, `downloadUrl.await()` chạy thành công và trả về URL ảnh! Worker tiếp tục gửi thông tin lên Supabase `submit_tester_report` và hoàn tất xuất sắc.
-     $\rightarrow$ **Kết quả:** Lần nào cũng nộp thành công, nhưng lần nào người dùng cũng bị ép nhìn thấy thông báo *"Mạng yếu, đang thử lại lần 2..."* trong đúng 10 giây.
-
----
-
-### 🟠 Nguyên nhân 2: Tranh chấp băng thông mạng khi nhấn Submit (`prefetchNextCampaign`)
-- **Vị trí code:** `app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt` (dòng 784 - 792):
-  ```kotlin
-  fun startSubmit(campaignId: String, localScreenshotPath: String, feedback: String) {
-      ...
-      reportSubmitManager.submit(campaignId, localScreenshotPath, feedback)
-      prefetchNextCampaign(campaignId) // <--- CHẠY ĐỒNG THỜI NGAY LẬP TỨC
-  }
-  ```
-- **Cơ chế phát sinh:**
-  - Ngay thời điểm thiết bị đang cần dồn toàn bộ băng thông và kết nối HTTP/TLS để upload file ảnh JPEG (1 - 2 MB) lên Firebase Storage, hàm `prefetchNextCampaign()` lại bắn ra liên tiếp 5-7 truy vấn mạng song song:
-    1. Đếm số checkin (`tester_campaign_checkins`).
-    2. Đếm số báo cáo (`tester_campaign_reports`).
-    3. Gọi RPC `get_home_feed` (RPC này hiện còn đang lỗi 404 trong migration cũ nên phải bắt fallback).
-    4. Query danh sách `campaigns`.
-    5. Query số lượng testers của các campaign khác.
-  - Trên kết nối mạng 3G/4G di động hoặc wifi có ping cao, việc dồn 6-8 request đồng thời gây ra tình trạng **Socket Contention (nghẽn hàng đợi mạng)**, làm request upload ảnh hoặc lấy token Firebase dễ bị timeout ở những giây đầu tiên.
-
----
-
-### 🟡 Nguyên nhân 3: Thông điệp UI gắn nhãn quá sớm và cứng nhắc
-- **Vị trí code:** `ReportSubmitManager.kt` dòng 291 & `CampaignDetailScreen.kt` dòng 315.
-- Cứ mỗi khi `attempt > 1` (kể cả lần thử thứ 2 chỉ do Worker đổi thread hoặc delay Firebase Storage vài mili-giây), hệ thống đã lập tức quy chụp là:
-  `"Mạng yếu, đang thử lại lần %1$d…"`
-- Trong thực tế, mạng của người dùng có thể đang rất mạnh (Wifi cáp quang 100Mbps), việc app báo *"Mạng yếu"* gây cảm giác app hoạt động không ổn định hoặc lỗi thời.
-
----
-
-## 3. KẾ HOẠCH SỬA CHỮA CHI TIẾT (ACTION PLAN)
-
-Khi bắt đầu tiến hành sửa code (ở phiên làm việc tiếp theo), hãy thực hiện lần lượt theo 4 bước sau:
-
-### BƯỚC 1: Cải tiến `FirebaseStorageHelper.kt` (Xử lý dứt điểm lỗi `downloadUrl`)
-1. **Bọc việc lấy `downloadUrl` trong vòng lặp thử lại cục bộ (Local Retry Loop):**
-   - Không được để `storageRef.downloadUrl.await()` nằm trần ngoài khối try-catch.
-   - Thêm hàm retry nội bộ với 3 lần thử, mỗi lần cách nhau 400ms - 600ms (dùng `delay` của coroutines).
-   - Nếu `putFile` xong, gọi ngay retry loop này để lấy URL. Nếu lấy được URL ngay tại lần chạy đầu tiên, hàm sẽ hoàn tất trong chưa đầy 1 giây mà **không bao giờ để Worker phải văng ngoại lệ hay rơi vào `Result.retry()`**.
-2. **Đoạn code dự kiến sửa tại `FirebaseStorageHelper.kt`:**
-   ```kotlin
-   // Đặt hàm helper nội bộ:
-   private suspend fun StorageReference.awaitDownloadUrlWithRetry(maxAttempts: Int = 3, delayMs: Long = 500): String {
-       var lastException: Exception? = null
-       repeat(maxAttempts) { attempt ->
-           try {
-               return this.downloadUrl.await().toString()
-           } catch (e: CancellationException) {
-               throw e
-           } catch (e: Exception) {
-               lastException = e
-               if (attempt < maxAttempts - 1) kotlinx.coroutines.delay(delayMs)
-           }
-       }
-       throw lastException ?: IllegalStateException("Failed to get download url")
-   }
-   ```
-   Và trong `uploadReportScreenshot`:
-   ```kotlin
-   try {
-       storageRef.putFile(Uri.fromFile(prepared.file), metadata).await()
-       return@withContext storageRef.awaitDownloadUrlWithRetry()
-   } catch (e: CancellationException) {
-       throw e
-   } catch (e: Exception) {
-       val existingUrl = runCatching { storageRef.awaitDownloadUrlWithRetry(maxAttempts = 2, delayMs = 300) }.getOrNull()
-       if (existingUrl != null) return@withContext existingUrl
-       throw e
-   }
-   ```
-
----
-
-### BƯỚC 2: Tách biệt và hoãn `prefetchNextCampaign` trong `CampaignDetailViewModel.kt`
-1. Không kích hoạt `prefetchNextCampaign(campaignId)` ngay cùng một tích tắc với `reportSubmitManager.submit(...)`.
-2. **Chiến lược:**
-   - Lắng nghe khi `reportSubmitManager` đạt trạng thái `UPLOADING` hoặc sau một khoảng trễ nhỏ (ví dụ `delay(1500)`), HOẶC chỉ prefetch khi `submitStage` đã hoàn thành upload ảnh và đang trong giai đoạn `SUBMITTING_REPORT` / `SUCCESS`.
-   - Giúp dành toàn bộ đường truyền băng thông cho Worker upload file ảnh nhanh nhất có thể.
-
----
-
-### BƯỚC 3: Tối ưu thời gian Backoff của WorkManager trong `ReportSubmitManager.kt`
-1. Thay vì để thời gian backoff tối thiểu mặc định là `10_000L` (10 giây), nếu có thể hãy cho phép thử lại nhanh hơn đối với lần đầu tiên (hoặc xử lý trực tiếp bên trong Worker thay vì để WorkManager reschedule ra ngoài).
-2. Khi Worker tự giải quyết được các lỗi mạng tạm thời trong vòng lặp nội bộ (exponential backoff 1s, 2s) trước khi trả về `Result.retry()`, WorkManager sẽ hầu như không bao giờ cần phải kích hoạt retry bên ngoài.
-
----
-
-### BƯỚC 4: Tinh chỉnh thông điệp UI (`strings.xml` & `CampaignDetailScreen.kt`)
-1. Điều chỉnh chuỗi thông báo và trạng thái:
-   - Ở lần thử 2: Thay vì hiển thị *"Mạng yếu, đang thử lại lần 2…"*, hãy hiển thị thông điệp trung tính, thân thiện hơn:
-     - `values-vi/strings.xml`:
-       ```xml
-       <string name="campaign_submit_retrying_format">Đang hoàn tất báo cáo (lần %1$d)…</string>
-       <string name="campaign_submit_weak_network_format">Mạng không ổn định, đang thử lại lần %1$d…</string>
-       ```
-   - Chỉ khi `attempt >= 3` hoặc phát hiện lỗi mất kết nối Internet thực sự (`isNetworkError`), UI mới hiển thị *"Mạng không ổn định..."*.
-
----
-
-## 4. DANH SÁCH TỆP SẼ ĐƯỢC CHỈNH SỬA KHI THI CÔNG
-
-| Tệp | Vị trí / Mục đích |
+| Nội dung cũ | Kết quả đối chiếu / quyết định mới |
 |---|---|
-| `app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt` | Thêm retry loop cho `downloadUrl.await()` và bọc an toàn trong try-catch |
-| `app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt` | Hoãn `prefetchNextCampaign()` để tránh nghẽn băng thông lúc upload ảnh |
-| `app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt` | Kiểm soát `Stage.RETRYING` và thời gian thử lại |
-| `app/src/main/res/values-vi/strings.xml` (và `values-en`, `values`) | Tinh chỉnh thông điệp UI thân thiện, tránh gây hiểu nhầm cho người dùng |
+| Đã cô lập chính xác nguyên nhân do metadata Firebase chậm lan truyền | **Chưa được chứng minh.** Cloud Storage bảo đảm đọc object/metadata sau khi ghi thành công; không dùng propagation delay để kết luận lỗi Firebase. Lỗi request lấy URL vẫn có thể xảy ra và cần log riêng. |
+| UI báo lần 2 nghĩa là Worker đã trả `Result.retry()` | **Không đủ căn cứ.** Manager cộng 1 vào `WorkInfo.runAttemptCount` cả lúc RUNNING; có thể báo lần 2 ngay lần chạy đầu. |
+| Worker đổi thread làm tăng số lần thử | Đổi thread coroutine không tự tạo lần chạy Worker mới. Phân biệt OS dừng/chạy lại, retry do lỗi và retry nội bộ. |
+| Có thể giảm backoff WorkManager dưới 10 giây | Không thể; 10 giây là tối thiểu. Checkout đã đặt `EXPONENTIAL, 10, SECONDS`. Lịch chạy thực tế còn phụ thuộc constraints và OS. |
+| Policy hiện blacklist HTTP 400/401/403 | Không đúng checkout: `ReportSubmitPolicy` chỉ dò chuỗi message, mặc định retry lỗi còn lại; chưa kiểm tra kiểu exception/HTTP status. |
+| Prefetch chắc chắn bắn 5–7 request song song gây nghẽn | Chưa có trace. Prefetch bắt đầu cả khi mở form và submit; nhánh cache/feed/fallback quyết định số request. |
+| Dùng `attempt >= 3` để kết luận mạng yếu | Không dùng số lần chạy để chẩn đoán chất lượng mạng; chỉ báo chờ kết nối khi có bằng chứng phù hợp. |
 
----
+Nguồn: [Cloud Storage consistency](https://docs.cloud.google.com/storage/docs/consistency), [WorkManager retry/backoff](https://developer.android.com/develop/background-work/background-tasks/persistent/getting-started/define-work).
 
-## 5. KẾT LUẬN & BƯỚC TIẾP THEO
+## 3. Phân tích theo mức độ chắc chắn
 
-- Toàn bộ nguyên nhân gây ra việc báo *"Mạng yếu..."* đã được cô lập chính xác (chủ yếu do dòng `storageRef.downloadUrl.await()` văng exception trước khi metadata lan truyền xong, khiến Worker phải retry sau 10 giây).
-- File tài liệu này đã được lưu tại thư mục gốc của dự án:  
-  `KE_HOACH_SUA_LOI_MANG_YEU_BAO_CAO.md`
-- **Mã nguồn ứng dụng hiện tại vẫn được giữ nguyên vẹn 100% theo đúng chỉ thị của bạn.**
-- Bất cứ khi nào bạn sẵn sàng sửa code, chỉ cần yêu cầu: *"Hãy thực hiện theo kế hoạch trong file KE_HOACH_SUA_LOI_MANG_YEU_BAO_CAO.md"*, tôi sẽ áp dụng các thay đổi một cách chuẩn xác và an toàn nhất.
+### 3.1. Ưu tiên cao nhất: số lần chạy và trạng thái UI có thể bị lệch
+
+`ReportSubmitManager.observeWork()` đang tính:
+
+```kotlin
+val attempt = (info.runAttemptCount + 1).coerceAtLeast(1)
+// ENQUEUED, BLOCKED và RUNNING đều gọi updateRunningState(...)
+// updateRunningState: attempt > 1 => RETRYING
+```
+
+Không được coi `WorkInfo.runAttemptCount` và `CoroutineWorker.runAttemptCount` là hai bộ đếm có cùng thời điểm cập nhật. Nguồn AndroidX tham khảo tạo `WorkerParameters` bằng giá trị trước lần chạy, sau đó tăng bộ đếm database khi chuyển sang RUNNING; `WorkInfo` phản ánh giá trị database. Worker lần đầu có thể thấy `0`, còn observer thấy `1`; phép cộng hiện tại biến lần đầu thành lần 2.
+
+**Mức bằng chứng:** xác nhận phép cộng và nhánh UI trong checkout; cơ chế thư viện đã đối chiếu nguồn AndroidX `androidx-main`, chưa xác minh artifact WorkManager `2.11.2` đang pin hoặc APK trên thiết bị. Đây là ứng viên mạnh, cần R00 trước khi chốt nguyên nhân gốc.
+
+Nguồn: [WorkerWrapper](https://github.com/androidx/androidx/blob/androidx-main/work/work-runtime/src/main/java/androidx/work/impl/WorkerWrapper.kt), [WorkSpec → WorkInfo](https://github.com/androidx/androidx/blob/androidx-main/work/work-runtime/src/main/java/androidx/work/impl/model/WorkSpec.kt).
+
+### 3.2. Chắc chắn: nhãn “Mạng yếu” không dựa trên chẩn đoán mạng
+
+`Stage.RETRYING` chỉ phụ thuộc `attempt > 1`; UI dùng `campaign_submit_retrying_format` trong `values`, `values-en`, `values-vi`. Không có mã lỗi hay bằng chứng mất Internet gắn vào quyết định. Ngay cả retry thật cũng có thể do Supabase chưa khởi tạo xong, server, quyền hoặc lưu file.
+
+`NetworkMonitor` hiện chỉ kiểm tra capability INTERNET, chưa kiểm tra VALIDATED; không dùng riêng giá trị đó để kết luận Internet hoạt động hay mạng yếu.
+
+### 3.3. Chắc chắn có điểm cần gia cố: Storage và phân loại retry
+
+- `putFile(...).await()` và lấy `downloadUrl` là hai request riêng. Lỗi URL có thể đi tới catch của Worker, **không có nghĩa ứng dụng bỏ sót mọi xử lý exception**. Cần phân loại trước khi retry.
+- Rules trong repo cho đọc/create, cấm update/delete. Upload đã commit nhưng mất response thì `putFile` lại có thể bị từ chối update; fallback đọc object đúng path cũ là hành vi cần giữ.
+- `runCatching { ...await() }.getOrNull()` ở fallback có thể bắt cả `CancellationException`. Mẫu đề xuất cũ cũng mắc lỗi này. Worker còn có `runCatching` quanh `joinCampaign`; cần bảo toàn cancellation trên các đường liên quan.
+- Policy dò message không đủ phân biệt lỗi mạng, cấu hình, quyền và dữ liệu. Lỗi chưa biết nguyên nhân không được tự đổi thành “mạng yếu”.
+
+Tham khảo: [Firebase Storage error codes](https://firebase.google.com/docs/storage/android/handle-errors), [Task.await và cancellation](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-play-services/kotlinx.coroutines.tasks/await.html).
+
+### 3.4. Prefetch là giả thuyết hiệu năng, chưa phải nguyên nhân đã xác nhận
+
+Call site thực tế: Screen khi mở form và `ViewModel.startSubmit()` trước manager. Có guard `nextSuggestionLoading`/`nextCampaignToTest`, nên lần gọi lúc submit không luôn tạo mạng mới. Job bắt đầu lúc mở form vẫn có thể chạy trùng upload; thêm `delay(1500)` ở một call site không giải quyết đầy đủ.
+
+`getNextCampaignCandidates()` ưu tiên `getHomeFeed(forceRefresh = true)`, chỉ fallback khi không có feed. `firstTimeTester` khởi động từ ViewModel, không nhất thiết bắt đầu lúc submit. Chưa xác nhận RPC `get_home_feed` trên server đang 404.
+
+### 3.5. Các ràng buộc dữ liệu cần bảo vệ
+
+- Giữ cùng `PendingReport.id` / `clientSubmitId` / Storage path qua retry tự động, thủ công và khôi phục; không sinh object mới để né quyền update.
+- Worker `markUploaded()` trước RPC; lần chạy lại dùng URL đã lưu, không upload lại. Không xóa pending/ảnh khi lỗi tạm thời.
+- Bảng trong checkout là `tester_reports` và `checkins`, không phải `tester_campaign_reports` / `tester_campaign_checkins` như báo cáo cũ.
+- Migrations `033_media_integrity.sql`, `037_reward_10_credits.sql` có idempotency qua `p_client_submit_id`. Repository còn fallback RPC legacy khi thiếu function/parameter. Phải xác nhận signature mới trên server trước khi tuyên bố retry an toàn về Credit.
+- Worker xóa pending sau RPC nhưng trước `Result.success()`: process death ở cửa sổ này có thể làm lần chạy lại thiếu request. Đây là rủi ro riêng cần probe; có WorkManager không chứng minh mọi cửa sổ khôi phục đều an toàn.
+
+## 4. Kế hoạch triển khai theo gói và điểm dừng
+
+Thứ tự: **R00 → R01 → R02 → R03 (có điều kiện) → R04**. Mỗi gói báo cáo file đổi, bằng chứng, test đã chạy và gate chưa chạy. Việc bổ sung tài liệu chưa phải yêu cầu triển khai code.
+
+### R00 — Tái hiện: retry thật hay hiển thị sai
+
+**Phạm vi:** instrumentation debug/test tối thiểu trong manager, Worker, Storage và đường RPC; chưa đổi hành vi.
+
+1. Timeline liên kết bằng request/work ID đã che bớt: `WorkInfo.state`, raw `WorkInfo.runAttemptCount`, `Worker.runAttemptCount`, worker start, upload/URL start-end, markUploaded, join/RPC start-end, quyết định retry/failure/success. Đo từng bước bằng đồng hồ monotonic.
+2. Lỗi ghi kiểu exception, Firebase errorCode/HTTP status nếu có, mã PostgREST và bước lỗi. Không log URL ảnh có download token, token đăng nhập, feedback hay thông tin tài khoản.
+3. Kiểm tra dependency thực sự resolve và semantics WorkManager. Chạy Worker thành công ngay, không mạng, đủ lâu để observer đọc RUNNING. Nếu UI RETRYING mà chưa có `Result.retry()`, xác nhận lỗi ánh xạ.
+4. Tái hiện gửi thật trên Wi-Fi ổn định và mạng chậm có kiểm soát; tách chờ scheduler, upload, URL, join, RPC và backoff. Không coi 10–15 giây là bằng chứng riêng của retry.
+5. Ghi artifact APK; đối chiếu rules đã deploy và signature RPC có `p_client_submit_id`. Thiếu quyền/môi trường live phải ghi rõ.
+
+**Đầu ra/gate:** timeline một lần đầu thành công, một retry thật bằng fault injection và bảng bộ đếm theo trạng thái trên dependency thực tế. Chưa có log lỗi URL thì không kết luận propagation delay. Nếu UI sai ngay lần đầu, sửa R01 và đo lại trước.
+
+### R01 — Sửa ánh xạ trạng thái và thông điệp
+
+**Phạm vi:** manager, ba file strings; ViewModel/Screen nếu cần truyền state.
+
+1. Bỏ phép cộng 1 dùng chung mọi trạng thái. Ánh xạ dự kiến dưới đây phải được R00 kiểm chứng:
+
+| WorkInfo quan sát | Ý nghĩa dự kiến | UI |
+|---|---|---|
+| ENQUEUED, count 0 | Chờ chạy lần đầu | Chờ gửi, không báo lần 2 |
+| RUNNING, count 1 | Lần chạy đầu | SENDING, attempt 1 |
+| ENQUEUED sau lần đầu trả retry, count 1 | Đợi chạy tiếp | Chờ thử lại lần 2 |
+| RUNNING, count 2 | Lần chạy thứ hai | Thử lại lần 2 |
+| SUCCEEDED/FAILED | Đã kết thúc | Số lần đã chạy, không cộng sang lần tiếp theo |
+
+2. Không suy lý do retry từ count: mất constraints, OS dừng Worker, Supabase chưa sẵn sàng và lỗi request là các trường hợp khác nhau. Nếu chưa có lý do đáng tin cậy, dùng trạng thái chờ/gửi trung tính. BLOCKED không tự đồng nghĩa lỗi mạng.
+3. Chuỗi đề xuất: `Đang thử gửi lại báo cáo (lần %1$d)…` / `Retrying report submission (attempt %1$d)…`; nếu tách trạng thái chờ: `Đang chờ thử gửi lại báo cáo…`. Không dùng `attempt >= 3` để chuyển thành “mạng yếu”.
+4. Nếu cần phase upload/URL/RPC, bổ sung progress rõ ràng. Enum hiện chỉ có SENDING, RETRYING, DONE, FAILED; UPLOADING/SUBMITTING_REPORT trong kế hoạch cũ chưa tồn tại.
+5. Giữ guard requestId; kết quả app trước không ghi đè app hiện tại. Giữ gửi nền khi chuyển màn, không khóa điều hướng để che lỗi.
+
+**Nghiệm thu:** lần đầu thành công không từng hiện RETRYING; retry thật đúng lần; trạng thái cuối không lệch số; Việt/Anh đồng bộ; Credit theo kết quả server.
+
+### R02 — Retry Storage/Worker có giới hạn, không nuốt cancellation
+
+**Phạm vi:** Storage helper, policy, Worker; pending store chỉ khi probe chứng minh cần sửa.
+
+1. Tách lỗi upload và URL. Upload xong mà URL lỗi tạm thời thì chỉ retry URL. Không bọc upload + URL bằng một catch rồi chạy thêm một vòng URL retry chồng lên vòng vừa thất bại.
+2. Upload lỗi/không rõ đã commit: recovery bằng đọc URL **đúng path cũ**, ngân sách hữu hạn. Chỉ công nhận đã upload khi đọc được object. Upload bị cấm nhưng object cũ đọc được vẫn có thể recovery; object không tồn tại thì trả lỗi gốc, không lặp upload vô hạn.
+3. Phân loại theo kiểu/cause/error code, thay vì chỉ message:
+
+| Lỗi | Chính sách |
+|---|---|
+| Cancellation của Worker/coroutine | Ném lại ngay, không đổi thành retry/failure/success |
+| Timeout/kết nối, HTTP 408/429/5xx có thể khôi phục | Retry hữu hạn đúng bước; hết ngân sách mới về WorkManager; tôn trọng Retry-After nếu áp dụng |
+| Firebase unauthorized/unauthenticated, bucket/project sai, dữ liệu/ảnh sai | Fail rõ nguyên nhân sau recovery hợp lệ nếu có; không lặp thao tác sai |
+| Object not found khi recovery | Chưa chứng minh đã upload; giữ ngữ cảnh lỗi gốc. Upload báo thành công mà not found thì ghi bằng chứng, không mặc định metadata chậm |
+| Supabase 400/403 hoặc lỗi nghiệp vụ vĩnh viễn | Không retry, trừ recovery cụ thể đã kiểm thử |
+| Supabase 401 | Chỉ dùng cơ chế refresh phiên hợp lệ hiện có; thất bại thì yêu cầu đăng nhập, không lặp vô ích |
+| Chưa phân loại | Ghi nguyên nhân; không local retry; fallback Worker hữu hạn theo policy đã chốt, UI trung tính |
+
+4. Nếu bổ sung local retry URL: tối đa **3 lần gọi tổng cộng** trong một lượt resolve; delay 500 ms rồi 1.000 ms chỉ giữa lỗi tạm thời, không delay happy path. Đây là ngân sách thử ban đầu, không bảo đảm hoàn tất trong 1 giây. Trước khi triển khai phải chốt timeout từng request/tổng lượt theo SDK và số đo R00; SDK có retry riêng nên tránh nhân request/thời gian ngoài dự kiến.
+5. Catch có suspend phải bắt và ném lại `CancellationException` trước; thay `runCatching` trên các đường liên quan. Hủy `Task.await()` không mặc nhiên hủy UploadTask bên dưới: nếu cần, quản lý handle/cancel rõ ràng và kiểm thử, tránh hai upload chồng nhau.
+6. Nếu dùng `withTimeout`, phân biệt timeout ngân sách nội bộ với cancellation bên ngoài; không nuốt hủy Worker thành lỗi mạng. Không thêm vòng retry toàn bộ doWork/RPC để chữa riêng lỗi URL.
+7. Giữ outer backoff 10 giây và `MAX_ATTEMPTS = 3`; tách số lần Worker với số request URL. Giữ ID/bytes/hash/path, lưu URL trước RPC; retry RPC dùng URL đã lưu.
+8. Giữ lỗi chính và lỗi recovery để chẩn đoán, không lộ token. Sửa comment “ghi đè object cũ” vì rules chỉ cho create. Không nới update/delete.
+
+**Nghiệm thu:** URL lỗi tạm thời khôi phục hữu hạn, không upload lại; lỗi quyền thật fail đúng; cancellation thoát ngay; không tăng object/report/Credit do retry.
+
+### R03 — Điều phối prefetch khi có bằng chứng ảnh hưởng
+
+**Gate:** chỉ triển khai khi trace R00/sau R01 cho thấy ảnh hưởng đáng kể. Nếu gửi đã đúng và nhanh, ghi “không cần thay đổi” cùng số đo.
+
+1. Kiểm soát cả call site mở form, submit và job đã chạy; không chỉ xóa một lời gọi hoặc thêm delay cố định. Giữ kết quả sẵn có để hộp thoại hiện ngay.
+2. Khi cần hoãn: không khởi tạo prefetch mới trong lúc upload/resolve URL; chạy lại sau khi URL lưu thành công, hoặc sau DONE nếu chọn phương án đơn giản. Muốn dùng mốc upload xong phải thêm Worker progress, không đoán thời gian.
+3. Nếu cần hủy job prefetch, giữ Job riêng và finally dọn `nextSuggestionLoading`; không ảnh hưởng Worker. Đặt guard single-flight trước launch để tránh hai job trùng.
+4. Giữ snapshot tester lần đầu trước submit, ưu tiên app đã cài, loại app hiện tại/app chủ sở hữu/app đã test hôm nay/app pending. DONE/refresh không làm sai tiêu chí của cùng lần nộp.
+5. Prefetch lỗi không làm báo cáo fail, không kẹt spinner; vẫn đóng/chuyển màn được. ViewModel hủy không hủy Worker gửi nền.
+
+**Nghiệm thu:** không có request gợi ý mới trong giai đoạn được bảo vệ; không trùng job/mất gợi ý/đổi tiêu chí; có so sánh latency trước-sau.
+
+### R04 — Kiểm thử hồi quy và nghiệm thu thiết bị/backend
+
+Repo chưa có `app/src/test`, `app/src/androidTest` và test dependencies trong app build file. Khi triển khai, thêm hạ tầng tối thiểu phù hợp phiên bản pin: unit test, coroutine virtual time và WorkManager test harness/instrumentation. Fake Storage/RPC phải điều khiển được lỗi. Cần ít nhất một integration test qua observer WorkManager thật để bắt lệch bộ đếm, không chỉ test hàm mapping tự viết.
+
+| Ca kiểm tra | Tiêu chí |
+|---|---|
+| Lần đầu thành công, không trả retry | SENDING → DONE; không thoáng hiện lần 2 khi observer bắt RUNNING |
+| Một Result.retry rồi thành công | Chờ/gửi lại đúng lần 2, không lần 3; DONE không lệch số |
+| URL timeout một lần rồi được | Một upload; URL retry hữu hạn; không reschedule nếu khôi phục được |
+| URL lỗi liên tục | Đúng tổng request/delay; outer retry hữu hạn, không vòng lặp vô tận |
+| Object cũ đã có, putFile bị cấm update | Dùng URL cũ; không tạo path mới/nới rules |
+| Object chưa có, upload bị từ chối quyền | Fail quyền; không thành công giả/báo mạng yếu |
+| Offline, Wi-Fi không Internet, mất mạng giữa upload | Chờ/thử lại trung tính; giữ pending; phục hồi khi đủ điều kiện; không dựa riêng capability INTERNET |
+| Hủy ở upload, URL, delay, join, RPC | Không nuốt cancellation hoặc phát success/Credit từ fallback bị hủy |
+| RPC commit rồi mất response | Giữ ID; dùng URL đã lưu; server có report/checkin/Credit không tăng lần hai |
+| Process death trước/sau markUploaded, sau RPC commit, sau xóa pending trước success | Probe từng cửa sổ; thiếu request sau commit không được báo kết quả sai. Nếu fail, chặn tuyên bố phục hồi đầy đủ và lập gói sửa riêng rõ phạm vi |
+| Double tap, retry thủ công, hai campaign liên tiếp | Không request trùng/ghi đè state mới/nhân Credit |
+| Đổi màn, xoay máy, mở lại; logout/đổi tài khoản | Đúng vòng đời gửi nền; không hiển thị kết quả tài khoản cũ |
+| Prefetch đang chạy/chưa chạy/đã có kết quả/lỗi | Không kẹt spinner/chọn sai app/làm Worker fail |
+| Báo cáo mới, sửa pending/rejected, approved/đã nhận thưởng | Giữ validation/ảnh/hash/thưởng server; không mặc định mọi lần +10 |
+| Việt/Anh, lỗi vĩnh viễn | Đúng format; không quy lỗi quyền/server thành mạng yếu |
+
+Dùng emulator hoặc staging, tài khoản/campaign kiểm thử riêng. Xác minh rules và RPC đang deploy độc lập với file trong repo. Fallback RPC legacy còn chạy thì gate idempotency chưa đạt; không tuyên bố an toàn chỉ dựa vào migration. Không sửa dữ liệu production để tạo lỗi.
+
+Lệnh dự kiến sau khi triển khai và cấu hình môi trường hợp lệ:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+.\gradlew.bat :app:connectedDebugAndroidTest
+```
+
+Lệnh connected chỉ chạy sau khi có tests và thiết bị/emulator. Ghi rõ thiếu SDK/Firebase/Supabase/thiết bị; không đưa secret vào báo cáo. Đọc cả lint report vì `abortOnError = false` hiện tại có thể cho task xanh dù còn lỗi.
+
+## 5. Danh sách tệp dự kiến
+
+| Tệp / nhóm | Mục đích |
+|---|---|
+| `app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt` | WorkInfo/state/attempt/progress đúng |
+| `app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt` | Timeline, retry, cancellation, progress |
+| `app/src/main/java/com/ntt/crosstest/data/ReportSubmitPolicy.kt` | Phân loại kiểu/mã lỗi và unit tests |
+| `app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt` | URL retry chọn lọc, recovery object cũ, cancellation, comment |
+| `app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt` | Truyền state; prefetch có điều kiện |
+| `app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt` | Hiển thị state và call site prefetch nếu cần |
+| `app/src/main/res/values/strings.xml`, `values-en/strings.xml`, `values-vi/strings.xml` | Chuỗi trung tính, placeholder nhất quán |
+| `app/src/test/…`, `app/src/androidTest/…`, `app/build.gradle.kts`, version catalog nếu cần | Hạ tầng test và hồi quy có ý nghĩa |
+| `PendingReportStore.kt` / `CampaignRepository.kt` | Chỉ mở rộng sửa khi probe chứng minh cần thiết |
+
+Rules/migrations là tài liệu đối chiếu, chưa có căn cứ thay đổi/deploy. Không nâng dependency, đổi schema hoặc thay toàn bộ kiến trúc nộp để chữa thông báo.
+
+## 6. Điều kiện hoàn tất và phát hành
+
+1. Có timeline phân biệt lỗi hiển thị và retry thật; không khẳng định propagation delay khi chưa có bằng chứng.
+2. Tối thiểu 20 lần nộp hợp lệ trên kết nối ổn định: lần nào Worker thành công ngay thì không hiện retry giả; ghi số lần chạy thật, lỗi nếu có và thời lượng từng bước. Không cam kết 1–3 giây cho mọi mạng/ảnh.
+3. So sánh p50/p95 trước-sau trên cùng loại thiết bị, tập ảnh và điều kiện mạng. Báo riêng cải thiện UI và latency. Nếu còn 10–15 giây, chỉ đúng bước chiếm thời gian; đổi chữ không chứng minh đã sửa tốc độ.
+4. Failure injection trọng yếu đạt: retry hữu hạn, không upload thừa/nuốt cancellation/cộng Credit trùng/regression gửi nền. Gate thiết bị/backend chưa chạy ghi **CHƯA XÁC MINH**, không thay bằng JVM/build xanh.
+5. Chạy nội bộ/staging trước; thử cả request pending từ phiên bản cũ. Báo cáo artifact, diff, test output, timeline đã che dữ liệu nhạy cảm và gate còn mở trước phát hành.
+6. Rollback app bằng artifact đã kiểm chứng; giữ pending tương thích hoặc kiểm thử migration nếu buộc đổi format. Không xóa pending để che lỗi, không deploy schema/rules ngoài phạm vi.
+
+**Kết luận rà soát:** kế hoạch cũ chưa đủ tin cậy để triển khai nguyên trạng. Bản hiệu chỉnh ưu tiên kiểm chứng lệch `WorkInfo.runAttemptCount`, sửa nhãn UI không có căn cứ, sau đó gia cố retry chọn lọc và chỉ tối ưu prefetch khi có số đo. Chỉnh tài liệu không đồng nghĩa ứng dụng đã được sửa hoặc sự cố đã được khắc phục trên thiết bị.

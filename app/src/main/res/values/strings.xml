@@ -187,17 +187,17 @@
 
     <!-- Credit & Daily Quest -->
     <string name="daily_quest_title">Daily Quest</string>
-    <string name="daily_quest_desc">Owners: test 3 apps per active posted app. Members: log in daily.</string>
+    <string name="daily_quest_desc">Owners: complete the test target shown for today. Members: log in daily.</string>
     <string name="daily_quest_completed">Daily task completed</string>
     <string name="daily_quest_completed_compact">Daily task completed (%1$d app)</string>
     <string name="daily_quest_pending">Task pending</string>
     <string name="daily_quest_warning">Complete today\'s task before midnight to avoid inactivity Credit penalties!</string>
     <string name="daily_quest_safe">Your Credits are protected for today.</string>
     <string name="daily_quest_progress">%1$d/1</string>
-    <string name="daily_task_goal">Daily task: test 3 different apps for each active posted app, or log in if you don\'t post apps.</string>
+    <string name="daily_task_goal">Daily task: test enough different apps to meet today\'s target, or log in if you don\'t post apps.</string>
     <string name="daily_penalty_info_btn">Penalty Rules</string>
     <string name="daily_penalty_dialog_title">Daily Inactivity Penalty Policy</string>
-    <string name="daily_penalty_dialog_content" formatted="false">The system checks at 00:05 daily.\n\n• App owners: test 3 different apps for each active posted app (1 app → 3 tests; 2 apps → 6 tests; 6 apps → 18 tests/day). The target is capped by the number of other apps available.\n• Members: open the app at least once a day.\n• A new app starts counting the next day; a new account is free on signup day.\n• Admin/Moderator accounts are exempt.\n\nMissed-day penalty:\n• Day 1: -1% Credits\n• Day 2: -2% Credits\n• Day 3: -5% Credits\n• Day 4+: -10% Credits\nThe percentage is multiplied by the shortfall ratio (minimum 1 Credit, never more than your balance).\n\n7 consecutive missed days: your posted apps are automatically paused until you complete today\'s target and resume them.\n\n💡 Pending/approved reports count as tests. Rejected reports do not.</string>
+    <string name="daily_penalty_dialog_content" formatted="false">The system checks at 00:05 daily.\n\n• App owners: test the number of different apps shown on today\'s task card. The target depends on your active posted apps and the current policy, and is capped by the number of other apps available.\n• Members: open the app at least once a day.\n• A new app starts counting the next day; a new account is free on signup day.\n• Admin/Moderator accounts are exempt.\n\nMissed-day penalty:\n• Day 1: -1% Credits\n• Day 2: -2% Credits\n• Day 3: -5% Credits\n• Day 4+: -10% Credits\nThe percentage is multiplied by the shortfall ratio (minimum 1 Credit, never more than your balance).\n\n7 consecutive missed days: your posted apps are automatically paused until you complete today\'s target and resume them.\n\n💡 Pending/approved reports count as tests. Rejected reports do not.</string>
     <string name="daily_task_test_now">Find App to Test</string>
     <string name="daily_browse_apps">Browse Apps</string>
     <string name="daily_missed_streak_alert">Missed %1$d days in a row! You will lose up to %2$d%% Credits if you don\'t complete today\'s task.</string>
