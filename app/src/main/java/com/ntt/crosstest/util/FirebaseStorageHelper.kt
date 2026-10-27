@@ -6,19 +6,23 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageMetadata
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.ntt.crosstest.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 object FirebaseStorageHelper {
 
+    private const val TAG = "FirebaseStorageHelper"
     private const val REPORT_MAX_DIMENSION = 1080
     private const val REPORT_QUALITY = 80
     /** Storage rules giới hạn 2MB; chừa biên an toàn để không bị reject. */
@@ -118,8 +122,38 @@ object FirebaseStorageHelper {
     }
 
     /**
-     * Upload ảnh đã nén. Path cố định theo uploadId để retry không tạo
-     * thêm object rác; file cùng nội dung sẽ ghi đè cùng một object.
+     * Thử lấy download URL với ngân sách thử lại hữu hạn (tối đa 3 lần).
+     * Tránh trường hợp vừa putFile xong nhưng metadata chưa index kịp,
+     * làm văng ngoại lệ ra ngoài khiến Worker phải hoãn 10 giây qua WorkManager.
+     * Bảo toàn CancellationException.
+     */
+    private suspend fun StorageReference.awaitDownloadUrlWithRetry(
+        maxAttempts: Int = 3,
+        initialDelayMs: Long = 500L,
+    ): String {
+        var lastException: Exception? = null
+        var currentDelay = initialDelayMs
+        repeat(maxAttempts) { attempt ->
+            try {
+                return this.downloadUrl.await().toString()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                lastException = e
+                if (attempt < maxAttempts - 1) {
+                    delay(currentDelay)
+                    currentDelay = (currentDelay * 2).coerceAtMost(1000L)
+                }
+            }
+        }
+        throw lastException ?: IllegalStateException("Failed to resolve download URL")
+    }
+
+    /**
+     * Upload ảnh đã nén. Path cố định theo uploadId để retry không tạo thêm object rác.
+     * Storage rules chỉ cho phép create (không cho update/overwrite), do đó nếu object
+     * đã tồn tại từ lần trước nhưng client chưa nhận được kết quả, hàm sẽ thử đọc lại
+     * downloadUrl của object cũ thay vì fail cả bài nộp.
      */
     suspend fun uploadReportScreenshot(
         prepared: PreparedScreenshot,
@@ -141,12 +175,22 @@ object FirebaseStorageHelper {
             // Storage rules chỉ cho create (không cho update). Nếu lần upload
             // trước đã tạo object nhưng response bị mất, downloadUrl sẽ trả về
             // object cũ; dùng lại thay vì fail cả bài nộp.
-            val existingUrl = runCatching { storageRef.downloadUrl.await().toString() }.getOrNull()
-            if (existingUrl != null) return@withContext existingUrl
+            val existingUrl = try {
+                storageRef.awaitDownloadUrlWithRetry(maxAttempts = 2, initialDelayMs = 300L)
+            } catch (ce: CancellationException) {
+                throw ce
+            } catch (_: Exception) {
+                null
+            }
+            if (existingUrl != null) {
+                Log.d(TAG, "uploadReportScreenshot: recovered existing object URL for ${prepared.uploadId.take(8)}")
+                return@withContext existingUrl
+            }
             throw e
         }
 
-        storageRef.downloadUrl.await().toString()
+        // Lấy download URL sau khi putFile thành công với retry có giới hạn (tránh văng ra Worker vì delay tạm thời)
+        storageRef.awaitDownloadUrlWithRetry(maxAttempts = 3, initialDelayMs = 500L)
     }
 
     /**

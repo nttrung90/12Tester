@@ -1,6 +1,7 @@
 package com.ntt.crosstest.data
 
 import android.content.Context
+import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
@@ -245,10 +246,11 @@ class ReportSubmitManager(
             }
 
             val attempt = (info.runAttemptCount + 1).coerceAtLeast(1)
+            Log.d(TAG, "observeWork: req=${report.id.take(8)} state=${info.state} runAttemptCount=${info.runAttemptCount}")
             when (info.state) {
                 WorkInfo.State.ENQUEUED,
                 WorkInfo.State.BLOCKED,
-                WorkInfo.State.RUNNING -> updateRunningState(report, attempt)
+                WorkInfo.State.RUNNING -> updateRunningState(report, info.runAttemptCount)
 
                 WorkInfo.State.SUCCEEDED -> {
                     handleSuccess(report, info.outputData, attempt)
@@ -284,11 +286,13 @@ class ReportSubmitManager(
         }
     }
 
-    private fun updateRunningState(report: PendingReport, attempt: Int) {
+    private fun updateRunningState(report: PendingReport, runAttemptCount: Int) {
         if (!isCurrentRequest(report.id)) return
+        val isRetry = runAttemptCount > 0
+        val attempt = (runAttemptCount + 1).coerceAtLeast(1)
         _state.value = SubmitState(
             campaignId = report.campaignId,
-            stage = if (attempt > 1) Stage.RETRYING else Stage.SENDING,
+            stage = if (isRetry) Stage.RETRYING else Stage.SENDING,
             attempt = attempt,
             requestId = report.id,
         )

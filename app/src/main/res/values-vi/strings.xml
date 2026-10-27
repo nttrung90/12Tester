@@ -531,7 +531,7 @@
     <string name="campaign_next_searching">Đang tìm app tiếp theo…</string>
     <string name="campaign_finding_next_btn">Đang tìm…</string>
     <string name="campaign_submit_sending_bg">Đang gửi kết quả test (chạy nền)…</string>
-    <string name="campaign_submit_retrying_format">Mạng yếu, đang thử lại lần %1$d…</string>
+    <string name="campaign_submit_retrying_format">Đang thử gửi lại báo cáo (lần %1$d)…</string>
     <string name="campaign_submit_sent_ok">Đã gửi kết quả thành công</string>
     <string name="campaign_submit_failed_bg">Gửi kết quả thất bại</string>
     <string name="campaign_submit_retry_btn">Thử lại</string>

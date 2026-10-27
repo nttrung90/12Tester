@@ -532,7 +532,7 @@
     <string name="campaign_next_searching">Finding the next app…</string>
     <string name="campaign_finding_next_btn">Finding…</string>
     <string name="campaign_submit_sending_bg">Sending your report in the background…</string>
-    <string name="campaign_submit_retrying_format">Weak network, retrying (attempt %1$d)…</string>
+    <string name="campaign_submit_retrying_format">Retrying report submission (attempt %1$d)…</string>
     <string name="campaign_submit_sent_ok">Report sent successfully</string>
     <string name="campaign_submit_failed_bg">Sending failed</string>
     <string name="campaign_submit_retry_btn">Retry</string>

@@ -1,6 +1,7 @@
 package com.ntt.crosstest.work
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ListenableWorker
@@ -33,8 +34,11 @@ class ReportUploadWorker(
         val request = PendingReportStore.read(applicationContext, requestId)
             ?: return failure("pending_request_not_found")
 
+        Log.d(TAG, "doWork started: req=${request.id.take(8)} attempt=$runAttemptCount")
+
         if (!SupabaseHolder.isInitialized()) {
             return if (runAttemptCount < MAX_ATTEMPTS - 1) {
+                Log.w(TAG, "doWork: supabase not initialized yet, retrying req=${request.id.take(8)}")
                 ListenableWorker.Result.retry()
             } else {
                 failure("supabase_not_ready")
@@ -71,6 +75,7 @@ class ReportUploadWorker(
                     userId = request.userId,
                 )
                 uploadedHash = imageHash
+                Log.d(TAG, "screenshot uploaded: req=${request.id.take(8)}")
                 // Lưu URL ngay: nếu RPC fail thì lần retry không upload lại.
                 PendingReportStore.markUploaded(
                     context = applicationContext,
@@ -78,11 +83,19 @@ class ReportUploadWorker(
                     url = uploadedUrl,
                     hash = uploadedHash,
                 )
+                Log.d(TAG, "markUploaded done: req=${request.id.take(8)}")
             }
 
             if (request.needsJoin) {
                 // Không chặn nộp báo cáo chỉ vì join thất bại; RPC vẫn kiểm tra quyền.
-                runCatching { repository.joinCampaign(request.campaignId) }
+                // Bảo toàn CancellationException, không dùng runCatching nuốt cancellation.
+                try {
+                    repository.joinCampaign(request.campaignId)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // Lỗi join tạm thời không chặn submitFeedback, server RPC sẽ xác thực
+                }
             }
 
             val result = repository.submitFeedback(
@@ -93,6 +106,7 @@ class ReportUploadWorker(
                 imageHash = uploadedHash ?: request.fallbackImageHash,
                 clientSubmitId = request.id,
             )
+            Log.d(TAG, "submitFeedback success: req=${request.id.take(8)} status=${result.status}")
 
             PendingReportStore.delete(applicationContext, request.id)
 
@@ -112,7 +126,12 @@ class ReportUploadWorker(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            if (ReportSubmitPolicy.isRetryable(e) && runAttemptCount < MAX_ATTEMPTS - 1) {
+            val retryable = ReportSubmitPolicy.isRetryable(e) && runAttemptCount < MAX_ATTEMPTS - 1
+            Log.w(
+                TAG,
+                "doWork error: req=${request.id.take(8)} retryable=$retryable attempt=$runAttemptCount err=${e.javaClass.simpleName}: ${e.message?.take(100)}"
+            )
+            if (retryable) {
                 return ListenableWorker.Result.retry()
             }
             return failure(e.message ?: e.javaClass.simpleName)
@@ -125,6 +144,7 @@ class ReportUploadWorker(
         )
 
     companion object {
+        private const val TAG = "ReportUploadWorker"
         const val EXTRA_REQUEST_ID = "request_id"
         const val KEY_SUCCESS = "success"
         const val KEY_STATUS = "status"

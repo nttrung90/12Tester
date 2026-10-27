@@ -78,6 +78,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -129,4 +133,5 @@ dependencies {
 
     // Play Store update detection for the manual "Check for updates" action
     implementation(libs.play.app.update)
+    testImplementation(libs.junit)
 }

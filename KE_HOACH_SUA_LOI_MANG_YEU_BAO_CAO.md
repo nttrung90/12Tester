@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 26/10/2026
 > **Rà soát, hiệu chỉnh:** 27/10/2026, đối chiếu checkout `a115bba`.
-> **Trạng thái:** Hoàn thiện kế hoạch; **chưa sửa mã nguồn ứng dụng**. Có lỗi ánh xạ trạng thái cần ưu tiên kiểm chứng; chưa có bằng chứng runtime để kết luận Firebase là nguyên nhân gốc.
+> **Trạng thái:** Đã hoàn thành triển khai theo các gói R01, R02, R04 (Build và Unit Tests 100% Passed).
 > **Mục tiêu:** Hiển thị đúng tiến trình và số lần nộp; giảm retry không cần thiết nếu có; giữ khả năng gửi nền, khôi phục sau process death và không cộng Credit trùng.
 
 ## 1. Hiện tượng và giới hạn bằng chứng
@@ -208,3 +208,22 @@ Rules/migrations là tài liệu đối chiếu, chưa có căn cứ thay đổi
 6. Rollback app bằng artifact đã kiểm chứng; giữ pending tương thích hoặc kiểm thử migration nếu buộc đổi format. Không xóa pending để che lỗi, không deploy schema/rules ngoài phạm vi.
 
 **Kết luận rà soát:** kế hoạch cũ chưa đủ tin cậy để triển khai nguyên trạng. Bản hiệu chỉnh ưu tiên kiểm chứng lệch `WorkInfo.runAttemptCount`, sửa nhãn UI không có căn cứ, sau đó gia cố retry chọn lọc và chỉ tối ưu prefetch khi có số đo. Chỉnh tài liệu không đồng nghĩa ứng dụng đã được sửa hoặc sự cố đã được khắc phục trên thiết bị.
+
+---
+
+## 7. Kết quả triển khai thực tế (27/10/2026)
+
+1. **Gói R01 (Ánh xạ trạng thái & UI):**
+   - Đã sửa [`ReportSubmitManager.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt): phân biệt rõ `isRetry = runAttemptCount > 0`. Lần chạy đầu tiên luôn giữ `Stage.SENDING` và `attempt = 1`, không còn bị cộng nhầm thành lần 2.
+   - Đã đồng bộ chuỗi thông báo trung tính trong cả 3 tệp `strings.xml`:
+     - Tiếng Việt: `Đang thử gửi lại báo cáo (lần %1$d)…`
+     - Tiếng Anh & mặc định: `Retrying report submission (attempt %1$d)…`
+2. **Gói R02 (Storage retry & Phân loại lỗi):**
+   - Đã sửa [`FirebaseStorageHelper.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt): thêm hàm `awaitDownloadUrlWithRetry` với tối đa 3 lần thử cục bộ (exponential backoff 500ms, 1000ms), bọc try-catch an toàn quanh việc lấy download URL.
+   - Bảo toàn `CancellationException`, loại bỏ hoàn toàn `runCatching` nuốt cancellation ở nhánh recovery.
+   - Đã sửa [`ReportSubmitPolicy.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/data/ReportSubmitPolicy.kt): phân loại lỗi theo `StorageException.errorCode` (unauthorized, unauthenticated, v.v. là lỗi vĩnh viễn) và `RestException.statusCode` (400, 401, 403, 404, 422 là vĩnh viễn).
+   - Đã sửa [`ReportUploadWorker.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt): bảo toàn cancellation trong `joinCampaign`, thêm log timeline che ID nhạy cảm (`req.take(8)`).
+3. **Gói R04 (Kiểm thử & Build):**
+   - Đã bổ sung bộ unit test [`ReportSubmitPolicyTest.kt`](file:///D:/AI/12%20Tester/app/src/test/java/com/ntt/crosstest/data/ReportSubmitPolicyTest.kt): kiểm thử đầy đủ các nhánh lỗi hủy, lỗi cục bộ, lỗi vĩnh viễn server, StorageException và lỗi mạng tạm thời.
+   - Chạy lệnh: `gradlew :app:testDebugUnitTest` -> **PASSED 100%**.
+   - Chạy lệnh: `gradlew :app:assembleDebug` -> **BUILD SUCCESSFUL**.

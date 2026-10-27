@@ -25,6 +25,7 @@ exifinterface = "1.4.2"
 googleServices = "4.4.2"
 firebaseBom = "33.10.0"
 playAppUpdate = "2.1.0"
+junit = "4.13.2"
 
 [libraries]
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
@@ -66,6 +67,7 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx
 
 # Google Play In-App Updates
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
