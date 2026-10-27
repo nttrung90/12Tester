@@ -6,6 +6,7 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.SessionCacheManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,8 @@ data class MissionCreateUiState(
     val isSaving: Boolean = false,
     val error: String? = null,
     val created: Boolean = false,
+    val initialLoadError: String? = null,
+    val allAppsBusy: Boolean = false,
 ) {
     val rewardValue: Int? get() = rewardCredits.trim().toIntOrNull()
 
@@ -40,39 +43,55 @@ class MissionCreateViewModel(
     private val _uiState = MutableStateFlow(MissionCreateUiState())
     val uiState: StateFlow<MissionCreateUiState> = _uiState.asStateFlow()
 
+    private val loadSequence = java.util.concurrent.atomic.AtomicLong(0L)
+
     init {
         loadInitialData()
     }
 
-    private fun loadInitialData() {
+    fun loadInitialData(forceRefresh: Boolean = false) {
+        val seq = loadSequence.incrementAndGet()
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, initialLoadError = null, allAppsBusy = false) }
             try {
-                val profile = repository.getMyProfile()
-                val campaigns = repository.myCampaigns().filter { it.isOpen }
-                // Loại app đã có nhiệm vụ đang mở (server chỉ cho 1 nhiệm vụ đang mở/app).
-                // Server chưa chạy migration 039 thì getOpenMissions lỗi — bỏ qua lọc.
-                val busyCampaignIds = try {
-                    repository.getOpenMissions()
-                        .filter { it.isMine && it.isActive }
-                        .mapNotNull { it.campaignId.takeIf(String::isNotBlank) }
-                        .toSet()
-                } catch (_: Exception) {
-                    emptySet()
+                val profile = repository.getMyProfile(forceRefresh = forceRefresh)
+                val allMyCampaigns = repository.myCampaigns(forceRefresh = forceRefresh)
+                val openCampaigns = allMyCampaigns.filter { it.isOpen }
+                // M02: Dùng endpoint độc lập getMyActiveMissionCampaignIds (không bị cắt ở 100 discovery records)
+                val busyCampaignIds = repository.getMyActiveMissionCampaignIds().toSet()
+                val selectable = openCampaigns.filter { it.id !in busyCampaignIds }
+                if (seq != loadSequence.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    return@launch
                 }
-                val selectable = campaigns.filter { it.id !in busyCampaignIds }
                 _uiState.update {
                     it.copy(
                         myCampaigns = selectable,
                         selectedCampaignId = selectable.firstOrNull()?.id,
                         userCredits = profile?.credits ?: 0,
                         isLoading = false,
+                        allAppsBusy = openCampaigns.isNotEmpty() && selectable.isEmpty(),
+                        initialLoadError = null,
                     )
                 }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false) }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                if (seq != loadSequence.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    return@launch
+                }
+                _uiState.update { it.copy(isLoading = false, initialLoadError = friendlyError(e, localizer)) }
             }
         }
     }
+
+    fun retry() = loadInitialData(forceRefresh = true)
 
     fun update(
         title: String? = null,
@@ -164,6 +183,8 @@ class MissionCreateViewModel(
             return
         }
 
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
             try {
@@ -177,8 +198,19 @@ class MissionCreateViewModel(
                         rewardCredits = reward,
                     )
                 )
+                if (initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    return@launch
+                }
                 _uiState.update { it.copy(isSaving = false, created = true) }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                if (initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    return@launch
+                }
                 val errorMsg = when {
                     e.message?.contains("INSUFFICIENT_MIN_CREDITS") == true ->
                         localizer.get(R.string.mission_err_min_balance_format, s.userCredits)

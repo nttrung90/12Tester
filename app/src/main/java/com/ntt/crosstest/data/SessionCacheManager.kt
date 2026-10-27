@@ -2,14 +2,21 @@ package com.ntt.crosstest.data
 
 import android.content.Context
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
+import com.ntt.crosstest.util.VnTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Snapshot of the user's latest session data for instant, offline-first app opening.
@@ -39,11 +46,46 @@ data class CachedSessionData(
     val unreadNotificationsCount: Int = 0,
     val questSummary: QuestSummary? = null,
     val timestamp: Long = 0L,
-)
+    val dateVn: String? = null,
+    val sessionGeneration: Long = SessionCacheManager.currentGeneration(),
+) {
+    /**
+     * Lọc và làm sạch dữ liệu nếu snapshot thuộc về ngày cũ ở Việt Nam.
+     * Tránh việc mở app ngày mới nhưng các chỉ số "hôm nay" vẫn hiển thị dữ liệu hôm qua.
+     */
+    fun sanitizeForDate(): CachedSessionData {
+        val todayStr = VnTime.today().toString()
+        val isOldDate = if (dateVn != null) {
+            dateVn != todayStr
+        } else if (timestamp > 0) {
+            try {
+                java.time.Instant.ofEpochMilli(timestamp)
+                    .atZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))
+                    .toLocalDate()
+                    .toString() != todayStr
+            } catch (_: Exception) {
+                false
+            }
+        } else {
+            false
+        }
+        if (isOldDate) {
+            return copy(
+                todayCheckinCount = 0,
+                displayItems = displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
+                pausedDisplayItems = pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
+                completedDisplayItems = completedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
+                dailyTask = if (dailyTask?.statusDate != null && dailyTask.statusDate != todayStr) null else dailyTask,
+                questSummary = questSummary?.copy(dailyCount = 0),
+            )
+        }
+        return this
+    }
+}
 
 /**
  * High-performance disk cache manager for the user's last session.
- * Employs atomic file writes and fast JSON serialization.
+ * Employs atomic file writes, fast JSON serialization, and generation scoping.
  */
 object SessionCacheManager {
     private const val FILE_NAME = "last_session_cache.json"
@@ -56,8 +98,18 @@ object SessionCacheManager {
         encodeDefaults = true
     }
 
+    val generation = AtomicLong(1L)
+    private val diskLock = Any()
+
     @Volatile
     private var inMemoryCache: CachedSessionData? = null
+
+    fun currentGeneration(): Long = generation.get()
+
+    /**
+     * Synchronously returns the in-memory cache without performing any disk I/O.
+     */
+    fun peekMemory(): CachedSessionData? = inMemoryCache?.sanitizeForDate()
 
     /**
      * Fast O(1) synchronous check to know if an authenticated session exists on disk.
@@ -68,16 +120,23 @@ object SessionCacheManager {
     }
 
     /**
-     * Synchronously loads the cached session (< 2ms) from disk on ViewModel startup.
+     * Synchronously loads the cached session from memory or disk on ViewModel startup.
      */
     fun loadSync(context: Context): CachedSessionData? {
-        inMemoryCache?.let { return it }
+        inMemoryCache?.let { return it.sanitizeForDate() }
+        val curGen = generation.get()
         val file = File(context.filesDir, FILE_NAME)
         if (!file.exists()) return null
         return try {
-            val content = file.readText()
-            val data = json.decodeFromString<CachedSessionData>(content)
-            inMemoryCache = data
+            val (content, genAfterRead) = synchronized(diskLock) {
+                if (!file.exists()) return null
+                Pair(file.readText(), generation.get())
+            }
+            if (curGen != genAfterRead || curGen != generation.get()) return null
+            val data = json.decodeFromString<CachedSessionData>(content).sanitizeForDate()
+            if (curGen == generation.get()) {
+                inMemoryCache = data
+            }
             data
         } catch (_: Exception) {
             null
@@ -94,44 +153,84 @@ object SessionCacheManager {
     }
 
     /**
-     * Atomically saves session snapshot to disk.
+     * Atomically saves session snapshot to disk with generation check and unique staging file.
      */
-    suspend fun save(context: Context, data: CachedSessionData) = withContext(Dispatchers.IO) {
-        inMemoryCache = data
-        try {
-            val file = File(context.filesDir, FILE_NAME)
-            val tempFile = File(context.filesDir, "$FILE_NAME.tmp")
-            val content = json.encodeToString(data)
-            tempFile.writeText(content)
-            if (tempFile.renameTo(file) || (file.delete() && tempFile.renameTo(file))) {
-                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    .edit()
-                    // Guest snapshots (userId == null) must not mark an
-                    // authenticated session, otherwise cold start would skip
-                    // the login screen with no real session.
-                    .putBoolean(KEY_HAS_SESSION, data.userId != null)
-                    .putString(KEY_LAST_USER_ID, data.userId)
-                    .apply()
+    suspend fun save(context: Context, data: CachedSessionData, targetGeneration: Long? = null) = withContext(Dispatchers.IO) {
+        val genAtStart = targetGeneration ?: data.sessionGeneration
+        if (genAtStart != generation.get()) return@withContext
+
+        val enrichedData = if (data.dateVn == null) {
+            data.copy(dateVn = VnTime.today().toString())
+        } else {
+            data
+        }
+
+        synchronized(diskLock) {
+            if (genAtStart != generation.get()) return@synchronized
+            val stagingFile = File(context.filesDir, "$FILE_NAME.${UUID.randomUUID()}.tmp")
+            try {
+                val content = json.encodeToString(enrichedData)
+                stagingFile.writeText(content)
+
+                if (genAtStart != generation.get()) {
+                    stagingFile.delete()
+                    return@synchronized
+                }
+
+                val targetFile = File(context.filesDir, FILE_NAME)
+                try {
+                    Files.move(
+                        stagingFile.toPath(),
+                        targetFile.toPath(),
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+                } catch (_: Exception) {
+                    Files.move(
+                        stagingFile.toPath(),
+                        targetFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+                }
+
+                if (genAtStart == generation.get()) {
+                    inMemoryCache = enrichedData
+                    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean(KEY_HAS_SESSION, enrichedData.userId != null)
+                        .putString(KEY_LAST_USER_ID, enrichedData.userId)
+                        .apply()
+                } else {
+                    targetFile.delete()
+                }
+            } catch (_: Exception) {
+                // Non-critical if disk write fails
+            } finally {
+                if (stagingFile.exists()) {
+                    stagingFile.delete()
+                }
             }
-        } catch (_: Exception) {
-            // Non-critical if disk write fails
         }
     }
 
     /**
-     * Clears all cached session data from disk on user sign out.
+     * Clears all cached session data from memory and disk on user sign out or session termination.
+     * Increments generation to safely invalidate any pending or in-flight save operations.
      */
     fun clear(context: Context) {
+        generation.incrementAndGet()
         inMemoryCache = null
         try {
-            val file = File(context.filesDir, FILE_NAME)
-            if (file.exists()) file.delete()
-            val tempFile = File(context.filesDir, "$FILE_NAME.tmp")
-            if (tempFile.exists()) tempFile.delete()
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                .edit()
-                .clear()
-                .apply()
+            synchronized(diskLock) {
+                val file = File(context.filesDir, FILE_NAME)
+                if (file.exists()) file.delete()
+                val dir = context.filesDir
+                dir.listFiles { _, name -> name.startsWith(FILE_NAME) }?.forEach { it.delete() }
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .clear()
+                    .apply()
+            }
         } catch (_: Exception) {}
     }
 }

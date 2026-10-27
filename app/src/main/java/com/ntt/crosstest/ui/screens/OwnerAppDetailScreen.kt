@@ -51,6 +51,7 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.ZoomIn
@@ -516,6 +517,17 @@ fun OwnerAppDetailScreen(
                                     uiState.mission?.title.orEmpty(),
                                 ),
                                 onClick = { showMissionManageDialog = true },
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        } else if (uiState.missionError != null && uiState.isActualOwner) {
+                            OwnerActionItem(
+                                icon = Icons.Filled.EmojiEvents,
+                                iconTint = MaterialTheme.colorScheme.error,
+                                title = stringResource(R.string.mission_manage_title),
+                                titleColor = MaterialTheme.colorScheme.error,
+                                subtitle = stringResource(R.string.mission_owner_load_error),
+                                onClick = { viewModel.retryLoadMission() },
                             )
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -1873,16 +1885,16 @@ private fun ReportReviewCard(
     }
     var isCheckingHash by remember { mutableStateOf(false) }
 
-    LaunchedEffect(report.screenshotUrl, previousReport?.screenshotUrl, report.imageHash, previousReport?.imageHash) {
+    LaunchedEffect(report.screenshotUrl, previousReport?.screenshotUrl, report.imageHash, previousReport?.imageHash, report.isScreenshotExpired, previousReport?.isScreenshotExpired) {
         val u1 = report.screenshotUrl
         val u2 = previousReport?.screenshotUrl
         if (!u1.isNullOrBlank() && !u2.isNullOrBlank()) {
             isCheckingHash = true
-            // Ưu tiên image_hash đã lưu trong DB — chỉ tải + decode ảnh khi hash trống.
+            // Ưu tiên image_hash đã lưu trong DB — chỉ tải + decode ảnh khi hash trống và chưa hết hạn 30 ngày.
             val h1 = report.imageHash?.takeIf { it.isNotBlank() }
-                ?: ImageHashHelper.computeDHashFromUrl(context, u1)
+                ?: if (!report.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, u1) else null
             val h2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: ImageHashHelper.computeDHashFromUrl(context, u2)
+                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, u2) else null
             if (h1 != null && h2 != null) {
                 comparison = ImageHashHelper.compare(h1, h2, context)
             }
@@ -2062,50 +2074,87 @@ private fun ReportReviewCard(
             }
 
             // Spacious Screenshot Preview Card (height 200dp, no cropping!)
-            if (!report.screenshotUrl.isNullOrBlank()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { onPreviewImage(report.screenshotUrl) },
-                    colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.06f)),
-                ) {
-                    Box(Modifier.fillMaxSize()) {
-                        AsyncImage(
-                            model = report.screenshotUrl,
-                            contentDescription = stringResource(R.string.oad_screenshot_tester_title),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit,
-                        )
-
-                        // Bottom overlay banner
-                        Surface(
+            if (report.isScreenshotExpired || !report.screenshotUrl.isNullOrBlank()) {
+                if (report.isScreenshotExpired) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    ) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            color = Color(0xB3000000)
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Row(
+                            Icon(
+                                Icons.Filled.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.img_expired_storage_policy),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.img_expired_storage_policy_desc),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { report.screenshotUrl?.let { onPreviewImage(it) } },
+                        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.06f)),
+                    ) {
+                        Box(Modifier.fillMaxSize()) {
+                            AsyncImage(
+                                model = report.screenshotUrl,
+                                contentDescription = stringResource(R.string.oad_screenshot_tester_title),
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit,
+                            )
+
+                            // Bottom overlay banner
+                            Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .align(Alignment.BottomCenter),
+                                color = Color(0xB3000000)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(stringResource(R.string.oad_tap_zoom), color = Color.White, style = MaterialTheme.typography.labelSmall)
-                                }
-                                if (previousReport != null) {
-                                    Text(
-                                        text = stringResource(R.string.oad_compare_2days),
-                                        color = Color(0xFF90CAF9),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.clickable { onCompare() }
-                                    )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Filled.ZoomIn, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(stringResource(R.string.oad_tap_zoom), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                    }
+                                    if (previousReport != null) {
+                                        Text(
+                                            text = stringResource(R.string.oad_compare_2days),
+                                            color = Color(0xFF90CAF9),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.clickable { onCompare() }
+                                        )
+                                    }
                                 }
                             }
                         }

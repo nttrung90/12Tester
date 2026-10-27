@@ -81,9 +81,11 @@ fun QuestsScreen(
     claimingMilestone: String?,
     missions: List<Mission> = emptyList(),
     isMissionsLoading: Boolean = false,
+    missionsError: String? = null,
     joiningMissionId: String? = null,
     onJoinMission: (String) -> Unit = {},
     onMissionAppClick: (String) -> Unit = {},
+    onRetryMissions: () -> Unit = {},
     isAuthenticated: Boolean,
     isLoading: Boolean,
     onRefresh: () -> Unit,
@@ -461,6 +463,48 @@ fun QuestsScreen(
                             CircularProgressIndicator(modifier = Modifier.size(28.dp))
                         }
                     }
+                } else if (missionsError != null && missions.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                            ),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.mission_load_error),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = missionsError,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                Button(
+                                    onClick = onRetryMissions,
+                                    shape = RoundedCornerShape(8.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.mission_load_error_retry),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 } else if (missions.isEmpty()) {
                     item {
                         Card(
@@ -799,8 +843,13 @@ private fun MissionCard(
                 )
             }
 
-            // App liên kết + người mở nhiệm vụ
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // App liên kết + người mở nhiệm vụ (M01: cho phép bấm mở app ngay từ header app)
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(enabled = mission.campaignId.isNotBlank()) { onOpenApp() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 AppIcon(
                     iconUrl = mission.iconUrl.orEmpty(),
                     packageName = mission.packageName,
@@ -895,14 +944,6 @@ private fun MissionCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
-                mission.isFull -> {
-                    Text(
-                        text = stringResource(R.string.mission_status_full),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
                 mission.hasJoined -> {
                     Button(
                         onClick = onOpenApp,
@@ -918,6 +959,14 @@ private fun MissionCard(
                             fontWeight = FontWeight.Bold,
                         )
                     }
+                }
+                mission.isFull -> {
+                    Text(
+                        text = stringResource(R.string.mission_status_full),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
                 else -> {
                     Button(

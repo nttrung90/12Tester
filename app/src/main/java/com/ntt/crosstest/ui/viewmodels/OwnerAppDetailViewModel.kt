@@ -8,6 +8,7 @@ import com.ntt.crosstest.data.CampaignDetailResult
 import com.ntt.crosstest.data.CampaignMember
 import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Mission
 import com.ntt.crosstest.data.Profile
@@ -43,6 +44,8 @@ data class OwnerAppDetailUiState(
     val isActualOwner: Boolean = false,
     /** Nhiệm vụ hiện tại của app (mục "Quản lý nhiệm vụ", migration 040). */
     val mission: Mission? = null,
+    val isMissionLoading: Boolean = false,
+    val missionError: String? = null,
     val isMissionActionLoading: Boolean = false,
     /** Reward overlay shown inside [TesterReportsDialog]. */
     val reward: CreditReward? = null,
@@ -54,6 +57,8 @@ class OwnerAppDetailViewModel(
     private val localizer: Localizer,
 ) : ViewModel() {
 
+    private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
+    private val missionLoadSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val _uiState = MutableStateFlow(OwnerAppDetailUiState())
     val uiState: StateFlow<OwnerAppDetailUiState> = _uiState.asStateFlow()
 
@@ -62,19 +67,19 @@ class OwnerAppDetailViewModel(
             // Nạp cache trước (best-effort): lỗi mạng ở đây không được làm crash màn,
             // refresh() phía dưới sẽ tải lại và báo lỗi qua UI state nếu cần.
             runCatching {
-                val cachedCamp = repository.getCampaign(campaignId, forceRefresh = false)
-                val cachedStats = repository.getCampaignOwnerStats(campaignId, forceRefresh = false)
-                val cachedReports = repository.getCampaignReports(campaignId, canManage = true, forceRefresh = false)
-                val cachedTesters = repository.getCampaignTesters(campaignId, forceRefresh = false)
+                val cachedCamp = repository.peekCampaign(campaignId)
+                val cachedStats = repository.peekCampaignOwnerStats(campaignId)
+                val cachedReports = repository.peekCampaignReports(campaignId, canManage = true)
+                val cachedTesters = repository.peekCampaignTesters(campaignId)
                 if (cachedCamp != null) {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isBackgroundSyncing = true,
                             campaign = cachedCamp,
-                            stats = cachedStats,
-                            reports = cachedReports,
-                            testers = cachedTesters,
+                            stats = cachedStats ?: it.stats,
+                            reports = cachedReports ?: it.reports,
+                            testers = cachedTesters ?: it.testers,
                         )
                     }
                 }
@@ -85,6 +90,9 @@ class OwnerAppDetailViewModel(
 
     fun refresh(forceRefresh: Boolean = false) {
         loadMission()
+        val seq = refreshSequence.incrementAndGet()
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             if (forceRefresh || _uiState.value.campaign == null) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
@@ -95,6 +103,9 @@ class OwnerAppDetailViewModel(
                 // Fast path: 1 RPC gộp (campaign + testers + reports + stats) thay cho 5-8 round-trip.
                 val detail = repository.getCampaignDetailPage(campaignId, forceRefresh = forceRefresh)
                 if (detail != null) {
+                    if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                        return@launch
+                    }
                     applyDetail(detail, forceRefresh)
                     return@launch
                 }
@@ -112,6 +123,10 @@ class OwnerAppDetailViewModel(
                 )
                 val slots = try { repository.getMySlotsInfo(forceRefresh = forceRefresh) } catch (_: Exception) { emptyList() }
                 val slot = slots.find { it.slotNumber == camp?.slotNumber }
+
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
 
                 _uiState.update {
                     it.copy(
@@ -522,15 +537,40 @@ class OwnerAppDetailViewModel(
      * Nhiệm vụ hiện tại của app cho mục "Quản lý nhiệm vụ". Server chưa chạy
      * migration 040 thì RPC lỗi — bỏ qua im lặng, giữ nguyên giá trị cũ.
      */
-    private fun loadMission() {
+    fun loadMission() {
+        val seq = missionLoadSequence.incrementAndGet()
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
+        val targetCampaignId = campaignId
         viewModelScope.launch {
+            _uiState.update { it.copy(isMissionLoading = true, missionError = null) }
             try {
-                val mission = repository.getCampaignMission(campaignId)
-                _uiState.update { it.copy(mission = mission) }
-            } catch (_: Exception) {
+                val mission = repository.getCampaignMission(targetCampaignId)
+                if (seq != missionLoadSequence.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId() ||
+                    targetCampaignId != campaignId
+                ) {
+                    _uiState.update { it.copy(isMissionLoading = false) }
+                    return@launch
+                }
+                _uiState.update { it.copy(mission = mission, isMissionLoading = false, missionError = null) }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                if (seq != missionLoadSequence.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId() ||
+                    targetCampaignId != campaignId
+                ) {
+                    _uiState.update { it.copy(isMissionLoading = false) }
+                    return@launch
+                }
+                _uiState.update { it.copy(isMissionLoading = false, missionError = friendlyError(e, localizer)) }
             }
         }
     }
+
+    fun retryLoadMission() = loadMission()
 
     /** Dừng / tiếp tục nhiệm vụ của app này (chỉ chủ nhiệm vụ). */
     fun togglePauseResumeMission(onResult: (Boolean, String) -> Unit) {
@@ -545,9 +585,11 @@ class OwnerAppDetailViewModel(
                     repository.pauseMission(mission.id)
                 }
                 if (result.success) {
+                    missionLoadSequence.incrementAndGet()
                     _uiState.update { state ->
                         state.copy(
                             isMissionActionLoading = false,
+                            isMissionLoading = false,
                             mission = state.mission?.copy(status = result.status),
                         )
                     }
@@ -557,11 +599,23 @@ class OwnerAppDetailViewModel(
                         localizer.get(R.string.mission_manage_resumed_toast)
                     }
                     onResult(true, msg)
+                } else if (result.isExpired) {
+                    missionLoadSequence.incrementAndGet()
+                    _uiState.update { state ->
+                        state.copy(
+                            isMissionActionLoading = false,
+                            isMissionLoading = false,
+                            mission = state.mission?.copy(status = "expired"),
+                        )
+                    }
+                    onResult(false, localizer.get(R.string.mission_status_expired))
                 } else {
                     _uiState.update { it.copy(isMissionActionLoading = false) }
-                    onResult(false, localizer.get(R.string.repo_connection_failed))
+                    val msg = result.message ?: result.error ?: localizer.get(R.string.repo_connection_failed)
+                    onResult(false, msg)
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 _uiState.update { it.copy(isMissionActionLoading = false) }
                 onResult(false, missionActionError(e))
             }
@@ -576,9 +630,11 @@ class OwnerAppDetailViewModel(
             _uiState.update { it.copy(isMissionActionLoading = true, error = null) }
             try {
                 repository.deleteMission(mission.id)
-                _uiState.update { it.copy(isMissionActionLoading = false, mission = null) }
+                missionLoadSequence.incrementAndGet()
+                _uiState.update { it.copy(isMissionActionLoading = false, isMissionLoading = false, mission = null) }
                 onDeleted()
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 _uiState.update { it.copy(isMissionActionLoading = false, error = missionActionError(e)) }
             }
         }

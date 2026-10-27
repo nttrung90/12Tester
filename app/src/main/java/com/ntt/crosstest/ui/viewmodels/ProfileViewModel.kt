@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
@@ -53,9 +54,11 @@ class ProfileViewModel(
     private val localizer: Localizer,
 ) : ViewModel() {
 
+    private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
+
     private val _uiState = MutableStateFlow(
         run {
-            val cached = SessionCacheManager.loadSync(app)
+            val cached = SessionCacheManager.peekMemory()
             // Only hydrate from disk when the snapshot belongs to the user who
             // actually holds the current session (prevents cross-account leaks).
             // While the session is still loading (currentUserId == null) the cache
@@ -88,6 +91,25 @@ class ProfileViewModel(
     private var refreshWhenSessionReady = false
 
     init {
+        if (_uiState.value.profile == null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val loaded = SessionCacheManager.loadSync(app)
+                val curUid = authRepository.currentUserId()
+                if (loaded?.userProfile != null && (loaded.userId == null || curUid == null || loaded.userId == curUid)) {
+                    _uiState.update { current ->
+                        if (current.profile == null) {
+                            current.copy(
+                                isLoading = false,
+                                isBackgroundSyncing = true,
+                                isAuthenticated = true,
+                                profile = loaded.userProfile,
+                                email = loaded.userProfile.email,
+                            )
+                        } else current
+                    }
+                }
+            }
+        }
         refresh(forceRefresh = false)
         observeSession()
         viewModelScope.launch {
@@ -144,6 +166,9 @@ class ProfileViewModel(
     }
 
     fun refresh(forceRefresh: Boolean = false) {
+        val seq = refreshSequence.incrementAndGet()
+        val initialUid = authRepository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             if (forceRefresh || _uiState.value.profile == null) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
@@ -190,8 +215,12 @@ class ProfileViewModel(
                     }
                     return@launch
                 }
-                val logs = dashboard?.creditLogs ?: campaignRepository.getMyCreditLogs()
+                val logs = dashboard?.creditLogs ?: campaignRepository.getMyCreditLogs(forceRefresh = forceRefresh)
                 val slots = campaignRepository.getMySlotsInfo(forceRefresh = forceRefresh)
+
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != authRepository.currentUserId()) {
+                    return@launch
+                }
 
                 _uiState.update {
                     it.copy(

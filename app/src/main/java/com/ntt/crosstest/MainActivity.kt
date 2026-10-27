@@ -1,4 +1,4 @@
-package com.ntt.crosstest
+﻿package com.ntt.crosstest
 
 import android.Manifest
 import android.content.Context
@@ -241,6 +241,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 is SessionStatus.NotAuthenticated -> {
+                                    app.campaignRepository.clearMemoryCache()
                                     // Xoá snapshot tập trung, tránh race giữa cache và routing.
                                     if (SessionCacheManager.hasCachedSession(app)) {
                                         SessionCacheManager.clear(app)

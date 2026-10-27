@@ -51,6 +51,7 @@ fun FullscreenImageViewer(
     onDismiss: () -> Unit,
     title: String = stringResource(R.string.img_screenshot_title),
     subtitle: String? = null,
+    isExpired: Boolean = false,
 ) {
     if (imageUrl.isNullOrBlank()) return
 
@@ -111,33 +112,72 @@ fun FullscreenImageViewer(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                SubcomposeAsyncImage(
-                    model = imageUrl,
-                    contentDescription = title,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            scaleX = scale
-                            scaleY = scale
-                            translationX = offset.x
-                            translationY = offset.y
-                        },
-                    contentScale = ContentScale.Fit,
-                ) {
-                    val state = painter.state
-                    when (state) {
-                        is AsyncImagePainter.State.Loading -> {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(color = Color.White)
+                if (isExpired) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Schedule,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.8f),
+                            modifier = Modifier.size(56.dp)
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.img_expired_storage_policy),
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.img_expired_storage_policy_desc),
+                            color = Color(0xFFCBD5E1),
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    SubcomposeAsyncImage(
+                        model = imageUrl,
+                        contentDescription = title,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                translationX = offset.x
+                                translationY = offset.y
+                            },
+                        contentScale = ContentScale.Fit,
+                    ) {
+                        val state = painter.state
+                        when (state) {
+                            is AsyncImagePainter.State.Loading -> {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(color = Color.White)
+                                }
                             }
-                        }
-                        is AsyncImagePainter.State.Error -> {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(stringResource(R.string.img_load_failed), color = Color.White)
+                            is AsyncImagePainter.State.Error -> {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Icon(
+                                            imageVector = Icons.Filled.BrokenImage,
+                                            contentDescription = null,
+                                            tint = Color.White.copy(alpha = 0.6f),
+                                            modifier = Modifier.size(40.dp)
+                                        )
+                                        Spacer(Modifier.height(6.dp))
+                                        Text(stringResource(R.string.img_load_failed), color = Color.White)
+                                    }
+                                }
                             }
-                        }
-                        else -> {
-                            SubcomposeAsyncImageContent()
+                            else -> {
+                                SubcomposeAsyncImageContent()
+                            }
                         }
                     }
                 }
@@ -242,16 +282,19 @@ fun ImageComparisonDialog(
         previousReport?.screenshotUrl,
         currentReport.imageHash,
         previousReport?.imageHash,
+        currentReport.isScreenshotExpired,
+        previousReport?.isScreenshotExpired,
     ) {
         val url1 = currentReport.screenshotUrl
         val url2 = previousReport?.screenshotUrl
         if (!url1.isNullOrBlank() && !url2.isNullOrBlank()) {
             isCalculatingHash = true
             comparisonResult = null
+            // Không tải từ URL nếu ảnh đã hết hạn theo chính sách 30 ngày
             val hash1 = currentReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: ImageHashHelper.computeDHashFromUrl(context, url1)
+                ?: if (!currentReport.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, url1) else null
             val hash2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: ImageHashHelper.computeDHashFromUrl(context, url2)
+                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, url2) else null
             if (hash1 != null && hash2 != null) {
                 comparisonResult = ImageHashHelper.compare(hash1, hash2, context)
             }
@@ -271,6 +314,8 @@ fun ImageComparisonDialog(
             ?: stringResource(R.string.img_none_yet),
         comparisonResult = comparisonResult,
         isCalculatingHash = isCalculatingHash,
+        currentExpired = currentReport.isScreenshotExpired,
+        previousExpired = previousReport?.isScreenshotExpired ?: false,
         onDismiss = onDismiss,
         actions = {
             // Quick Action Buttons if callbacks provided
@@ -368,6 +413,8 @@ private fun ComparisonDialogScaffold(
     previousDate: String,
     comparisonResult: ImageHashHelper.ComparisonResult?,
     isCalculatingHash: Boolean,
+    currentExpired: Boolean = false,
+    previousExpired: Boolean = false,
     onDismiss: () -> Unit,
     actions: @Composable () -> Unit,
 ) {
@@ -509,6 +556,21 @@ private fun ComparisonDialogScaffold(
                                 text = stringResource(R.string.img_first_report_note),
                                 style = MaterialTheme.typography.bodySmall
                             )
+                        } else if (currentExpired || previousExpired) {
+                            Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.img_expired_storage_policy),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.img_expired_storage_policy_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         } else {
                             Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Text(
@@ -562,9 +624,11 @@ private fun ComparisonDialogScaffold(
                             previousImage = previousImage,
                             previousLabel = previousLabel,
                             previousDate = previousDate,
+                            currentExpired = currentExpired,
+                            previousExpired = previousExpired,
                         )
-                        1 -> SplitSliderView(currentImage, previousImage, sliderRatio) { sliderRatio = it }
-                        2 -> BlinkView(currentImage, previousImage, blinkShowCurrent) { blinkShowCurrent = !blinkShowCurrent }
+                        1 -> SplitSliderView(currentImage, previousImage, sliderRatio, currentExpired, previousExpired) { sliderRatio = it }
+                        2 -> BlinkView(currentImage, previousImage, blinkShowCurrent, currentExpired, previousExpired) { blinkShowCurrent = !blinkShowCurrent }
                     }
                 }
             }
@@ -580,6 +644,8 @@ private fun SideBySideView(
     previousImage: String?,
     previousLabel: String,
     previousDate: String,
+    currentExpired: Boolean = false,
+    previousExpired: Boolean = false,
 ) {
     Row(
         modifier = Modifier.fillMaxSize(),
@@ -620,12 +686,30 @@ private fun SideBySideView(
                 shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
-                AsyncImage(
-                    model = currentImage,
-                    contentDescription = stringResource(R.string.img_today_photo_cd),
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit
-                )
+                if (currentExpired) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.img_expired_storage_policy),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    AsyncImage(
+                        model = currentImage,
+                        contentDescription = stringResource(R.string.img_today_photo_cd),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
         }
 
@@ -664,7 +748,23 @@ private fun SideBySideView(
                 shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
-                if (previousImage != null) {
+                if (previousExpired) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.img_expired_storage_policy),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else if (previousImage != null) {
                     AsyncImage(
                         model = previousImage,
                         contentDescription = stringResource(R.string.img_prev_photo_cd),
@@ -690,8 +790,22 @@ private fun SplitSliderView(
     currentImage: Any?,
     previousImage: String?,
     ratio: Float,
+    currentExpired: Boolean = false,
+    previousExpired: Boolean = false,
     onRatioChange: (Float) -> Unit,
 ) {
+    if (currentExpired || previousExpired) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.height(8.dp))
+                Text(stringResource(R.string.img_expired_storage_policy), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(4.dp))
+                Text(stringResource(R.string.img_expired_storage_policy_desc), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        return
+    }
     if (currentImage == null || previousImage == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(stringResource(R.string.img_need_two_photos_slider), style = MaterialTheme.typography.bodyMedium)
@@ -779,8 +893,22 @@ private fun BlinkView(
     currentImage: Any?,
     previousImage: String?,
     showCurrent: Boolean,
+    currentExpired: Boolean = false,
+    previousExpired: Boolean = false,
     onToggle: () -> Unit,
 ) {
+    if (currentExpired || previousExpired) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.height(8.dp))
+                Text(stringResource(R.string.img_expired_storage_policy), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(4.dp))
+                Text(stringResource(R.string.img_expired_storage_policy_desc), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        return
+    }
     if (previousImage == null || currentImage == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(stringResource(R.string.img_no_old_photo_blink), style = MaterialTheme.typography.bodyMedium)

@@ -654,6 +654,7 @@ fun HomeScreen(
                     claimingMilestone = uiState.claimingMilestone,
                     missions = uiState.missions,
                     isMissionsLoading = uiState.isMissionsLoading,
+                    missionsError = uiState.missionsError,
                     joiningMissionId = uiState.joiningMissionId,
                     onJoinMission = { missionId ->
                         viewModel.joinMission(missionId) { success, msg ->
@@ -665,6 +666,7 @@ fun HomeScreen(
                         }
                     },
                     onMissionAppClick = { campaignId -> onCampaignClick(campaignId) },
+                    onRetryMissions = { viewModel.refreshMissions(forceRefresh = true) },
                     isAuthenticated = uiState.isAuthenticated,
                     isLoading = uiState.isLoading,
                     onRefresh = { viewModel.refresh(context, forceRefresh = true) },

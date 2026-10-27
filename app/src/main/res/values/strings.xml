@@ -933,6 +933,8 @@
     <string name="img_showing_today">SHOWING: TODAY\'S PHOTO</string>
     <string name="img_showing_previous">SHOWING: PREVIOUS PHOTO</string>
     <string name="img_tap_to_swap">Tap to swap photos (or tap directly on the image)</string>
+    <string name="img_expired_storage_policy">Screenshot expired (30-day retention policy)</string>
+    <string name="img_expired_storage_policy_desc">Screenshots are purged after 30 days per storage policy. All report details, feedback, and credits remain preserved.</string>
     <string name="oad_warning_dialog_title">REPORT APPROVAL WARNING ⚠️</string>
     <string name="oad_understood">I understand</string>
     <string name="oad_title_fallback">App Management</string>
@@ -1142,5 +1144,9 @@
     <string name="mission_err_not_found">Mission no longer exists</string>
     <string name="mission_manage_status_active">Active</string>
     <string name="mission_status_paused">Paused</string>
+    <string name="mission_create_all_apps_busy">All of your active apps already have an active mission.</string>
+    <string name="mission_load_error">Could not load missions</string>
+    <string name="mission_load_error_retry">Retry</string>
+    <string name="mission_owner_load_error">Failed to load mission for this app — tap to retry</string>
 
 </resources>

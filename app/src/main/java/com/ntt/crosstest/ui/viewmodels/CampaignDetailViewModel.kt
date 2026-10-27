@@ -9,6 +9,7 @@ import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignDetailResult
 import com.ntt.crosstest.data.CampaignMember
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.Feedback
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.NextCampaignCandidate
@@ -105,6 +106,7 @@ class CampaignDetailViewModel(
     private val appContext: Context? = null,
 ) : ViewModel() {
 
+    private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val _uiState = MutableStateFlow(CampaignDetailUiState())
     val uiState: StateFlow<CampaignDetailUiState> = _uiState.asStateFlow()
 
@@ -250,7 +252,7 @@ class CampaignDetailViewModel(
                 refreshWhenSessionReady = true
                 return@launch
             }
-            val cached = repository.getCampaign(campaignId, forceRefresh = false)
+            val cached = repository.peekCampaign(campaignId)
             if (cached != null) {
                 val isOwner = effectiveUserId() != null && cached.ownerId == effectiveUserId()
                 _uiState.update {
@@ -274,6 +276,9 @@ class CampaignDetailViewModel(
     }
 
     fun refresh(forceRefresh: Boolean = false) {
+        val seq = refreshSequence.incrementAndGet()
+        val initialUid = effectiveUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             if (forceRefresh || _uiState.value.campaign == null) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
@@ -294,6 +299,9 @@ class CampaignDetailViewModel(
                 // Fast path: 1 RPC gộp toàn bộ dữ liệu màn chi tiết (migration 020).
                 val detail = repository.getCampaignDetailPage(campaignId, forceRefresh = forceRefresh)
                 if (detail != null) {
+                    if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
+                        return@launch
+                    }
                     applyDetail(detail)
                     return@launch
                 }
@@ -358,6 +366,10 @@ class CampaignDetailViewModel(
                 if (myTodayReport?.isApproved == true) {
                     _uiState.value.preparedScreenshot?.file?.delete()
                 }
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
+                    return@launch
+                }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,

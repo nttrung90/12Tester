@@ -32,6 +32,8 @@ object FirebaseStorageHelper {
     private const val ICON_MAX_DIMENSION = 256
     private const val ICON_QUALITY = 90
     private const val IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable"
+    /** Screenshot báo cáo chỉ lưu tối đa 30 ngày và chứa dữ liệu phiên thử nghiệm; tuyệt đối không cache 1 năm như icon */
+    private const val REPORT_CACHE_CONTROL = "private, no-store"
 
     /**
      * Nén ảnh nộp đúng một lần rồi ghi ra file local:
@@ -153,7 +155,7 @@ object FirebaseStorageHelper {
 
         val metadata = StorageMetadata.Builder()
             .setContentType(prepared.contentType)
-            .setCacheControl(IMMUTABLE_CACHE_CONTROL)
+            .setCacheControl(REPORT_CACHE_CONTROL)
             .build()
         val upload = storageRef.putFile(Uri.fromFile(prepared.file), metadata)
         try {

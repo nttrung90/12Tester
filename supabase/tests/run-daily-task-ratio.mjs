@@ -10,8 +10,21 @@ const read = path => readFileSync(`${root}${path}`, 'utf8').replaceAll('\r\n', '
 const migration = read('supabase/migrations/042_configurable_daily_task_ratio.sql');
 const full = read('supabase/full_schema_singapore.sql');
 const marker = '-- ===== 042_configurable_daily_task_ratio.sql =====\n';
+const nextMarker = '-- ===== 043_backend_cleanup_hardening.sql =====\n';
 assert.equal(full.split(marker).length, 2, 'exactly one 042 mirror');
-assert.equal(full.split(marker)[1], migration, 'mirror equals migration byte for byte');
+const section042 = full.split(marker)[1].split(nextMarker)[0].trimEnd() + '\n';
+assert.equal(section042, migration.trimEnd() + '\n', 'mirror equals migration 042 byte for byte');
+const marker044 = '-- ===== 044_mission_flow_hardening.sql =====\n';
+if (full.includes(nextMarker)) {
+  const migration043 = read('supabase/migrations/043_backend_cleanup_hardening.sql');
+  const section043 = (full.includes(marker044) ? full.split(nextMarker)[1].split(marker044)[0] : full.split(nextMarker)[1]).trim();
+  assert.equal(section043, migration043.trim(), 'mirror equals migration 043 byte for byte');
+}
+if (full.includes(marker044)) {
+  const migration044 = read('supabase/migrations/044_mission_flow_hardening.sql');
+  const section044 = full.split(marker044)[1].trim();
+  assert.equal(section044, migration044.trim(), 'mirror equals migration 044 byte for byte');
+}
 const bootstrap = `
   create role anon nologin;
   create role authenticated nologin;

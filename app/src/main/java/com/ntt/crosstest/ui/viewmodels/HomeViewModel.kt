@@ -120,6 +120,7 @@ data class HomeUiState(
     /** Danh sách nhiệm vụ do người dùng tạo cho sub-tab "Nhiệm vụ App" (migration 039). */
     val missions: List<Mission> = emptyList(),
     val isMissionsLoading: Boolean = false,
+    val missionsError: String? = null,
     val joiningMissionId: String? = null,
     /** Quest claim / top-up reward shown above the Home screen. */
     val reward: CreditReward? = null,
@@ -132,9 +133,13 @@ class HomeViewModel(
     private val reportSubmitManager: ReportSubmitManager? = null,
 ) : ViewModel() {
 
+    private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
+    private val missionRefreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
+    private val missionMutationVersion = java.util.concurrent.atomic.AtomicLong(0L)
+
     private val _uiState = MutableStateFlow(
         run {
-            val cached = context?.let { SessionCacheManager.loadSync(it) }
+            val cached = context?.let { SessionCacheManager.peekMemory() }
             // Ignore a snapshot that provably belongs to a different account.
             // While the session is still loading (currentUid == null) the cache
             // is kept to preserve the offline-first instant paint.
@@ -221,6 +226,41 @@ class HomeViewModel(
     private var refreshWhenSessionReady = false
 
     init {
+        if (_uiState.value.openCampaigns.isEmpty() && context != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val loaded = SessionCacheManager.loadSync(context)
+                val curUid = repository.currentUserId()
+                if (loaded != null && (loaded.userId == null || curUid == null || loaded.userId == curUid)) {
+                    _uiState.update { current ->
+                        if (current.openCampaigns.isEmpty()) {
+                            current.copy(
+                                isLoading = false,
+                                isBackgroundSyncing = true,
+                                isAuthenticated = loaded.userId != null,
+                                openCampaigns = loaded.displayItems.map { it.campaign },
+                                displayItems = loaded.displayItems,
+                                pausedDisplayItems = loaded.pausedDisplayItems,
+                                completedDisplayItems = loaded.completedDisplayItems,
+                                myCampaigns = loaded.myCampaigns,
+                                joinedCampaigns = loaded.joinedCampaigns,
+                                leaderboard = loaded.leaderboard,
+                                myRank = loaded.myRank,
+                                ownerStatsMap = loaded.ownerStatsMap,
+                                userCredits = loaded.userCredits,
+                                todayCheckinCount = loaded.todayCheckinCount,
+                                missedStreak = loaded.missedStreak,
+                                dailyTask = loaded.dailyTask,
+                                userProfile = loaded.userProfile,
+                                pendingReportsCount = loaded.pendingReportsCount,
+                                notifications = loaded.notifications,
+                                unreadNotificationsCount = loaded.unreadNotificationsCount,
+                                questSummary = loaded.questSummary,
+                            )
+                        } else current
+                    }
+                }
+            }
+        }
         refresh(context = context, forceRefresh = false)
         observeSession()
         observeSubmittedReports()
@@ -355,6 +395,9 @@ class HomeViewModel(
 
     fun refresh(context: android.content.Context? = null, forceRefresh: Boolean = false) {
         val appContext = context ?: this.context
+        val seq = refreshSequence.incrementAndGet()
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             val isOnline = appContext?.let { NetworkMonitor.isOnline(it) } ?: true
             _uiState.update { it.copy(isOffline = !isOnline) }
@@ -397,20 +440,11 @@ class HomeViewModel(
                 }
                 if (isAuthed) lastSyncedUid = repository.currentUserId()
 
-                // Nhiệm vụ App: tải nền, không chặn Trang chủ. Server chưa deploy
-                // migration 039 thì RPC lỗi — giữ danh sách rỗng, không ảnh hưởng phần khác.
+                // Nhiệm vụ App: tải nền độc lập với sequence và error handling riêng (M08, M09)
                 if (isAuthed) {
-                    _uiState.update { it.copy(isMissionsLoading = true) }
-                    viewModelScope.launch {
-                        try {
-                            val missions = repository.getOpenMissions(forceRefresh = forceRefresh)
-                            _uiState.update { it.copy(missions = missions, isMissionsLoading = false) }
-                        } catch (_: Exception) {
-                            _uiState.update { it.copy(isMissionsLoading = false) }
-                        }
-                    }
+                    refreshMissions(forceRefresh = forceRefresh)
                 } else {
-                    _uiState.update { it.copy(missions = emptyList(), isMissionsLoading = false) }
+                    _uiState.update { it.copy(missions = emptyList(), isMissionsLoading = false, missionsError = null) }
                 }
 
                 val open: List<Campaign>
@@ -581,6 +615,10 @@ class HomeViewModel(
                 val unreadNotifsCount = notifs.count { !it.isRead }
                 val myProfile = personal.myProfile
 
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -620,7 +658,7 @@ class HomeViewModel(
                 // Persist fresh session snapshot to disk
                 if (appContext != null) {
                     val snapshot = CachedSessionData(
-                        userId = repository.currentUserId(),
+                        userId = initialUid,
                         userProfile = myProfile,
                         displayItems = displayList,
                         pausedDisplayItems = pausedList,
@@ -640,8 +678,9 @@ class HomeViewModel(
                         unreadNotificationsCount = unreadNotifsCount,
                         questSummary = personal.quests,
                         timestamp = System.currentTimeMillis(),
+                        sessionGeneration = initialGen,
                     )
-                    SessionCacheManager.save(appContext, snapshot)
+                    SessionCacheManager.save(appContext, snapshot, targetGeneration = initialGen)
                 }
 
                 // Auto-sync missing icon for owner's campaigns if app is installed on this device
@@ -682,7 +721,7 @@ class HomeViewModel(
         com.ntt.crosstest.util.InstalledAppCache.clear()
         if (appContext != null) {
             SessionCacheManager.clear(appContext)
-            com.ntt.crosstest.util.InstalledAppCache.refresh(appContext)
+            com.ntt.crosstest.util.InstalledAppCache.init(appContext)
             try {
                 coil.Coil.imageLoader(appContext).memoryCache?.clear()
             } catch (_: Exception) {}
@@ -930,18 +969,65 @@ class HomeViewModel(
     }
 
     /**
+     * Tải danh sách nhiệm vụ App độc lập với refresh Trang chủ (M08, M09).
+     * Có sequence token, generation và UID guard để không bị response cũ ghi đè.
+     */
+    fun refreshMissions(forceRefresh: Boolean = false) {
+        val seq = missionRefreshSequence.incrementAndGet()
+        val initialMutation = missionMutationVersion.get()
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isMissionsLoading = true, missionsError = null) }
+            try {
+                val missions = repository.getOpenMissions(forceRefresh = forceRefresh)
+                if (seq != missionRefreshSequence.get() ||
+                    initialMutation != missionMutationVersion.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    _uiState.update { it.copy(isMissionsLoading = false) }
+                    return@launch
+                }
+                _uiState.update { it.copy(missions = missions, isMissionsLoading = false, missionsError = null) }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                if (seq != missionRefreshSequence.get() ||
+                    initialMutation != missionMutationVersion.get() ||
+                    initialGen != SessionCacheManager.currentGeneration() ||
+                    initialUid != repository.currentUserId()
+                ) {
+                    _uiState.update { it.copy(isMissionsLoading = false) }
+                    return@launch
+                }
+                _uiState.update { it.copy(isMissionsLoading = false, missionsError = friendlyError(e, localizer)) }
+            }
+        }
+    }
+
+    /**
      * Người dùng nhận nhiệm vụ trong tab "Nhiệm vụ App". Thành công: cập nhật
      * trạng thái mission local (joined, count, status) để UI phản ánh ngay.
+     * Có guard chống click đúp và reload trạng thái có thẩm quyền khi có xung đột (M09, R07).
      */
     fun joinMission(missionId: String, onResult: (Boolean, String) -> Unit) {
+        if (_uiState.value.joiningMissionId != null) return
+        val initialUid = repository.currentUserId()
+        val initialGen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             _uiState.update { it.copy(joiningMissionId = missionId) }
             try {
                 val result = repository.joinMission(missionId)
+                if (initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
                 if (result.success) {
+                    missionMutationVersion.incrementAndGet()
+                    missionRefreshSequence.incrementAndGet()
                     _uiState.update { state ->
                         state.copy(
                             joiningMissionId = null,
+                            isMissionsLoading = false,
                             missions = state.missions.map { m ->
                                 if (m.id == missionId) {
                                     m.copy(
@@ -961,17 +1047,37 @@ class HomeViewModel(
                     onResult(false, localizer.get(R.string.repo_connection_failed))
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                if (initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
                 _uiState.update { it.copy(joiningMissionId = null) }
+                val errStr = e.message.orEmpty()
+                if (errStr.contains("ALREADY_JOINED")) {
+                    missionMutationVersion.incrementAndGet()
+                    missionRefreshSequence.incrementAndGet()
+                    _uiState.update { state ->
+                        state.copy(
+                            isMissionsLoading = false,
+                            missions = state.missions.map { m ->
+                                if (m.id == missionId) m.copy(hasJoined = true) else m
+                            }
+                        )
+                    }
+                    refreshMissions(forceRefresh = true)
+                } else if (errStr.contains("MISSION_FULL") || errStr.contains("MISSION_EXPIRED") || errStr.contains("MISSION_NOT_OPEN")) {
+                    refreshMissions(forceRefresh = true)
+                }
                 val msg = when {
-                    e.message?.contains("MISSION_FULL") == true ->
+                    errStr.contains("MISSION_FULL") ->
                         localizer.get(R.string.mission_status_full)
-                    e.message?.contains("MISSION_EXPIRED") == true ->
+                    errStr.contains("MISSION_EXPIRED") ->
                         localizer.get(R.string.mission_status_expired)
-                    e.message?.contains("ALREADY_JOINED") == true ->
+                    errStr.contains("ALREADY_JOINED") ->
                         localizer.get(R.string.mission_joined_cta)
-                    e.message?.contains("MISSION_NOT_OPEN") == true ->
+                    errStr.contains("MISSION_NOT_OPEN") ->
                         localizer.get(R.string.mission_status_stopped)
-                    e.message?.contains("CANNOT_JOIN_OWN_MISSION") == true ->
+                    errStr.contains("CANNOT_JOIN_OWN_MISSION") ->
                         localizer.get(R.string.mission_mine_badge)
                     else -> friendlyError(e, localizer)
                 }

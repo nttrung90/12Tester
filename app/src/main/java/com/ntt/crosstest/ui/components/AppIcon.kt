@@ -1,4 +1,4 @@
-package com.ntt.crosstest.ui.components
+﻿package com.ntt.crosstest.ui.components
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
@@ -43,8 +43,18 @@ fun AppIcon(
     shapeRadius: Dp = 12.dp,
 ) {
     val context = LocalContext.current
-    val localDrawable: Drawable? = remember(packageName) {
-        InstalledAppCache.getInstalledAppDrawable(context, packageName)
+    val localDrawable: Drawable? = if (iconUrl.isNotBlank()) {
+        null
+    } else {
+        val peeked = remember(packageName) { InstalledAppCache.peekInstalledAppDrawable(packageName) }
+        val loadedState = androidx.compose.runtime.produceState<Drawable?>(initialValue = peeked, key1 = packageName) {
+            if (value == null) {
+                value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    InstalledAppCache.getInstalledAppDrawable(context, packageName)
+                }
+            }
+        }
+        loadedState.value
     }
 
     val modelToLoad: Any? = when {

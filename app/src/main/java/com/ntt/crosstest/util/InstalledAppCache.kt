@@ -1,4 +1,4 @@
-package com.ntt.crosstest.util
+﻿package com.ntt.crosstest.util
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -28,6 +28,9 @@ object InstalledAppCache {
     @Volatile
     private var cachedInstalledUserApps: List<PlayStoreHelper.InstalledAppItem> = emptyList()
 
+    @Volatile
+    private var isUserAppsLoaded = false
+
     /** Gói đã xác nhận là CHƯA cài (pkg -> thời điểm kiểm tra) — cùng cửa sổ
      *  15s với [ensureFresh] để tránh lặp IPC PackageManager mỗi lần refresh. */
     private val notInstalledCache = java.util.concurrent.ConcurrentHashMap<String, Long>()
@@ -44,6 +47,7 @@ object InstalledAppCache {
     fun refresh(context: Context) {
         refreshPackages(context)
         cachedInstalledUserApps = PlayStoreHelper.getInstalledUserApps(context)
+        isUserAppsLoaded = true
     }
 
     /**
@@ -82,12 +86,16 @@ object InstalledAppCache {
     /**
      * Retrieves cached user installed launcher apps (< 1ms).
      */
+    fun peekInstalledUserApps(): List<PlayStoreHelper.InstalledAppItem>? =
+        if (isUserAppsLoaded) cachedInstalledUserApps else null
+
     fun getInstalledUserApps(context: Context): List<PlayStoreHelper.InstalledAppItem> {
-        if (cachedInstalledUserApps.isNotEmpty()) {
+        if (isUserAppsLoaded) {
             return cachedInstalledUserApps
         }
         val apps = PlayStoreHelper.getInstalledUserApps(context)
         cachedInstalledUserApps = apps
+        isUserAppsLoaded = true
         return apps
     }
 
@@ -151,12 +159,20 @@ object InstalledAppCache {
         }
     }
 
+    fun peekInstalledAppDrawable(packageName: String): Drawable? {
+        if (packageName.isBlank()) return null
+        synchronized(iconCache) {
+            return iconCache.get(packageName)
+        }
+    }
+
     fun clear() {
         synchronized(iconCache) {
             iconCache.evictAll()
         }
         installedPackages = emptySet()
         cachedInstalledUserApps = emptyList()
+        isUserAppsLoaded = false
         notInstalledCache.clear()
         isInitialized = false
         lastRefreshAt = 0L

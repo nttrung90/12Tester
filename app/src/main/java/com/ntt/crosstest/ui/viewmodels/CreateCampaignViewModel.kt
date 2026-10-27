@@ -1,4 +1,4 @@
-package com.ntt.crosstest.ui.viewmodels
+﻿package com.ntt.crosstest.ui.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -239,11 +239,12 @@ class CreateCampaignViewModel(
 
     fun loadInstalledApps(context: Context) {
         if (_uiState.value.installedApps.isNotEmpty() || _uiState.value.isLoadingInstalledApps) return
-        val cached = com.ntt.crosstest.util.InstalledAppCache.getInstalledUserApps(context)
-        if (cached.isNotEmpty()) {
+        val cached = com.ntt.crosstest.util.InstalledAppCache.peekInstalledUserApps()
+        if (cached != null) {
             _uiState.update { it.copy(installedApps = cached, isLoadingInstalledApps = false) }
             return
         }
+        _uiState.update { it.copy(isLoadingInstalledApps = true) }
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoadingInstalledApps = true) }
             val apps = com.ntt.crosstest.util.InstalledAppCache.getInstalledUserApps(context)

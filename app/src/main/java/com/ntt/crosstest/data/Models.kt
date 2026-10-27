@@ -231,11 +231,28 @@ data class TesterReport(
     @SerialName("tester_name") val testerName: String? = null,
     @SerialName("tester_avatar") val testerAvatar: String? = null,
     @SerialName("tester_credits") val testerCredits: Int? = null,
+    @SerialName("media_expired") val mediaExpired: Boolean? = null,
     @kotlinx.serialization.Transient val testerProfile: Profile? = null,
 ) {
     val isPending: Boolean get() = status == "pending"
     val isApproved: Boolean get() = status == "approved"
     val isRejected: Boolean get() = status == "rejected"
+
+    /**
+     * Screenshot hết hạn sau 30 ngày (GCS lifecycle / worker cleanup) hoặc đã đánh dấu media_expired.
+     */
+    val isScreenshotExpired: Boolean
+        get() {
+            if (mediaExpired == true) return true
+            if (createdAt.isNullOrBlank()) return false
+            return try {
+                val created = java.time.Instant.parse(createdAt)
+                val cutoff = java.time.Instant.now().minus(java.time.Duration.ofDays(30))
+                created.isBefore(cutoff)
+            } catch (_: Exception) {
+                false
+            }
+        }
 
     /**
      * Số Credit hiển thị cho báo cáo đã duyệt.
@@ -1074,7 +1091,12 @@ data class MissionActionResult(
     @SerialName("success") val success: Boolean = false,
     @SerialName("mission_id") val missionId: String = "",
     @SerialName("status") val status: String = "",
-)
+    @SerialName("code") val code: String? = null,
+    @SerialName("error") val error: String? = null,
+    @SerialName("message") val message: String? = null,
+) {
+    val isExpired: Boolean get() = code == "MISSION_EXPIRED" || error == "MISSION_EXPIRED" || status == "expired"
+}
 
 
 

@@ -670,7 +670,28 @@ fun CampaignDetailScreen(
                                         if (rep.isRejected && !rep.rejectionReason.isNullOrBlank()) {
                                             Text(text = stringResource(R.string.campaign_history_reason_format, rep.rejectionReason), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                                         }
-                                        if (!rep.screenshotUrl.isNullOrBlank()) {
+                                        if (rep.isScreenshotExpired) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Schedule,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.img_expired_storage_policy),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                )
+                                            }
+                                        } else if (!rep.screenshotUrl.isNullOrBlank()) {
                                             Row(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(8.dp))
@@ -2047,9 +2068,9 @@ private fun SubmitReportBottomSheet(
                     ?: ImageHashHelper.computeDHashFromUrl(context, todayUrl!!)
             }
         }
-        // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh cũ khi hash trống.
+        // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh cũ khi hash trống và chưa hết hạn 30 ngày.
         val prevHash = previousReport.imageHash?.takeIf { it.isNotBlank() }
-            ?: ImageHashHelper.computeDHashFromUrl(context, previousUrl)
+            ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, previousUrl) else null
         if (newHash != null && prevHash != null) {
             val comp = ImageHashHelper.compare(newHash, prevHash, context)
             comparisonResult = comp

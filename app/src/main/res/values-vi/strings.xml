@@ -932,6 +932,8 @@
     <string name="img_showing_today">ĐANG HIỆN: ẢNH HÔM NAY</string>
     <string name="img_showing_previous">ĐANG HIỆN: ẢNH HÔM TRƯỚC</string>
     <string name="img_tap_to_swap">Chạm để đổi ảnh (hoặc chạm trực tiếp vào hình)</string>
+    <string name="img_expired_storage_policy">Ảnh báo cáo đã hết hạn lưu trữ (chính sách 30 ngày)</string>
+    <string name="img_expired_storage_policy_desc">Ảnh chụp được dọn dẹp sau 30 ngày theo chính sách lưu trữ. Toàn bộ thông tin báo cáo, phản hồi và Credit vẫn được bảo lưu nguyên vẹn.</string>
     <string name="oad_warning_dialog_title">CẢNH BÁO DUYỆT BÁO CÁO ⚠️</string>
     <string name="oad_understood">Tôi đã hiểu</string>
     <string name="oad_title_fallback">Quản lý App</string>
@@ -1141,5 +1143,9 @@
     <string name="mission_err_not_found">Nhiệm vụ không còn tồn tại</string>
     <string name="mission_manage_status_active">Đang hoạt động</string>
     <string name="mission_status_paused">Tạm dừng</string>
+    <string name="mission_create_all_apps_busy">Tất cả ứng dụng đang mở của bạn đều đã có nhiệm vụ đang hoạt động.</string>
+    <string name="mission_load_error">Không thể tải danh sách nhiệm vụ</string>
+    <string name="mission_load_error_retry">Thử lại</string>
+    <string name="mission_owner_load_error">Không thể tải nhiệm vụ của app — bấm để thử lại</string>
 
 </resources>
