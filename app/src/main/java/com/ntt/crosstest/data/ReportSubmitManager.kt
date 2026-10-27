@@ -2,6 +2,7 @@ package com.ntt.crosstest.data
 
 import android.content.Context
 import android.util.Log
+import com.ntt.crosstest.BuildConfig
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
@@ -25,9 +26,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Điều phối nộp báo cáo qua WorkManager.
@@ -88,6 +94,27 @@ class ReportSubmitManager(
 
     @Volatile
     private var lastFailedRequestId: String? = null
+    private val deliveredRequests = ConcurrentHashMap.newKeySet<String>()
+
+    init {
+        scope.launch {
+            try { reconcileCompletedReports() }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) {
+                if (BuildConfig.DEBUG) Log.w(TAG, "receipt_reconcile_failed type=${e.javaClass.simpleName}")
+            }
+        }
+    }
+
+    /** No UI reward replay at startup; only reclaim receipts for committed/pruned work. */
+    internal suspend fun reconcileCompletedReports() {
+        for (report in PendingReportStore.list(appContext).filter { it.completedResult != null }) {
+            val infos = workManager.getWorkInfosForUniqueWork(uniqueWorkName(report.id)).get()
+            if (infos.isEmpty() || (infos.all { it.state.isFinished } && infos.any { it.state == WorkInfo.State.SUCCEEDED })) {
+                PendingReportStore.delete(appContext, report.id)
+            }
+        }
+    }
 
     /** Nộp mới; bỏ qua nếu cùng campaign đang gửi/thử lại (chống double-tap). */
     fun submit(request: SubmitRequest) {
@@ -146,15 +173,20 @@ class ReportSubmitManager(
     }
 
     /** Huỷ mọi request đang chờ/chạy; dùng khi logout để không lộ dữ liệu tài khoản cũ. */
-    fun cancelAllPendingWork() {
-        workManager.cancelAllWorkByTag(TAG)
+    suspend fun cancelAllPendingWork() {
+        val jobs = scope.coroutineContext[Job]!!.children.toList()
+        jobs.forEach { it.cancel() }
+        jobs.joinAll()
+        withContext(Dispatchers.IO) { workManager.cancelAllWorkByTag(TAG).result.get() }
         lastFailedRequestId = null
         _state.value = null
+        deliveredRequests.clear()
     }
 
     private suspend fun prepareAndEnqueue(request: SubmitRequest) {
         try {
             val report = withContext(Dispatchers.IO) { persist(request) }
+            currentCoroutineContext().ensureActive()
             enqueueAndObserve(report, replace = false)
         } catch (e: CancellationException) {
             throw e
@@ -204,6 +236,7 @@ class ReportSubmitManager(
             fallbackScreenshotUrl = request.fallbackScreenshotUrl,
             fallbackImageHash = request.fallbackImageHash,
             needsJoin = request.needsJoin,
+            screenshotSha256 = pendingScreenshotPath?.let { PendingReportStore.screenshotSha256(java.io.File(it)) },
         )
         PendingReportStore.write(appContext, report)
         return report
@@ -225,15 +258,16 @@ class ReportSubmitManager(
             uniqueWorkName(report.id),
             if (replace) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP,
             workRequest,
-        )
-        observeWork(workRequest.id, report)
+        ).result.get()
+        // KEEP can retain an existing work ID; observe the work that actually exists.
+        val actual = workManager.getWorkInfosForUniqueWork(uniqueWorkName(report.id)).get()
+            .firstOrNull { !it.state.isFinished } ?: workManager.getWorkInfoById(workRequest.id).get()
+        observeWork(actual?.id ?: workRequest.id, report)
     }
 
     private suspend fun observeWork(workId: UUID, report: PendingReport) {
         while (true) {
-            val info = withContext(Dispatchers.IO) {
-                runCatching { workManager.getWorkInfoById(workId).get() }.getOrNull()
-            }
+            val info = withContext(Dispatchers.IO) { workManager.getWorkInfoById(workId).get() }
             if (info == null) {
                 handleFailure(
                     campaignId = report.campaignId,
@@ -245,12 +279,13 @@ class ReportSubmitManager(
                 return
             }
 
-            val attempt = (info.runAttemptCount + 1).coerceAtLeast(1)
-            Log.d(TAG, "observeWork: req=${report.id.take(8)} state=${info.state} runAttemptCount=${info.runAttemptCount}")
+            val mapped = reportWorkState(info.state, info.runAttemptCount)
+            val attempt = mapped.attempt
+            if (BuildConfig.DEBUG) Log.d(TAG, "observeWork: req=${report.id.take(8)} state=${info.state} runAttemptCount=${info.runAttemptCount}")
             when (info.state) {
                 WorkInfo.State.ENQUEUED,
                 WorkInfo.State.BLOCKED,
-                WorkInfo.State.RUNNING -> updateRunningState(report, info.runAttemptCount)
+                WorkInfo.State.RUNNING -> updateRunningState(report, mapped)
 
                 WorkInfo.State.SUCCEEDED -> {
                     handleSuccess(report, info.outputData, attempt)
@@ -286,20 +321,18 @@ class ReportSubmitManager(
         }
     }
 
-    private fun updateRunningState(report: PendingReport, runAttemptCount: Int) {
+    private fun updateRunningState(report: PendingReport, mapped: ReportWorkState) {
         if (!isCurrentRequest(report.id)) return
-        val isRetry = runAttemptCount > 0
-        val attempt = (runAttemptCount + 1).coerceAtLeast(1)
         _state.value = SubmitState(
             campaignId = report.campaignId,
-            stage = if (isRetry) Stage.RETRYING else Stage.SENDING,
-            attempt = attempt,
+            stage = mapped.stage,
+            attempt = mapped.attempt,
             requestId = report.id,
         )
     }
 
     private fun handleSuccess(report: PendingReport, data: Data, attempt: Int) {
-        // Worker đã xoá; gọi lại để chắc chắn kể cả khi worker bị kill sau RPC.
+        // This callback is reached only after WorkManager has committed SUCCEEDED.
         scope.launch {
             withContext(Dispatchers.IO) { PendingReportStore.delete(appContext, report.id) }
         }
@@ -315,7 +348,7 @@ class ReportSubmitManager(
         )
         // Phát event TRƯỚC khi guard request hiện tại: khi tester nộp 2 app liên tiếp,
         // success của app đầu không được nuốt (Credit server vẫn cộng, overlay phải hiện).
-        _events.tryEmit(
+        if (deliveredRequests.add(report.id)) _events.tryEmit(
             SubmitEvent.Success(
                 campaignId = report.campaignId,
                 appName = report.appName,

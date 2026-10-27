@@ -5,6 +5,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.io.IOException
+import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption.ATOMIC_MOVE
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.security.MessageDigest
 import java.util.UUID
 
 /**
@@ -30,6 +36,10 @@ data class PendingReport(
     /** URL đã upload thành công; retry RPC sẽ dùng lại, không upload thêm file. */
     val uploadedUrl: String? = null,
     val uploadedHash: String? = null,
+    /** Full-byte fingerprint; null keeps requests from older app versions readable. */
+    val screenshotSha256: String? = null,
+    /** Durable server receipt. Never remove it before WorkManager commits success. */
+    val completedResult: SubmitTesterReportResult? = null,
 ) {
     companion object {
         fun newId(): String = UUID.randomUUID().toString()
@@ -58,19 +68,29 @@ object PendingReportStore {
     fun write(context: Context, report: PendingReport) {
         val target = jsonFile(context, report.id)
         val temp = File(target.parentFile, "${target.name}.tmp")
-        temp.writeText(json.encodeToString(report))
-        if (!temp.renameTo(target)) {
-            target.writeText(temp.readText())
+        try {
+            FileOutputStream(temp).use { stream ->
+                stream.write(json.encodeToString(report).toByteArray(Charsets.UTF_8))
+                stream.fd.sync()
+            }
+            // Same-directory atomic replacement is supported on our API 26+ storage.
+            // Unlike File.renameTo/AtomicFile.finishWrite, failure is never silently ignored.
+            Files.move(temp.toPath(), target.toPath(), ATOMIC_MOVE, REPLACE_EXISTING)
+        } finally {
             temp.delete()
         }
     }
 
     @Synchronized
     fun read(context: Context, id: String): PendingReport? {
-        val file = jsonFile(context, id)
-        if (!file.isFile) return null
         return try {
-            json.decodeFromString<PendingReport>(file.readText())
+            val target = jsonFile(context, id)
+            val legacyBackup = File(target.path + ".bak")
+            if (legacyBackup.isFile) {
+                Files.move(legacyBackup.toPath(), target.toPath(), ATOMIC_MOVE, REPLACE_EXISTING)
+            }
+            val text = target.readText()
+            json.decodeFromString<PendingReport>(text)
         } catch (_: Exception) {
             null
         }
@@ -78,8 +98,38 @@ object PendingReportStore {
 
     @Synchronized
     fun markUploaded(context: Context, id: String, url: String, hash: String?) {
-        val current = read(context, id) ?: return
+        val current = read(context, id) ?: throw IOException("pending_request_not_found")
         write(context, current.copy(uploadedUrl = url, uploadedHash = hash))
+    }
+
+    @Synchronized
+    fun markCompleted(context: Context, id: String, result: SubmitTesterReportResult) {
+        require(result.success && result.reportId.isNotBlank()) { "invalid_report_result" }
+        val current = read(context, id) ?: throw IOException("pending_request_not_found")
+        write(context, current.copy(completedResult = result))
+        // The receipt is sufficient for replay, so large image files can now be removed.
+        deleteInsideAppStorage(context, current.screenshotPath)
+        deleteInsideAppStorage(context, current.preparedPath)
+    }
+
+    @Synchronized
+    fun list(context: Context): List<PendingReport> = directory(context).listFiles().orEmpty()
+        .filter { it.name.endsWith(".json") || it.name.endsWith(".json.bak") }
+        .map { it.name.removeSuffix(".bak").removeSuffix(".json") }
+        .distinct()
+        .mapNotNull { read(context, it) }
+
+    fun screenshotSha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(8_192)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     @Synchronized
@@ -89,7 +139,9 @@ object PendingReportStore {
             deleteInsideAppStorage(context, report.screenshotPath)
             deleteInsideAppStorage(context, report.preparedPath)
         }
-        jsonFile(context, id).delete()
+        val target = jsonFile(context, id)
+        listOf(target, File(target.path + ".tmp"), File(target.path + ".new"), File(target.path + ".bak"))
+            .forEach { it.delete() }
     }
 
     /** Dọn request/ảnh cũ và giới hạn 20 file / 20MB. */
@@ -103,7 +155,7 @@ object PendingReportStore {
 
         dir.listFiles { file -> file.isFile && file.name.endsWith(".json") }?.forEach { file ->
             val report = try {
-                json.decodeFromString<PendingReport>(file.readText())
+                read(context, file.name.removeSuffix(".json"))
             } catch (_: Exception) {
                 null
             }
@@ -111,6 +163,9 @@ object PendingReportStore {
                 file.delete()
                 return@forEach
             }
+            // WorkManager may still need this receipt after a crash. Its reconciler
+            // removes completed records only after SUCCEEDED (or work pruning).
+            if (report.completedResult != null) return@forEach
             if (report.createdAt < cutoff) {
                 deleteInsideAppStorage(context, report.screenshotPath)
                 deleteInsideAppStorage(context, report.preparedPath)
@@ -155,7 +210,8 @@ object PendingReportStore {
         } ?: return emptySet()
         return files.mapNotNull { file ->
             try {
-                json.decodeFromString<PendingReport>(file.readText()).campaignId
+                val report = read(context, file.name.removeSuffix(".json"))
+                report?.takeIf { it.completedResult == null }?.campaignId
             } catch (_: Exception) {
                 null
             }

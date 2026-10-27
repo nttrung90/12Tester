@@ -85,6 +85,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -142,6 +143,7 @@ fun HomeScreen(
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val app = context.applicationContext as TestCheoApp
     val viewModel: HomeViewModel = viewModel(
         factory = viewModelFactory {
@@ -398,7 +400,7 @@ fun HomeScreen(
                         )
                         IconButton(onClick = {
                             viewModel.clearCacheAndReload(context)
-                            Toast.makeText(context, context.getString(R.string.home_cache_cleared_toast), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, resources.getString(R.string.home_cache_cleared_toast), Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.CleaningServices,
@@ -656,7 +658,7 @@ fun HomeScreen(
                     onJoinMission = { missionId ->
                         viewModel.joinMission(missionId) { success, msg ->
                             if (success) {
-                                Toast.makeText(context, context.getString(R.string.mission_join_success), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, resources.getString(R.string.mission_join_success), Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             }

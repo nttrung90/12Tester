@@ -99,6 +99,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -145,6 +146,7 @@ fun OwnerAppDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     LaunchedEffect(uiState.isOwnerLocked) {
         if (uiState.isOwnerLocked) {
@@ -588,7 +590,7 @@ fun OwnerAppDetailScreen(
                                             }
                                             context.startActivity(intent)
                                         } catch (_: Exception) {
-                                            Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, resources.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
@@ -610,7 +612,7 @@ fun OwnerAppDetailScreen(
                                             }
                                             context.startActivity(intent)
                                         } catch (_: Exception) {
-                                            Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, resources.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
@@ -855,7 +857,7 @@ fun OwnerAppDetailScreen(
                             showMissionManageDialog = false
                             Toast.makeText(
                                 context,
-                                context.getString(R.string.mission_manage_deleted_toast),
+                                resources.getString(R.string.mission_manage_deleted_toast),
                                 Toast.LENGTH_SHORT,
                             ).show()
                         })
@@ -1408,6 +1410,7 @@ private fun ShareLinkDialog(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
 
     AlertDialog(
@@ -1423,7 +1426,7 @@ private fun ShareLinkDialog(
                             OutlinedButton(
                                 onClick = {
                                     clipboard.setPrimaryClip(ClipData.newPlainText("Testing URL", campaign.testingUrl))
-                                    Toast.makeText(context, context.getString(R.string.oad_copied_testing), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, resources.getString(R.string.oad_copied_testing), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -1438,7 +1441,7 @@ private fun ShareLinkDialog(
                                     try {
                                         context.startActivity(intent)
                                     } catch (_: Exception) {
-                                        Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, resources.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 modifier = Modifier.weight(1f)
@@ -1457,7 +1460,7 @@ private fun ShareLinkDialog(
                             OutlinedButton(
                                 onClick = {
                                     clipboard.setPrimaryClip(ClipData.newPlainText("Play URL", campaign.playUrl))
-                                    Toast.makeText(context, context.getString(R.string.oad_copied_play), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, resources.getString(R.string.oad_copied_play), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -1472,7 +1475,7 @@ private fun ShareLinkDialog(
                                     try {
                                         context.startActivity(intent)
                                     } catch (_: Exception) {
-                                        Toast.makeText(context, context.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, resources.getString(R.string.oad_open_link_failed), Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 modifier = Modifier.weight(1f)
@@ -2214,6 +2217,7 @@ private fun RejectConfirmDialog(
     onConfirm: (TesterReport, String) -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val predefinedReasons = listOf(
         stringResource(R.string.oad_reject_reason_1),
         stringResource(R.string.oad_reject_reason_2),
@@ -2282,7 +2286,7 @@ private fun RejectConfirmDialog(
             Button(
                 onClick = {
                     val finalReason = if (selectedReasonIndex == predefinedReasons.lastIndex) {
-                        customReason.trim().ifBlank { context.getString(R.string.oad_reject_fallback_reason) }
+                        customReason.trim().ifBlank { resources.getString(R.string.oad_reject_fallback_reason) }
                     } else {
                         predefinedReasons[selectedReasonIndex]
                     }

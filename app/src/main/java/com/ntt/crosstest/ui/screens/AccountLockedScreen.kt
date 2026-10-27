@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +74,7 @@ fun AccountLockedScreen(
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val app = context.applicationContext as TestCheoApp
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -92,7 +94,7 @@ fun AccountLockedScreen(
                     onUnlocked()
                 }
             } catch (e: Exception) {
-                snackbarHostState.showSnackbar(e.localizedMessage ?: context.getString(R.string.account_locked_load_failed))
+                snackbarHostState.showSnackbar(e.localizedMessage ?: resources.getString(R.string.account_locked_load_failed))
             } finally {
                 isLoading = false
             }
@@ -143,15 +145,15 @@ fun AccountLockedScreen(
                                 val result = app.campaignRepository.selfUnlockAccount()
                                 if (result.success) {
                                     showConfirmDialog = false
-                                    Toast.makeText(context, context.getString(R.string.locked_unlock_success), Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, resources.getString(R.string.locked_unlock_success), Toast.LENGTH_LONG).show()
                                     onUnlocked()
                                 } else {
-                                    snackbarHostState.showSnackbar(context.getString(R.string.locked_unlock_failed))
+                                    snackbarHostState.showSnackbar(resources.getString(R.string.locked_unlock_failed))
                                 }
                             } catch (e: Exception) {
-                                val msg = e.localizedMessage ?: context.getString(R.string.locked_unlock_error)
+                                val msg = e.localizedMessage ?: resources.getString(R.string.locked_unlock_error)
                                 snackbarHostState.showSnackbar(
-                                    if ("INSUFFICIENT" in msg.uppercase()) context.getString(R.string.locked_insufficient_credits) else msg
+                                    if ("INSUFFICIENT" in msg.uppercase()) resources.getString(R.string.locked_insufficient_credits) else msg
                                 )
                             } finally {
                                 isUnlocking = false
@@ -427,8 +429,8 @@ fun AccountLockedScreen(
                             val userEmail = profile?.email ?: "N/A"
                             val userId = profile?.id ?: "N/A"
                             val emailAndId = "$userEmail\n- User ID: $userId"
-                            val subject = Uri.encode(context.getString(R.string.account_locked_email_subject, userEmail))
-                            val body = Uri.encode(context.getString(R.string.account_locked_email_body_template, emailAndId))
+                            val subject = Uri.encode(resources.getString(R.string.account_locked_email_subject, userEmail))
+                            val body = Uri.encode(resources.getString(R.string.account_locked_email_body_template, emailAndId))
                             val mailtoUri = Uri.parse("mailto:$ADMIN_EMAIL?subject=$subject&body=$body")
                             val emailIntent = Intent(Intent.ACTION_SENDTO, mailtoUri).apply {
                                 // LocalContext is a localized wrapper (not an Activity).
@@ -439,7 +441,7 @@ fun AccountLockedScreen(
                             } catch (_: Exception) {
                                 Toast.makeText(
                                     context,
-                                    context.getString(R.string.locked_no_email_app_format, ADMIN_EMAIL),
+                                    resources.getString(R.string.locked_no_email_app_format, ADMIN_EMAIL),
                                     Toast.LENGTH_LONG
                                 ).show()
                             }

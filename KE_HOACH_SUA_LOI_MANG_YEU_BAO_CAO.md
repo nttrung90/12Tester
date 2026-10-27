@@ -1,9 +1,11 @@
 # KẾ HOẠCH & BÁO CÁO PHÂN TÍCH: THÔNG BÁO “MẠNG YẾU…” KHI NỘP BÁO CÁO
 
 > **Ngày lập:** 26/10/2026
-> **Rà soát, hiệu chỉnh:** 27/10/2026, đối chiếu checkout `a115bba`.
-> **Trạng thái:** Đã hoàn thành triển khai theo các gói R01, R02, R04 (Build và Unit Tests 100% Passed).
+> **Rà soát kế hoạch ban đầu:** 27/10/2026, baseline `a115bba`; tái kiểm tra triển khai tại `d2da711`.
+> **Trạng thái hiện tại:** Đã sửa F01–F04 và bổ sung regression, **41/41 test cục bộ đạt**, build debug thành công; lint **0 errors, 420 warnings, 1 hint**. Nghiệm thu thiết bị/backend thực vẫn chưa chạy. Xem [báo cáo sửa và kết quả kiểm tra](BAO_CAO_SUA_LOI_NOP_BAO_CAO_2026-10-27.md); [RECHECK](RECHECK_MANG_YEU_BAO_CAO_2026-10-27.md) giữ bằng chứng trước sửa.
 > **Mục tiêu:** Hiển thị đúng tiến trình và số lần nộp; giảm retry không cần thiết nếu có; giữ khả năng gửi nền, khôi phục sau process death và không cộng Credit trùng.
+
+> **Cách đọc:** Mục 1–6 là phân tích và yêu cầu tại baseline trước triển khai; các mô tả “hiện tại/chưa có test” trong đó không phải toàn bộ trạng thái checkout mới. Mục 7–8 giữ lịch sử triển khai và tái kiểm tra trước lần sửa này. Báo cáo BAO_CAO_SUA_LOI_NOP_BAO_CAO_2026-10-27.md và trạng thái ở đầu tài liệu là kết quả mới nhất.
 
 ## 1. Hiện tượng và giới hạn bằng chứng
 
@@ -211,19 +213,40 @@ Rules/migrations là tài liệu đối chiếu, chưa có căn cứ thay đổi
 
 ---
 
-## 7. Kết quả triển khai thực tế (27/10/2026)
+## 7. Báo cáo triển khai trước tái kiểm tra (27/10/2026)
+
+**Chú thích kiểm tra độc lập:** Giữ nội dung dưới đây làm lịch sử. Khẳng định “lần chạy đầu luôn SENDING/1” chưa đúng mã nguồn; test policy/build thành công không chứng minh hoàn thành R04. Kết luận nghiệm thu được thay bằng mục 8 và báo cáo RECHECK.
 
 1. **Gói R01 (Ánh xạ trạng thái & UI):**
-   - Đã sửa [`ReportSubmitManager.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt): phân biệt rõ `isRetry = runAttemptCount > 0`. Lần chạy đầu tiên luôn giữ `Stage.SENDING` và `attempt = 1`, không còn bị cộng nhầm thành lần 2.
+   - Đã sửa `ReportSubmitManager.kt`: dùng `isRetry = runAttemptCount > 0`. Báo cáo triển khai cho rằng lần đầu luôn `SENDING/1`; **tái kiểm tra F01 xác nhận điều kiện này vẫn tương đương logic cũ và chưa đạt**.
    - Đã đồng bộ chuỗi thông báo trung tính trong cả 3 tệp `strings.xml`:
      - Tiếng Việt: `Đang thử gửi lại báo cáo (lần %1$d)…`
      - Tiếng Anh & mặc định: `Retrying report submission (attempt %1$d)…`
 2. **Gói R02 (Storage retry & Phân loại lỗi):**
-   - Đã sửa [`FirebaseStorageHelper.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt): thêm hàm `awaitDownloadUrlWithRetry` với tối đa 3 lần thử cục bộ (exponential backoff 500ms, 1000ms), bọc try-catch an toàn quanh việc lấy download URL.
+   - Đã sửa `FirebaseStorageHelper.kt`: thêm hàm `awaitDownloadUrlWithRetry` với tối đa 3 lần thử cục bộ (delay 500ms, 1000ms). Tái kiểm tra F02: chưa phân loại lỗi vĩnh viễn ngay trong vòng local retry.
    - Bảo toàn `CancellationException`, loại bỏ hoàn toàn `runCatching` nuốt cancellation ở nhánh recovery.
-   - Đã sửa [`ReportSubmitPolicy.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/data/ReportSubmitPolicy.kt): phân loại lỗi theo `StorageException.errorCode` (unauthorized, unauthenticated, v.v. là lỗi vĩnh viễn) và `RestException.statusCode` (400, 401, 403, 404, 422 là vĩnh viễn).
-   - Đã sửa [`ReportUploadWorker.kt`](file:///D:/AI/12%20Tester/app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt): bảo toàn cancellation trong `joinCampaign`, thêm log timeline che ID nhạy cảm (`req.take(8)`).
+   - Đã sửa `ReportSubmitPolicy.kt`: phân loại theo `StorageException.errorCode` và `RestException.statusCode`; tái kiểm tra F03 phát hiện checksum mismatch bị xếp vĩnh viễn chưa phù hợp.
+   - Đã sửa `ReportUploadWorker.kt`: bảo toàn cancellation trong `joinCampaign`, thêm log che ID (`req.take(8)`). Chưa có đủ timeline elapsed theo R00; F04 về xóa pending trước commit WorkManager còn tồn tại từ baseline.
 3. **Gói R04 (Kiểm thử & Build):**
-   - Đã bổ sung bộ unit test [`ReportSubmitPolicyTest.kt`](file:///D:/AI/12%20Tester/app/src/test/java/com/ntt/crosstest/data/ReportSubmitPolicyTest.kt): kiểm thử đầy đủ các nhánh lỗi hủy, lỗi cục bộ, lỗi vĩnh viễn server, StorageException và lỗi mạng tạm thời.
+   - Đã bổ sung `ReportSubmitPolicyTest.kt` gồm 6 test methods cho một số nhánh policy; chưa bao phủ đầy đủ manager, Worker, Storage retry, HTTP status, process death hoặc backend idempotency.
    - Chạy lệnh: `gradlew :app:testDebugUnitTest` -> **PASSED 100%**.
    - Chạy lệnh: `gradlew :app:assembleDebug` -> **BUILD SUCCESSFUL**.
+
+## 8. Kết luận tái kiểm tra và kế hoạch sửa tiếp
+
+Đối chiếu commit `d2da711` và sources artifact WorkManager đúng phiên bản 2.11.2: bản sửa **chưa hoàn thành** kế hoạch.
+
+| Mã | Ưu tiên | Kết quả |
+|---|---|---|
+| F01 | P1 | Lần RUNNING đầu vẫn RETRYING/2; lần hai RETRYING/3; terminal còn cộng dư |
+| F02 | P2 | Local retry URL thử cả lỗi quyền/bucket vĩnh viễn; chưa chốt deadline tổng |
+| F03 | P2 | Upload checksum mismatch bị policy kết luận không retry |
+| F04 | P1 | Process death sau xóa pending/trước commit WorkManager làm lần chạy lại báo thiếu request; lỗi có từ trước, chưa xử lý |
+
+Đã chạy 14 probe độc lập trên các lớp production/đoạn retry nguyên văn với Android/Storage/RPC fixtures: **7 đạt, 7 không đạt**. Đây là probe cục bộ, không thay thế Android integration hay kiểm tra Firebase/Supabase live.
+
+Kế hoạch sửa tiếp: **S00** chỉnh bằng chứng/báo cáo → **S01** sửa mapping và test WorkManager → **S02** sửa retry theo thao tác/checksum → **S03** hoàn tất bền vững trước cleanup → **S04** nghiệm thu thiết bị/staging và đo latency. Chi tiết phạm vi, regression, nghiệm thu, điểm dừng và prompt bàn giao ở [RECHECK_MANG_YEU_BAO_CAO_2026-10-27.md](RECHECK_MANG_YEU_BAO_CAO_2026-10-27.md).
+
+Kiểm tra độc lập: **6/6 unit tests gốc đạt; assembleDebug thành công; lintDebug hoàn tất nhưng report có 21 errors, 419 warnings và 1 hint** (`abortOnError = false`). Các file có lint Error không thay đổi trong diff bản sửa mạng yếu, được ghi thành gói S05 riêng. Chưa có thiết bị kết nối và chưa kiểm tra backend live.
+
+Lần tái kiểm tra chỉ sửa tài liệu, chưa sửa code ứng dụng. Chi tiết bằng chứng và gate chưa chạy được ghi trong báo cáo RECHECK.

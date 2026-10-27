@@ -712,6 +712,7 @@ class CampaignRepository(
         screenshotUrl: String? = null,
         imageHash: String? = null,
         clientSubmitId: String? = null,
+        requireIdempotency: Boolean = false,
     ): SubmitTesterReportResult {
         // RPC nguyên tử (migration 012/015/016/033). Không còn fallback ghi thẳng DB:
         // server thiếu RPC hoặc lỗi mạng đều ném lại để UI báo lỗi, tránh cộng
@@ -735,6 +736,7 @@ class CampaignRepository(
             // Chỉ fallback khi lỗi đúng kiểu "function/parameter không tồn tại";
             // lỗi mạng/timeout không được fallback để tránh nộp trùng.
             if (clientSubmitId == null || !isMissingSubmitRpc(e)) throw e
+            if (requireIdempotency) throw IllegalStateException("report_idempotency_unavailable", e)
             supabase.postgrest.rpc(
                 function = "submit_tester_report",
                 parameters = SubmitTesterReportLegacyParams(

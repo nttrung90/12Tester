@@ -703,7 +703,7 @@ private fun SplitSliderView(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()

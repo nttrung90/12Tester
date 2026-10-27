@@ -231,7 +231,7 @@ fun friendlyError(e: Exception, localizer: Localizer): String {
             localizer.get(R.string.error_email_not_confirmed)
         "unlock_or_renew_slot" in lower || ("pgrst202" in lower && "slot" in lower) ->
             localizer.get(R.string.error_multi_slot_not_configured)
-        "pgrst202" in lower || "schema cache" in lower ->
+        "pgrst202" in lower || "schema cache" in lower || "report_idempotency_unavailable" in lower ->
             localizer.get(R.string.error_rpc_not_available)
         "already registered" in lower || "user_already_exists" in lower ->
             localizer.get(R.string.error_email_already_registered)
@@ -241,7 +241,7 @@ fun friendlyError(e: Exception, localizer: Localizer): String {
             localizer.get(R.string.error_password_too_short)
         "rate limit" in lower || "over_email_send_rate_limit" in lower ->
             localizer.get(R.string.error_rate_limited)
-        "not_authenticated" in lower ->
+        "not_authenticated" in lower || "report_account_mismatch" in lower || "report_session_not_ready" in lower ->
             localizer.get(R.string.campaign_login_required)
         "network" in lower || "unable to resolve host" in lower || "timeout" in lower ->
             localizer.get(R.string.error_network)

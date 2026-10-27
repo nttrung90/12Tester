@@ -7,15 +7,17 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.os.SystemClock
 import androidx.exifinterface.media.ExifInterface
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.ntt.crosstest.R
+import com.ntt.crosstest.BuildConfig
+import com.ntt.crosstest.data.ReportSubmitPolicy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -122,31 +124,17 @@ object FirebaseStorageHelper {
     }
 
     /**
-     * Thử lấy download URL với ngân sách thử lại hữu hạn (tối đa 3 lần).
-     * Tránh trường hợp vừa putFile xong nhưng metadata chưa index kịp,
-     * làm văng ngoại lệ ra ngoài khiến Worker phải hoãn 10 giây qua WorkManager.
-     * Bảo toàn CancellationException.
+     * Retry only transient URL errors; upload success does not require a metadata delay.
      */
     private suspend fun StorageReference.awaitDownloadUrlWithRetry(
         maxAttempts: Int = 3,
         initialDelayMs: Long = 500L,
-    ): String {
-        var lastException: Exception? = null
-        var currentDelay = initialDelayMs
-        repeat(maxAttempts) { attempt ->
-            try {
-                return this.downloadUrl.await().toString()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                lastException = e
-                if (attempt < maxAttempts - 1) {
-                    delay(currentDelay)
-                    currentDelay = (currentDelay * 2).coerceAtMost(1000L)
-                }
-            }
+    ): String = resolveReportUrl(maxAttempts, initialDelayMs) {
+        val started = SystemClock.elapsedRealtime()
+        if (BuildConfig.DEBUG) Log.d(TAG, "req=${name.take(8)} url_start")
+        try { downloadUrl.await().toString() } finally {
+            if (BuildConfig.DEBUG) Log.d(TAG, "req=${name.take(8)} url_end elapsed_ms=${SystemClock.elapsedRealtime() - started}")
         }
-        throw lastException ?: IllegalStateException("Failed to resolve download URL")
     }
 
     /**
@@ -167,11 +155,18 @@ object FirebaseStorageHelper {
             .setContentType(prepared.contentType)
             .setCacheControl(IMMUTABLE_CACHE_CONTROL)
             .build()
+        val upload = storageRef.putFile(Uri.fromFile(prepared.file), metadata)
         try {
-            storageRef.putFile(Uri.fromFile(prepared.file), metadata).await()
+            val started = SystemClock.elapsedRealtime()
+            if (BuildConfig.DEBUG) Log.d(TAG, "req=${prepared.uploadId.take(8)} put_file_start")
+            try { upload.await() } finally {
+                if (BuildConfig.DEBUG) Log.d(TAG, "req=${prepared.uploadId.take(8)} put_file_end elapsed_ms=${SystemClock.elapsedRealtime() - started}")
+            }
         } catch (e: CancellationException) {
+            upload.cancel()
             throw e
         } catch (e: Exception) {
+            ReportSubmitPolicy.cancellationCause(e)?.let { upload.cancel(); throw it }
             // Storage rules chỉ cho create (không cho update). Nếu lần upload
             // trước đã tạo object nhưng response bị mất, downloadUrl sẽ trả về
             // object cũ; dùng lại thay vì fail cả bài nộp.
@@ -179,17 +174,14 @@ object FirebaseStorageHelper {
                 storageRef.awaitDownloadUrlWithRetry(maxAttempts = 2, initialDelayMs = 300L)
             } catch (ce: CancellationException) {
                 throw ce
-            } catch (_: Exception) {
-                null
+            } catch (recoveryError: Exception) {
+                throw reportRecoveryFailure(e, recoveryError)
             }
-            if (existingUrl != null) {
-                Log.d(TAG, "uploadReportScreenshot: recovered existing object URL for ${prepared.uploadId.take(8)}")
-                return@withContext existingUrl
-            }
-            throw e
+            if (BuildConfig.DEBUG) Log.d(TAG, "req=${prepared.uploadId.take(8)} existing_object_recovered")
+            return@withContext existingUrl
         }
 
-        // Lấy download URL sau khi putFile thành công với retry có giới hạn (tránh văng ra Worker vì delay tạm thời)
+        // Resolve the URL without repeating a successful upload.
         storageRef.awaitDownloadUrlWithRetry(maxAttempts = 3, initialDelayMs = 500L)
     }
 

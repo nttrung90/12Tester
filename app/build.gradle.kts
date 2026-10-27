@@ -80,6 +80,18 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.jvmArgs(
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.net=ALL-UNNAMED",
+                "--add-opens=java.base/java.security=ALL-UNNAMED",
+                "--add-opens=java.base/java.text=ALL-UNNAMED",
+                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+            )
+        }
     }
 
     buildFeatures {
@@ -134,4 +146,8 @@ dependencies {
     // Play Store update detection for the manual "Check for updates" action
     implementation(libs.play.app.update)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.workmanager.testing)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
 }

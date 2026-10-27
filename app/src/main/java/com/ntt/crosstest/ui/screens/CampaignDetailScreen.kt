@@ -108,6 +108,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -142,6 +143,7 @@ fun CampaignDetailScreen(
     onAccountLocked: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val app = context.applicationContext as TestCheoApp
     val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
     val viewModel: CampaignDetailViewModel = viewModel(
@@ -1770,7 +1772,7 @@ fun CampaignDetailScreen(
                                 campaign.playUrl.takeIf { it.isNotBlank() },
                             ).joinToString("\n")
                             clipboard.setPrimaryClip(ClipData.newPlainText("App note", textToCopy))
-                            Toast.makeText(context, context.getString(R.string.campaign_note_copied_toast), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, resources.getString(R.string.campaign_note_copied_toast), Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.ContentCopy,
@@ -1995,9 +1997,11 @@ private fun SubmitReportBottomSheet(
         }
     }
 
-    var duplicateWarning by remember { mutableStateOf<String?>(null) }
     var isCheckingDuplicate by remember { mutableStateOf(false) }
     var comparisonResult by remember { mutableStateOf<ImageHashHelper.ComparisonResult?>(null) }
+    val duplicateWarning = comparisonResult?.takeIf { it.isSuspectDuplicate }?.let {
+        stringResource(R.string.campaign_duplicate_warning_format, it.similarity)
+    }
     var showComparisonDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(
@@ -2016,20 +2020,17 @@ private fun SubmitReportBottomSheet(
         val previousUrl = previousReport?.screenshotUrl
         if (uiState.isPreparingScreenshot) {
             // Ảnh đang được nén một lần trong ViewModel; chưa có hash để so.
-            duplicateWarning = null
             comparisonResult = null
             isCheckingDuplicate = true
             return@LaunchedEffect
         }
         if (isRejectedToday && currentUri == null) {
             // Chưa chọn ảnh mới: chỉ hiển thị nhắc bắt buộc chụp ảnh mới, không báo "trùng".
-            duplicateWarning = null
             comparisonResult = null
             isCheckingDuplicate = false
             return@LaunchedEffect
         }
         if (previousUrl.isNullOrBlank() || (currentUri == null && todayUrl.isNullOrBlank())) {
-            duplicateWarning = null
             comparisonResult = null
             isCheckingDuplicate = false
             return@LaunchedEffect
@@ -2052,14 +2053,8 @@ private fun SubmitReportBottomSheet(
         if (newHash != null && prevHash != null) {
             val comp = ImageHashHelper.compare(newHash, prevHash, context)
             comparisonResult = comp
-            duplicateWarning = if (comp.isSuspectDuplicate) {
-                context.getString(R.string.campaign_duplicate_warning_format, comp.similarity)
-            } else {
-                null
-            }
         } else {
             comparisonResult = null
-            duplicateWarning = null
         }
         isCheckingDuplicate = false
     }
