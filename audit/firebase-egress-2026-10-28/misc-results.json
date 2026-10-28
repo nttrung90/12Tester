@@ -1,0 +1,40 @@
+{
+  "lateThumbnailWithoutParentMetadata": {
+    "fullDeleted": true,
+    "thumbnailDeleted": true
+  },
+  "clientMetadataHidesOldFull": {
+    "deleted": true,
+    "slaViolations": 1,
+    "candidates": 1
+  },
+  "tcoFreeAllowanceUnused": {
+    "free0Cost": 2.2,
+    "free10000Cost": 0.14,
+    "equal": false
+  },
+  "reconciliationClientExceedsCloud": {
+    "status": "INVALID",
+    "validationError": "Client reported bytes (200) vượt quá Cloud sent_bytes (100). Kiểm tra lại hiện tượng đếm trùng hoặc chồng lấn thời gian.",
+    "cloudReportedSentBytes": 100,
+    "cloudReportedRequests": 0,
+    "clientReportedBodyBytes": 200,
+    "clientReportedRequests": 0,
+    "clientReportedMemoryHits": 0,
+    "unclassifiedExternalBytes": 0,
+    "unclassifiedPercent": 100,
+    "isAlertTriggered": true
+  },
+  "reconciliationNoCloud": {
+    "status": "INVALID",
+    "validationError": "Cloud Storage metrics = 0 trong khi Client báo cáo có lưu lượng. Cửa sổ thời gian hoặc cấu hình bucket bị lệch.",
+    "cloudReportedSentBytes": 0,
+    "cloudReportedRequests": 0,
+    "clientReportedBodyBytes": 200,
+    "clientReportedRequests": 0,
+    "clientReportedMemoryHits": 0,
+    "unclassifiedExternalBytes": 0,
+    "unclassifiedPercent": 100,
+    "isAlertTriggered": true
+  }
+}

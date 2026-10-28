@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.EgressGatewayClientAuditTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:55.705Z" hostname="PC-5700X3D" time="0.071">
+  <properties/>
+  <testcase name="mediaAccessGrantResultDecodesSnakeCasePayload" classname="com.ntt.crosstest.util.EgressGatewayClientAuditTest" time="0.016"/>
+  <testcase name="legacyHashFallbackKeepsDatabaseReportIdentityForGatewayGrant" classname="com.ntt.crosstest.util.EgressGatewayClientAuditTest" time="0.017"/>
+  <testcase name="runtimeReportRequestUsesDatabaseReportIdentityAndBearer" classname="com.ntt.crosstest.util.EgressGatewayClientAuditTest" time="0.017"/>
+  <testcase name="supabaseMediaAccessGrantProviderRejectsBlankReportId" classname="com.ntt.crosstest.util.EgressGatewayClientAuditTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

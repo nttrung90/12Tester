@@ -1,11 +1,19 @@
-﻿package com.ntt.crosstest.util
+package com.ntt.crosstest.util
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.Drawable
+import android.os.SystemClock
 import android.util.LruCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * High-performance in-memory cache for installed packages and application icons.
@@ -15,6 +23,15 @@ import kotlinx.coroutines.launch
 object InstalledAppCache {
 
     private const val NEGATIVE_TTL_MS = 15_000L
+
+    val version = AtomicLong(1L)
+    val generation = AtomicLong(1L)
+
+    private val _versionFlow = MutableStateFlow(1L)
+    val versionFlow: StateFlow<Long> = _versionFlow.asStateFlow()
+
+    @Volatile
+    private var isReceiverRegistered = false
 
     @Volatile
     private var isInitialized = false
@@ -38,22 +55,88 @@ object InstalledAppCache {
     // Cache up to 120 app icons in memory
     private val iconCache = object : LruCache<String, Drawable>(120) {}
 
+    fun registerPackageReceiver(context: Context) {
+        if (isReceiverRegistered) return
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        }
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                val pkgName = intent?.data?.schemeSpecificPart ?: return
+                when (intent.action) {
+                    Intent.ACTION_PACKAGE_ADDED -> onPackageAdded(pkgName)
+                    Intent.ACTION_PACKAGE_REMOVED -> onPackageRemoved(pkgName)
+                    Intent.ACTION_PACKAGE_REPLACED -> onPackageReplaced(pkgName)
+                }
+            }
+        }
+        try {
+            context.registerReceiver(receiver, filter)
+            isReceiverRegistered = true
+        } catch (_: Exception) {}
+    }
+
     fun init(context: Context, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+        registerPackageReceiver(context)
         scope.launch(Dispatchers.IO) {
             refresh(context)
         }
     }
 
+    private fun notifyVersionChanged() {
+        val v = version.incrementAndGet()
+        _versionFlow.value = v
+    }
+
     fun refresh(context: Context) {
+        val currentGen = generation.get()
         refreshPackages(context)
-        cachedInstalledUserApps = PlayStoreHelper.getInstalledUserApps(context)
-        isUserAppsLoaded = true
+        val userApps = PlayStoreHelper.getInstalledUserApps(context)
+        if (currentGen == generation.get()) {
+            cachedInstalledUserApps = userApps
+            isUserAppsLoaded = true
+            notifyVersionChanged()
+        }
+    }
+
+    fun onPackageAdded(packageName: String) {
+        synchronized(this) {
+            installedPackages = installedPackages + packageName
+            notInstalledCache.remove(packageName)
+            cachedInstalledUserApps = emptyList()
+            isUserAppsLoaded = false
+            notifyVersionChanged()
+        }
+    }
+
+    fun onPackageRemoved(packageName: String) {
+        synchronized(this) {
+            installedPackages = installedPackages - packageName
+            notInstalledCache.remove(packageName)
+            synchronized(iconCache) { iconCache.remove(packageName) }
+            cachedInstalledUserApps = emptyList()
+            isUserAppsLoaded = false
+            notifyVersionChanged()
+        }
+    }
+
+    fun onPackageReplaced(packageName: String) {
+        synchronized(this) {
+            synchronized(iconCache) { iconCache.remove(packageName) }
+            cachedInstalledUserApps = emptyList()
+            isUserAppsLoaded = false
+            notifyVersionChanged()
+        }
     }
 
     /**
      * Lightweight refresh of the installed-package set only (no app icons/labels).
      */
     fun refreshPackages(context: Context) {
+        val currentGen = generation.get()
         try {
             val pm = context.packageManager
             val packages = pm.getInstalledPackages(0)
@@ -61,11 +144,14 @@ object InstalledAppCache {
             for (pkg in packages) {
                 set.add(pkg.packageName)
             }
-            installedPackages = set
-            // Trạng thái cài/không cài có thể đã đổi — bỏ mọi kết quả âm cũ.
-            notInstalledCache.clear()
-            isInitialized = true
-            lastRefreshAt = System.currentTimeMillis()
+            if (currentGen == generation.get()) {
+                installedPackages = set
+                // Trạng thái cài/không cài có thể đã đổi — bỏ mọi kết quả âm cũ.
+                notInstalledCache.clear()
+                isInitialized = true
+                lastRefreshAt = SystemClock.elapsedRealtime()
+                notifyVersionChanged()
+            }
         } catch (_: Exception) {
             // Keep previous set on failure
         }
@@ -77,7 +163,7 @@ object InstalledAppCache {
      * Call from a background thread (PackageManager enumeration is synchronous).
      */
     fun ensureFresh(context: Context, maxAgeMs: Long = 15_000L) {
-        val age = System.currentTimeMillis() - lastRefreshAt
+        val age = SystemClock.elapsedRealtime() - lastRefreshAt
         if (!isInitialized || age > maxAgeMs) {
             refreshPackages(context)
         }
@@ -90,12 +176,15 @@ object InstalledAppCache {
         if (isUserAppsLoaded) cachedInstalledUserApps else null
 
     fun getInstalledUserApps(context: Context): List<PlayStoreHelper.InstalledAppItem> {
+        val curGen = generation.get()
         if (isUserAppsLoaded) {
             return cachedInstalledUserApps
         }
         val apps = PlayStoreHelper.getInstalledUserApps(context)
-        cachedInstalledUserApps = apps
-        isUserAppsLoaded = true
+        if (curGen == generation.get()) {
+            cachedInstalledUserApps = apps
+            isUserAppsLoaded = true
+        }
         return apps
     }
 
@@ -111,7 +200,7 @@ object InstalledAppCache {
         }
         // 2. Negative cache ngắn hạn — kết quả "chưa cài" mới kiểm tra trong
         //    15s thì khỏi lặp lại IPC bên dưới cho cùng một package.
-        val now = System.currentTimeMillis()
+        val now = SystemClock.elapsedRealtime()
         if (notInstalledCache[cleanPkg]?.let { now - it < NEGATIVE_TTL_MS } == true) {
             return false
         }
@@ -143,6 +232,7 @@ object InstalledAppCache {
      */
     fun getInstalledAppDrawable(context: Context, packageName: String): Drawable? {
         if (packageName.isBlank()) return null
+        val curGen = generation.get()
         synchronized(iconCache) {
             val cached = iconCache.get(packageName)
             if (cached != null) return cached
@@ -150,8 +240,10 @@ object InstalledAppCache {
 
         return try {
             val icon = context.packageManager.getApplicationIcon(packageName)
-            synchronized(iconCache) {
-                iconCache.put(packageName, icon)
+            if (curGen == generation.get()) {
+                synchronized(iconCache) {
+                    iconCache.put(packageName, icon)
+                }
             }
             icon
         } catch (_: Exception) {
@@ -167,6 +259,8 @@ object InstalledAppCache {
     }
 
     fun clear() {
+        generation.incrementAndGet()
+        notifyVersionChanged()
         synchronized(iconCache) {
             iconCache.evictAll()
         }

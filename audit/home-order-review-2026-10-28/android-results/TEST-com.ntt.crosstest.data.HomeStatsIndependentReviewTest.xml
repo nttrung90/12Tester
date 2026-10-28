@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.HomeStatsIndependentReviewTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-28T15:32:58.927Z" hostname="PC-5700X3D" time="1.727">
+  <properties/>
+  <testcase name="expiredCycleCountMustRemainUnknownRatherThanRenderZero" classname="com.ntt.crosstest.data.HomeStatsIndependentReviewTest" time="1.523"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

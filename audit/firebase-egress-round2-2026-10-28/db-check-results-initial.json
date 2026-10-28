@@ -1,0 +1,44 @@
+[
+  {
+    "name": "valid_paired_thumbnail",
+    "actual": true,
+    "expected": true,
+    "pass": true
+  },
+  {
+    "name": "reject_wrong_bucket",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  },
+  {
+    "name": "reject_query_path_spoof",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  },
+  {
+    "name": "reject_other_full_upload_id",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  },
+  {
+    "name": "anon_cannot_execute_secret_reader",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  },
+  {
+    "name": "unconfigured_secret_has_no_fallback",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  },
+  {
+    "name": "reject_unbound_nonexistent_report_grant",
+    "actual": true,
+    "expected": false,
+    "pass": false
+  }
+]

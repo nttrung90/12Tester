@@ -1,0 +1,52 @@
+[
+  {
+    "phase": "before_045",
+    "name": "external_screenshot_url",
+    "pass": true
+  },
+  {
+    "phase": "before_045",
+    "name": "confirmed_checkin_additional_reward",
+    "pass": true
+  },
+  {
+    "phase": "before_045",
+    "name": "feedback_written_on_submission",
+    "pass": true
+  },
+  {
+    "phase": "before_045",
+    "name": "approved_rating_immutable",
+    "pass": true
+  },
+  {
+    "phase": "before_045",
+    "name": "rejected_same_hash_new_url",
+    "pass": true
+  },
+  {
+    "phase": "after_045_046",
+    "name": "external_screenshot_url",
+    "pass": true
+  },
+  {
+    "phase": "after_045_046",
+    "name": "confirmed_checkin_additional_reward",
+    "pass": true
+  },
+  {
+    "phase": "after_045_046",
+    "name": "feedback_written_on_submission",
+    "pass": true
+  },
+  {
+    "phase": "after_045_046",
+    "name": "approved_rating_immutable",
+    "pass": true
+  },
+  {
+    "phase": "after_045_046",
+    "name": "rejected_same_hash_new_url",
+    "pass": true
+  }
+]

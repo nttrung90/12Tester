@@ -9,6 +9,7 @@ import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
+import com.ntt.crosstest.data.SessionCacheManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,10 @@ data class AdminUsersUiState(
     val appConfig: AppConfig? = null,
     val isConfigLoading: Boolean = false,
     val configSaveSignal: Int = 0,
+    val homeStatsConfig: com.ntt.crosstest.data.HomeStatsPolicyConfig? = null,
+    val isHomeStatsLoading: Boolean = false,
+    val isHomeStatsSaving: Boolean = false,
+    val homeStatsSaveSignal: Int = 0,
 )
 
 class AdminUsersViewModel(
@@ -43,6 +48,7 @@ class AdminUsersViewModel(
 
     private val _uiState = MutableStateFlow(AdminUsersUiState())
     val uiState: StateFlow<AdminUsersUiState> = _uiState.asStateFlow()
+    private val homeStatsSeq = java.util.concurrent.atomic.AtomicLong(0L)
 
     init {
         _uiState.update { it.copy(currentAdminId = authRepository.currentUserId()) }
@@ -58,6 +64,11 @@ class AdminUsersViewModel(
     }
 
     fun refresh(forceRefresh: Boolean = false) {
+        val curUid = authRepository.currentUserId()
+        if (_uiState.value.currentAdminId != curUid) {
+            homeStatsSeq.incrementAndGet()
+            _uiState.update { it.copy(currentAdminId = curUid, homeStatsConfig = null, isHomeStatsLoading = false, isHomeStatsSaving = false) }
+        }
         viewModelScope.launch {
             if (forceRefresh || _uiState.value.allUsers.isEmpty()) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
@@ -212,6 +223,77 @@ class AdminUsersViewModel(
     }
 
     // ------------------------------------------------------------- app config
+
+    fun loadHomeStatsConfig() {
+        if (_uiState.value.isHomeStatsLoading) return
+        val reqUid = authRepository.currentUserId()
+        val seq = homeStatsSeq.incrementAndGet()
+        val initialGen = SessionCacheManager.currentGeneration()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isHomeStatsLoading = true, error = null) }
+            try {
+                val config = campaignRepository.adminGetHomeStatsConfig()
+                if (seq != homeStatsSeq.get() || reqUid != authRepository.currentUserId() || initialGen != SessionCacheManager.currentGeneration()) {
+                    _uiState.update { it.copy(isHomeStatsLoading = false, homeStatsConfig = null) }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        isHomeStatsLoading = false,
+                        homeStatsConfig = config,
+                    )
+                }
+            } catch (e: Exception) {
+                if (seq != homeStatsSeq.get() || reqUid != authRepository.currentUserId() || initialGen != SessionCacheManager.currentGeneration()) {
+                    _uiState.update { it.copy(isHomeStatsLoading = false, homeStatsConfig = null) }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        isHomeStatsLoading = false,
+                        error = localizer.get(R.string.admin_home_stats_load_failed, friendlyError(e, localizer)),
+                    )
+                }
+            }
+        }
+    }
+
+    fun saveHomeStatsCycle(cycleDays: Int) {
+        if (_uiState.value.isHomeStatsSaving) return
+        val reqUid = authRepository.currentUserId()
+        val seq = homeStatsSeq.incrementAndGet()
+        val initialGen = SessionCacheManager.currentGeneration()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isHomeStatsSaving = true, error = null) }
+            try {
+                val currentRev = _uiState.value.homeStatsConfig?.revision
+                val updated = campaignRepository.adminSetHomeStatsCycle(cycleDays, currentRev)
+                if (seq != homeStatsSeq.get() || reqUid != authRepository.currentUserId() || initialGen != SessionCacheManager.currentGeneration()) {
+                    _uiState.update { it.copy(isHomeStatsSaving = false, homeStatsConfig = null) }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        isHomeStatsSaving = false,
+                        homeStatsConfig = updated,
+                        actionMessage = localizer.get(R.string.admin_home_stats_saved_success),
+                        homeStatsSaveSignal = it.homeStatsSaveSignal + 1,
+                    )
+                }
+            } catch (e: Exception) {
+                if (seq != homeStatsSeq.get() || reqUid != authRepository.currentUserId() || initialGen != SessionCacheManager.currentGeneration()) {
+                    _uiState.update { it.copy(isHomeStatsSaving = false, homeStatsConfig = null) }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        isHomeStatsSaving = false,
+                        error = localizer.get(R.string.admin_home_stats_save_failed, friendlyError(e, localizer)),
+                    )
+                }
+            }
+        }
+    }
 
     fun loadAppConfig() {
         if (_uiState.value.isConfigLoading) return

@@ -1,0 +1,16 @@
+=== BẮT ĐẦU KIỂM THỬ MIGRATION 047: CHU KỲ THỐNG KÊ TRANG CHỦ (1 / 2 / 3 NGÀY) ===
+PASS 1: Áp dụng thành công baseline schema và migration 045, 046, 047
+PASS 2: Mặc định chu kỳ 1 ngày, không có lịch chờ
+PASS 3: Phân quyền chặn anon và non-admin gọi RPC cấu hình
+PASS 4: Validate chu kỳ hợp lệ (chỉ chấp nhận 1, 2, 3)
+PASS 5: Chu kỳ 1 ngày cho home_tested_count đúng bằng today_tested_count
+PASS 6: Admin lên lịch đổi chu kỳ 3 ngày, ghi nhận audit đầy đủ
+PASS 7: Chống ghi đè đồng thời hoạt động chính xác khi sai revision
+PASS 8: Chọn lại chu kỳ đang chạy hủy lịch chờ thành công
+PASS 9: Helper _get_home_stats_period tính đúng mốc chu kỳ 3 ngày và tự reset đầu chu kỳ
+PASS 10: Chu kỳ 3 ngày cộng dồn 4 -> 7 -> 9, sang chu kỳ mới reset về 0 rồi lên 5
+PASS 11: Không cộng trùng lượt khi cùng tester nộp nhiều lần trong một ngày
+PASS 12: Reject xóa check-in làm giảm home_tested_count ngay lập tức
+PASS 13: Tử số vượt mục tiêu (14/12) không bị giới hạn hay cắt cụt
+PASS 14: Đổi cấu hình giữa chu kỳ: ngày hôm nay giữ nguyên, ngày mai bắt đầu chu kỳ mới từ 0
+=== TẤT CẢ 14 KIỂM THỬ BACKEND SQL MIGRATION 047 ĐỀU PASS 100% ===

@@ -27,6 +27,7 @@ data class PendingReport(
     val comment: String,
     val screenshotPath: String? = null,
     val preparedPath: String? = null,
+    val preparedThumbnailPath: String? = null,
     val imageHash: String? = null,
     val contentType: String = "image/jpeg",
     val fallbackScreenshotUrl: String? = null,
@@ -38,6 +39,8 @@ data class PendingReport(
     val uploadedHash: String? = null,
     /** Full-byte fingerprint; null keeps requests from older app versions readable. */
     val screenshotSha256: String? = null,
+    val thumbnailPath: String? = null,
+    val uploadedThumbnailUrl: String? = null,
     /** Durable server receipt. Never remove it before WorkManager commits success. */
     val completedResult: SubmitTesterReportResult? = null,
 ) {
@@ -63,6 +66,9 @@ object PendingReportStore {
 
     fun newScreenshotFile(context: Context, id: String, extension: String = "jpg"): File =
         File(directory(context), "$id.$extension")
+
+    fun newThumbnailFile(context: Context, id: String, extension: String = "jpg"): File =
+        File(directory(context), "${id}_thumb.$extension")
 
     @Synchronized
     fun write(context: Context, report: PendingReport) {
@@ -97,9 +103,13 @@ object PendingReportStore {
     }
 
     @Synchronized
-    fun markUploaded(context: Context, id: String, url: String, hash: String?) {
+    fun markUploaded(context: Context, id: String, url: String, hash: String?, thumbnailUrl: String? = null) {
         val current = read(context, id) ?: throw IOException("pending_request_not_found")
-        write(context, current.copy(uploadedUrl = url, uploadedHash = hash))
+        write(context, current.copy(
+            uploadedUrl = url,
+            uploadedHash = hash,
+            uploadedThumbnailUrl = thumbnailUrl ?: current.uploadedThumbnailUrl
+        ))
     }
 
     @Synchronized
@@ -110,6 +120,10 @@ object PendingReportStore {
         // The receipt is sufficient for replay, so large image files can now be removed.
         deleteInsideAppStorage(context, current.screenshotPath)
         deleteInsideAppStorage(context, current.preparedPath)
+        deleteInsideAppStorage(context, current.thumbnailPath)
+        deleteInsideAppStorage(context, current.preparedThumbnailPath)
+        val orphanThumb = File(context.noBackupFilesDir, "prepared_report_images/thumb_${id}.jpg")
+        if (orphanThumb.isFile) orphanThumb.delete()
     }
 
     @Synchronized
@@ -138,6 +152,10 @@ object PendingReportStore {
         if (report != null) {
             deleteInsideAppStorage(context, report.screenshotPath)
             deleteInsideAppStorage(context, report.preparedPath)
+            deleteInsideAppStorage(context, report.thumbnailPath)
+            deleteInsideAppStorage(context, report.preparedThumbnailPath)
+            val orphanThumb = File(context.noBackupFilesDir, "prepared_report_images/thumb_${id}.jpg")
+            if (orphanThumb.isFile) orphanThumb.delete()
         }
         val target = jsonFile(context, id)
         listOf(target, File(target.path + ".tmp"), File(target.path + ".new"), File(target.path + ".bak"))
@@ -169,12 +187,18 @@ object PendingReportStore {
             if (report.createdAt < cutoff) {
                 deleteInsideAppStorage(context, report.screenshotPath)
                 deleteInsideAppStorage(context, report.preparedPath)
+                deleteInsideAppStorage(context, report.thumbnailPath)
+                deleteInsideAppStorage(context, report.preparedThumbnailPath)
                 file.delete()
             } else {
                 report.screenshotPath?.let { referenced += File(it).absolutePath }
                 report.preparedPath?.let { referenced += File(it).absolutePath }
+                report.thumbnailPath?.let { referenced += File(it).absolutePath }
+                report.preparedThumbnailPath?.let { referenced += File(it).absolutePath }
                 val bytes = file.length() +
-                    (report.screenshotPath?.let { File(it).length() } ?: 0L)
+                    (report.screenshotPath?.let { File(it).length() } ?: 0L) +
+                    (report.thumbnailPath?.let { File(it).length() } ?: 0L) +
+                    (report.preparedThumbnailPath?.let { File(it).length() } ?: 0L)
                 entries += Triple(file, report, bytes)
             }
         }
@@ -186,6 +210,8 @@ object PendingReportStore {
             if (remaining <= MAX_FILES && totalBytes <= MAX_TOTAL_BYTES) return@forEach
             deleteInsideAppStorage(context, report.screenshotPath)
             deleteInsideAppStorage(context, report.preparedPath)
+            deleteInsideAppStorage(context, report.thumbnailPath)
+            deleteInsideAppStorage(context, report.preparedThumbnailPath)
             file.delete()
             remaining -= 1
             totalBytes -= bytes

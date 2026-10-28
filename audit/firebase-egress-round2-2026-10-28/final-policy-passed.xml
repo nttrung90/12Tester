@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.EgressFinalPolicyAuditTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-28T06:24:24.645Z" hostname="PC-5700X3D" time="0.057">
+  <properties/>
+  <testcase name="malformedAgeCannotBeTreatedAsAJustGeneratedResponse" classname="com.ntt.crosstest.util.EgressFinalPolicyAuditTest" time="0.018"/>
+  <testcase name="malformedOrConflictingMaxAgeCannotBecomeFreshThirtyMinuteCache" classname="com.ntt.crosstest.util.EgressFinalPolicyAuditTest" time="0.014"/>
+  <testcase name="cdnRoutingOnlyRewritesIconsFromTheConfiguredStorageBucket" classname="com.ntt.crosstest.util.EgressFinalPolicyAuditTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

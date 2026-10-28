@@ -12,11 +12,13 @@ import io.github.jan.supabase.postgrest.query.Count
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -45,6 +47,8 @@ data class CacheEntry<T>(
     val mutationVersion: Long,
     val scopeUid: String? = null,
     val limit: Long? = null,
+    val isPublic: Boolean = false,
+    val businessDate: LocalDate? = null,
 ) {
     fun isFresh(
         ttlMs: Long,
@@ -52,12 +56,15 @@ data class CacheEntry<T>(
         currentMutationVersion: Long,
         currentUid: String?,
         requestedLimit: Long? = null,
+        currentBusinessDate: LocalDate? = null,
+        nowMs: Long = SystemClock.elapsedRealtime(),
     ): Boolean {
         if (sessionGeneration != currentGeneration) return false
         if (mutationVersion != currentMutationVersion) return false
-        if (scopeUid != null && scopeUid != currentUid) return false
+        if (!isPublic && scopeUid != currentUid) return false
         if (requestedLimit != null && (limit == null || limit < requestedLimit)) return false
-        return (SystemClock.elapsedRealtime() - monotonicCreatedAtMs) < ttlMs
+        if (businessDate != null && currentBusinessDate != null && businessDate != currentBusinessDate) return false
+        return (nowMs - monotonicCreatedAtMs) < ttlMs
     }
 }
 
@@ -70,6 +77,8 @@ class CampaignRepository(
     private val supabase: SupabaseClient,
     private val localizer: Localizer,
     val sessionCacheManager: SessionCacheManager = SessionCacheManager,
+    private val monotonicClock: () -> Long = { SystemClock.elapsedRealtime() },
+    private val businessDayClock: () -> LocalDate = { VnTime.today() },
 ) {
 
     companion object {
@@ -77,6 +86,7 @@ class CampaignRepository(
         private const val SHORT_CACHE_TTL_MS = 60 * 1000L // warnings/notifications/logs
         private const val PACKAGES_CACHE_TTL_MS = 10 * 60 * 1000L
         private const val AUTO_ACCEPT_THROTTLE_MS = 10 * 60 * 1000L
+        private const val MAX_MAP_ENTRIES = 200
 
         /**
          * Danh sÃ¡ch cá»™t cá»§a báº£ng `campaigns` khá»›p model [Campaign].
@@ -94,13 +104,27 @@ class CampaignRepository(
     private val mutationVersions = ConcurrentHashMap<String, AtomicLong>()
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun monotonicNow(): Long = SystemClock.elapsedRealtime()
+    fun monotonicNow(): Long = monotonicClock()
+    fun businessDay(): LocalDate = businessDayClock()
 
     fun getMutationVersion(domain: String): Long =
         mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.get()
 
     fun bumpMutationVersion(domain: String): Long =
         mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.incrementAndGet()
+
+    private fun <K, V> evictOldEntries(map: ConcurrentHashMap<K, CacheEntry<V>>, maxCapacity: Int = MAX_MAP_ENTRIES) {
+        if (map.size > maxCapacity) {
+            val now = monotonicNow()
+            map.entries.removeIf { (_, entry) -> (now - entry.monotonicCreatedAtMs) > CACHE_TTL_MS * 2 }
+            if (map.size > maxCapacity) {
+                val oldest = map.entries.sortedBy { it.value.monotonicCreatedAtMs }.take(map.size - maxCapacity)
+                for (item in oldest) {
+                    map.remove(item.key, item.value)
+                }
+            }
+        }
+    }
 
     @Volatile
     private var cachedOpenCampaigns: CacheEntry<List<Campaign>>? = null
@@ -178,7 +202,7 @@ class CampaignRepository(
     @Volatile
     private var lastAutoAcceptRunMs: Long = 0L
 
-    private val flightMap = ConcurrentHashMap<String, Deferred<Any?>>()
+    private val flightMap = ConcurrentHashMap<String, CompletableDeferred<Any?>>()
 
     private suspend fun <T> deduped(
         domain: String,
@@ -196,14 +220,25 @@ class CampaignRepository(
             getCached()?.let { return it }
         }
 
-        val flightKey = if (forceRefresh) "$domain:$key:$gen:$mutVer:$curUid:force" else "$domain:$key:$gen:$mutVer:$curUid"
+        val flightKey = "$domain:$key:$gen:$mutVer:$curUid"
 
-        val deferred: Deferred<Any?> = flightMap.computeIfAbsent(flightKey) {
-            repositoryScope.async {
+        var isNew = false
+        val deferred = flightMap.computeIfAbsent(flightKey) {
+            isNew = true
+            CompletableDeferred()
+        }
+
+        if (isNew) {
+            repositoryScope.launch {
                 try {
-                    fetch()
+                    val result = fetch()
+                    flightMap.remove(flightKey, deferred)
+                    deferred.complete(result)
+                } catch (t: Throwable) {
+                    flightMap.remove(flightKey, deferred)
+                    deferred.completeExceptionally(t)
                 } finally {
-                    flightMap.remove(flightKey)
+                    flightMap.remove(flightKey, deferred)
                 }
             }
         }
@@ -274,6 +309,7 @@ class CampaignRepository(
 
     fun invalidateCampaign(campaignId: String) {
         bumpMutationVersion("campaigns")
+        bumpMutationVersion("user_slots")
         campaignCache.remove(campaignId)
         cachedOpenCampaigns = null
         cachedPausedCampaigns = null
@@ -281,6 +317,7 @@ class CampaignRepository(
         cachedMyCampaigns = null
         cachedMyJoinedCampaigns = null
         cachedHomeFeed = null
+        cachedSlotsInfo = null
         statsCache.remove(campaignId)
         ownerStatsCache.remove(campaignId)
         invalidateDetailCache(campaignId)
@@ -292,6 +329,7 @@ class CampaignRepository(
         bumpMutationVersion("campaigns")
         bumpMutationVersion("stats")
         bumpMutationVersion("dashboard")
+        bumpMutationVersion("user_slots")
         membersCache.remove(campaignId)
         testersCache.remove(campaignId)
         ownerStatsCache.remove(campaignId)
@@ -301,6 +339,7 @@ class CampaignRepository(
         cachedPausedCampaigns = null
         cachedCompletedCampaigns = null
         cachedHomeFeed = null
+        cachedSlotsInfo = null
         invalidateDetailCache(campaignId)
         invalidateDashboardCache()
     }
@@ -327,33 +366,35 @@ class CampaignRepository(
     fun peekCampaign(id: String): Campaign? {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val open = cachedOpenCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null) }?.value?.find { it.id == id }
+        val now = monotonicNow()
+        val open = cachedOpenCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = now) }?.value?.find { it.id == id }
         if (open != null) return open
-        val my = cachedMyCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, supabase.auth.currentUserOrNull()?.id) }?.value?.find { it.id == id }
+        val my = cachedMyCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, supabase.auth.currentUserOrNull()?.id, nowMs = now) }?.value?.find { it.id == id }
         if (my != null) return my
-        val joined = cachedMyJoinedCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, supabase.auth.currentUserOrNull()?.id) }?.value?.find { it.id == id }
+        val joined = cachedMyJoinedCampaigns?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, supabase.auth.currentUserOrNull()?.id, nowMs = now) }?.value?.find { it.id == id }
         if (joined != null) return joined
-        return campaignCache[id]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null) }?.value
+        return campaignCache[id]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = now) }?.value
     }
 
     fun peekCampaignOwnerStats(campaignId: String): CampaignOwnerStats? {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: return null
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("stats")
-        return ownerStatsCache[campaignId]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null) }?.value
+        return ownerStatsCache[campaignId]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = businessDay(), nowMs = monotonicNow()) }?.value
     }
 
     fun peekCampaignReports(campaignId: String, canManage: Boolean = false): List<TesterReport>? {
         val uid = supabase.auth.currentUserOrNull()?.id
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val scope = if (canManage) null else uid
-        return reportsCache["${campaignId}_$canManage"]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, scope) }?.value
+        val scope = uid
+        return reportsCache["${campaignId}_$canManage"]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, scope, nowMs = monotonicNow()) }?.value
     }
 
     fun peekCampaignTesters(campaignId: String): List<TesterItem>? {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("membership")
-        return testersCache[campaignId]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null) }?.value
+        return testersCache[campaignId]?.takeIf { it.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) }?.value
     }
 
     private fun uid(): String =
@@ -364,14 +405,14 @@ class CampaignRepository(
         suspend fun listOpenCampaigns(forceRefresh: Boolean = false): List<Campaign> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val isFresh = { cachedOpenCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { cachedOpenCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "open", forceRefresh, isFresh, { cachedOpenCampaigns?.value }) {
             val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
                 filter { eq("status", "open") }
                 order("created_at", Order.DESCENDING)
             }.decodeList<Campaign>()
             if (gen == sessionGeneration.get()) {
-                cachedOpenCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+                cachedOpenCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
@@ -381,7 +422,7 @@ class CampaignRepository(
     suspend fun listPausedCampaigns(forceRefresh: Boolean = false): List<Campaign> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val isFresh = { cachedPausedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { cachedPausedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "paused", forceRefresh, isFresh, { cachedPausedCampaigns?.value }) {
             val result = try {
                 supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
@@ -396,7 +437,7 @@ class CampaignRepository(
                 throw e
             }
             if (gen == sessionGeneration.get()) {
-                cachedPausedCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+                cachedPausedCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
@@ -406,7 +447,7 @@ class CampaignRepository(
     suspend fun listCompletedCampaigns(forceRefresh: Boolean = false): List<Campaign> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val isFresh = { cachedCompletedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { cachedCompletedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "completed", forceRefresh, isFresh, { cachedCompletedCampaigns?.value }) {
             val result = try {
                 supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
@@ -421,7 +462,7 @@ class CampaignRepository(
                 throw e
             }
             if (gen == sessionGeneration.get()) {
-                cachedCompletedCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+                cachedCompletedCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
@@ -430,6 +471,7 @@ class CampaignRepository(
     /** XÃ³a cache danh sÃ¡ch campaign theo tráº¡ng thÃ¡i (dÃ¹ng sau khi sync vÃ²ng Ä‘á»i). */
     private fun invalidateCampaignLists() {
         bumpMutationVersion("campaigns")
+        bumpMutationVersion("user_slots")
         cachedOpenCampaigns = null
         cachedPausedCampaigns = null
         cachedCompletedCampaigns = null
@@ -494,14 +536,14 @@ class CampaignRepository(
         if (!forceRefresh) {
             peekCampaign(id)?.let { return it }
         }
-        val isFresh = { campaignCache[id]?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { campaignCache[id]?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "get:$id", forceRefresh, isFresh, { campaignCache[id]?.value }) {
             val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
                 filter { eq("id", id) }
                 limit(1)
             }.decodeList<Campaign>().firstOrNull()
             if (gen == sessionGeneration.get() && result != null) {
-                campaignCache[id] = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+                campaignCache[id] = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
@@ -639,7 +681,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val user = supabase.auth.currentUserOrNull() ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val isFresh = { cachedMyCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id) == true }
+        val isFresh = { cachedMyCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "myCampaigns", forceRefresh, isFresh, { cachedMyCampaigns?.value }) {
             val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
                 filter { eq("owner_id", user.id) }
@@ -685,7 +727,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
     suspend fun getMembers(campaignId: String, forceRefresh: Boolean = false): List<CampaignMember> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("membership")
-        val isFresh = { membersCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { membersCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("membership", "members:$campaignId", forceRefresh, isFresh, { membersCache[campaignId]?.value }) {
             val result = supabase.from("campaign_members").select {
                 filter { eq("campaign_id", campaignId) }
@@ -702,7 +744,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val user = supabase.auth.currentUserOrNull() ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
-        val isFresh = { cachedMyJoinedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id) == true }
+        val isFresh = { cachedMyJoinedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "myJoinedCampaigns", forceRefresh, isFresh, { cachedMyJoinedCampaigns?.value }) {
             val memberRows = supabase.from("campaign_members").select {
                 filter { eq("user_id", user.id) }
@@ -765,7 +807,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         suspend fun getCheckins(campaignId: String, forceRefresh: Boolean = false): List<Checkin> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val isFresh = { checkinsCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { checkinsCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("reports", "checkins:$campaignId", forceRefresh, isFresh, { checkinsCache[campaignId]?.value }) {
             val result = supabase.from("checkins").select {
                 filter { eq("campaign_id", campaignId) }
@@ -789,6 +831,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         imageHash: String? = null,
         clientSubmitId: String? = null,
         requireIdempotency: Boolean = false,
+        thumbnailUrl: String? = null,
     ): SubmitTesterReportResult {
         val params = SubmitTesterReportParams(
             campaignId = campaignId,
@@ -797,6 +840,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             rating = rating.coerceIn(1, 5),
             imageHash = imageHash,
             clientSubmitId = clientSubmitId,
+            thumbnailUrl = thumbnailUrl,
         )
         val result = try {
             supabase.postgrest.rpc(
@@ -825,17 +869,22 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         return result
     }
 
-    private fun isMissingSubmitRpc(error: Exception): Boolean {
+    private fun isMissingRpc(error: Exception, functionName: String? = null): Boolean {
+        if (error is CancellationException) return false
         val message = error.message.orEmpty().lowercase()
-        return "pgrst202" in message ||
-            "could not find the function" in message ||
-            ("submit_tester_report" in message && "schema cache" in message)
+        val isPgrst202 = "pgrst202" in message || "could not find the function" in message
+        val isSchemaCache = functionName != null && functionName.lowercase() in message && ("schema cache" in message || "not found" in message)
+        return isPgrst202 || isSchemaCache
+    }
+
+    private fun isMissingSubmitRpc(error: Exception): Boolean {
+        return isMissingRpc(error, "submit_tester_report")
     }
 
     suspend fun getFeedbacks(campaignId: String, forceRefresh: Boolean = false): List<Feedback> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val isFresh = { feedbacksCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { feedbacksCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("reports", "feedbacks:$campaignId", forceRefresh, isFresh, { feedbacksCache[campaignId]?.value }) {
             val result = supabase.from("feedbacks").select {
                 filter { eq("campaign_id", campaignId) }
@@ -860,7 +909,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         if (!forceRefresh) {
             for (id in userIds) {
                 val cached = profileCache[id]
-                if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, null)) {
+                if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow())) {
                     result[id] = cached.value
                 } else {
                     missingIds.add(id)
@@ -886,6 +935,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                     profileCache[p.id] = CacheEntry(p, fetchTime, gen, mutVer, null)
                     result[p.id] = p
                 }
+                evictOldEntries(profileCache)
             }
         }
         return result
@@ -895,7 +945,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val user = supabase.auth.currentUserOrNull() ?: return null
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("profile")
-        val isFresh = { cachedMyProfile?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id) == true }
+        val isFresh = { cachedMyProfile?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id, nowMs = monotonicNow()) == true }
         return deduped("profile", "myProfile", forceRefresh, isFresh, { cachedMyProfile?.value }) {
             val profile = getProfiles(listOf(user.id), forceRefresh = forceRefresh)[user.id]
             if (gen == sessionGeneration.get() && user.id == supabase.auth.currentUserOrNull()?.id) {
@@ -909,11 +959,14 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
 
     suspend fun getTodayCheckinCount(forceRefresh: Boolean = false): Int {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return 0
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val isFresh = { cachedTodayCheckins?.isFresh(CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = {
+            cachedTodayCheckins?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true
+        }
         return deduped("reports", "todayCheckins", forceRefresh, isFresh, { cachedTodayCheckins?.value }) {
-            val today = VnTime.today().toString()
+            val today = requestDate.toString()
             val count = try {
                 val checkins = supabase.from("checkins").select {
                     filter {
@@ -938,12 +991,14 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedTodayCheckins?.takeIf { it.sessionGeneration == gen && it.scopeUid == uid }?.value
+                val existing = cachedTodayCheckins?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == uid && it.mutationVersion == mutVer && it.businessDate == requestDate
+                }?.value
                 if (existing != null) return@deduped existing
                 throw e
             }
             if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedTodayCheckins = CacheEntry(count, monotonicNow(), gen, mutVer, uid)
+                cachedTodayCheckins = CacheEntry(count, monotonicNow(), gen, mutVer, uid, businessDate = requestDate)
             }
             count
         }
@@ -954,19 +1009,30 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("notifications")
         val isFresh = {
-            cachedCreditLogs?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid, requestedLimit = limit) == true
+            cachedCreditLogs?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid, requestedLimit = limit, nowMs = monotonicNow()) == true
         }
-        return deduped("notifications", "creditLogs:$limit", forceRefresh, isFresh, { cachedCreditLogs?.value }) {
-            val result = supabase.from("credit_logs").select {
-                filter { eq("user_id", uid) }
-                order("created_at", Order.DESCENDING)
-                limit(limit)
-            }.decodeList<CreditLog>()
-            if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
+        val cachedSlice = { cachedCreditLogs?.value?.take(limit.toInt()) }
+        return deduped("notifications", "creditLogs:$limit", forceRefresh, isFresh, cachedSlice) {
+            val result = try {
+                supabase.from("credit_logs").select {
+                    filter { eq("user_id", uid) }
+                    order("created_at", Order.DESCENDING)
+                    limit(limit)
+                }.decodeList<CreditLog>()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val existing = cachedCreditLogs?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == uid && it.mutationVersion == mutVer
+                }?.value?.take(limit.toInt())
+                if (existing != null) return@deduped existing
+                throw e
+            }
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("notifications") && uid == supabase.auth.currentUserOrNull()?.id) {
                 cachedCreditLogs = CacheEntry(result, monotonicNow(), gen, mutVer, uid, limit = limit)
             }
             result
-        }
+        }.take(limit.toInt())
     }
 // ---------------------------------------------------------------- leaderboard
 
@@ -980,8 +1046,8 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("leaderboard")
         val isFresh = {
-            if (isTest) cachedTestLeaderboard?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true
-            else cachedLeaderboard?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true
+            if (isTest) cachedTestLeaderboard?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true
+            else cachedLeaderboard?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true
         }
         val cached = if (isTest) cachedTestLeaderboard?.value else cachedLeaderboard?.value
         return deduped("leaderboard", if (isTest) "test" else "credit", forceRefresh, isFresh, { cached }) {
@@ -991,13 +1057,14 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                     LeaderboardParams(limit = 100, sort = if (isTest) "test" else "credit")
                 ).decodeAs<List<LeaderboardUser>>()
                 if (gen == sessionGeneration.get()) {
-                    val entry = CacheEntry(rpcList, monotonicNow(), gen, mutVer, null)
+                    val entry = CacheEntry(rpcList, monotonicNow(), gen, mutVer, null, isPublic = true)
                     if (isTest) cachedTestLeaderboard = entry else cachedLeaderboard = entry
                 }
                 return@deduped rpcList
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_leaderboard_v2")) throw e
             }
             val res = try {
                 val profiles = supabase.from("profiles").select {
@@ -1008,13 +1075,9 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 if (profiles.isEmpty()) return@deduped emptyList()
 
                 val userIds = profiles.map { it.id }
-                val checkins = try {
-                    supabase.from("checkins").select {
-                        filter { isIn("user_id", userIds) }
-                    }.decodeList<Checkin>()
-                } catch (_: Exception) {
-                    emptyList()
-                }
+                val checkins = supabase.from("checkins").select {
+                    filter { isIn("user_id", userIds) }
+                }.decodeList<Checkin>()
 
                 val checkinsByUser = checkins.groupBy { it.userId }
 
@@ -1051,11 +1114,9 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
-                emptyList()
             }
             if (gen == sessionGeneration.get()) {
-                val entry = CacheEntry(res, monotonicNow(), gen, mutVer, null)
+                val entry = CacheEntry(res, monotonicNow(), gen, mutVer, null, isPublic = true)
                 if (isTest) cachedTestLeaderboard = entry else cachedLeaderboard = entry
             }
             res
@@ -1066,7 +1127,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("leaderboard")
-        val isFresh = { myRankCache[sort]?.isFresh(CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { myRankCache[sort]?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("leaderboard", "myRank:$sort", forceRefresh, isFresh, { myRankCache[sort]?.value }) {
             try {
                 val rpcResult = supabase.postgrest.rpc("get_my_rank_v1", MyRankParams(sort)).decodeAs<MyRank>()
@@ -1078,7 +1139,8 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_my_rank_v1")) throw e
             }
 
             val fromList = try {
@@ -1128,28 +1190,27 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
     }
 
     suspend fun getCampaignOwnerStats(campaignId: String, forceRefresh: Boolean = false): CampaignOwnerStats {
+        val uid = supabase.auth.currentUserOrNull()?.id
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("stats")
+        val isFresh = { !forceRefresh && ownerStatsCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         if (!forceRefresh) {
             val cached = ownerStatsCache[campaignId]
-            if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, null)) {
+            if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow())) {
                 return cached.value
             }
         }
-        return deduped("stats", "ownerStats:$campaignId", forceRefresh, { !forceRefresh && ownerStatsCache[campaignId]?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }, { ownerStatsCache[campaignId]?.value }) {
-            val members = try { getMembers(campaignId, forceRefresh) } catch (_: Exception) { emptyList() }
-            val today = VnTime.today().toString()
-            val checkins = try { getCheckins(campaignId, forceRefresh) } catch (_: Exception) { emptyList() }
-            val feedbacks = try {
-                getFeedbacks(campaignId, forceRefresh)
-            } catch (_: Exception) {
-                emptyList<Feedback>()
-            }
+        return deduped("stats", "ownerStats:$campaignId", forceRefresh, isFresh, { ownerStatsCache[campaignId]?.value }) {
+            val members = getMembers(campaignId, forceRefresh)
+            val today = requestDate.toString()
+            val checkins = getCheckins(campaignId, forceRefresh)
+            val feedbacks = getFeedbacks(campaignId, forceRefresh)
             val avgRating = if (feedbacks.isNotEmpty()) {
                 feedbacks.map { it.rating }.average().toFloat()
             } else null
 
-            val reports = try { getCampaignReports(campaignId, canManage = true, forceRefresh = forceRefresh) } catch (e: CancellationException) { throw e } catch (_: Exception) { emptyList() }
+            val reports = getCampaignReports(campaignId, canManage = true, forceRefresh = forceRefresh)
             val todayCheckins = (
                 checkins.filter { it.checkinDate == today }.map { it.userId } +
                 reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
@@ -1164,8 +1225,9 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 pendingReportsCount = pendingCount,
                 averageRating = avgRating,
             )
-            if (gen == sessionGeneration.get()) {
-                ownerStatsCache[campaignId] = CacheEntry(stats, monotonicNow(), gen, mutVer, null)
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("stats") && uid == supabase.auth.currentUserOrNull()?.id) {
+                ownerStatsCache[campaignId] = CacheEntry(stats, monotonicNow(), gen, mutVer, uid, businessDate = requestDate)
+                evictOldEntries(ownerStatsCache)
             }
             stats
         }
@@ -1175,7 +1237,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val uid = supabase.auth.currentUserOrNull()?.id ?: return 0
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val isFresh = { cachedPendingReports?.isFresh(CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { cachedPendingReports?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("reports", "pendingReports", forceRefresh, isFresh, { cachedPendingReports?.value }) {
             val count = try {
                 val myCamps = myCampaigns(forceRefresh = forceRefresh)
@@ -1191,7 +1253,9 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedPendingReports?.takeIf { it.sessionGeneration == gen && it.scopeUid == uid }?.value
+                val existing = cachedPendingReports?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == uid && it.mutationVersion == mutVer
+                }?.value
                 if (existing != null) return@deduped existing
                 throw e
             }
@@ -1206,19 +1270,15 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val mutVer = getMutationVersion("membership")
         if (!forceRefresh) {
             val cached = testersCache[campaignId]
-            if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, null)) {
+            if (cached != null && cached.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow())) {
                 return cached.value
             }
         }
-        val members = try { getMembers(campaignId, forceRefresh) } catch (_: Exception) { emptyList() }
+        val members = getMembers(campaignId, forceRefresh)
         if (members.isEmpty()) return emptyList()
         val userIds = members.map { it.userId }
-        val profilesMap = try { getProfiles(userIds, forceRefresh) } catch (_: Exception) { emptyMap() }
-        val checkins = try {
-            getCheckins(campaignId, forceRefresh).filter { it.userId in userIds }
-        } catch (_: Exception) {
-            emptyList()
-        }
+        val profilesMap = getProfiles(userIds, forceRefresh)
+        val checkins = getCheckins(campaignId, forceRefresh).filter { it.userId in userIds }
         val checkinsByUser = checkins.groupBy { it.userId }
         val result = members.map { member ->
             val userCheckins = checkinsByUser[member.userId].orEmpty()
@@ -1230,8 +1290,9 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 lastCheckinDate = latestDate,
             )
         }
-        if (gen == sessionGeneration.get()) {
+        if (gen == sessionGeneration.get() && mutVer == getMutationVersion("membership")) {
             testersCache[campaignId] = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+            evictOldEntries(testersCache)
         }
         return result
     }
@@ -1241,8 +1302,8 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val cacheKey = "${campaignId}_$canManage"
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("reports")
-        val scope = if (canManage) null else uid
-        val isFresh = { reportsCache[cacheKey]?.isFresh(CACHE_TTL_MS, gen, mutVer, scope) == true }
+        val scope = uid
+        val isFresh = { reportsCache[cacheKey]?.isFresh(CACHE_TTL_MS, gen, mutVer, scope, nowMs = monotonicNow()) == true }
         return deduped("reports", cacheKey, forceRefresh, isFresh, { reportsCache[cacheKey]?.value }) {
             val now = monotonicNow()
             if (!canManage) {
@@ -1262,22 +1323,17 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                     }
                 } catch (rpcError: Exception) {
                     if (rpcError is CancellationException) throw rpcError
-                    try {
-                        fetchReportsDirect(campaignId)
-                    } catch (fallbackError: Exception) {
-                        if (fallbackError is CancellationException) throw fallbackError
-                        fallbackError.addSuppressed(rpcError)
-                        throw fallbackError
-                    }
+                    if (!isMissingRpc(rpcError, "get_campaign_reports_for_owner")) throw rpcError
+                    fetchReportsDirect(campaignId)
                 }
-                if (gen == sessionGeneration.get()) {
+                if (gen == sessionGeneration.get() && mutVer == getMutationVersion("reports") && uid == supabase.auth.currentUserOrNull()?.id) {
                     reportsCache[cacheKey] = CacheEntry(rpcResult, now, gen, mutVer, scope)
                 }
                 return@deduped rpcResult
             }
 
             val finalResult = fetchReportsDirect(campaignId)
-            if (gen == sessionGeneration.get()) {
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("reports") && uid == supabase.auth.currentUserOrNull()?.id) {
                 reportsCache[cacheKey] = CacheEntry(finalResult, now, gen, mutVer, scope)
             }
             finalResult
@@ -1380,7 +1436,7 @@ suspend fun autoAcceptExpiredReports(): Int {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("notifications")
-        val isFresh = { cachedUnreadWarnings?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { cachedUnreadWarnings?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("notifications", "unreadWarnings", forceRefresh, isFresh, { cachedUnreadWarnings?.value }) {
             val result = try {
                 supabase.from("user_warnings").select {
@@ -1393,7 +1449,9 @@ suspend fun autoAcceptExpiredReports(): Int {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedUnreadWarnings?.takeIf { it.sessionGeneration == gen && it.scopeUid == uid }?.value
+                val existing = cachedUnreadWarnings?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == uid && it.mutationVersion == mutVer
+                }?.value
                 if (existing != null) return@deduped existing
                 throw e
             }
@@ -1419,12 +1477,13 @@ suspend fun autoAcceptExpiredReports(): Int {
 
     suspend fun getWeeklyWarningsCount(forceRefresh: Boolean = false): Int {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return 0
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("notifications")
-        val isFresh = { cachedWeeklyWarnings?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { cachedWeeklyWarnings?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         return deduped("notifications", "weeklyWarnings", forceRefresh, isFresh, { cachedWeeklyWarnings?.value }) {
             val result = try {
-                val sevenDaysAgo = VnTime.today().minusDays(6).toString()
+                val sevenDaysAgo = requestDate.minusDays(6).toString()
                 supabase.from("user_warnings").select {
                     filter {
                         eq("user_id", uid)
@@ -1434,12 +1493,14 @@ suspend fun autoAcceptExpiredReports(): Int {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedWeeklyWarnings?.takeIf { it.sessionGeneration == gen && it.scopeUid == uid }?.value
+                val existing = cachedWeeklyWarnings?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == uid && it.mutationVersion == mutVer && it.businessDate == requestDate
+                }?.value
                 if (existing != null) return@deduped existing
                 throw e
             }
             if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedWeeklyWarnings = CacheEntry(result, monotonicNow(), gen, mutVer, uid)
+                cachedWeeklyWarnings = CacheEntry(result, monotonicNow(), gen, mutVer, uid, businessDate = requestDate)
             }
             result
         }
@@ -1548,10 +1609,11 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
     suspend fun getCampaignsStatsMap(campaignIds: List<String>, forceRefresh: Boolean = false): Map<String, CampaignStats> {
         if (campaignIds.isEmpty()) return emptyMap()
         val currentUid = supabase.auth.currentUserOrNull()?.id
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("stats")
         val isFresh = {
-            campaignIds.all { id -> statsCache[id]?.isFresh(CACHE_TTL_MS, gen, mutVer, currentUid) == true }
+            campaignIds.all { id -> statsCache[id]?.isFresh(CACHE_TTL_MS, gen, mutVer, currentUid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         }
         val distinctSorted = campaignIds.distinct().sorted()
         val flightKey = "statsMap:" + distinctSorted.joinToString(",")
@@ -1566,8 +1628,11 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
                 val at = monotonicNow()
                 if (gen == sessionGeneration.get() && currentUid == supabase.auth.currentUserOrNull()?.id) {
                     for ((statId, stat) in stats) {
-                        statsCache[statId] = CacheEntry(stat, at, gen, mutVer, currentUid)
+                        if (stat.statsDate == null || stat.statsDate == requestDate.toString()) {
+                            statsCache[statId] = CacheEntry(stat, at, gen, mutVer, currentUid, businessDate = requestDate)
+                        }
                     }
+                    evictOldEntries(statsCache)
                 }
             }
             try {
@@ -1575,36 +1640,27 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
                     "get_campaigns_stats",
                     CampaignIdsParams(campaignIds = distinctSorted)
                 ).decodeAs<Map<String, CampaignStats>>()
-                if (rpcStats.isNotEmpty()) {
-                    cacheAll(rpcStats)
-                    return@deduped rpcStats.filterKeys { it in campaignIds }
-                }
+                cacheAll(rpcStats)
+                return@deduped rpcStats.filterKeys { it in campaignIds }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_campaigns_stats")) throw e
             }
             val uid = currentUid
-            val today = VnTime.today().toString()
+            val today = requestDate.toString()
 
-            val membersMap = try {
-                val members = supabase.from("campaign_members").select {
-                    filter { isIn("campaign_id", campaignIds) }
-                }.decodeList<CampaignMember>()
-                members.groupBy { it.campaignId }.mapValues { it.value.size }
-            } catch (_: Exception) {
-                emptyMap()
-            }
+            val members = supabase.from("campaign_members").select {
+                filter { isIn("campaign_id", campaignIds) }
+            }.decodeList<CampaignMember>()
+            val membersMap = members.groupBy { it.campaignId }.mapValues { it.value.size }
 
-            val todayCheckins = try {
-                supabase.from("checkins").select {
-                    filter {
-                        isIn("campaign_id", campaignIds)
-                        eq("checkin_date", today)
-                    }
-                }.decodeList<Checkin>()
-            } catch (_: Exception) {
-                emptyList()
-            }
+            val todayCheckins = supabase.from("checkins").select {
+                filter {
+                    isIn("campaign_id", campaignIds)
+                    eq("checkin_date", today)
+                }
+            }.decodeList<Checkin>()
 
             val todayCountMap = todayCheckins.groupBy { it.campaignId }.mapValues { it.value.size }
             val userCheckedInIds = if (uid != null) {
@@ -1612,18 +1668,14 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
             } else emptySet()
 
             val userSubmittedTodayCampIds = if (uid != null) {
-                try {
-                    val reports = supabase.from("tester_reports").select {
-                        filter {
-                            isIn("campaign_id", campaignIds)
-                            eq("user_id", uid)
-                        }
-                        order("created_at", Order.DESCENDING)
-                    }.decodeList<TesterReport>()
-                    reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.campaignId }.toSet()
-                } catch (_: Exception) {
-                    emptySet()
-                }
+                val reports = supabase.from("tester_reports").select {
+                    filter {
+                        isIn("campaign_id", campaignIds)
+                        eq("user_id", uid)
+                    }
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<TesterReport>()
+                reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.campaignId }.toSet()
             } else emptySet()
 
             val testedTodayIds = userCheckedInIds + userSubmittedTodayCampIds
@@ -1633,6 +1685,8 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
                     installedCount = membersMap[id] ?: 0,
                     todayTestedCount = todayCountMap[id] ?: 0,
                     hasTestedToday = testedTodayIds.contains(id),
+                    homeTestedCount = todayCountMap[id] ?: 0,
+                    statsDate = today,
                 )
             }
             cacheAll(resultMap)
@@ -1642,33 +1696,37 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
 
     suspend fun getHomeFeed(forceRefresh: Boolean = false): HomeFeedResult? {
         val currentUid = supabase.auth.currentUserOrNull()?.id
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val dashboardMutVer = getMutationVersion("dashboard")
         val campMutVer = getMutationVersion("campaigns")
         val statsMutVer = getMutationVersion("stats")
-        val isFresh = { cachedHomeFeed?.isFresh(CACHE_TTL_MS, gen, dashboardMutVer, currentUid) == true }
+        val isFresh = { cachedHomeFeed?.isFresh(CACHE_TTL_MS, gen, dashboardMutVer, currentUid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         return deduped("dashboard", "homeFeed", forceRefresh, isFresh, { cachedHomeFeed?.value }) {
             val result = try {
                 supabase.postgrest.rpc("get_home_feed").decodeAs<HomeFeedResult>()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_home_feed")) throw e
                 return@deduped null
             }
             val now = monotonicNow()
-            if (gen == sessionGeneration.get() && dashboardMutVer == getMutationVersion("dashboard") && currentUid == supabase.auth.currentUserOrNull()?.id) {
-                cachedHomeFeed = CacheEntry(result, now, gen, dashboardMutVer, currentUid)
+            val hasStaleStats = result.stats.values.any { it.statsDate != null && it.statsDate != requestDate.toString() }
+            if (!hasStaleStats && gen == sessionGeneration.get() && dashboardMutVer == getMutationVersion("dashboard") && currentUid == supabase.auth.currentUserOrNull()?.id) {
+                cachedHomeFeed = CacheEntry(result, now, gen, dashboardMutVer, currentUid, businessDate = requestDate)
             }
             if (gen == sessionGeneration.get() && campMutVer == getMutationVersion("campaigns")) {
-                cachedOpenCampaigns = CacheEntry(result.open, now, gen, campMutVer, null)
-                cachedPausedCampaigns = CacheEntry(result.paused, now, gen, campMutVer, null)
-                cachedCompletedCampaigns = CacheEntry(result.completed, now, gen, campMutVer, null)
+                cachedOpenCampaigns = CacheEntry(result.open, now, gen, campMutVer, null, isPublic = true)
+                cachedPausedCampaigns = CacheEntry(result.paused, now, gen, campMutVer, null, isPublic = true)
+                cachedCompletedCampaigns = CacheEntry(result.completed, now, gen, campMutVer, null, isPublic = true)
             }
-            if (gen == sessionGeneration.get() && statsMutVer == getMutationVersion("stats") && currentUid == supabase.auth.currentUserOrNull()?.id) {
+            if (!hasStaleStats && gen == sessionGeneration.get() && statsMutVer == getMutationVersion("stats") && currentUid == supabase.auth.currentUserOrNull()?.id) {
                 if (result.stats.isNotEmpty()) {
                     for ((statId, stat) in result.stats) {
-                        statsCache[statId] = CacheEntry(stat, now, gen, statsMutVer, currentUid)
+                        statsCache[statId] = CacheEntry(stat, now, gen, statsMutVer, currentUid, businessDate = requestDate)
                     }
+                    evictOldEntries(statsCache)
                 }
             }
             result
@@ -1677,22 +1735,24 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
 
     suspend fun getMyDashboard(forceRefresh: Boolean = false): MyDashboardResult? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val dashboardMutVer = getMutationVersion("dashboard")
         val campMutVer = getMutationVersion("campaigns")
         val profMutVer = getMutationVersion("profile")
-        val isFresh = { cachedDashboard?.isFresh(CACHE_TTL_MS, gen, dashboardMutVer, uid) == true }
+        val isFresh = { cachedDashboard?.isFresh(SHORT_CACHE_TTL_MS, gen, dashboardMutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         return deduped("dashboard", "myDashboard", forceRefresh, isFresh, { cachedDashboard?.value }) {
             val result = try {
                 supabase.postgrest.rpc("get_my_dashboard").decodeAs<MyDashboardResult>()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_my_dashboard")) throw e
                 return@deduped null
             }
             val now = monotonicNow()
             if (gen == sessionGeneration.get() && dashboardMutVer == getMutationVersion("dashboard") && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedDashboard = CacheEntry(result, now, gen, dashboardMutVer, uid)
+                cachedDashboard = CacheEntry(result, now, gen, dashboardMutVer, uid, businessDate = requestDate)
             }
             if (gen == sessionGeneration.get() && campMutVer == getMutationVersion("campaigns") && uid == supabase.auth.currentUserOrNull()?.id) {
                 cachedMyCampaigns = CacheEntry(result.myCampaigns, now, gen, campMutVer, uid)
@@ -1736,12 +1796,13 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
      */
         suspend fun getCampaignDetailPage(campaignId: String, forceRefresh: Boolean = false): CampaignDetailResult? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        val requestDate = businessDay()
         val cacheKey = "${campaignId}|${uid}"
         val gen = sessionGeneration.get()
         val campMutVer = getMutationVersion("campaigns")
         val reportsMutVer = getMutationVersion("reports")
         val profMutVer = getMutationVersion("profile")
-        val isFresh = { detailCache[cacheKey]?.isFresh(CACHE_TTL_MS, gen, campMutVer, uid) == true }
+        val isFresh = { detailCache[cacheKey]?.isFresh(CACHE_TTL_MS, gen, campMutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "detail:$cacheKey", forceRefresh, isFresh, { detailCache[cacheKey]?.value }) {
             val now = monotonicNow()
             val result = try {
@@ -1749,26 +1810,32 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
                     .decodeAs<CampaignDetailResult>()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_campaign_detail")) throw e
                 return@deduped null
             }
             if (gen == sessionGeneration.get() && campMutVer == getMutationVersion("campaigns") && uid == supabase.auth.currentUserOrNull()?.id) {
-                detailCache[cacheKey] = CacheEntry(result, now, gen, campMutVer, uid)
-                result.campaign.id?.let { campaignCache[it] = CacheEntry(result.campaign, now, gen, campMutVer, null) }
+                detailCache[cacheKey] = CacheEntry(result, now, gen, campMutVer, uid, businessDate = requestDate)
+                result.campaign.id?.let { campaignCache[it] = CacheEntry(result.campaign, now, gen, campMutVer, null, businessDate = requestDate) }
+                evictOldEntries(detailCache)
+                evictOldEntries(campaignCache)
             }
             if (gen == sessionGeneration.get() && reportsMutVer == getMutationVersion("reports")) {
                 feedbacksCache[campaignId] = CacheEntry(result.feedbacks, now, gen, reportsMutVer, null)
                 val reportsWithProfiles = result.reports.map { report ->
                     report.copy(testerProfile = result.profiles[report.userId])
                 }
-                val reportsScope = if (result.canManage) null else uid
+                val reportsScope = uid
                 val reportsKey = "${campaignId}_${result.canManage}"
                 reportsCache[reportsKey] = CacheEntry(reportsWithProfiles, now, gen, reportsMutVer, reportsScope)
+                evictOldEntries(feedbacksCache)
+                evictOldEntries(reportsCache)
             }
             if (gen == sessionGeneration.get() && profMutVer == getMutationVersion("profile")) {
                 for ((profileId, profile) in result.profiles) {
                     profileCache[profileId] = CacheEntry(profile, now, gen, profMutVer, null)
                 }
+                evictOldEntries(profileCache)
                 result.myProfile?.let {
                     if (uid == supabase.auth.currentUserOrNull()?.id) {
                         cachedMyProfile = CacheEntry(it, now, gen, profMutVer, uid)
@@ -1785,7 +1852,7 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val user = supabase.auth.currentUserOrNull() ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("user_slots")
-        val isFresh = { cachedUserSlots?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id) == true }
+        val isFresh = { cachedUserSlots?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id, nowMs = monotonicNow()) == true }
         return deduped("user_slots", "userSlots", forceRefresh, isFresh, { cachedUserSlots?.value }) {
             val result = try {
                 supabase.from("user_slots").select {
@@ -1795,7 +1862,9 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedUserSlots?.takeIf { it.sessionGeneration == gen && it.scopeUid == user.id }?.value
+                val existing = cachedUserSlots?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == user.id && it.mutationVersion == mutVer
+                }?.value
                 if (existing != null) return@deduped existing
                 throw e
             }
@@ -1825,10 +1894,10 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("user_slots")
-        val isFresh = { cachedSlotsInfo?.isFresh(CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { cachedSlotsInfo?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("user_slots", "slotsInfo", forceRefresh, isFresh, { cachedSlotsInfo?.value }) {
             val userSlots = getUserSlots(forceRefresh = forceRefresh)
-            val myCamps = try { myCampaigns(forceRefresh = forceRefresh) } catch (_: Exception) { emptyList() }
+            val myCamps = myCampaigns(forceRefresh = forceRefresh)
             val activeCamps = myCamps.filter { it.isOpen || it.isPaused }
             val result = (1..6).map { slotNum ->
                 if (slotNum == 1) {
@@ -1860,16 +1929,17 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
     // ---------------------------------------------------------------- admin operations
 
     suspend fun getAllProfiles(forceRefresh: Boolean = false): List<Profile> {
+        val uid = supabase.auth.currentUserOrNull()?.id
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("profile")
-        val isFresh = { cachedAllProfiles?.isFresh(CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { cachedAllProfiles?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("profile", "allProfiles", forceRefresh, isFresh, { cachedAllProfiles?.value }) {
             val list = supabase.from("profiles").select {
                 order("created_at", Order.DESCENDING)
                 limit(500)
             }.decodeList<Profile>()
-            if (gen == sessionGeneration.get()) {
-                cachedAllProfiles = CacheEntry(list, monotonicNow(), gen, mutVer, null)
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("profile") && uid == supabase.auth.currentUserOrNull()?.id) {
+                cachedAllProfiles = CacheEntry(list, monotonicNow(), gen, mutVer, uid)
             }
             list
         }
@@ -1892,6 +1962,17 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         cachedAllProfiles = null
         invalidateProfile(targetUserId)
         return result
+    }
+
+    suspend fun adminGetHomeStatsConfig(): HomeStatsPolicyConfig {
+        return supabase.postgrest.rpc("admin_get_home_stats_config").decodeAs<HomeStatsPolicyConfig>()
+    }
+
+    suspend fun adminSetHomeStatsCycle(cycleDays: Int, expectedRevision: String? = null): HomeStatsPolicyConfig {
+        return supabase.postgrest.rpc(
+            "admin_set_home_stats_cycle",
+            AdminSetHomeStatsCycleParams(cycleDays = cycleDays, expectedRevision = expectedRevision)
+        ).decodeAs<HomeStatsPolicyConfig>()
     }
 
     suspend fun adminAdjustCredits(
@@ -1967,7 +2048,7 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
     suspend fun getTopupPackages(forceRefresh: Boolean = false): List<TopupPackage> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("topup")
-        val isFresh = { cachedTopupPackages?.isFresh(PACKAGES_CACHE_TTL_MS, gen, mutVer, null) == true }
+        val isFresh = { cachedTopupPackages?.isFresh(PACKAGES_CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("topup", "topupPackages", forceRefresh, isFresh, { cachedTopupPackages?.value }) {
             val result = try {
                 val packages = supabase.from("topup_packages").select {
@@ -1981,7 +2062,7 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
                 com.ntt.crosstest.util.TopupConfig.DEFAULT_PACKAGES
             }
             if (gen == sessionGeneration.get()) {
-                cachedTopupPackages = CacheEntry(result, monotonicNow(), gen, mutVer, null)
+                cachedTopupPackages = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
@@ -2018,9 +2099,10 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("notifications")
         val isFresh = {
-            cachedNotifications?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, currentUid, requestedLimit = limit) == true
+            cachedNotifications?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, currentUid, requestedLimit = limit, nowMs = monotonicNow()) == true
         }
-        return deduped("notifications", "notifications:$limit", forceRefresh, isFresh, { cachedNotifications?.value }) {
+        val cachedSlice = { cachedNotifications?.value?.take(limit.toInt()) }
+        return deduped("notifications", "notifications:$limit", forceRefresh, isFresh, cachedSlice) {
             val result = try {
                 supabase.from("notifications").select {
                     filter { eq("user_id", currentUid) }
@@ -2030,15 +2112,17 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val existing = cachedNotifications?.takeIf { it.sessionGeneration == gen && it.scopeUid == currentUid }?.value
+                val existing = cachedNotifications?.takeIf {
+                    it.sessionGeneration == gen && it.scopeUid == currentUid && it.mutationVersion == getMutationVersion("notifications")
+                }?.value?.take(limit.toInt())
                 if (existing != null) return@deduped existing
                 throw e
             }
-            if (gen == sessionGeneration.get() && currentUid == supabase.auth.currentUserOrNull()?.id) {
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("notifications") && currentUid == supabase.auth.currentUserOrNull()?.id) {
                 cachedNotifications = CacheEntry(result, monotonicNow(), gen, mutVer, currentUid, limit = limit)
             }
             result
-        }
+        }.take(limit.toInt())
     }
 
     suspend fun getNotifications(limit: Long = 30, forceRefresh: Boolean = false): List<UserNotification> =
@@ -2105,32 +2189,30 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
 
     suspend fun getQuestSummary(forceRefresh: Boolean = false): QuestSummary {
         val uid = supabase.auth.currentUserOrNull()?.id
+        val requestDate = businessDay()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("quests")
-        val isFresh = { cachedQuestSummary?.isFresh(CACHE_TTL_MS, gen, mutVer, uid) == true }
+        val isFresh = { cachedQuestSummary?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
         return deduped("quests", "questSummary", forceRefresh, isFresh, { cachedQuestSummary?.value }) {
             val summary = try {
                 supabase.postgrest.rpc("get_user_quest_summary").decodeAs<QuestSummary>()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
-                val today = VnTime.today().toString()
+            } catch (e: Exception) {
+                if (!isMissingRpc(e, "get_user_quest_summary")) throw e
+                val today = requestDate.toString()
                 val dailyCount = if (uid != null) {
-                    try {
-                        supabase.from("checkins").select {
-                            filter {
-                                eq("user_id", uid)
-                                eq("checkin_date", today)
-                            }
-                        }.decodeList<Checkin>().size
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (_: Exception) { 0 }
+                    supabase.from("checkins").select {
+                        filter {
+                            eq("user_id", uid)
+                            eq("checkin_date", today)
+                        }
+                    }.decodeList<Checkin>().size
                 } else 0
                 QuestSummary(dailyCount = dailyCount)
             }
             if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedQuestSummary = CacheEntry(summary, monotonicNow(), gen, mutVer, uid)
+                cachedQuestSummary = CacheEntry(summary, monotonicNow(), gen, mutVer, uid, businessDate = requestDate)
             }
             summary
         }
@@ -2172,7 +2254,7 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("quests")
         val curUid = supabase.auth.currentUserOrNull()?.id
-        val isFresh = { cachedOpenMissions?.isFresh(CACHE_TTL_MS, gen, mutVer, curUid) == true }
+        val isFresh = { cachedOpenMissions?.isFresh(CACHE_TTL_MS, gen, mutVer, curUid, nowMs = monotonicNow()) == true }
         return deduped("quests", "openMissions", forceRefresh, isFresh, { cachedOpenMissions?.value }) {
             val result = supabase.postgrest.rpc("get_open_missions").decodeAs<OpenMissionsResult>()
             if (gen == sessionGeneration.get() &&

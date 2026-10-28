@@ -72,11 +72,12 @@ data class CachedSessionData(
         if (isOldDate) {
             return copy(
                 todayCheckinCount = 0,
-                displayItems = displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
-                pausedDisplayItems = pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
-                completedDisplayItems = completedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0) },
+                displayItems = displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
+                pausedDisplayItems = pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
+                completedDisplayItems = completedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
                 dailyTask = if (dailyTask?.statusDate != null && dailyTask.statusDate != todayStr) null else dailyTask,
                 questSummary = questSummary?.copy(dailyCount = 0),
+                ownerStatsMap = ownerStatsMap.mapValues { (_, stats) -> stats.copy(testedTodayCount = 0) },
             )
         }
         return this
@@ -104,17 +105,21 @@ object SessionCacheManager {
     @Volatile
     private var inMemoryCache: CachedSessionData? = null
 
+    @Volatile
+    private var isTombstoned = false
+
     fun currentGeneration(): Long = generation.get()
 
     /**
      * Synchronously returns the in-memory cache without performing any disk I/O.
      */
-    fun peekMemory(): CachedSessionData? = inMemoryCache?.sanitizeForDate()
+    fun peekMemory(): CachedSessionData? = if (isTombstoned) null else inMemoryCache?.sanitizeForDate()
 
     /**
      * Fast O(1) synchronous check to know if an authenticated session exists on disk.
      */
     fun hasCachedSession(context: Context): Boolean {
+        if (isTombstoned) return false
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getBoolean(KEY_HAS_SESSION, false)
     }
@@ -123,23 +128,46 @@ object SessionCacheManager {
      * Synchronously loads the cached session from memory or disk on ViewModel startup.
      */
     fun loadSync(context: Context): CachedSessionData? {
-        inMemoryCache?.let { return it.sanitizeForDate() }
-        val curGen = generation.get()
+        val initialGen = generation.get()
+        if (isTombstoned) return null
+        inMemoryCache?.let {
+            if (generation.get() == initialGen && !isTombstoned) return it.sanitizeForDate()
+        }
         val file = File(context.filesDir, FILE_NAME)
         if (!file.exists()) return null
-        return try {
-            val (content, genAfterRead) = synchronized(diskLock) {
-                if (!file.exists()) return null
-                Pair(file.readText(), generation.get())
-            }
-            if (curGen != genAfterRead || curGen != generation.get()) return null
-            val data = json.decodeFromString<CachedSessionData>(content).sanitizeForDate()
-            if (curGen == generation.get()) {
+        return synchronized(diskLock) {
+            if (generation.get() != initialGen || isTombstoned) return null
+            inMemoryCache?.let { return it.sanitizeForDate() }
+            if (!file.exists()) return null
+            try {
+                val content = file.readText()
+                if (generation.get() != initialGen || isTombstoned) return null
+                val data = json.decodeFromString<CachedSessionData>(content).sanitizeForDate()
+                if (generation.get() != initialGen || isTombstoned) return null
+                val expectedUid = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString(KEY_LAST_USER_ID, null)
+                if (data.userId != expectedUid) {
+                    try {
+                        file.delete()
+                        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            .edit()
+                            .clear()
+                            .commit()
+                    } catch (_: Exception) {}
+                    return null
+                }
                 inMemoryCache = data
+                data
+            } catch (_: Exception) {
+                try {
+                    file.delete()
+                    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        .edit()
+                        .clear()
+                        .commit()
+                } catch (_: Exception) {}
+                null
             }
-            data
-        } catch (_: Exception) {
-            null
         }
     }
 
@@ -185,7 +213,7 @@ object SessionCacheManager {
                         StandardCopyOption.ATOMIC_MOVE,
                         StandardCopyOption.REPLACE_EXISTING
                     )
-                } catch (_: Exception) {
+                } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
                     Files.move(
                         stagingFile.toPath(),
                         targetFile.toPath(),
@@ -194,12 +222,13 @@ object SessionCacheManager {
                 }
 
                 if (genAtStart == generation.get()) {
+                    isTombstoned = false
                     inMemoryCache = enrichedData
                     context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                         .edit()
                         .putBoolean(KEY_HAS_SESSION, enrichedData.userId != null)
                         .putString(KEY_LAST_USER_ID, enrichedData.userId)
-                        .apply()
+                        .commit()
                 } else {
                     targetFile.delete()
                 }
@@ -213,15 +242,39 @@ object SessionCacheManager {
         }
     }
 
+    private val scope = CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.IO)
+
     /**
      * Clears all cached session data from memory and disk on user sign out or session termination.
      * Increments generation to safely invalidate any pending or in-flight save operations.
      */
     fun clear(context: Context) {
-        generation.incrementAndGet()
+        val clearGen = generation.incrementAndGet()
+        isTombstoned = true
         inMemoryCache = null
-        try {
-            synchronized(diskLock) {
+        val isMainThread = try {
+            android.os.Looper.myLooper() == android.os.Looper.getMainLooper()
+        } catch (_: Exception) {
+            false
+        }
+        if (isMainThread) {
+            scope.launch { clearDisk(context, clearGen) }
+        } else {
+            clearDisk(context, clearGen)
+        }
+    }
+
+    fun clearSync(context: Context) {
+        val clearGen = generation.incrementAndGet()
+        isTombstoned = true
+        inMemoryCache = null
+        clearDisk(context, clearGen)
+    }
+
+    private fun clearDisk(context: Context, clearGen: Long) {
+        synchronized(diskLock) {
+            if (generation.get() != clearGen) return
+            try {
                 val file = File(context.filesDir, FILE_NAME)
                 if (file.exists()) file.delete()
                 val dir = context.filesDir
@@ -229,8 +282,8 @@ object SessionCacheManager {
                 context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .edit()
                     .clear()
-                    .apply()
-            }
-        } catch (_: Exception) {}
+                    .commit()
+            } catch (_: Exception) {}
+        }
     }
 }

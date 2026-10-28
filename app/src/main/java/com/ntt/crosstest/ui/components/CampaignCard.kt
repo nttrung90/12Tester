@@ -2,20 +2,19 @@ package com.ntt.crosstest.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Groups
@@ -25,20 +24,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
+import com.ntt.crosstest.ui.theme.statusColors
 
 @Composable
 fun CampaignCard(
@@ -53,11 +53,13 @@ fun CampaignCard(
         todayTestedCount = item.todayTestedCount,
         hasTestedToday = item.hasTestedToday,
         isInstalledLocally = item.isInstalledLocally,
+        displayTestedCount = item.displayTestedCount,
         onClick = onClick,
         modifier = modifier,
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CampaignCard(
     campaign: Campaign,
@@ -68,170 +70,162 @@ fun CampaignCard(
     todayTestedCount: Int = 0,
     hasTestedToday: Boolean = false,
     isInstalledLocally: Boolean? = null,
+    displayTestedCount: Int? = null,
 ) {
-
+    val statusColors = MaterialTheme.statusColors
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            // App Icon
-            AppIcon(
-                iconUrl = campaign.safeIconUrl,
-                packageName = campaign.packageName,
-                appName = campaign.appName,
-                size = 52.dp,
-            )
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                // App Name (+ lifecycle badge)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = campaign.appName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    val badge = when {
-                        campaign.isProduction -> Triple(
-                            stringResource(R.string.campaign_badge_production),
-                            Color(0xFFE8F5E9),
-                            Color(0xFF2E7D32),
-                        )
-                        campaign.isCompleted -> Triple(
-                            stringResource(R.string.campaign_badge_completed),
-                            Color(0xFFE3F2FD),
-                            Color(0xFF1565C0),
-                        )
-                        campaign.isPaused -> Triple(
-                            stringResource(R.string.campaign_badge_paused),
-                            Color(0xFFFFF8E1),
-                            Color(0xFFB26A00),
-                        )
-                        else -> null
-                    }
-                    if (badge != null) {
-                        Spacer(Modifier.width(8.dp))
-                        StatusBadge(label = badge.first, background = badge.second, foreground = badge.third)
-                    }
-                }
-
-                // Owner Name
-                Text(
-                    text = ownerName.ifBlank { stringResource(R.string.campaign_owner_fallback) },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppIcon(
+                    iconUrl = campaign.safeIconUrl,
+                    packageName = campaign.packageName,
+                    appName = campaign.appName,
+                    size = 44.dp,
+                    shapeRadius = 10.dp,
                 )
-
-                Spacer(Modifier.height(4.dp))
-
-                // Row 1: trạng thái cài trên máy + trạng thái test hôm nay
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    if (isInstalledLocally != null) {
-                        if (isInstalledLocally) {
-                            StatusBadge(
-                                label = stringResource(R.string.campaign_badge_installed),
-                                background = Color(0xFFE8F5E9),
-                                foreground = Color(0xFF2E7D32),
+                Spacer(Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    // Wrap individual labels on narrow windows and with larger fonts.
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = campaign.appName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = ownerName.ifBlank { stringResource(R.string.campaign_owner_fallback) },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                        val badge = when {
+                            campaign.isProduction -> Triple(
+                                stringResource(R.string.campaign_badge_production),
+                                statusColors.infoContainer,
+                                statusColors.onInfoContainer,
                             )
-                        } else {
-                            StatusBadge(
-                                label = stringResource(R.string.campaign_badge_not_installed),
-                                background = Color(0xFFFFF8E1),
-                                foreground = Color(0xFFB26A00),
+                            campaign.isCompleted -> Triple(
+                                stringResource(R.string.campaign_badge_completed),
+                                statusColors.infoContainer,
+                                statusColors.onInfoContainer,
                             )
+                            campaign.isPaused -> Triple(
+                                stringResource(R.string.campaign_badge_paused),
+                                statusColors.warningContainer,
+                                statusColors.onWarningContainer,
+                            )
+                            else -> null
+                        }
+                        if (badge != null) {
+                            StatusBadge(label = badge.first, background = badge.second, foreground = badge.third)
                         }
                     }
 
-                    if (hasTestedToday) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(13.dp),
-                            tint = Color(0xFF2E7D32),
-                        )
-                        Text(
-                            text = stringResource(R.string.campaign_tested_today),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF2E7D32),
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Filled.FileDownload,
-                            contentDescription = null,
-                            modifier = Modifier.size(13.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = stringResource(R.string.campaign_not_tested_today),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-
-                // Row 2: thống kê chung của campaign
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    val dailyTarget = campaign.dailyTarget
-                    val isTargetReached = todayTestedCount >= dailyTarget
-
-                    Icon(
-                        imageVector = Icons.Filled.Groups,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                    )
-                    Text(
-                        text = buildString {
-                            append(
-                                stringResource(
-                                    R.string.campaign_stats_line_format,
-                                    todayTestedCount,
-                                    dailyTarget,
-                                    installedCount,
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        if (isInstalledLocally != null) {
+                            if (isInstalledLocally) {
+                                StatusBadge(
+                                    label = stringResource(R.string.campaign_badge_installed),
+                                    background = statusColors.successContainer,
+                                    foreground = statusColors.onSuccessContainer,
                                 )
-                            )
-                            if (campaign.isOpen) {
-                                campaign.testingDaysRemaining?.let {
-                                    append(stringResource(R.string.campaign_days_left_suffix, it))
-                                }
+                            } else {
+                                StatusBadge(
+                                    label = stringResource(R.string.campaign_badge_not_installed),
+                                    background = statusColors.warningContainer,
+                                    foreground = statusColors.onWarningContainer,
+                                )
                             }
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (isTargetReached) {
-                        Text(
-                            text = stringResource(R.string.campaign_target_reached),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF2E7D32),
-                            fontWeight = FontWeight.Bold,
-                        )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Icon(
+                                imageVector = if (hasTestedToday) Icons.Filled.Check else Icons.Filled.FileDownload,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = if (hasTestedToday) statusColors.success else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (hasTestedToday) R.string.campaign_tested_today else R.string.campaign_not_tested_today,
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (hasTestedToday) statusColors.success else MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = if (hasTestedToday) FontWeight.SemiBold else FontWeight.Normal,
+                            )
+                        }
                     }
                 }
+            }
+
+            // Full-width statistics avoid the narrow column beside the app icon.
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                val dailyTarget = campaign.dailyTarget
+                val isTargetReached = todayTestedCount >= dailyTarget
+
+                Icon(
+                    imageVector = Icons.Filled.Groups,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val statsText = buildString {
+                    append(
+                        stringResource(
+                            R.string.campaign_stats_line_format,
+                            displayTestedCount?.toString() ?: "--",
+                            dailyTarget,
+                            installedCount,
+                        )
+                    )
+                    if (campaign.isOpen) {
+                        campaign.testingDaysRemaining?.let {
+                            append(stringResource(R.string.campaign_days_left_suffix, it))
+                        }
+                    }
+                }
+                val targetReachedText = if (isTargetReached) stringResource(R.string.campaign_target_reached) else ""
+                Text(
+                    text = buildAnnotatedString {
+                        append(statsText)
+                        if (isTargetReached) {
+                            append(" ")
+                            withStyle(SpanStyle(color = statusColors.success, fontWeight = FontWeight.Bold)) {
+                                append(targetReachedText)
+                            }
+                        }
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }

@@ -128,6 +128,12 @@ export async function cleanupStorage({
     try {
         const [files] = await bucket.getFiles({ prefix, autoPaginate: true });
 
+        // Xây dựng index file để tra cứu quan hệ parent-thumbnail
+        const filesByName = new Map();
+        for (const f of files) {
+            filesByName.set(f.name, f);
+        }
+
         for (const file of files) {
             stats.total_scanned++;
 
@@ -138,11 +144,80 @@ export async function cleanupStorage({
 
             // Đọc metadata (nếu getFiles chưa populate đầy đủ thì fetch metadata)
             const metadata = file.metadata || (await file.getMetadata())[0];
-            const timeCreatedStr = metadata.timeCreated;
+            const customMeta = metadata.metadata || metadata.customMetadata;
+
+            // F11: Kiểm tra định dạng file
+            const baseFileName = file.name.split('/').pop() || '';
+            const isThumb = baseFileName.startsWith('thumb_');
+
+            let timeCreatedStr = metadata.timeCreated;
+            let isConfirmedOrphan = false;
+
+            if (isThumb) {
+                // Với thumbnail (kể cả upload muộn):
+                // 1. Ưu tiên tìm file ảnh full parent trong cùng thư mục
+                const parentName = file.name.replace(/thumb_([^/]+)$/, '$1');
+                let parentTimeCreated = null;
+
+                if (filesByName.has(parentName)) {
+                    const parentFile = filesByName.get(parentName);
+                    const parentMeta = parentFile.metadata || (parentFile.getMetadata ? (await parentFile.getMetadata())[0] : null);
+                    parentTimeCreated = parentMeta?.timeCreated;
+                } else if (bucket && typeof bucket.file === 'function') {
+                    // Khi parent không nằm trong listing/index hiện tại (ví dụ: bị xóa trước bởi lifecycle/crash):
+                    // Thực hiện authoritative lookup qua bucket.file(parentName).getMetadata()
+                    try {
+                        const parentFile = bucket.file(parentName);
+                        if (parentFile && typeof parentFile.getMetadata === 'function') {
+                            const [parentMeta] = await parentFile.getMetadata();
+                            parentTimeCreated = parentMeta?.timeCreated;
+                        }
+                    } catch (err) {
+                        const errorCode = err.code || err.status || (err.response && err.response.status);
+                        if (Number(errorCode) === 404 || String(errorCode) === '404') {
+                            // Chỉ mã 404 xác nhận chắc chắn parent đã bị xóa (orphan) -> đánh dấu xóa derivative
+                            isConfirmedOrphan = true;
+                            logger.info(JSON.stringify({
+                                event: 'ORPHAN_THUMBNAIL_CONFIRMED',
+                                file: file.name,
+                                parent: parentName,
+                            }));
+                        } else {
+                            // 403 hoặc 5xx hoặc lỗi mạng: KHÔNG được coi là orphan để tránh xóa nhầm dữ liệu
+                            logger.warn(JSON.stringify({
+                                event: 'PARENT_LOOKUP_ERROR',
+                                file: file.name,
+                                parent: parentName,
+                                error_code: errorCode,
+                                error_message: err.message,
+                            }));
+                        }
+                    }
+                }
+
+                // 2. Nếu không tìm thấy file parent trong lần quét và không phải orphan, kiểm tra custom metadata parent_time_created
+                if (!isConfirmedOrphan && !parentTimeCreated && customMeta && customMeta.parent_time_created) {
+                    parentTimeCreated = customMeta.parent_time_created;
+                }
+
+                if (!isConfirmedOrphan && parentTimeCreated) {
+                    const parentTime = new Date(parentTimeCreated).getTime();
+                    const thumbTime = new Date(metadata.timeCreated).getTime();
+                    // Bảo vệ SLA: parent_time_created chỉ được làm thumbnail hết hạn sớm hơn hoặc bằng với
+                    // thời điểm tạo thumbnail trên server, tuyệt đối không được dùng ngày tương lai để kéo dài tuổi thọ
+                    if (!isNaN(parentTime) && (isNaN(thumbTime) || parentTime <= thumbTime)) {
+                        timeCreatedStr = parentTimeCreated;
+                    }
+                }
+            } else {
+                // Với ảnh full gốc: TUYỆT ĐỐI KHÔNG dùng parent_time_created từ client metadata!
+                // Luôn dùng metadata.timeCreated chính thức từ server để chống gian lận SLA.
+                timeCreatedStr = metadata.timeCreated;
+            }
             const generation = metadata.generation;
             const size = Number(metadata.size || 0);
 
-            if (!timeCreatedStr) {
+            if (!timeCreatedStr && !isConfirmedOrphan) {
                 logger.warn(JSON.stringify({
                     event: 'MISSING_METADATA_TIMECREATED',
                     file: file.name,
@@ -150,7 +225,7 @@ export async function cleanupStorage({
                 continue;
             }
 
-            const createdTime = new Date(timeCreatedStr).getTime();
+            const createdTime = timeCreatedStr ? new Date(timeCreatedStr).getTime() : nowTime;
             const ageDays = (nowTime - createdTime) / oneDayMs;
 
             if (ageDays > stats.oldest_object_age_days) {
@@ -158,7 +233,7 @@ export async function cleanupStorage({
             }
 
             // Phát hiện vi phạm SLA (quá 30 ngày mà chưa được dọn)
-            if (ageDays >= slaThresholdDays) {
+            if (ageDays >= slaThresholdDays && !isConfirmedOrphan) {
                 stats.sla_violations_count++;
                 logger.warn(JSON.stringify({
                     event: 'SLA_RETENTION_VIOLATION',
@@ -169,8 +244,8 @@ export async function cleanupStorage({
                 }));
             }
 
-            // Ứng viên cần xóa (đã đạt từ ngày 29 trở đi)
-            if (ageDays >= targetAgeDays) {
+            // Ứng viên cần xóa (đã đạt từ ngày 29 trở đi HOẶC là orphan thumbnail đã xác nhận)
+            if (isConfirmedOrphan || ageDays >= targetAgeDays) {
                 stats.candidates_found++;
                 stats.bytes_reclaimed += size;
 
@@ -178,6 +253,7 @@ export async function cleanupStorage({
                     logger.info(JSON.stringify({
                         event: 'DRY_RUN_CANDIDATE',
                         file: file.name,
+                        is_orphan: isConfirmedOrphan,
                         age_days: Math.round(ageDays * 10) / 10,
                         size_bytes: size,
                     }));

@@ -1,5 +1,6 @@
 package com.ntt.crosstest.data
 
+import android.content.Context
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.auth
@@ -7,6 +8,7 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.postgrest.from
+import com.ntt.crosstest.util.ScreenshotManager
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -15,7 +17,10 @@ import kotlinx.serialization.json.put
  * Authentication repository supporting Google sign-in and Email/Password sign-in/up
  * through Supabase Auth, along with role and account lock verification.
  */
-class AuthRepository(private val supabase: SupabaseClient) {
+class AuthRepository(
+    private val supabase: SupabaseClient,
+    private val context: Context? = null
+) {
 
     val sessionStatus: StateFlow<SessionStatus> = supabase.auth.sessionStatus
 
@@ -57,6 +62,9 @@ class AuthRepository(private val supabase: SupabaseClient) {
             signOutQuietly()
             throw IllegalStateException("ACCOUNT_LOCKED")
         }
+        if (uid != null) {
+            ScreenshotManager.onUserSessionChanged(uid)
+        }
     }
 
     /**
@@ -71,6 +79,9 @@ class AuthRepository(private val supabase: SupabaseClient) {
         if (uid != null && ensureProfileRow(uid, null, null)?.isLocked == true) {
             signOutQuietly()
             throw IllegalStateException("ACCOUNT_LOCKED")
+        }
+        if (uid != null) {
+            ScreenshotManager.onUserSessionChanged(uid)
         }
     }
 
@@ -113,9 +124,9 @@ class AuthRepository(private val supabase: SupabaseClient) {
     }
 
     /**
-     * Một vòng đọc profile duy nhất: kiểm tra khoá + chỉ ghi khi profile thiếu
-     * hoặc tên/avatar đổi (bỏ hẳn ghi vô điều kiện mỗi lần đăng nhập).
-     * Trả về profile hiện có (kể cả khi đang bị khoá) hoặc null nếu chưa đọc được.
+     * Má»™t vÃ²ng Ä‘á»c profile duy nháº¥t: kiá»ƒm tra khoÃ¡ + chá»‰ ghi khi profile thiáº¿u
+     * hoáº·c tÃªn/avatar Ä‘á»•i (bá» háº³n ghi vÃ´ Ä‘iá»u kiá»‡n má»—i láº§n Ä‘Äƒng nháº­p).
+     * Tráº£ vá» profile hiá»‡n cÃ³ (ká»ƒ cáº£ khi Ä‘ang bá»‹ khoÃ¡) hoáº·c null náº¿u chÆ°a Ä‘á»c Ä‘Æ°á»£c.
      */
     private suspend fun ensureProfileRow(userId: String, displayName: String?, avatarUrl: String?): Profile? {
         val existing = try {
@@ -165,15 +176,17 @@ class AuthRepository(private val supabase: SupabaseClient) {
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
-            // Supabase chỉ tự xoá session cục bộ khi gặp RestException; khi mất mạng
-            // (IOException) nó ném lỗi mà vẫn giữ session trên máy → lần mở sau tự
-            // đăng nhập lại. Chủ động xoá để đăng xuất luôn dứt khoát.
+            // Supabase chá»‰ tá»± xoÃ¡ session cá»¥c bá»™ khi gáº·p RestException; khi máº¥t máº¡ng
+            // (IOException) nÃ³ nÃ©m lá»—i mÃ  váº«n giá»¯ session trÃªn mÃ¡y â†’ láº§n má»Ÿ sau tá»±
+            // Ä‘Äƒng nháº­p láº¡i. Chá»§ Ä‘á»™ng xoÃ¡ Ä‘á»ƒ Ä‘Äƒng xuáº¥t luÃ´n dá»©t khoÃ¡t.
             try {
                 supabase.auth.clearSession()
             } catch (_: Exception) {
-                // Local session có thể đã bị xoá; bỏ qua để không che lỗi gốc.
+                // Local session cÃ³ thá»ƒ Ä‘Ã£ bá»‹ xoÃ¡; bá» qua Ä‘á»ƒ khÃ´ng che lá»—i gá»‘c.
             }
             throw e
+        } finally {
+            ScreenshotManager.onUserSignedOut(context)
         }
     }
 

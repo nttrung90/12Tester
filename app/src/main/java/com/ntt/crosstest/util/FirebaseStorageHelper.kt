@@ -29,6 +29,8 @@ object FirebaseStorageHelper {
     private const val REPORT_QUALITY = 80
     /** Storage rules giới hạn 2MB; chừa biên an toàn để không bị reject. */
     private const val REPORT_MAX_BYTES = 1_900_000
+    private const val THUMBNAIL_MAX_DIMENSION = 360
+    private const val THUMBNAIL_QUALITY = 75
     private const val ICON_MAX_DIMENSION = 256
     private const val ICON_QUALITY = 90
     private const val IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable"
@@ -113,12 +115,21 @@ object FirebaseStorageHelper {
                 throw e
             }
 
+            val thumbFile = try {
+                createThumbnailFile(context, file, uploadId)
+            } catch (e: Exception) {
+                if (BuildConfig.DEBUG) Log.w(TAG, "Thumbnail generation failed: ${e.message}")
+                null
+            }
+
             PreparedScreenshot(
                 uploadId = uploadId,
                 file = file,
                 imageHash = hash,
                 sizeBytes = bytes.size.toLong(),
                 contentType = "image/jpeg",
+                thumbnailFile = thumbFile,
+                thumbnailSizeBytes = thumbFile?.length(),
             )
         } finally {
             if (!working.isRecycled) working.recycle()
@@ -185,6 +196,71 @@ object FirebaseStorageHelper {
 
         // Resolve the URL without repeating a successful upload.
         storageRef.awaitDownloadUrlWithRetry(maxAttempts = 3, initialDelayMs = 500L)
+    }
+
+    /**
+     * Tạo file thumbnail nhỏ từ ảnh đã nén full.
+     */
+    fun createThumbnailFile(
+        context: Context,
+        sourceFile: java.io.File,
+        uploadId: String,
+        maxDimension: Int = THUMBNAIL_MAX_DIMENSION,
+        quality: Int = THUMBNAIL_QUALITY,
+    ): java.io.File {
+        val bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
+            ?: throw IllegalStateException(context.getString(R.string.error_image_read_failed))
+        val thumbFile = PreparedScreenshotCache.newThumbnailFile(context, uploadId)
+        try {
+            val thumbBytes = compressBitmap(
+                bitmap = bitmap,
+                maxDimension = maxDimension,
+                quality = quality,
+                format = Bitmap.CompressFormat.JPEG,
+            )
+            thumbFile.outputStream().use { it.write(thumbBytes) }
+            return thumbFile
+        } catch (e: Exception) {
+            thumbFile.delete()
+            throw e
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
+    /**
+     * Upload thumbnail ảnh báo cáo.
+     * Thất bại ở đây là non-fatal, không được làm hỏng bài nộp chính.
+     */
+    suspend fun uploadReportThumbnail(
+        thumbnailFile: java.io.File,
+        campaignId: String,
+        userId: String,
+        uploadId: String,
+        parentTimeCreated: String? = null,
+    ): String? = withContext(Dispatchers.IO) {
+        val storageRef = Firebase.storage.reference
+            .child("reports/$campaignId/$userId/thumb_$uploadId.jpg")
+
+        val metadataBuilder = StorageMetadata.Builder()
+            .setContentType("image/jpeg")
+            .setCacheControl(REPORT_CACHE_CONTROL)
+        if (!parentTimeCreated.isNullOrBlank()) {
+            metadataBuilder.setCustomMetadata("parent_time_created", parentTimeCreated)
+        }
+        val metadata = metadataBuilder.build()
+
+        try {
+            val upload = storageRef.putFile(Uri.fromFile(thumbnailFile), metadata)
+            upload.await()
+            storageRef.awaitDownloadUrlWithRetry(maxAttempts = 3, initialDelayMs = 500L)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ReportSubmitPolicy.cancellationCause(e)?.let { throw it }
+            if (BuildConfig.DEBUG) Log.w(TAG, "uploadReportThumbnail failed non-fatal: ${e.message}")
+            null
+        }
     }
 
     /**

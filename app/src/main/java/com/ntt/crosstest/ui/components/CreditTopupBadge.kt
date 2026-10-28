@@ -45,7 +45,7 @@ fun CreditTopupBadge(
         modifier = modifier
             .height(34.dp)
             .clip(RoundedCornerShape(17.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f))
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(start = 10.dp, end = if (isTopupEnabled) 4.dp else 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,

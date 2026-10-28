@@ -34,6 +34,10 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -107,6 +111,15 @@ fun AdminUsersScreen(
     var userToSendNotification by rememberSaveable { mutableStateOf<Profile?>(null) }
     var showBroadcastDialog by rememberSaveable { mutableStateOf(false) }
     var showUpdateConfigDialog by rememberSaveable { mutableStateOf(false) }
+    var showHomeStatsCycleDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showHomeStatsCycleDialog) {
+        if (showHomeStatsCycleDialog) viewModel.loadHomeStatsConfig()
+    }
+
+    LaunchedEffect(uiState.homeStatsSaveSignal) {
+        if (uiState.homeStatsSaveSignal > 0) showHomeStatsCycleDialog = false
+    }
 
     LaunchedEffect(showUpdateConfigDialog) {
         if (showUpdateConfigDialog) viewModel.loadAppConfig()
@@ -300,6 +313,19 @@ fun AdminUsersScreen(
         )
     }
 
+    // Dialog: Home stats aggregation cycle configuration (migration 047)
+    if (showHomeStatsCycleDialog) {
+        AdminHomeStatsCycleDialog(
+            config = uiState.homeStatsConfig,
+            isLoading = uiState.isHomeStatsLoading,
+            isSaving = uiState.isHomeStatsSaving,
+            onDismiss = { showHomeStatsCycleDialog = false },
+            onSave = { cycleDays ->
+                viewModel.saveHomeStatsCycle(cycleDays)
+            },
+        )
+    }
+
     // Dialog: App update configuration (version gate for all clients)
     if (showUpdateConfigDialog) {
         AdminUpdateConfigDialog(
@@ -336,6 +362,13 @@ fun AdminUsersScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showHomeStatsCycleDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.admin_home_stats_cycle_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     IconButton(onClick = { showUpdateConfigDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.SystemUpdate,
@@ -914,5 +947,162 @@ private fun AdminUpdateConfigDialog(
                 Text(stringResource(R.string.cancel))
             }
         },
+    )
+}
+
+@Composable
+private fun AdminHomeStatsCycleDialog(
+    config: com.ntt.crosstest.data.HomeStatsPolicyConfig?,
+    isLoading: Boolean,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (Int) -> Unit,
+) {
+    var selectedCycle by rememberSaveable { mutableStateOf(config?.activeCycleDays ?: 1) }
+
+    LaunchedEffect(config) {
+        if (config != null) {
+            selectedCycle = config.pendingCycleDays ?: config.activeCycleDays
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { if (!isSaving) onDismiss() },
+        title = {
+            Text(
+                text = stringResource(R.string.admin_home_stats_cycle_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            if (isLoading && config == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.admin_home_stats_cycle_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    config?.let { cfg ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.admin_home_stats_current_active,
+                                        cfg.activeCycleDays,
+                                        cfg.activeEffectiveFrom ?: cfg.today
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                if (cfg.pendingCycleDays != null && cfg.pendingEffectiveFrom != null) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.admin_home_stats_pending_schedule,
+                                            cfg.pendingCycleDays,
+                                            cfg.pendingEffectiveFrom
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Medium,
+                                    )
+                                } else {
+                                    Text(
+                                        text = stringResource(R.string.admin_home_stats_no_pending),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = stringResource(R.string.admin_home_stats_cycle_title),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+
+                    val cycles = listOf(
+                        1 to stringResource(R.string.admin_home_stats_cycle_1_day),
+                        2 to stringResource(R.string.admin_home_stats_cycle_2_days),
+                        3 to stringResource(R.string.admin_home_stats_cycle_3_days),
+                    )
+
+                    cycles.forEach { (days, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = selectedCycle == days,
+                                    onClick = { if (!isSaving) selectedCycle = days },
+                                    role = androidx.compose.ui.semantics.Role.RadioButton,
+                                )
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = selectedCycle == days,
+                                onClick = null,
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(text = label, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+
+                    Text(
+                        text = stringResource(R.string.admin_home_stats_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(selectedCycle) },
+                enabled = !isSaving && !isLoading && config != null,
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isSaving,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
     )
 }

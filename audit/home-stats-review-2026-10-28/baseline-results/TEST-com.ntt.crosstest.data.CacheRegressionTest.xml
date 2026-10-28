@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.CacheRegressionTest" tests="36" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:48.363Z" hostname="PC-5700X3D" time="3.337">
+  <properties/>
+  <testcase name="probe09_deleteCampaign_invalidatesSingleItemAndListCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="2.131"/>
+  <testcase name="probe02_concurrentOrdinaryReads_coalesceToSingleCall" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.093"/>
+  <testcase name="feedbackOnlyFailureMustNotOverwriteGoodAverageRating" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.117"/>
+  <testcase name="probe03_emptyPausedCampaignsSuccess_cachedAndReused" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.021"/>
+  <testcase name="ownerStatsFailureMustNotOverwriteGoodCount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.025"/>
+  <testcase name="businessDayClockAdvancementMustInvalidateTodayCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.022"/>
+  <testcase name="probe07_unlockSlot_mutatesBalance_getMyProfileFalse_returnsUpdatedBalance" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.022"/>
+  <testcase name="memoryPeekMustSanitizePreviousDay" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.033"/>
+  <testcase name="probe05_inFlightReadBeforeClear_completingAfterClear_doesNotRepopulateCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.068"/>
+  <testcase name="failedColdCountMustNotCacheZeroAsSuccess" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.022"/>
+  <testcase name="adminProfilesMustNotCarryIntoAnotherAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.019"/>
+  <testcase name="previousDaySnapshotMustClearOwnerTodayStats" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="feedStartedBeforeClearMustNotRepopulateChildCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.022"/>
+  <testcase name="packageEventUpdatesVersionFlowAndInvalidatesCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.041"/>
+  <testcase name="probe11_concurrentForcedRefreshes_coalesceToSingleFlight" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.07"/>
+  <testcase name="probe10_networkFailure_doesNotOverwriteExistingCachedListWithEmpty" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.021"/>
+  <testcase name="probe04_profileA_thenProfileB_neverReturnsProfileAForUserB" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="homeFeed500MustNotLookLikeMissingRpc" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="creditLogCoverageMustSliceRequestedLimit" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.021"/>
+  <testcase name="probe01_readListTwiceWithinTtl_makesSingleNetworkCall" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="guestStatsMustNotCarryIntoAuthenticatedUser" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.027"/>
+  <testcase name="probe06_inFlightSaveSnapshot_thenClear_doesNotReviveOldSessionOnDisk" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.014"/>
+  <testcase name="inFlightRequestAcrossMidnightStampsStartDay" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="managerReportsMustBeScopedToRequestingAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.016"/>
+  <testcase name="ordinaryAndForceSameVersionMustShareFreshInFlightRead" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="ownerDetailMustRecheckAccountAfterLoadingSlots" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.053"/>
+  <testcase name="probe12_creditLogs_differentLimits_doNotReturnTruncatedCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="differentStatsIdSetsMustNotShareFlightResult" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.017"/>
+  <testcase name="profileNetworkFailureMustSurfaceAsFailure" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.015"/>
+  <testcase name="probe08_joinCampaign_invalidatesTestersCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.023"/>
+  <testcase name="campaignUpdateMustInvalidateSlotInfoDependency" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.017"/>
+  <testcase name="notificationsFailureForBMustNotReturnAData" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="oldNotificationsMustNotReviveAfterReadMutationAndNetworkFailure" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.014"/>
+  <testcase name="stats500MustNotManufactureSuccessfulZeroStats" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.011"/>
+  <testcase name="checkinOnlyFailureMustNotOverwriteTesterHistoryWithZero" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.015"/>
+  <testcase name="statsAreScopedToAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+Exception in thread "DefaultDispatcher-worker-6 @coroutine#300" java.lang.IllegalStateException: Method addObserver must be called on the main thread
+	at androidx.lifecycle.LifecycleRegistry.enforceMainThreadIfNeeded(LifecycleRegistry.kt:382)
+	at androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.kt:233)
+	at io.github.jan.supabase.auth.SetupPlatformKt$addLifecycleCallbacks$1.invokeSuspend(setupPlatform.kt:35)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.internal.DispatchedContinuationKt.resumeCancellableWithInternal(DispatchedContinuation.kt:384)
+	at kotlinx.coroutines.intrinsics.CancellableKt.startCoroutineCancellable(Cancellable.kt:26)
+	at kotlinx.coroutines.CoroutineStart.invoke(CoroutineStart.kt:358)
+	at kotlinx.coroutines.AbstractCoroutine.start(AbstractCoroutine.kt:134)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:209)
+	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch$default(Builders.common.kt:200)
+	at kotlinx.coroutines.BuildersKt.launch$default(Unknown Source)
+	at io.github.jan.supabase.auth.SetupPlatformKt.addLifecycleCallbacks(setupPlatform.kt:34)
+	at io.github.jan.supabase.auth.SetupPlatformKt.setupPlatform(setupPlatform.kt:27)
+	at io.github.jan.supabase.auth.AuthImpl$init$4.invokeSuspend(AuthImpl.kt:176)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:798)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [CoroutineId(300), "coroutine#300":StandaloneCoroutine{Cancelling}@3a9ddc0e, Dispatchers.Main]
+]]></system-err>
+</testsuite>

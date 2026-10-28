@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.ReportUrlRetryTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:57.743Z" hostname="PC-5700X3D" time="0.044">
+  <properties/>
+  <testcase name="wrappedCancellationIsRethrownWithoutRetry" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.027"/>
+  <testcase name="transientFailureRecoversWithoutUnnecessaryDelay" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.001"/>
+  <testcase name="outerTimeoutIsNeverConvertedToNetworkFailure" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.003"/>
+  <testcase name="unknownFailureDoesNotRetryLocally" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <testcase name="exhaustedRetriesRespectTheRequestBudget" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <testcase name="totalDeadlineAlsoBoundsSdkWaitingAndDelays" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <testcase name="permanentRecoveryFailureStopsTransientUploadRetry" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.0"/>
+  <testcase name="requestTimeoutRetriesAreBounded" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <testcase name="permissionFailureDoesNotRetryLocally" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <testcase name="missingRecoveryObjectPreservesChecksumUploadRetry" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.0"/>
+  <testcase name="existingObjectWriteDenialDoesNotHideTransientUrlFailure" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.0"/>
+  <testcase name="cancellationDuringBackoffStopsFurtherCalls" classname="com.ntt.crosstest.util.ReportUrlRetryTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

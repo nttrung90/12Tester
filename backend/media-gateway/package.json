@@ -1,0 +1,16 @@
+{
+  "name": "crosstest-media-gateway",
+  "version": "1.0.0",
+  "description": "Media Access Gateway (E04) - Dịch vụ proxy tải media có xác thực và kiểm soát quyền",
+  "private": true,
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test media-gateway-server.test.mjs"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.15.0",
+    "@supabase/supabase-js": "^2.49.1"
+  }
+}

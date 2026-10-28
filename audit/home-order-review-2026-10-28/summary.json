@@ -1,0 +1,30 @@
+{
+  "baseline": [
+    {
+      "suite": "com.ntt.crosstest.data.HomeStatsCycleTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "independent": [
+    {
+      "suite": "com.ntt.crosstest.data.HomeStatsIndependentReviewTest",
+      "tests": 7,
+      "failures": 6,
+      "errors": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.DailyHomeOrderIndependentReviewTest",
+      "tests": 5,
+      "failures": 4,
+      "errors": 0
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "baselineAndroidTests": 83,
+  "baselineFailures": 0,
+  "probeTests": 8,
+  "probeFailures": 8,
+  "lintErrors": 0,
+  "lintWarnings": 422,
+  "lintHints": 1,
+  "probeCases": [
+    {
+      "name": "probe01_preparedThumbnailMustSurviveDurablePendingPersistence",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: Worker only uploads request.thumbnailPath; persistence must populate it"
+    },
+    {
+      "name": "probe03_diskCacheMustRequireTrustedExpiry",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: Missing expiry/authorization contract must fail closed"
+    },
+    {
+      "name": "probe04_diskCacheMustRespectServerMaxAge",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: max-age=60 must not become 30-minute freshness: ttl=1800000"
+    },
+    {
+      "name": "probe07_runtimeLoaderMustCountOneMemoryHitOnce",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: Runtime event listener and interceptor must not both count same hit expected:<1> but was:<2>"
+    },
+    {
+      "name": "probe05_serverClockBehindMustNotImmediatelyInvalidateValidCache",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: Server Date skew must be applied consistently during get"
+    },
+    {
+      "name": "probe06_clearDuringBodyReadMustNotReviveDiskFiles",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: In-flight response wrote disk files after logout/clear: 1"
+    },
+    {
+      "name": "probe08_diskDecodeMustPreserveDHashBasis",
+      "failureType": "org.junit.ComparisonFailure",
+      "failureMessage": "org.junit.ComparisonFailure: Same JPEG changed dHash after disk-cache decode on fixture 0 expected:<[54294d24294015ab]> but was:<[4009492428001021]>"
+    },
+    {
+      "name": "probe02_thumbnail404FallbackMustWorkOnSecondDisplay",
+      "failureType": "java.lang.AssertionError",
+      "failureMessage": "java.lang.AssertionError: Tombstoned thumbnail must still fall back to cached full on re-entry"
+    }
+  ]
+}

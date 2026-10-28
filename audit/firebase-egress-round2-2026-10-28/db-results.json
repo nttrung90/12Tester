@@ -1,0 +1,70 @@
+[
+  {
+    "phase": "before_045",
+    "name": "external_screenshot_url",
+    "error": "INVALID_SCREENSHOT_URL"
+  },
+  {
+    "phase": "before_045",
+    "name": "confirmed_checkin_additional_reward",
+    "creditDelta": 0,
+    "provisionalGranted": false
+  },
+  {
+    "phase": "before_045",
+    "name": "feedback_written_on_submission",
+    "feedbackRows": 1
+  },
+  {
+    "phase": "before_045",
+    "name": "approved_rating_immutable",
+    "rating": 5
+  },
+  {
+    "phase": "before_045",
+    "name": "rejected_same_hash_new_url",
+    "error": "SAME_SCREENSHOT_REJECTED"
+  },
+  {
+    "phase": "after_045_046",
+    "name": "external_screenshot_url",
+    "error": "INVALID_SCREENSHOT_URL"
+  },
+  {
+    "phase": "after_045_046",
+    "name": "confirmed_checkin_additional_reward",
+    "creditDelta": 0,
+    "provisionalGranted": false
+  },
+  {
+    "phase": "after_045_046",
+    "name": "feedback_written_on_submission",
+    "feedbackRows": 1
+  },
+  {
+    "phase": "after_045_046",
+    "name": "approved_rating_immutable",
+    "rating": 5
+  },
+  {
+    "phase": "after_045_046",
+    "name": "rejected_same_hash_new_url",
+    "error": "SAME_SCREENSHOT_REJECTED"
+  },
+  {
+    "phase": "after_045_046",
+    "name": "replacement_full_without_thumbnail",
+    "fullReplaced": true,
+    "oldThumbnailRetained": false
+  },
+  {
+    "phase": "after_045_046",
+    "name": "untrusted_thumbnail_url",
+    "error": "INVALID_THUMBNAIL_URL"
+  },
+  {
+    "phase": "after_045_046",
+    "name": "media_access_returns_original_download_url",
+    "error": "MEDIA_GATEWAY_SECRET_NOT_CONFIGURED"
+  }
+]

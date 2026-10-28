@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.PendingReportStoreTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:52.055Z" hostname="PC-5700X3D" time="0.091">
+  <properties/>
+  <testcase name="interruptedAtomicUpdatePreservesPreviousRequest" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.02"/>
+  <testcase name="legacyJsonRemainsReadable" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.012"/>
+  <testcase name="missingRecordCannotPretendToPersistUploadedUrl" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.01"/>
+  <testcase name="legacyBackupIsRecoveredBeforeReading" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.015"/>
+  <testcase name="fingerprintDetectsChangedBytes" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.013"/>
+  <testcase name="completedReceiptSurvivesReReadAndCleanupWithoutBlockingSuggestions" classname="com.ntt.crosstest.data.PendingReportStoreTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

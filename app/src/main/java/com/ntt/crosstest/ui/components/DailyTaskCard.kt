@@ -2,12 +2,13 @@ package com.ntt.crosstest.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,13 +52,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.DailyTaskStatus
-import com.ntt.crosstest.ui.theme.TaskAmberText
-import com.ntt.crosstest.ui.theme.TaskAmberTextDark
-import com.ntt.crosstest.ui.theme.TaskGreenText
-import com.ntt.crosstest.ui.theme.TaskGreenTextDark
-import com.ntt.crosstest.ui.theme.TaskRedText
-import com.ntt.crosstest.ui.theme.TaskRedTextDark
+import com.ntt.crosstest.ui.theme.statusColors
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DailyTaskCard(
     todayCheckinCount: Int,
@@ -71,10 +69,10 @@ fun DailyTaskCard(
 ) {
     var showPenaltyDialog by rememberSaveable { mutableStateOf(false) }
 
-    val isDark = isSystemInDarkTheme()
-    val accentAmber = if (isDark) TaskAmberTextDark else TaskAmberText
-    val accentGreen = if (isDark) TaskGreenTextDark else TaskGreenText
-    val accentRed = if (isDark) TaskRedTextDark else TaskRedText
+    val statusColors = MaterialTheme.statusColors
+    val accentAmber = statusColors.warning
+    val accentGreen = statusColors.success
+    val accentRed = MaterialTheme.colorScheme.error
 
     val exempt = isPenaltyExempt || dailyTask?.isPenaltyExempt == true
     val ownerMode = dailyTask?.isOwner == true
@@ -115,6 +113,13 @@ fun DailyTaskCard(
         waived -> accentGreen
         streak > 0 -> accentRed
         else -> accentAmber
+    }
+    val accentContainer = when {
+        !isAuthenticated -> MaterialTheme.colorScheme.primaryContainer
+        exempt -> statusColors.warningContainer
+        waived -> statusColors.successContainer
+        streak > 0 -> MaterialTheme.colorScheme.errorContainer
+        else -> statusColors.warningContainer
     }
 
     if (showPenaltyDialog && !exempt) {
@@ -165,17 +170,17 @@ fun DailyTaskCard(
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
                 .clickable { showPenaltyDialog = true },
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -213,16 +218,16 @@ fun DailyTaskCard(
 
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
             // Row 1: [Badge Icon] --------- [Title] --------- [Info Button]
             Row(
@@ -231,9 +236,9 @@ fun DailyTaskCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(28.dp)
                         .clip(CircleShape)
-                        .background(accentColor.copy(alpha = 0.12f)),
+                        .background(accentContainer),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -274,43 +279,51 @@ fun DailyTaskCard(
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Row 2: [Status Pill] --------------------- [Progress Count]
+            val animatedProgress by animateFloatAsState(
+                targetValue = progress,
+                label = "dailyProgress",
+            )
+            // Large text gets a separate progress row rather than squeezed labels.
+            val inlineProgress = LocalDensity.current.fontScale <= 1.3f
+
+            // Keep the status, progress and count on one compact row by default.
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val (statusText, statusBg, statusTextColor) = when {
                     !isAuthenticated -> Triple(
                         stringResource(R.string.daily_guest_badge),
-                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
                         MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     exempt -> Triple(
                         stringResource(R.string.daily_exempt_badge),
-                        accentAmber.copy(alpha = 0.12f),
+                        statusColors.warningContainer,
                         accentAmber
                     )
                     waived -> Triple(
                         stringResource(R.string.daily_task_waived_badge),
-                        accentGreen.copy(alpha = 0.12f),
-                        accentGreen
+                        statusColors.successContainer,
+                        statusColors.onSuccessContainer
                     )
                     streak > 0 -> Triple(
                         stringResource(R.string.daily_missed_badge, streak),
-                        accentRed.copy(alpha = 0.12f),
+                        MaterialTheme.colorScheme.errorContainer,
                         accentRed
                     )
                     else -> Triple(
                         stringResource(R.string.daily_quest_pending),
-                        accentAmber.copy(alpha = 0.12f),
+                        statusColors.warningContainer,
                         accentAmber
                     )
                 }
                 Box(
                     modifier = Modifier
+                        .then(if (inlineProgress) Modifier else Modifier.weight(1f))
                         .clip(RoundedCornerShape(8.dp))
                         .background(statusBg)
                         .padding(horizontal = 7.dp, vertical = 2.dp)
@@ -321,6 +334,15 @@ fun DailyTaskCard(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
+                    )
+                }
+
+                if (inlineProgress) {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(4.dp)),
+                        color = accentColor,
+                        trackColor = accentContainer,
                     )
                 }
 
@@ -346,24 +368,17 @@ fun DailyTaskCard(
                 )
             }
 
+            if (!inlineProgress) {
+                Spacer(Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(4.dp)),
+                    color = accentColor,
+                    trackColor = accentContainer,
+                )
+            }
+
             Spacer(Modifier.height(6.dp))
-
-            val animatedProgress by animateFloatAsState(
-                targetValue = progress,
-                label = "dailyProgress"
-            )
-
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = accentColor,
-                trackColor = accentColor.copy(alpha = 0.2f),
-            )
-
-            Spacer(Modifier.height(10.dp))
 
             // Explanatory Message
             if (!isAuthenticated) {
@@ -373,7 +388,7 @@ fun DailyTaskCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp,
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(4.dp))
                 Button(
                     onClick = onRequireLogin,
                     modifier = Modifier.fillMaxWidth(),
@@ -419,23 +434,27 @@ fun DailyTaskCard(
                     lineHeight = 18.sp,
                 )
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(4.dp))
 
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     Button(
                         onClick = onTestAppClick,
-                        modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (!exempt && !waived && streak > 0) {
                                 accentRed
                             } else {
                                 MaterialTheme.colorScheme.primary
-                            }
+                            },
+                            contentColor = if (!exempt && !waived && streak > 0) {
+                                MaterialTheme.colorScheme.onError
+                            } else {
+                                MaterialTheme.colorScheme.onPrimary
+                            },
                         ),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {
@@ -447,8 +466,6 @@ fun DailyTaskCard(
                                 else R.string.daily_task_test_now
                             ),
                             fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
                         )
                     }
 
@@ -460,7 +477,6 @@ fun DailyTaskCard(
                         ) {
                             Text(
                                 text = stringResource(R.string.daily_penalty_info_btn),
-                                maxLines = 1,
                             )
                         }
                     }

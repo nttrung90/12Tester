@@ -1,0 +1,14 @@
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ MIGRATION 046 (E04 MEDIA GATEWAY) ---
+PASS: Áp dụng thành công migration 045 và 046
+PASS: Thiếu cấu hình secret fail-closed với MEDIA_GATEWAY_SECRET_NOT_CONFIGURED
+PASS: Thiếu cấu hình base URL fail-closed với MEDIA_GATEWAY_BASE_URL_NOT_CONFIGURED
+PASS: Unauthenticated bị từ chối với NOT_AUTHENTICATED
+PASS: Author được cấp quyền truy cập media với role=author và HMAC hợp lệ
+PASS: Grant token bị từ chối khi consumer khác người được cấp (identity binding)
+PASS: Grant token ràng buộc chặt chẽ với variant (full vs thumb)
+PASS: Token hết hạn bị từ chối
+PASS: Campaign Owner được cấp quyền truy cập media với role=owner
+PASS: Admin hệ thống được cấp quyền truy cập media với role=admin
+PASS: Stranger bị từ chối truy cập với lỗi FORBIDDEN
+PASS: Báo cáo quá hạn 31 ngày bị từ chối với lỗi MEDIA_EXPIRED
+=== TẤT CẢ KIỂM THỬ MIGRATION 046 MEDIA GATEWAY ĐỀU PASS 100% ===

@@ -27,8 +27,8 @@ android {
         applicationId = "com.ntt.crosstest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 19
-        versionName = "0.9.9"
+        versionCode = 20
+        versionName = "1.0.0"
 
         buildConfigField("String", "SUPABASE_URL", "\"${appSecret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${appSecret("SUPABASE_ANON_KEY")}\"")
@@ -141,6 +141,8 @@ dependencies {
     // Firebase Storage (Google Cloud Console)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
     implementation(libs.coroutines.play.services)
 
     // Play Store update detection for the manual "Check for updates" action

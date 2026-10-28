@@ -7,6 +7,8 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.TesterReport
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -22,11 +24,15 @@ object ImageHashHelper {
 
     private const val HASH_CACHE_SIZE = 128
 
+    private val hashLock = Any()
+    // Lưu ý: key gắn kèm sessionGeneration để chặn race condition khi clear() giữa chừng
     private val hashCache = LruCache<String, String>(HASH_CACHE_SIZE)
 
     /** Xoá cache hash (gọi khi đăng xuất để không giữ dữ liệu phiên cũ). */
     fun clearCache() {
-        hashCache.evictAll()
+        synchronized(hashLock) {
+            hashCache.evictAll()
+        }
     }
 
     enum class SimilarityLevel {
@@ -83,26 +89,60 @@ object ImageHashHelper {
     /**
      * Downloads/fetches cached bitmap via Coil and computes dHash from image URL.
      */
-    suspend fun computeDHashFromUrl(context: Context, imageUrl: String): String? = withContext(Dispatchers.IO) {
+    suspend fun computeDHashFromUrl(
+        context: Context,
+        imageUrl: String,
+        report: TesterReport? = null,
+    ): String? = withContext(Dispatchers.IO) {
         if (imageUrl.isBlank()) return@withContext null
-        hashCache.get(imageUrl)?.let { return@withContext it }
+        if (report?.imageHash?.isNotBlank() == true) return@withContext report.imageHash
+        if (report?.isScreenshotExpired == true || ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+            return@withContext null
+        }
+
+        val genAtStart = ScreenshotManager.sessionGeneration.get()
+        val cacheKey = "$genAtStart:$imageUrl"
+
+        synchronized(hashLock) {
+            if (ScreenshotManager.sessionGeneration.get() == genAtStart) {
+                hashCache.get(cacheKey)?.let { return@withContext it }
+            }
+        }
 
         try {
-            val request = ImageRequest.Builder(context)
-                .data(imageUrl)
-                .allowHardware(false) // Software bitmap needed for pixel reading
-                .build()
+            val bitmap = ScreenshotManager.getOrFetchBitmap(
+                context = context,
+                url = imageUrl,
+                purpose = "hash",
+                report = report,
+            )
 
-            val result = context.imageLoader.execute(request)
-            if (result is SuccessResult) {
-                val drawable = result.drawable
-                if (drawable is android.graphics.drawable.BitmapDrawable) {
-                    val hash = computeDHash(drawable.bitmap)
-                    hashCache.put(imageUrl, hash)
-                    return@withContext hash
-                }
+            // Guard trước khi tính hash
+            if (genAtStart != ScreenshotManager.sessionGeneration.get()) {
+                return@withContext null
             }
-            null
+            if (ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+                return@withContext null
+            }
+            if (bitmap == null || bitmap.isRecycled) {
+                return@withContext null
+            }
+
+            val hash = computeDHash(bitmap)
+
+            // Guard trước return & publication: kiểm tra generation và expiry nguyên tử với lock
+            synchronized(hashLock) {
+                if (genAtStart != ScreenshotManager.sessionGeneration.get()) {
+                    return@withContext null
+                }
+                if (ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+                    return@withContext null
+                }
+                hashCache.put(cacheKey, hash)
+                return@withContext hash
+            }
+        } catch (ce: CancellationException) {
+            throw ce
         } catch (_: Exception) {
             null
         }

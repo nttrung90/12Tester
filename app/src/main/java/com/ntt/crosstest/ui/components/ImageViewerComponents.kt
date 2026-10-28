@@ -41,6 +41,13 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.TesterReport
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ScreenshotManager
+import com.ntt.crosstest.util.ScreenshotExpiredException
+import com.ntt.crosstest.util.ScreenshotUnavailableException
+import com.ntt.crosstest.util.ScreenshotPermissionDeniedException
+import com.ntt.crosstest.util.ScreenshotDescriptor
+import com.ntt.crosstest.util.ScreenshotRequestFactory
+import kotlinx.coroutines.delay
 
 /**
  * Fullscreen Zoomable Image Lightbox with Pinch-to-zoom, Pan, and Double-tap 2.5x zoom.
@@ -52,9 +59,44 @@ fun FullscreenImageViewer(
     title: String = stringResource(R.string.img_screenshot_title),
     subtitle: String? = null,
     isExpired: Boolean = false,
+    report: TesterReport? = null,
+    descriptor: ScreenshotDescriptor? = null,
 ) {
     if (imageUrl.isNullOrBlank()) return
+    val context = LocalContext.current
 
+    // Cập nhật động: tự động chuyển sang trạng thái hết hạn nếu dialog mở qua mốc 30 ngày (E01d)
+    var isMediaExpired by remember(imageUrl, isExpired, report, descriptor) {
+        mutableStateOf(
+            isExpired ||
+            (report?.isScreenshotExpired ?: false) ||
+            ScreenshotManager.isExpired(
+                imageUrl,
+                report?.createdAt ?: descriptor?.createdAt,
+                report?.mediaExpired ?: descriptor?.mediaExpired
+            )
+        )
+    }
+
+    LaunchedEffect(imageUrl, isExpired, report, descriptor) {
+        if (isExpired || (report?.isScreenshotExpired == true)) {
+            isMediaExpired = true
+            return@LaunchedEffect
+        }
+        val effCreatedAt = report?.createdAt ?: descriptor?.createdAt
+        val effMediaExpired = report?.mediaExpired ?: descriptor?.mediaExpired
+        if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired)) {
+            isMediaExpired = true
+            return@LaunchedEffect
+        }
+        while (!isMediaExpired) {
+            delay(5000L)
+            if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired)) {
+                isMediaExpired = true
+                break
+            }
+        }
+    }
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -62,8 +104,8 @@ fun FullscreenImageViewer(
             decorFitsSystemWindows = false,
         )
     ) {
-        var scale by remember { mutableFloatStateOf(1f) }
-        var offset by remember { mutableStateOf(Offset.Zero) }
+        var scale by remember(imageUrl) { mutableFloatStateOf(1f) }
+        var offset by remember(imageUrl) { mutableStateOf(Offset.Zero) }
 
         Box(
             modifier = Modifier
@@ -112,7 +154,7 @@ fun FullscreenImageViewer(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (isExpired) {
+                if (isMediaExpired) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -141,8 +183,17 @@ fun FullscreenImageViewer(
                         )
                     }
                 } else {
+                    val imageRequest = remember(context, imageUrl, report, descriptor) {
+                        ScreenshotRequestFactory.createRequest(
+                            context = context,
+                            model = imageUrl,
+                            report = report,
+                            descriptor = descriptor,
+                            crossfade = false,
+                        )
+                    }
                     SubcomposeAsyncImage(
-                        model = imageUrl,
+                        model = imageRequest ?: imageUrl,
                         contentDescription = title,
                         modifier = Modifier
                             .fillMaxSize()
@@ -162,16 +213,53 @@ fun FullscreenImageViewer(
                                 }
                             }
                             is AsyncImagePainter.State.Error -> {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                val err = state.result.throwable
+                                val isPermissionDenied = err is ScreenshotPermissionDeniedException
+                                val isExpiredError = isMediaExpired ||
+                                    err is ScreenshotExpiredException ||
+                                    err is ScreenshotUnavailableException ||
+                                    ScreenshotManager.isExpired(imageUrl)
+
+                                if (isExpiredError && !isPermissionDenied) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.padding(24.dp)
+                                    ) {
                                         Icon(
-                                            imageVector = Icons.Filled.BrokenImage,
+                                            imageVector = Icons.Filled.Schedule,
                                             contentDescription = null,
-                                            tint = Color.White.copy(alpha = 0.6f),
-                                            modifier = Modifier.size(40.dp)
+                                            tint = Color.White.copy(alpha = 0.8f),
+                                            modifier = Modifier.size(56.dp)
+                                        )
+                                        Spacer(Modifier.height(12.dp))
+                                        Text(
+                                            text = stringResource(R.string.img_expired_storage_policy),
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
                                         )
                                         Spacer(Modifier.height(6.dp))
-                                        Text(stringResource(R.string.img_load_failed), color = Color.White)
+                                        Text(
+                                            text = stringResource(R.string.img_expired_storage_policy_desc),
+                                            color = Color(0xFFCBD5E1),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                } else {
+                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(
+                                                imageVector = Icons.Filled.BrokenImage,
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.6f),
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                            Spacer(Modifier.height(6.dp))
+                                            Text(stringResource(R.string.img_load_failed), color = Color.White)
+                                        }
                                     }
                                 }
                             }
@@ -274,6 +362,43 @@ fun ImageComparisonDialog(
     var comparisonResult by remember { mutableStateOf<ImageHashHelper.ComparisonResult?>(null) }
     var isCalculatingHash by remember { mutableStateOf(false) }
 
+    val currentRequest = remember(context, currentReport) {
+        ScreenshotRequestFactory.createRequest(context, currentReport)
+    }
+    val previousRequest = remember(context, previousReport) {
+        ScreenshotRequestFactory.createRequest(context, previousReport)
+    }
+
+    // Cập nhật động khi dialog mở qua mốc hết hạn (E01d)
+    var isCurrentDynamicallyExpired by remember(currentReport.id, currentReport.isScreenshotExpired, currentReport.screenshotUrl) {
+        mutableStateOf(currentReport.isScreenshotExpired || ScreenshotManager.isExpired(currentReport))
+    }
+    var isPreviousDynamicallyExpired by remember(previousReport?.id, previousReport?.isScreenshotExpired, previousReport?.screenshotUrl) {
+        mutableStateOf((previousReport?.isScreenshotExpired ?: false) || ScreenshotManager.isExpired(previousReport))
+    }
+    LaunchedEffect(currentReport.id, previousReport?.id, currentReport.screenshotUrl, previousReport?.screenshotUrl) {
+        while (!isCurrentDynamicallyExpired || (!isPreviousDynamicallyExpired && previousReport != null)) {
+            delay(5000L)
+            if (!isCurrentDynamicallyExpired && ScreenshotManager.isExpired(currentReport)) {
+                isCurrentDynamicallyExpired = true
+            }
+            if (!isPreviousDynamicallyExpired && previousReport != null && ScreenshotManager.isExpired(previousReport)) {
+                isPreviousDynamicallyExpired = true
+            }
+        }
+    }
+    LaunchedEffect(currentReport.screenshotUrl, previousReport?.screenshotUrl) {
+        while (!isCurrentDynamicallyExpired || (!isPreviousDynamicallyExpired && previousReport != null)) {
+            delay(5000L)
+            if (!isCurrentDynamicallyExpired && ScreenshotManager.isExpired(currentReport)) {
+                isCurrentDynamicallyExpired = true
+            }
+            if (!isPreviousDynamicallyExpired && previousReport != null && ScreenshotManager.isExpired(previousReport)) {
+                isPreviousDynamicallyExpired = true
+            }
+        }
+    }
+
     // Calculate dHash comparison asynchronously on load.
     // Ưu tiên image_hash đã lưu trong DB (cùng basis với ảnh đã upload), chỉ
     // tải + decode ảnh khi hash trống — đồng bộ với badge trên OwnerAppDetailScreen.
@@ -292,9 +417,9 @@ fun ImageComparisonDialog(
             comparisonResult = null
             // Không tải từ URL nếu ảnh đã hết hạn theo chính sách 30 ngày
             val hash1 = currentReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: if (!currentReport.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, url1) else null
-            val hash2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, url2) else null
+                ?: if (!currentReport.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, url1, currentReport) else null
+            val hash2 = previousReport?.imageHash?.takeIf { it.isNotBlank() }
+                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, url2, previousReport) else null
             if (hash1 != null && hash2 != null) {
                 comparisonResult = ImageHashHelper.compare(hash1, hash2, context)
             }
@@ -305,17 +430,17 @@ fun ImageComparisonDialog(
     ComparisonDialogScaffold(
         title = stringResource(R.string.img_compare_title),
         subtitle = stringResource(R.string.img_compare_tester_format, currentReport.resolvedTesterName),
-        currentImage = currentReport.screenshotUrl,
+        currentImage = currentRequest ?: currentReport.screenshotUrl,
         currentLabel = stringResource(R.string.img_today),
         currentDate = currentReport.createdAt?.take(16)?.replace("T", " ").orEmpty(),
-        previousImage = previousReport?.screenshotUrl,
+        previousImage = previousRequest ?: previousReport?.screenshotUrl,
         previousLabel = stringResource(R.string.img_previous_day),
         previousDate = previousReport?.createdAt?.take(16)?.replace("T", " ")
             ?: stringResource(R.string.img_none_yet),
         comparisonResult = comparisonResult,
         isCalculatingHash = isCalculatingHash,
-        currentExpired = currentReport.isScreenshotExpired,
-        previousExpired = previousReport?.isScreenshotExpired ?: false,
+        currentExpired = isCurrentDynamicallyExpired,
+        previousExpired = isPreviousDynamicallyExpired,
         onDismiss = onDismiss,
         actions = {
             // Quick Action Buttons if callbacks provided
@@ -375,18 +500,61 @@ fun TesterImageComparisonDialog(
     previousDate: String? = null,
     comparisonResult: ImageHashHelper.ComparisonResult? = null,
     isCalculatingHash: Boolean = false,
+    currentReport: TesterReport? = null,
+    previousReport: TesterReport? = null,
 ) {
+    val context = LocalContext.current
+
+    // Cập nhật động khi dialog mở qua mốc hết hạn (E01d)
+    var isCurrentDynamicallyExpired by remember(currentReport?.id, currentReport?.isScreenshotExpired, currentImage) {
+        mutableStateOf(
+            (currentReport?.isScreenshotExpired ?: false) ||
+            (currentImage is String && ScreenshotManager.isExpired(currentImage, currentReport?.createdAt, currentReport?.mediaExpired))
+        )
+    }
+    var isPreviousDynamicallyExpired by remember(previousReport?.id, previousReport?.isScreenshotExpired, previousImage) {
+        mutableStateOf(
+            (previousReport?.isScreenshotExpired ?: false) ||
+            (previousImage != null && ScreenshotManager.isExpired(previousImage, previousReport?.createdAt, previousReport?.mediaExpired))
+        )
+    }
+    LaunchedEffect(currentReport?.id, previousReport?.id, currentImage, previousImage) {
+        while (!isCurrentDynamicallyExpired || (!isPreviousDynamicallyExpired && previousImage != null)) {
+            delay(5000L)
+            if (!isCurrentDynamicallyExpired && currentImage is String && ScreenshotManager.isExpired(currentImage, currentReport?.createdAt, currentReport?.mediaExpired)) {
+                isCurrentDynamicallyExpired = true
+            }
+            if (!isPreviousDynamicallyExpired && previousImage != null && ScreenshotManager.isExpired(previousImage, previousReport?.createdAt, previousReport?.mediaExpired)) {
+                isPreviousDynamicallyExpired = true
+            }
+        }
+    }
+
+    // Tạo request ở đầu dialog, giữ nguyên local Uri nếu là Uri
+    val currentModel = remember(context, currentImage, currentReport) {
+        if (currentImage is String) {
+            ScreenshotRequestFactory.createRequest(context, currentImage, currentReport) ?: currentImage
+        } else {
+            currentImage
+        }
+    }
+    val previousModel = remember(context, previousImage, previousReport) {
+        ScreenshotRequestFactory.createRequest(context, previousImage, previousReport) ?: previousImage
+    }
+
     ComparisonDialogScaffold(
         title = stringResource(R.string.img_compare_title),
         subtitle = null,
-        currentImage = currentImage,
+        currentImage = currentModel,
         currentLabel = stringResource(R.string.img_new_photo),
         currentDate = currentDate.orEmpty(),
-        previousImage = previousImage,
+        previousImage = previousModel,
         previousLabel = stringResource(R.string.img_previous_day),
         previousDate = previousDate ?: stringResource(R.string.img_none_yet),
         comparisonResult = comparisonResult,
         isCalculatingHash = isCalculatingHash,
+        currentExpired = isCurrentDynamicallyExpired,
+        previousExpired = isPreviousDynamicallyExpired,
         onDismiss = onDismiss,
         actions = {
             Button(
@@ -399,7 +567,6 @@ fun TesterImageComparisonDialog(
         }
     )
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ComparisonDialogScaffold(
@@ -408,7 +575,7 @@ private fun ComparisonDialogScaffold(
     currentImage: Any?,
     currentLabel: String,
     currentDate: String,
-    previousImage: String?,
+    previousImage: Any?,
     previousLabel: String,
     previousDate: String,
     comparisonResult: ImageHashHelper.ComparisonResult?,
@@ -550,7 +717,7 @@ private fun ComparisonDialogScaffold(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
-                        } else if (previousImage.isNullOrBlank()) {
+                        } else if (previousImage == null || (previousImage is String && previousImage.isBlank())) {
                             Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Text(
                                 text = stringResource(R.string.img_first_report_note),
@@ -641,7 +808,7 @@ private fun SideBySideView(
     currentImage: Any?,
     currentLabel: String,
     currentDate: String,
-    previousImage: String?,
+    previousImage: Any?,
     previousLabel: String,
     previousDate: String,
     currentExpired: Boolean = false,
@@ -788,7 +955,7 @@ private fun SideBySideView(
 @Composable
 private fun SplitSliderView(
     currentImage: Any?,
-    previousImage: String?,
+    previousImage: Any?,
     ratio: Float,
     currentExpired: Boolean = false,
     previousExpired: Boolean = false,
@@ -891,7 +1058,7 @@ private fun SplitSliderView(
 @Composable
 private fun BlinkView(
     currentImage: Any?,
-    previousImage: String?,
+    previousImage: Any?,
     showCurrent: Boolean,
     currentExpired: Boolean = false,
     previousExpired: Boolean = false,

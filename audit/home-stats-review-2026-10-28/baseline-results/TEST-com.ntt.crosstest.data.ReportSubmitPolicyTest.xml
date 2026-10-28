@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ReportSubmitPolicyTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:54.957Z" hostname="PC-5700X3D" time="0.106">
+  <properties/>
+  <testcase name="storageException_retryLimitExceeded_isRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.004"/>
+  <testcase name="storageHttp503RemainsTransientBut404DoesNot" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.001"/>
+  <testcase name="realRestExceptionsClassifyPermanentAndTransientHttpStatuses" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.1"/>
+  <testcase name="checksumCanRetryUploadButNotUrlResolution" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <testcase name="wrappedPermanentFailureAndCancellationAreRecognized" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <testcase name="permanentServerErrors_areNotRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <testcase name="permanentLocalErrors_areNotRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <testcase name="transientNetworkErrors_areRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.001"/>
+  <testcase name="cancellationException_isNeverRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <testcase name="storageException_unauthorizedOrUnauthenticated_isNotRetryable" classname="com.ntt.crosstest.data.ReportSubmitPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

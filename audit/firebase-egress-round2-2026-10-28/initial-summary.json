@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-28",
+  "existingAndroidSuite": {
+    "failures": 0,
+    "forcedRerun": true,
+    "tests": 99
+  },
+  "additionalAndroidTests": {
+    "failures": 3,
+    "details": [
+      "Opt-out direct manager increments memory hit",
+      "Opt-out Coil runtime increments memory hit",
+      "Prepared thumbnail survives successful receipt cleanup"
+    ],
+    "tests": 3
+  },
+  "initialAdditionalDbAssertions": {
+    "failures": 6,
+    "checks": 7
+  },
+  "additionalBucketChecks": {
+    "failures": 2,
+    "checks": 2
+  },
+  "additionalNodeToolTests": {
+    "tests": 6,
+    "failures": 6
+  },
+  "productionChanged": false
+}

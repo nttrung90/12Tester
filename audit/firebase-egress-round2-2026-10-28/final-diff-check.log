@@ -1,0 +1,14 @@
+warning: in the working copy of 'app/build.gradle.kts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/TestCheoApp.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/data/AuthRepository.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/data/Models.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/data/PendingReportStore.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/ui/components/AppIcon.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/util/FirebaseStorageHelper.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/util/ImageHashHelper.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/storage-cleanup/cleanup-reports-storage.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'gradle/libs.versions.toml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'storage.rules', LF will be replaced by CRLF the next time Git touches it

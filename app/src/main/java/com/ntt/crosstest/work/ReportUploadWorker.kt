@@ -68,6 +68,7 @@ class ReportUploadWorker(
         // tạo instance riêng ở đây khiến badge Credit bị cũ tới hết TTL cache.
         var uploadedUrl = request.uploadedUrl
         var uploadedHash = request.uploadedHash
+        var uploadedThumbUrl = request.uploadedThumbnailUrl
 
         try {
             verifyAccount(operations, request.userId)
@@ -83,12 +84,15 @@ class ReportUploadWorker(
                 if (request.screenshotSha256 != null &&
                     PendingReportStore.screenshotSha256(pendingFile) != request.screenshotSha256
                 ) return failure("screenshot_file_changed")
+                val thumbFile = request.thumbnailPath?.let { File(it) }?.takeIf { it.isFile }
                 val prepared = PreparedScreenshot(
                     uploadId = request.id,
                     file = pendingFile,
                     imageHash = imageHash,
                     sizeBytes = pendingFile.length(),
                     contentType = request.contentType,
+                    thumbnailFile = thumbFile,
+                    thumbnailSizeBytes = thumbFile?.length(),
                 )
                 uploadedUrl = timed(request.id, "upload") { operations.upload(
                     prepared = prepared,
@@ -96,12 +100,27 @@ class ReportUploadWorker(
                     userId = request.userId,
                 ) }
                 uploadedHash = imageHash
+
+                if (thumbFile != null && uploadedThumbUrl.isNullOrBlank()) {
+                    uploadedThumbUrl = try {
+                        timed(request.id, "upload_thumb") {
+                            operations.uploadThumbnail(thumbFile, request.campaignId, request.userId, request.id)
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        trace(request.id, "thumb_upload_failed non-fatal: ${e.message}")
+                        null
+                    }
+                }
+
                 // Lưu URL ngay: nếu RPC fail thì lần retry không upload lại.
                 PendingReportStore.markUploaded(
                     context = applicationContext,
                     id = request.id,
                     url = uploadedUrl,
                     hash = uploadedHash,
+                    thumbnailUrl = uploadedThumbUrl,
                 )
                 trace(request.id, "mark_uploaded")
             }
@@ -122,11 +141,12 @@ class ReportUploadWorker(
             verifyAccount(operations, request.userId)
             val response = timed(request.id, "rpc") {
                 operations.submit(request, uploadedUrl ?: request.fallbackScreenshotUrl,
-                    uploadedHash ?: request.fallbackImageHash)
+                    uploadedHash ?: request.fallbackImageHash, uploadedThumbUrl)
             }
             val result = response.copy(
                 screenshotUrl = response.screenshotUrl ?: uploadedUrl ?: request.fallbackScreenshotUrl,
                 imageHash = response.imageHash ?: uploadedHash ?: request.fallbackImageHash,
+                thumbnailUrl = response.thumbnailUrl ?: uploadedThumbUrl,
             )
             // Keep the request and receipt until WorkManager commits SUCCEEDED.
             PendingReportStore.markCompleted(applicationContext, request.id, result)
@@ -157,6 +177,7 @@ class ReportUploadWorker(
             .putString(KEY_REPORT_ID, result.reportId)
         result.screenshotUrl?.let { output.putString(KEY_SCREENSHOT_URL, it) }
         result.imageHash?.let { output.putString(KEY_IMAGE_HASH, it) }
+        result.thumbnailUrl?.let { output.putString(KEY_THUMBNAIL_URL, it) }
         return ListenableWorker.Result.success(output.build())
     }
 
@@ -171,10 +192,15 @@ class ReportUploadWorker(
         override val currentUserId get() = repository.currentUserId()
         override suspend fun upload(prepared: PreparedScreenshot, campaignId: String, userId: String) =
             FirebaseStorageHelper.uploadReportScreenshot(prepared, campaignId, userId)
+        override suspend fun uploadThumbnail(thumbnailFile: File, campaignId: String, userId: String, uploadId: String): String? =
+            FirebaseStorageHelper.uploadReportThumbnail(thumbnailFile, campaignId, userId, uploadId)
         override suspend fun join(campaignId: String) { repository.joinCampaign(campaignId) }
         override suspend fun submit(request: PendingReport, url: String?, hash: String?) =
             repository.submitFeedback(request.campaignId, request.rating, request.comment, url, hash,
                 request.id, requireIdempotency = true)
+        override suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?) =
+            repository.submitFeedback(request.campaignId, request.rating, request.comment, url, hash,
+                request.id, requireIdempotency = true, thumbnailUrl = thumbnailUrl)
     }
 
     private suspend fun <T> timed(id: String, stage: String, action: suspend () -> T): T {
@@ -204,6 +230,7 @@ class ReportUploadWorker(
         const val KEY_REPORT_ID = "report_id"
         const val KEY_SCREENSHOT_URL = "screenshot_url"
         const val KEY_IMAGE_HASH = "image_hash"
+        const val KEY_THUMBNAIL_URL = "thumbnail_url"
         const val KEY_ERROR = "error"
 
         private const val MAX_ATTEMPTS = 3
@@ -215,6 +242,9 @@ internal interface ReportUploadOperations {
     val isReady: Boolean
     val currentUserId: String?
     suspend fun upload(prepared: PreparedScreenshot, campaignId: String, userId: String): String
+    suspend fun uploadThumbnail(thumbnailFile: File, campaignId: String, userId: String, uploadId: String): String? = null
     suspend fun join(campaignId: String)
     suspend fun submit(request: PendingReport, url: String?, hash: String?): SubmitTesterReportResult
+    suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?): SubmitTesterReportResult =
+        submit(request, url, hash)
 }

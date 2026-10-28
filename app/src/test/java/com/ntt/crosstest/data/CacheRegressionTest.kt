@@ -28,6 +28,11 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import com.ntt.crosstest.ui.viewmodels.OwnerAppDetailViewModel
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [34])
@@ -507,5 +512,321 @@ class CacheRegressionTest {
     fun memoryPeekMustSanitizePreviousDay() = runBlocking {
         SessionCacheManager.save(context, CachedSessionData(userId = "userA", todayCheckinCount = 9, dateVn = "2000-01-01"))
         assertEquals("Home peek must not display yesterday as today", 0, SessionCacheManager.peekMemory()!!.todayCheckinCount)
+    }
+
+    // Audit Probes (B01 - B08)
+    @Test
+    fun guestStatsMustNotCarryIntoAuthenticatedUser() = runBlocking {
+        val calls=AtomicInteger()
+        val client=createTestClient { jsonResponse("""{"c1":{"has_tested_today":${calls.incrementAndGet()==1}}}""") }
+        val repo=CampaignRepository(client,Localizer(context))
+        assertTrue(repo.getCampaignsStatsMap(listOf("c1"))["c1"]!!.hasTestedToday)
+        importUser(client,"userB")
+        assertFalse("guest entry cannot be reused as B data",repo.getCampaignsStatsMap(listOf("c1"))["c1"]!!.hasTestedToday)
+    }
+
+    @Test
+    fun managerReportsMustBeScopedToRequestingAccount() = runBlocking {
+        val client=createTestClient { req ->
+            if(req.url.toString().contains("get_campaign_reports_for_owner")) {
+                if(req.headers[HttpHeaders.Authorization]?.contains("userA")==true)
+                    jsonResponse("""[{"id":"private-report-A","campaign_id":"c1","user_id":"testerA"}]""")
+                else jsonResponse("[]")
+            } else jsonResponse("[]")
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        assertEquals(1,repo.getCampaignReports("c1",canManage=true).size)
+        importUser(client,"userB")
+        assertTrue("B must fetch under own permission rather than reuse A manager cache",repo.getCampaignReports("c1",canManage=true).isEmpty())
+    }
+
+    @Test
+    fun adminProfilesMustNotCarryIntoAnotherAccount() = runBlocking {
+        val client=createTestClient { req ->
+            if(req.headers[HttpHeaders.Authorization]?.contains("userA")==true)
+                jsonResponse("""[{"id":"private-A","credits":100}]""") else jsonResponse("[]")
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        assertEquals(1,repo.getAllProfiles().size)
+        importUser(client,"userB")
+        assertTrue("admin data must not survive account transition",repo.getAllProfiles().isEmpty())
+    }
+
+    @Test
+    fun ownerStatsFailureMustNotOverwriteGoodCount() = runBlocking {
+        var fail=false
+        val client=createTestClient { req ->
+            if(fail) jsonResponse("{}",HttpStatusCode.InternalServerError)
+            else if(req.url.toString().contains("campaign_members")) jsonResponse("""[{"campaign_id":"c1","user_id":"testerA"}]""")
+            else jsonResponse("[]")
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        assertEquals(1,repo.getCampaignOwnerStats("c1").installedTestersCount)
+        fail=true
+        try { repo.getCampaignOwnerStats("c1",forceRefresh=true) } catch (_:Exception) {}
+        fail=false
+        assertEquals("network failures must not become fresh zero stats",1,repo.getCampaignOwnerStats("c1").installedTestersCount)
+    }
+
+    @Test
+    fun homeFeed500MustNotLookLikeMissingRpc() = runBlocking {
+        val client=createTestClient { jsonResponse("{}",HttpStatusCode.InternalServerError) }
+        val repo=CampaignRepository(client,Localizer(context))
+        var failure=false
+        try { repo.getHomeFeed(forceRefresh=true) } catch (_:Exception) { failure=true }
+        assertTrue("500 must surface, not return missing-RPC null and trigger legacy",failure)
+    }
+
+    @Test
+    fun stats500MustNotManufactureSuccessfulZeroStats() = runBlocking {
+        val client=createTestClient { jsonResponse("{}",HttpStatusCode.InternalServerError) }
+        val repo=CampaignRepository(client,Localizer(context))
+        var failure=false
+        try { repo.getCampaignsStatsMap(listOf("c1")) } catch (_:Exception) { failure=true }
+        assertTrue("RPC and legacy network failure must not become successful zero stats",failure)
+    }
+
+    @Test
+    fun creditLogCoverageMustSliceRequestedLimit() = runBlocking {
+        val client=createTestClient { req ->
+            val amount=if(req.url.toString().contains("limit=50")) 50 else 20
+            jsonResponse((1..amount).joinToString(",","[","]") { """{"id":"log-$it","user_id":"userA","amount":10,"action":"test","balance":100}""" })
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        assertEquals(50,repo.getMyCreditLogs(limit=50).size)
+        assertEquals("coverage reuse must respect requested limit",20,repo.getMyCreditLogs(limit=20).size)
+    }
+
+    @Test
+    fun campaignUpdateMustInvalidateSlotInfoDependency() = runBlocking {
+        var name="Old"
+        val client=createTestClient { req ->
+            when {
+                req.method.value=="PATCH" -> { name="New"; jsonResponse("[]") }
+                req.url.toString().contains("user_slots") -> jsonResponse("[]")
+                req.url.toString().contains("campaigns") -> jsonResponse("""[{"id":"c1","owner_id":"userA","app_name":"$name","package_name":"pkg.c1","status":"open","slot_number":1}]""")
+                else -> jsonResponse("[]")
+            }
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        assertEquals("Old",repo.getMySlotsInfo().first().currentCampaign?.appName)
+        repo.updateCampaignDetails("c1","New","desc","play","test","u","p")
+        assertEquals("slot info depends on campaign fields","New",repo.getMySlotsInfo().first().currentCampaign?.appName)
+    }
+
+    @Test
+    fun previousDaySnapshotMustClearOwnerTodayStats() {
+        val old=CachedSessionData(dateVn="2000-01-01",ownerStatsMap=mapOf("c1" to CampaignOwnerStats(testedTodayCount=7)))
+        assertEquals("owner tested-today is daily data too",0,old.sanitizeForDate().ownerStatsMap["c1"]?.testedTodayCount ?: 0)
+    }
+
+    @Test
+    fun oldNotificationsMustNotReviveAfterReadMutationAndNetworkFailure() = runBlocking {
+        val started=CompletableDeferred<Unit>()
+        val release=CompletableDeferred<Unit>()
+        val reads=AtomicInteger()
+        val client=createTestClient { req ->
+            if(req.method.value=="PATCH") jsonResponse("[]")
+            else if(reads.incrementAndGet()==1) {
+                started.complete(Unit)
+                release.await()
+                jsonResponse("""[{"id":"n1","user_id":"userA","is_read":false}]""")
+            } else jsonResponse("{}",HttpStatusCode.InternalServerError)
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        importUser(client,"userA")
+        val before=async(start=CoroutineStart.UNDISPATCHED) { try { repo.getMyNotifications() } catch (_:Exception) { emptyList() } }
+        withTimeout(5000) { started.await() }
+        repo.markAllNotificationsAsRead()
+        release.complete(Unit)
+        before.await()
+        val after=try { repo.getMyNotifications() } catch (_:Exception) { emptyList() }
+        assertTrue("response before read mutation must not be served as unread fallback",after.none { !it.isRead })
+    }
+
+    @Test
+    fun ordinaryAndForceSameVersionMustShareFreshInFlightRead() = runBlocking {
+        val started=CompletableDeferred<Unit>()
+        val release=CompletableDeferred<Unit>()
+        val reads=AtomicInteger()
+        val client=createTestClient {
+            reads.incrementAndGet()
+            started.complete(Unit)
+            release.await()
+            jsonResponse("[]")
+        }
+        val repo=CampaignRepository(client,Localizer(context))
+        val ordinary=async(start=CoroutineStart.UNDISPATCHED) { repo.listOpenCampaigns() }
+        withTimeout(5000) { started.await() }
+        val forced=async(start=CoroutineStart.UNDISPATCHED) { repo.listOpenCampaigns(forceRefresh=true) }
+        release.complete(Unit)
+        ordinary.await()
+        forced.await()
+        assertEquals("same scope/version fresh network flight should satisfy ordinary and force",1,reads.get())
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun ownerDetailMustRecheckAccountAfterLoadingSlots() = runBlocking {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        val enteredSlots=CompletableDeferred<Unit>()
+        val releaseSlots=CompletableDeferred<Unit>()
+        val client=createTestClient { req ->
+            when {
+                req.url.toString().contains("get_campaign_detail") -> jsonResponse("""{"campaign":{"id":"c1","owner_id":"userA","app_name":"A private app","package_name":"pkg.c1","slot_number":1},"can_manage":true,"is_actual_owner":true}""")
+                req.url.toString().contains("get_campaign_mission") -> jsonResponse("""{"mission":null}""")
+                req.url.toString().contains("user_slots") -> {
+                    enteredSlots.complete(Unit)
+                    releaseSlots.await()
+                    jsonResponse("[]")
+                }
+                else -> jsonResponse("[]")
+            }
+        }
+        importUser(client,"userA")
+        val repo=CampaignRepository(client,Localizer(context))
+        val vm=OwnerAppDetailViewModel("c1",repo,Localizer(context))
+
+        try {
+            withTimeout(5000) { enteredSlots.await() }
+            importUser(client,"userB")
+            releaseSlots.complete(Unit)
+            withTimeout(5000) { vm.viewModelScope.coroutineContext[Job]!!.children.toList().joinAll() }
+            assertFalse("old A detail must not publish after slots await changed account to B",vm.uiState.value.campaign?.ownerId=="userA")
+        } finally {
+            vm.viewModelScope.cancel()
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun feedbackOnlyFailureMustNotOverwriteGoodAverageRating() = runBlocking {
+        var failFeedback = false
+        val client = createTestClient { req ->
+            if (req.url.toString().contains("feedbacks")) {
+                if (failFeedback) jsonResponse("{}", HttpStatusCode.InternalServerError)
+                else jsonResponse("""[{"campaign_id":"c1","user_id":"testerA","rating":5}]""")
+            } else jsonResponse("[]")
+        }
+        val repo = CampaignRepository(client, Localizer(context))
+        importUser(client, "userA")
+        assertEquals(5f, repo.getCampaignOwnerStats("c1").averageRating!!, 0f)
+        failFeedback = true
+        try { repo.getCampaignOwnerStats("c1", forceRefresh = true) } catch (_: Exception) {}
+        failFeedback = false
+        assertEquals("failed component must not cache successful null average", 5f, repo.getCampaignOwnerStats("c1").averageRating ?: -1f, 0f)
+    }
+
+    @Test
+    fun checkinOnlyFailureMustNotOverwriteTesterHistoryWithZero() = runBlocking {
+        var failCheckins = false
+        val client = createTestClient { req ->
+            when {
+                req.url.toString().contains("campaign_members") -> jsonResponse("""[{"campaign_id":"c1","user_id":"testerA"}]""")
+                req.url.toString().contains("checkins") -> {
+                    if (failCheckins) jsonResponse("{}", HttpStatusCode.InternalServerError)
+                    else jsonResponse("""[{"campaign_id":"c1","user_id":"testerA","checkin_date":"2026-10-27"}]""")
+                }
+                else -> jsonResponse("[]")
+            }
+        }
+        val repo = CampaignRepository(client, Localizer(context))
+        importUser(client, "userA")
+        assertEquals(1, repo.getCampaignTesters("c1").first().checkinCount)
+        failCheckins = true
+        try { repo.getCampaignTesters("c1", forceRefresh = true) } catch (_: Exception) {}
+        failCheckins = false
+        assertEquals("failed checkins must not cache successful zero history", 1, repo.getCampaignTesters("c1").first().checkinCount)
+    }
+
+    @Test
+    fun businessDayClockAdvancementMustInvalidateTodayCache() = runBlocking {
+        var currentDay = java.time.LocalDate.of(2026, 10, 27)
+        val checkinCalls = AtomicInteger()
+        val client = createTestClient { req ->
+            if (req.url.toString().contains("checkins")) {
+                checkinCalls.incrementAndGet()
+                jsonResponse("""[{"id":"ch1","user_id":"userA","campaign_id":"c1","checkin_date":"$currentDay"}]""")
+            } else {
+                jsonResponse("[]")
+            }
+        }
+        val repo = CampaignRepository(
+            supabase = client,
+            localizer = Localizer(context),
+            businessDayClock = { currentDay }
+        )
+        importUser(client, "userA")
+        assertEquals(1, repo.getTodayCheckinCount())
+        assertEquals(1, checkinCalls.get())
+
+        // Read again same day -> cached
+        assertEquals(1, repo.getTodayCheckinCount())
+        assertEquals(1, checkinCalls.get())
+
+        // Clock moves to next day -> must not return stale day's count
+        currentDay = java.time.LocalDate.of(2026, 10, 28)
+        assertEquals(1, repo.getTodayCheckinCount())
+        assertEquals(2, checkinCalls.get())
+    }
+
+    @Test
+    fun inFlightRequestAcrossMidnightStampsStartDay() = runBlocking {
+        var currentDay = java.time.LocalDate.of(2026, 10, 27)
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        val client = createTestClient { req ->
+            if (req.url.toString().contains("checkins")) {
+                started.complete(Unit)
+                release.await()
+                jsonResponse("""[{"id":"ch1","user_id":"userA","campaign_id":"c1","checkin_date":"2026-10-27"}]""")
+            } else {
+                jsonResponse("[]")
+            }
+        }
+        val repo = CampaignRepository(
+            supabase = client,
+            localizer = Localizer(context),
+            businessDayClock = { currentDay }
+        )
+        importUser(client, "userA")
+        val job = async { repo.getTodayCheckinCount() }
+        started.await()
+        // Midnight passes before response finishes
+        currentDay = java.time.LocalDate.of(2026, 10, 28)
+        release.complete(Unit)
+        job.await()
+
+        // Subsequent query on new day must not reuse the 2026-10-27 result
+        val calls = AtomicInteger()
+        val client2 = createTestClient {
+            calls.incrementAndGet()
+            jsonResponse("[]")
+        }
+        val repo2 = CampaignRepository(
+            supabase = client2,
+            localizer = Localizer(context),
+            businessDayClock = { currentDay }
+        )
+        importUser(client2, "userA")
+        assertEquals(0, repo2.getTodayCheckinCount())
+    }
+
+    @Test
+    fun packageEventUpdatesVersionFlowAndInvalidatesCache() {
+        com.ntt.crosstest.util.InstalledAppCache.refreshPackages(context)
+        val initialVersion = com.ntt.crosstest.util.InstalledAppCache.version.get()
+        com.ntt.crosstest.util.InstalledAppCache.onPackageAdded("com.example.testapp")
+        assertTrue(com.ntt.crosstest.util.InstalledAppCache.version.get() > initialVersion)
+        assertEquals(com.ntt.crosstest.util.InstalledAppCache.version.get(), com.ntt.crosstest.util.InstalledAppCache.versionFlow.value)
+        assertTrue(com.ntt.crosstest.util.InstalledAppCache.isInstalled(context, "com.example.testapp"))
+
+        com.ntt.crosstest.util.InstalledAppCache.onPackageRemoved("com.example.testapp")
+        assertFalse(com.ntt.crosstest.util.InstalledAppCache.isInstalled(context, "com.example.testapp"))
     }
 }

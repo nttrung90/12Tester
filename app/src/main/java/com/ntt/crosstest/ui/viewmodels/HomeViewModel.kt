@@ -14,6 +14,7 @@ import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.CreditLog
 import com.ntt.crosstest.data.ReportSubmitManager
 import com.ntt.crosstest.data.TopupPackage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -51,9 +52,17 @@ data class CampaignDisplayItem(
     val hasTestedToday: Boolean = false,
     /** App đang có sẵn trên máy của người test (kiểm tra qua PackageManager). */
     val isInstalledLocally: Boolean = false,
+    val homeTestedCount: Int? = null,
+    val statsDate: String? = null,
 ) {
     val dailyTarget: Int get() = campaign.dailyTarget
     val isTargetReached: Boolean get() = todayTestedCount >= dailyTarget
+    val displayTestedCount: Int? get() = when {
+        homeTestedCount != null -> homeTestedCount
+        statsDate != null -> if (statsDate == vnToday()) todayTestedCount else null
+        todayTestedCount > 0 -> todayTestedCount
+        else -> null
+    }
 }
 
 private fun vnToday(): String =
@@ -82,6 +91,7 @@ data class HomeUiState(
     val displayItems: List<CampaignDisplayItem> = emptyList(),
     val pausedDisplayItems: List<CampaignDisplayItem> = emptyList(),
     val completedDisplayItems: List<CampaignDisplayItem> = emptyList(),
+    val homeOrderDate: String? = null,
     /** null = not searching; non-null = search results for [query] */
     val searchResults: List<CampaignDisplayItem>? = null,
     val myCampaigns: List<Campaign> = emptyList(),
@@ -136,6 +146,7 @@ class HomeViewModel(
     private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val missionRefreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val missionMutationVersion = java.util.concurrent.atomic.AtomicLong(0L)
+    private val staleFeedRetryCount = java.util.concurrent.atomic.AtomicInteger(0)
 
     private val _uiState = MutableStateFlow(
         run {
@@ -147,30 +158,37 @@ class HomeViewModel(
             val cacheMatchesSession = cached != null &&
                 (cached.userId == null || currentUid == null || cached.userId == currentUid)
             if (cached != null && cacheMatchesSession) {
+                val todayStr = repository.businessDay().toString()
+                val sortedDisplay = DailyHomeOrder.sortOpenCampaigns(cached.displayItems, todayStr)
+                val sortedPaused = DailyHomeOrder.sortOtherCampaigns(cached.pausedDisplayItems, todayStr)
+                val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(cached.completedDisplayItems, todayStr)
                 HomeUiState(
                     isLoading = false,
                     isBackgroundSyncing = true,
                     isAuthenticated = cached.userId != null,
-                    openCampaigns = cached.displayItems.map { it.campaign },
-                    displayItems = cached.displayItems,
-                    pausedDisplayItems = cached.pausedDisplayItems,
-                    completedDisplayItems = cached.completedDisplayItems,
+                    openCampaigns = sortedDisplay.map { it.campaign },
+                    displayItems = sortedDisplay,
+                    pausedDisplayItems = sortedPaused,
+                    completedDisplayItems = sortedCompleted,
+                    homeOrderDate = todayStr,
                     myCampaigns = cached.myCampaigns,
                     joinedCampaigns = cached.joinedCampaigns,
                     leaderboard = cached.leaderboard,
                     myRank = cached.myRank,
                     ownerStatsMap = cached.ownerStatsMap,
-                    ownerNameById = (cached.displayItems + cached.pausedDisplayItems + cached.completedDisplayItems)
+                    ownerNameById = (sortedDisplay + sortedPaused + sortedCompleted)
                         .filter { it.ownerName.isNotBlank() }
                         .mapNotNull { item -> item.campaign.id?.let { it to item.ownerName } }
                         .toMap(),
-                    joinedStatsMap = (cached.displayItems + cached.pausedDisplayItems + cached.completedDisplayItems)
+                    joinedStatsMap = (sortedDisplay + sortedPaused + sortedCompleted)
                         .mapNotNull { item ->
                             item.campaign.id?.let { id ->
                                 id to CampaignStats(
                                     installedCount = item.installedCount,
                                     todayTestedCount = item.todayTestedCount,
                                     hasTestedToday = item.hasTestedToday,
+                                    homeTestedCount = item.homeTestedCount,
+                                    statsDate = item.statsDate,
                                 )
                             }
                         }
@@ -194,6 +212,33 @@ class HomeViewModel(
 
     private var searchJob: Job? = null
     private var dailyLoginJob: Job? = null
+    private var midnightJob: Job? = null
+
+    fun scheduleMidnightRefresh() {
+        midnightJob?.cancel()
+        midnightJob = viewModelScope.launch {
+            while (true) {
+                try {
+                    val zone = java.time.ZoneId.of("Asia/Ho_Chi_Minh")
+                    val currentDay = repository.businessDay()
+                    val now = java.time.ZonedDateTime.now(zone)
+                    val nextMidnight = currentDay.plusDays(1).atStartOfDay(zone).plusSeconds(1)
+                    val delayMs = java.time.Duration.between(now, nextMidnight).toMillis().coerceIn(1000L, 86_400_000L)
+                    kotlinx.coroutines.delay(delayMs)
+                    refresh(forceRefresh = true)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    kotlinx.coroutines.delay(60_000L)
+                }
+            }
+        }
+    }
+
+    fun stopMidnightScheduler() {
+        midnightJob?.cancel()
+        midnightJob = null
+    }
 
     /** Gom dữ liệu cá nhân của Trang chủ, dùng chung cho fast path (dashboard RPC) và legacy. */
     private data class PersonalData(
@@ -215,6 +260,7 @@ class HomeViewModel(
 
     /** uid của phiên đã đồng bộ thành công — tránh refresh lặp lại mỗi lần token làm mới. */
     private var lastSyncedUid: String? = null
+    private var renderedUserId: String? = null
     private var leaderboardLoaded = false
     private var testLeaderboardLoaded = false
 
@@ -226,21 +272,29 @@ class HomeViewModel(
     private var refreshWhenSessionReady = false
 
     init {
+        val initUid = repository.currentUserId()
+        val initGen = SessionCacheManager.currentGeneration()
         if (_uiState.value.openCampaigns.isEmpty() && context != null) {
             viewModelScope.launch(Dispatchers.IO) {
                 val loaded = SessionCacheManager.loadSync(context)
                 val curUid = repository.currentUserId()
-                if (loaded != null && (loaded.userId == null || curUid == null || loaded.userId == curUid)) {
+                val curGen = SessionCacheManager.currentGeneration()
+                if (curGen == initGen && curUid == initUid && loaded != null && (loaded.userId == curUid)) {
+                    val todayStr = repository.businessDay().toString()
+                    val sortedDisplay = DailyHomeOrder.sortOpenCampaigns(loaded.displayItems, todayStr)
+                    val sortedPaused = DailyHomeOrder.sortOtherCampaigns(loaded.pausedDisplayItems, todayStr)
+                    val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(loaded.completedDisplayItems, todayStr)
                     _uiState.update { current ->
-                        if (current.openCampaigns.isEmpty()) {
+                        if (current.openCampaigns.isEmpty() && SessionCacheManager.currentGeneration() == initGen && repository.currentUserId() == initUid) {
                             current.copy(
                                 isLoading = false,
                                 isBackgroundSyncing = true,
                                 isAuthenticated = loaded.userId != null,
-                                openCampaigns = loaded.displayItems.map { it.campaign },
-                                displayItems = loaded.displayItems,
-                                pausedDisplayItems = loaded.pausedDisplayItems,
-                                completedDisplayItems = loaded.completedDisplayItems,
+                                openCampaigns = sortedDisplay.map { it.campaign },
+                                displayItems = sortedDisplay,
+                                pausedDisplayItems = sortedPaused,
+                                completedDisplayItems = sortedCompleted,
+                                homeOrderDate = todayStr,
                                 myCampaigns = loaded.myCampaigns,
                                 joinedCampaigns = loaded.joinedCampaigns,
                                 leaderboard = loaded.leaderboard,
@@ -264,6 +318,7 @@ class HomeViewModel(
         refresh(context = context, forceRefresh = false)
         observeSession()
         observeSubmittedReports()
+        scheduleMidnightRefresh()
     }
 
     /**
@@ -317,7 +372,6 @@ class HomeViewModel(
                     is SessionStatus.Authenticated -> {
                         val uid = repository.currentUserId()
                         if (uid != null && uid != lastSyncedUid) {
-                            lastSyncedUid = uid
                             refreshWhenSessionReady = false
                             refresh(forceRefresh = false)
                         } else if (uid != null && refreshWhenSessionReady) {
@@ -398,17 +452,114 @@ class HomeViewModel(
         val seq = refreshSequence.incrementAndGet()
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
+        val initialDay = repository.businessDay()
         viewModelScope.launch {
             val isOnline = appContext?.let { NetworkMonitor.isOnline(it) } ?: true
             _uiState.update { it.copy(isOffline = !isOnline) }
 
-            if (!isOnline && _uiState.value.openCampaigns.isNotEmpty()) {
+            val currentProfileId = _uiState.value.userProfile?.id
+            val isAccountSwitch = (renderedUserId != null && renderedUserId != initialUid) ||
+                (lastSyncedUid != null && lastSyncedUid != initialUid) ||
+                (currentProfileId != null && currentProfileId != initialUid)
+            val currentDayStr = repository.businessDay().toString()
+            if (isAccountSwitch) {
+                renderedUserId = initialUid
+                lastSyncedUid = null
+                _uiState.update {
+                    val clearedOpen = it.displayItems.map { d -> d.copy(hasTestedToday = false) }
+                    val clearedPaused = it.pausedDisplayItems.map { d -> d.copy(hasTestedToday = false) }
+                    val clearedCompleted = it.completedDisplayItems.map { d -> d.copy(hasTestedToday = false) }
+                    val sortedOpen = DailyHomeOrder.sortOpenCampaigns(clearedOpen, currentDayStr)
+                    val sortedPaused = DailyHomeOrder.sortOtherCampaigns(clearedPaused, currentDayStr)
+                    val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(clearedCompleted, currentDayStr)
+                    it.copy(
+                        userProfile = null,
+                        userCredits = 0,
+                        myCampaigns = emptyList(),
+                        joinedCampaigns = emptyList(),
+                        notifications = emptyList(),
+                        unreadNotificationsCount = 0,
+                        unreadWarning = null,
+                        weeklyWarningsCount = 0,
+                        pendingReportsCount = 0,
+                        todayCheckinCount = 0,
+                        questSummary = null,
+                        dailyTask = null,
+                        creditLogs = emptyList(),
+                        openCampaigns = sortedOpen.map { d -> d.campaign },
+                        displayItems = sortedOpen,
+                        pausedDisplayItems = sortedPaused,
+                        completedDisplayItems = sortedCompleted,
+                        searchResults = it.searchResults?.map { d -> d.copy(hasTestedToday = false) },
+                        ownerStatsMap = emptyMap(),
+                        joinedStatsMap = emptyMap(),
+                        homeOrderDate = currentDayStr,
+                    )
+                }
+            }
+
+            // Kiểm tra đổi ngày trước khi xét offline.
+            // Nếu ngày đã sang ngày mới, làm sạch dữ liệu cũ theo quy tắc hiện có
+            // rồi mới sắp xếp theo ngày mới, không chờ mạng và không đoán số thống kê mới.
+            val stateOrderDate = _uiState.value.homeOrderDate
+            val isCalendarDayChanged = stateOrderDate != null && stateOrderDate != currentDayStr
+            if (isCalendarDayChanged) {
+                _uiState.update { state ->
+                    val sanitizedOpen = state.displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                    val sanitizedPaused = state.pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                    val sanitizedCompleted = state.completedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                    val sortedOpen = DailyHomeOrder.sortOpenCampaigns(sanitizedOpen, currentDayStr)
+                    val sortedPaused = DailyHomeOrder.sortOtherCampaigns(sanitizedPaused, currentDayStr)
+                    val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(sanitizedCompleted, currentDayStr)
+                    val sanitizedJoined = state.joinedStatsMap.mapValues { (_, s) ->
+                        s.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null)
+                    }
+                    val sanitizedSearch = state.searchResults?.map { d ->
+                        d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null)
+                    }
+                    state.copy(
+                        openCampaigns = sortedOpen.map { d -> d.campaign },
+                        displayItems = sortedOpen,
+                        pausedDisplayItems = sortedPaused,
+                        completedDisplayItems = sortedCompleted,
+                        searchResults = sanitizedSearch,
+                        todayCheckinCount = 0,
+                        dailyTask = null,
+                        questSummary = state.questSummary?.copy(dailyCount = 0),
+                        ownerStatsMap = state.ownerStatsMap.mapValues { (_, s) -> s.copy(testedTodayCount = 0) },
+                        joinedStatsMap = sanitizedJoined,
+                        homeOrderDate = currentDayStr,
+                    )
+                }
+                if (_uiState.value.query.isNotBlank()) {
+                    runSearch(_uiState.value.query)
+                }
+            } else if (stateOrderDate == null) {
+                _uiState.update { state ->
+                    val sortedOpen = DailyHomeOrder.sortOpenCampaigns(state.displayItems, currentDayStr)
+                    val sortedPaused = DailyHomeOrder.sortOtherCampaigns(state.pausedDisplayItems, currentDayStr)
+                    val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(state.completedDisplayItems, currentDayStr)
+                    state.copy(
+                        openCampaigns = sortedOpen.map { d -> d.campaign },
+                        displayItems = sortedOpen,
+                        pausedDisplayItems = sortedPaused,
+                        completedDisplayItems = sortedCompleted,
+                        homeOrderDate = currentDayStr,
+                    )
+                }
+            }
+
+            val hasContent = _uiState.value.displayItems.isNotEmpty() ||
+                _uiState.value.pausedDisplayItems.isNotEmpty() ||
+                _uiState.value.completedDisplayItems.isNotEmpty()
+
+            if (!isOnline && hasContent) {
                 _uiState.update { it.copy(isLoading = false, isBackgroundSyncing = false) }
                 return@launch
             }
 
             // Kéo làm mới giữ nguyên dữ liệu đang hiển thị; chỉ hiện vòng xoay toàn màn hình khi chưa có gì.
-            if (_uiState.value.openCampaigns.isEmpty()) {
+            if (!hasContent) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
             } else {
                 _uiState.update { it.copy(isBackgroundSyncing = true, error = null) }
@@ -506,14 +657,12 @@ class HomeViewModel(
                         todayTestedCount = stats.todayTestedCount,
                         hasTestedToday = stats.hasTestedToday,
                         isInstalledLocally = installFlags[c.packageName] ?: false,
+                        homeTestedCount = stats.homeTestedCount ?: stats.todayTestedCount,
+                        statsDate = stats.statsDate ?: initialDay.toString(),
                     )
                 }
 
-                val displayList = open.map { toDisplayItem(it) }.sortedWith(
-                    compareBy<CampaignDisplayItem> { it.isTargetReached }
-                        .thenByDescending { it.campaign.isBoosted }
-                        .thenByDescending { it.campaign.tipCredits }
-                )
+                val displayList = open.map { toDisplayItem(it) }
                 val pausedList = paused.map { toDisplayItem(it) }
                 val completedList = completed.map { toDisplayItem(it) }
 
@@ -619,29 +768,60 @@ class HomeViewModel(
                     return@launch
                 }
 
+                val currentBusinessDay = repository.businessDay().toString()
+                val hasStaleStatsDate = statsMap.values.any { it.statsDate != null && it.statsDate != currentBusinessDay }
+                val isDayRollover = repository.businessDay() != initialDay
+                fun sanitizeItemIfStale(d: CampaignDisplayItem): CampaignDisplayItem {
+                    val isItemStale = isDayRollover || (d.statsDate != null && d.statsDate != currentBusinessDay)
+                    return if (isItemStale) {
+                        d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null)
+                    } else {
+                        d
+                    }
+                }
+                val sanitizedDisplayList = displayList.map { sanitizeItemIfStale(it) }
+                val sanitizedPausedList = pausedList.map { sanitizeItemIfStale(it) }
+                val sanitizedCompletedList = completedList.map { sanitizeItemIfStale(it) }
+                val sanitizedJoinedStats = joinedStats.mapValues { (_, s) ->
+                    val isStatStale = isDayRollover || (s.statsDate != null && s.statsDate != currentBusinessDay)
+                    if (isStatStale) {
+                        s.copy(homeTestedCount = null, statsDate = null, hasTestedToday = false, todayTestedCount = 0)
+                    } else {
+                        s
+                    }
+                }
+                val finalDisplayList = DailyHomeOrder.sortOpenCampaigns(sanitizedDisplayList, currentBusinessDay)
+                val finalPausedList = DailyHomeOrder.sortOtherCampaigns(sanitizedPausedList, currentBusinessDay)
+                val finalCompletedList = DailyHomeOrder.sortOtherCampaigns(sanitizedCompletedList, currentBusinessDay)
+                val finalTodayCheckins = if (isDayRollover) 0 else personal.todayCheckins
+                val finalDailyTask = if (isDayRollover) null else personal.dailyTask
+                val finalQuestSummary = if (isDayRollover) personal.quests?.copy(dailyCount = 0) else personal.quests
+                val finalOwnerStats = if (isDayRollover) ownerStats.mapValues { (_, s) -> s.copy(testedTodayCount = 0) } else ownerStats
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isBackgroundSyncing = false,
                         isAuthenticated = isAuthed,
-                        openCampaigns = open,
-                        displayItems = displayList,
-                        pausedDisplayItems = pausedList,
-                        completedDisplayItems = completedList,
+                        openCampaigns = finalDisplayList.map { d -> d.campaign },
+                        displayItems = finalDisplayList,
+                        pausedDisplayItems = finalPausedList,
+                        completedDisplayItems = finalCompletedList,
+                        homeOrderDate = currentBusinessDay,
                         myCampaigns = personal.mine,
                         joinedCampaigns = personal.joined,
                         // Dashboard không còn trả leaderboard (tải lazy theo tab) — giữ bảng đang hiển thị.
                         leaderboard = personal.leaderboard.ifEmpty { it.leaderboard },
                         myRank = personal.myRank ?: it.myRank,
-                        todayCheckinCount = personal.todayCheckins,
+                        todayCheckinCount = finalTodayCheckins,
                         userCredits = myProfile?.credits ?: it.userCredits,
-                        missedStreak = personal.dailyTask?.missedStreak
+                        missedStreak = finalDailyTask?.missedStreak
                             ?: myProfile?.effectiveMissedStreak ?: 0,
-                        dailyTask = personal.dailyTask,
+                        dailyTask = finalDailyTask,
                         userProfile = myProfile,
                         pendingReportsCount = personal.pendingReports,
-                        ownerStatsMap = ownerStats,
-                        joinedStatsMap = joinedStats,
+                        ownerStatsMap = finalOwnerStats,
+                        joinedStatsMap = sanitizedJoinedStats,
                         ownerNameById = ownerNameById,
                         unreadWarning = personal.unreadWarnings.firstOrNull(),
                         weeklyWarningsCount = personal.weeklyWarnings,
@@ -650,34 +830,37 @@ class HomeViewModel(
                         topupPackages = personal.packages,
                         notifications = notifs,
                         unreadNotificationsCount = unreadNotifsCount,
-                        questSummary = personal.quests,
+                        questSummary = finalQuestSummary,
                         error = null,
                     )
                 }
+                renderedUserId = initialUid
+                lastSyncedUid = initialUid
 
                 // Persist fresh session snapshot to disk
                 if (appContext != null) {
                     val snapshot = CachedSessionData(
                         userId = initialUid,
                         userProfile = myProfile,
-                        displayItems = displayList,
-                        pausedDisplayItems = pausedList,
-                        completedDisplayItems = completedList,
+                        displayItems = finalDisplayList,
+                        pausedDisplayItems = finalPausedList,
+                        completedDisplayItems = finalCompletedList,
                         myCampaigns = personal.mine,
                         joinedCampaigns = personal.joined,
                         leaderboard = personal.leaderboard,
                         myRank = personal.myRank ?: _uiState.value.myRank,
-                        ownerStatsMap = ownerStats,
+                        ownerStatsMap = finalOwnerStats,
                         userCredits = myProfile?.credits ?: _uiState.value.userCredits,
-                        todayCheckinCount = personal.todayCheckins,
-                        missedStreak = personal.dailyTask?.missedStreak
+                        todayCheckinCount = finalTodayCheckins,
+                        missedStreak = finalDailyTask?.missedStreak
                             ?: myProfile?.effectiveMissedStreak ?: 0,
-                        dailyTask = personal.dailyTask,
+                        dailyTask = finalDailyTask,
                         pendingReportsCount = personal.pendingReports,
                         notifications = notifs,
                         unreadNotificationsCount = unreadNotifsCount,
-                        questSummary = personal.quests,
+                        questSummary = finalQuestSummary,
                         timestamp = System.currentTimeMillis(),
+                        dateVn = currentBusinessDay,
                         sessionGeneration = initialGen,
                     )
                     SessionCacheManager.save(appContext, snapshot, targetGeneration = initialGen)
@@ -703,13 +886,95 @@ class HomeViewModel(
 
                 // Re-run the current search against fresh data.
                 if (_uiState.value.query.isNotBlank()) runSearch(_uiState.value.query)
+
+                if (hasStaleStatsDate) {
+                    if (staleFeedRetryCount.incrementAndGet() <= 2) {
+                        viewModelScope.launch {
+                            refresh(appContext, forceRefresh = true)
+                        }
+                    }
+                } else {
+                    staleFeedRetryCount.set(0)
+                }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
+                val isAccountSwitch = (renderedUserId != null && renderedUserId != initialUid) ||
+                    (lastSyncedUid != null && lastSyncedUid != initialUid) ||
+                    (_uiState.value.userProfile?.id != null && _uiState.value.userProfile?.id != initialUid)
+                if (isAccountSwitch) {
+                    renderedUserId = initialUid
+                    lastSyncedUid = null
+                }
+                val currentBusinessDay = repository.businessDay().toString()
+                val isDayRollover = repository.businessDay() != initialDay ||
+                    (_uiState.value.homeOrderDate != null && _uiState.value.homeOrderDate != currentBusinessDay)
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isBackgroundSyncing = false,
-                        error = if (_uiState.value.openCampaigns.isEmpty()) friendlyError(e, localizer) else null
-                    )
+                    if (isAccountSwitch) {
+                        val clearedDisplay = it.displayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                        val clearedPaused = it.pausedDisplayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                        val clearedCompleted = it.completedDisplayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
+                        val sortedDisplay = DailyHomeOrder.sortOpenCampaigns(clearedDisplay, currentBusinessDay)
+                        val sortedPaused = DailyHomeOrder.sortOtherCampaigns(clearedPaused, currentBusinessDay)
+                        val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(clearedCompleted, currentBusinessDay)
+                        it.copy(
+                            isLoading = false,
+                            isBackgroundSyncing = false,
+                            userProfile = null,
+                            userCredits = 0,
+                            myCampaigns = emptyList(),
+                            joinedCampaigns = emptyList(),
+                            notifications = emptyList(),
+                            unreadNotificationsCount = 0,
+                            unreadWarning = null,
+                            weeklyWarningsCount = 0,
+                            pendingReportsCount = 0,
+                            todayCheckinCount = 0,
+                            questSummary = null,
+                            dailyTask = null,
+                            creditLogs = emptyList(),
+                            openCampaigns = sortedDisplay.map { d -> d.campaign },
+                            displayItems = sortedDisplay,
+                            pausedDisplayItems = sortedPaused,
+                            completedDisplayItems = sortedCompleted,
+                            searchResults = it.searchResults?.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
+                            ownerStatsMap = emptyMap(),
+                            joinedStatsMap = emptyMap(),
+                            homeOrderDate = currentBusinessDay,
+                            error = if (it.displayItems.isEmpty() && it.pausedDisplayItems.isEmpty() && it.completedDisplayItems.isEmpty()) friendlyError(e, localizer) else null,
+                        )
+                    } else {
+                        val baseDisplayItems = if (isDayRollover) it.displayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) } else it.displayItems
+                        val basePausedItems = if (isDayRollover) it.pausedDisplayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) } else it.pausedDisplayItems
+                        val baseCompletedItems = if (isDayRollover) it.completedDisplayItems.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) } else it.completedDisplayItems
+                        val sortedDisplay = DailyHomeOrder.sortOpenCampaigns(baseDisplayItems, currentBusinessDay)
+                        val sortedPaused = DailyHomeOrder.sortOtherCampaigns(basePausedItems, currentBusinessDay)
+                        val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(baseCompletedItems, currentBusinessDay)
+                        val baseSearchResults = if (isDayRollover) it.searchResults?.map { d -> d.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) } else it.searchResults
+                        it.copy(
+                            isLoading = false,
+                            isBackgroundSyncing = false,
+                            openCampaigns = sortedDisplay.map { d -> d.campaign },
+                            displayItems = sortedDisplay,
+                            pausedDisplayItems = sortedPaused,
+                            completedDisplayItems = sortedCompleted,
+                            searchResults = baseSearchResults,
+                            homeOrderDate = currentBusinessDay,
+                            todayCheckinCount = if (isDayRollover) 0 else it.todayCheckinCount,
+                            dailyTask = if (isDayRollover) null else it.dailyTask,
+                            questSummary = if (isDayRollover) it.questSummary?.copy(dailyCount = 0) else it.questSummary,
+                            ownerStatsMap = if (isDayRollover) it.ownerStatsMap.mapValues { (_, s) -> s.copy(testedTodayCount = 0) } else it.ownerStatsMap,
+                            joinedStatsMap = if (isDayRollover) it.joinedStatsMap.mapValues { (_, s) -> s.copy(homeTestedCount = null, statsDate = null, hasTestedToday = false, todayTestedCount = 0) } else it.joinedStatsMap,
+                            userProfile = if (it.userProfile?.id != initialUid) null else it.userProfile,
+                            notifications = if (initialUid == null) emptyList() else it.notifications.filter { n -> n.userId == initialUid },
+                            error = if (it.displayItems.isEmpty() && it.pausedDisplayItems.isEmpty() && it.completedDisplayItems.isEmpty()) friendlyError(e, localizer) else null
+                        )
+                    }
+                }
+                if (_uiState.value.query.isNotBlank()) {
+                    runSearch(_uiState.value.query)
                 }
             }
         }
@@ -977,6 +1242,7 @@ class HomeViewModel(
         val initialMutation = missionMutationVersion.get()
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
+        val initialDay = repository.businessDay()
         viewModelScope.launch {
             _uiState.update { it.copy(isMissionsLoading = true, missionsError = null) }
             try {
@@ -1014,6 +1280,7 @@ class HomeViewModel(
         if (_uiState.value.joiningMissionId != null) return
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
+        val initialDay = repository.businessDay()
         viewModelScope.launch {
             _uiState.update { it.copy(joiningMissionId = missionId) }
             try {

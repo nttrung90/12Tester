@@ -416,7 +416,7 @@
     <string name="campaign_badge_not_installed">Chưa cài</string>
     <string name="campaign_tested_today">Đã test hôm nay</string>
     <string name="campaign_not_tested_today">Chưa test hôm nay</string>
-    <string name="campaign_stats_line_format">%1$d/%2$d hôm nay · %3$d người đã cài</string>
+    <string name="campaign_stats_line_format">%1$s/%2$d hôm nay · %3$d người đã cài</string>
     <string name="campaign_days_left_suffix"> · Còn %1$d ngày</string>
     <string name="campaign_target_reached">· Đủ chỉ tiêu</string>
 
@@ -1147,5 +1147,19 @@
     <string name="mission_load_error">Không thể tải danh sách nhiệm vụ</string>
     <string name="mission_load_error_retry">Thử lại</string>
     <string name="mission_owner_load_error">Không thể tải nhiệm vụ của app — bấm để thử lại</string>
+
+    <!-- Chu kỳ thống kê Trang chủ (Admin) -->
+    <string name="admin_home_stats_cycle_title">Chu kỳ thống kê Trang chủ</string>
+    <string name="admin_home_stats_cycle_desc">Cấu hình chu kỳ cộng dồn lượt test trên thẻ app Trang chủ (1 / 2 / 3 ngày). Mặc định là 1 ngày.</string>
+    <string name="admin_home_stats_cycle_1_day">1 ngày (Mặc định)</string>
+    <string name="admin_home_stats_cycle_2_days">2 ngày</string>
+    <string name="admin_home_stats_cycle_3_days">3 ngày</string>
+    <string name="admin_home_stats_current_active">Chu kỳ đang áp dụng: %1$d ngày (từ %2$s)</string>
+    <string name="admin_home_stats_pending_schedule">Lịch chờ áp dụng: %1$d ngày (bắt đầu 00:00 ngày %2$s)</string>
+    <string name="admin_home_stats_no_pending">Không có thay đổi chờ áp dụng.</string>
+    <string name="admin_home_stats_note">Lưu ý: Cấu hình mới sẽ có hiệu lực từ 00:00 ngày tiếp theo (theo giờ Việt Nam Asia/Ho_Chi_Minh). Nếu chọn lại chu kỳ đang chạy, lịch chờ áp dụng (nếu có) sẽ bị hủy.</string>
+    <string name="admin_home_stats_saved_success">Đã lưu cấu hình chu kỳ thống kê Trang chủ thành công.</string>
+    <string name="admin_home_stats_load_failed">Không thể tải cấu hình chu kỳ: %1$s</string>
+    <string name="admin_home_stats_save_failed">Lỗi khi lưu chu kỳ thống kê: %1$s</string>
 
 </resources>

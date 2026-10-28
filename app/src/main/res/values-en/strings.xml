@@ -416,7 +416,7 @@
     <string name="campaign_badge_not_installed">Not installed</string>
     <string name="campaign_tested_today">Tested today</string>
     <string name="campaign_not_tested_today">Not tested today</string>
-    <string name="campaign_stats_line_format">%1$d/%2$d today · %3$d installed</string>
+    <string name="campaign_stats_line_format">%1$s/%2$d today · %3$d installed</string>
     <string name="campaign_days_left_suffix"> · %1$d days left</string>
     <string name="campaign_target_reached">· Target reached</string>
 
@@ -1148,5 +1148,19 @@
     <string name="mission_load_error">Could not load missions</string>
     <string name="mission_load_error_retry">Retry</string>
     <string name="mission_owner_load_error">Failed to load mission for this app — tap to retry</string>
+
+    <!-- Keep the explicit English locale in sync with the default English resources. -->
+    <string name="admin_home_stats_cycle_title">Home Stats Cycle</string>
+    <string name="admin_home_stats_cycle_desc">Configure the test aggregation cycle on Home app cards (1 / 2 / 3 days). Default is 1 day.</string>
+    <string name="admin_home_stats_cycle_1_day">1 Day (Default)</string>
+    <string name="admin_home_stats_cycle_2_days">2 Days</string>
+    <string name="admin_home_stats_cycle_3_days">3 Days</string>
+    <string name="admin_home_stats_current_active">Active cycle: %1$d day(s) (from %2$s)</string>
+    <string name="admin_home_stats_pending_schedule">Scheduled change: %1$d day(s) (effective 00:00 %2$s)</string>
+    <string name="admin_home_stats_no_pending">No scheduled changes pending.</string>
+    <string name="admin_home_stats_note">Note: New cycle configuration will take effect at 00:00 next day (Asia/Ho_Chi_Minh). Selecting the currently active cycle will cancel any pending schedule.</string>
+    <string name="admin_home_stats_saved_success">Home stats cycle configuration saved successfully.</string>
+    <string name="admin_home_stats_load_failed">Failed to load cycle configuration: %1$s</string>
+    <string name="admin_home_stats_save_failed">Failed to save cycle configuration: %1$s</string>
 
 </resources>

@@ -20,11 +20,18 @@ import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ImageInstrumentation
+import com.ntt.crosstest.util.ScreenshotCoilInterceptor
+import com.ntt.crosstest.util.PrivateScreenshotDiskCache
+import com.ntt.crosstest.util.ScreenshotManager
+import com.ntt.crosstest.util.AppCheckObservationConfig
 import com.ntt.crosstest.util.CoinSoundPlayer
+import okhttp3.OkHttpClient
 import com.ntt.crosstest.util.PreparedScreenshotCache
 import com.ntt.crosstest.work.ReminderWorker
 import com.ntt.crosstest.work.UpdateCheckWorker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.LocalDateTime
@@ -32,6 +39,8 @@ import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
 class TestCheoApp : Application(), ImageLoaderFactory {
+
+    private val appScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Main.immediate)
 
     lateinit var authRepository: AuthRepository
         private set
@@ -46,6 +55,15 @@ class TestCheoApp : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
+            .components {
+                add(ScreenshotCoilInterceptor(this@TestCheoApp))
+            }
+            .okHttpClient {
+                OkHttpClient.Builder()
+                    .addInterceptor(ImageInstrumentation.createTrackingInterceptor())
+                    .build()
+            }
+            .eventListener(ImageInstrumentation.createEventListener())
             .memoryCache {
                 MemoryCache.Builder(this)
                     .maxSizePercent(0.25)
@@ -67,8 +85,8 @@ class TestCheoApp : Application(), ImageLoaderFactory {
 
         InstalledAppCache.init(this)
         CoinSoundPlayer.preload(this)
-        // Làm nóng snapshot session trên IO để loadSync trong constructor
-        // ViewModel (main thread) gần như chỉ đọc bản trong RAM.
+        // LÃ m nÃ³ng snapshot session trÃªn IO Ä‘á»ƒ loadSync trong constructor
+        // ViewModel (main thread) gáº§n nhÆ° chá»‰ Ä‘á»c báº£n trong RAM.
         SessionCacheManager.preload(this)
 
         // Secrets come from local.properties (see README). Without them the app
@@ -77,16 +95,37 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         val key = BuildConfig.SUPABASE_ANON_KEY
         if (url.isNotBlank() && key.isNotBlank()) {
             val client = SupabaseHolder.init(url, key)
-            authRepository = AuthRepository(client)
+            authRepository = AuthRepository(client, this)
             campaignRepository = CampaignRepository(client, Localizer(this))
             appConfigRepository = AppConfigRepository(client, this)
             reportSubmitManager = ReportSubmitManager(this)
+
+            // R2-02 & E04: Đăng ký SupabaseMediaAccessGrantProvider thật cho ScreenshotCachePolicy
+            com.ntt.crosstest.util.ScreenshotCachePolicy.mediaAccessGrantProvider =
+                com.ntt.crosstest.data.SupabaseMediaAccessGrantProvider(client)
+
+            // R2-04: Quan sát sessionStatus trong application scope để bind sau async session restoration
+            // và cấp application Context cho logout/account switch
+            observeAuthSession(appScope, this, authRepository)
         }
 
         settingsRepository = SettingsRepository(this)
-        // Dọn ảnh pending/prepared quá hạn sau khi process khởi động lại.
+        // Dá»n áº£nh pending/prepared quÃ¡ háº¡n sau khi process khá»Ÿi Ä‘á»™ng láº¡i.
         PreparedScreenshotCache.cleanup(this)
         PendingReportStore.cleanup(this)
+        PrivateScreenshotDiskCache.cleanupOnStartupOrResume(this)
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            override fun onActivityResumed(activity: android.app.Activity) {
+                PrivateScreenshotDiskCache.cleanupOnStartupOrResume(this@TestCheoApp)
+            }
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
+            override fun onActivityStarted(activity: android.app.Activity) {}
+            override fun onActivityPaused(activity: android.app.Activity) {}
+            override fun onActivityStopped(activity: android.app.Activity) {}
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
+            override fun onActivityDestroyed(activity: android.app.Activity) {}
+        })
+        AppCheckObservationConfig.initObservation(this)
         scheduleDailyReminder()
         scheduleUpdateCheck()
     }
@@ -94,7 +133,7 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     /**
      * Schedules the daily 20:00 check-in reminder. The first run is aligned to
      * the next 20:00, then repeats every 24h. Note: WorkManager guarantees
-     * *at-least-daily* delivery, not an exact clock time — on some devices the
+     * *at-least-daily* delivery, not an exact clock time â€” on some devices the
      * notification may arrive a bit after 20:00 (Doze / battery optimization).
      */
     fun scheduleDailyReminder() {
@@ -153,13 +192,14 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         }
         campaignRepository.clearMemoryCache()
         SessionCacheManager.clear(this)
+        ScreenshotManager.clear(this)
         ImageHashHelper.clearCache()
         if (::reportSubmitManager.isInitialized) {
             reportSubmitManager.cancelAllPendingWork()
         }
         withContext(Dispatchers.IO) {
-            // Ảnh remote (screenshot/icon) và ảnh đang chờ nộp không được
-            // tồn tại sau khi đổi tài khoản.
+            // áº¢nh remote (screenshot/icon) vÃ  áº£nh Ä‘ang chá» ná»™p khÃ´ng Ä‘Æ°á»£c
+            // tá»“n táº¡i sau khi Ä‘á»•i tÃ i khoáº£n.
             val loader = coil.Coil.imageLoader(this@TestCheoApp)
             loader.memoryCache?.clear()
             loader.diskCache?.clear()
@@ -173,5 +213,41 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         const val REMINDER_TAG = "checkin_reminder"
         const val UPDATE_CHECK_WORK_NAME = "app_update_check"
         const val UPDATE_CHECK_TAG = "app_update_check"
+
+        fun observeAuthSession(
+            scope: kotlinx.coroutines.CoroutineScope,
+            context: android.content.Context,
+            authRepository: AuthRepository
+        ): kotlinx.coroutines.Job {
+            return observeAuthSession(scope, context, authRepository.sessionStatus) {
+                authRepository.currentUserId()
+            }
+        }
+
+        fun observeAuthSession(
+            scope: kotlinx.coroutines.CoroutineScope,
+            context: android.content.Context,
+            sessionStatus: kotlinx.coroutines.flow.Flow<io.github.jan.supabase.auth.status.SessionStatus>,
+            currentUserIdProvider: () -> String? = { null }
+        ): kotlinx.coroutines.Job {
+            return scope.launch {
+                sessionStatus.collect { status ->
+                    when (status) {
+                        is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
+                            val uid = status.session.user?.id ?: currentUserIdProvider()
+                            if (!uid.isNullOrBlank()) {
+                                ScreenshotManager.onUserSessionChanged(uid, context)
+                            }
+                        }
+                        is io.github.jan.supabase.auth.status.SessionStatus.NotAuthenticated -> {
+                            ScreenshotManager.onUserSignedOut(context)
+                        }
+                        else -> {
+                            // Initializing hoặc RefreshFailure: chờ trạng thái tiếp theo
+                        }
+                    }
+                }
+            }
+        }
     }
 }

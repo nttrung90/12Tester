@@ -1,0 +1,84 @@
+PASS actual_RPC_2_day_accumulation
+PASS actual_RPC_3_day_accumulation
+PASS actual_RPC_2_day_boundary_excludes_previous_cycle
+PASS actual_RPC_3_day_boundary_excludes_previous_cycle
+PASS non_admin_direct_access_is_denied
+FAIL stale_admin_cannot_overwrite_without_revision: Missing expected rejection: A second caller bypassed the expected revision by sending NULL and overwrote the first admin schedule
+FAIL active_policy_must_be_immutable_for_operational_DML: Missing expected rejection: Already active policy can be changed directly; no immutability guard exists
+FAIL same_revision_is_independent_of_session_TimeZone: Revision hashes timestamp text using the session TimeZone
++ actual - expected
+
++ 'ca4b11c90eac665081a559adaee826ec'
+- '5cce0c5864598381f96fd63f2bd75cce'
+
+{
+  "results": [
+    {
+      "name": "actual_RPC_2_day_accumulation",
+      "pass": true,
+      "detail": {
+        "feed": {
+          "stats_date": "2026-10-28",
+          "installed_count": 0,
+          "has_tested_today": true,
+          "home_tested_count": 3,
+          "today_tested_count": 2
+        },
+        "batch": {
+          "stats_date": "2026-10-28",
+          "installed_count": 0,
+          "has_tested_today": true,
+          "home_tested_count": 3,
+          "today_tested_count": 2
+        }
+      }
+    },
+    {
+      "name": "actual_RPC_3_day_accumulation",
+      "pass": true,
+      "detail": {
+        "feed": {
+          "stats_date": "2026-10-28",
+          "installed_count": 0,
+          "has_tested_today": true,
+          "home_tested_count": 4,
+          "today_tested_count": 2
+        },
+        "batch": {
+          "stats_date": "2026-10-28",
+          "installed_count": 0,
+          "has_tested_today": true,
+          "home_tested_count": 4,
+          "today_tested_count": 2
+        }
+      }
+    },
+    {
+      "name": "actual_RPC_2_day_boundary_excludes_previous_cycle",
+      "pass": true
+    },
+    {
+      "name": "actual_RPC_3_day_boundary_excludes_previous_cycle",
+      "pass": true
+    },
+    {
+      "name": "non_admin_direct_access_is_denied",
+      "pass": true
+    },
+    {
+      "name": "stale_admin_cannot_overwrite_without_revision",
+      "pass": false,
+      "error": "Missing expected rejection: A second caller bypassed the expected revision by sending NULL and overwrote the first admin schedule"
+    },
+    {
+      "name": "active_policy_must_be_immutable_for_operational_DML",
+      "pass": false,
+      "error": "Missing expected rejection: Already active policy can be changed directly; no immutability guard exists"
+    },
+    {
+      "name": "same_revision_is_independent_of_session_TimeZone",
+      "pass": false,
+      "error": "Revision hashes timestamp text using the session TimeZone\n+ actual - expected\n\n+ 'ca4b11c90eac665081a559adaee826ec'\n- '5cce0c5864598381f96fd63f2bd75cce'\n"
+    }
+  ]
+}

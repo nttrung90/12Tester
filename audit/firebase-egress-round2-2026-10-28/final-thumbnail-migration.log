@@ -1,0 +1,12 @@
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ MIGRATION 045 (E02 THUMBNAIL) ---
+PASS: Nạp schema baseline
+PASS: Áp dụng thành công migration 045_thumbnail_support.sql
+PASS: Cột thumbnail_url đã tồn tại trong public.tester_reports
+PASS: Legacy 6-argument call tương thích ngược 100%
+PASS: 7-argument call lưu và trả thumbnail_url chính xác
+PASS: Idempotency trả lại đúng thumbnail_url đã lưu
+PASS: Chặn thumbnail từ bucket ngoài allowlist
+PASS: Chặn query-string spoofing trên URL thumbnail
+PASS: Chặn không cho ghép cặp thumbnail sai lệch ID với ảnh full
+PASS: Chặn thumbnail có user_id không khớp với session
+=== TẤT CẢ KIỂM THỬ MIGRATION 045 ĐỀU PASS 100% ===

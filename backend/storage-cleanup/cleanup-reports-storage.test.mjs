@@ -9,7 +9,7 @@ import {
 /**
  * Mock File helper
  */
-function createMockFile({ name, timeCreated, generation = '1700000000000001', size = 500000, deleteHandler }) {
+function createMockFile({ name, timeCreated, customMetadata, generation = '1700000000000001', size = 500000, deleteHandler }) {
     let deleted = false;
     let deleteCalls = [];
 
@@ -19,6 +19,8 @@ function createMockFile({ name, timeCreated, generation = '1700000000000001', si
             timeCreated,
             generation,
             size,
+            metadata: customMetadata,
+            customMetadata,
         },
         async delete(options) {
             deleteCalls.push(options);
@@ -234,5 +236,40 @@ describe('Storage Cleanup Worker Tests', () => {
                 message: /Prefix "" khong hop le/,
             }
         );
+    });
+
+    test('R02: E02 Thumbnail tạo muộn kế thừa expiry của parent qua parent_time_created, bị xóa cùng parent', async () => {
+        const parentTimeCreated = new Date(fixedNow.getTime() - 29.5 * dayMs).toISOString();
+        const thumbUploadTime = new Date(fixedNow.getTime() - 1 * dayMs).toISOString();
+
+        const fileParent = createMockFile({
+            name: 'reports/camp_01/user_01/report_01.jpg',
+            timeCreated: parentTimeCreated,
+            generation: 'gen_parent',
+        });
+
+        const fileThumb = createMockFile({
+            name: 'reports/camp_01/user_01/thumb_report_01.jpg',
+            timeCreated: thumbUploadTime,
+            customMetadata: { parent_time_created: parentTimeCreated },
+            generation: 'gen_thumb',
+        });
+
+        const mockStorage = createMockStorage([fileParent, fileThumb]);
+
+        const stats = await cleanupStorage({
+            storage: mockStorage,
+            bucketName: ALLOWED_BUCKET,
+            prefix: TARGET_PREFIX,
+            now: fixedNow,
+            dryRun: false,
+            logger: { info: () => {}, warn: () => {}, error: () => {} },
+        });
+
+        assert.equal(stats.total_scanned, 2);
+        assert.equal(stats.candidates_found, 2, 'Cả parent và thumbnail đều quá hạn 29 ngày theo parent_time_created');
+        assert.equal(stats.candidates_deleted, 2);
+        assert.equal(fileParent._isDeleted(), true);
+        assert.equal(fileThumb._isDeleted(), true);
     });
 });

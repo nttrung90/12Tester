@@ -70,6 +70,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -128,6 +129,7 @@ import com.ntt.crosstest.ui.components.NotificationBottomSheet
 import com.ntt.crosstest.ui.screens.QuestsScreen
 import com.ntt.crosstest.util.TopupConfig
 import com.ntt.crosstest.ui.viewmodels.HomeViewModel
+import com.ntt.crosstest.ui.theme.statusColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,8 +173,11 @@ fun HomeScreen(
     var appTargetReachedToConfirm by rememberSaveable { mutableStateOf<CampaignDisplayItem?>(null) }
 
     LifecycleResumeEffect(Unit) {
+        viewModel.scheduleMidnightRefresh()
         viewModel.refresh(context, forceRefresh = false)
-        onPauseOrDispose { }
+        onPauseOrDispose {
+            viewModel.stopMidnightScheduler()
+        }
     }
 
     LaunchedEffect(uiState.userProfile?.isLocked) {
@@ -365,6 +370,9 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
                 title = {
                     Text(
                         when (pagerState.currentPage) {
@@ -426,12 +434,12 @@ fun HomeScreen(
                                         modifier = Modifier
                                             .size(16.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFD32F2F)),
+                                            .background(MaterialTheme.colorScheme.error),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
                                             text = if (unread > 99) "99+" else "$unread",
-                                            color = Color.White,
+                                            color = MaterialTheme.colorScheme.onError,
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
                                         )
@@ -447,7 +455,7 @@ fun HomeScreen(
                             .padding(end = 12.dp)
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFC2185B))
+                            .background(MaterialTheme.colorScheme.tertiaryContainer)
                             .clickable {
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(4)
@@ -467,7 +475,7 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     text = initial,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
                                 )
@@ -478,7 +486,7 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
                 val claimableQuests = if (uiState.isAuthenticated) uiState.questSummary?.totalClaimableCount ?: 0 else 0
                 tabs.forEach { (label, icon, index) ->
                     NavigationBarItem(
@@ -493,8 +501,8 @@ fun HomeScreen(
                                 BadgedBox(
                                     badge = {
                                         Badge(
-                                            containerColor = Color(0xFFE65100),
-                                            contentColor = Color.White
+                                            containerColor = MaterialTheme.statusColors.warningContainer,
+                                            contentColor = MaterialTheme.statusColors.onWarningContainer,
                                         ) {
                                             Text("$claimableQuests")
                                         }
@@ -807,7 +815,7 @@ private fun DiscoverTab(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (query.isBlank()) {
                     item(key = "daily_task_card") {
@@ -874,13 +882,13 @@ private fun DiscoverTab(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     ) {
-                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF263238)))
-                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFFFFC107)))
-                                        Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSurfaceVariant))
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(MaterialTheme.statusColors.warning))
+                                        Box(Modifier.size(7.dp).clip(CircleShape).background(MaterialTheme.statusColors.success))
                                     }
                                     Text(
                                         text = stringResource(R.string.home_tested_progress_format, testedCount, items.size),
-                                        color = Color(0xFFD32F2F),
+                                        color = MaterialTheme.colorScheme.error,
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.titleSmall,
                                     )
@@ -906,7 +914,20 @@ private fun DiscoverTab(
                         )
                     }
                 } else {
-                    itemsIndexed(activeItems, key = { index, item -> "disc_${item.campaign.id ?: item.campaign.packageName}_$index" }) { _, item ->
+                    itemsIndexed(
+                        activeItems,
+                        key = { index, item ->
+                            val id = item.campaign.id?.trim()
+                            if (!id.isNullOrEmpty()) {
+                                "disc_$id"
+                            } else {
+                                val owner = item.campaign.ownerId?.trim().orEmpty()
+                                val pkg = item.campaign.packageName.trim()
+                                val slot = item.campaign.slotNumber
+                                "disc_fallback_${owner}_${pkg}_${slot}_$index"
+                            }
+                        }
+                    ) { _, item ->
                         CampaignCard(
                             item = item,
                             onClick = { onCardClick(item) },
@@ -945,8 +966,8 @@ private fun HomeSubTab(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(
-                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            else MaterialTheme.colorScheme.surfaceVariant
+                            if (selected) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                         .padding(horizontal = 5.dp, vertical = 1.dp),
                 ) {
@@ -1053,7 +1074,7 @@ private fun MyTab(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Banner chờ duyệt (Matching Image 1) - Chỉ hiện khi có báo cáo chờ duyệt thực tế
             if (pendingReportsCount > 0 && myCampaigns.isNotEmpty()) {
@@ -1068,7 +1089,7 @@ private fun MyTab(
                                 if (targetApp?.id != null) onOwnerAppClick(targetApp.id)
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFF6EEFB)
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
                         ),
                         shape = RoundedCornerShape(14.dp),
                     ) {
@@ -1082,7 +1103,7 @@ private fun MyTab(
                                 imageVector = Icons.AutoMirrored.Filled.Assignment,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
-                                tint = Color(0xFF6A1B9A),
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
                             )
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
@@ -1090,20 +1111,20 @@ private fun MyTab(
                                     text = stringResource(R.string.home_pending_reports_format, pendingReportsCount),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF4A148C),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                                 )
                                 Spacer(Modifier.height(2.dp))
                                 Text(
                                     text = stringResource(R.string.home_pending_reports_hint),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF6A1B9A),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                                 )
                             }
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = Color(0xFF6A1B9A),
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
                             )
                         }
                     }
@@ -1171,6 +1192,7 @@ private fun MyTab(
                         installedCount = stats?.installedCount ?: 0,
                         todayTestedCount = stats?.todayTestedCount ?: 0,
                         hasTestedToday = stats?.hasTestedToday ?: false,
+                        displayTestedCount = stats?.effectiveHomeTestedCount,
                     )
                 }
             }

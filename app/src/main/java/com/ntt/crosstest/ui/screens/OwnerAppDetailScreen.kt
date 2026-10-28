@@ -76,6 +76,8 @@ import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.ImageComparisonDialog
 import com.ntt.crosstest.ui.theme.AmberStar
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ScreenshotManager
+import com.ntt.crosstest.util.ScreenshotRequestFactory
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -112,6 +114,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.ntt.crosstest.util.ScreenshotVariant
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
@@ -1622,6 +1625,8 @@ private fun TesterReportsDialog(
     onReject: (TesterReport, String?) -> Unit,
 ) {
     var previewImageUrl by remember { mutableStateOf<String?>(null) }
+    var previewImageExpired by remember { mutableStateOf(false) }
+    var previewReport by remember { mutableStateOf<TesterReport?>(null) }
     var reportToReject by remember { mutableStateOf<TesterReport?>(null) }
     var reportToCompare by remember { mutableStateOf<Pair<TesterReport, TesterReport?>?>(null) }
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Chờ duyệt, 1: Đã duyệt, 2: Đã từ chối, 3: Tất cả
@@ -1672,9 +1677,15 @@ private fun TesterReportsDialog(
     if (previewImageUrl != null) {
         FullscreenImageViewer(
             imageUrl = previewImageUrl,
-            onDismiss = { previewImageUrl = null },
+            onDismiss = {
+                previewImageUrl = null
+                previewImageExpired = false
+                previewReport = null
+            },
             title = stringResource(R.string.oad_screenshot_tester_title),
-            subtitle = stringResource(R.string.img_zoom_hint)
+            subtitle = stringResource(R.string.img_zoom_hint),
+            isExpired = previewImageExpired,
+            report = previewReport,
         )
     }
 
@@ -1849,7 +1860,11 @@ private fun TesterReportsDialog(
                                 report = report,
                                 previousReport = previousReport,
                                 isActionLoading = isActionLoading,
-                                onPreviewImage = { url -> previewImageUrl = url },
+                                onPreviewImage = { url, expired, rep ->
+                                    previewImageUrl = url
+                                    previewImageExpired = expired
+                                    previewReport = rep
+                                },
                                 onCompare = { reportToCompare = Pair(report, previousReport) },
                                 onApprove = { onApprove(report, 0) },
                                 onReject = { reportToReject = report }
@@ -1874,7 +1889,7 @@ private fun ReportReviewCard(
     report: TesterReport,
     previousReport: TesterReport?,
     isActionLoading: Boolean,
-    onPreviewImage: (String) -> Unit,
+    onPreviewImage: (String, Boolean, TesterReport?) -> Unit,
     onCompare: () -> Unit,
     onApprove: () -> Unit,
     onReject: () -> Unit,
@@ -1886,15 +1901,17 @@ private fun ReportReviewCard(
     var isCheckingHash by remember { mutableStateOf(false) }
 
     LaunchedEffect(report.screenshotUrl, previousReport?.screenshotUrl, report.imageHash, previousReport?.imageHash, report.isScreenshotExpired, previousReport?.isScreenshotExpired) {
+        ScreenshotManager.registerReportMetadata(report)
+        ScreenshotManager.registerReportMetadata(previousReport)
         val u1 = report.screenshotUrl
         val u2 = previousReport?.screenshotUrl
         if (!u1.isNullOrBlank() && !u2.isNullOrBlank()) {
             isCheckingHash = true
             // Ưu tiên image_hash đã lưu trong DB — chỉ tải + decode ảnh khi hash trống và chưa hết hạn 30 ngày.
             val h1 = report.imageHash?.takeIf { it.isNotBlank() }
-                ?: if (!report.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, u1) else null
-            val h2 = previousReport.imageHash?.takeIf { it.isNotBlank() }
-                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, u2) else null
+                ?: if (!report.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, u1, report) else null
+            val h2 = previousReport?.imageHash?.takeIf { it.isNotBlank() }
+                ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, u2, previousReport) else null
             if (h1 != null && h2 != null) {
                 comparison = ImageHashHelper.compare(h1, h2, context)
             }
@@ -2116,12 +2133,12 @@ private fun ReportReviewCard(
                             .fillMaxWidth()
                             .height(200.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .clickable { report.screenshotUrl?.let { onPreviewImage(it) } },
+                            .clickable { report.screenshotUrl?.let { onPreviewImage(it, report.isScreenshotExpired, report) } },
                         colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.06f)),
                     ) {
                         Box(Modifier.fillMaxSize()) {
                             AsyncImage(
-                                model = report.screenshotUrl,
+                                model = remember(context, report) { ScreenshotRequestFactory.createRequest(context, report, variant = ScreenshotVariant.THUMBNAIL) } ?: (report.thumbnailUrl ?: report.screenshotUrl),
                                 contentDescription = stringResource(R.string.oad_screenshot_tester_title),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Fit,

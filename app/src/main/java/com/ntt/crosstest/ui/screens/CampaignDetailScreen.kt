@@ -85,6 +85,9 @@ import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.TesterImageComparisonDialog
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ScreenshotManager
+import com.ntt.crosstest.data.TesterReport
+import com.ntt.crosstest.util.ScreenshotRequestFactory
 import com.ntt.crosstest.util.formatIsoUtcToLocal
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -123,6 +126,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.ntt.crosstest.util.ScreenshotVariant
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
@@ -174,6 +178,8 @@ fun CampaignDetailScreen(
     var showAdminResumeDialog by rememberSaveable { mutableStateOf(false) }
     var adminPauseReason by rememberSaveable { mutableStateOf("") }
     var previewImageUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var previewImageExpired by rememberSaveable { mutableStateOf(false) }
+    var previewReport by remember { mutableStateOf<TesterReport?>(null) }
 
     var isInstalledLocally by remember { mutableStateOf(false) }
 
@@ -692,17 +698,24 @@ fun CampaignDetailScreen(
                                                 )
                                             }
                                         } else if (!rep.screenshotUrl.isNullOrBlank()) {
+                                            LaunchedEffect(rep.screenshotUrl) {
+                                                ScreenshotManager.registerReportMetadata(rep)
+                                            }
                                             Row(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .clickable { previewImageUrl = rep.screenshotUrl }
+                                                    .clickable {
+                                                        previewImageUrl = rep.screenshotUrl
+                                                        previewImageExpired = rep.isScreenshotExpired
+                                                        previewReport = rep
+                                                    }
                                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
                                                     .padding(6.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             ) {
                                                 AsyncImage(
-                                                    model = rep.screenshotUrl,
+                                                model = remember(context, rep) { ScreenshotRequestFactory.createRequest(context, rep, variant = ScreenshotVariant.THUMBNAIL) } ?: (rep.thumbnailUrl ?: rep.screenshotUrl),
                                                     contentDescription = stringResource(R.string.campaign_submitted_photo_cd),
                                                     modifier = Modifier
                                                         .size(width = 60.dp, height = 42.dp)
@@ -771,7 +784,7 @@ fun CampaignDetailScreen(
                 viewModel.startSubmit()
                 showReportDialog = false
             },
-            onPreviewImage = { url: String -> previewImageUrl = url },
+            onPreviewImage = { url: String, expired: Boolean, rep: TesterReport? -> previewImageUrl = url; previewImageExpired = expired; previewReport = rep },
         )
     }
 
@@ -1641,11 +1654,18 @@ fun CampaignDetailScreen(
 
                         // Thumbnail preview of screenshot submitted today (if any)
                         if (!todayReport?.screenshotUrl.isNullOrBlank()) {
+                            LaunchedEffect(todayReport.screenshotUrl) {
+                                ScreenshotManager.registerReportMetadata(todayReport)
+                            }
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(10.dp))
-                                    .clickable { previewImageUrl = todayReport.screenshotUrl },
+                                    .clickable {
+                                        previewImageUrl = todayReport.screenshotUrl
+                                        previewImageExpired = todayReport.isScreenshotExpired
+                                        previewReport = todayReport
+                                    },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
                                 shape = RoundedCornerShape(10.dp),
                             ) {
@@ -1657,7 +1677,7 @@ fun CampaignDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
                                     AsyncImage(
-                                        model = todayReport.screenshotUrl,
+                                    model = remember(context, todayReport) { ScreenshotRequestFactory.createRequest(context, todayReport, variant = ScreenshotVariant.THUMBNAIL) } ?: (todayReport.thumbnailUrl ?: todayReport.screenshotUrl),
                                         contentDescription = stringResource(R.string.campaign_your_photo_cd),
                                         modifier = Modifier
                                             .size(width = 72.dp, height = 50.dp)
@@ -1924,9 +1944,15 @@ fun CampaignDetailScreen(
     if (previewImageUrl != null) {
         FullscreenImageViewer(
             imageUrl = previewImageUrl,
-            onDismiss = { previewImageUrl = null },
+            onDismiss = {
+                previewImageUrl = null
+                previewImageExpired = false
+                previewReport = null
+            },
             title = stringResource(R.string.img_screenshot_title),
-            subtitle = campaign?.appName
+            subtitle = campaign?.appName,
+            isExpired = previewImageExpired,
+            report = previewReport,
         )
     }
 }
@@ -2000,7 +2026,7 @@ private fun SubmitReportBottomSheet(
     onRatingChange: (Int) -> Unit,
     onCommentChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onPreviewImage: (String) -> Unit,
+    onPreviewImage: (String, Boolean, TesterReport?) -> Unit,
 ) {
     val context = LocalContext.current
     val todayReport = uiState.myTodayReport
@@ -2065,12 +2091,12 @@ private fun SubmitReportBottomSheet(
             else -> {
                 // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh hôm nay khi hash trống.
                 uiState.myTodayReport?.imageHash?.takeIf { it.isNotBlank() }
-                    ?: ImageHashHelper.computeDHashFromUrl(context, todayUrl!!)
+                    ?: ImageHashHelper.computeDHashFromUrl(context, todayUrl!!, uiState.myTodayReport)
             }
         }
         // Ưu tiên hash đã lưu trong DB — chỉ tải ảnh cũ khi hash trống và chưa hết hạn 30 ngày.
         val prevHash = previousReport.imageHash?.takeIf { it.isNotBlank() }
-            ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, previousUrl) else null
+            ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, previousUrl, previousReport) else null
         if (newHash != null && prevHash != null) {
             val comp = ImageHashHelper.compare(newHash, prevHash, context)
             comparisonResult = comp
@@ -2196,13 +2222,14 @@ private fun SubmitReportBottomSheet(
                                     model = uiState.selectedScreenshotUri,
                                     label = stringResource(R.string.campaign_photo_new_label),
                                     modifier = Modifier.weight(1f),
-                                    onClick = { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
+                                    onClick = { onPreviewImage(uiState.selectedScreenshotUri.toString(), false, null) },
                                 )
                                 ComparisonPhotoCard(
                                     model = previousImageUrl,
                                     label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
                                     modifier = Modifier.weight(1f),
-                                    onClick = { onPreviewImage(previousImageUrl) },
+                                    report = previousReport,
+                                    onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
                                 )
                             }
                         } else {
@@ -2212,7 +2239,7 @@ private fun SubmitReportBottomSheet(
                                     .height(220.dp)
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(Color.Black.copy(alpha = 0.05f))
-                                    .clickable { onPreviewImage(uiState.selectedScreenshotUri.toString()) },
+                                    .clickable { onPreviewImage(uiState.selectedScreenshotUri.toString(), false, null) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 AsyncImage(
@@ -2325,13 +2352,15 @@ private fun SubmitReportBottomSheet(
                                     model = todayImageUrl,
                                     label = stringResource(R.string.campaign_today_photo_title),
                                     modifier = Modifier.weight(1f),
-                                    onClick = { todayImageUrl?.let(onPreviewImage) },
+                                    report = uiState.myTodayReport,
+                                    onClick = { todayImageUrl?.let { onPreviewImage(it, uiState.myTodayReport?.isScreenshotExpired ?: false, uiState.myTodayReport) } },
                                 )
                                 ComparisonPhotoCard(
                                     model = previousImageUrl,
                                     label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
                                     modifier = Modifier.weight(1f),
-                                    onClick = { onPreviewImage(previousImageUrl) },
+                                    report = previousReport,
+                                    onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
                                 )
                             }
                             OutlinedButton(
@@ -2350,11 +2379,11 @@ private fun SubmitReportBottomSheet(
                                     .height(200.dp)
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(Color.Black.copy(alpha = 0.05f))
-                                    .clickable { onPreviewImage(uiState.myTodayReport!!.screenshotUrl!!) },
+                                    .clickable { onPreviewImage(uiState.myTodayReport!!.screenshotUrl!!, uiState.myTodayReport?.isScreenshotExpired ?: false, uiState.myTodayReport) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 AsyncImage(
-                                    model = uiState.myTodayReport!!.screenshotUrl,
+                                model = remember(context, uiState.myTodayReport) { ScreenshotRequestFactory.createRequest(context, uiState.myTodayReport, variant = ScreenshotVariant.THUMBNAIL) } ?: (uiState.myTodayReport?.thumbnailUrl ?: uiState.myTodayReport!!.screenshotUrl),
                                     contentDescription = stringResource(R.string.campaign_submitted_photo_cd),
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Fit
@@ -2559,6 +2588,8 @@ private fun SubmitReportBottomSheet(
             previousDate = previousReport?.createdAt?.let { formatIsoUtcToLocal(it) },
             comparisonResult = comparisonResult,
             isCalculatingHash = isCheckingDuplicate,
+            currentReport = uiState.myTodayReport,
+            previousReport = previousReport,
             onDismiss = { showComparisonDialog = false },
         )
     }
@@ -2570,8 +2601,13 @@ private fun ComparisonPhotoCard(
     label: String,
     modifier: Modifier = Modifier,
     height: Dp = 160.dp,
+    report: TesterReport? = null,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val imageRequest = remember(context, model, report) {
+        ScreenshotRequestFactory.createRequest(context, model, report)
+    }
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -2592,7 +2628,7 @@ private fun ComparisonPhotoCard(
             contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
-                model = model,
+                model = imageRequest ?: model,
                 contentDescription = label,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,

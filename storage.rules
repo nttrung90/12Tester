@@ -12,7 +12,12 @@ service firebase.storage {
       // (xem FirebaseStorageHelper), nên không cần quyền update.
       allow create: if request.resource.size > 0
         && request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/jpeg');
+        && request.resource.contentType.matches('image/jpeg')
+        && (
+          fileName.matches('^thumb_.*') ||
+          request.resource.metadata == null ||
+          !('parent_time_created' in request.resource.metadata)
+        );
       allow update, delete: if false;
     }
 
@@ -22,7 +27,12 @@ service firebase.storage {
       allow read: if true;
       allow create: if request.resource.size > 0
         && request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/jpeg');
+        && request.resource.contentType.matches('image/jpeg')
+        && (
+          fileName.matches('^thumb_.*') ||
+          request.resource.metadata == null ||
+          !('parent_time_created' in request.resource.metadata)
+        );
       allow update, delete: if false;
     }
 

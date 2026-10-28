@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:28:45.793Z" hostname="PC-5700X3D" time="0.016">
+  <properties/>
+  <testcase name="testComposeStableKeyLogic" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.002"/>
+  <testcase name="testEdgeCases_emptyList_singleApp_missingIdentifiers" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.003"/>
+  <testcase name="testSanitizeOldSnapshot_andReSortForToday" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.001"/>
+  <testcase name="testStableTieBreakerById" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testPrioritiesPreserved_randomOnlyBreaksTies" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testSortOrderStableWithinDay_independentOfInputOrder" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.003"/>
+  <testcase name="testAddingOrRemovingApp_preservesRelativeOrderOfRemainingApps" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.001"/>
+  <testcase name="testPreservesAllDataFieldsAfterSort" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testStableCampaignIdentifierNormalization" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testHashAlgorithmKnownVector" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.004"/>
+  <testcase name="testPausedAndCompletedTabs_useDailyKeyWithoutBoostOrTipPriority" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.001"/>
+  <testcase name="testSearchFilter_preservesRelativeOrderOfSortedItems" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testAcrossMidnightInMultiDayCycle_updatesOrderKeyWithoutChangingCycleStats" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <testcase name="testDifferentDatesChangeSortOrder" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.001"/>
+  <testcase name="testCycleStatsGreaterThanTarget_butTodayNotReached_groupedInNotReached" classname="com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

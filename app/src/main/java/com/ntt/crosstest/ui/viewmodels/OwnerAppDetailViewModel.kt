@@ -17,6 +17,8 @@ import com.ntt.crosstest.data.TesterItem
 import com.ntt.crosstest.data.TesterReport
 import com.ntt.crosstest.ui.components.CreditReward
 import com.ntt.crosstest.ui.components.CreditRewardType
+import kotlinx.coroutines.CancellationException
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,6 +95,7 @@ class OwnerAppDetailViewModel(
         val seq = refreshSequence.incrementAndGet()
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
+        val initialDay = repository.businessDay()
         viewModelScope.launch {
             if (forceRefresh || _uiState.value.campaign == null) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
@@ -106,7 +109,7 @@ class OwnerAppDetailViewModel(
                     if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
                         return@launch
                     }
-                    applyDetail(detail, forceRefresh)
+                    applyDetail(detail, forceRefresh, seq, initialGen, initialUid, initialDay)
                     return@launch
                 }
                 val camp = repository.getCampaign(campaignId, forceRefresh = forceRefresh)
@@ -128,6 +131,7 @@ class OwnerAppDetailViewModel(
                     return@launch
                 }
 
+                val finalStats = if (repository.businessDay() == initialDay) stats else stats?.copy(testedTodayCount = 0)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -135,7 +139,7 @@ class OwnerAppDetailViewModel(
                         campaign = camp,
                         ownerProfile = owner,
                         slotInfo = slot,
-                        stats = stats,
+                        stats = finalStats ?: CampaignOwnerStats(),
                         testers = testers,
                         reports = reports,
                         isAdmin = myProfile?.isAdmin == true,
@@ -145,6 +149,10 @@ class OwnerAppDetailViewModel(
                     )
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+                    return@launch
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -157,11 +165,19 @@ class OwnerAppDetailViewModel(
     }
 
     /** Áp kết quả RPC `get_campaign_detail` (1 round-trip) vào UI state của chủ app. */
-    private suspend fun applyDetail(detail: CampaignDetailResult, forceRefresh: Boolean) {
+    private suspend fun applyDetail(
+        detail: CampaignDetailResult,
+        forceRefresh: Boolean,
+        seq: Long,
+        initialGen: Long,
+        initialUid: String?,
+        initialDay: LocalDate,
+    ) {
         val camp = detail.campaign
+        val isSameDay = repository.businessDay() == initialDay
         val stats = CampaignOwnerStats(
             installedTestersCount = detail.testers.size,
-            testedTodayCount = detail.todayTestedCount,
+            testedTodayCount = if (isSameDay) detail.todayTestedCount else 0,
             totalReportsCount = detail.reportsCount,
             pendingReportsCount = detail.pendingReportsCount,
             averageRating = detail.avgRating,
@@ -183,7 +199,11 @@ class OwnerAppDetailViewModel(
             myProfile = detail.myProfile,
         )
         val slots = try { repository.getMySlotsInfo(forceRefresh = forceRefresh) } catch (_: Exception) { emptyList() }
+        if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != repository.currentUserId()) {
+            return
+        }
         val slot = slots.find { it.slotNumber == camp.slotNumber }
+        val finalStats = if (repository.businessDay() == initialDay) stats else stats.copy(testedTodayCount = 0)
 
         _uiState.update {
             it.copy(
@@ -192,7 +212,7 @@ class OwnerAppDetailViewModel(
                 campaign = camp,
                 ownerProfile = owner,
                 slotInfo = slot,
-                stats = stats,
+                stats = finalStats,
                 testers = testers,
                 reports = reports,
                 isAdmin = detail.myProfile?.isAdmin == true,

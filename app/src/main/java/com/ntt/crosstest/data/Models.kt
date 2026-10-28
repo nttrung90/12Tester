@@ -2,6 +2,7 @@ package com.ntt.crosstest.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.ntt.crosstest.util.VnTime
 
 /**
  * Database models. Column names use snake_case via @SerialName.
@@ -219,6 +220,7 @@ data class TesterReport(
     @SerialName("report_type") val reportType: String = "feedback",
     @SerialName("content") val content: String = "",
     @SerialName("screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("thumbnail_url") val thumbnailUrl: String? = null,
     @SerialName("rating") val rating: Int? = null,
     @SerialName("status") val status: String = "pending", // pending, approved, rejected
     @SerialName("bonus_awarded") val bonusAwarded: Int = 0,
@@ -694,6 +696,7 @@ data class SubmitTesterReportParams(
     // null = không sửa nội dung (server giữ nguyên comment cũ khi chỉ đổi ảnh)
     @SerialName("p_content") val content: String? = null,
     @SerialName("p_screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("p_thumbnail_url") val thumbnailUrl: String? = null,
     @SerialName("p_rating") val rating: Int = 5,
     @SerialName("p_image_hash") val imageHash: String? = null,
     @SerialName("p_client_submit_id") val clientSubmitId: String? = null,
@@ -705,6 +708,7 @@ data class SubmitTesterReportLegacyParams(
     @SerialName("p_campaign_id") val campaignId: String,
     @SerialName("p_content") val content: String? = null,
     @SerialName("p_screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("p_thumbnail_url") val thumbnailUrl: String? = null,
     @SerialName("p_rating") val rating: Int = 5,
     @SerialName("p_image_hash") val imageHash: String? = null,
 )
@@ -718,6 +722,7 @@ data class SubmitTesterReportResult(
     @SerialName("provisional_amount") val provisionalAmount: Int = 0,
     /** URL thực tế server đang giữ; dùng để tránh xoá nhầm ảnh cũ khi báo cáo đã duyệt. */
     @SerialName("screenshot_url") val screenshotUrl: String? = null,
+    @SerialName("thumbnail_url") val thumbnailUrl: String? = null,
     @SerialName("image_hash") val imageHash: String? = null,
 )
 
@@ -807,6 +812,33 @@ data class CampaignStats(
     @SerialName("installed_count") val installedCount: Int = 0,
     @SerialName("today_tested_count") val todayTestedCount: Int = 0,
     @SerialName("has_tested_today") val hasTestedToday: Boolean = false,
+    @SerialName("home_tested_count") val homeTestedCount: Int? = null,
+    @SerialName("stats_date") val statsDate: String? = null,
+) {
+    val effectiveHomeTestedCount: Int? get() = when {
+        homeTestedCount != null -> homeTestedCount
+        statsDate != null -> if (statsDate == VnTime.today().toString()) todayTestedCount else null
+        todayTestedCount > 0 -> todayTestedCount
+        else -> null
+    }
+}
+
+/** Cấu hình chu kỳ thống kê lượt test Trang chủ (migration 047). */
+@Serializable
+data class HomeStatsPolicyConfig(
+    @SerialName("active_cycle_days") val activeCycleDays: Int = 1,
+    @SerialName("active_effective_from") val activeEffectiveFrom: String? = null,
+    @SerialName("pending_cycle_days") val pendingCycleDays: Int? = null,
+    @SerialName("pending_effective_from") val pendingEffectiveFrom: String? = null,
+    @SerialName("revision") val revision: String = "",
+    @SerialName("today") val today: String = "",
+)
+
+/** Tham số RPC admin_set_home_stats_cycle. */
+@Serializable
+data class AdminSetHomeStatsCycleParams(
+    @SerialName("p_cycle_days") val cycleDays: Int,
+    @SerialName("p_expected_revision") val expectedRevision: String? = null,
 )
 
 /** Kết quả RPC `get_home_feed` — danh sách campaign 3 tab + tên chủ app + stats. */

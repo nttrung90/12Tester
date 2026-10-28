@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "status": "OK",
+    "validationError": null,
+    "cloudReportedSentBytes": 100,
+    "cloudReportedRequests": 1,
+    "clientReportedBodyBytes": 100,
+    "clientReportedRequests": 1,
+    "clientReportedMemoryHits": 0,
+    "unclassifiedExternalBytes": 0,
+    "unclassifiedPercent": 0,
+    "isAlertTriggered": false
+  },
+  "cohortBreakdown": [
+    {
+      "clientVersion": "fixture",
+      "cohort": "audit",
+      "requestCount": 1,
+      "bodyBytesRead": 100,
+      "memoryHits": 0
+    }
+  ],
+  "explanation": {
+    "status": "OK",
+    "causeOfDelta": [
+      "GCS Network & HTTP response headers (không nằm trong response body client đo)",
+      "Truy cập từ app phiên bản cũ chưa có ImageInstrumentation",
+      "Truy cập trực tiếp qua browser hoặc công cụ bên ngoài bằng download token URL",
+      "Worker cleanup hoặc backend task quét metadata"
+    ],
+    "actionRequired": "OK: Lưu lượng nằm trong biên độ cho phép."
+  }
+}

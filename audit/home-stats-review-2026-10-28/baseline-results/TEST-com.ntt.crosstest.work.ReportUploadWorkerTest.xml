@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.work.ReportUploadWorkerTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:57.848Z" hostname="PC-5700X3D" time="0.115">
+  <properties/>
+  <testcase name="changedFileFailsBeforeAnyNetworkOperation" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.015"/>
+  <testcase name="restartAfterReceiptDoesNotSubmitAgainAndWorksOffline" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.02"/>
+  <testcase name="finalAttemptStopsAndKeepsPendingForManualRetry" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.013"/>
+  <testcase name="checksumRetriesWithoutChangingBytesHashOrId" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.019"/>
+  <testcase name="accountChangeAfterUploadCannotSubmitForAnotherUser" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.014"/>
+  <testcase name="cancellationDuringJoinIsNeverSwallowed" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.012"/>
+  <testcase name="lostRpcResponseRetriesSameRequestAndSkipsSavedUpload" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,4 +1,4 @@
-﻿package com.ntt.crosstest.ui.components
+package com.ntt.crosstest.ui.components
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
@@ -43,22 +43,31 @@ fun AppIcon(
     shapeRadius: Dp = 12.dp,
 ) {
     val context = LocalContext.current
+    val cacheVersionState = androidx.compose.runtime.produceState(initialValue = InstalledAppCache.version.get()) {
+        InstalledAppCache.versionFlow.collect { value = it }
+    }
+    val cacheVersion = cacheVersionState.value
+
     val localDrawable: Drawable? = if (iconUrl.isNotBlank()) {
         null
     } else {
-        val peeked = remember(packageName) { InstalledAppCache.peekInstalledAppDrawable(packageName) }
-        val loadedState = androidx.compose.runtime.produceState<Drawable?>(initialValue = peeked, key1 = packageName) {
-            if (value == null) {
-                value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    InstalledAppCache.getInstalledAppDrawable(context, packageName)
-                }
+        val peeked = remember(packageName, cacheVersion) { InstalledAppCache.peekInstalledAppDrawable(packageName) }
+        val loadedState = androidx.compose.runtime.produceState<Drawable?>(initialValue = peeked, key1 = packageName, key2 = cacheVersion) {
+            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                InstalledAppCache.getInstalledAppDrawable(context, packageName)
             }
         }
         loadedState.value
     }
 
+    val (effectiveIconUrl, setEffectiveIconUrl) = androidx.compose.runtime.remember(iconUrl) {
+        androidx.compose.runtime.mutableStateOf(
+            com.ntt.crosstest.util.IconRoutingHelper.resolveIconUrl(iconUrl)
+        )
+    }
+
     val modelToLoad: Any? = when {
-        iconUrl.isNotBlank() -> iconUrl
+        effectiveIconUrl.isNotBlank() -> effectiveIconUrl
         localDrawable != null -> localDrawable
         else -> null
     }
@@ -77,6 +86,13 @@ fun AppIcon(
                 ImageRequest.Builder(context)
                     .data(modelToLoad)
                     .crossfade(true)
+                    .listener(
+                        onError = { _, result ->
+                            if (effectiveIconUrl != iconUrl && com.ntt.crosstest.util.IconRoutingHelper.shouldFallbackToOrigin(effectiveIconUrl, result.throwable)) {
+                                setEffectiveIconUrl(iconUrl)
+                            }
+                        }
+                    )
                     .apply {
                         if (localDrawable != null) {
                             error(localDrawable)

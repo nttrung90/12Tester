@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.MissionRegressionTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:52.021Z" hostname="PC-5700X3D" time="0.032">
+  <properties/>
+  <testcase name="M08 - distinct UI error and busy states for missions" classname="com.ntt.crosstest.data.MissionRegressionTest" time="0.009"/>
+  <testcase name="M01 - when mission is full and user has joined then action prioritizes joined over full" classname="com.ntt.crosstest.data.MissionRegressionTest" time="0.009"/>
+  <testcase name="M09 - getOpenMissions cache is scoped to userId" classname="com.ntt.crosstest.data.MissionRegressionTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

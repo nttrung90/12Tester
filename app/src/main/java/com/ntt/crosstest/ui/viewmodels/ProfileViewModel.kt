@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -65,7 +66,7 @@ class ProfileViewModel(
             // is kept to preserve the offline-first instant paint.
             val currentUid = authRepository.currentUserId()
             val cacheMatchesSession = cached != null && cached.userProfile != null &&
-                (cached.userId == null || currentUid == null || cached.userId == currentUid)
+                currentUid != null && cached.userId == currentUid
             if (cached != null && cacheMatchesSession) {
                 ProfileUiState(
                     isLoading = false,
@@ -91,13 +92,16 @@ class ProfileViewModel(
     private var refreshWhenSessionReady = false
 
     init {
+        val initUid = authRepository.currentUserId()
+        val initGen = SessionCacheManager.currentGeneration()
         if (_uiState.value.profile == null) {
             viewModelScope.launch(Dispatchers.IO) {
                 val loaded = SessionCacheManager.loadSync(app)
                 val curUid = authRepository.currentUserId()
-                if (loaded?.userProfile != null && (loaded.userId == null || curUid == null || loaded.userId == curUid)) {
+                val curGen = SessionCacheManager.currentGeneration()
+                if (curGen == initGen && curUid == initUid && loaded?.userProfile != null && curUid != null && loaded.userId == curUid) {
                     _uiState.update { current ->
-                        if (current.profile == null) {
+                        if (current.profile == null && SessionCacheManager.currentGeneration() == initGen && authRepository.currentUserId() == initUid) {
                             current.copy(
                                 isLoading = false,
                                 isBackgroundSyncing = true,
@@ -204,6 +208,9 @@ class ProfileViewModel(
                 val dashboard = campaignRepository.getMyDashboard(forceRefresh = forceRefresh)
                 val profile = dashboard?.profile ?: campaignRepository.getMyProfile(forceRefresh = forceRefresh)
                 if (profile?.isLocked == true) {
+                    if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != authRepository.currentUserId()) {
+                        return@launch
+                    }
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -235,6 +242,10 @@ class ProfileViewModel(
                     )
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != authRepository.currentUserId()) {
+                    return@launch
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,

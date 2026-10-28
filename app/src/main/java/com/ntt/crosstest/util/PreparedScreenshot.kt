@@ -18,6 +18,8 @@ data class PreparedScreenshot(
     val imageHash: String,
     val sizeBytes: Long,
     val contentType: String,
+    val thumbnailFile: File? = null,
+    val thumbnailSizeBytes: Long? = null,
 )
 
 object PreparedScreenshotCache {
@@ -32,6 +34,9 @@ object PreparedScreenshotCache {
 
     fun newFile(context: Context, uploadId: String, extension: String = "jpg"): File =
         File(directory(context), "$uploadId.$extension")
+
+    fun newThumbnailFile(context: Context, uploadId: String, extension: String = "jpg"): File =
+        File(directory(context), "thumb_$uploadId.$extension")
 
     /** Dọn ảnh đã chọn nhưng không nộp sau 48h. */
     fun cleanup(context: Context) {

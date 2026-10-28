@@ -1,0 +1,74 @@
+{
+  "verifiedAt": "2026-10-28T13:24:44.7480295+07:00",
+  "scope": "E00-E05 local working tree; independent Codex verification after Antigravity fixes",
+  "android": {
+    "suites": 14,
+    "tests": 117,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "testBuildLintExitCode": 0,
+    "log": "final-android.log"
+  },
+  "lint": [
+    {
+      "severity": "Hint",
+      "count": 1
+    },
+    {
+      "severity": "Warning",
+      "count": 426
+    }
+  ],
+  "node": {
+    "tests": 53,
+    "suites": 4,
+    "pass": 53,
+    "fail": 0,
+    "skipped": 0,
+    "log": "final-node.log"
+  },
+  "database": {
+    "strictAssertions": 12,
+    "strictPassed": 12,
+    "cryptoExtensionsSchemaPassed": true,
+    "businessScenarios": 5,
+    "beforeAfterChecks": 10,
+    "businessPassed": 10,
+    "thumbnailMigrationExit": 0,
+    "gatewayMigrationExit": 0
+  },
+  "gitDiffCheckExit": 0,
+  "production": {
+    "deployed": false,
+    "productionMigrationApplied": false,
+    "tokensRevoked": false,
+    "liveCleanupExecuted": false,
+    "privateDiskCacheDefault": false,
+    "mediaGatewayDefault": false,
+    "cdnDefault": false,
+    "appCheckMode": "MONITOR_ONLY"
+  },
+  "sourceHashes": [
+    {
+      "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\PrivateScreenshotDiskCache.kt",
+      "Hash": "D4F4717F2DF68A01F0C864EFA6536BBDD7E2D3F98084CC29896321AB6E08A4FD"
+    },
+    {
+      "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\IconRoutingHelper.kt",
+      "Hash": "BB8F4B3C7A435ECE7C2590F14EFC4AC220FA7710394187120C5023CCCDBEE73C"
+    },
+    {
+      "Path": "F:\\AI\\12Tester\\backend\\storage-cleanup\\cleanup-reports-storage.mjs",
+      "Hash": "4766AB50B8C218F818266C7AD88A679C93C6EFA6C63997FD33F9DB4F14201499"
+    },
+    {
+      "Path": "F:\\AI\\12Tester\\supabase\\migrations\\045_thumbnail_support.sql",
+      "Hash": "F1BDD1F6AF26C0F7C029B15699C2733F81CE8F2DB2650BBE4B9352527EE8FA4C"
+    },
+    {
+      "Path": "F:\\AI\\12Tester\\supabase\\migrations\\046_media_access_gateway.sql",
+      "Hash": "9E2153C11EB41F301BDA7489DBA89CCF668F95110E275CD4CF3666180F7A3F76"
+    }
+  ]
+}

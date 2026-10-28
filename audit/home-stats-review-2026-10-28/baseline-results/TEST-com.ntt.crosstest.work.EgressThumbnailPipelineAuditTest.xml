@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.work.EgressThumbnailPipelineAuditTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-28T14:07:57.789Z" hostname="PC-5700X3D" time="0.056">
+  <properties/>
+  <testcase name="durableThumbnailReachesRpcAcrossRetryAndAllImageFilesAreCleaned" classname="com.ntt.crosstest.work.EgressThumbnailPipelineAuditTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

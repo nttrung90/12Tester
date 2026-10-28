@@ -208,6 +208,7 @@ class ReportSubmitManager(
     private fun persist(request: SubmitRequest): PendingReport {
         val prepared = request.preparedScreenshot
         var pendingScreenshotPath: String? = null
+        var pendingThumbnailPath: String? = null
         if (prepared != null) {
             if (!prepared.file.isFile) {
                 throw IllegalStateException("screenshot_file_missing")
@@ -220,6 +221,17 @@ class ReportSubmitManager(
             )
             prepared.file.copyTo(pendingFile, overwrite = true)
             pendingScreenshotPath = pendingFile.absolutePath
+
+            val thumbFile = prepared.thumbnailFile
+            if (thumbFile != null && thumbFile.isFile) {
+                val pendingThumb = PendingReportStore.newThumbnailFile(
+                    context = appContext,
+                    id = request.clientSubmitId,
+                    extension = "jpg",
+                )
+                thumbFile.copyTo(pendingThumb, overwrite = true)
+                pendingThumbnailPath = pendingThumb.absolutePath
+            }
         }
 
         val report = PendingReport(
@@ -230,7 +242,9 @@ class ReportSubmitManager(
             rating = request.rating,
             comment = request.comment,
             screenshotPath = pendingScreenshotPath,
+            thumbnailPath = pendingThumbnailPath,
             preparedPath = prepared?.file?.absolutePath,
+            preparedThumbnailPath = prepared?.thumbnailFile?.absolutePath,
             imageHash = prepared?.imageHash,
             contentType = prepared?.contentType ?: "image/jpeg",
             fallbackScreenshotUrl = request.fallbackScreenshotUrl,
