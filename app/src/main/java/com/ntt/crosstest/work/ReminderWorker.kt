@@ -37,7 +37,7 @@ class ReminderWorker(
             // ghi nhận đăng nhập và sẽ làm sai nhiệm vụ ngày của user.
             val daily = repo.getMyDailyTaskStatus()
             if (daily != null) {
-                if (!daily.met && !daily.isPenaltyExempt) {
+                if (!daily.met && !daily.isPenaltyExempt && daily.carryoverReady) {
                     NotificationHelper.showDailyTaskReminder(applicationContext, daily)
                 }
                 return Result.success()

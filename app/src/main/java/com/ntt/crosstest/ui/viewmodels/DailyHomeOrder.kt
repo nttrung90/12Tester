@@ -68,18 +68,24 @@ object DailyHomeOrder {
     private data class ItemSortWrapper(
         val item: CampaignDisplayItem,
         val dailyKey: String,
-        val stableId: String
+        val stableId: String,
+        val isPushActiveToday: Boolean = false,
+        val pushOrder: Long = 0L
     )
 
     /**
      * Sắp xếp danh sách app cho tab "Đang mở".
      *
      * Ưu tiên:
-     * 1. Chưa đủ chỉ tiêu hôm nay trước (item.isTargetReached == false)
-     * 2. Boost trước (campaign.isBoosted == true)
-     * 3. Tip cao trước (campaign.tipCredits giảm dần)
-     * 4. Khóa ngẫu nhiên xác định theo ngày tăng dần
-     * 5. ID ổn định tăng dần (phá hòa)
+     * 1. Nhóm App được đẩy còn hiệu lực hôm nay (isPushActive == true):
+     *    - push_order DESC (lượt đẩy thành công sau đứng trên lượt trước)
+     *    - stableId ASC (phá hòa ổn định)
+     * 2. Nhóm App thông thường (giữ nguyên thuật toán cũ):
+     *    - Chưa đủ chỉ tiêu hôm nay trước (item.isTargetReached == false)
+     *    - Boost trước (campaign.isBoosted == true)
+     *    - Tip cao trước (campaign.tipCredits giảm dần)
+     *    - Khóa ngẫu nhiên xác định theo ngày tăng dần
+     *    - ID ổn định tăng dần (phá hòa)
      */
     fun sortOpenCampaigns(
         items: List<CampaignDisplayItem>,
@@ -91,16 +97,26 @@ object DailyHomeOrder {
         val wrapped = items.map { item ->
             val stableId = getStableCampaignIdentifier(item.campaign)
             val dailyKey = computeDailyOrderKey(effectiveDate, stableId)
-            ItemSortWrapper(item, dailyKey, stableId)
+            val isPushActive = item.campaign.isPushActive(effectiveDate)
+            val pushOrder = item.campaign.pushOrder ?: 0L
+            ItemSortWrapper(item, dailyKey, stableId, isPushActive, pushOrder)
         }
 
-        val comparator = compareBy<ItemSortWrapper> { it.item.isTargetReached }
+        val (pushedItems, normalItems) = wrapped.partition { it.isPushActiveToday }
+
+        val pushedComparator = compareByDescending<ItemSortWrapper> { it.pushOrder }
+            .thenBy { it.stableId }
+
+        val normalComparator = compareBy<ItemSortWrapper> { it.item.isTargetReached }
             .thenByDescending { it.item.campaign.isBoosted }
             .thenByDescending { it.item.campaign.tipCredits }
             .thenBy { it.dailyKey }
             .thenBy { it.stableId }
 
-        return wrapped.sortedWith(comparator).map { it.item }
+        val sortedPushed = pushedItems.sortedWith(pushedComparator)
+        val sortedNormal = normalItems.sortedWith(normalComparator)
+
+        return (sortedPushed + sortedNormal).map { it.item }
     }
 
     fun sortOpenCampaigns(

@@ -43,6 +43,8 @@ data class PendingReport(
     val uploadedThumbnailUrl: String? = null,
     /** Durable server receipt. Never remove it before WorkManager commits success. */
     val completedResult: SubmitTesterReportResult? = null,
+    val missionId: String? = null,
+    val missionTitle: String? = null,
 ) {
     companion object {
         fun newId(): String = UUID.randomUUID().toString()

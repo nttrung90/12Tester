@@ -143,7 +143,7 @@ class MissionRegressionTest {
             if (path.contains("get_open_missions")) {
                 callCount++
                 respond(
-                    content = """{"missions":[{"id":"m1","title":"Mission 1","status":"open","has_joined":true,"reward_credits":10,"max_participants":5,"participant_count":1,"ends_at":"2026-10-28T00:00:00Z","created_at":"2026-10-27T00:00:00Z","campaign_id":"c1","app_name":"App 1","creator_id":"u1","creator_name":"User 1","is_mine":false,"has_completed":false}]}""",
+                    content = """{"missions":[{"id":"m1","title":"Mission 1","status":"open","has_joined":true,"reward_credits":10,"max_participants":5,"participant_count":1,"ends_at":"2026-11-28T00:00:00Z","created_at":"2026-10-27T00:00:00Z","campaign_id":"c1","app_name":"App 1","creator_id":"u1","creator_name":"User 1","is_mine":false,"has_completed":false}]}""",
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )

@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node run-daily-task-ratio.mjs && node run-backend-cleanup-hardening.mjs && node run-mission-flow-hardening.mjs"
+    "test": "node run-daily-task-ratio.mjs && node run-backend-cleanup-hardening.mjs && node run-mission-flow-hardening.mjs && node run-thumbnail-migration.mjs && node run-media-gateway-test.mjs && node run-home-stats-cycle-test.mjs && node run-mission-report-and-expiration-test.mjs && node run-app-update-reward-test.mjs && node run-campaign-push-test.mjs && node run-daily-task-carryover.mjs && node run-push-and-carryover-hardening-test.mjs",
+    "test:hardening": "node run-push-and-carryover-hardening-test.mjs",
+    "test:carryover": "node run-daily-task-carryover.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.12"

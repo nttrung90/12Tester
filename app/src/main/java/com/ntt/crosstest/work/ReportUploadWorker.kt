@@ -22,6 +22,7 @@ import com.ntt.crosstest.util.PreparedScreenshot
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.io.File
 
@@ -101,10 +102,22 @@ class ReportUploadWorker(
                 ) }
                 uploadedHash = imageHash
 
+                // Lưu URL ngay: nếu RPC hoặc upload thumbnail sau đó bị hủy/lỗi thì lần retry không upload full lại.
+                PendingReportStore.markUploaded(
+                    context = applicationContext,
+                    id = request.id,
+                    url = uploadedUrl,
+                    hash = uploadedHash,
+                    thumbnailUrl = null,
+                )
+                trace(request.id, "mark_uploaded_full")
+
                 if (thumbFile != null && uploadedThumbUrl.isNullOrBlank()) {
                     uploadedThumbUrl = try {
-                        timed(request.id, "upload_thumb") {
-                            operations.uploadThumbnail(thumbFile, request.campaignId, request.userId, request.id)
+                        withTimeoutOrNull(THUMBNAIL_UPLOAD_TIMEOUT_MS) {
+                            timed(request.id, "upload_thumb") {
+                                operations.uploadThumbnail(thumbFile, request.campaignId, request.userId, request.id)
+                            }
                         }
                     } catch (e: CancellationException) {
                         throw e
@@ -112,17 +125,19 @@ class ReportUploadWorker(
                         trace(request.id, "thumb_upload_failed non-fatal: ${e.message}")
                         null
                     }
+                    if (uploadedThumbUrl == null) {
+                        trace(request.id, "thumb_upload_timeout_or_failed non-fatal")
+                    } else if (!uploadedThumbUrl.isNullOrBlank()) {
+                        PendingReportStore.markUploaded(
+                            context = applicationContext,
+                            id = request.id,
+                            url = uploadedUrl,
+                            hash = uploadedHash,
+                            thumbnailUrl = uploadedThumbUrl,
+                        )
+                        trace(request.id, "mark_uploaded_thumb")
+                    }
                 }
-
-                // Lưu URL ngay: nếu RPC fail thì lần retry không upload lại.
-                PendingReportStore.markUploaded(
-                    context = applicationContext,
-                    id = request.id,
-                    url = uploadedUrl,
-                    hash = uploadedHash,
-                    thumbnailUrl = uploadedThumbUrl,
-                )
-                trace(request.id, "mark_uploaded")
             }
 
             if (request.needsJoin) {
@@ -140,13 +155,20 @@ class ReportUploadWorker(
             currentCoroutineContext().ensureActive()
             verifyAccount(operations, request.userId)
             val response = timed(request.id, "rpc") {
-                operations.submit(request, uploadedUrl ?: request.fallbackScreenshotUrl,
-                    uploadedHash ?: request.fallbackImageHash, uploadedThumbUrl)
+                operations.submit(
+                    request = request,
+                    url = uploadedUrl ?: request.fallbackScreenshotUrl,
+                    hash = uploadedHash ?: request.fallbackImageHash,
+                    thumbnailUrl = uploadedThumbUrl,
+                    missionId = request.missionId,
+                )
             }
             val result = response.copy(
                 screenshotUrl = response.screenshotUrl ?: uploadedUrl ?: request.fallbackScreenshotUrl,
                 imageHash = response.imageHash ?: uploadedHash ?: request.fallbackImageHash,
                 thumbnailUrl = response.thumbnailUrl ?: uploadedThumbUrl,
+                missionId = response.missionId ?: request.missionId,
+                missionTitle = response.missionTitle ?: request.missionTitle,
             )
             // Keep the request and receipt until WorkManager commits SUCCEEDED.
             PendingReportStore.markCompleted(applicationContext, request.id, result)
@@ -178,6 +200,11 @@ class ReportUploadWorker(
         result.screenshotUrl?.let { output.putString(KEY_SCREENSHOT_URL, it) }
         result.imageHash?.let { output.putString(KEY_IMAGE_HASH, it) }
         result.thumbnailUrl?.let { output.putString(KEY_THUMBNAIL_URL, it) }
+        output.putBoolean(KEY_IS_MISSION_REPORT, result.isMissionReport)
+        result.missionId?.let { output.putString(KEY_MISSION_ID, it) }
+        result.missionTitle?.let { output.putString(KEY_MISSION_TITLE, it) }
+        result.missionRewardCredits?.let { output.putInt(KEY_MISSION_REWARD_CREDITS, it) }
+        result.missionEndsAt?.let { output.putString(KEY_MISSION_ENDS_AT, it) }
         return ListenableWorker.Result.success(output.build())
     }
 
@@ -199,8 +226,19 @@ class ReportUploadWorker(
             repository.submitFeedback(request.campaignId, request.rating, request.comment, url, hash,
                 request.id, requireIdempotency = true)
         override suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?) =
-            repository.submitFeedback(request.campaignId, request.rating, request.comment, url, hash,
-                request.id, requireIdempotency = true, thumbnailUrl = thumbnailUrl)
+            submit(request, url, hash, thumbnailUrl, request.missionId)
+        override suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?, missionId: String?) =
+            repository.submitFeedback(
+                campaignId = request.campaignId,
+                rating = request.rating,
+                comment = request.comment,
+                screenshotUrl = url,
+                imageHash = hash,
+                clientSubmitId = request.id,
+                requireIdempotency = true,
+                thumbnailUrl = thumbnailUrl,
+                missionId = missionId ?: request.missionId,
+            )
     }
 
     private suspend fun <T> timed(id: String, stage: String, action: suspend () -> T): T {
@@ -231,10 +269,16 @@ class ReportUploadWorker(
         const val KEY_SCREENSHOT_URL = "screenshot_url"
         const val KEY_IMAGE_HASH = "image_hash"
         const val KEY_THUMBNAIL_URL = "thumbnail_url"
+        const val KEY_IS_MISSION_REPORT = "is_mission_report"
+        const val KEY_MISSION_ID = "mission_id"
+        const val KEY_MISSION_TITLE = "mission_title"
+        const val KEY_MISSION_REWARD_CREDITS = "mission_reward_credits"
+        const val KEY_MISSION_ENDS_AT = "mission_ends_at"
         const val KEY_ERROR = "error"
 
         private const val MAX_ATTEMPTS = 3
         private const val MAX_ERROR_LENGTH = 1_000
+        const val THUMBNAIL_UPLOAD_TIMEOUT_MS = 5_000L
     }
 }
 
@@ -247,4 +291,6 @@ internal interface ReportUploadOperations {
     suspend fun submit(request: PendingReport, url: String?, hash: String?): SubmitTesterReportResult
     suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?): SubmitTesterReportResult =
         submit(request, url, hash)
+    suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?, missionId: String?): SubmitTesterReportResult =
+        submit(request, url, hash, thumbnailUrl)
 }

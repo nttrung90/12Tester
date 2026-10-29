@@ -1,0 +1,38 @@
+{
+  "Mirrors": [
+    {
+      "Migration": "052_campaign_push_priority.sql",
+      "MirrorMatches": false
+    },
+    {
+      "Migration": "053_daily_task_carryover.sql",
+      "MirrorMatches": false
+    }
+  ],
+  "BaselineAndroid": {
+    "Tests": 240,
+    "Failures": 0,
+    "Suites": 33,
+    "Errors": 0
+  },
+  "IndependentAndroidDefectProbes": {
+    "Tests": 3,
+    "Failures": 0,
+    "Suites": 1,
+    "Errors": 0
+  },
+  "BackendExistingSuitesPassed": 10,
+  "IndependentSqlDefectProbes": 10,
+  "LiveChecked": false,
+  "PostgresConcurrencyChecked": false,
+  "MirrorSqlComparison": [
+    {
+      "Migration": "052_campaign_push_priority.sql",
+      "WithoutCommentsEqual": true
+    },
+    {
+      "Migration": "053_daily_task_carryover.sql",
+      "WithoutCommentsEqual": true
+    }
+  ]
+}

@@ -197,7 +197,7 @@
     <string name="daily_task_goal">Nhiệm vụ ngày: test đủ số app khác nhau theo chỉ tiêu hôm nay, hoặc đăng nhập nếu bạn không đăng app.</string>
     <string name="daily_penalty_info_btn">Cơ chế trừ điểm</string>
     <string name="daily_penalty_dialog_title">Cơ chế trừ điểm vắng mặt hàng ngày</string>
-    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống kiểm tra lúc 00:05 mỗi ngày (theo giờ Việt Nam).\n\n• Chủ app: test đủ số app khác nhau theo chỉ tiêu trên thẻ nhiệm vụ hôm nay. Chỉ tiêu tùy thuộc số app đang hoạt động, chính sách hiện hành và số app khác đang có.\n• Thành viên: mở app ít nhất 1 lần/ngày.\n• App mới bắt đầu tính từ ngày mai; tài khoản mới được miễn ngày đăng ký.\n• Admin/Moderator được miễn.\n\nMức phạt khi thiếu nhiệm vụ:\n• Ngày 1: -1% Credit\n• Ngày 2: -2% Credit\n• Ngày 3: -5% Credit\n• Ngày 4 trở đi: -10% Credit\nTỷ lệ được nhân với tỷ lệ thiếu (tối thiểu 1 Credit, không vượt quá số dư).\n\nThiếu 7 ngày liên tiếp: app của bạn tự động tạm dừng cho đến khi bạn hoàn thành chỉ tiêu hôm nay và bật lại.\n\n💡 Report đang chờ/đã duyệt được tính là đã test. Report bị từ chối không được tính.</string>
+    <string name="daily_penalty_dialog_content" formatted="false">Hệ thống kiểm tra lúc 00:05 mỗi ngày (theo giờ Việt Nam).\n\n• Chủ app: test đủ số app khác nhau theo chỉ tiêu trên thẻ nhiệm vụ hôm nay. Chỉ tiêu gồm chỉ tiêu cơ bản hôm nay cộng phần app test còn thiếu từ các ngày trước chuyển sang. Nếu thiếu nguồn app khả dụng, chỉ tiêu được giới hạn theo nguồn app hiện có và phần thiếu chưa làm hết tiếp tục được bảo lưu.\n• Thành viên: mở app ít nhất 1 lần/ngày.\n• App mới bắt đầu tính từ ngày mai; tài khoản mới được miễn ngày đăng ký.\n• Admin/Moderator được miễn.\n\nMức phạt khi thiếu nhiệm vụ:\n• Ngày 1: -1% Credit\n• Ngày 2: -2% Credit\n• Ngày 3: -5% Credit\n• Ngày 4 trở đi: -10% Credit\nTỷ lệ được nhân với tỷ lệ thiếu (tối thiểu 1 Credit, không vượt quá số dư). Phần thiếu chưa làm hết tiếp tục chuyển sang ngày hôm sau và không thay thế mức phạt Credit.\n\nThiếu 7 ngày liên tiếp: app của bạn tự động tạm dừng cho đến khi bạn hoàn thành chỉ tiêu hôm nay và bật lại.\n\n💡 Report đang chờ/đã duyệt được tính là đã test. Report bị từ chối không được tính.</string>
     <string name="daily_task_test_now">Tìm app test ngay</string>
     <string name="daily_browse_apps">Xem app</string>
     <string name="daily_missed_streak_alert">Đang bỏ lỡ %1$d ngày liên tiếp! Sẽ bị trừ tối đa %2$d%% Credit nếu không hoàn thành nhiệm vụ hôm nay.</string>
@@ -212,6 +212,11 @@
     <string name="daily_owner_goal_format">Bạn có %1$d app đang hoạt động. Hãy test %2$d app khác nhau hôm nay để bảo vệ Credit.</string>
     <string name="daily_owner_missed_alert">Hôm nay bạn mới test %1$d/%2$d app. Đã bỏ lỡ %3$d ngày liên tiếp — hoàn thành chỉ tiêu hôm nay để đặt lại chuỗi và tránh mức phạt -%4$d%%.</string>
     <string name="daily_member_goal">Mở app mỗi ngày để giữ tài khoản hoạt động. Việc test app là không bắt buộc.</string>
+    <string name="daily_task_carryover_badge">Đang cập nhật chỉ tiêu</string>
+    <string name="daily_task_carryover_pending_note">Chỉ tiêu ngày mới đang được cập nhật từ hôm qua. Bạn vẫn có thể test app bình thường, kết quả sẽ được tính cho hôm nay.</string>
+    <string name="daily_owner_goal_with_carryover">Chỉ tiêu hôm nay: %1$d app (%2$d app hôm nay + %3$d app còn thiếu từ trước).</string>
+    <string name="daily_task_carryover_limited_note">Nguồn app hiện có chỉ có %1$d app. Bạn cần test %2$d app hôm nay; %3$d app còn thiếu tiếp tục được bảo lưu.</string>
+    <string name="daily_task_waived_with_carryover_note">Hệ thống không có đủ app mở để giao chỉ tiêu hôm nay. Bạn được miễn hôm nay; %1$d app còn thiếu tiếp tục được bảo lưu.</string>
 
     <!-- Quests System -->
     <string name="quest_section_title">Nhiệm vụ Thử Nghiệm</string>
@@ -1161,5 +1166,74 @@
     <string name="admin_home_stats_saved_success">Đã lưu cấu hình chu kỳ thống kê Trang chủ thành công.</string>
     <string name="admin_home_stats_load_failed">Không thể tải cấu hình chu kỳ: %1$s</string>
     <string name="admin_home_stats_save_failed">Lỗi khi lưu chu kỳ thống kê: %1$s</string>
+
+    <!-- Mission Reports (Báo cáo nhiệm vụ) -->
+    <string name="mission_report_title">Báo cáo nhiệm vụ</string>
+    <string name="mission_report_badge">Báo cáo nhiệm vụ</string>
+    <string name="mission_report_submitted_waiting">Đã gửi báo cáo nhiệm vụ — chờ duyệt</string>
+    <string name="mission_report_deadline_format">Hạn nộp: %1$s</string>
+    <string name="mission_report_reward_format">Thưởng nhiệm vụ: +%1$d Credit</string>
+    <string name="mission_expired_error">Nhiệm vụ đã hết hạn</string>
+    <string name="filter_all_reports">Tất cả</string>
+    <string name="filter_app_test_reports">Báo cáo test app</string>
+    <string name="filter_mission_reports">Báo cáo nhiệm vụ</string>
+
+    <!-- App Update Reward Feature (Thưởng cập nhật phiên bản app) -->
+    <string name="oad_app_update_title">Đã cập nhật phiên bản mới</string>
+    <string name="oad_app_update_subtitle">Trả cho mỗi người cập nhật 6 Credit</string>
+    <string name="app_update_screen_title">Công bố phiên bản mới</string>
+    <string name="app_update_current_round">Đợt cập nhật hiện tại</string>
+    <string name="app_update_status_active">Đang mở</string>
+    <string name="app_update_status_exhausted">Đã đủ 20</string>
+    <string name="app_update_status_superseded">Đã thay thế</string>
+    <string name="app_update_status_closed">Đã kết thúc</string>
+    <string name="app_update_progress_format">%1$d/20 người đã nhận thưởng</string>
+    <string name="app_update_held_format">Đang giữ: %1$d Credit</string>
+    <string name="app_update_spent_format">Đã chi: %1$d Credit</string>
+    <string name="app_update_close_round_btn">Kết thúc đợt và hoàn Credit còn lại</string>
+    <string name="app_update_close_dialog_title">Kết thúc đợt cập nhật?</string>
+    <string name="app_update_close_dialog_desc_format">Bạn có chắc muốn kết thúc đợt cập nhật này? Toàn bộ %1$d Credit chưa sử dụng sẽ được hoàn lại vào ví của bạn ngay lập tức.</string>
+    <string name="app_update_form_title">Công bố phiên bản mới</string>
+    <string name="app_update_version_name_label">Số phiên bản</string>
+    <string name="app_update_version_name_placeholder">Ví dụ: 1.2.0</string>
+    <string name="app_update_version_code_label">Mã bản dựng (versionCode)</string>
+    <string name="app_update_version_code_placeholder">Ví dụ: 12</string>
+    <string name="app_update_version_code_hint">Mã số nguyên trên Google Play Console, phải lớn hơn bản trước</string>
+    <string name="app_update_version_code_hint_greater_format">Phải lớn hơn mã phiên bản trước đó (%1$d)</string>
+    <string name="app_update_features_label">Tính năng cập nhật mới</string>
+    <string name="app_update_features_placeholder">Mô tả chi tiết những thay đổi, cải tiến, sửa lỗi trong bản này…</string>
+    <string name="app_update_budget_rule">Giữ trước 120 Credit • 6 Credit/người • Tối đa 20 người</string>
+    <string name="app_update_available_balance">Số dư khả dụng hiện tại</string>
+    <string name="app_update_refund_from_old">Hoàn từ đợt cũ</string>
+    <string name="app_update_reserve_cost">Giữ trước cho đợt mới</string>
+    <string name="app_update_projected_balance">Số dư còn lại dự kiến</string>
+    <string name="app_update_insufficient_credits_format">Số dư không đủ để giữ trước 120 Credit (cần thêm %1$d Credit).</string>
+    <string name="app_update_apply_btn">Áp dụng</string>
+    <string name="app_update_client_limit_notice">Lưu ý: Hệ thống đối chiếu mã phiên bản báo từ thiết bị tester qua PackageManager. Không tuyên bố Google Play hay server chứng thực bản cài app khác.</string>
+    <string name="app_update_history_title">Lịch sử các đợt cập nhật</string>
+    <string name="tester_update_title">Cập nhật phiên bản mới</string>
+    <string name="tester_update_reward_badge">+6 Credit</string>
+    <string name="tester_update_btn">Cập nhật phiên bản mới (+6 Credit)</string>
+    <string name="tester_update_already_updated">Đã cập nhật</string>
+    <string name="tester_update_verifying">Đang xác nhận thưởng…</string>
+    <string name="tester_update_reward_success_format">Đã nhận +%1$d Credit thưởng cập nhật phiên bản!</string>
+
+    <!-- Push Campaign (Tính năng Đẩy app) -->
+    <string name="oad_push_title">Đẩy app</string>
+    <string name="oad_push_subtitle">Trả 100 Credit để đưa ứng dụng của bạn lên đầu danh sách kiểm thử</string>
+    <string name="oad_push_helper">Hiệu lực đến 00:00 (giờ VN). Chi phí 100 Credit (không hoàn lại). Không miễn nhiệm vụ ngày hay chống tự động tạm dừng.</string>
+    <string name="oad_push_badge">Đang đẩy</string>
+    <string name="oad_push_active_info_format">Đang được ưu tiên đến 00:00 ngày mai. Đẩy lại tốn 100 Credit.</string>
+    <string name="oad_push_dialog_title">Xác nhận đẩy app</string>
+    <string name="oad_push_dialog_content">Bạn sẽ trả 100 Credit để đưa ứng dụng lên đầu danh sách kiểm thử đến 00:00 (giờ Việt Nam). App được đẩy sau sẽ đứng trên app của bạn. Phí đẩy không hoàn lại và không tính hoàn thành nhiệm vụ ngày. App vẫn có thể bị tự động tạm dừng nếu bạn không hoàn thành chỉ tiêu test.</string>
+    <string name="oad_push_dialog_app_format">Ứng dụng: %1$s</string>
+    <string name="oad_push_dialog_current_balance_format">Số dư hiện tại: %1$d Credit</string>
+    <string name="oad_push_dialog_expected_balance_format">Số dư sau khi mua: %1$d Credit</string>
+    <string name="oad_push_dialog_confirm">Xác nhận đẩy app</string>
+    <string name="oad_push_dialog_cancel">Hủy</string>
+    <string name="oad_push_paused_warning">Ứng dụng đang tạm dừng. Vui lòng tiếp tục nhận tester trước khi đẩy app.</string>
+    <string name="oad_push_insufficient_credits">Bạn cần ít nhất 100 Credit để đẩy app.</string>
+    <string name="oad_push_success">Đã đẩy app lên đầu danh sách. Đã trừ 100 Credit.</string>
+    <string name="oad_push_replayed_success">Đã xác nhận yêu cầu đẩy app trước đó. App đang được ưu tiên trên đầu danh sách.</string>
 
 </resources>

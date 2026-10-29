@@ -135,6 +135,7 @@ import com.ntt.crosstest.ui.theme.statusColors
 @Composable
 fun HomeScreen(
     onCampaignClick: (String) -> Unit,
+    onMissionAppClick: (String, String?) -> Unit = { cId, _ -> onCampaignClick(cId) },
     onOwnerAppClick: (String) -> Unit = onCampaignClick,
     onOwnerReportNotificationClick: (String) -> Unit = onOwnerAppClick,
     onCreateClick: () -> Unit,
@@ -175,8 +176,17 @@ fun HomeScreen(
     LifecycleResumeEffect(Unit) {
         viewModel.scheduleMidnightRefresh()
         viewModel.refresh(context, forceRefresh = false)
+        viewModel.pruneExpiredMissions()
         onPauseOrDispose {
             viewModel.stopMidnightScheduler()
+            viewModel.stopMissionDeadlineScheduler()
+            viewModel.stopPendingCarryoverRetry()
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage == 1) {
+            viewModel.pruneExpiredMissions()
         }
     }
 
@@ -673,7 +683,7 @@ fun HomeScreen(
                             }
                         }
                     },
-                    onMissionAppClick = { campaignId -> onCampaignClick(campaignId) },
+                    onMissionAppClick = { campaignId, missionId -> onMissionAppClick(campaignId, missionId) },
                     onRetryMissions = { viewModel.refreshMissions(forceRefresh = true) },
                     isAuthenticated = uiState.isAuthenticated,
                     isLoading = uiState.isLoading,

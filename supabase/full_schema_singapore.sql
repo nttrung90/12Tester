@@ -15965,3 +15965,7958 @@ revoke execute on function public.get_my_active_mission_campaign_ids() from publ
 grant execute on function public.get_my_active_mission_campaign_ids() to authenticated, service_role;
 
 notify pgrst, 'reload schema';
+
+
+-- ===== 045_thumbnail_support.sql =====
+-- ============================================================================
+-- 12 Tester — Supabase migration 045: Hỗ trợ Thumbnail cho Báo cáo (E02)
+-- Đã hiệu chỉnh: Bảo toàn 100% hợp đồng nghiệp vụ từ migration 037/044/schema chuẩn
+-- (F01, F02, F05: validator full/thumb, checkin reward, feedbacks upsert,
+--  approved immutable rating, rejected dHash check, replacement full clears thumb)
+-- ============================================================================
+
+-- 1. Thêm cột thumbnail_url vào bảng tester_reports (tùy chọn, tương thích ngược)
+alter table public.tester_reports
+add column if not exists thumbnail_url text;
+
+-- 2a. Validator cho URL Screenshot báo cáo (chống query spoofing & ràng buộc bucket allowlist)
+create or replace function public.is_valid_report_screenshot_url(
+    p_url text,
+    p_campaign_id uuid,
+    p_user_id uuid
+)
+returns boolean
+language plpgsql
+immutable
+as $$
+declare
+    v_clean_url text;
+    v_bucket text;
+    v_path text;
+    v_matches text[];
+begin
+    if p_url is null or length(p_url) > 2048 then
+        return false;
+    end if;
+
+    -- Tách query string (?) và fragment (#) để triệt tiêu query spoofing
+    v_clean_url := split_part(split_part(p_url, '?', 1), '#', 1);
+
+    -- 1. Parse theo định dạng Firebase Storage chuẩn hoặc GCS
+    if v_clean_url ~* '^https://firebasestorage\.googleapis\.com/v0/b/([^/]+)/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_url, '^https://firebasestorage\.googleapis\.com/v0/b/([^/]+)/o/(.+)$', 'i');
+        v_bucket := v_matches[1];
+        v_path := v_matches[2];
+    elsif v_clean_url ~* '^https://([^/]+)\.firebasestorage\.app/v0/b/([^/]+)/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_url, '^https://([^/]+)\.firebasestorage\.app/v0/b/([^/]+)/o/(.+)$', 'i');
+        v_bucket := v_matches[2];
+        v_path := v_matches[3];
+    elsif v_clean_url ~* '^https://([^/]+)\.firebasestorage\.app/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_url, '^https://([^/]+)\.firebasestorage\.app/o/(.+)$', 'i');
+        v_bucket := v_matches[1] || '.firebasestorage.app';
+        v_path := v_matches[2];
+    elsif v_clean_url ~* '^https://storage\.googleapis\.com/([^/]+)/(.+)$' then
+        v_matches := regexp_matches(v_clean_url, '^https://storage\.googleapis\.com/([^/]+)/(.+)$', 'i');
+        v_bucket := v_matches[1];
+        v_path := v_matches[2];
+    else
+        return false;
+    end if;
+
+    -- 2. Allowlist bucket (chỉ cho phép các bucket chính thức của dự án, không cho phép ký tự đại diện hoặc bucket test trong validator production)
+    if not (
+        v_bucket in ('cross-testers.firebasestorage.app', 'cross-testers.appspot.com', 'crosstest-prod.appspot.com')
+    ) then
+        return false;
+    end if;
+
+    -- 3. Chuẩn hoá percent-encoding (%2F -> /)
+    v_path := replace(replace(v_path, '%2F', '/'), '%2f', '/');
+
+    -- 4. Ràng buộc object path: reports/<campaign_id>/<user_id>/<filename>
+    if not (
+        v_path ~* ('^reports/' || p_campaign_id::text || '/' || p_user_id::text || '/[a-zA-Z0-9_\-\.]+\.(jpg|jpeg|png|webp)$')
+        or v_path ~* ('^reports/' || p_campaign_id::text || '/' || p_user_id::text || '_[a-zA-Z0-9_\-\.]+\.(jpg|jpeg|png|webp)$')
+    ) then
+        return false;
+    end if;
+
+    return true;
+end;
+$$;
+
+-- 2b. Validator cho URL Thumbnail báo cáo (ràng buộc bucket, path và cặp full-thumbnail)
+create or replace function public.is_valid_report_thumbnail_url(
+    p_thumb_url text,
+    p_campaign_id uuid,
+    p_user_id uuid,
+    p_screenshot_url text default null
+)
+returns boolean
+language plpgsql
+immutable
+as $$
+declare
+    v_clean_thumb text;
+    v_clean_full text;
+    v_thumb_bucket text;
+    v_thumb_path text;
+    v_matches text[];
+    v_thumb_filename text;
+    v_full_filename text;
+begin
+    -- 1. Thumbnail là tùy chọn: NULL là hoàn toàn hợp lệ (legacy reports)
+    if p_thumb_url is null then
+        return true;
+    end if;
+
+    if length(p_thumb_url) > 2048 then
+        return false;
+    end if;
+
+    -- Tách query string (?) và fragment (#)
+    v_clean_thumb := split_part(split_part(p_thumb_url, '?', 1), '#', 1);
+
+    if v_clean_thumb ~* '^https://firebasestorage\.googleapis\.com/v0/b/([^/]+)/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_thumb, '^https://firebasestorage\.googleapis\.com/v0/b/([^/]+)/o/(.+)$', 'i');
+        v_thumb_bucket := v_matches[1];
+        v_thumb_path := v_matches[2];
+    elsif v_clean_thumb ~* '^https://([^/]+)\.firebasestorage\.app/v0/b/([^/]+)/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_thumb, '^https://([^/]+)\.firebasestorage\.app/v0/b/([^/]+)/o/(.+)$', 'i');
+        v_thumb_bucket := v_matches[2];
+        v_thumb_path := v_matches[3];
+    elsif v_clean_thumb ~* '^https://([^/]+)\.firebasestorage\.app/o/(.+)$' then
+        v_matches := regexp_matches(v_clean_thumb, '^https://([^/]+)\.firebasestorage\.app/o/(.+)$', 'i');
+        v_thumb_bucket := v_matches[1] || '.firebasestorage.app';
+        v_thumb_path := v_matches[2];
+    elsif v_clean_thumb ~* '^https://storage\.googleapis\.com/([^/]+)/(.+)$' then
+        v_matches := regexp_matches(v_clean_thumb, '^https://storage\.googleapis\.com/([^/]+)/(.+)$', 'i');
+        v_thumb_bucket := v_matches[1];
+        v_thumb_path := v_matches[2];
+    else
+        return false;
+    end if;
+
+    -- Allowlist bucket
+    if not (
+        v_thumb_bucket in ('cross-testers.firebasestorage.app', 'cross-testers.appspot.com', 'crosstest-prod.appspot.com')
+    ) then
+        return false;
+    end if;
+
+    -- Chuẩn hoá percent-encoding
+    v_thumb_path := replace(replace(v_thumb_path, '%2F', '/'), '%2f', '/');
+
+    -- Đường dẫn object thumbnail phải thuộc đúng campaign, user và có tiền tố thumb_
+    if not (
+        v_thumb_path ~* ('^reports/' || p_campaign_id::text || '/' || p_user_id::text || '/thumb_[a-zA-Z0-9_\-\.]+\.(jpg|jpeg|png|webp)$')
+        or v_thumb_path ~* ('^reports/' || p_campaign_id::text || '/' || p_user_id::text || '_thumb_[a-zA-Z0-9_\-\.]+\.(jpg|jpeg|png|webp)$')
+    ) then
+        return false;
+    end if;
+
+    -- 2. Kiểm tra ràng buộc cặp Full - Thumbnail nếu có p_screenshot_url
+    if p_screenshot_url is not null then
+        v_clean_full := split_part(split_part(p_screenshot_url, '?', 1), '#', 1);
+        v_clean_full := replace(replace(v_clean_full, '%2F', '/'), '%2f', '/');
+        
+        v_thumb_filename := substring(v_thumb_path from '[^/]+$');
+        v_full_filename := substring(v_clean_full from '[^/]+$');
+
+        -- Tên file thumbnail phải đúng định dạng 'thumb_' + tên file full
+        if v_thumb_filename != ('thumb_' || v_full_filename) then
+            return false;
+        end if;
+    end if;
+
+    return true;
+end;
+$$;
+
+-- 3. Cập nhật stored procedure submit_tester_report với tham số p_thumbnail_url tùy chọn
+drop function if exists public.submit_tester_report(uuid, text, text, int, text, uuid);
+
+create or replace function public.submit_tester_report(
+    p_campaign_id uuid,
+    p_content text default '',
+    p_screenshot_url text default null,
+    p_rating int default 5,
+    p_image_hash text default null,
+    p_client_submit_id uuid default null,
+    p_thumbnail_url text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_report_id uuid;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp record;
+    v_existing_report record;
+    v_idempotent_report record;
+    v_already_checked_in boolean := false;
+    v_status text := 'pending';
+    v_rating int := greatest(1, least(5, coalesce(p_rating, 5)));
+    v_new_balance int;
+    v_provisional_granted boolean := false;
+    v_provisional_amount int := 0;
+    v_provisional_reward int := 10;
+    v_regrant int := 0;
+    v_new_screenshot boolean := false;
+    v_effective_full text;
+    v_final_url text;
+    v_final_hash text;
+    v_final_thumb text;
+begin
+    if v_user_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Idempotency: nếu RPC đã commit nhưng response bị mất/timeout, lần retry
+    -- trả lại đúng report cũ, không cộng credit lần hai.
+    if p_client_submit_id is not null then
+        select * into v_idempotent_report
+        from public.tester_reports
+        where user_id = v_user_id
+          and client_submit_id = p_client_submit_id
+        limit 1;
+
+        if v_idempotent_report.id is not null then
+            return jsonb_build_object(
+                'success', true,
+                'report_id', v_idempotent_report.id,
+                'status', v_idempotent_report.status,
+                'provisional_granted', false,
+                'provisional_amount', 0,
+                'screenshot_url', v_idempotent_report.screenshot_url,
+                'image_hash', v_idempotent_report.image_hash,
+                'thumbnail_url', v_idempotent_report.thumbnail_url
+            );
+        end if;
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    if v_camp.owner_id = v_user_id then
+        raise exception 'CANNOT_TEST_OWN_APP';
+    end if;
+
+    if exists (
+        select 1 from public.profiles
+        where id = v_user_id and is_locked = true
+    ) then
+        raise exception 'ACCOUNT_LOCKED';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    perform pg_advisory_xact_lock(
+        hashtextextended(format('%s:%s:%s', v_user_id, p_campaign_id, v_today), 0)
+    );
+
+    insert into public.campaign_members (campaign_id, user_id)
+    values (p_campaign_id, v_user_id)
+    on conflict (campaign_id, user_id) do nothing;
+
+    -- Lấy report hôm nay TRƯỚC và khóa dòng: không đua với thao tác duyệt/từ chối.
+    select * into v_existing_report
+    from public.tester_reports
+    where campaign_id = p_campaign_id
+      and user_id = v_user_id
+      and (created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today
+    order by created_at desc
+    limit 1
+    for update;
+
+    -- Ảnh mới = URL khác ảnh hiện tại. Báo cáo đã duyệt thì không nhận ảnh mới.
+    v_new_screenshot := p_screenshot_url is not null
+        and (v_existing_report.id is null
+             or p_screenshot_url is distinct from v_existing_report.screenshot_url);
+
+    if p_image_hash is not null and lower(p_image_hash) !~ '^[0-9a-f]{16}$' then
+        raise exception 'INVALID_IMAGE_HASH';
+    end if;
+
+    if v_new_screenshot then
+        if p_image_hash is null or p_image_hash = '' then
+            raise exception 'IMAGE_HASH_REQUIRED';
+        end if;
+        if not public.is_valid_report_screenshot_url(p_screenshot_url, p_campaign_id, v_user_id) then
+            raise exception 'INVALID_SCREENSHOT_URL';
+        end if;
+    end if;
+
+    -- Xác định effective full screenshot (từ tham số mới hoặc từ report hiện tại trong DB)
+    v_effective_full := coalesce(p_screenshot_url, v_existing_report.screenshot_url);
+
+    -- Kiểm tra thumbnail URL nếu được truyền vào
+    if p_thumbnail_url is not null then
+        -- Chặn orphan thumbnail: không cho phép thumbnail khi không có ảnh full hợp lệ (kể cả report mới lẫn omitted full)
+        if v_effective_full is null then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+        if not public.is_valid_report_thumbnail_url(p_thumbnail_url, p_campaign_id, v_user_id, v_effective_full) then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+    end if;
+
+    -- Feedback: báo cáo đã duyệt thì giữ nguyên rating, chỉ cho bổ sung comment.
+    insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+    values (
+        p_campaign_id,
+        v_user_id,
+        case when v_existing_report.status = 'approved'
+             then coalesce(v_existing_report.rating, v_rating)
+             else v_rating end,
+        coalesce(p_content, ''),
+        now()
+    )
+    on conflict (campaign_id, user_id)
+    do update set
+        rating = case
+            when v_existing_report.status = 'approved' then public.feedbacks.rating
+            else excluded.rating
+        end,
+        comment = case
+            when coalesce(excluded.comment, '') <> '' then excluded.comment
+            else public.feedbacks.comment
+        end,
+        updated_at = now();
+
+    -- Checkin "xác nhận" hôm nay = checkin không phải tạm tính
+    select exists (
+        select 1 from public.checkins
+        where campaign_id = p_campaign_id
+          and user_id = v_user_id
+          and checkin_date = v_today
+          and (note is null or note not like '%tạm tính%')
+    ) into v_already_checked_in;
+
+    if v_existing_report.id is not null then
+        -- Trường hợp 1: đã duyệt -> chỉ bổ sung nội dung, giữ nguyên ảnh & rating
+        if v_existing_report.status = 'approved' then
+            update public.tester_reports
+            set content = case
+                when coalesce(p_content, '') <> '' then p_content
+                else content
+            end,
+                client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+            where id = v_existing_report.id
+              and status = 'approved'
+            returning id into v_report_id;
+
+            if v_report_id is null then
+                raise exception 'REPORT_ALREADY_REVIEWED';
+            end if;
+            v_status := 'approved';
+
+        -- Trường hợp 2: bị từ chối thật -> nộp lại, BẮT BUỘC ảnh mới khác ảnh cũ
+        elsif v_existing_report.status = 'rejected' and v_existing_report.reviewed_at is not null then
+            if not v_new_screenshot then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is not null
+               and p_image_hash is not null
+               and public.dhash_hamming(v_existing_report.image_hash, p_image_hash) <= 5 then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is null
+               and p_image_hash is null
+               and p_screenshot_url = v_existing_report.screenshot_url then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_already_checked_in then
+                -- Legacy: đã có checkin xác nhận trong ngày, không cấp thêm tạm nhận.
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = 2,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = 0,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+            else
+                -- Chỉ cấp lại đúng số đã thu hồi; báo cáo cũ tối đa 2, báo cáo mới tối đa 10.
+                v_regrant := least(
+                    v_provisional_reward,
+                    greatest(
+                        0,
+                        coalesce(
+                            v_existing_report.provisional_clawed,
+                            v_existing_report.provisional_granted_credits,
+                            2
+                        )
+                    )
+                );
+
+                if v_regrant > 0 then
+                    update public.profiles
+                    set credits = credits + v_regrant,
+                        last_active_date = v_today,
+                        missed_streak = 0
+                    where id = v_user_id
+                    returning credits into v_new_balance;
+
+                    insert into public.credit_logs (user_id, amount, action, note, balance)
+                    values (
+                        v_user_id,
+                        v_regrant,
+                        'test_provisional',
+                        format('Tạm nhận lại %s Credit sau khi nộp lại kết quả test (chờ chủ app duyệt)', v_regrant),
+                        v_new_balance
+                    );
+
+                    v_provisional_granted := true;
+                    v_provisional_amount := v_regrant;
+                end if;
+
+                insert into public.checkins (campaign_id, user_id, checkin_date, note)
+                values (p_campaign_id, v_user_id, v_today, 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)')
+                on conflict (campaign_id, user_id, checkin_date)
+                do update set note = 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)';
+
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = v_regrant,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = v_regrant,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+            end if;
+
+        -- Trường hợp 3: pending (hoặc rejected legacy chưa review) -> cho chỉnh sửa ảnh/nội dung
+        else
+            update public.tester_reports
+            set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                screenshot_url = case when v_new_screenshot then p_screenshot_url else screenshot_url end,
+                -- F05: Khi đổi ảnh full, thumbnail phải lấy ảnh mới p_thumbnail_url (null nếu không có),
+                -- không được giữ thumbnail cũ của ảnh trước.
+                thumbnail_url = case
+                    when v_new_screenshot then p_thumbnail_url
+                    else coalesce(p_thumbnail_url, thumbnail_url)
+                end,
+                rating = v_rating,
+                image_hash = case when v_new_screenshot then lower(p_image_hash) else image_hash end,
+                client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+            where id = v_existing_report.id
+              and status = v_existing_report.status
+              and reviewed_at is not distinct from v_existing_report.reviewed_at
+            returning id into v_report_id;
+
+            if v_report_id is null then
+                raise exception 'REPORT_ALREADY_REVIEWED';
+            end if;
+            v_status := v_existing_report.status;
+        end if;
+    else
+        -- Trường hợp 4: chưa có báo cáo hôm nay
+        if v_already_checked_in then
+            -- Legacy: đã có checkin xác nhận trong ngày, không cấp thêm tạm nhận.
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', 2, 0, 0,
+                lower(p_image_hash), p_client_submit_id, now()
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+        else
+            update public.profiles
+            set credits = credits + v_provisional_reward,
+                last_active_date = v_today,
+                missed_streak = 0
+            where id = v_user_id
+            returning credits into v_new_balance;
+
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_user_id, v_provisional_reward, 'test_provisional',
+                format('Tạm nhận %s Credit sau khi nộp kết quả test (chờ chủ app duyệt)', v_provisional_reward),
+                v_new_balance
+            );
+
+            insert into public.checkins (campaign_id, user_id, checkin_date, note)
+            values (p_campaign_id, v_user_id, v_today, 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)')
+            on conflict (campaign_id, user_id, checkin_date)
+            do update set note = 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)';
+
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', v_provisional_reward, 0, v_provisional_reward,
+                lower(p_image_hash), p_client_submit_id, now()
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+            v_provisional_granted := true;
+            v_provisional_amount := v_provisional_reward;
+        end if;
+    end if;
+
+    update public.profiles
+    set last_active_date = v_today,
+        missed_streak = 0
+    where id = v_user_id;
+
+    select screenshot_url, image_hash, thumbnail_url
+    into v_final_url, v_final_hash, v_final_thumb
+    from public.tester_reports
+    where id = v_report_id;
+
+    return jsonb_build_object(
+        'success', true,
+        'report_id', v_report_id,
+        'status', v_status,
+        'provisional_granted', v_provisional_granted,
+        'provisional_amount', v_provisional_amount,
+        'screenshot_url', v_final_url,
+        'image_hash', v_final_hash,
+        'thumbnail_url', v_final_thumb
+    );
+end;
+$$;
+
+revoke execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text) from public, anon;
+grant execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text) to authenticated, service_role;
+
+
+-- ===== 046_media_access_gateway.sql =====
+-- ============================================================================
+-- 12 Tester — Supabase migration 046: Gateway truy cập Media có kiểm tra quyền (E04)
+-- R2-01: Bỏ secret hardcode, fail closed khi thiếu config, bảo vệ quyền thực thi,
+--        ràng buộc danh tính consumer (auth.uid), role hiện tại, expiry và unrevoked status.
+-- ============================================================================
+
+-- 1. Đảm bảo cột media_expired tồn tại trên bảng tester_reports
+alter table public.tester_reports
+add column if not exists media_expired boolean not null default false;
+
+-- 2. Secret nội bộ cho chữ ký HMAC của Media Gateway (server-side only)
+-- Không lưu secret mặc định trong source code; fail closed nếu chưa cấu hình.
+create or replace function public.get_media_gateway_secret()
+returns text
+language plpgsql
+stable
+security definer
+set search_path = public, extensions
+as $$
+declare
+    v_secret text;
+begin
+    v_secret := current_setting('app.settings.media_gateway_secret', true);
+    if v_secret is null or length(trim(v_secret)) = 0 then
+        raise exception 'MEDIA_GATEWAY_SECRET_NOT_CONFIGURED';
+    end if;
+    return v_secret;
+end;
+$$;
+
+-- Thu hồi toàn bộ quyền public/anon/authenticated đối với hàm lấy secret
+revoke all on function public.get_media_gateway_secret() from public, anon, authenticated;
+grant execute on function public.get_media_gateway_secret() to service_role;
+
+-- 3. Hàm xác thực chữ ký grant token của Media Gateway với identity binding
+create or replace function public.verify_media_access_grant(
+    p_report_id uuid,
+    p_grant_token text,
+    p_variant text default 'full',
+    p_expires_at_epoch bigint default null
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+    v_consumer_id uuid := auth.uid();
+    v_report record;
+    v_camp record;
+    v_role text := null;
+    v_now_epoch bigint := extract(epoch from now())::bigint;
+    v_expected_sig text;
+begin
+    -- 1. Identity binding: Bắt buộc phải có phiên người dùng thực tế
+    if v_consumer_id is null or p_grant_token is null or p_expires_at_epoch is null then
+        return false;
+    end if;
+
+    -- 2. Kiểm tra hết hạn & tuổi thọ tối đa của grant (tối đa 30 phút = 1800s)
+    if v_now_epoch > p_expires_at_epoch or (p_expires_at_epoch - v_now_epoch) > 1800 then
+        return false;
+    end if;
+
+    -- 3. Kiểm tra báo cáo tồn tại, không bị xóa và chưa hết hạn lưu trữ (SLA 30 ngày)
+    select id, campaign_id, user_id, media_expired, created_at
+    into v_report
+    from public.tester_reports
+    where id = p_report_id;
+
+    if v_report.id is null or v_report.media_expired = true or v_report.created_at < (now() - interval '30 days') then
+        return false;
+    end if;
+
+    -- 4. Xác định quyền hiện tại của consumer đối với báo cáo
+    if v_report.user_id = v_consumer_id then
+        v_role := 'author';
+    else
+        select owner_id into v_camp from public.campaigns where id = v_report.campaign_id;
+        if v_camp.owner_id = v_consumer_id then
+            v_role := 'owner';
+        elsif exists (
+            select 1 from public.profiles
+            where id = v_consumer_id and lower(coalesce(role, '')) in ('admin', 'moderator')
+        ) then
+            v_role := 'admin';
+        else
+            return false;
+        end if;
+    end if;
+
+    -- 5. Tính lại chữ ký HMAC gắn chặt với định danh consumer, role, report, variant, expires
+    v_expected_sig := encode(
+        hmac(
+            format('%s:%s:%s:%s:%s', p_report_id, v_consumer_id, v_role, coalesce(p_variant, 'full'), p_expires_at_epoch),
+            public.get_media_gateway_secret(),
+            'sha256'
+        ),
+        'hex'
+    );
+
+    return (v_expected_sig = p_grant_token);
+exception
+    when others then
+        return false;
+end;
+$$;
+
+-- 3b. Phiên bản nội bộ cho Backend Service Role (xác thực token thay mặt user qua JWT)
+create or replace function public.verify_media_access_grant_internal(
+    p_report_id uuid,
+    p_user_id uuid,
+    p_grant_token text,
+    p_variant text default 'full',
+    p_expires_at_epoch bigint default null
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+    v_report record;
+    v_camp record;
+    v_role text := null;
+    v_now_epoch bigint := extract(epoch from now())::bigint;
+    v_expected_sig text;
+begin
+    if p_user_id is null or p_grant_token is null or p_expires_at_epoch is null then
+        return false;
+    end if;
+
+    if v_now_epoch > p_expires_at_epoch or (p_expires_at_epoch - v_now_epoch) > 1800 then
+        return false;
+    end if;
+
+    select id, campaign_id, user_id, media_expired, created_at
+    into v_report
+    from public.tester_reports
+    where id = p_report_id;
+
+    if v_report.id is null or v_report.media_expired = true or v_report.created_at < (now() - interval '30 days') then
+        return false;
+    end if;
+
+    if v_report.user_id = p_user_id then
+        v_role := 'author';
+    else
+        select owner_id into v_camp from public.campaigns where id = v_report.campaign_id;
+        if v_camp.owner_id = p_user_id then
+            v_role := 'owner';
+        elsif exists (
+            select 1 from public.profiles
+            where id = p_user_id and lower(coalesce(role, '')) in ('admin', 'moderator')
+        ) then
+            v_role := 'admin';
+        else
+            return false;
+        end if;
+    end if;
+
+    v_expected_sig := encode(
+        hmac(
+            format('%s:%s:%s:%s:%s', p_report_id, p_user_id, v_role, coalesce(p_variant, 'full'), p_expires_at_epoch),
+            public.get_media_gateway_secret(),
+            'sha256'
+        ),
+        'hex'
+    );
+
+    return (v_expected_sig = p_grant_token);
+exception
+    when others then
+        return false;
+end;
+$$;
+
+-- 4. Function cấp quyền truy cập media ngắn hạn có xác thực danh tính từ JWT auth.uid()
+create or replace function public.get_report_media_access(
+    p_report_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_report record;
+    v_camp record;
+    v_role text := null;
+    v_is_admin boolean := false;
+    v_is_author boolean := false;
+    v_is_owner boolean := false;
+    v_full_token text;
+    v_thumb_token text;
+    v_expires_at timestamptz;
+    v_expires_epoch bigint;
+    v_gateway_base text;
+    v_signed_full_url text;
+    v_signed_thumb_url text;
+begin
+    -- 1. Xác thực bắt buộc: Phải có JWT hợp lệ, không tin bất kỳ UID/role client gửi
+    if v_user_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- 2. Đọc thông tin báo cáo
+    select id, campaign_id, user_id, screenshot_url, thumbnail_url,
+           created_at, media_expired
+    into v_report
+    from public.tester_reports
+    where id = p_report_id;
+
+    if v_report.id is null then
+        raise exception 'REPORT_NOT_FOUND';
+    end if;
+
+    -- 3. Kiểm tra thời hạn lưu trữ & thu hồi (SLA 30 ngày)
+    if v_report.media_expired = true or v_report.created_at < (now() - interval '30 days') then
+        raise exception 'MEDIA_EXPIRED';
+    end if;
+
+    -- 4. Xác định quyền dựa trên quan hệ thực tế trong database
+    v_is_author := (v_report.user_id = v_user_id);
+
+    select * into v_camp from public.campaigns where id = v_report.campaign_id;
+    if v_camp.id is not null and v_camp.owner_id = v_user_id then
+        v_is_owner := true;
+    end if;
+
+    if exists (
+        select 1 from public.profiles
+        where id = v_user_id and lower(coalesce(role, '')) in ('admin', 'moderator')
+    ) then
+        v_is_admin := true;
+    end if;
+
+    if v_is_author then
+        v_role := 'author';
+    elsif v_is_owner then
+        v_role := 'owner';
+    elsif v_is_admin then
+        v_role := 'admin';
+    else
+        -- Không có quyền truy cập báo cáo này
+        raise exception 'FORBIDDEN';
+    end if;
+
+    -- 5. Cấp grant tải media có hiệu lực ngắn hạn (15 phút) dùng HMAC sha256 với secret server
+    v_expires_at := now() + interval '15 minutes';
+    v_expires_epoch := extract(epoch from v_expires_at)::bigint;
+
+    v_full_token := encode(
+        hmac(
+            format('%s:%s:%s:%s:%s', p_report_id, v_user_id, v_role, 'full', v_expires_epoch),
+            public.get_media_gateway_secret(),
+            'sha256'
+        ),
+        'hex'
+    );
+
+    v_thumb_token := encode(
+        hmac(
+            format('%s:%s:%s:%s:%s', p_report_id, v_user_id, v_role, 'thumb', v_expires_epoch),
+            public.get_media_gateway_secret(),
+            'sha256'
+        ),
+        'hex'
+    );
+
+    v_gateway_base := nullif(current_setting('app.settings.media_gateway_base_url', true), '');
+    if v_gateway_base is null or length(trim(v_gateway_base)) = 0 then
+        raise exception 'MEDIA_GATEWAY_BASE_URL_NOT_CONFIGURED';
+    end if;
+
+    v_signed_full_url := format('%s?report_id=%s&variant=full&expires_at=%s&grant_token=%s',
+        v_gateway_base, p_report_id, v_expires_epoch, v_full_token);
+
+    v_signed_thumb_url := case
+        when v_report.thumbnail_url is not null then
+            format('%s?report_id=%s&variant=thumb&expires_at=%s&grant_token=%s',
+                v_gateway_base, p_report_id, v_expires_epoch, v_thumb_token)
+        else null
+    end;
+
+    -- Không trả về raw_storage_url cho client để chặn bypass URL
+    return jsonb_build_object(
+        'success', true,
+        'report_id', p_report_id,
+        'role', v_role,
+        'screenshot_url', v_signed_full_url,
+        'thumbnail_url', v_signed_thumb_url,
+        'expires_at', v_expires_at,
+        'expires_at_epoch', v_expires_epoch,
+        'access_grant_token', v_full_token
+    );
+end;
+$$;
+
+revoke execute on function public.get_report_media_access(uuid) from public, anon;
+grant execute on function public.get_report_media_access(uuid) to authenticated, service_role;
+grant execute on function public.verify_media_access_grant(uuid, text, text, bigint) to authenticated, service_role;
+revoke execute on function public.verify_media_access_grant_internal(uuid, uuid, text, text, bigint) from public, anon, authenticated;
+grant execute on function public.verify_media_access_grant_internal(uuid, uuid, text, text, bigint) to service_role;
+
+
+-- ===== 047_home_stats_cycle.sql =====
+-- ============================================================================
+-- Migration 047: Cấu hình chu kỳ thống kê lượt test Trang chủ (1 / 2 / 3 ngày)
+-- ============================================================================
+
+-- 1. Bảng lưu trữ chính sách chu kỳ thống kê Trang chủ
+create table if not exists public.home_stats_policies (
+    id bigserial primary key,
+    effective_from date not null unique,
+    cycle_days int not null check (cycle_days in (1, 2, 3)),
+    created_at timestamptz not null default now(),
+    created_by uuid references auth.users(id) on delete set null,
+    updated_at timestamptz not null default now(),
+    updated_by uuid references auth.users(id) on delete set null
+);
+
+create index if not exists idx_home_stats_policies_effective on public.home_stats_policies(effective_from desc);
+
+-- 2. Bảng audit ghi nhận lịch sử thay đổi cấu hình chu kỳ
+create table if not exists public.home_stats_policy_audits (
+    id bigserial primary key,
+    action text not null, -- 'INIT', 'SET_SCHEDULE', 'UPDATE_SCHEDULE', 'CANCEL_SCHEDULE'
+    effective_from date not null,
+    cycle_days_old int,
+    cycle_days_new int,
+    actor_id uuid references auth.users(id) on delete set null,
+    recorded_at timestamptz not null default now()
+);
+
+-- 3. Bảo vệ RLS và phân quyền truy cập
+alter table public.home_stats_policies enable row level security;
+alter table public.home_stats_policy_audits enable row level security;
+
+-- Thu hồi mọi quyền đọc/sửa trực tiếp từ anon và authenticated.
+-- Toàn bộ việc đọc và cập nhật phải qua các RPC có kiểm tra role admin.
+revoke all on public.home_stats_policies from public, anon, authenticated;
+revoke all on public.home_stats_policy_audits from public, anon, authenticated;
+
+grant select, insert, update, delete on public.home_stats_policies to service_role;
+grant select, insert on public.home_stats_policy_audits to service_role;
+
+-- 4. Seed chính sách nền: Mặc định chu kỳ 1 ngày từ mốc cố định trong quá khứ
+insert into public.home_stats_policies (effective_from, cycle_days, created_at, updated_at)
+values ('2020-01-01', 1, now(), now())
+on conflict (effective_from) do nothing;
+
+-- 5. Helper nội bộ: Tính chu kỳ cố định theo ngày hiện tại Asia/Ho_Chi_Minh
+--    Công thức: period_start = A + floor((D - A) / N) * N
+create or replace function public._get_home_stats_period(p_today date)
+returns table (
+    period_start date,
+    period_end_exclusive date,
+    cycle_days int
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+    v_eff date;
+    v_days int;
+    v_diff int;
+begin
+    -- Tìm chính sách có effective_from <= p_today gần nhất
+    select p.effective_from, p.cycle_days
+    into v_eff, v_days
+    from public.home_stats_policies p
+    where p.effective_from <= p_today
+    order by p.effective_from desc
+    limit 1;
+
+    if v_eff is null then
+        v_eff := p_today;
+        v_days := 1;
+    end if;
+
+    v_diff := p_today - v_eff;
+    period_start := v_eff + ((floor(v_diff::numeric / v_days) * v_days)::int);
+    period_end_exclusive := period_start + v_days;
+    cycle_days := v_days;
+    return next;
+end;
+$$;
+
+revoke execute on function public._get_home_stats_period(date) from public, anon, authenticated;
+grant execute on function public._get_home_stats_period(date) to service_role;
+
+-- 6. Helper nội bộ: Tạo revision băm để kiểm tra xung đột sửa đồng thời (concurrency revision check)
+--    Chuẩn hóa timestamp bằng extract(epoch from updated_at) để không phụ thuộc vào session timezone.
+create or replace function public._get_home_stats_revision()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+    select coalesce(
+        md5(string_agg(
+            id::text || ':' || effective_from::text || ':' || cycle_days::text || ':' || coalesce(extract(epoch from updated_at)::bigint::text, '0'),
+            ',' order by id
+        )),
+        'empty'
+    ) from public.home_stats_policies;
+$$;
+
+revoke execute on function public._get_home_stats_revision() from public, anon, authenticated;
+grant execute on function public._get_home_stats_revision() to service_role;
+
+-- 7. Trigger: Bảo vệ bất biến chính sách đang hoặc đã có hiệu lực (R06)
+create or replace function public._check_home_stats_policy_immutability()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_current_vn date := (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date;
+begin
+    if tg_op = 'UPDATE' then
+        if old.effective_from <= v_current_vn then
+            raise exception 'ACTIVE_POLICY_IMMUTABLE: Cannot modify an active or past policy (effective_from: %)', old.effective_from;
+        end if;
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists trg_home_stats_policy_immutability on public.home_stats_policies;
+create trigger trg_home_stats_policy_immutability
+    before update on public.home_stats_policies
+    for each row execute function public._check_home_stats_policy_immutability();
+
+-- 8. RPC Admin: Đọc cấu hình chu kỳ hiện tại và lịch chờ áp dụng
+create or replace function public.admin_get_home_stats_config()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_caller_role text;
+    v_today date := (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_active_days int;
+    v_active_from date;
+    v_pending_days int;
+    v_pending_from date;
+    v_revision text;
+begin
+    if v_uid is null then
+        raise exception 'UNAUTHORIZED: Authentication required';
+    end if;
+
+    select role into v_caller_role from public.profiles where id = v_uid;
+    if v_caller_role is null or lower(v_caller_role) != 'admin' then
+        raise exception 'FORBIDDEN: Admin access required';
+    end if;
+
+    -- Lấy chính sách đang chạy (effective_from <= v_today)
+    select cycle_days, effective_from into v_active_days, v_active_from
+    from public.home_stats_policies
+    where effective_from <= v_today
+    order by effective_from desc
+    limit 1;
+
+    -- Lấy chính sách chờ áp dụng ở tương lai gần nhất (effective_from > v_today)
+    select cycle_days, effective_from into v_pending_days, v_pending_from
+    from public.home_stats_policies
+    where effective_from > v_today
+    order by effective_from asc
+    limit 1;
+
+    v_revision := public._get_home_stats_revision();
+
+    return jsonb_build_object(
+        'active_cycle_days', coalesce(v_active_days, 1),
+        'active_effective_from', v_active_from,
+        'pending_cycle_days', v_pending_days,
+        'pending_effective_from', v_pending_from,
+        'revision', v_revision,
+        'today', v_today
+    );
+end;
+$$;
+
+grant execute on function public.admin_get_home_stats_config() to authenticated, service_role;
+revoke execute on function public.admin_get_home_stats_config() from anon;
+
+-- 9. RPC Admin: Cập nhật chu kỳ thống kê Trang chủ
+--    Admin chọn 1, 2 hoặc 3 ngày; có hiệu lực từ 00:00 ngày hôm sau.
+create or replace function public.admin_set_home_stats_cycle(
+    p_cycle_days int,
+    p_expected_revision text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_caller_role text;
+    v_today date;
+    v_tomorrow date;
+    v_active_days int;
+    v_active_from date;
+    v_existing_tomorrow int;
+    v_current_rev text;
+    r record;
+begin
+    if v_uid is null then
+        raise exception 'UNAUTHORIZED: Authentication required';
+    end if;
+
+    select role into v_caller_role from public.profiles where id = v_uid;
+    if v_caller_role is null or lower(v_caller_role) != 'admin' then
+        raise exception 'FORBIDDEN: Admin access required';
+    end if;
+
+    if p_cycle_days is null or p_cycle_days not in (1, 2, 3) then
+        raise exception 'INVALID_CYCLE_DAYS: Must be 1, 2, or 3';
+    end if;
+
+    -- R05: Bắt buộc revision hợp lệ; không được để null hoặc rỗng
+    if p_expected_revision is null or trim(p_expected_revision) = '' then
+        raise exception 'MISSING_REVISION: Expected revision is required';
+    end if;
+
+    -- Khóa tránh hai admin thao tác cùng lúc
+    lock table public.home_stats_policies in exclusive mode;
+
+    -- R06: Tính lại ngày chính xác sau khi đã lấy được lock
+    v_today := (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_tomorrow := v_today + 1;
+
+    -- Kiểm tra revision dưới lock
+    v_current_rev := public._get_home_stats_revision();
+    if p_expected_revision <> v_current_rev then
+        raise exception 'CONCURRENCY_CONFLICT: Config has been modified by another administrator';
+    end if;
+
+    -- Tìm chu kỳ đang có hiệu lực hôm nay
+    select cycle_days, effective_from into v_active_days, v_active_from
+    from public.home_stats_policies
+    where effective_from <= v_today
+    order by effective_from desc
+    limit 1;
+
+    v_active_days := coalesce(v_active_days, 1);
+
+    if p_cycle_days = v_active_days then
+        -- Admin chọn lại cùng giá trị đang chạy
+        -- Nếu có lịch chờ ở tương lai (> v_today), hủy lịch chờ đó (rollback về mốc cũ)
+        for r in select * from public.home_stats_policies where effective_from > v_today loop
+            insert into public.home_stats_policy_audits (action, effective_from, cycle_days_old, cycle_days_new, actor_id)
+            values ('CANCEL_SCHEDULE', r.effective_from, r.cycle_days, null, v_uid);
+        end loop;
+        delete from public.home_stats_policies where effective_from > v_today;
+    else
+        -- Admin chọn chu kỳ mới khác chu kỳ đang chạy -> áp dụng từ 00:00 ngày mai
+        select cycle_days into v_existing_tomorrow
+        from public.home_stats_policies
+        where effective_from = v_tomorrow;
+
+        if found then
+            if v_existing_tomorrow <> p_cycle_days then
+                update public.home_stats_policies
+                set cycle_days = p_cycle_days, updated_at = now(), updated_by = v_uid
+                where effective_from = v_tomorrow;
+
+                insert into public.home_stats_policy_audits (action, effective_from, cycle_days_old, cycle_days_new, actor_id)
+                values ('UPDATE_SCHEDULE', v_tomorrow, v_existing_tomorrow, p_cycle_days, v_uid);
+            end if;
+        else
+            insert into public.home_stats_policies (effective_from, cycle_days, created_by, updated_by, created_at, updated_at)
+            values (v_tomorrow, p_cycle_days, v_uid, v_uid, now(), now());
+
+            insert into public.home_stats_policy_audits (action, effective_from, cycle_days_old, cycle_days_new, actor_id)
+            values ('SET_SCHEDULE', v_tomorrow, v_active_days, p_cycle_days, v_uid);
+        end if;
+
+        -- Dọn các lịch xa hơn ngày mai nếu có
+        delete from public.home_stats_policies where effective_from > v_tomorrow;
+    end if;
+
+    -- Trả về cấu hình mới nhất
+    return public.admin_get_home_stats_config();
+end;
+$$;
+
+grant execute on function public.admin_set_home_stats_cycle(int, text) to authenticated, service_role;
+revoke execute on function public.admin_set_home_stats_cycle(int, text) from anon;
+
+-- 10. Nâng cấp get_home_feed(): Bổ sung home_tested_count và stats_date vào stats
+create or replace function public.get_home_feed()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_today date := (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_period_start date;
+    v_open jsonb := '[]'::jsonb;
+    v_paused jsonb := '[]'::jsonb;
+    v_completed jsonb := '[]'::jsonb;
+    v_owner_names jsonb := '{}'::jsonb;
+    v_stats jsonb := '{}'::jsonb;
+begin
+    select coalesce(jsonb_agg(public._campaign_json(c) order by c.created_at desc), '[]'::jsonb)
+    into v_open
+    from public.campaigns c
+    where c.status = 'open';
+
+    if v_uid is not null then
+        select coalesce(jsonb_agg(public._campaign_json(c) order by c.created_at desc), '[]'::jsonb)
+        into v_paused
+        from public.campaigns c
+        where c.status = 'paused';
+
+        select coalesce(jsonb_agg(public._campaign_json(c) order by c.created_at desc), '[]'::jsonb)
+        into v_completed
+        from public.campaigns c
+        where c.status in ('production', 'completed');
+    end if;
+
+    select coalesce(jsonb_object_agg(t.owner_id::text, t.name), '{}'::jsonb)
+    into v_owner_names
+    from (
+        select distinct c.owner_id,
+               coalesce(nullif(p.display_name, ''), split_part(coalesce(p.email, ''), '@', 1), 'Chủ app') as name
+        from public.campaigns c
+        left join public.profiles p on p.id = c.owner_id
+        where c.status = 'open'
+           or (v_uid is not null and c.status in ('paused', 'production', 'completed'))
+    ) t;
+
+    -- Xác định mốc đầu chu kỳ hiện tại
+    select period_start into v_period_start from public._get_home_stats_period(v_today);
+
+    select coalesce(jsonb_object_agg(s.id::text, jsonb_build_object(
+        'installed_count', coalesce(s.installed_count, 0),
+        'today_tested_count', coalesce(s.today_tested_count, 0),
+        'has_tested_today', coalesce(s.has_tested_today, false),
+        'home_tested_count', coalesce(s.home_tested_count, 0),
+        'stats_date', v_today::text
+    )), '{}'::jsonb)
+    into v_stats
+    from (
+        select c.id,
+            (select count(*) from public.campaign_members m where m.campaign_id = c.id) as installed_count,
+            (select count(distinct ci.user_id) from public.checkins ci
+              where ci.campaign_id = c.id and ci.checkin_date = v_today) as today_tested_count,
+            (select count(*) from public.checkins ci_period
+              where ci_period.campaign_id = c.id
+                and ci_period.checkin_date >= v_period_start
+                and ci_period.checkin_date <= v_today) as home_tested_count,
+            (v_uid is not null and (
+                exists (select 1 from public.checkins ci2
+                        where ci2.campaign_id = c.id and ci2.user_id = v_uid and ci2.checkin_date = v_today)
+                or exists (select 1 from public.tester_reports tr
+                           where tr.campaign_id = c.id and tr.user_id = v_uid
+                             and tr.status <> 'rejected'
+                             and (tr.created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today)
+            )) as has_tested_today
+        from public.campaigns c
+        where c.status = 'open'
+           or (v_uid is not null and c.status in ('paused', 'production', 'completed'))
+    ) s;
+
+    return jsonb_build_object(
+        'open', v_open,
+        'paused', v_paused,
+        'completed', v_completed,
+        'owner_names', v_owner_names,
+        'stats', v_stats
+    );
+end;
+$$;
+
+grant execute on function public.get_home_feed() to authenticated, anon, service_role;
+
+-- 11. Nâng cấp get_campaigns_stats(): Bổ sung home_tested_count và stats_date vào stats
+create or replace function public.get_campaigns_stats(p_campaign_ids uuid[])
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+stable
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_today date := (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_period_start date;
+begin
+    if p_campaign_ids is null or array_length(p_campaign_ids, 1) is null then
+        return '{}'::jsonb;
+    end if;
+
+    select period_start into v_period_start from public._get_home_stats_period(v_today);
+
+    return (
+        select coalesce(jsonb_object_agg(cid::text, jsonb_build_object(
+            'installed_count', coalesce(t.installed, 0),
+            'today_tested_count', coalesce(t.today_tested, 0),
+            'has_tested_today', coalesce(t.has_tested, false),
+            'home_tested_count', coalesce(t.home_tested, 0),
+            'stats_date', v_today::text
+        )), '{}'::jsonb)
+        from unnest(p_campaign_ids) as cid
+        left join (
+            select c.id,
+                (select count(*) from public.campaign_members m where m.campaign_id = c.id) as installed,
+                (select count(distinct ci.user_id) from public.checkins ci
+                  where ci.campaign_id = c.id and ci.checkin_date = v_today) as today_tested,
+                (select count(*) from public.checkins ci_period
+                  where ci_period.campaign_id = c.id
+                    and ci_period.checkin_date >= v_period_start
+                    and ci_period.checkin_date <= v_today) as home_tested,
+                (v_uid is not null and (
+                    exists (select 1 from public.checkins ci2
+                            where ci2.campaign_id = c.id and ci2.user_id = v_uid and ci2.checkin_date = v_today)
+                    or exists (select 1 from public.tester_reports tr
+                               where tr.campaign_id = c.id and tr.user_id = v_uid
+                                 and tr.status <> 'rejected'
+                                 and (tr.created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today)
+                )) as has_tested
+            from public.campaigns c
+            where c.id = any(p_campaign_ids)
+        ) t on t.id = cid
+    );
+end;
+$$;
+
+grant execute on function public.get_campaigns_stats(uuid[]) to authenticated, service_role;
+
+
+-- ===== 048_mission_report_and_expiration.sql =====
+-- ============================================================================
+-- 12 Tester — Supabase migration 048: Báo cáo nhiệm vụ và ẩn nhiệm vụ hết hạn
+-- ============================================================================
+
+-- 1. Bổ sung các cột metadata nhiệm vụ vào bảng public.tester_reports
+alter table public.tester_reports
+    add column if not exists submission_context text check (submission_context in ('app_test', 'mission')),
+    add column if not exists mission_id uuid references public.missions(id) on delete set null,
+    add column if not exists mission_participant_id uuid references public.mission_participants(id) on delete set null,
+    add column if not exists mission_title text,
+    add column if not exists mission_reward_credits int,
+    add column if not exists mission_ends_at timestamptz,
+    add column if not exists mission_submitted_at timestamptz;
+
+create index if not exists idx_tester_reports_mission_id
+on public.tester_reports(mission_id)
+where mission_id is not null;
+
+create index if not exists idx_tester_reports_submission_context
+on public.tester_reports(submission_context);
+
+-- 2. Backfill an toàn dữ liệu lịch sử từ mission_settlement_jobs có định danh đủ chắc
+update public.tester_reports tr
+set
+    submission_context = 'mission',
+    mission_id = msj.mission_id,
+    mission_participant_id = msj.participant_id,
+    mission_title = m.title,
+    mission_reward_credits = msj.reward_credits,
+    mission_ends_at = m.ends_at,
+    mission_submitted_at = tr.created_at
+from public.mission_settlement_jobs msj
+join public.missions m on m.id = msj.mission_id
+where tr.id = msj.report_id
+  and tr.user_id = msj.tester_id
+  and tr.campaign_id = msj.campaign_id
+  and tr.submission_context is null;
+
+-- 3. Trigger chặn client tự gắn/sửa metadata nhiệm vụ qua đường ghi bảng trực tiếp
+create or replace function public.trig_protect_tester_reports_mission_metadata()
+returns trigger
+language plpgsql
+as $$
+begin
+    if current_setting('app.submitting_report', true) = 'true' then
+        return new;
+    end if;
+
+    if current_user not in ('anon', 'authenticated')
+       and coalesce(current_setting('request.jwt.claim.role', true), '') not in ('anon', 'authenticated') then
+        return new;
+    end if;
+
+    if (TG_OP = 'INSERT') then
+        if new.submission_context is not null
+           or new.mission_id is not null
+           or new.mission_participant_id is not null
+           or new.mission_title is not null
+           or new.mission_reward_credits is not null
+           or new.mission_ends_at is not null
+           or new.mission_submitted_at is not null then
+            raise exception 'CANNOT_SET_MISSION_METADATA_DIRECTLY';
+        end if;
+    elsif (TG_OP = 'UPDATE') then
+        if (new.submission_context is distinct from old.submission_context)
+           or (new.mission_id is distinct from old.mission_id)
+           or (new.mission_participant_id is distinct from old.mission_participant_id)
+           or (new.mission_title is distinct from old.mission_title)
+           or (new.mission_reward_credits is distinct from old.mission_reward_credits)
+           or (new.mission_ends_at is distinct from old.mission_ends_at)
+           or (new.mission_submitted_at is distinct from old.mission_submitted_at) then
+            raise exception 'CANNOT_MODIFY_MISSION_METADATA_DIRECTLY';
+        end if;
+    end if;
+
+    return new;
+end;
+$$;
+
+drop trigger if exists trg_protect_tester_reports_mission_metadata on public.tester_reports;
+create trigger trg_protect_tester_reports_mission_metadata
+before insert or update on public.tester_reports
+for each row execute function public.trig_protect_tester_reports_mission_metadata();
+
+-- 4. Cập nhật submit_tester_report hỗ trợ tham số mission tùy chọn và lưu metadata
+drop function if exists public.submit_tester_report(uuid, text, text, int);
+drop function if exists public.submit_tester_report(uuid, text, text, int, text);
+drop function if exists public.submit_tester_report(uuid, text, text, int, text, uuid);
+drop function if exists public.submit_tester_report(uuid, text, text, int, text, uuid, text);
+drop function if exists public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid);
+
+create or replace function public.submit_tester_report(
+    p_campaign_id uuid,
+    p_content text default '',
+    p_screenshot_url text default null,
+    p_rating int default 5,
+    p_image_hash text default null,
+    p_client_submit_id uuid default null,
+    p_thumbnail_url text default null,
+    p_mission_id uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_report_id uuid;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp record;
+    v_existing_report record;
+    v_idempotent_report record;
+    v_already_checked_in boolean := false;
+    v_status text := 'pending';
+    v_rating int := greatest(1, least(5, coalesce(p_rating, 5)));
+    v_new_balance int;
+    v_provisional_granted boolean := false;
+    v_provisional_amount int := 0;
+    v_provisional_reward int := 10;
+    v_regrant int := 0;
+    v_new_screenshot boolean := false;
+    v_effective_full text;
+    v_final_url text;
+    v_final_hash text;
+    v_final_thumb text;
+
+    -- Mission context variables
+    v_mission record;
+    v_mp record;
+    v_eligible_count int := 0;
+    v_submission_context text := 'app_test';
+    v_target_mission_id uuid := null;
+    v_target_mp_id uuid := null;
+    v_target_title text := null;
+    v_target_reward int := null;
+    v_target_ends_at timestamptz := null;
+    v_check_m record;
+    v_res_context text;
+    v_res_mission_id uuid;
+    v_res_title text;
+    v_res_reward int;
+    v_res_ends_at timestamptz;
+begin
+    if v_user_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Idempotency: nếu RPC đã commit nhưng response bị mất/timeout, lần retry
+    -- trả lại đúng report cũ, không cộng credit lần hai (kể cả retry sau hạn).
+    if p_client_submit_id is not null then
+        select * into v_idempotent_report
+        from public.tester_reports
+        where user_id = v_user_id
+          and client_submit_id = p_client_submit_id
+        limit 1;
+
+        if v_idempotent_report.id is not null then
+            if v_idempotent_report.campaign_id <> p_campaign_id then
+                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+            end if;
+            if p_mission_id is not null and v_idempotent_report.mission_id is distinct from p_mission_id then
+                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+            end if;
+
+            return jsonb_build_object(
+                'success', true,
+                'report_id', v_idempotent_report.id,
+                'status', v_idempotent_report.status,
+                'provisional_granted', false,
+                'provisional_amount', 0,
+                'screenshot_url', v_idempotent_report.screenshot_url,
+                'image_hash', v_idempotent_report.image_hash,
+                'thumbnail_url', v_idempotent_report.thumbnail_url,
+                'submission_context', v_idempotent_report.submission_context,
+                'mission_id', v_idempotent_report.mission_id,
+                'mission_title', v_idempotent_report.mission_title,
+                'mission_reward_credits', v_idempotent_report.mission_reward_credits,
+                'mission_ends_at', to_char(v_idempotent_report.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            );
+        end if;
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    if v_camp.owner_id = v_user_id then
+        raise exception 'CANNOT_TEST_OWN_APP';
+    end if;
+
+    if exists (
+        select 1 from public.profiles
+        where id = v_user_id and is_locked = true
+    ) then
+        raise exception 'ACCOUNT_LOCKED';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    -- Thống nhất thứ tự khóa: Advisory lock -> Mission -> Campaign member -> Existing report
+    perform pg_advisory_xact_lock(
+        hashtextextended(format('%s:%s:%s', v_user_id, p_campaign_id, v_today), 0)
+    );
+
+    -- Xác minh mission context
+    if p_mission_id is not null then
+        select * into v_mission
+        from public.missions
+        where id = p_mission_id
+        for update;
+
+        if v_mission.id is null then
+            raise exception 'MISSION_NOT_FOUND';
+        end if;
+
+        if v_mission.campaign_id <> p_campaign_id then
+            raise exception 'INVALID_MISSION_CAMPAIGN';
+        end if;
+
+        if v_mission.creator_id = v_user_id then
+            raise exception 'CANNOT_TEST_OWN_APP';
+        end if;
+
+        if v_mission.ends_at <= now() or v_mission.status = 'expired' then
+            raise exception 'MISSION_EXPIRED';
+        end if;
+
+        if v_mission.status not in ('open', 'full') then
+            raise exception 'MISSION_NOT_OPEN';
+        end if;
+
+        select * into v_mp
+        from public.mission_participants
+        where mission_id = p_mission_id
+          and user_id = v_user_id
+        for update;
+
+        if v_mp.id is null or v_mp.status <> 'joined' then
+            raise exception 'MISSION_NOT_JOINED';
+        end if;
+
+        v_submission_context := 'mission';
+        v_target_mission_id := v_mission.id;
+        v_target_mp_id := v_mp.id;
+        v_target_title := v_mission.title;
+        v_target_reward := v_mission.reward_credits;
+        v_target_ends_at := v_mission.ends_at;
+    else
+        -- Khi client không chỉ định mission: tự động phân loại nếu tester có đúng 1 mission đã nhận còn hạn
+        select count(*) into v_eligible_count
+        from public.missions m
+        join public.mission_participants mp on mp.mission_id = m.id
+        where m.campaign_id = p_campaign_id
+          and mp.user_id = v_user_id
+          and mp.status = 'joined'
+          and m.status in ('open', 'full')
+          and m.ends_at > now();
+
+        if v_eligible_count = 1 then
+            select m.*, mp.id as mp_id
+            into v_mission
+            from public.missions m
+            join public.mission_participants mp on mp.mission_id = m.id
+            where m.campaign_id = p_campaign_id
+              and mp.user_id = v_user_id
+              and mp.status = 'joined'
+              and m.status in ('open', 'full')
+              and m.ends_at > now()
+            for update of m;
+
+            v_submission_context := 'mission';
+            v_target_mission_id := v_mission.id;
+            v_target_mp_id := v_mission.mp_id;
+            v_target_title := v_mission.title;
+            v_target_reward := v_mission.reward_credits;
+            v_target_ends_at := v_mission.ends_at;
+        elsif v_eligible_count > 1 then
+            raise exception 'AMBIGUOUS_MISSION_SUBMISSION';
+        else
+            v_submission_context := 'app_test';
+        end if;
+    end if;
+
+    insert into public.campaign_members (campaign_id, user_id)
+    values (p_campaign_id, v_user_id)
+    on conflict (campaign_id, user_id) do nothing;
+
+    -- Lấy report hôm nay và khóa dòng
+    select * into v_existing_report
+    from public.tester_reports
+    where campaign_id = p_campaign_id
+      and user_id = v_user_id
+      and (created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today
+    order by created_at desc
+    limit 1
+    for update;
+
+    -- Ảnh mới = URL khác ảnh hiện tại. Báo cáo đã duyệt thì không nhận ảnh mới.
+    v_new_screenshot := p_screenshot_url is not null
+        and (v_existing_report.id is null
+             or p_screenshot_url is distinct from v_existing_report.screenshot_url);
+
+    if p_image_hash is not null and lower(p_image_hash) !~ '^[0-9a-f]{16}$' then
+        raise exception 'INVALID_IMAGE_HASH';
+    end if;
+
+    if v_new_screenshot then
+        if p_image_hash is null or p_image_hash = '' then
+            raise exception 'IMAGE_HASH_REQUIRED';
+        end if;
+        if not public.is_valid_report_screenshot_url(p_screenshot_url, p_campaign_id, v_user_id) then
+            raise exception 'INVALID_SCREENSHOT_URL';
+        end if;
+    end if;
+
+    -- Xác định effective full screenshot
+    v_effective_full := coalesce(p_screenshot_url, v_existing_report.screenshot_url);
+
+    if p_thumbnail_url is not null then
+        if v_effective_full is null then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+        if not public.is_valid_report_thumbnail_url(p_thumbnail_url, p_campaign_id, v_user_id, v_effective_full) then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+    end if;
+
+    -- Feedback
+    insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+    values (
+        p_campaign_id,
+        v_user_id,
+        case when v_existing_report.status = 'approved'
+             then coalesce(v_existing_report.rating, v_rating)
+             else v_rating end,
+        coalesce(p_content, ''),
+        now()
+    )
+    on conflict (campaign_id, user_id)
+    do update set
+        rating = case
+            when v_existing_report.status = 'approved' then public.feedbacks.rating
+            else excluded.rating
+        end,
+        comment = case
+            when coalesce(excluded.comment, '') <> '' then excluded.comment
+            else public.feedbacks.comment
+        end,
+        updated_at = now();
+
+    -- Checkin xác nhận hôm nay
+    select exists (
+        select 1 from public.checkins
+        where campaign_id = p_campaign_id
+          and user_id = v_user_id
+          and checkin_date = v_today
+          and (note is null or note not like '%tạm tính%')
+    ) into v_already_checked_in;
+
+    -- Cho phép cập nhật/chèn metadata qua session variable
+    perform set_config('app.submitting_report', 'true', true);
+
+    if v_existing_report.id is not null then
+        -- Trường hợp 1: đã duyệt -> chỉ bổ sung comment, không cho đổi thành mission report
+        if v_existing_report.status = 'approved' then
+            if v_submission_context = 'mission' and v_existing_report.submission_context <> 'mission' then
+                raise exception 'REPORT_ALREADY_APPROVED_AS_APP_TEST';
+            end if;
+            if v_submission_context = 'mission' and v_existing_report.mission_id is distinct from v_target_mission_id then
+                raise exception 'REPORT_ALREADY_APPROVED_FOR_ANOTHER_MISSION';
+            end if;
+
+            update public.tester_reports
+            set content = case
+                when coalesce(p_content, '') <> '' then p_content
+                else content
+            end,
+                client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+            where id = v_existing_report.id
+              and status = 'approved'
+            returning id into v_report_id;
+
+            if v_report_id is null then
+                raise exception 'REPORT_ALREADY_REVIEWED';
+            end if;
+            v_status := 'approved';
+
+        -- Trường hợp 2: bị từ chối -> nộp lại
+        elsif v_existing_report.status = 'rejected' and v_existing_report.reviewed_at is not null then
+            if not v_new_screenshot then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is not null
+               and p_image_hash is not null
+               and public.dhash_hamming(v_existing_report.image_hash, p_image_hash) <= 5 then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is null
+               and p_image_hash is null
+               and p_screenshot_url = v_existing_report.screenshot_url then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            -- Nếu báo cáo bị từ chối vốn là mission report: bắt buộc giữ cùng identity và mission phải còn hạn
+            if v_existing_report.submission_context = 'mission' then
+                if v_target_mission_id is not null and v_existing_report.mission_id is distinct from v_target_mission_id then
+                    raise exception 'CANNOT_SWITCH_REJECTED_REPORT_MISSION';
+                end if;
+
+                select * into v_check_m from public.missions where id = v_existing_report.mission_id;
+                if v_check_m.id is null or v_check_m.ends_at <= now() or v_check_m.status = 'expired' then
+                    raise exception 'MISSION_EXPIRED';
+                end if;
+                if v_check_m.status not in ('open', 'full') then
+                    raise exception 'MISSION_NOT_OPEN';
+                end if;
+
+                v_submission_context := 'mission';
+                v_target_mission_id := v_existing_report.mission_id;
+                v_target_mp_id := v_existing_report.mission_participant_id;
+                v_target_title := v_existing_report.mission_title;
+                v_target_reward := v_existing_report.mission_reward_credits;
+                v_target_ends_at := v_existing_report.mission_ends_at;
+            end if;
+
+            if v_already_checked_in then
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = 2,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = 0,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null,
+                    submission_context = v_submission_context,
+                    mission_id = v_target_mission_id,
+                    mission_participant_id = v_target_mp_id,
+                    mission_title = v_target_title,
+                    mission_reward_credits = v_target_reward,
+                    mission_ends_at = v_target_ends_at,
+                    mission_submitted_at = case when v_submission_context = 'mission' then now() else null end
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+            else
+                v_regrant := least(
+                    v_provisional_reward,
+                    greatest(
+                        0,
+                        coalesce(
+                            v_existing_report.provisional_clawed,
+                            v_existing_report.provisional_granted_credits,
+                            2
+                        )
+                    )
+                );
+
+                if v_regrant > 0 then
+                    update public.profiles
+                    set credits = credits + v_regrant,
+                        last_active_date = v_today,
+                        missed_streak = 0
+                    where id = v_user_id
+                    returning credits into v_new_balance;
+
+                    insert into public.credit_logs (user_id, amount, action, note, balance)
+                    values (
+                        v_user_id,
+                        v_regrant,
+                        'test_provisional',
+                        format('Tạm nhận lại %s Credit sau khi nộp lại kết quả test (chờ chủ app duyệt)', v_regrant),
+                        v_new_balance
+                    );
+
+                    v_provisional_granted := true;
+                    v_provisional_amount := v_regrant;
+                end if;
+
+                insert into public.checkins (campaign_id, user_id, checkin_date, note)
+                values (p_campaign_id, v_user_id, v_today, 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)')
+                on conflict (campaign_id, user_id, checkin_date)
+                do update set note = 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)';
+
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = v_regrant,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = v_regrant,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null,
+                    submission_context = v_submission_context,
+                    mission_id = v_target_mission_id,
+                    mission_participant_id = v_target_mp_id,
+                    mission_title = v_target_title,
+                    mission_reward_credits = v_target_reward,
+                    mission_ends_at = v_target_ends_at,
+                    mission_submitted_at = case when v_submission_context = 'mission' then now() else null end
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+            end if;
+
+        -- Trường hợp 3: pending -> cho chỉnh sửa ảnh/nội dung, không gắn hồi tố mission nếu trước đó là app_test
+        else
+            if v_existing_report.submission_context = 'mission' then
+                if v_target_mission_id is not null and v_existing_report.mission_id is distinct from v_target_mission_id then
+                    raise exception 'CANNOT_CHANGE_MISSION_IDENTITY';
+                end if;
+            else
+                if v_submission_context = 'mission' then
+                    raise exception 'CANNOT_CONVERT_EXISTING_PENDING_REPORT';
+                end if;
+            end if;
+
+            update public.tester_reports
+            set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                screenshot_url = case when v_new_screenshot then p_screenshot_url else screenshot_url end,
+                thumbnail_url = case
+                    when v_new_screenshot then p_thumbnail_url
+                    else coalesce(p_thumbnail_url, thumbnail_url)
+                end,
+                rating = v_rating,
+                image_hash = case when v_new_screenshot then lower(p_image_hash) else image_hash end,
+                client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+            where id = v_existing_report.id
+              and status = v_existing_report.status
+              and reviewed_at is not distinct from v_existing_report.reviewed_at
+            returning id into v_report_id;
+
+            if v_report_id is null then
+                raise exception 'REPORT_ALREADY_REVIEWED';
+            end if;
+            v_status := v_existing_report.status;
+        end if;
+    else
+        -- Trường hợp 4: chưa có báo cáo hôm nay -> nộp mới
+        if v_already_checked_in then
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at,
+                submission_context, mission_id, mission_participant_id,
+                mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', 2, 0, 0,
+                lower(p_image_hash), p_client_submit_id, now(),
+                v_submission_context, v_target_mission_id, v_target_mp_id,
+                v_target_title, v_target_reward, v_target_ends_at,
+                case when v_submission_context = 'mission' then now() else null end
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+        else
+            update public.profiles
+            set credits = credits + v_provisional_reward,
+                last_active_date = v_today,
+                missed_streak = 0
+            where id = v_user_id
+            returning credits into v_new_balance;
+
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_user_id, v_provisional_reward, 'test_provisional',
+                format('Tạm nhận %s Credit sau khi nộp kết quả test (chờ chủ app duyệt)', v_provisional_reward),
+                v_new_balance
+            );
+
+            insert into public.checkins (campaign_id, user_id, checkin_date, note)
+            values (p_campaign_id, v_user_id, v_today, 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)')
+            on conflict (campaign_id, user_id, checkin_date)
+            do update set note = 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)';
+
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at,
+                submission_context, mission_id, mission_participant_id,
+                mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', v_provisional_reward, 0, v_provisional_reward,
+                lower(p_image_hash), p_client_submit_id, now(),
+                v_submission_context, v_target_mission_id, v_target_mp_id,
+                v_target_title, v_target_reward, v_target_ends_at,
+                case when v_submission_context = 'mission' then now() else null end
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+            v_provisional_granted := true;
+            v_provisional_amount := v_provisional_reward;
+        end if;
+    end if;
+
+    update public.profiles
+    set last_active_date = v_today,
+        missed_streak = 0
+    where id = v_user_id;
+
+    select
+        screenshot_url, image_hash, thumbnail_url,
+        submission_context, mission_id, mission_title,
+        mission_reward_credits, mission_ends_at
+    into
+        v_final_url, v_final_hash, v_final_thumb,
+        v_res_context, v_res_mission_id, v_res_title,
+        v_res_reward, v_res_ends_at
+    from public.tester_reports
+    where id = v_report_id;
+
+    return jsonb_build_object(
+        'success', true,
+        'report_id', v_report_id,
+        'status', v_status,
+        'provisional_granted', v_provisional_granted,
+        'provisional_amount', v_provisional_amount,
+        'screenshot_url', v_final_url,
+        'image_hash', v_final_hash,
+        'thumbnail_url', v_final_thumb,
+        'submission_context', v_res_context,
+        'mission_id', v_res_mission_id,
+        'mission_title', v_res_title,
+        'mission_reward_credits', v_res_reward,
+        'mission_ends_at', to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    );
+end;
+$$;
+
+revoke execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid) from public, anon;
+grant execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid) to authenticated, service_role;
+
+-- 5. Cập nhật _settle_mission_reward dùng danh tính đã lưu trên báo cáo
+create or replace function public._settle_mission_reward(p_report_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_report record;
+    v_match record;
+    v_job record;
+    v_saved_m record;
+    v_saved_mp record;
+    v_creator_balance int;
+    v_tester_balance int;
+    v_paid boolean := false;
+    v_backoff interval;
+begin
+    if p_report_id is null then
+        return jsonb_build_object('settled', false, 'reason', 'NULL_REPORT_ID');
+    end if;
+
+    select * into v_report
+    from public.tester_reports
+    where id = p_report_id
+    for update;
+
+    if v_report.id is null then
+        return jsonb_build_object('settled', false, 'reason', 'REPORT_NOT_FOUND');
+    end if;
+
+    if v_report.status <> 'approved' then
+        return jsonb_build_object('settled', false, 'reason', 'REPORT_NOT_APPROVED');
+    end if;
+
+    -- Báo cáo test thường không được xét thưởng nhiệm vụ
+    if v_report.submission_context = 'app_test' then
+        return jsonb_build_object('settled', false, 'reason', 'NOT_A_MISSION_REPORT');
+    end if;
+
+    select * into v_job
+    from public.mission_settlement_jobs
+    where report_id = p_report_id
+    for update;
+
+    if v_job.id is not null and v_job.status in ('completed', 'skipped') then
+        return jsonb_build_object('settled', false, 'reason', 'ALREADY_SETTLED', 'job_status', v_job.status);
+    end if;
+
+    if v_job.id is not null then
+        select * into v_saved_m from public.missions where id = v_job.mission_id for update;
+        select * into v_saved_mp from public.mission_participants where id = v_job.participant_id for update;
+
+        if v_saved_m.id is null or v_saved_mp.id is null then
+            update public.mission_settlement_jobs
+            set status = 'skipped',
+                skip_reason = 'MISSION_OR_PARTICIPANT_NOT_FOUND',
+                updated_at = now()
+            where id = v_job.id;
+            return jsonb_build_object('settled', false, 'reason', 'TERMINATED_NOT_FOUND');
+        end if;
+
+        if v_saved_mp.status <> 'joined' then
+            update public.mission_settlement_jobs
+            set status = 'skipped',
+                skip_reason = 'PARTICIPANT_NOT_JOINED',
+                updated_at = now()
+            where id = v_job.id;
+            return jsonb_build_object('settled', false, 'reason', 'TERMINATED_PARTICIPANT_NOT_JOINED');
+        end if;
+
+        if v_saved_m.ends_at <= now() or v_saved_m.status in ('expired', 'cancelled', 'deleted', 'stopped_no_credits') then
+            update public.mission_settlement_jobs
+            set status = 'skipped',
+                skip_reason = 'MISSION_EXPIRED_OR_TERMINATED',
+                updated_at = now()
+            where id = v_job.id;
+            return jsonb_build_object('settled', false, 'reason', 'TERMINATED_MISSION_EXPIRED');
+        end if;
+
+        if v_saved_m.status = 'paused_by_creator' then
+            update public.mission_settlement_jobs
+            set attempt_count = attempt_count + 1,
+                next_attempt_at = now() + interval '5 minutes',
+                last_error = 'MISSION_PAUSED_BY_CREATOR',
+                updated_at = now()
+            where id = v_job.id;
+            return jsonb_build_object('settled', false, 'reason', 'MISSION_PAUSED_BY_CREATOR');
+        end if;
+
+        select
+            v_saved_m.id as mission_id,
+            v_saved_m.creator_id,
+            v_saved_m.title as mission_title,
+            v_job.reward_credits,
+            v_job.campaign_id,
+            v_saved_mp.id as participant_id,
+            v_saved_mp.joined_at
+        into v_match;
+    else
+        -- Lần đầu (chưa có job)
+        if v_report.mission_id is not null then
+            -- Dữ liệu mới: Dùng chính xác identity nhiệm vụ đã lưu trên báo cáo
+            select
+                m.id as mission_id,
+                m.creator_id,
+                m.title as mission_title,
+                m.reward_credits,
+                m.campaign_id,
+                mp.id as participant_id,
+                mp.joined_at,
+                m.status as mission_status,
+                m.ends_at as mission_ends_at,
+                mp.status as participant_status
+            into v_match
+            from public.missions m
+            join public.mission_participants mp on mp.mission_id = m.id
+            where m.id = v_report.mission_id
+              and mp.id = v_report.mission_participant_id
+              and mp.user_id = v_report.user_id
+              and m.campaign_id = v_report.campaign_id
+            for update of m;
+
+            if v_match.mission_id is null then
+                return jsonb_build_object('settled', false, 'reason', 'MISSION_OR_PARTICIPANT_NOT_FOUND');
+            end if;
+
+            if v_match.participant_status <> 'joined' then
+                return jsonb_build_object('settled', false, 'reason', 'PARTICIPANT_NOT_JOINED');
+            end if;
+
+            -- Chính sách hiện hành: duyệt sau hạn ends_at <= now() không trả thưởng mission
+            if v_match.mission_ends_at <= now() or v_match.mission_status in ('expired', 'cancelled', 'deleted', 'stopped_no_credits') then
+                return jsonb_build_object('settled', false, 'reason', 'TERMINATED_MISSION_EXPIRED');
+            end if;
+
+            if v_match.mission_status = 'paused_by_creator' then
+                return jsonb_build_object('settled', false, 'reason', 'MISSION_PAUSED_BY_CREATOR');
+            end if;
+        else
+            -- Dữ liệu lịch sử (legacy reports chưa có mission_id)
+            select
+                m.id as mission_id,
+                m.creator_id,
+                m.title as mission_title,
+                m.reward_credits,
+                m.campaign_id,
+                mp.id as participant_id,
+                mp.joined_at
+            into v_match
+            from public.missions m
+            join public.mission_participants mp on mp.mission_id = m.id
+            where m.campaign_id = v_report.campaign_id
+              and mp.user_id = v_report.user_id
+              and mp.status = 'joined'
+              and v_report.created_at >= mp.joined_at
+              and m.status in ('open', 'full')
+              and m.ends_at > now()
+            order by m.created_at desc
+            limit 1
+            for update of m;
+
+            if v_match.mission_id is null then
+                return jsonb_build_object('settled', false, 'reason', 'NO_ELIGIBLE_MISSION');
+            end if;
+        end if;
+
+        insert into public.mission_settlement_jobs (
+            report_id, mission_id, participant_id, campaign_id,
+            tester_id, creator_id, reward_credits, status,
+            next_attempt_at
+        ) values (
+            v_report.id, v_match.mission_id, v_match.participant_id, v_match.campaign_id,
+            v_report.user_id, v_match.creator_id, v_match.reward_credits, 'pending',
+            now()
+        )
+        on conflict (report_id) do update
+        set mission_id = excluded.mission_id,
+            participant_id = excluded.participant_id,
+            updated_at = now()
+        returning * into v_job;
+    end if;
+
+    begin
+        select credits into v_creator_balance
+        from public.profiles
+        where id = v_match.creator_id
+        for update;
+
+        if coalesce(v_creator_balance, 0) >= v_match.reward_credits then
+            update public.mission_participants
+            set status = 'completed',
+                completed_at = now()
+            where id = v_match.participant_id
+              and status = 'joined';
+
+            if not found then
+                update public.mission_settlement_jobs
+                set status = 'skipped',
+                    skip_reason = 'PARTICIPANT_ALREADY_COMPLETED',
+                    updated_at = now()
+                where id = v_job.id;
+
+                return jsonb_build_object('settled', false, 'reason', 'ALREADY_COMPLETED');
+            end if;
+
+            update public.profiles
+            set credits = credits - v_match.reward_credits
+            where id = v_match.creator_id
+            returning credits into v_creator_balance;
+
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_match.creator_id,
+                -v_match.reward_credits,
+                'mission_reward',
+                format('Trả thưởng nhiệm vụ "%s" cho người tham gia', v_match.mission_title),
+                v_creator_balance
+            );
+
+            update public.profiles
+            set credits = credits + v_match.reward_credits
+            where id = v_report.user_id
+            returning credits into v_tester_balance;
+
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_report.user_id,
+                v_match.reward_credits,
+                'mission_reward',
+                format('Nhận thưởng nhiệm vụ "%s"', v_match.mission_title),
+                v_tester_balance
+            );
+
+            update public.mission_settlement_jobs
+            set status = 'completed',
+                updated_at = now()
+            where id = v_job.id;
+
+            insert into public.notifications (user_id, title, message, type, data)
+            values (
+                v_report.user_id,
+                'Nhận thưởng nhiệm vụ 🎉',
+                format('Báo cáo của bạn đã được duyệt. Bạn nhận được +%s Credit từ nhiệm vụ "%s"!', v_match.reward_credits, v_match.mission_title),
+                'mission',
+                jsonb_build_object(
+                    'mission_id', v_match.mission_id,
+                    'campaign_id', v_match.campaign_id,
+                    'report_id', v_report.id,
+                    'reward_credits', v_match.reward_credits
+                )
+            );
+
+            return jsonb_build_object(
+                'settled', true,
+                'mission_id', v_match.mission_id,
+                'reward_credits', v_match.reward_credits,
+                'tester_balance', v_tester_balance
+            );
+        else
+            update public.missions
+            set status = 'stopped_no_credits'
+            where id = v_match.mission_id
+              and status in ('open', 'full', 'paused_by_creator');
+
+            update public.mission_settlement_jobs
+            set status = 'failed',
+                attempt_count = attempt_count + 1,
+                last_error = 'INSUFFICIENT_CREATOR_CREDITS',
+                next_attempt_at = now() + interval '10 minutes',
+                updated_at = now()
+            where id = v_job.id;
+
+            insert into public.notifications (user_id, title, message, type, data)
+            values (
+                v_match.creator_id,
+                'Nhiệm vụ bị tạm dừng do hết Credit',
+                format('Nhiệm vụ "%s" không đủ Credit trả cho tester. Nhiệm vụ đã tạm dừng.', v_match.mission_title),
+                'mission',
+                jsonb_build_object(
+                    'mission_id', v_match.mission_id,
+                    'campaign_id', v_match.campaign_id,
+                    'action', 'stopped_no_credits'
+                )
+            );
+
+            return jsonb_build_object('settled', false, 'reason', 'INSUFFICIENT_CREATOR_CREDITS');
+        end if;
+    exception when others then
+        v_backoff := case
+            when coalesce(v_job.attempt_count, 0) < 3 then interval '1 minute'
+            when coalesce(v_job.attempt_count, 0) < 6 then interval '5 minutes'
+            else interval '30 minutes'
+        end;
+
+        update public.mission_settlement_jobs
+        set status = 'failed',
+            attempt_count = attempt_count + 1,
+            last_error = sqlerrm,
+            next_attempt_at = now() + v_backoff,
+            updated_at = now()
+        where id = v_job.id;
+
+        return jsonb_build_object('settled', false, 'reason', 'ERROR', 'error', sqlerrm);
+    end;
+end;
+$$;
+
+revoke execute on function public._settle_mission_reward(uuid) from public, anon, authenticated;
+grant execute on function public._settle_mission_reward(uuid) to service_role;
+
+-- 6. Cập nhật get_open_missions lọc hết hạn trước ORDER BY/LIMIT và trả server_now
+create or replace function public.get_open_missions()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_now timestamptz := now();
+begin
+    -- Đồng bộ trạng thái hết hạn trong DB
+    update public.missions
+    set status = 'expired'
+    where status in ('open', 'full', 'paused_by_creator')
+      and ends_at <= v_now;
+
+    return jsonb_build_object(
+        'missions', coalesce((
+            select jsonb_agg(
+                jsonb_build_object(
+                    'id', t.id,
+                    'title', t.title,
+                    'description', t.description,
+                    'reward_credits', t.reward_credits,
+                    'max_participants', t.max_participants,
+                    'participant_count', t.participant_count,
+                    'status', t.status,
+                    'ends_at', to_char(t.ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                    'created_at', to_char(t.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                    'campaign_id', t.campaign_id,
+                    'app_name', t.app_name,
+                    'icon_url', t.icon_url,
+                    'package_name', t.package_name,
+                    'creator_id', t.creator_id,
+                    'creator_name', t.creator_name,
+                    'is_mine', t.creator_id = v_user_id,
+                    'has_joined', t.has_joined,
+                    'has_completed', t.has_completed
+                )
+                order by t.sort_mine desc, t.sort_active desc, t.created_at desc, t.id desc
+            )
+            from (
+                select
+                    m.id, m.title, m.description, m.reward_credits,
+                    m.max_participants, m.participant_count, m.status,
+                    m.ends_at, m.created_at, m.campaign_id, m.creator_id,
+                    c.app_name, c.icon_url, c.package_name,
+                    coalesce(nullif(p.display_name, ''), split_part(coalesce(p.email, ''), '@', 1), '') as creator_name,
+                    case
+                        when m.creator_id = v_user_id then 1
+                        when exists (
+                            select 1 from public.mission_participants mp_mine
+                            where mp_mine.mission_id = m.id and mp_mine.user_id = v_user_id
+                        ) then 1
+                        else 0
+                    end as sort_mine,
+                    case m.status
+                        when 'open' then 2
+                        when 'full' then 2
+                        when 'paused_by_creator' then 1
+                        else 0
+                    end as sort_active,
+                    exists (
+                        select 1 from public.mission_participants mp2
+                        where mp2.mission_id = m.id and mp2.user_id = v_user_id
+                    ) as has_joined,
+                    exists (
+                        select 1 from public.mission_participants mp3
+                        where mp3.mission_id = m.id and mp3.user_id = v_user_id
+                          and mp3.status = 'completed'
+                    ) as has_completed
+                from public.missions m
+                join public.campaigns c on c.id = m.campaign_id
+                left join public.profiles p on p.id = m.creator_id
+                where m.status in ('open', 'full', 'paused_by_creator')
+                  and m.ends_at > v_now
+                order by
+                    case
+                        when m.creator_id = v_user_id then 1
+                        when exists (
+                            select 1 from public.mission_participants mp_mine
+                            where mp_mine.mission_id = m.id and mp_mine.user_id = v_user_id
+                        ) then 1
+                        else 0
+                    end desc,
+                    case m.status
+                        when 'open' then 2
+                        when 'full' then 2
+                        when 'paused_by_creator' then 1
+                        else 0
+                    end desc,
+                    m.created_at desc,
+                    m.id desc
+                limit 100
+            ) t
+        ), '[]'::jsonb),
+        'server_now', to_char(v_now at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    );
+end;
+$$;
+
+revoke execute on function public.get_open_missions() from public, anon;
+grant execute on function public.get_open_missions() to authenticated, service_role;
+
+-- 7. Cập nhật get_my_active_mission_campaign_ids lọc ends_at > now()
+create or replace function public.get_my_active_mission_campaign_ids()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_user_id uuid := auth.uid();
+begin
+    if v_user_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    update public.missions
+    set status = 'expired'
+    where creator_id = v_user_id
+      and status in ('open', 'full', 'paused_by_creator')
+      and ends_at <= now();
+
+    return coalesce((
+        select jsonb_agg(campaign_id)
+        from public.missions
+        where creator_id = v_user_id
+          and status in ('open', 'full', 'paused_by_creator')
+          and ends_at > now()
+    ), '[]'::jsonb);
+end;
+$$;
+
+revoke execute on function public.get_my_active_mission_campaign_ids() from public, anon;
+grant execute on function public.get_my_active_mission_campaign_ids() to authenticated, service_role;
+
+-- 8. Cập nhật get_campaign_reports_for_owner trả metadata nhiệm vụ và thumbnail
+create or replace function public.get_campaign_reports_for_owner(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id uuid := auth.uid();
+    v_camp record;
+    v_role text;
+    v_res jsonb;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    select role into v_role from public.profiles where id = v_caller_id;
+
+    if v_camp.owner_id <> v_caller_id
+       and lower(coalesce(v_role, '')) not in ('admin', 'moderator') then
+        raise exception 'PERMISSION_DENIED';
+    end if;
+
+    perform public.auto_accept_expired_reports();
+
+    select coalesce(
+        jsonb_agg(
+            jsonb_build_object(
+                'id', tr.id,
+                'campaign_id', tr.campaign_id,
+                'user_id', tr.user_id,
+                'report_type', tr.report_type,
+                'content', tr.content,
+                'screenshot_url', tr.screenshot_url,
+                'thumbnail_url', tr.thumbnail_url,
+                'rating', tr.rating,
+                'status', tr.status,
+                'bonus_awarded', tr.bonus_awarded,
+                'created_at', to_char(tr.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                'reviewed_at', to_char(tr.reviewed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                'rejection_reason', tr.rejection_reason,
+                'image_hash', tr.image_hash,
+                'tester_name', coalesce(p.display_name, split_part(coalesce(p.email, ''), '@', 1), 'Tester'),
+                'tester_avatar', p.avatar_url,
+                'tester_credits', p.credits,
+                'submission_context', tr.submission_context,
+                'mission_id', tr.mission_id,
+                'mission_participant_id', tr.mission_participant_id,
+                'mission_title', tr.mission_title,
+                'mission_reward_credits', tr.mission_reward_credits,
+                'mission_ends_at', to_char(tr.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                'mission_submitted_at', to_char(tr.mission_submitted_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            )
+            order by tr.created_at desc
+        ),
+        '[]'::jsonb
+    ) into v_res
+    from public.tester_reports tr
+    left join public.profiles p on p.id = tr.user_id
+    where tr.campaign_id = p_campaign_id;
+
+    return v_res;
+end;
+$$;
+
+revoke execute on function public.get_campaign_reports_for_owner(uuid) from public, anon;
+grant execute on function public.get_campaign_reports_for_owner(uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+-- ===== 049_mission_report_hardening.sql =====
+-- ==============================================================================
+-- 049_mission_report_hardening.sql
+-- Khắc phục các vấn đề ngữ cảnh nhiệm vụ theo kế hoạch recheck 2026-10-29:
+-- 1. get_campaign_detail: Bổ sung metadata nhiệm vụ (context, id, title, reward, ends_at)
+--    và thumbnail_url để đồng bộ contract với receipt và API chủ app (R01).
+-- 2. submit_tester_report:
+--    - Tách nhánh cập nhật comment báo cáo approved khỏi luồng kiểm tra participant joined (R03).
+--    - Cho phép sửa comment báo cáo approved mà không bị chặn bởi trạng thái completed
+--      hoặc auto-resolve nhầm sang mission mới (R03).
+--    - Kiểm tra thời hạn/trạng thái nhiệm vụ của báo cáo pending mang identity mission,
+--      kể cả khi request không truyền p_mission_id (R04).
+--    - Giữ nguyên bảo vệ hồi tố, replay idempotency và settlement an toàn một lần.
+-- ==============================================================================
+
+-- 1. Override get_campaign_detail đồng bộ metadata nhiệm vụ và thumbnail
+create or replace function public.get_campaign_detail(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp public.campaigns%rowtype;
+    v_is_owner boolean := false;
+    v_is_actual_owner boolean := false;
+    v_can_manage boolean := false;
+    v_is_member boolean := false;
+    v_confirmed boolean := false;
+    v_campaign jsonb;
+    v_testers jsonb := '[]'::jsonb;
+    v_feedbacks jsonb := '[]'::jsonb;
+    v_reports jsonb := '[]'::jsonb;
+    v_profiles jsonb := '{}'::jsonb;
+    v_today_tested int := 0;
+    v_reports_count int := 0;
+    v_avg float;
+    v_my_dates jsonb := '[]'::jsonb;
+    v_my_profile jsonb;
+    v_unread jsonb := '[]'::jsonb;
+    v_weekly int := 0;
+begin
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    perform public.auto_accept_expired_reports();
+
+    v_is_actual_owner := (v_camp.owner_id = v_uid);
+
+    v_can_manage := v_is_actual_owner
+        or exists (
+            select 1 from public.profiles p
+            where p.id = v_uid and lower(p.role) in ('admin', 'moderator')
+        );
+
+    v_is_owner := v_can_manage;
+
+    v_is_member := exists (
+        select 1 from public.campaign_members m
+        where m.campaign_id = p_campaign_id and m.user_id = v_uid
+    );
+
+    v_confirmed := exists (
+        select 1 from public.checkins ci
+        where ci.campaign_id = p_campaign_id
+          and ci.user_id = v_uid
+          and ci.checkin_date = v_today
+          and coalesce(ci.note, '') not like '%tạm tính%'
+    );
+
+    v_campaign := public._campaign_json(v_camp);
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'user_id', t.user_id,
+        'joined_at', t.joined_at,
+        'days', t.days,
+        'checkin_count', t.checkin_count,
+        'last_checkin_date', t.last_checkin_date
+    ) order by t.days desc), '[]'::jsonb)
+    into v_testers
+    from (
+        select m.user_id,
+               to_char(m.joined_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as joined_at,
+               coalesce(s.days, 0) as days,
+               coalesce(s.cnt, 0) as checkin_count,
+               to_char(s.last_date, 'YYYY-MM-DD') as last_checkin_date
+        from public.campaign_members m
+        left join (
+            select user_id,
+                   count(distinct checkin_date) as days,
+                   count(*) as cnt,
+                   max(checkin_date) as last_date
+            from public.checkins
+            where campaign_id = p_campaign_id
+            group by user_id
+        ) s on s.user_id = m.user_id
+        where m.campaign_id = p_campaign_id
+    ) t;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', f.id,
+        'campaign_id', f.campaign_id,
+        'user_id', f.user_id,
+        'rating', f.rating,
+        'comment', f.comment,
+        'created_at', to_char(f.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'updated_at', to_char(f.updated_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by f.created_at desc), '[]'::jsonb)
+    into v_feedbacks
+    from public.feedbacks f
+    where f.campaign_id = p_campaign_id;
+
+    -- Bổ sung đầy đủ metadata nhiệm vụ và thumbnail cho lịch sử báo cáo
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', tr.id,
+        'campaign_id', tr.campaign_id,
+        'user_id', tr.user_id,
+        'report_type', tr.report_type,
+        'content', tr.content,
+        'screenshot_url', tr.screenshot_url,
+        'thumbnail_url', tr.thumbnail_url,
+        'rating', tr.rating,
+        'status', tr.status,
+        'bonus_awarded', tr.bonus_awarded,
+        'created_at', to_char(tr.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'reviewed_at', to_char(tr.reviewed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'rejection_reason', tr.rejection_reason,
+        'image_hash', tr.image_hash,
+        'submission_context', tr.submission_context,
+        'mission_id', tr.mission_id,
+        'mission_participant_id', tr.mission_participant_id,
+        'mission_title', tr.mission_title,
+        'mission_reward_credits', tr.mission_reward_credits,
+        'mission_ends_at', to_char(tr.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'mission_submitted_at', to_char(tr.mission_submitted_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by tr.created_at desc), '[]'::jsonb)
+    into v_reports
+    from (
+        select * from public.tester_reports
+        where campaign_id = p_campaign_id
+          and (v_can_manage or user_id = v_uid)
+        order by created_at desc
+        limit 200
+    ) tr;
+
+    select coalesce(jsonb_object_agg(t.id::text, public._profile_json(p)), '{}'::jsonb)
+    into v_profiles
+    from public.profiles p
+    join (
+        select v_camp.owner_id as id
+        union
+        select m.user_id from public.campaign_members m where m.campaign_id = p_campaign_id
+        union
+        select f.user_id from public.feedbacks f where f.campaign_id = p_campaign_id
+        union
+        select tr.user_id from public.tester_reports tr
+        where tr.campaign_id = p_campaign_id and (v_can_manage or tr.user_id = v_uid)
+    ) t on t.id = p.id;
+
+    select count(distinct u.user_id) into v_today_tested
+    from (
+        select ci.user_id from public.checkins ci
+        where ci.campaign_id = p_campaign_id and ci.checkin_date = v_today
+        union
+        select tr.user_id from public.tester_reports tr
+        where tr.campaign_id = p_campaign_id and tr.status <> 'rejected'
+          and (tr.created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today
+    ) u;
+
+    select count(*) into v_reports_count
+    from public.tester_reports
+    where campaign_id = p_campaign_id;
+
+    select avg(rating) into v_avg
+    from public.feedbacks
+    where campaign_id = p_campaign_id;
+
+    select coalesce(jsonb_agg(to_char(ci.checkin_date, 'YYYY-MM-DD') order by ci.checkin_date desc), '[]'::jsonb)
+    into v_my_dates
+    from public.checkins ci
+    where ci.campaign_id = p_campaign_id and ci.user_id = v_uid;
+
+    select public._profile_json(p) into v_my_profile
+    from public.profiles p where p.id = v_uid;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', w.id,
+        'user_id', w.user_id,
+        'warning_type', w.warning_type,
+        'message', w.message,
+        'warning_date', to_char(w.warning_date, 'YYYY-MM-DD'),
+        'created_at', to_char(w.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'acknowledged', w.acknowledged
+    ) order by w.created_at desc), '[]'::jsonb)
+    into v_unread
+    from public.user_warnings w
+    where w.user_id = v_uid and w.acknowledged = false;
+
+    select count(*) into v_weekly
+    from public.user_warnings w
+    where w.user_id = v_uid
+      and (w.created_at at time zone 'Asia/Ho_Chi_Minh')::date >= (v_today - 6);
+
+    return jsonb_build_object(
+        'campaign', v_campaign,
+        'is_owner', v_is_owner,
+        'is_actual_owner', v_is_actual_owner,
+        'can_manage', v_can_manage,
+        'is_member', v_is_member,
+        'checked_in_confirmed_today', v_confirmed,
+        'testers', v_testers,
+        'feedbacks', v_feedbacks,
+        'reports', v_reports,
+        'profiles', v_profiles,
+        'today_tested_count', v_today_tested,
+        'reports_count', v_reports_count,
+        'avg_rating', v_avg,
+        'my_checkin_dates', v_my_dates,
+        'my_profile', v_my_profile,
+        'unread_warnings', v_unread,
+        'weekly_warnings_count', v_weekly
+    );
+end;
+$$;
+
+revoke execute on function public.get_campaign_detail(uuid) from public, anon;
+grant execute on function public.get_campaign_detail(uuid) to authenticated, service_role;
+
+-- 2. Override submit_tester_report hoàn thiện các phân nhánh R03, R04
+drop function if exists public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid);
+
+create or replace function public.submit_tester_report(
+    p_campaign_id uuid,
+    p_content text default '',
+    p_screenshot_url text default null,
+    p_rating int default 5,
+    p_image_hash text default null,
+    p_client_submit_id uuid default null,
+    p_thumbnail_url text default null,
+    p_mission_id uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_report_id uuid;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp record;
+    v_existing_report record;
+    v_idempotent_report record;
+    v_already_checked_in boolean := false;
+    v_status text := 'pending';
+    v_rating int := greatest(1, least(5, coalesce(p_rating, 5)));
+    v_new_balance int;
+    v_provisional_granted boolean := false;
+    v_provisional_amount int := 0;
+    v_provisional_reward int := 10;
+    v_regrant int := 0;
+    v_new_screenshot boolean := false;
+    v_effective_full text;
+    v_final_url text;
+    v_final_hash text;
+    v_final_thumb text;
+
+    -- Mission context variables
+    v_mission record;
+    v_mp record;
+    v_eligible_count int := 0;
+    v_submission_context text := 'app_test';
+    v_target_mission_id uuid := null;
+    v_target_mp_id uuid := null;
+    v_target_title text := null;
+    v_target_reward int := null;
+    v_target_ends_at timestamptz := null;
+    v_check_m record;
+    v_res_context text;
+    v_res_mission_id uuid;
+    v_res_title text;
+    v_res_reward int;
+    v_res_ends_at timestamptz;
+begin
+    if v_user_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Idempotency check: receipt đã commit với cùng client_submit_id trả lại kết quả ngay
+    if p_client_submit_id is not null then
+        select * into v_idempotent_report
+        from public.tester_reports
+        where user_id = v_user_id
+          and client_submit_id = p_client_submit_id
+        limit 1;
+
+        if v_idempotent_report.id is not null then
+            if v_idempotent_report.campaign_id <> p_campaign_id then
+                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+            end if;
+            if p_mission_id is not null and v_idempotent_report.mission_id is distinct from p_mission_id then
+                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+            end if;
+
+            return jsonb_build_object(
+                'success', true,
+                'report_id', v_idempotent_report.id,
+                'status', v_idempotent_report.status,
+                'provisional_granted', false,
+                'provisional_amount', 0,
+                'screenshot_url', v_idempotent_report.screenshot_url,
+                'image_hash', v_idempotent_report.image_hash,
+                'thumbnail_url', v_idempotent_report.thumbnail_url,
+                'submission_context', v_idempotent_report.submission_context,
+                'mission_id', v_idempotent_report.mission_id,
+                'mission_title', v_idempotent_report.mission_title,
+                'mission_reward_credits', v_idempotent_report.mission_reward_credits,
+                'mission_ends_at', to_char(v_idempotent_report.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            );
+        end if;
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    if v_camp.owner_id = v_user_id then
+        raise exception 'CANNOT_TEST_OWN_APP';
+    end if;
+
+    if exists (
+        select 1 from public.profiles
+        where id = v_user_id and is_locked = true
+    ) then
+        raise exception 'USER_LOCKED';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    -- Khóa tuần tự theo (user, campaign, ngày)
+    perform pg_advisory_xact_lock(
+        hashtextextended(format('%s:%s:%s', v_user_id, p_campaign_id, v_today), 0)
+    );
+
+    insert into public.campaign_members (campaign_id, user_id)
+    values (p_campaign_id, v_user_id)
+    on conflict (campaign_id, user_id) do nothing;
+
+    -- Tìm báo cáo hôm nay và khóa dòng để phân loại thao tác
+    select * into v_existing_report
+    from public.tester_reports
+    where campaign_id = p_campaign_id
+      and user_id = v_user_id
+      and (created_at at time zone 'Asia/Ho_Chi_Minh')::date = v_today
+    order by created_at desc
+    limit 1
+    for update;
+
+    -- TH1: BÁO CÁO ĐÃ DUYỆT (approved) -> Chỉ cho phép bổ sung comment, không phát sinh thưởng
+    if v_existing_report.id is not null and v_existing_report.status = 'approved' then
+        -- R03: Nếu nộp kèm p_mission_id mà báo cáo đã duyệt vốn là app_test thường -> chặn
+        if p_mission_id is not null then
+            if v_existing_report.submission_context <> 'mission' then
+                raise exception 'REPORT_ALREADY_APPROVED_AS_APP_TEST';
+            end if;
+            if v_existing_report.mission_id is distinct from p_mission_id then
+                raise exception 'REPORT_ALREADY_APPROVED_FOR_ANOTHER_MISSION';
+            end if;
+            -- Báo cáo duyệt là mission report và đúng missionId: cho phép sửa comment, giữ context mission
+            v_submission_context := 'mission';
+            v_target_mission_id := v_existing_report.mission_id;
+            v_target_mp_id := v_existing_report.mission_participant_id;
+            v_target_title := v_existing_report.mission_title;
+            v_target_reward := v_existing_report.mission_reward_credits;
+            v_target_ends_at := v_existing_report.mission_ends_at;
+        else
+            -- R03: Không truyền p_mission_id: giữ nguyên context cũ (app_test hoặc mission), KHÔNG auto-resolve
+            v_submission_context := coalesce(v_existing_report.submission_context, 'app_test');
+            v_target_mission_id := v_existing_report.mission_id;
+            v_target_mp_id := v_existing_report.mission_participant_id;
+            v_target_title := v_existing_report.mission_title;
+            v_target_reward := v_existing_report.mission_reward_credits;
+            v_target_ends_at := v_existing_report.mission_ends_at;
+        end if;
+
+        -- Feedback: chỉ cập nhật comment, giữ rating
+        insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+        values (
+            p_campaign_id, v_user_id, coalesce(v_existing_report.rating, v_rating),
+            coalesce(p_content, ''), now()
+        )
+        on conflict (campaign_id, user_id)
+        do update set
+            comment = case when coalesce(excluded.comment, '') <> '' then excluded.comment else public.feedbacks.comment end,
+            updated_at = now();
+
+        perform set_config('app.submitting_report', 'true', true);
+
+        update public.tester_reports
+        set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+            client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+        where id = v_existing_report.id
+          and status = 'approved'
+        returning id into v_report_id;
+
+        if v_report_id is null then
+            raise exception 'REPORT_ALREADY_REVIEWED';
+        end if;
+        v_status := 'approved';
+
+        update public.profiles
+        set last_active_date = v_today, missed_streak = 0
+        where id = v_user_id;
+
+        select
+            submission_context, mission_id, mission_title,
+            mission_reward_credits, mission_ends_at, screenshot_url,
+            image_hash, thumbnail_url
+        into
+            v_res_context, v_res_mission_id, v_res_title,
+            v_res_reward, v_res_ends_at, v_final_url,
+            v_final_hash, v_final_thumb
+        from public.tester_reports
+        where id = v_report_id;
+
+        return jsonb_build_object(
+            'success', true,
+            'report_id', v_report_id,
+            'status', 'approved',
+            'provisional_granted', false,
+            'provisional_amount', 0,
+            'screenshot_url', v_final_url,
+            'image_hash', v_final_hash,
+            'thumbnail_url', v_final_thumb,
+            'submission_context', v_res_context,
+            'mission_id', v_res_mission_id,
+            'mission_title', v_res_title,
+            'mission_reward_credits', v_res_reward,
+            'mission_ends_at', to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+        );
+    end if;
+
+    -- TH2: BÁO CÁO ĐANG CHỜ DUYỆT (pending) HOẶC BỊ TỪ CHỐI (rejected) HOẶC NỘP MỚI
+    -- R04: Nếu báo cáo đã có mission identity, việc sửa ảnh/minh chứng PHẢI kiểm tra mission cũ còn hạn
+    if v_existing_report.id is not null and v_existing_report.submission_context = 'mission' then
+        if p_mission_id is not null and p_mission_id <> v_existing_report.mission_id then
+            raise exception 'CANNOT_CHANGE_MISSION_IDENTITY';
+        end if;
+
+        select * into v_check_m
+        from public.missions
+        where id = v_existing_report.mission_id
+        for update;
+
+        if v_check_m.id is null or v_check_m.ends_at <= now() or v_check_m.status = 'expired' then
+            raise exception 'MISSION_EXPIRED';
+        end if;
+        if v_check_m.status not in ('open', 'full') then
+            raise exception 'MISSION_NOT_OPEN';
+        end if;
+
+        select * into v_mp
+        from public.mission_participants
+        where mission_id = v_existing_report.mission_id
+          and user_id = v_user_id
+        for update;
+
+        if v_mp.id is null or v_mp.status <> 'joined' then
+            raise exception 'MISSION_NOT_JOINED';
+        end if;
+
+        v_submission_context := 'mission';
+        v_target_mission_id := v_existing_report.mission_id;
+        v_target_mp_id := v_mp.id;
+        v_target_title := v_check_m.title;
+        v_target_reward := v_check_m.reward_credits;
+        v_target_ends_at := v_check_m.ends_at;
+
+    elsif v_existing_report.id is not null and v_existing_report.submission_context <> 'mission' then
+        -- Báo cáo hôm nay là app_test thường: không cho phép chuyển đổi pending thành mission report
+        if p_mission_id is not null then
+            raise exception 'CANNOT_CONVERT_EXISTING_PENDING_REPORT';
+        end if;
+        v_submission_context := 'app_test';
+
+    else
+        -- Báo cáo nộp mới (v_existing_report.id is null)
+        if p_mission_id is not null then
+            select * into v_mission
+            from public.missions
+            where id = p_mission_id
+            for update;
+
+            if v_mission.id is null then
+                raise exception 'MISSION_NOT_FOUND';
+            end if;
+            if v_mission.campaign_id <> p_campaign_id then
+                raise exception 'INVALID_MISSION_CAMPAIGN';
+            end if;
+            if v_mission.creator_id = v_user_id then
+                raise exception 'CANNOT_TEST_OWN_APP';
+            end if;
+            if v_mission.ends_at <= now() or v_mission.status = 'expired' then
+                raise exception 'MISSION_EXPIRED';
+            end if;
+            if v_mission.status not in ('open', 'full') then
+                raise exception 'MISSION_NOT_OPEN';
+            end if;
+
+            select * into v_mp
+            from public.mission_participants
+            where mission_id = p_mission_id
+              and user_id = v_user_id
+            for update;
+
+            if v_mp.id is null or v_mp.status <> 'joined' then
+                raise exception 'MISSION_NOT_JOINED';
+            end if;
+
+            v_submission_context := 'mission';
+            v_target_mission_id := v_mission.id;
+            v_target_mp_id := v_mp.id;
+            v_target_title := v_mission.title;
+            v_target_reward := v_mission.reward_credits;
+            v_target_ends_at := v_mission.ends_at;
+        else
+            -- Tự động phân loại nếu tester đã join đúng 1 mission đang mở và còn hạn
+            select count(*) into v_eligible_count
+            from public.missions m
+            join public.mission_participants mp on mp.mission_id = m.id
+            where m.campaign_id = p_campaign_id
+              and mp.user_id = v_user_id
+              and mp.status = 'joined'
+              and m.status in ('open', 'full')
+              and m.ends_at > now();
+
+            if v_eligible_count = 1 then
+                select m.*, mp.id as mp_id
+                into v_mission
+                from public.missions m
+                join public.mission_participants mp on mp.mission_id = m.id
+                where m.campaign_id = p_campaign_id
+                  and mp.user_id = v_user_id
+                  and mp.status = 'joined'
+                  and m.status in ('open', 'full')
+                  and m.ends_at > now()
+                for update of m;
+
+                v_submission_context := 'mission';
+                v_target_mission_id := v_mission.id;
+                v_target_mp_id := v_mission.mp_id;
+                v_target_title := v_mission.title;
+                v_target_reward := v_mission.reward_credits;
+                v_target_ends_at := v_mission.ends_at;
+            elsif v_eligible_count > 1 then
+                raise exception 'AMBIGUOUS_MISSION_SUBMISSION';
+            else
+                v_submission_context := 'app_test';
+            end if;
+        end if;
+    end if;
+
+    -- Kiểm tra ảnh mới và tính hợp lệ
+    v_new_screenshot := p_screenshot_url is not null
+        and (v_existing_report.id is null or p_screenshot_url is distinct from v_existing_report.screenshot_url);
+
+    if p_image_hash is not null and lower(p_image_hash) !~ '^[0-9a-f]{16}$' then
+        raise exception 'INVALID_IMAGE_HASH';
+    end if;
+
+    if v_new_screenshot then
+        if p_image_hash is null or p_image_hash = '' then
+            raise exception 'IMAGE_HASH_REQUIRED';
+        end if;
+        if not public.is_valid_report_screenshot_url(p_screenshot_url, p_campaign_id, v_user_id) then
+            raise exception 'INVALID_SCREENSHOT_URL';
+        end if;
+    end if;
+
+    v_effective_full := coalesce(p_screenshot_url, v_existing_report.screenshot_url);
+
+    if p_thumbnail_url is not null then
+        if v_effective_full is null then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+        if not public.is_valid_report_thumbnail_url(p_thumbnail_url, p_campaign_id, v_user_id, v_effective_full) then
+            raise exception 'INVALID_THUMBNAIL_URL';
+        end if;
+    end if;
+
+    -- Ghi nhận feedback
+    insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+    values (
+        p_campaign_id, v_user_id, v_rating,
+        coalesce(p_content, ''), now()
+    )
+    on conflict (campaign_id, user_id)
+    do update set
+        rating = excluded.rating,
+        comment = case when coalesce(excluded.comment, '') <> '' then excluded.comment else public.feedbacks.comment end,
+        updated_at = now();
+
+    select exists (
+        select 1 from public.checkins
+        where campaign_id = p_campaign_id
+          and user_id = v_user_id
+          and checkin_date = v_today
+          and (note is null or note not like '%tạm tính%')
+    ) into v_already_checked_in;
+
+    perform set_config('app.submitting_report', 'true', true);
+
+    if v_existing_report.id is not null then
+        -- TH2a: Nộp lại báo cáo bị từ chối
+        if v_existing_report.status = 'rejected' and v_existing_report.reviewed_at is not null then
+            if not v_new_screenshot then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is not null
+               and p_image_hash is not null
+               and public.dhash_hamming(v_existing_report.image_hash, p_image_hash) <= 5 then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_existing_report.image_hash is null
+               and p_image_hash is null
+               and p_screenshot_url = v_existing_report.screenshot_url then
+                raise exception 'SAME_SCREENSHOT_REJECTED';
+            end if;
+
+            if v_already_checked_in then
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = 2,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = 0,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null,
+                    submission_context = v_submission_context,
+                    mission_id = v_target_mission_id,
+                    mission_participant_id = v_target_mp_id,
+                    mission_title = v_target_title,
+                    mission_reward_credits = v_target_reward,
+                    mission_ends_at = v_target_ends_at,
+                    mission_submitted_at = case when v_submission_context = 'mission' then now() else null end
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+            else
+                v_regrant := coalesce(v_existing_report.provisional_clawed, 0);
+                if v_regrant <= 0 then
+                    v_regrant := v_provisional_reward;
+                end if;
+
+                update public.profiles
+                set credits = credits + v_regrant,
+                    last_active_date = v_today,
+                    missed_streak = 0
+                where id = v_user_id
+                returning credits into v_new_balance;
+
+                insert into public.credit_logs (user_id, amount, action, note, balance)
+                values (
+                    v_user_id, v_regrant, 'test_provisional',
+                    format('Hoàn trả %s Credit tạm nhận sau khi nộp lại báo cáo (chờ duyệt)', v_regrant),
+                    v_new_balance
+                );
+
+                insert into public.checkins (campaign_id, user_id, checkin_date, note)
+                values (p_campaign_id, v_user_id, v_today, 'Đã nộp lại kết quả test (tạm tính, chờ chủ app duyệt)')
+                on conflict (campaign_id, user_id, checkin_date)
+                do update set note = 'Đã nộp lại kết quả test (tạm tính, chờ chủ app duyệt)';
+
+                update public.tester_reports
+                set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                    screenshot_url = p_screenshot_url,
+                    thumbnail_url = p_thumbnail_url,
+                    rating = v_rating,
+                    status = 'pending',
+                    bonus_awarded = v_regrant,
+                    provisional_clawed = 0,
+                    provisional_granted_credits = v_regrant,
+                    rejection_reason = null,
+                    image_hash = lower(p_image_hash),
+                    client_submit_id = coalesce(p_client_submit_id, client_submit_id),
+                    created_at = now(),
+                    reviewed_at = null,
+                    submission_context = v_submission_context,
+                    mission_id = v_target_mission_id,
+                    mission_participant_id = v_target_mp_id,
+                    mission_title = v_target_title,
+                    mission_reward_credits = v_target_reward,
+                    mission_ends_at = v_target_ends_at,
+                    mission_submitted_at = case when v_submission_context = 'mission' then now() else null end
+                where id = v_existing_report.id
+                  and status = 'rejected'
+                  and reviewed_at is not null
+                returning id into v_report_id;
+
+                if v_report_id is null then
+                    raise exception 'REPORT_ALREADY_REVIEWED';
+                end if;
+                v_status := 'pending';
+                v_provisional_granted := true;
+                v_provisional_amount := v_regrant;
+            end if;
+
+        -- TH2b: Báo cáo pending -> cho phép chỉnh sửa nội dung/ảnh
+        elsif v_existing_report.status = 'pending' then
+            update public.tester_reports
+            set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                screenshot_url = case when v_new_screenshot then p_screenshot_url else screenshot_url end,
+                thumbnail_url = case
+                    when p_thumbnail_url is not null then p_thumbnail_url
+                    when v_new_screenshot then null
+                    else thumbnail_url
+                end,
+                rating = v_rating,
+                image_hash = case when v_new_screenshot then lower(p_image_hash) else image_hash end,
+                client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+            where id = v_existing_report.id
+              and status = 'pending'
+              and reviewed_at is null
+            returning id into v_report_id;
+
+            if v_report_id is null then
+                raise exception 'REPORT_ALREADY_REVIEWED';
+            end if;
+            v_status := 'pending';
+        else
+            raise exception 'REPORT_ALREADY_REVIEWED';
+        end if;
+
+    else
+        -- TH3: Chưa có báo cáo hôm nay -> nộp mới
+        if v_already_checked_in then
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at,
+                submission_context, mission_id, mission_participant_id,
+                mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', 2, 0, 0,
+                lower(p_image_hash), p_client_submit_id, now(),
+                v_submission_context, v_target_mission_id, v_target_mp_id,
+                v_target_title, v_target_reward, v_target_ends_at,
+                case when v_submission_context = 'mission' then now() else null end
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+        else
+            update public.profiles
+            set credits = credits + v_provisional_reward,
+                last_active_date = v_today,
+                missed_streak = 0
+            where id = v_user_id
+            returning credits into v_new_balance;
+
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_user_id, v_provisional_reward, 'test_provisional',
+                format('Tạm nhận %s Credit sau khi nộp kết quả test (chờ chủ app duyệt)', v_provisional_reward),
+                v_new_balance
+            );
+
+            insert into public.checkins (campaign_id, user_id, checkin_date, note)
+            values (p_campaign_id, v_user_id, v_today, 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)')
+            on conflict (campaign_id, user_id, checkin_date)
+            do update set note = 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)';
+
+            insert into public.tester_reports (
+                campaign_id, user_id, report_type, content, screenshot_url,
+                thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+                provisional_granted_credits, image_hash, client_submit_id, created_at,
+                submission_context, mission_id, mission_participant_id,
+                mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at
+            ) values (
+                p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                p_screenshot_url, p_thumbnail_url, v_rating, 'pending', v_provisional_reward, 0, v_provisional_reward,
+                lower(p_image_hash), p_client_submit_id, now(),
+                v_submission_context, v_target_mission_id, v_target_mp_id,
+                v_target_title, v_target_reward, v_target_ends_at,
+                case when v_submission_context = 'mission' then now() else null end
+            )
+            returning id into v_report_id;
+
+            v_status := 'pending';
+            v_provisional_granted := true;
+            v_provisional_amount := v_provisional_reward;
+        end if;
+    end if;
+
+    update public.profiles
+    set last_active_date = v_today, missed_streak = 0
+    where id = v_user_id;
+
+    select
+        submission_context, mission_id, mission_title,
+        mission_reward_credits, mission_ends_at, screenshot_url,
+        image_hash, thumbnail_url
+    into
+        v_res_context, v_res_mission_id, v_res_title,
+        v_res_reward, v_res_ends_at, v_final_url,
+        v_final_hash, v_final_thumb
+    from public.tester_reports
+    where id = v_report_id;
+
+    return jsonb_build_object(
+        'success', true,
+        'report_id', v_report_id,
+        'status', v_status,
+        'provisional_granted', v_provisional_granted,
+        'provisional_amount', v_provisional_amount,
+        'screenshot_url', v_final_url,
+        'image_hash', v_final_hash,
+        'thumbnail_url', v_final_thumb,
+        'submission_context', v_res_context,
+        'mission_id', v_res_mission_id,
+        'mission_title', v_res_title,
+        'mission_reward_credits', v_res_reward,
+        'mission_ends_at', to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    );
+end;
+$$;
+
+revoke execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid) from public, anon;
+grant execute on function public.submit_tester_report(uuid, text, text, int, text, uuid, text, uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+
+-- ===== 050_app_update_reward.sql =====
+-- ==============================================================================
+-- 12 Tester - Supabase migration 050: App Version Update Reward (Thưởng cập nhật phiên bản app)
+-- ==============================================================================
+-- Kế hoạch: F:\AI\12Tester\KE_HOACH_THUONG_CAP_NHAT_PHIEN_BAN_2026-10-29.md
+-- Mã bàn giao: APP-UPDATE-20261029-01a18562
+--
+-- Nghiệp vụ cốt lõi:
+-- 1. Giữ trước 120 Credit mỗi phiên bản từ ví chủ app khi công bố (app_update_reserve, -120).
+-- 2. Trả thưởng 6 Credit/người cho tối đa 20 người cập nhật bản mới đáp ứng target_version_code.
+-- 3. Mỗi tài khoản tester chỉ nhận thưởng 1 lần trong 1 đợt phiên bản.
+-- 4. Khi chi trả 6 Credit cho tester (app_update_reward, +6), trích từ quỹ 120 đang giữ;
+--    TUYỆT ĐỐI KHÔNG trừ thêm 6 Credit từ ví chủ app.
+-- 5. Đủ 20 người nhận thưởng -> chuyển trạng thái exhausted, ẩn khối cập nhật ở phía tester.
+-- 6. Chủ app công bố phiên bản tiếp theo -> hoàn phần Credit chưa dùng của đợt cũ (nếu có),
+--    và giữ 120 Credit cho đợt mới trong cùng 1 transaction nguyên tử.
+-- 7. Cho phép chủ app kết thúc sớm đợt đang mở và hoàn lại toàn bộ Credit chưa dùng.
+-- 8. Tự động đóng đợt và hoàn Credit chưa dùng khi campaign hoàn thành (completed), lên production,
+--    hoặc trước khi campaign bị xóa (BEFORE DELETE trigger).
+-- 9. Bất biến kế toán duy trì cho mọi đợt:
+--    reserved_credits = remaining_credits + (paid_count * 6) + refunded_credits = 120.
+-- ==============================================================================
+
+-- 1. Bảng app_update_releases: Lưu trữ thông tin từng đợt cập nhật phiên bản
+create table if not exists public.app_update_releases (
+    id                  uuid primary key default gen_random_uuid(),
+    campaign_id         uuid references public.campaigns(id) on delete set null,
+    owner_id            uuid not null references public.profiles(id) on delete restrict,
+    package_name        text not null,
+    app_name            text not null default '',
+    version_name        text not null,
+    target_version_code bigint not null,
+    release_notes       text not null default '',
+    status              text not null default 'active' check (status in ('active', 'exhausted', 'superseded', 'closed')),
+    reward_per_claim    int not null default 6 check (reward_per_claim = 6),
+    max_claims          int not null default 20 check (max_claims = 20),
+    reserved_credits    int not null default 120 check (reserved_credits = 120),
+    paid_count          int not null default 0 check (paid_count >= 0 and paid_count <= 20),
+    remaining_credits   int not null default 120 check (remaining_credits >= 0),
+    refunded_credits    int not null default 0 check (refunded_credits >= 0),
+    published_at        timestamptz not null default now(),
+    closed_at           timestamptz,
+    constraint chk_release_version_code check (target_version_code > 0),
+    constraint chk_release_accounting check (reserved_credits = remaining_credits + (paid_count * reward_per_claim) + refunded_credits)
+);
+
+create index if not exists idx_app_update_releases_campaign on public.app_update_releases(campaign_id);
+create index if not exists idx_app_update_releases_owner on public.app_update_releases(owner_id);
+create index if not exists idx_app_update_releases_pkg on public.app_update_releases(package_name);
+create unique index if not exists idx_app_update_releases_active on public.app_update_releases(owner_id, package_name) where (status = 'active');
+create unique index if not exists idx_app_update_releases_code on public.app_update_releases(owner_id, package_name, target_version_code);
+
+comment on table public.app_update_releases is 'Các đợt công bố phiên bản cập nhật kèm quỹ thưởng 120 Credit (20 suất x 6 Credit)';
+
+-- 2. Bảng app_update_controls: Khóa tuần tự hóa và watermark mã phiên bản cao nhất
+create table if not exists public.app_update_controls (
+    owner_id             uuid not null references public.profiles(id) on delete cascade,
+    package_name         text not null,
+    highest_version_code bigint not null default 0,
+    active_release_id    uuid references public.app_update_releases(id) on delete set null,
+    updated_at           timestamptz not null default now(),
+    primary key (owner_id, package_name)
+);
+
+-- 3. Bảng app_update_claims: Biên lai nhận thưởng của từng tester
+create table if not exists public.app_update_claims (
+    id                    uuid primary key default gen_random_uuid(),
+    release_id            uuid not null references public.app_update_releases(id) on delete cascade,
+    tester_id             uuid not null references public.profiles(id) on delete cascade,
+    ordinal               int not null check (ordinal >= 1 and ordinal <= 20),
+    observed_version_code bigint not null check (observed_version_code > 0),
+    reward_credits        int not null default 6 check (reward_credits = 6),
+    confirmed_at          timestamptz not null default now(),
+    credit_log_id         uuid references public.credit_logs(id) on delete set null,
+    constraint uq_release_tester unique (release_id, tester_id),
+    constraint uq_release_ordinal unique (release_id, ordinal)
+);
+
+create index if not exists idx_app_update_claims_tester on public.app_update_claims(tester_id);
+
+-- 4. Bảng app_update_operations: Lưu trữ idempotency cho các thao tác công bố
+create table if not exists public.app_update_operations (
+    operation_id         text primary key,
+    owner_id             uuid not null references public.profiles(id) on delete cascade,
+    release_id           uuid references public.app_update_releases(id) on delete set null,
+    status               text not null default 'completed',
+    created_at           timestamptz not null default now()
+);
+
+-- 5. Bảng app_update_financial_events: Nhật ký dòng tiền độc lập để đối soát
+create table if not exists public.app_update_financial_events (
+    id                   uuid primary key default gen_random_uuid(),
+    release_id           uuid not null references public.app_update_releases(id) on delete cascade,
+    event_type           text not null check (event_type in ('reserve', 'reward', 'refund')),
+    amount               int not null,
+    owner_id             uuid not null,
+    tester_id            uuid,
+    credit_log_id        uuid references public.credit_logs(id) on delete set null,
+    operation_id         text,
+    created_at           timestamptz not null default now()
+);
+
+-- Bật RLS và phân quyền
+alter table public.app_update_releases enable row level security;
+alter table public.app_update_controls enable row level security;
+alter table public.app_update_claims enable row level security;
+alter table public.app_update_operations enable row level security;
+alter table public.app_update_financial_events enable row level security;
+
+-- Policies
+drop policy if exists "app_update_releases_select_policy" on public.app_update_releases;
+create policy "app_update_releases_select_policy" on public.app_update_releases
+    for select to authenticated
+    using (
+        owner_id = auth.uid()
+        or (
+            campaign_id is not null and exists (
+                select 1 from public.campaign_members cm
+                where cm.campaign_id = app_update_releases.campaign_id
+                  and cm.user_id = auth.uid()
+            )
+        )
+        or exists (
+            select 1 from public.profiles p
+            where p.id = auth.uid() and lower(p.role) in ('admin', 'moderator')
+        )
+    );
+
+drop policy if exists "app_update_controls_select_policy" on public.app_update_controls;
+create policy "app_update_controls_select_policy" on public.app_update_controls
+    for select to authenticated
+    using (
+        owner_id = auth.uid()
+        or exists (
+            select 1 from public.profiles p
+            where p.id = auth.uid() and lower(p.role) in ('admin', 'moderator')
+        )
+    );
+
+drop policy if exists "app_update_claims_select_policy" on public.app_update_claims;
+create policy "app_update_claims_select_policy" on public.app_update_claims
+    for select to authenticated
+    using (
+        tester_id = auth.uid()
+        or exists (
+            select 1 from public.app_update_releases r
+            where r.id = app_update_claims.release_id
+              and r.owner_id = auth.uid()
+        )
+        or exists (
+            select 1 from public.profiles p
+            where p.id = auth.uid() and lower(p.role) in ('admin', 'moderator')
+        )
+    );
+
+drop policy if exists "app_update_operations_select_policy" on public.app_update_operations;
+create policy "app_update_operations_select_policy" on public.app_update_operations
+    for select to authenticated
+    using (
+        owner_id = auth.uid()
+        or exists (
+            select 1 from public.profiles p
+            where p.id = auth.uid() and lower(p.role) in ('admin', 'moderator')
+        )
+    );
+
+drop policy if exists "app_update_financial_events_select_policy" on public.app_update_financial_events;
+create policy "app_update_financial_events_select_policy" on public.app_update_financial_events
+    for select to authenticated
+    using (
+        owner_id = auth.uid()
+        or tester_id = auth.uid()
+        or exists (
+            select 1 from public.profiles p
+            where p.id = auth.uid() and lower(p.role) in ('admin', 'moderator')
+        )
+    );
+
+-- Thu hồi quyền ghi trực tiếp từ client trên các bảng này
+revoke insert, update, delete on table public.app_update_releases from public, anon, authenticated;
+revoke insert, update, delete on table public.app_update_controls from public, anon, authenticated;
+revoke insert, update, delete on table public.app_update_claims from public, anon, authenticated;
+revoke insert, update, delete on table public.app_update_operations from public, anon, authenticated;
+revoke insert, update, delete on table public.app_update_financial_events from public, anon, authenticated;
+
+grant select on table public.app_update_releases to authenticated, service_role;
+grant select on table public.app_update_controls to authenticated, service_role;
+grant select on table public.app_update_claims to authenticated, service_role;
+grant select on table public.app_update_operations to authenticated, service_role;
+grant select on table public.app_update_financial_events to authenticated, service_role;
+
+-- 6. Helper nội bộ: Quyết toán và hoàn Credit đợt cập nhật khi đóng hoặc xóa campaign
+create or replace function public._settle_campaign_app_update(p_campaign_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_rel record;
+    v_remaining int;
+    v_owner_balance int;
+    v_credit_log_id uuid;
+begin
+    for v_rel in
+        select * from public.app_update_releases
+        where campaign_id = p_campaign_id and status = 'active'
+        for update
+    loop
+        v_remaining := v_rel.remaining_credits;
+        update public.app_update_releases
+        set status = 'closed',
+            closed_at = now(),
+            remaining_credits = 0,
+            refunded_credits = refunded_credits + v_remaining
+        where id = v_rel.id;
+
+        update public.app_update_controls
+        set active_release_id = null,
+            updated_at = now()
+        where owner_id = v_rel.owner_id
+          and package_name = v_rel.package_name
+          and active_release_id = v_rel.id;
+
+        if v_remaining > 0 then
+            -- Kiểm tra xem profile chủ app còn tồn tại không (phòng trường hợp account deletion cascade)
+            if exists (select 1 from public.profiles where id = v_rel.owner_id) then
+                update public.profiles
+                set credits = credits + v_remaining
+                where id = v_rel.owner_id
+                returning credits into v_owner_balance;
+
+                insert into public.credit_logs (user_id, amount, action, note, balance)
+                values (
+                    v_rel.owner_id,
+                    v_remaining,
+                    'app_update_refund',
+                    format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_remaining, v_rel.version_name, v_rel.app_name),
+                    v_owner_balance
+                )
+                returning id into v_credit_log_id;
+
+                insert into public.app_update_financial_events (
+                    release_id, event_type, amount, owner_id, credit_log_id
+                ) values (
+                    v_rel.id, 'refund', v_remaining, v_rel.owner_id, v_credit_log_id
+                );
+            else
+                insert into public.app_update_financial_events (
+                    release_id, event_type, amount, owner_id, credit_log_id
+                ) values (
+                    v_rel.id, 'refund', v_remaining, v_rel.owner_id, null
+                );
+            end if;
+        end if;
+    end loop;
+end;
+$$;
+
+revoke execute on function public._settle_campaign_app_update(uuid) from public, anon;
+grant execute on function public._settle_campaign_app_update(uuid) to authenticated, service_role;
+
+-- 7. Triggers trên public.campaigns để bảo vệ quỹ khi hoàn thành/lên production hoặc xóa campaign
+create or replace function public.trg_fn_campaigns_app_update_settle()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if TG_OP = 'DELETE' then
+        perform public._settle_campaign_app_update(OLD.id);
+        return OLD;
+    elsif TG_OP = 'UPDATE' then
+        if OLD.status = 'open' and NEW.status in ('completed', 'production') then
+            perform public._settle_campaign_app_update(NEW.id);
+        end if;
+        return NEW;
+    end if;
+    return null;
+end;
+$$;
+
+drop trigger if exists trg_campaigns_app_update_settle_delete on public.campaigns;
+create trigger trg_campaigns_app_update_settle_delete
+    before delete on public.campaigns
+    for each row
+    execute function public.trg_fn_campaigns_app_update_settle();
+
+drop trigger if exists trg_campaigns_app_update_settle_update on public.campaigns;
+create trigger trg_campaigns_app_update_settle_update
+    after update of status on public.campaigns
+    for each row
+    execute function public.trg_fn_campaigns_app_update_settle();
+
+-- 8. RPC publish_app_update: Công bố phiên bản mới và giữ quỹ 120 Credit
+create or replace function public.publish_app_update(
+    p_campaign_id                  uuid,
+    p_version_name                 text,
+    p_target_version_code          bigint,
+    p_release_notes                text,
+    p_client_operation_id          text default null,
+    p_expected_current_release_id  uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id           uuid := auth.uid();
+    v_camp                public.campaigns%rowtype;
+    v_version_name_clean  text;
+    v_release_notes_clean text;
+    v_ctrl                record;
+    v_active_rel          record;
+    v_old_remaining       int := 0;
+    v_owner_credits       int;
+    v_effective_credits   int;
+    v_new_release_id      uuid;
+    v_new_release         public.app_update_releases%rowtype;
+    v_refund_log_id       uuid;
+    v_reserve_log_id      uuid;
+    v_existing_op         record;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Kiểm tra idempotency theo client_operation_id nếu có
+    if p_client_operation_id is not null and trim(p_client_operation_id) <> '' then
+        select * into v_existing_op
+        from public.app_update_operations
+        where operation_id = trim(p_client_operation_id) and owner_id = v_caller_id;
+
+        if v_existing_op.operation_id is not null then
+            select * into v_new_release from public.app_update_releases where id = v_existing_op.release_id;
+            select credits into v_owner_credits from public.profiles where id = v_caller_id;
+
+            return jsonb_build_object(
+                'success', true,
+                'release', row_to_json(v_new_release),
+                'owner_credits', v_owner_credits,
+                'refund_amount', 0,
+                'idempotent_replay', true
+            );
+        end if;
+    end if;
+
+    -- Khóa và kiểm tra campaign
+    select * into v_camp from public.campaigns where id = p_campaign_id for update;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    -- Chỉ chủ app thật mới được giữ quỹ và công bố (không dùng quyền admin xem giúp)
+    if v_camp.owner_id <> v_caller_id then
+        raise exception 'NOT_ACTUAL_OWNER';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    if v_camp.package_name is null or trim(v_camp.package_name) = '' then
+        raise exception 'INVALID_PACKAGE_NAME';
+    end if;
+
+    -- Validate version_name
+    v_version_name_clean := trim(coalesce(p_version_name, ''));
+    if v_version_name_clean = '' or length(v_version_name_clean) > 100 then
+        raise exception 'INVALID_VERSION_NAME';
+    end if;
+
+    -- Validate target_version_code
+    if p_target_version_code is null or p_target_version_code <= 0 then
+        raise exception 'INVALID_VERSION_CODE';
+    end if;
+
+    -- Validate release_notes
+    v_release_notes_clean := trim(coalesce(p_release_notes, ''));
+    if v_release_notes_clean = '' or length(v_release_notes_clean) > 4000 then
+        raise exception 'INVALID_RELEASE_NOTES';
+    end if;
+
+    -- Khóa hàng điều khiển app_update_controls (ngăn 2 request công bố đồng thời)
+    insert into public.app_update_controls (owner_id, package_name, highest_version_code)
+    values (v_caller_id, v_camp.package_name, 0)
+    on conflict (owner_id, package_name) do nothing;
+
+    select * into v_ctrl
+    from public.app_update_controls
+    where owner_id = v_caller_id and package_name = v_camp.package_name
+    for update;
+
+    -- Kiểm tra expected_current_release_id để phát hiện form cũ
+    if p_expected_current_release_id is not null and v_ctrl.active_release_id is not null then
+        if p_expected_current_release_id <> v_ctrl.active_release_id then
+            raise exception 'CONCURRENT_UPDATE_CONFLICT';
+        end if;
+    end if;
+
+    -- Kiểm tra high-watermark versionCode: phải lớn hơn bản công bố trước của cùng app
+    if p_target_version_code <= v_ctrl.highest_version_code then
+        raise exception 'VERSION_CODE_NOT_GREATER';
+    end if;
+
+    -- Kiểm tra xem có đợt active nào đang chạy không
+    select * into v_active_rel
+    from public.app_update_releases
+    where owner_id = v_caller_id
+      and package_name = v_camp.package_name
+      and status = 'active'
+    for update;
+
+    if v_active_rel.id is not null then
+        v_old_remaining := v_active_rel.remaining_credits;
+    end if;
+
+    -- Khóa ví chủ app
+    select credits into v_owner_credits from public.profiles where id = v_caller_id for update;
+
+    -- Tính toán ngân sách: cần 120 cho bản mới, đợt cũ hoàn lại v_old_remaining
+    v_effective_credits := v_owner_credits + v_old_remaining;
+    if v_effective_credits < 120 then
+        raise exception 'INSUFFICIENT_CREDITS';
+    end if;
+
+    -- Xử lý đợt cũ nếu có: đóng đợt, hoàn phần chưa dùng
+    if v_active_rel.id is not null then
+        update public.app_update_releases
+        set status = 'superseded',
+            closed_at = now(),
+            remaining_credits = 0,
+            refunded_credits = refunded_credits + v_old_remaining
+        where id = v_active_rel.id;
+
+        if v_old_remaining > 0 then
+            v_owner_credits := v_owner_credits + v_old_remaining;
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_caller_id,
+                v_old_remaining,
+                'app_update_refund',
+                format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_old_remaining, v_active_rel.version_name, v_camp.app_name),
+                v_owner_credits
+            )
+            returning id into v_refund_log_id;
+
+            insert into public.app_update_financial_events (
+                release_id, event_type, amount, owner_id, credit_log_id, operation_id
+            ) values (
+                v_active_rel.id, 'refund', v_old_remaining, v_caller_id, v_refund_log_id, p_client_operation_id
+            );
+        end if;
+    end if;
+
+    -- Trừ 120 Credit cho đợt mới
+    v_owner_credits := v_owner_credits - 120;
+    update public.profiles set credits = v_owner_credits where id = v_caller_id;
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (
+        v_caller_id,
+        -120,
+        'app_update_reserve',
+        format('Giữ trước 120 Credit cho phiên bản mới %s (%s)', v_version_name_clean, v_camp.app_name),
+        v_owner_credits
+    )
+    returning id into v_reserve_log_id;
+
+    -- Tạo release mới
+    insert into public.app_update_releases (
+        campaign_id,
+        owner_id,
+        package_name,
+        app_name,
+        version_name,
+        target_version_code,
+        release_notes,
+        status,
+        reward_per_claim,
+        max_claims,
+        reserved_credits,
+        paid_count,
+        remaining_credits,
+        refunded_credits,
+        published_at
+    ) values (
+        p_campaign_id,
+        v_caller_id,
+        v_camp.package_name,
+        coalesce(v_camp.app_name, ''),
+        v_version_name_clean,
+        p_target_version_code,
+        v_release_notes_clean,
+        'active',
+        6,
+        20,
+        120,
+        0,
+        120,
+        0,
+        now()
+    )
+    returning * into v_new_release;
+
+    v_new_release_id := v_new_release.id;
+
+    -- Ghi nhận financial event cho đợt giữ tiền
+    insert into public.app_update_financial_events (
+        release_id, event_type, amount, owner_id, credit_log_id, operation_id
+    ) values (
+        v_new_release_id, 'reserve', 120, v_caller_id, v_reserve_log_id, p_client_operation_id
+    );
+
+    -- Cập nhật app_update_controls
+    update public.app_update_controls
+    set highest_version_code = p_target_version_code,
+        active_release_id = v_new_release_id,
+        updated_at = now()
+    where owner_id = v_caller_id and package_name = v_camp.package_name;
+
+    -- Lưu vết idempotency
+    if p_client_operation_id is not null and trim(p_client_operation_id) <> '' then
+        insert into public.app_update_operations (operation_id, owner_id, release_id, status)
+        values (trim(p_client_operation_id), v_caller_id, v_new_release_id, 'completed')
+        on conflict (operation_id) do nothing;
+    end if;
+
+    return jsonb_build_object(
+        'success', true,
+        'release', row_to_json(v_new_release),
+        'owner_credits', v_owner_credits,
+        'refund_amount', v_old_remaining
+    );
+end;
+$$;
+
+revoke execute on function public.publish_app_update(uuid, text, bigint, text, text, uuid) from public, anon;
+grant execute on function public.publish_app_update(uuid, text, bigint, text, text, uuid) to authenticated, service_role;
+
+-- 9. RPC claim_app_update_reward: Tester nhận thưởng cập nhật 6 Credit
+create or replace function public.claim_app_update_reward(
+    p_release_id            uuid,
+    p_observed_version_code bigint
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id          uuid := auth.uid();
+    v_existing_claim     record;
+    v_rel                record;
+    v_camp               record;
+    v_member             record;
+    v_tester_credits     int;
+    v_is_banned          boolean;
+    v_next_ordinal       int;
+    v_new_paid_count     int;
+    v_new_remaining      int;
+    v_new_status         text;
+    v_credit_log_id      uuid;
+    v_claim_id           uuid;
+    v_confirmed_at       timestamptz;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    if p_observed_version_code is null or p_observed_version_code <= 0 then
+        raise exception 'INVALID_OBSERVED_VERSION_CODE';
+    end if;
+
+    -- Idempotency: Kiểm tra xem tester đã nhận thưởng đợt này chưa
+    select * into v_existing_claim
+    from public.app_update_claims
+    where release_id = p_release_id and tester_id = v_caller_id;
+
+    if v_existing_claim.id is not null then
+        select credits into v_tester_credits from public.profiles where id = v_caller_id;
+        select paid_count, max_claims, status into v_new_paid_count, v_next_ordinal, v_new_status
+        from public.app_update_releases where id = p_release_id;
+
+        return jsonb_build_object(
+            'success', true,
+            'newly_awarded', false,
+            'reward', v_existing_claim.reward_credits,
+            'tester_balance', v_tester_credits,
+            'paid_count', v_new_paid_count,
+            'max_claims', 20,
+            'release_status', v_new_status,
+            'receipt', jsonb_build_object(
+                'claim_id', v_existing_claim.id,
+                'release_id', v_existing_claim.release_id,
+                'ordinal', v_existing_claim.ordinal,
+                'reward_credits', v_existing_claim.reward_credits,
+                'confirmed_at', to_char(v_existing_claim.confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            )
+        );
+    end if;
+
+    -- Khóa và kiểm tra release
+    select * into v_rel
+    from public.app_update_releases
+    where id = p_release_id
+    for update;
+
+    if v_rel.id is null then
+        raise exception 'RELEASE_NOT_FOUND';
+    end if;
+
+    -- Kiểm tra chủ app không được tự claim thưởng của chính app mình
+    if v_rel.owner_id = v_caller_id then
+        raise exception 'OWNER_CANNOT_CLAIM';
+    end if;
+
+    -- Kiểm tra trạng thái đợt
+    if v_rel.status = 'superseded' then
+        raise exception 'RELEASE_REPLACED';
+    end if;
+
+    if v_rel.status in ('exhausted', 'closed') or v_rel.paid_count >= v_rel.max_claims or v_rel.remaining_credits < v_rel.reward_per_claim then
+        -- Cập nhật trạng thái exhausted nếu chưa cập nhật
+        if v_rel.status = 'active' then
+            update public.app_update_releases set status = 'exhausted', closed_at = coalesce(closed_at, now()) where id = v_rel.id;
+        end if;
+        raise exception 'RELEASE_EXHAUSTED';
+    end if;
+
+    -- Kiểm tra campaign
+    if v_rel.campaign_id is not null then
+        select status, owner_id into v_camp
+        from public.campaigns
+        where id = v_rel.campaign_id;
+
+        if v_camp.owner_id = v_caller_id then
+            raise exception 'OWNER_CANNOT_CLAIM';
+        end if;
+
+        if v_camp.status = 'paused' then
+            raise exception 'CAMPAIGN_PAUSED';
+        end if;
+
+        if v_camp.status <> 'open' then
+            raise exception 'CAMPAIGN_NOT_OPEN';
+        end if;
+
+        -- Kiểm tra membership và điều kiện tham gia trước/tại thời điểm công bố
+        select joined_at into v_member
+        from public.campaign_members
+        where campaign_id = v_rel.campaign_id and user_id = v_caller_id;
+
+        if v_member.joined_at is null then
+            raise exception 'NOT_CAMPAIGN_MEMBER';
+        end if;
+
+        if v_member.joined_at > v_rel.published_at then
+            raise exception 'MEMBER_JOINED_AFTER_RELEASE';
+        end if;
+    end if;
+
+    -- Kiểm tra versionCode quan sát được từ client: phải >= target_version_code
+    if p_observed_version_code < v_rel.target_version_code then
+        raise exception 'VERSION_NOT_SATISFIED';
+    end if;
+
+    -- Khóa và kiểm tra profile tester
+    select credits, is_locked into v_tester_credits, v_is_banned
+    from public.profiles
+    where id = v_caller_id
+    for update;
+
+    if v_is_banned then
+        raise exception 'USER_LOCKED';
+    end if;
+
+    -- Gán số thứ tự suất thưởng (1..20)
+    v_next_ordinal := v_rel.paid_count + 1;
+    if v_next_ordinal > v_rel.max_claims or v_rel.remaining_credits < v_rel.reward_per_claim then
+        update public.app_update_releases
+        set status = 'exhausted', closed_at = coalesce(closed_at, now())
+        where id = v_rel.id;
+        raise exception 'RELEASE_EXHAUSTED';
+    end if;
+
+    -- Cập nhật release: giảm remaining_credits 6, tăng paid_count 1
+    v_new_paid_count := v_next_ordinal;
+    v_new_remaining := v_rel.remaining_credits - v_rel.reward_per_claim;
+    v_new_status := case
+        when v_new_paid_count >= v_rel.max_claims or v_new_remaining < v_rel.reward_per_claim then 'exhausted'
+        else 'active'
+    end;
+
+    update public.app_update_releases
+    set paid_count = v_new_paid_count,
+        remaining_credits = v_new_remaining,
+        status = v_new_status,
+        closed_at = case when v_new_status = 'exhausted' then now() else closed_at end
+    where id = v_rel.id;
+
+    -- Cộng 6 Credit cho tester (TUYỆT ĐỐI KHÔNG trừ từ ví chủ app)
+    v_tester_credits := v_tester_credits + v_rel.reward_per_claim;
+    update public.profiles set credits = v_tester_credits where id = v_caller_id;
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (
+        v_caller_id,
+        v_rel.reward_per_claim,
+        'app_update_reward',
+        format('Thưởng +%s Credit cập nhật phiên bản %s (%s)', v_rel.reward_per_claim, v_rel.version_name, v_rel.app_name),
+        v_tester_credits
+    )
+    returning id into v_credit_log_id;
+
+    -- Ghi nhận biên lai claim
+    insert into public.app_update_claims (
+        release_id,
+        tester_id,
+        ordinal,
+        observed_version_code,
+        reward_credits,
+        confirmed_at,
+        credit_log_id
+    ) values (
+        v_rel.id,
+        v_caller_id,
+        v_next_ordinal,
+        p_observed_version_code,
+        v_rel.reward_per_claim,
+        now(),
+        v_credit_log_id
+    )
+    returning id, confirmed_at into v_claim_id, v_confirmed_at;
+
+    -- Ghi nhận financial event
+    insert into public.app_update_financial_events (
+        release_id, event_type, amount, owner_id, tester_id, credit_log_id
+    ) values (
+        v_rel.id, 'reward', v_rel.reward_per_claim, v_rel.owner_id, v_caller_id, v_credit_log_id
+    );
+
+    return jsonb_build_object(
+        'success', true,
+        'newly_awarded', true,
+        'reward', v_rel.reward_per_claim,
+        'tester_balance', v_tester_credits,
+        'paid_count', v_new_paid_count,
+        'max_claims', v_rel.max_claims,
+        'release_status', v_new_status,
+        'receipt', jsonb_build_object(
+            'claim_id', v_claim_id,
+            'release_id', v_rel.id,
+            'ordinal', v_next_ordinal,
+            'reward_credits', v_rel.reward_per_claim,
+            'confirmed_at', to_char(v_confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+        )
+    );
+end;
+$$;
+
+revoke execute on function public.claim_app_update_reward(uuid, bigint) from public, anon;
+grant execute on function public.claim_app_update_reward(uuid, bigint) to authenticated, service_role;
+
+-- 10. RPC close_app_update_release: Chủ app kết thúc sớm đợt cập nhật và hoàn tiền chưa dùng
+create or replace function public.close_app_update_release(
+    p_release_id uuid,
+    p_reason     text default 'manual_close'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id      uuid := auth.uid();
+    v_rel            record;
+    v_remaining      int;
+    v_owner_balance  int;
+    v_credit_log_id  uuid;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_rel
+    from public.app_update_releases
+    where id = p_release_id
+    for update;
+
+    if v_rel.id is null then
+        raise exception 'RELEASE_NOT_FOUND';
+    end if;
+
+    if v_rel.owner_id <> v_caller_id then
+        raise exception 'NOT_ACTUAL_OWNER';
+    end if;
+
+    if v_rel.status <> 'active' then
+        return jsonb_build_object(
+            'success', false,
+            'error_code', 'RELEASE_NOT_ACTIVE',
+            'message', 'Đợt cập nhật này không còn hoạt động.',
+            'release_status', v_rel.status
+        );
+    end if;
+
+    v_remaining := v_rel.remaining_credits;
+
+    update public.app_update_releases
+    set status = 'closed',
+        closed_at = now(),
+        remaining_credits = 0,
+        refunded_credits = refunded_credits + v_remaining
+    where id = v_rel.id;
+
+    update public.app_update_controls
+    set active_release_id = null,
+        updated_at = now()
+    where owner_id = v_rel.owner_id
+      and package_name = v_rel.package_name
+      and active_release_id = v_rel.id;
+
+    if v_remaining > 0 then
+        update public.profiles
+        set credits = credits + v_remaining
+        where id = v_rel.owner_id
+        returning credits into v_owner_balance;
+
+        insert into public.credit_logs (user_id, amount, action, note, balance)
+        values (
+            v_rel.owner_id,
+            v_remaining,
+            'app_update_refund',
+            format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_remaining, v_rel.version_name, v_rel.app_name),
+            v_owner_balance
+        )
+        returning id into v_credit_log_id;
+
+        insert into public.app_update_financial_events (
+            release_id, event_type, amount, owner_id, credit_log_id
+        ) values (
+            v_rel.id, 'refund', v_remaining, v_rel.owner_id, v_credit_log_id
+        );
+    else
+        select credits into v_owner_balance from public.profiles where id = v_rel.owner_id;
+    end if;
+
+    return jsonb_build_object(
+        'success', true,
+        'refund_amount', v_remaining,
+        'owner_credits', v_owner_balance,
+        'release_status', 'closed'
+    );
+end;
+$$;
+
+revoke execute on function public.close_app_update_release(uuid, text) from public, anon;
+grant execute on function public.close_app_update_release(uuid, text) to authenticated, service_role;
+
+-- 11. RPC get_campaign_update_history: Lấy lịch sử các đợt cập nhật cho chủ app
+create or replace function public.get_campaign_update_history(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id  uuid := auth.uid();
+    v_camp       record;
+    v_can_manage boolean := false;
+    v_history    jsonb := '[]'::jsonb;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select owner_id into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.owner_id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    v_can_manage := (v_camp.owner_id = v_caller_id)
+        or exists (
+            select 1 from public.profiles p
+            where p.id = v_caller_id and lower(p.role) in ('admin', 'moderator')
+        );
+
+    if not v_can_manage then
+        raise exception 'FORBIDDEN';
+    end if;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', r.id,
+        'campaign_id', r.campaign_id,
+        'owner_id', r.owner_id,
+        'package_name', r.package_name,
+        'app_name', r.app_name,
+        'version_name', r.version_name,
+        'target_version_code', r.target_version_code,
+        'release_notes', r.release_notes,
+        'status', r.status,
+        'reward_per_claim', r.reward_per_claim,
+        'max_claims', r.max_claims,
+        'reserved_credits', r.reserved_credits,
+        'paid_count', r.paid_count,
+        'remaining_credits', r.remaining_credits,
+        'refunded_credits', r.refunded_credits,
+        'spent_credits', r.paid_count * r.reward_per_claim,
+        'published_at', to_char(r.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'closed_at', case when r.closed_at is not null then to_char(r.closed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') else null end
+    ) order by r.published_at desc), '[]'::jsonb)
+    into v_history
+    from public.app_update_releases r
+    where r.campaign_id = p_campaign_id;
+
+    return v_history;
+end;
+$$;
+
+revoke execute on function public.get_campaign_update_history(uuid) from public, anon;
+grant execute on function public.get_campaign_update_history(uuid) to authenticated, service_role;
+
+-- 12. Override get_campaign_detail: Mở rộng trả về đối tượng app_update cho chủ app và tester
+create or replace function public.get_campaign_detail(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid              uuid := auth.uid();
+    v_today            date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp             public.campaigns%rowtype;
+    v_is_owner         boolean := false;
+    v_is_actual_owner  boolean := false;
+    v_can_manage       boolean := false;
+    v_is_member        boolean := false;
+    v_member_joined_at timestamptz;
+    v_confirmed        boolean := false;
+    v_campaign         jsonb;
+    v_testers          jsonb := '[]'::jsonb;
+    v_feedbacks        jsonb := '[]'::jsonb;
+    v_reports          jsonb := '[]'::jsonb;
+    v_profiles         jsonb := '{}'::jsonb;
+    v_today_tested     int := 0;
+    v_reports_count    int := 0;
+    v_avg              float;
+    v_my_dates         jsonb := '[]'::jsonb;
+    v_my_profile       jsonb;
+    v_unread           jsonb := '[]'::jsonb;
+    v_weekly           int := 0;
+    -- Biến cho tính năng thưởng cập nhật phiên bản
+    v_rel              record;
+    v_app_update       jsonb := null;
+    v_claim            record;
+    v_is_eligible      boolean := true;
+    v_ineligible_reason text := null;
+begin
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    perform public.auto_accept_expired_reports();
+
+    v_is_actual_owner := (v_camp.owner_id = v_uid);
+
+    v_can_manage := v_is_actual_owner
+        or exists (
+            select 1 from public.profiles p
+            where p.id = v_uid and lower(p.role) in ('admin', 'moderator')
+        );
+
+    v_is_owner := v_can_manage;
+
+    select joined_at into v_member_joined_at
+    from public.campaign_members m
+    where m.campaign_id = p_campaign_id and m.user_id = v_uid;
+
+    v_is_member := (v_member_joined_at is not null);
+
+    v_confirmed := exists (
+        select 1 from public.checkins ci
+        where ci.campaign_id = p_campaign_id
+          and ci.user_id = v_uid
+          and ci.checkin_date = v_today
+          and coalesce(ci.note, '') not like '%tạm tính%'
+    );
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'user_id', t.user_id,
+        'joined_at', t.joined_at,
+        'days', t.days,
+        'checkin_count', t.checkin_count,
+        'last_checkin_date', t.last_checkin_date
+    ) order by t.days desc), '[]'::jsonb)
+    into v_testers
+    from (
+        select m.user_id,
+               to_char(m.joined_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as joined_at,
+               coalesce(s.days, 0) as days,
+               coalesce(s.cnt, 0) as checkin_count,
+               to_char(s.last_date, 'YYYY-MM-DD') as last_checkin_date
+        from public.campaign_members m
+        left join (
+            select user_id,
+                   count(distinct checkin_date) as days,
+                   count(*) as cnt,
+                   max(checkin_date) as last_date
+            from public.checkins
+            where campaign_id = p_campaign_id
+            group by user_id
+        ) s on s.user_id = m.user_id
+        where m.campaign_id = p_campaign_id
+    ) t;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', f.id,
+        'campaign_id', f.campaign_id,
+        'user_id', f.user_id,
+        'rating', f.rating,
+        'comment', f.comment,
+        'created_at', to_char(f.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'updated_at', to_char(f.updated_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by f.created_at desc), '[]'::jsonb)
+    into v_feedbacks
+    from public.feedbacks f
+    where f.campaign_id = p_campaign_id;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', tr.id,
+        'campaign_id', tr.campaign_id,
+        'user_id', tr.user_id,
+        'report_type', tr.report_type,
+        'content', tr.content,
+        'screenshot_url', tr.screenshot_url,
+        'thumbnail_url', tr.thumbnail_url,
+        'rating', tr.rating,
+        'status', tr.status,
+        'bonus_awarded', tr.bonus_awarded,
+        'created_at', to_char(tr.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'reviewed_at', to_char(tr.reviewed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'rejection_reason', tr.rejection_reason,
+        'image_hash', tr.image_hash,
+        'submission_context', tr.submission_context,
+        'mission_id', tr.mission_id,
+        'mission_participant_id', tr.mission_participant_id,
+        'mission_title', tr.mission_title,
+        'mission_reward_credits', tr.mission_reward_credits,
+        'mission_ends_at', to_char(tr.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'mission_submitted_at', to_char(tr.mission_submitted_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by tr.created_at desc), '[]'::jsonb)
+    into v_reports
+    from (
+        select * from public.tester_reports
+        where campaign_id = p_campaign_id
+          and (v_can_manage or user_id = v_uid)
+        order by created_at desc
+        limit 200
+    ) tr;
+
+    select coalesce(jsonb_object_agg(t.id::text, public._profile_json(p)), '{}'::jsonb)
+    into v_profiles
+    from public.profiles p
+    join (
+        select v_camp.owner_id as id
+        union
+        select m.user_id from public.campaign_members m where m.campaign_id = p_campaign_id
+        union
+        select f.user_id from public.feedbacks f where f.campaign_id = p_campaign_id
+        union
+        select tr.user_id from public.tester_reports tr
+        where tr.campaign_id = p_campaign_id and (v_can_manage or tr.user_id = v_uid)
+    ) t on t.id = p.id;
+
+    select count(distinct user_id) into v_today_tested
+    from public.checkins
+    where campaign_id = p_campaign_id and checkin_date = v_today;
+
+    select count(*), coalesce(round(avg(rating)::numeric, 1), 0.0)
+    into v_reports_count, v_avg
+    from public.feedbacks
+    where campaign_id = p_campaign_id;
+
+    select coalesce(jsonb_agg(to_char(ci.checkin_date, 'YYYY-MM-DD') order by ci.checkin_date asc), '[]'::jsonb)
+    into v_my_dates
+    from public.checkins ci
+    where ci.campaign_id = p_campaign_id and ci.user_id = v_uid;
+
+    v_campaign := row_to_json(v_camp);
+
+    select public._profile_json(p) into v_my_profile
+    from public.profiles p where p.id = v_uid;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', w.id,
+        'user_id', w.user_id,
+        'warning_type', w.warning_type,
+        'message', w.message,
+        'warning_date', to_char(w.warning_date, 'YYYY-MM-DD'),
+        'created_at', to_char(w.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'acknowledged', w.acknowledged
+    ) order by w.created_at desc), '[]'::jsonb)
+    into v_unread
+    from public.user_warnings w
+    where w.user_id = v_uid and w.acknowledged = false;
+
+    select count(*) into v_weekly
+    from public.user_warnings w
+    where w.user_id = v_uid
+      and (w.created_at at time zone 'Asia/Ho_Chi_Minh')::date >= (v_today - 6);
+
+    -- =========================================================================
+    -- Xây dựng metadata thưởng cập nhật phiên bản (app_update)
+    -- =========================================================================
+    select * into v_rel
+    from public.app_update_releases
+    where campaign_id = p_campaign_id and status in ('active', 'exhausted')
+    order by published_at desc
+    limit 1;
+
+    if v_rel.id is not null then
+        if v_is_actual_owner then
+            -- Góc nhìn chủ app: hiển thị toàn bộ tiến độ, ngân sách đang giữ và đã chi
+            v_app_update := jsonb_build_object(
+                'id', v_rel.id,
+                'campaign_id', v_rel.campaign_id,
+                'owner_id', v_rel.owner_id,
+                'package_name', v_rel.package_name,
+                'app_name', v_rel.app_name,
+                'version_name', v_rel.version_name,
+                'target_version_code', v_rel.target_version_code,
+                'release_notes', v_rel.release_notes,
+                'status', v_rel.status,
+                'reward_per_claim', v_rel.reward_per_claim,
+                'max_claims', v_rel.max_claims,
+                'reserved_credits', v_rel.reserved_credits,
+                'paid_count', v_rel.paid_count,
+                'remaining_credits', v_rel.remaining_credits,
+                'spent_credits', v_rel.paid_count * v_rel.reward_per_claim,
+                'published_at', to_char(v_rel.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            );
+        else
+            -- Góc nhìn tester:
+            -- Quy tắc: Nếu đã đủ 20 suất (paid_count >= 20) thì ẩn toàn bộ đối với tester
+            if v_rel.paid_count < v_rel.max_claims and v_rel.remaining_credits >= v_rel.reward_per_claim then
+                select * into v_claim
+                from public.app_update_claims
+                where release_id = v_rel.id and tester_id = v_uid;
+
+                -- Kiểm tra điều kiện tester
+                if not v_is_member then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'not_member';
+                elsif v_member_joined_at > v_rel.published_at then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'joined_after_release';
+                elsif v_camp.status = 'paused' then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'campaign_paused';
+                elsif v_camp.status <> 'open' then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'campaign_not_open';
+                end if;
+
+                v_app_update := jsonb_build_object(
+                    'id', v_rel.id,
+                    'campaign_id', v_rel.campaign_id,
+                    'package_name', v_rel.package_name,
+                    'app_name', v_rel.app_name,
+                    'version_name', v_rel.version_name,
+                    'target_version_code', v_rel.target_version_code,
+                    'release_notes', v_rel.release_notes,
+                    'status', v_rel.status,
+                    'reward_per_claim', v_rel.reward_per_claim,
+                    'max_claims', v_rel.max_claims,
+                    'paid_count', v_rel.paid_count,
+                    'has_claimed', (v_claim.id is not null),
+                    'is_eligible', v_is_eligible,
+                    'ineligibility_reason', v_ineligible_reason,
+                    'claim_receipt', case when v_claim.id is not null then jsonb_build_object(
+                        'claim_id', v_claim.id,
+                        'release_id', v_claim.release_id,
+                        'ordinal', v_claim.ordinal,
+                        'reward_credits', v_claim.reward_credits,
+                        'confirmed_at', to_char(v_claim.confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                    ) else null end
+                );
+            end if;
+        end if;
+    end if;
+
+    return jsonb_build_object(
+        'campaign', v_campaign,
+        'is_owner', v_is_owner,
+        'is_actual_owner', v_is_actual_owner,
+        'can_manage', v_can_manage,
+        'is_member', v_is_member,
+        'checked_in_confirmed_today', v_confirmed,
+        'testers', v_testers,
+        'feedbacks', v_feedbacks,
+        'reports', v_reports,
+        'profiles', v_profiles,
+        'today_tested_count', v_today_tested,
+        'reports_count', v_reports_count,
+        'avg_rating', v_avg,
+        'my_checkin_dates', v_my_dates,
+        'my_profile', v_my_profile,
+        'unread_warnings', v_unread,
+        'weekly_warnings_count', v_weekly,
+        'app_update', v_app_update
+    );
+end;
+$$;
+
+revoke execute on function public.get_campaign_detail(uuid) from public, anon;
+grant execute on function public.get_campaign_detail(uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+
+-- ===== 051_app_update_reward_hardening.sql =====
+-- ==============================================================================
+-- 12 Tester - Supabase migration 051: App Update Reward Hardening & Security
+-- ==============================================================================
+-- Kế hoạch & Báo cáo:
+-- F:\AI\12Tester\RECHECK_VA_KE_HOACH_SUA_THUONG_CAP_NHAT_PHIEN_BAN_2026-10-29.md
+-- Mã bàn giao sửa: APP-UPDATE-RECHECK-20261029-FIX
+--
+-- Xử lý đầy đủ 10 nhóm lỗi (R01 -> R10):
+-- R01: Thu hồi quyền thực thi _settle_campaign_app_update khỏi client (public, anon, authenticated).
+-- R02: Tự động hoàn quỹ khi campaign chuyển từ bất kỳ trạng thái nào (kể cả paused) sang completed/production/closed.
+-- R03: Sửa ràng buộc FK app_update_releases.owner_id thành on delete set null và lưu snapshot định danh, cho phép xóa tài khoản chủ app an toàn.
+-- R04: Gắn operation_id với fingerprint/payload của request; chặn cùng operation_id khác payload (OPERATION_PAYLOAD_CONFLICT).
+-- R05: Kiểm tra concurrency đầy đủ (bao gồm expected = null), thống nhất thứ tự khóa (campaigns -> controls -> releases -> profiles).
+-- R06: Invalidate đúng cache sau claim/close; hỗ trợ replay đối soát số dư.
+-- R07: Bổ sung kiểm tra eligibility, membership, campaign status trước khi hiển thị/claim.
+-- R08: Guard release id, sequence và session để response bản cũ không ghi nhận nhầm lên bản mới.
+-- R09: Tách current release, history và watermark; đánh dấu superseded các đợt cũ khi ra đợt mới, không phục hồi exhausted cũ sau khi đóng.
+-- R10: Chặn chủ app bị khóa (is_locked) công bố đợt mới (USER_LOCKED), nhưng vẫn bảo đảm đường quyết toán/hoàn quỹ hợp lệ.
+-- ==============================================================================
+
+-- ------------------------------------------------------------------------------
+-- 1. R03 & R04: Cập nhật cấu trúc bảng app_update_releases & app_update_operations
+-- ------------------------------------------------------------------------------
+
+-- R03: Cho phép xóa tài khoản chủ app bằng cách đổi FK sang ON DELETE SET NULL và lưu snapshot owner_id
+alter table public.app_update_releases drop constraint if exists app_update_releases_owner_id_fkey;
+alter table public.app_update_releases alter column owner_id drop not null;
+alter table public.app_update_releases add column if not exists owner_id_snapshot uuid;
+update public.app_update_releases set owner_id_snapshot = owner_id where owner_id_snapshot is null and owner_id is not null;
+
+alter table public.app_update_releases add constraint app_update_releases_owner_id_fkey
+    foreign key (owner_id) references public.profiles(id) on delete set null;
+
+-- R04: Bổ sung metadata payload cho app_update_operations để chống xung đột payload
+alter table public.app_update_operations add column if not exists campaign_id uuid;
+alter table public.app_update_operations add column if not exists target_version_code bigint;
+alter table public.app_update_operations add column if not exists version_name text;
+alter table public.app_update_operations add column if not exists release_notes text;
+
+-- ------------------------------------------------------------------------------
+-- 2. R01: Thu hồi quyền thực thi helper _settle_campaign_app_update khỏi client
+-- ------------------------------------------------------------------------------
+revoke execute on function public._settle_campaign_app_update(uuid) from public, anon, authenticated;
+grant execute on function public._settle_campaign_app_update(uuid) to service_role;
+
+-- ------------------------------------------------------------------------------
+-- 3. R01 & R02 & R05: Cập nhật hàm quyết toán nội bộ _settle_campaign_app_update
+-- ------------------------------------------------------------------------------
+create or replace function public._settle_campaign_app_update(p_campaign_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_camp                public.campaigns%rowtype;
+    v_rel                 record;
+    v_remaining           int;
+    v_owner_balance       int;
+    v_credit_log_id       uuid;
+    v_target_owner_id     uuid;
+begin
+    -- Khóa theo thứ tự chuẩn: campaigns -> controls -> releases -> profiles
+    select * into v_camp from public.campaigns where id = p_campaign_id for update;
+
+    for v_rel in
+        select * from public.app_update_releases
+        where campaign_id = p_campaign_id and status = 'active'
+        order by id
+        for update
+    loop
+        v_remaining := v_rel.remaining_credits;
+        v_target_owner_id := coalesce(v_rel.owner_id, v_rel.owner_id_snapshot);
+
+        -- Khóa control trước
+        update public.app_update_controls
+        set active_release_id = null,
+            updated_at = now()
+        where owner_id = v_target_owner_id
+          and package_name = v_rel.package_name
+          and active_release_id = v_rel.id;
+
+        -- Cập nhật release
+        update public.app_update_releases
+        set status = 'closed',
+            closed_at = now(),
+            remaining_credits = 0,
+            refunded_credits = refunded_credits + v_remaining
+        where id = v_rel.id;
+
+        if v_remaining > 0 and v_target_owner_id is not null then
+            -- Khóa profile nếu tồn tại
+            if exists (select 1 from public.profiles where id = v_target_owner_id) then
+                update public.profiles
+                set credits = credits + v_remaining
+                where id = v_target_owner_id
+                returning credits into v_owner_balance;
+
+                insert into public.credit_logs (user_id, amount, action, note, balance)
+                values (
+                    v_target_owner_id,
+                    v_remaining,
+                    'app_update_refund',
+                    format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_remaining, v_rel.version_name, v_rel.app_name),
+                    v_owner_balance
+                )
+                returning id into v_credit_log_id;
+
+                insert into public.app_update_financial_events (
+                    release_id, event_type, amount, owner_id, credit_log_id
+                ) values (
+                    v_rel.id, 'refund', v_remaining, v_target_owner_id, v_credit_log_id
+                );
+            else
+                insert into public.app_update_financial_events (
+                    release_id, event_type, amount, owner_id, credit_log_id
+                ) values (
+                    v_rel.id, 'refund', v_remaining, v_target_owner_id, null
+                );
+            end if;
+        end if;
+    end loop;
+end;
+$$;
+
+revoke execute on function public._settle_campaign_app_update(uuid) from public, anon, authenticated;
+grant execute on function public._settle_campaign_app_update(uuid) to service_role;
+
+-- ------------------------------------------------------------------------------
+-- 4. R02: Trigger tự động hoàn quỹ từ MỌI trạng thái sang completed/production/closed
+-- ------------------------------------------------------------------------------
+create or replace function public.trg_fn_campaigns_app_update_settle()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if TG_OP = 'DELETE' then
+        perform public._settle_campaign_app_update(OLD.id);
+        return OLD;
+    elsif TG_OP = 'UPDATE' then
+        -- R02: Xử lý mọi chuyển trạng thái hợp lệ sang completed/production/closed (bao gồm cả từ paused)
+        if (OLD.status is distinct from NEW.status) and NEW.status in ('completed', 'production', 'closed') then
+            perform public._settle_campaign_app_update(NEW.id);
+        end if;
+        return NEW;
+    end if;
+    return null;
+end;
+$$;
+
+-- ------------------------------------------------------------------------------
+-- 5. R04, R05, R09, R10: RPC publish_app_update nâng cấp
+-- ------------------------------------------------------------------------------
+drop function if exists public.publish_app_update(uuid, text, bigint, text);
+drop function if exists public.publish_app_update(uuid, text, bigint, text, text);
+drop function if exists public.publish_app_update(uuid, text, bigint, text, text, uuid);
+
+create or replace function public.publish_app_update(
+    p_campaign_id                  uuid,
+    p_version_name                 text,
+    p_target_version_code          bigint,
+    p_release_notes                text,
+    p_client_operation_id          text default null,
+    p_expected_current_release_id  uuid default 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id           uuid := auth.uid();
+    v_camp                public.campaigns%rowtype;
+    v_version_name_clean  text;
+    v_release_notes_clean text;
+    v_ctrl                record;
+    v_active_rel          record;
+    v_old_remaining       int := 0;
+    v_owner_credits       int;
+    v_owner_is_locked     boolean := false;
+    v_effective_credits   int;
+    v_new_release_id      uuid;
+    v_new_release         public.app_update_releases%rowtype;
+    v_refund_log_id       uuid;
+    v_reserve_log_id      uuid;
+    v_existing_op         record;
+    c_sentinel            constant uuid := 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Chuẩn hóa dữ liệu đầu vào trước khi so sánh
+    v_version_name_clean := trim(coalesce(p_version_name, ''));
+    if v_version_name_clean = '' or length(v_version_name_clean) > 100 then
+        raise exception 'INVALID_VERSION_NAME';
+    end if;
+
+    if p_target_version_code is null or p_target_version_code <= 0 then
+        raise exception 'INVALID_VERSION_CODE';
+    end if;
+
+    v_release_notes_clean := trim(coalesce(p_release_notes, ''));
+    if v_release_notes_clean = '' or length(v_release_notes_clean) > 4000 then
+        raise exception 'INVALID_RELEASE_NOTES';
+    end if;
+
+    -- R04: Kiểm tra idempotency theo client_operation_id
+    if p_client_operation_id is not null and trim(p_client_operation_id) <> '' then
+        select * into v_existing_op
+        from public.app_update_operations
+        where operation_id = trim(p_client_operation_id) and owner_id = v_caller_id;
+
+        if v_existing_op.operation_id is not null then
+            -- R04: Kiểm tra payload/fingerprint conflict
+            if v_existing_op.campaign_id is distinct from p_campaign_id
+               or v_existing_op.target_version_code is distinct from p_target_version_code
+               or v_existing_op.version_name is distinct from v_version_name_clean
+               or v_existing_op.release_notes is distinct from v_release_notes_clean
+            then
+                raise exception 'OPERATION_PAYLOAD_CONFLICT';
+            end if;
+
+            select * into v_new_release from public.app_update_releases where id = v_existing_op.release_id;
+            select credits into v_owner_credits from public.profiles where id = v_caller_id;
+
+            return jsonb_build_object(
+                'success', true,
+                'release', row_to_json(v_new_release),
+                'owner_credits', v_owner_credits,
+                'refund_amount', 0,
+                'idempotent_replay', true
+            );
+        end if;
+    end if;
+
+    -- R10: Kiểm tra trạng thái tài khoản chủ app (dưới khóa profile)
+    select credits, coalesce(is_locked, false)
+    into v_owner_credits, v_owner_is_locked
+    from public.profiles
+    where id = v_caller_id
+    for update;
+
+    if v_owner_is_locked then
+        raise exception 'USER_LOCKED';
+    end if;
+
+    -- R05: Thứ tự khóa 1 - Khóa và kiểm tra campaign
+    select * into v_camp from public.campaigns where id = p_campaign_id for update;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    if v_camp.owner_id <> v_caller_id then
+        raise exception 'NOT_ACTUAL_OWNER';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    if v_camp.package_name is null or trim(v_camp.package_name) = '' then
+        raise exception 'INVALID_PACKAGE_NAME';
+    end if;
+
+    -- R05: Thứ tự khóa 2 - Khóa hàng điều khiển app_update_controls
+    insert into public.app_update_controls (owner_id, package_name, highest_version_code)
+    values (v_caller_id, v_camp.package_name, 0)
+    on conflict (owner_id, package_name) do nothing;
+
+    select * into v_ctrl
+    from public.app_update_controls
+    where owner_id = v_caller_id and package_name = v_camp.package_name
+    for update;
+
+    -- R05: Kiểm tra CAS concurrency đầy đủ (bao gồm cả khi caller mong đợi null)
+    if p_expected_current_release_id is distinct from c_sentinel then
+        if p_expected_current_release_id is distinct from v_ctrl.active_release_id then
+            raise exception 'CONCURRENT_UPDATE_CONFLICT';
+        end if;
+    end if;
+
+    -- Kiểm tra watermark versionCode: phải lớn hơn bản công bố trước của cùng app
+    if p_target_version_code <= v_ctrl.highest_version_code then
+        raise exception 'VERSION_CODE_NOT_GREATER';
+    end if;
+
+    -- R05: Thứ tự khóa 3 - Khóa đợt cập nhật active hiện tại (nếu có)
+    select * into v_active_rel
+    from public.app_update_releases
+    where owner_id = v_caller_id
+      and package_name = v_camp.package_name
+      and status = 'active'
+    for update;
+
+    if v_active_rel.id is not null then
+        v_old_remaining := v_active_rel.remaining_credits;
+    end if;
+
+    -- R05: Thứ tự khóa 4 - Ví chủ app đã được khóa ở bước trên
+    v_effective_credits := v_owner_credits + v_old_remaining;
+    if v_effective_credits < 120 then
+        raise exception 'INSUFFICIENT_CREDITS';
+    end if;
+
+    -- R09: Xử lý đợt active cũ: đổi sang superseded, hoàn phần chưa dùng
+    if v_active_rel.id is not null then
+        update public.app_update_releases
+        set status = 'superseded',
+            closed_at = now(),
+            remaining_credits = 0,
+            refunded_credits = refunded_credits + v_old_remaining
+        where id = v_active_rel.id;
+
+        if v_old_remaining > 0 then
+            v_owner_credits := v_owner_credits + v_old_remaining;
+            insert into public.credit_logs (user_id, amount, action, note, balance)
+            values (
+                v_caller_id,
+                v_old_remaining,
+                'app_update_refund',
+                format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_old_remaining, v_active_rel.version_name, v_camp.app_name),
+                v_owner_credits
+            )
+            returning id into v_refund_log_id;
+
+            insert into public.app_update_financial_events (
+                release_id, event_type, amount, owner_id, credit_log_id, operation_id
+            ) values (
+                v_active_rel.id, 'refund', v_old_remaining, v_caller_id, v_refund_log_id, p_client_operation_id
+            );
+        end if;
+    end if;
+
+    -- R09: Đổi tất cả các đợt exhausted cũ của cùng package sang superseded để không bị chọn lại
+    update public.app_update_releases
+    set status = 'superseded'
+    where owner_id = v_caller_id
+      and package_name = v_camp.package_name
+      and status in ('active', 'exhausted');
+
+    -- Giữ trước 120 Credit từ ví chủ app cho đợt mới
+    v_owner_credits := v_owner_credits - 120;
+    update public.profiles set credits = v_owner_credits where id = v_caller_id;
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (
+        v_caller_id,
+        -120,
+        'app_update_reserve',
+        format('Giữ trước 120 Credit thưởng cập nhật phiên bản %s (%s)', v_version_name_clean, v_camp.app_name),
+        v_owner_credits
+    )
+    returning id into v_reserve_log_id;
+
+    -- Tạo đợt cập nhật mới
+    insert into public.app_update_releases (
+        campaign_id,
+        owner_id,
+        owner_id_snapshot,
+        package_name,
+        app_name,
+        version_name,
+        target_version_code,
+        release_notes,
+        status,
+        reward_per_claim,
+        max_claims,
+        reserved_credits,
+        paid_count,
+        remaining_credits,
+        refunded_credits,
+        published_at
+    ) values (
+        p_campaign_id,
+        v_caller_id,
+        v_caller_id,
+        v_camp.package_name,
+        v_camp.app_name,
+        v_version_name_clean,
+        p_target_version_code,
+        v_release_notes_clean,
+        'active',
+        6,
+        20,
+        120,
+        0,
+        120,
+        0,
+        now()
+    )
+    returning id into v_new_release_id;
+
+    select * into v_new_release from public.app_update_releases where id = v_new_release_id;
+
+    -- Ghi nhận financial event
+    insert into public.app_update_financial_events (
+        release_id, event_type, amount, owner_id, credit_log_id, operation_id
+    ) values (
+        v_new_release_id, 'reserve', 120, v_caller_id, v_reserve_log_id, p_client_operation_id
+    );
+
+    -- Cập nhật app_update_controls: watermark và active_release_id
+    update public.app_update_controls
+    set highest_version_code = greatest(v_ctrl.highest_version_code, p_target_version_code),
+        active_release_id = v_new_release_id,
+        updated_at = now()
+    where owner_id = v_caller_id and package_name = v_camp.package_name;
+
+    -- R04: Lưu operation_id kèm fingerprint đầy đủ
+    if p_client_operation_id is not null and trim(p_client_operation_id) <> '' then
+        insert into public.app_update_operations (
+            operation_id, owner_id, release_id, status,
+            campaign_id, target_version_code, version_name, release_notes
+        )
+        values (
+            trim(p_client_operation_id), v_caller_id, v_new_release_id, 'completed',
+            p_campaign_id, p_target_version_code, v_version_name_clean, v_release_notes_clean
+        )
+        on conflict (operation_id) do nothing;
+    end if;
+
+    return jsonb_build_object(
+        'success', true,
+        'release', row_to_json(v_new_release),
+        'owner_credits', v_owner_credits,
+        'refund_amount', v_old_remaining,
+        'idempotent_replay', false
+    );
+end;
+$$;
+
+revoke execute on function public.publish_app_update(uuid, text, bigint, text, text, uuid) from public, anon;
+grant execute on function public.publish_app_update(uuid, text, bigint, text, text, uuid) to authenticated, service_role;
+
+-- ------------------------------------------------------------------------------
+-- 6. R05 & R09: RPC close_app_update_release nâng cấp (thống nhất thứ tự khóa)
+-- ------------------------------------------------------------------------------
+drop function if exists public.close_app_update_release(uuid);
+drop function if exists public.close_app_update_release(uuid, text);
+
+create or replace function public.close_app_update_release(
+    p_release_id uuid,
+    p_reason     text default 'manual_close'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id       uuid := auth.uid();
+    v_rel_lookup      record;
+    v_rel             public.app_update_releases%rowtype;
+    v_ctrl            record;
+    v_camp            public.campaigns%rowtype;
+    v_remaining       int;
+    v_owner_credits   int;
+    v_credit_log_id   uuid;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Tra cứu nhanh để biết campaign và package
+    select id, campaign_id, owner_id, owner_id_snapshot, package_name, status, remaining_credits
+    into v_rel_lookup
+    from public.app_update_releases
+    where id = p_release_id;
+
+    if v_rel_lookup.id is null then
+        raise exception 'RELEASE_NOT_FOUND';
+    end if;
+
+    if coalesce(v_rel_lookup.owner_id, v_rel_lookup.owner_id_snapshot) <> v_caller_id then
+        raise exception 'NOT_ACTUAL_OWNER';
+    end if;
+
+    -- R05: Khóa theo thứ tự 1 - campaigns (nếu có)
+    if v_rel_lookup.campaign_id is not null then
+        select * into v_camp from public.campaigns where id = v_rel_lookup.campaign_id for update;
+    end if;
+
+    -- R05: Khóa theo thứ tự 2 - app_update_controls
+    select * into v_ctrl
+    from public.app_update_controls
+    where owner_id = v_caller_id and package_name = v_rel_lookup.package_name
+    for update;
+
+    -- R05: Khóa theo thứ tự 3 - app_update_releases
+    select * into v_rel
+    from public.app_update_releases
+    where id = p_release_id
+    for update;
+
+    if v_rel.status <> 'active' then
+        raise exception 'RELEASE_NOT_ACTIVE';
+    end if;
+
+    v_remaining := v_rel.remaining_credits;
+
+    -- R05: Khóa theo thứ tự 4 - profiles
+    select credits into v_owner_credits from public.profiles where id = v_caller_id for update;
+
+    -- Đóng đợt
+    update public.app_update_releases
+    set status = 'closed',
+        closed_at = now(),
+        remaining_credits = 0,
+        refunded_credits = refunded_credits + v_remaining
+    where id = v_rel.id;
+
+    -- R09: Cập nhật active_release_id về null
+    update public.app_update_controls
+    set active_release_id = null,
+        updated_at = now()
+    where owner_id = v_caller_id
+      and package_name = v_rel.package_name
+      and active_release_id = v_rel.id;
+
+    -- Hoàn tiền cho chủ app nếu còn số dư chưa chi
+    if v_remaining > 0 then
+        v_owner_credits := v_owner_credits + v_remaining;
+        update public.profiles set credits = v_owner_credits where id = v_caller_id;
+
+        insert into public.credit_logs (user_id, amount, action, note, balance)
+        values (
+            v_caller_id,
+            v_remaining,
+            'app_update_refund',
+            format('Hoàn %s Credit chưa dùng từ phiên bản %s (%s)', v_remaining, v_rel.version_name, v_rel.app_name),
+            v_owner_credits
+        )
+        returning id into v_credit_log_id;
+
+        insert into public.app_update_financial_events (
+            release_id, event_type, amount, owner_id, credit_log_id
+        ) values (
+            v_rel.id, 'refund', v_remaining, v_caller_id, v_credit_log_id
+        );
+    end if;
+
+    return jsonb_build_object(
+        'success', true,
+        'release_id', v_rel.id,
+        'release_status', 'closed',
+        'refund_amount', v_remaining,
+        'owner_credits', v_owner_credits
+    );
+end;
+$$;
+
+revoke execute on function public.close_app_update_release(uuid, text) from public, anon;
+grant execute on function public.close_app_update_release(uuid, text) to authenticated, service_role;
+
+-- ------------------------------------------------------------------------------
+-- 7. R05, R06, R09: RPC claim_app_update_reward nâng cấp
+-- ------------------------------------------------------------------------------
+drop function if exists public.claim_app_update_reward(uuid, bigint);
+drop function if exists public.claim_app_update_reward(uuid, bigint, text);
+
+create or replace function public.claim_app_update_reward(
+    p_release_id             uuid,
+    p_observed_version_code  bigint,
+    p_client_operation_id    text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_caller_id            uuid := auth.uid();
+    v_rel                  public.app_update_releases%rowtype;
+    v_camp                 public.campaigns%rowtype;
+    v_member               public.campaign_members%rowtype;
+    v_existing_claim       public.app_update_claims%rowtype;
+    v_tester_is_locked     boolean := false;
+    v_next_ordinal         int;
+    v_new_paid_count       int;
+    v_new_remaining        int;
+    v_new_status           text;
+    v_tester_credits       int;
+    v_credit_log_id        uuid;
+    v_claim_id             uuid;
+    v_confirmed_at         timestamptz;
+begin
+    if v_caller_id is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    if p_observed_version_code is null or p_observed_version_code <= 0 then
+        raise exception 'INVALID_OBSERVED_VERSION_CODE';
+    end if;
+
+    -- Kiểm tra biên lai claim cũ dưới release_id và tester_id (Idempotency)
+    select * into v_existing_claim
+    from public.app_update_claims
+    where release_id = p_release_id and tester_id = v_caller_id;
+
+    if v_existing_claim.id is not null then
+        select credits into v_tester_credits from public.profiles where id = v_caller_id;
+        select * into v_rel from public.app_update_releases where id = p_release_id;
+
+        return jsonb_build_object(
+            'success', true,
+            'newly_awarded', false,
+            'reward', v_existing_claim.reward_credits,
+            'tester_balance', v_tester_credits,
+            'paid_count', v_rel.paid_count,
+            'release_status', v_rel.status,
+            'receipt', jsonb_build_object(
+                'claim_id', v_existing_claim.id,
+                'release_id', v_existing_claim.release_id,
+                'ordinal', v_existing_claim.ordinal,
+                'reward_credits', v_existing_claim.reward_credits,
+                'confirmed_at', to_char(v_existing_claim.confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            )
+        );
+    end if;
+
+    -- R05: Khóa đợt cập nhật (FOR UPDATE)
+    select * into v_rel from public.app_update_releases where id = p_release_id for update;
+    if v_rel.id is null then
+        raise exception 'RELEASE_NOT_FOUND';
+    end if;
+
+    -- Re-check claim sau khi đã có lock để tránh race condition giữa 2 request đồng thời
+    select * into v_existing_claim
+    from public.app_update_claims
+    where release_id = p_release_id and tester_id = v_caller_id;
+
+    if v_existing_claim.id is not null then
+        select credits into v_tester_credits from public.profiles where id = v_caller_id;
+        return jsonb_build_object(
+            'success', true,
+            'newly_awarded', false,
+            'reward', v_existing_claim.reward_credits,
+            'tester_balance', v_tester_credits,
+            'paid_count', v_rel.paid_count,
+            'release_status', v_rel.status,
+            'receipt', jsonb_build_object(
+                'claim_id', v_existing_claim.id,
+                'release_id', v_existing_claim.release_id,
+                'ordinal', v_existing_claim.ordinal,
+                'reward_credits', v_existing_claim.reward_credits,
+                'confirmed_at', to_char(v_existing_claim.confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            )
+        );
+    end if;
+
+    -- Kiểm tra trạng thái đợt
+    if v_rel.status = 'superseded' then
+        raise exception 'RELEASE_REPLACED';
+    elsif v_rel.status = 'closed' then
+        raise exception 'RELEASE_CLOSED';
+    elsif v_rel.status = 'exhausted' or v_rel.paid_count >= v_rel.max_claims or v_rel.remaining_credits < v_rel.reward_per_claim then
+        raise exception 'RELEASE_EXHAUSTED';
+    elsif v_rel.status <> 'active' then
+        raise exception 'RELEASE_NOT_ACTIVE';
+    end if;
+
+    -- Chủ app không thể tự claim nhận thưởng của chính app mình
+    if coalesce(v_rel.owner_id, v_rel.owner_id_snapshot) = v_caller_id then
+        raise exception 'OWNER_CANNOT_CLAIM';
+    end if;
+
+    -- Kiểm tra campaign
+    select * into v_camp from public.campaigns where id = v_rel.campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    -- Kiểm tra quyền thành viên và thời điểm tham gia
+    select * into v_member
+    from public.campaign_members
+    where campaign_id = v_rel.campaign_id and user_id = v_caller_id;
+
+    if v_member.campaign_id is null then
+        raise exception 'NOT_A_MEMBER';
+    end if;
+
+    if v_member.joined_at > v_rel.published_at then
+        raise exception 'MEMBER_JOINED_AFTER_RELEASE';
+    end if;
+
+    -- Kiểm tra phiên bản cài đặt thực tế
+    if p_observed_version_code < v_rel.target_version_code then
+        raise exception 'VERSION_NOT_SATISFIED';
+    end if;
+
+    -- Khóa ví tester
+    select credits, coalesce(is_locked, false)
+    into v_tester_credits, v_tester_is_locked
+    from public.profiles
+    where id = v_caller_id
+    for update;
+
+    if v_tester_is_locked then
+        raise exception 'USER_LOCKED';
+    end if;
+
+    -- Tính toán ordinal và số dư quỹ mới
+    v_next_ordinal := v_rel.paid_count + 1;
+    v_new_paid_count := v_next_ordinal;
+    v_new_remaining := v_rel.remaining_credits - v_rel.reward_per_claim;
+    v_new_status := case
+        when v_new_paid_count >= v_rel.max_claims or v_new_remaining < v_rel.reward_per_claim then 'exhausted'
+        else 'active'
+    end;
+
+    update public.app_update_releases
+    set paid_count = v_new_paid_count,
+        remaining_credits = v_new_remaining,
+        status = v_new_status,
+        closed_at = case when v_new_status = 'exhausted' then now() else closed_at end
+    where id = v_rel.id;
+
+    -- R09: Nếu đợt đã exhausted, cập nhật control active_release_id về null
+    if v_new_status = 'exhausted' then
+        update public.app_update_controls
+        set active_release_id = null,
+            updated_at = now()
+        where owner_id = coalesce(v_rel.owner_id, v_rel.owner_id_snapshot)
+          and package_name = v_rel.package_name
+          and active_release_id = v_rel.id;
+    end if;
+
+    -- Cộng 6 Credit cho tester (trích từ quỹ, KHÔNG trừ ví chủ)
+    v_tester_credits := v_tester_credits + v_rel.reward_per_claim;
+    update public.profiles set credits = v_tester_credits where id = v_caller_id;
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (
+        v_caller_id,
+        v_rel.reward_per_claim,
+        'app_update_reward',
+        format('Thưởng +%s Credit cập nhật phiên bản %s (%s)', v_rel.reward_per_claim, v_rel.version_name, v_rel.app_name),
+        v_tester_credits
+    )
+    returning id into v_credit_log_id;
+
+    -- Ghi nhận biên lai claim
+    insert into public.app_update_claims (
+        release_id,
+        tester_id,
+        ordinal,
+        observed_version_code,
+        reward_credits,
+        confirmed_at,
+        credit_log_id
+    ) values (
+        v_rel.id,
+        v_caller_id,
+        v_next_ordinal,
+        p_observed_version_code,
+        v_rel.reward_per_claim,
+        now(),
+        v_credit_log_id
+    )
+    returning id, confirmed_at into v_claim_id, v_confirmed_at;
+
+    -- Ghi nhận financial event
+    insert into public.app_update_financial_events (
+        release_id, event_type, amount, owner_id, tester_id, credit_log_id, operation_id
+    ) values (
+        v_rel.id, 'reward', v_rel.reward_per_claim, coalesce(v_rel.owner_id, v_rel.owner_id_snapshot), v_caller_id, v_credit_log_id, p_client_operation_id
+    );
+
+    return jsonb_build_object(
+        'success', true,
+        'newly_awarded', true,
+        'reward', v_rel.reward_per_claim,
+        'tester_balance', v_tester_credits,
+        'paid_count', v_new_paid_count,
+        'release_status', v_new_status,
+        'receipt', jsonb_build_object(
+            'claim_id', v_claim_id,
+            'release_id', v_rel.id,
+            'ordinal', v_next_ordinal,
+            'reward_credits', v_rel.reward_per_claim,
+            'confirmed_at', to_char(v_confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+        )
+    );
+end;
+$$;
+
+revoke execute on function public.claim_app_update_reward(uuid, bigint, text) from public, anon;
+grant execute on function public.claim_app_update_reward(uuid, bigint, text) to authenticated, service_role;
+
+-- ------------------------------------------------------------------------------
+-- 8. R07, R08, R09: Cập nhật RPC get_campaign_detail
+-- ------------------------------------------------------------------------------
+create or replace function public.get_campaign_detail(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid              uuid := auth.uid();
+    v_today            date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_camp             public.campaigns%rowtype;
+    v_is_owner         boolean := false;
+    v_is_actual_owner  boolean := false;
+    v_can_manage       boolean := false;
+    v_is_member        boolean := false;
+    v_member_joined_at timestamptz;
+    v_confirmed        boolean := false;
+    v_campaign         jsonb;
+    v_testers          jsonb := '[]'::jsonb;
+    v_feedbacks        jsonb := '[]'::jsonb;
+    v_reports          jsonb := '[]'::jsonb;
+    v_profiles         jsonb := '{}'::jsonb;
+    v_today_tested     int := 0;
+    v_reports_count    int := 0;
+    v_avg              float;
+    v_my_dates         jsonb := '[]'::jsonb;
+    v_my_profile       jsonb;
+    v_unread           jsonb := '[]'::jsonb;
+    v_weekly           int := 0;
+    v_rel              record;
+    v_app_update       jsonb := null;
+    v_claim            record;
+    v_is_eligible      boolean := true;
+    v_ineligible_reason text := null;
+begin
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    perform public.auto_accept_expired_reports();
+
+    v_is_actual_owner := (v_camp.owner_id = v_uid);
+
+    v_can_manage := v_is_actual_owner
+        or exists (
+            select 1 from public.profiles p
+            where p.id = v_uid and lower(p.role) in ('admin', 'moderator')
+        );
+
+    v_is_owner := v_can_manage;
+
+    select joined_at into v_member_joined_at
+    from public.campaign_members m
+    where m.campaign_id = p_campaign_id and m.user_id = v_uid;
+
+    v_is_member := (v_member_joined_at is not null);
+
+    v_confirmed := exists (
+        select 1 from public.checkins ci
+        where ci.campaign_id = p_campaign_id
+          and ci.user_id = v_uid
+          and ci.checkin_date = v_today
+          and coalesce(ci.note, '') not like '%tạm tính%'
+    );
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'user_id', t.user_id,
+        'joined_at', t.joined_at,
+        'days', t.days,
+        'checkin_count', t.checkin_count,
+        'last_checkin_date', t.last_checkin_date
+    ) order by t.days desc), '[]'::jsonb)
+    into v_testers
+    from (
+        select m.user_id,
+               to_char(m.joined_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as joined_at,
+               coalesce(s.days, 0) as days,
+               coalesce(s.cnt, 0) as checkin_count,
+               to_char(s.last_date, 'YYYY-MM-DD') as last_checkin_date
+        from public.campaign_members m
+        left join (
+            select user_id,
+                   count(distinct checkin_date) as days,
+                   count(*) as cnt,
+                   max(checkin_date) as last_date
+            from public.checkins
+            where campaign_id = p_campaign_id
+            group by user_id
+        ) s on s.user_id = m.user_id
+        where m.campaign_id = p_campaign_id
+    ) t;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', f.id,
+        'campaign_id', f.campaign_id,
+        'user_id', f.user_id,
+        'rating', f.rating,
+        'comment', f.comment,
+        'created_at', to_char(f.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'updated_at', to_char(f.updated_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by f.created_at desc), '[]'::jsonb)
+    into v_feedbacks
+    from public.feedbacks f
+    where f.campaign_id = p_campaign_id;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', tr.id,
+        'campaign_id', tr.campaign_id,
+        'user_id', tr.user_id,
+        'report_type', tr.report_type,
+        'content', tr.content,
+        'screenshot_url', tr.screenshot_url,
+        'thumbnail_url', tr.thumbnail_url,
+        'rating', tr.rating,
+        'status', tr.status,
+        'bonus_awarded', tr.bonus_awarded,
+        'created_at', to_char(tr.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'reviewed_at', to_char(tr.reviewed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'rejection_reason', tr.rejection_reason,
+        'image_hash', tr.image_hash,
+        'submission_context', tr.submission_context,
+        'mission_id', tr.mission_id,
+        'mission_participant_id', tr.mission_participant_id,
+        'mission_title', tr.mission_title,
+        'mission_reward_credits', tr.mission_reward_credits,
+        'mission_ends_at', to_char(tr.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'mission_submitted_at', to_char(tr.mission_submitted_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    ) order by tr.created_at desc), '[]'::jsonb)
+    into v_reports
+    from (
+        select * from public.tester_reports
+        where campaign_id = p_campaign_id
+          and (v_can_manage or user_id = v_uid)
+        order by created_at desc
+        limit 200
+    ) tr;
+
+    select coalesce(jsonb_object_agg(t.id::text, public._profile_json(p)), '{}'::jsonb)
+    into v_profiles
+    from public.profiles p
+    join (
+        select v_camp.owner_id as id
+        union
+        select m.user_id from public.campaign_members m where m.campaign_id = p_campaign_id
+        union
+        select f.user_id from public.feedbacks f where f.campaign_id = p_campaign_id
+        union
+        select tr.user_id from public.tester_reports tr
+        where tr.campaign_id = p_campaign_id and (v_can_manage or tr.user_id = v_uid)
+    ) t on t.id = p.id;
+
+    select count(distinct user_id) into v_today_tested
+    from public.checkins
+    where campaign_id = p_campaign_id and checkin_date = v_today;
+
+    select count(*), coalesce(round(avg(rating)::numeric, 1), 0.0)
+    into v_reports_count, v_avg
+    from public.feedbacks
+    where campaign_id = p_campaign_id;
+
+    select coalesce(jsonb_agg(to_char(ci.checkin_date, 'YYYY-MM-DD') order by ci.checkin_date asc), '[]'::jsonb)
+    into v_my_dates
+    from public.checkins ci
+    where ci.campaign_id = p_campaign_id and ci.user_id = v_uid;
+
+    v_campaign := row_to_json(v_camp);
+
+    select public._profile_json(p) into v_my_profile
+    from public.profiles p where p.id = v_uid;
+
+    select coalesce(jsonb_agg(jsonb_build_object(
+        'id', w.id,
+        'user_id', w.user_id,
+        'message', w.message,
+        'warning_date', to_char(w.warning_date, 'YYYY-MM-DD'),
+        'created_at', to_char(w.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'acknowledged', w.acknowledged
+    ) order by w.created_at desc), '[]'::jsonb)
+    into v_unread
+    from public.user_warnings w
+    where w.user_id = v_uid and w.acknowledged = false;
+
+    select count(*) into v_weekly
+    from public.user_warnings w
+    where w.user_id = v_uid
+      and (w.created_at at time zone 'Asia/Ho_Chi_Minh')::date >= (v_today - 6);
+
+    -- =========================================================================
+    -- R09: Tìm release cập nhật phiên bản
+    -- =========================================================================
+    select * into v_rel
+    from public.app_update_releases
+    where campaign_id = p_campaign_id and status in ('active', 'exhausted')
+    order by published_at desc, target_version_code desc
+    limit 1;
+
+    if v_rel.id is not null then
+        if v_is_actual_owner then
+            -- Góc nhìn chủ app: hiển thị toàn bộ tiến độ, ngân sách đang giữ và đã chi
+            v_app_update := jsonb_build_object(
+                'id', v_rel.id,
+                'campaign_id', v_rel.campaign_id,
+                'owner_id', coalesce(v_rel.owner_id, v_rel.owner_id_snapshot),
+                'package_name', v_rel.package_name,
+                'app_name', v_rel.app_name,
+                'version_name', v_rel.version_name,
+                'target_version_code', v_rel.target_version_code,
+                'release_notes', v_rel.release_notes,
+                'status', v_rel.status,
+                'reward_per_claim', v_rel.reward_per_claim,
+                'max_claims', v_rel.max_claims,
+                'reserved_credits', v_rel.reserved_credits,
+                'paid_count', v_rel.paid_count,
+                'remaining_credits', v_rel.remaining_credits,
+                'spent_credits', v_rel.paid_count * v_rel.reward_per_claim,
+                'published_at', to_char(v_rel.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+            );
+        else
+            -- Góc nhìn tester:
+            -- Quy tắc: Nếu đã đủ 20 suất (paid_count >= 20) thì ẩn toàn bộ đối với tester
+            if v_rel.paid_count < v_rel.max_claims and v_rel.remaining_credits >= v_rel.reward_per_claim then
+                select * into v_claim
+                from public.app_update_claims
+                where release_id = v_rel.id and tester_id = v_uid;
+
+                -- R07: Kiểm tra điều kiện tester
+                if not v_is_member then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'not_member';
+                elsif v_member_joined_at > v_rel.published_at then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'joined_after_release';
+                elsif v_camp.status = 'paused' then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'campaign_paused';
+                elsif v_camp.status <> 'open' then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'campaign_not_open';
+                elsif exists (select 1 from public.profiles p where p.id = v_uid and coalesce(p.is_locked, false) = true) then
+                    v_is_eligible := false;
+                    v_ineligible_reason := 'user_locked';
+                end if;
+
+                v_app_update := jsonb_build_object(
+                    'id', v_rel.id,
+                    'campaign_id', v_rel.campaign_id,
+                    'package_name', v_rel.package_name,
+                    'app_name', v_rel.app_name,
+                    'version_name', v_rel.version_name,
+                    'target_version_code', v_rel.target_version_code,
+                    'release_notes', v_rel.release_notes,
+                    'status', v_rel.status,
+                    'reward_per_claim', v_rel.reward_per_claim,
+                    'max_claims', v_rel.max_claims,
+                    'paid_count', v_rel.paid_count,
+                    'has_claimed', (v_claim.id is not null),
+                    'is_eligible', v_is_eligible,
+                    'ineligibility_reason', v_ineligible_reason,
+                    'claim_receipt', case when v_claim.id is not null then jsonb_build_object(
+                        'claim_id', v_claim.id,
+                        'release_id', v_claim.release_id,
+                        'ordinal', v_claim.ordinal,
+                        'reward_credits', v_claim.reward_credits,
+                        'confirmed_at', to_char(v_claim.confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                    ) else null end
+                );
+            end if;
+        end if;
+    end if;
+
+    return jsonb_build_object(
+        'campaign', v_campaign,
+        'is_owner', v_is_owner,
+        'is_actual_owner', v_is_actual_owner,
+        'can_manage', v_can_manage,
+        'is_member', v_is_member,
+        'checked_in_confirmed_today', v_confirmed,
+        'testers', v_testers,
+        'feedbacks', v_feedbacks,
+        'reports', v_reports,
+        'profiles', v_profiles,
+        'today_tested_count', v_today_tested,
+        'reports_count', v_reports_count,
+        'avg_rating', v_avg,
+        'my_checkin_dates', v_my_dates,
+        'my_profile', v_my_profile,
+        'unread_warnings', v_unread,
+        'weekly_warnings_count', v_weekly,
+        'app_update', v_app_update
+    );
+end;
+$$;
+
+revoke execute on function public.get_campaign_detail(uuid) from public, anon;
+grant execute on function public.get_campaign_detail(uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+
+-- ===== 052_campaign_push_priority.sql =====
+
+-- 1. Bổ sung cột metadata đẩy app trên bảng campaigns
+alter table public.campaigns
+    add column if not exists push_business_date date,
+    add column if not exists push_expires_at timestamptz,
+    add column if not exists push_order bigint;
+
+-- Ràng buộc tính nhất quán của metadata: cùng null hoặc cùng có giá trị hợp lệ
+alter table public.campaigns
+    drop constraint if exists chk_campaign_push_metadata_consistency;
+
+alter table public.campaigns
+    add constraint chk_campaign_push_metadata_consistency
+    check (
+        (push_business_date is null and push_expires_at is null and push_order is null)
+        or
+        (push_business_date is not null and push_expires_at is not null and push_order is not null and push_order > 0)
+    );
+
+create index if not exists idx_campaigns_push_order on public.campaigns(push_business_date, push_order desc) where (push_order is not null);
+
+-- 2. Sequence cấp thứ tự đẩy app toàn hệ thống
+create sequence if not exists public.campaign_push_order_seq as bigint start with 1 increment by 1;
+
+-- 3. Bảng biên lai giao dịch đẩy app (campaign_push_receipts)
+create table if not exists public.campaign_push_receipts (
+    id                uuid primary key default gen_random_uuid(),
+    user_id           uuid not null references public.profiles(id) on delete restrict,
+    campaign_id       uuid references public.campaigns(id) on delete set null,
+    client_request_id uuid not null,
+    cost_credits      int not null default 100 check (cost_credits = 100),
+    balance_after     int not null check (balance_after >= 0),
+    business_date     date not null,
+    pushed_at         timestamptz not null default now(),
+    expires_at        timestamptz not null,
+    push_order        bigint not null,
+    credit_log_id     uuid references public.credit_logs(id) on delete set null,
+    constraint uq_campaign_push_receipts_user_request unique (user_id, client_request_id)
+);
+
+create index if not exists idx_campaign_push_receipts_user on public.campaign_push_receipts(user_id);
+create index if not exists idx_campaign_push_receipts_campaign on public.campaign_push_receipts(campaign_id);
+create index if not exists idx_campaign_push_receipts_date_order on public.campaign_push_receipts(business_date, push_order desc);
+
+comment on table public.campaign_push_receipts is 'Biên lai giao dịch mua lượt Đẩy app (100 Credit/lượt, hiệu lực đến 00:00 hôm sau VN)';
+
+-- Row Level Security cho campaign_push_receipts
+alter table public.campaign_push_receipts enable row level security;
+
+drop policy if exists "campaign_push_receipts_select_own" on public.campaign_push_receipts;
+create policy "campaign_push_receipts_select_own"
+    on public.campaign_push_receipts for select to authenticated
+    using (user_id = auth.uid());
+
+revoke insert, update, delete on public.campaign_push_receipts from anon, authenticated;
+
+-- 4. Trigger bảo vệ metadata đẩy app khỏi thao tác ghi trực tiếp từ client
+create or replace function public.trg_fn_protect_campaign_push_metadata()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if tg_op = 'INSERT' then
+        if new.push_business_date is not null
+           or new.push_expires_at is not null
+           or new.push_order is not null then
+            if current_setting('app.allow_push_metadata_write', true) is distinct from 'true' then
+                raise exception 'PUSH_METADATA_READ_ONLY: Khong duoc khoi tao metadata day app khi tao moi campaign';
+            end if;
+        end if;
+    elsif tg_op = 'UPDATE' then
+        if new.push_business_date is distinct from old.push_business_date
+           or new.push_expires_at is distinct from old.push_expires_at
+           or new.push_order is distinct from old.push_order then
+            if current_setting('app.allow_push_metadata_write', true) is distinct from 'true' then
+                raise exception 'PUSH_METADATA_READ_ONLY: Metadata day app chi duoc cap nhat qua RPC push_campaign';
+            end if;
+        end if;
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists trg_protect_campaign_push_metadata on public.campaigns;
+create trigger trg_protect_campaign_push_metadata
+    before insert or update on public.campaigns
+    for each row execute function public.trg_fn_protect_campaign_push_metadata();
+
+-- 5. Cập nhật public._campaign_json(c public.campaigns)
+create or replace function public._campaign_json(c public.campaigns)
+returns jsonb
+language sql
+stable
+as $$
+    select jsonb_build_object(
+        'id', c.id,
+        'owner_id', c.owner_id,
+        'app_name', c.app_name,
+        'package_name', c.package_name,
+        'play_url', c.play_url,
+        'testing_url', c.testing_url,
+        'description', c.description,
+        'target_testers', c.target_testers,
+        'target_days', c.target_days,
+        'start_date', to_char(c.start_date, 'YYYY-MM-DD'),
+        'status', c.status,
+        'icon_url', c.icon_url,
+        'test_username', c.test_username,
+        'test_password', c.test_password,
+        'tip_credits', c.tip_credits,
+        'is_boosted', c.is_boosted,
+        'slot_number', c.slot_number,
+        'paused_reason', c.paused_reason,
+        'admin_note', c.admin_note,
+        'completed_at', to_char(c.completed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'created_at', to_char(c.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'push_business_date', to_char(c.push_business_date, 'YYYY-MM-DD'),
+        'push_expires_at', to_char(c.push_expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'push_order', c.push_order
+    );
+$$;
+
+revoke execute on function public._campaign_json(public.campaigns) from public;
+
+-- 6. RPC push_campaign: Mua lượt đẩy ứng dụng lên đầu danh sách kiểm thử
+create or replace function public.push_campaign(
+    p_campaign_id uuid,
+    p_client_request_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid               uuid := auth.uid();
+    v_existing_receipt  record;
+    v_camp              public.campaigns%rowtype;
+    v_profile           public.profiles%rowtype;
+    v_now               timestamptz;
+    v_business_date     date;
+    v_expires_at        timestamptz;
+    v_push_order        bigint;
+    v_balance_after     int;
+    v_credit_log_id     uuid;
+    v_receipt_id        uuid;
+    v_note              text;
+begin
+    -- 1. Yêu cầu phiên đăng nhập
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    if p_client_request_id is null then
+        raise exception 'INVALID_REQUEST_ID';
+    end if;
+
+    if p_campaign_id is null then
+        raise exception 'INVALID_CAMPAIGN_ID';
+    end if;
+
+    -- 2. Kiểm tra receipt trước khi khóa
+    select * into v_existing_receipt
+    from public.campaign_push_receipts
+    where user_id = v_uid and client_request_id = p_client_request_id;
+
+    if v_existing_receipt.id is not null then
+        if v_existing_receipt.campaign_id is distinct from p_campaign_id then
+            raise exception 'REQUEST_ID_CONFLICT';
+        end if;
+        return jsonb_build_object(
+            'success', true,
+            'receipt_id', v_existing_receipt.id,
+            'client_request_id', v_existing_receipt.client_request_id,
+            'campaign_id', v_existing_receipt.campaign_id,
+            'charged_credits', v_existing_receipt.cost_credits,
+            'balance_after', v_existing_receipt.balance_after,
+            'business_date', to_char(v_existing_receipt.business_date, 'YYYY-MM-DD'),
+            'expires_at', to_char(v_existing_receipt.expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+            'push_order', v_existing_receipt.push_order,
+            'replayed', true
+        );
+    end if;
+
+    -- 3. Khóa campaign và profile theo thứ tự nhất quán
+    select * into v_camp
+    from public.campaigns
+    where id = p_campaign_id
+    for update;
+
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    select * into v_profile
+    from public.profiles
+    where id = v_uid
+    for update;
+
+    if v_profile.id is null then
+        raise exception 'PROFILE_NOT_FOUND';
+    end if;
+
+    -- Re-check receipt sau khi đã có khóa
+    select * into v_existing_receipt
+    from public.campaign_push_receipts
+    where user_id = v_uid and client_request_id = p_client_request_id;
+
+    if v_existing_receipt.id is not null then
+        if v_existing_receipt.campaign_id is distinct from p_campaign_id then
+            raise exception 'REQUEST_ID_CONFLICT';
+        end if;
+        return jsonb_build_object(
+            'success', true,
+            'receipt_id', v_existing_receipt.id,
+            'client_request_id', v_existing_receipt.client_request_id,
+            'campaign_id', v_existing_receipt.campaign_id,
+            'charged_credits', v_existing_receipt.cost_credits,
+            'balance_after', v_existing_receipt.balance_after,
+            'business_date', to_char(v_existing_receipt.business_date, 'YYYY-MM-DD'),
+            'expires_at', to_char(v_existing_receipt.expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+            'push_order', v_existing_receipt.push_order,
+            'replayed', true
+        );
+    end if;
+
+    -- 4. Kiểm tra chủ thật và trạng thái tài khoản
+    if v_camp.owner_id is distinct from v_uid then
+        raise exception 'NOT_OWNER';
+    end if;
+
+    if coalesce(v_profile.is_locked, false) = true then
+        raise exception 'ACCOUNT_LOCKED';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    -- 5. Kiểm tra số dư (dưới 100 từ chối hoàn toàn; đúng 100 cho phép)
+    if coalesce(v_profile.credits, 0) < 100 then
+        raise exception 'INSUFFICIENT_CREDITS';
+    end if;
+
+    -- 6. Khóa transaction chung cho việc cấp thứ tự đẩy (serialize push sequence allocation)
+    perform pg_advisory_xact_lock(hashtext('campaign_push_order_lock'));
+
+    v_now := clock_timestamp();
+    v_business_date := (v_now at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_expires_at := (date_trunc('day', v_now at time zone 'Asia/Ho_Chi_Minh') + interval '1 day') at time zone 'Asia/Ho_Chi_Minh';
+
+    -- Kiểm tra lại điều kiện thời gian sau khi có khóa và đồng hồ mới
+    if v_camp.created_at <= v_now - interval '30 days' then
+        raise exception 'CAMPAIGN_WINDOW_EXPIRED';
+    end if;
+
+    if v_camp.slot_number > 1 then
+        if not exists (
+            select 1 from public.user_slots
+            where user_id = v_camp.owner_id
+              and slot_number = v_camp.slot_number
+              and expires_at > v_now
+        ) then
+            raise exception 'SLOT_EXPIRED';
+        end if;
+    end if;
+
+    v_push_order := nextval('public.campaign_push_order_seq');
+
+    -- 7. Trừ đúng 100 Credit, ghi log, cập nhật metadata campaign, ghi receipt
+    update public.profiles
+    set credits = credits - 100
+    where id = v_uid
+    returning credits into v_balance_after;
+
+    v_note := format('Đẩy ứng dụng "%s" lên đầu danh sách (hạn đến hết %s)',
+                     coalesce(nullif(v_camp.app_name, ''), 'của bạn'),
+                     to_char(v_business_date, 'DD/MM/YYYY'));
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (v_uid, -100, 'campaign_push', v_note, v_balance_after)
+    returning id into v_credit_log_id;
+
+    perform set_config('app.allow_push_metadata_write', 'true', true);
+
+    update public.campaigns
+    set push_business_date = v_business_date,
+        push_expires_at = v_expires_at,
+        push_order = v_push_order
+    where id = p_campaign_id;
+
+    perform set_config('app.allow_push_metadata_write', 'false', true);
+
+    insert into public.campaign_push_receipts (
+        user_id,
+        campaign_id,
+        client_request_id,
+        cost_credits,
+        balance_after,
+        business_date,
+        pushed_at,
+        expires_at,
+        push_order,
+        credit_log_id
+    )
+    values (
+        v_uid,
+        p_campaign_id,
+        p_client_request_id,
+        100,
+        v_balance_after,
+        v_business_date,
+        v_now,
+        v_expires_at,
+        v_push_order,
+        v_credit_log_id
+    )
+    returning id into v_receipt_id;
+
+    -- 8. Trả kết quả
+    return jsonb_build_object(
+        'success', true,
+        'receipt_id', v_receipt_id,
+        'client_request_id', p_client_request_id,
+        'campaign_id', p_campaign_id,
+        'charged_credits', 100,
+        'balance_after', v_balance_after,
+        'business_date', to_char(v_business_date, 'YYYY-MM-DD'),
+        'expires_at', to_char(v_expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'push_order', v_push_order,
+        'replayed', false
+    );
+end;
+$$;
+
+revoke execute on function public.push_campaign(uuid, uuid) from public;
+revoke execute on function public.push_campaign(uuid, uuid) from anon;
+grant execute on function public.push_campaign(uuid, uuid) to authenticated, service_role;
+
+
+-- ===== 053_daily_task_carryover.sql =====
+
+-- ==============================================================================
+-- 12 Tester - Migration 053: Daily Task Carryover (Cộng dồn app test còn thiếu)
+-- ==============================================================================
+
+-- 1. Bổ sung các cột lưu trữ sổ cộng dồn trên bảng user_daily_tasks
+alter table public.user_daily_tasks
+    add column if not exists carryover_version int default null,
+    add column if not exists base_required_tests int not null default 0 check (base_required_tests >= 0),
+    add column if not exists carry_in_tests int not null default 0 check (carry_in_tests >= 0),
+    add column if not exists carry_out_tests int not null default 0 check (carry_out_tests >= 0),
+    add column if not exists carry_source_date date default null,
+    add column if not exists carryover_effective_from date default null;
+
+comment on column public.user_daily_tasks.carryover_version is 'Phiên bản công thức cộng dồn (1 cho chính sách mới; NULL cho dòng lịch sử)';
+comment on column public.user_daily_tasks.base_required_tests is 'Chỉ tiêu cơ bản B của ngày đang chấm (tỷ lệ * số active app)';
+comment on column public.user_daily_tasks.carry_in_tests is 'Số app còn thiếu chuyển vào từ ngày trước (C)';
+comment on column public.user_daily_tasks.carry_out_tests is 'Số app còn thiếu chuyển sang ngày sau sau khi chốt (carry_out)';
+comment on column public.user_daily_tasks.carry_source_date is 'Ngày liền trước dùng làm nguồn chuyển tiếp; giúp phát hiện khoảng trống';
+comment on column public.user_daily_tasks.carryover_effective_from is 'Ngày bắt đầu có hiệu lực của chính sách cộng dồn';
+
+-- 2. Bảng quản lý chính sách cộng dồn (daily_task_carryover_policies)
+create table if not exists public.daily_task_carryover_policies (
+    id bigint generated always as identity primary key,
+    effective_from date not null unique,
+    is_enabled boolean not null default true,
+    operator_note text not null,
+    created_at timestamptz not null default clock_timestamp()
+);
+
+alter table public.daily_task_carryover_policies enable row level security;
+revoke all on public.daily_task_carryover_policies from public, anon, authenticated;
+grant all on public.daily_task_carryover_policies to service_role;
+
+-- Baseline chính sách cộng dồn: mặc định có hiệu lực từ 2026-10-30 VN (ngày mai)
+insert into public.daily_task_carryover_policies (
+    effective_from, is_enabled, operator_note
+)
+select '2026-10-30'::date, true, 'Migration 053: baseline daily task carryover policy'
+where not exists (select 1 from public.daily_task_carryover_policies);
+
+-- 3. Helper lấy chính sách cộng dồn theo ngày
+create or replace function public.get_daily_task_carryover_policy(p_date date)
+returns public.daily_task_carryover_policies
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+    v_row public.daily_task_carryover_policies;
+begin
+    if p_date is null then
+        return null;
+    end if;
+    select *
+    into v_row
+    from public.daily_task_carryover_policies
+    where effective_from <= p_date
+    order by effective_from desc
+    limit 1;
+    return v_row;
+end;
+$$;
+
+revoke execute on function public.get_daily_task_carryover_policy(date) from public, anon, authenticated;
+grant execute on function public.get_daily_task_carryover_policy(date) to service_role;
+
+-- 4. Helper thiết lập chính sách cộng dồn (cho quản trị / kiểm thử)
+create or replace function public.set_daily_task_carryover_policy(
+    p_effective_from date,
+    p_is_enabled boolean default true,
+    p_operator_note text default 'Configured carryover policy'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_row public.daily_task_carryover_policies;
+begin
+    if p_effective_from is null then
+        raise exception 'INVALID_EFFECTIVE_DATE';
+    end if;
+
+    insert into public.daily_task_carryover_policies (
+        effective_from, is_enabled, operator_note
+    ) values (
+        p_effective_from,
+        coalesce(p_is_enabled, true),
+        coalesce(btrim(p_operator_note), 'Configured carryover policy')
+    )
+    on conflict (effective_from) do update
+    set is_enabled = excluded.is_enabled,
+        operator_note = excluded.operator_note
+    returning * into v_row;
+
+    return to_jsonb(v_row);
+end;
+$$;
+
+revoke execute on function public.set_daily_task_carryover_policy(date, boolean, text) from public, anon, authenticated;
+grant execute on function public.set_daily_task_carryover_policy(date, boolean, text) to service_role;
+
+-- 5. Helper tính toán trạng thái nhiệm vụ ngày có cộng dồn (get_daily_task_status)
+create or replace function public.get_daily_task_status(
+    p_user_id uuid,
+    p_date date
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+    v_policy public.daily_task_policies;
+    v_carry_policy public.daily_task_carryover_policies;
+    v_role text;
+    v_last_login date;
+    v_streak int := 0;
+    v_exempt boolean := false;
+    v_k int := 0;
+    v_a int := 0;
+    v_d int := 0;
+    v_base_required int := 0;
+    v_carry_in int := 0;
+    v_required int := 0;
+    v_effective int := 0;
+    v_logged_in boolean := false;
+    v_met boolean := false;
+    v_next_pct int := 1;
+    v_mode text;
+    v_day_start timestamptz;
+    v_next_day_start timestamptz;
+    v_window_start timestamptz;
+    v_carryover_ready boolean := true;
+    v_carry_remaining int := 0;
+    v_carry_effective_from date := null;
+    v_prev_finalized timestamptz;
+    v_prev_carry_out int;
+    v_last_carry_out int;
+    v_q int := 0;
+begin
+    if p_user_id is null or p_date is null then
+        return null;
+    end if;
+
+    select lower(p.role), p.last_login_date, p.daily_missed_streak
+    into v_role, v_last_login, v_streak
+    from public.profiles p
+    where p.id = p_user_id;
+
+    if not found then
+        return null;
+    end if;
+
+    v_streak := coalesce(v_streak, 0);
+    v_exempt := coalesce(v_role in ('admin', 'moderator'), false);
+
+    v_day_start := (p_date::timestamp at time zone 'Asia/Ho_Chi_Minh');
+    v_next_day_start := ((p_date + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh');
+    v_window_start := ((p_date - 30)::timestamp at time zone 'Asia/Ho_Chi_Minh');
+
+    -- K: app của user đang open, hoặc paused do vắng mặt.
+    -- App tạo trước 00:00 VN của ngày chấm để bắt đầu tính từ ngày mai.
+    select count(*) into v_k
+    from public.campaigns c
+    where c.owner_id = p_user_id
+      and (
+          c.status = 'open'
+          or (c.status = 'paused' and c.paused_reason = 'owner_inactive')
+      )
+      and c.created_at < v_day_start
+      and c.created_at > v_window_start;
+
+    -- A: app open của người khác, đã tồn tại trong ngày chấm.
+    select count(*) into v_a
+    from public.campaigns c
+    where c.status = 'open'
+      and c.owner_id <> p_user_id
+      and c.created_at < v_next_day_start
+      and c.created_at > v_window_start;
+
+    -- D: số app khác nhau user đã test trong ngày.
+    select count(distinct campaign_id) into v_d
+    from (
+        select ci.campaign_id
+        from public.checkins ci
+        join public.campaigns c on c.id = ci.campaign_id
+        where ci.user_id = p_user_id
+          and ci.checkin_date = p_date
+          and c.owner_id <> p_user_id
+          and (
+              ci.note is null
+              or (
+                  ci.note not like 'Đã kiểm thử%'
+                  and ci.note not like 'Đã nộp kết quả%'
+                  and ci.note not like '%tạm tính%'
+                  and ci.note not like 'Tự động duyệt%'
+                  and ci.note not like '%Tự động duyệt%'
+                  and ci.note not like '%chủ app duyệt%'
+              )
+          )
+
+        union
+
+        select tr.campaign_id
+        from public.tester_reports tr
+        join public.campaigns c on c.id = tr.campaign_id
+        where tr.user_id = p_user_id
+          and (tr.created_at at time zone 'Asia/Ho_Chi_Minh')::date = p_date
+          and tr.status in ('pending', 'approved')
+          and c.owner_id <> p_user_id
+    ) t;
+
+    -- Login lấy từ lịch sử theo ngày hoặc profile
+    select (v_last_login = p_date) or exists (
+        select 1
+        from public.user_daily_tasks t
+        where t.user_id = p_user_id
+          and t.task_date = p_date
+          and t.logged_in = true
+    ) into v_logged_in;
+
+    v_policy := public.get_daily_task_policy(p_date);
+    v_base_required := coalesce(v_policy.tests_per_active_app, 3) * v_k;
+    v_mode := case when v_k > 0 then 'owner' else 'member' end;
+
+    -- Tính toán phần thiếu chuyển tiếp (Carryover)
+    v_carry_policy := public.get_daily_task_carryover_policy(p_date);
+
+    if v_carry_policy is not null and v_carry_policy.is_enabled and p_date >= v_carry_policy.effective_from then
+        v_carry_effective_from := v_carry_policy.effective_from;
+
+        if p_date = v_carry_effective_from then
+            -- Mốc bắt đầu: không truy thu phần thiếu trước ngày áp dụng
+            v_carry_in := 0;
+            v_carryover_ready := true;
+        else
+            -- p_date > effective_from: nguồn từ ngày liền trước
+            select t.finalized_at, t.carry_out_tests
+            into v_prev_finalized, v_prev_carry_out
+            from public.user_daily_tasks t
+            where t.user_id = p_user_id and t.task_date = (p_date - 1);
+
+            if v_prev_finalized is not null then
+                v_carry_in := coalesce(v_prev_carry_out, 0);
+                v_carryover_ready := true;
+            else
+                -- Ngày hôm qua chưa finalized (khoảng 00:00 - 00:05 hoặc cron trễ)
+                if v_exempt or v_mode = 'member' then
+                    -- Tester thuần không có app: không bị hoãn trạng thái hoàn thành login
+                    -- Lấy phần thiếu cũ được tạm giữ gần nhất (nếu trước đây từng là owner)
+                    select t.carry_out_tests
+                    into v_last_carry_out
+                    from public.user_daily_tasks t
+                    where t.user_id = p_user_id
+                      and t.task_date >= v_carry_effective_from
+                      and t.task_date < p_date
+                      and t.finalized_at is not null
+                    order by t.task_date desc
+                    limit 1;
+
+                    v_carry_in := coalesce(v_last_carry_out, 0);
+                    v_carryover_ready := true;
+                else
+                    -- Chủ app: chưa thể chốt chỉ tiêu mới khi hôm qua chưa finalized
+                    v_carryover_ready := false;
+                    v_carry_in := 0;
+                end if;
+            end if;
+        end if;
+    else
+        -- Chính sách cộng dồn chưa có hiệu lực
+        v_carry_in := 0;
+        v_carryover_ready := true;
+        v_carry_effective_from := null;
+    end if;
+
+    -- Tính chỉ tiêu và trạng thái hoàn thành
+    if v_carryover_ready then
+        if v_exempt then
+            v_required := v_base_required + v_carry_in;
+            v_effective := least(v_required, v_a);
+            v_carry_remaining := greatest(0, v_carry_in - v_d);
+            v_met := true;
+        elsif v_mode = 'member' then
+            v_required := 0;
+            v_effective := 0;
+            -- Member hoàn thành bằng đăng nhập hoặc có test, test tự nguyện giảm phần thiếu cũ
+            v_carry_remaining := greatest(0, v_carry_in - v_d);
+            v_met := v_logged_in or v_d > 0;
+        else
+            -- mode = 'owner'
+            -- Công thức:
+            -- R = B + C
+            -- T = min(R, A)
+            -- Q = max(C, T)
+            -- carry_out = max(0, Q - D)
+            v_required := v_base_required + v_carry_in;
+            v_effective := least(v_required, v_a);
+            v_q := greatest(v_carry_in, v_effective);
+            v_carry_remaining := greatest(0, v_q - v_d);
+            v_met := (v_d >= v_effective);
+        end if;
+    else
+        -- Owner đang chờ chốt hôm qua: hiển thị chỉ tiêu cơ bản tạm thời, met = false
+        v_required := v_base_required;
+        v_effective := least(v_required, v_a);
+        v_carry_remaining := 0;
+        v_met := false;
+    end if;
+
+    v_next_pct := case
+        when v_streak <= 0 then 1
+        when v_streak = 1 then 2
+        when v_streak = 2 then 5
+        else 10
+    end;
+
+    return jsonb_build_object(
+        'status_date', to_char(p_date, 'YYYY-MM-DD'),
+        'mode', v_mode,
+        'active_app_count', v_k,
+        'required_tests', v_required,
+        'available_apps', v_a,
+        'effective_required_tests', v_effective,
+        'completed_tests', v_d,
+        'logged_in_today', v_logged_in,
+        'is_penalty_exempt', v_exempt,
+        'missed_streak', v_streak,
+        'next_penalty_percent', v_next_pct,
+        'met', v_met,
+        'base_required_tests', v_base_required,
+        'carry_in_tests', v_carry_in,
+        'carryover_remaining_tests', coalesce(v_carry_remaining, 0),
+        'carryover_ready', v_carryover_ready,
+        'carryover_effective_from', case when v_carry_effective_from is not null then to_char(v_carry_effective_from, 'YYYY-MM-DD') else null end
+    );
+end;
+$$;
+
+revoke execute on function public.get_daily_task_status(uuid, date) from public, anon, authenticated;
+grant execute on function public.get_daily_task_status(uuid, date) to service_role;
+
+-- 6. Finalizer chốt ngày nguyên tử (public._apply_daily_inactivity_penalty)
+create or replace function public._apply_daily_inactivity_penalty(p_eval date)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_policy public.daily_task_policies;
+    v_carry_policy public.daily_task_carryover_policies;
+    v_is_carryover_active boolean := false;
+    v_effective_from date := null;
+    r record;
+    v_status jsonb;
+    v_met boolean;
+    v_mode text;
+    v_required int;
+    v_effective int;
+    v_completed int;
+    v_logged_in boolean;
+    v_exempt boolean;
+    v_prev_streak int;
+    v_new_streak int;
+    v_pct numeric;
+    v_ratio numeric;
+    v_deduction int;
+    v_new_balance int;
+    v_rows int;
+    v_note text;
+    v_base_req int;
+    v_carry_in int;
+    v_carry_out int;
+    v_source_date date;
+begin
+    if p_eval is null then
+        return;
+    end if;
+
+    -- Chống chạy song song giữa nhiều phiên / cron retry
+    perform pg_advisory_xact_lock(hashtextextended('daily_inactivity_penalty', 0));
+
+    v_policy := public.get_daily_task_policy(p_eval);
+    v_carry_policy := public.get_daily_task_carryover_policy(p_eval);
+    v_is_carryover_active := (v_carry_policy is not null and v_carry_policy.is_enabled and p_eval >= v_carry_policy.effective_from);
+    v_effective_from := case when v_is_carryover_active then v_carry_policy.effective_from else null end;
+
+    -- Khóa tuần tự từng profile
+    for r in
+        select p.id, p.credits, p.daily_missed_streak, lower(p.role) as role, p.created_at
+        from public.profiles p
+        where p.created_at < ((p_eval + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh')
+        for update of p
+    loop
+        -- 1. Tài khoản đăng ký trong chính ngày p_eval: miễn cho ngày đăng ký, tạo checkpoint
+        if r.created_at >= (p_eval::timestamp at time zone 'Asia/Ho_Chi_Minh') then
+            insert into public.user_daily_tasks as t (
+                user_id, task_date, mode, active_app_count, required_tests,
+                effective_required_tests, available_apps, completed_tests,
+                logged_in, is_exempt, met, missed_streak, penalty_credits, finalized_at,
+                policy_id, tests_per_active_app,
+                carryover_version, base_required_tests, carry_in_tests, carry_out_tests,
+                carry_source_date, carryover_effective_from
+            ) values (
+                r.id, p_eval, 'member',
+                0, 0, 0, 0, 0,
+                true, true, true, 0, 0, now(),
+                v_policy.id, v_policy.tests_per_active_app,
+                case when v_is_carryover_active then 1 else null end,
+                0, 0, 0, null, v_effective_from
+            )
+            on conflict (user_id, task_date) do update
+            set finalized_at = now()
+            where t.finalized_at is null;
+
+            continue;
+        end if;
+
+        -- 2. Đã finalized trước đó -> bỏ qua (idempotent, không trừ Credit lần hai)
+        if exists (
+            select 1
+            from public.user_daily_tasks t
+            where t.user_id = r.id
+              and t.task_date = p_eval
+              and t.finalized_at is not null
+        ) then
+            continue;
+        end if;
+
+        v_status := public.get_daily_task_status(r.id, p_eval);
+        if v_status is null then
+            continue;
+        end if;
+
+        v_met := coalesce((v_status ->> 'met')::boolean, false);
+        v_mode := coalesce(v_status ->> 'mode', 'member');
+        v_required := coalesce((v_status ->> 'required_tests')::int, 0);
+        v_effective := coalesce((v_status ->> 'effective_required_tests')::int, 0);
+        v_completed := coalesce((v_status ->> 'completed_tests')::int, 0);
+        v_logged_in := coalesce((v_status ->> 'logged_in_today')::boolean, false);
+        v_exempt := coalesce((v_status ->> 'is_penalty_exempt')::boolean, false);
+        v_base_req := coalesce((v_status ->> 'base_required_tests')::int, 0);
+        v_carry_in := coalesce((v_status ->> 'carry_in_tests')::int, 0);
+        v_carry_out := coalesce((v_status ->> 'carryover_remaining_tests')::int, 0);
+        v_source_date := case when v_is_carryover_active and p_eval > v_effective_from then (p_eval - 1) else null end;
+
+        -- Lấy missed_streak từ row finalized gần nhất
+        select coalesce(
+            (select t.missed_streak
+             from public.user_daily_tasks t
+             where t.user_id = r.id
+               and t.task_date < p_eval
+               and t.finalized_at is not null
+             order by t.task_date desc
+             limit 1),
+            r.daily_missed_streak,
+            0
+        ) into v_prev_streak;
+
+        -- Xác định streak mới và phạt
+        if v_exempt then
+            v_new_streak := 0;
+            v_deduction := 0;
+        elsif v_met then
+            v_new_streak := 0;
+            v_deduction := 0;
+        else
+            -- Khi owner có effective_required_tests = 0 (do nguồn app = 0): không phạt và không tăng chuỗi
+            if v_mode = 'owner' and v_effective <= 0 then
+                v_new_streak := v_prev_streak;
+                v_deduction := 0;
+            else
+                v_new_streak := v_prev_streak + 1;
+                v_pct := case
+                    when v_new_streak = 1 then 0.01
+                    when v_new_streak = 2 then 0.02
+                    when v_new_streak = 3 then 0.05
+                    else 0.10
+                end;
+
+                if v_mode = 'owner' and v_effective > 0 then
+                    v_ratio := greatest(
+                        0,
+                        least(
+                            1,
+                            (v_effective - v_completed)::numeric / v_effective::numeric
+                        )
+                    );
+                elsif v_mode = 'member' then
+                    v_ratio := case when v_logged_in then 0 else 1 end;
+                else
+                    v_ratio := 0;
+                end if;
+
+                if v_ratio <= 0 then
+                    v_deduction := 0;
+                else
+                    v_deduction := least(
+                        r.credits,
+                        greatest(1, ceil(r.credits * v_pct * v_ratio)::int)
+                    );
+                end if;
+            end if;
+        end if;
+
+        v_new_balance := r.credits - v_deduction;
+
+        -- Ghi bản ghi vào user_daily_tasks
+        insert into public.user_daily_tasks as t (
+            user_id, task_date, mode, active_app_count, required_tests,
+            effective_required_tests, available_apps, completed_tests,
+            logged_in, is_exempt, met, missed_streak, penalty_credits, finalized_at,
+            policy_id, tests_per_active_app,
+            carryover_version, base_required_tests, carry_in_tests, carry_out_tests,
+            carry_source_date, carryover_effective_from
+        ) values (
+            r.id, p_eval, v_mode,
+            coalesce((v_status ->> 'active_app_count')::int, 0),
+            v_required,
+            v_effective,
+            coalesce((v_status ->> 'available_apps')::int, 0),
+            v_completed,
+            v_logged_in,
+            v_exempt,
+            v_met,
+            v_new_streak,
+            v_deduction,
+            now(),
+            v_policy.id,
+            v_policy.tests_per_active_app,
+            case when v_is_carryover_active then 1 else null end,
+            v_base_req,
+            v_carry_in,
+            v_carry_out,
+            v_source_date,
+            v_effective_from
+        )
+        on conflict (user_id, task_date) do update
+        set mode = excluded.mode,
+            active_app_count = excluded.active_app_count,
+            required_tests = excluded.required_tests,
+            effective_required_tests = excluded.effective_required_tests,
+            available_apps = excluded.available_apps,
+            completed_tests = excluded.completed_tests,
+            logged_in = excluded.logged_in,
+            is_exempt = excluded.is_exempt,
+            met = excluded.met,
+            missed_streak = excluded.missed_streak,
+            penalty_credits = excluded.penalty_credits,
+            finalized_at = now(),
+            policy_id = excluded.policy_id,
+            tests_per_active_app = excluded.tests_per_active_app,
+            carryover_version = excluded.carryover_version,
+            base_required_tests = excluded.base_required_tests,
+            carry_in_tests = excluded.carry_in_tests,
+            carry_out_tests = excluded.carry_out_tests,
+            carry_source_date = excluded.carry_source_date,
+            carryover_effective_from = excluded.carryover_effective_from
+        where t.finalized_at is null;
+
+        get diagnostics v_rows = row_count;
+        if v_rows = 0 then
+            continue;
+        end if;
+
+        if not v_exempt then
+            update public.profiles
+            set credits = v_new_balance,
+                daily_missed_streak = v_new_streak
+            where id = r.id;
+
+            if v_deduction > 0 then
+                if v_mode = 'owner' then
+                    v_note := format(
+                        'Không đạt chỉ tiêu ngày %s: %s/%s app (thiếu %s). Trừ %s Credit.',
+                        to_char(p_eval, 'DD/MM/YYYY'),
+                        v_completed,
+                        v_effective,
+                        greatest(0, v_effective - v_completed),
+                        v_deduction
+                    );
+                else
+                    v_note := format(
+                        'Không đăng nhập ngày %s. Trừ %s Credit.',
+                        to_char(p_eval, 'DD/MM/YYYY'),
+                        v_deduction
+                    );
+                end if;
+
+                insert into public.credit_logs (user_id, amount, action, note, balance)
+                values (r.id, -v_deduction, 'inactivity_penalty', v_note, v_new_balance);
+            end if;
+
+            if not v_met then
+                insert into public.notifications (user_id, title, message, type, data)
+                values (
+                    r.id,
+                    'Không đạt nhiệm vụ ngày',
+                    case
+                        when v_deduction = 0 and v_mode = 'owner' then format(
+                            'Ngày %s bạn mới test %s/%s app. Số dư hiện tại là 0 nên không trừ Credit, nhưng chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_completed,
+                            v_effective,
+                            v_new_streak
+                        )
+                        when v_deduction = 0 then format(
+                            'Ngày %s bạn không mở app. Số dư hiện tại là 0 nên không trừ Credit, nhưng chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_new_streak
+                        )
+                        when v_mode = 'owner' then format(
+                            'Ngày %s bạn mới test %s/%s app. Bạn bị trừ %s Credit và chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_completed,
+                            v_effective,
+                            v_deduction,
+                            v_new_streak
+                        )
+                        else format(
+                            'Ngày %s bạn không mở app. Bạn bị trừ %s Credit và chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_deduction,
+                            v_new_streak
+                        )
+                    end,
+                    'credit',
+                    jsonb_build_object(
+                        'task_date', to_char(p_eval, 'YYYY-MM-DD'),
+                        'penalty_credits', v_deduction
+                    )
+                );
+            end if;
+
+            -- Nếu hôm nay (v_today) đã hoàn thành, reset streak ngay
+            perform public.refresh_daily_completion(r.id, v_today);
+        end if;
+    end loop;
+end;
+$$;
+
+revoke execute on function public._apply_daily_inactivity_penalty(date) from public, anon, authenticated;
+grant execute on function public._apply_daily_inactivity_penalty(date) to service_role;
+
+-- 7. Điều phối chốt nhiệm vụ ngày bù tự động (apply_daily_inactivity_penalty)
+create or replace function public.apply_daily_inactivity_penalty()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_yesterday date := ((now() at time zone 'Asia/Ho_Chi_Minh')::date) - 1;
+    v_carry_policy public.daily_task_carryover_policies;
+    v_earliest_unfinalized date;
+    v_cur date;
+begin
+    v_carry_policy := public.get_daily_task_carryover_policy(v_yesterday);
+
+    if v_carry_policy is not null and v_carry_policy.is_enabled then
+        -- Tìm ngày chưa chốt sớm nhất (tối đa lùi 30 ngày)
+        select min(d.dt::date) into v_earliest_unfinalized
+        from generate_series(
+            greatest(v_carry_policy.effective_from, v_yesterday - 30),
+            v_yesterday,
+            interval '1 day'
+        ) d(dt)
+        where exists (
+            select 1 from public.profiles p
+            where p.created_at < (d.dt::timestamp at time zone 'Asia/Ho_Chi_Minh')
+              and not exists (
+                  select 1 from public.user_daily_tasks t
+                  where t.user_id = p.id
+                    and t.task_date = d.dt::date
+                    and t.finalized_at is not null
+              )
+        );
+
+        if v_earliest_unfinalized is not null and v_earliest_unfinalized <= v_yesterday then
+            v_cur := v_earliest_unfinalized;
+            while v_cur <= v_yesterday loop
+                perform public._apply_daily_inactivity_penalty(v_cur);
+                v_cur := v_cur + 1;
+            end loop;
+            return;
+        end if;
+    end if;
+
+    -- Mặc định chốt hôm qua
+    perform public._apply_daily_inactivity_penalty(v_yesterday);
+end;
+$$;
+
+revoke execute on function public.apply_daily_inactivity_penalty() from public, anon, authenticated;
+grant execute on function public.apply_daily_inactivity_penalty() to service_role;
+
+-- 8. Wrapper hỗ trợ chốt ngày chỉ định (dùng cho service_role / kiểm thử)
+create or replace function public.finalize_daily_tasks_for_date(p_target_date date)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if p_target_date is null then
+        raise exception 'TARGET_DATE_REQUIRED';
+    end if;
+    perform public._apply_daily_inactivity_penalty(p_target_date);
+end;
+$$;
+
+revoke execute on function public.finalize_daily_tasks_for_date(date) from public, anon, authenticated;
+grant execute on function public.finalize_daily_tasks_for_date(date) to service_role;
+
+-- 9. Đồng bộ thứ tự khóa trong resume_campaign (campaigns -> profiles)
+create or replace function public.resume_campaign(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_camp record;
+    v_missed int;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+begin
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    -- Khóa campaign trước, nhất quán với RPC push_campaign
+    select * into v_camp from public.campaigns where id = p_campaign_id for update;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+    if v_camp.owner_id <> v_uid then
+        raise exception 'PERMISSION_DENIED';
+    end if;
+    if v_camp.status <> 'paused' then
+        raise exception 'CAMPAIGN_NOT_PAUSED';
+    end if;
+
+    -- App bị Admin tạm dừng: chủ app không được tự mở lại
+    if v_camp.paused_reason = 'admin_manual' then
+        raise exception 'PAUSED_BY_ADMIN';
+    end if;
+
+    -- Quá cửa sổ 30 ngày -> hoàn thành
+    if v_camp.created_at <= now() - interval '30 days' then
+        update public.campaigns
+        set status = 'completed',
+            completed_at = now(),
+            paused_reason = null,
+            admin_note = null,
+            admin_resumed = false
+        where id = p_campaign_id;
+
+        return jsonb_build_object(
+            'success', true,
+            'campaign_id', p_campaign_id,
+            'status', 'completed'
+        );
+    end if;
+
+    -- Slot > 1 phải còn hạn
+    if v_camp.slot_number > 1 then
+        if not exists (
+            select 1 from public.user_slots s
+            where s.user_id = v_camp.owner_id
+              and s.slot_number = v_camp.slot_number
+              and s.expires_at > now()
+        ) then
+            raise exception 'SLOT_EXPIRED';
+        end if;
+    end if;
+
+    -- Nếu hôm nay đã đạt chỉ tiêu (kể cả có cộng dồn), refresh sẽ reset streak về 0
+    perform public.refresh_daily_completion(v_uid, v_today);
+
+    select daily_missed_streak into v_missed
+    from public.profiles
+    where id = v_uid;
+
+    if coalesce(v_missed, 0) >= 7 then
+        raise exception 'OWNER_INACTIVE';
+    end if;
+
+    update public.campaigns
+    set status = 'open',
+        paused_reason = null,
+        completed_at = null,
+        admin_note = null,
+        admin_resumed = false
+    where id = p_campaign_id;
+
+    return jsonb_build_object(
+        'success', true,
+        'campaign_id', p_campaign_id,
+        'status', 'open'
+    );
+end;
+$$;
+
+revoke execute on function public.resume_campaign(uuid) from public;
+grant execute on function public.resume_campaign(uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+
+-- ==============================================================================
+-- 12 Tester - Migration 054: Push & Carryover Hardening
+-- ==============================================================================
+
+-- 1. R07 & R08: Nâng cấp bảng campaign_push_receipts
+alter table public.campaign_push_receipts
+    drop constraint if exists campaign_push_receipts_user_id_fkey;
+
+alter table public.campaign_push_receipts
+    alter column user_id drop not null;
+
+alter table public.campaign_push_receipts
+    add constraint campaign_push_receipts_user_id_fkey
+    foreign key (user_id) references public.profiles(id) on delete set null;
+
+alter table public.campaign_push_receipts
+    add column if not exists target_campaign_id uuid;
+
+update public.campaign_push_receipts
+set target_campaign_id = campaign_id
+where target_campaign_id is null and campaign_id is not null;
+
+update public.campaign_push_receipts
+set target_campaign_id = '00000000-0000-0000-0000-000000000000'::uuid
+where target_campaign_id is null;
+
+alter table public.campaign_push_receipts
+    alter column target_campaign_id set not null;
+
+create index if not exists idx_campaign_push_receipts_target_campaign
+    on public.campaign_push_receipts(target_campaign_id);
+
+-- 2. R09: Trigger bảo vệ metadata đẩy app khỏi client / role authenticated
+create or replace function public.trg_fn_protect_campaign_push_metadata()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+declare
+    v_active_role text := coalesce(nullif(current_setting('role', true), ''), current_user);
+begin
+    if (tg_op = 'INSERT' and (new.push_business_date is not null or new.push_expires_at is not null or new.push_order is not null))
+       or (tg_op = 'UPDATE' and (new.push_business_date is distinct from old.push_business_date
+            or new.push_expires_at is distinct from old.push_expires_at
+            or new.push_order is distinct from old.push_order)) then
+        -- Client trực tiếp mang role authenticated/anon/public tuyệt đối không được ghi đè metadata
+        if v_active_role in ('authenticated', 'anon', 'public') or current_user in ('authenticated', 'anon', 'public') or session_user in ('anon') then
+            raise exception 'PUSH_METADATA_READ_ONLY: Client khong duoc phep thay doi metadata day app truc tiep';
+        end if;
+        if current_setting('app.allow_push_metadata_write', true) is distinct from 'true' then
+            raise exception 'PUSH_METADATA_READ_ONLY: Metadata day app chi duoc cap nhat qua RPC push_campaign';
+        end if;
+    end if;
+    return new;
+end;
+$$;
+
+-- 3. R08: Cập nhật RPC push_campaign dùng target_campaign_id bất biến
+create or replace function public.push_campaign(
+    p_campaign_id uuid,
+    p_client_request_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid               uuid := auth.uid();
+    v_existing_receipt  record;
+    v_camp              public.campaigns%rowtype;
+    v_profile           public.profiles%rowtype;
+    v_now               timestamptz;
+    v_business_date     date;
+    v_expires_at        timestamptz;
+    v_push_order        bigint;
+    v_balance_after     int;
+    v_credit_log_id     uuid;
+    v_receipt_id        uuid;
+    v_note              text;
+begin
+    -- 1. Yêu cầu phiên đăng nhập
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    if p_client_request_id is null then
+        raise exception 'INVALID_REQUEST_ID';
+    end if;
+
+    if p_campaign_id is null then
+        raise exception 'INVALID_CAMPAIGN_ID';
+    end if;
+
+    -- 2. Kiểm tra receipt trước khi khóa (so sánh target_campaign_id bất biến)
+    select * into v_existing_receipt
+    from public.campaign_push_receipts
+    where user_id = v_uid and client_request_id = p_client_request_id;
+
+    if v_existing_receipt.id is not null then
+        if coalesce(v_existing_receipt.target_campaign_id, v_existing_receipt.campaign_id) is distinct from p_campaign_id then
+            raise exception 'REQUEST_ID_CONFLICT';
+        end if;
+        return jsonb_build_object(
+            'success', true,
+            'receipt_id', v_existing_receipt.id,
+            'client_request_id', v_existing_receipt.client_request_id,
+            'campaign_id', p_campaign_id,
+            'charged_credits', v_existing_receipt.cost_credits,
+            'balance_after', v_existing_receipt.balance_after,
+            'business_date', to_char(v_existing_receipt.business_date, 'YYYY-MM-DD'),
+            'expires_at', to_char(v_existing_receipt.expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+            'push_order', v_existing_receipt.push_order,
+            'replayed', true
+        );
+    end if;
+
+    -- 3. Khóa campaign và profile theo thứ tự nhất quán
+    select * into v_camp
+    from public.campaigns
+    where id = p_campaign_id
+    for update;
+
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+
+    select * into v_profile
+    from public.profiles
+    where id = v_uid
+    for update;
+
+    if v_profile.id is null then
+        raise exception 'PROFILE_NOT_FOUND';
+    end if;
+
+    -- Re-check receipt sau khi đã có khóa
+    select * into v_existing_receipt
+    from public.campaign_push_receipts
+    where user_id = v_uid and client_request_id = p_client_request_id;
+
+    if v_existing_receipt.id is not null then
+        if coalesce(v_existing_receipt.target_campaign_id, v_existing_receipt.campaign_id) is distinct from p_campaign_id then
+            raise exception 'REQUEST_ID_CONFLICT';
+        end if;
+        return jsonb_build_object(
+            'success', true,
+            'receipt_id', v_existing_receipt.id,
+            'client_request_id', v_existing_receipt.client_request_id,
+            'campaign_id', p_campaign_id,
+            'charged_credits', v_existing_receipt.cost_credits,
+            'balance_after', v_existing_receipt.balance_after,
+            'business_date', to_char(v_existing_receipt.business_date, 'YYYY-MM-DD'),
+            'expires_at', to_char(v_existing_receipt.expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+            'push_order', v_existing_receipt.push_order,
+            'replayed', true
+        );
+    end if;
+
+    -- 4. Kiểm tra chủ thật và trạng thái tài khoản
+    if v_camp.owner_id is distinct from v_uid then
+        raise exception 'NOT_OWNER';
+    end if;
+
+    if coalesce(v_profile.is_locked, false) = true then
+        raise exception 'ACCOUNT_LOCKED';
+    end if;
+
+    if v_camp.status <> 'open' then
+        raise exception 'CAMPAIGN_NOT_OPEN';
+    end if;
+
+    -- 5. Kiểm tra số dư (dưới 100 từ chối hoàn toàn; đúng 100 cho phép)
+    if coalesce(v_profile.credits, 0) < 100 then
+        raise exception 'INSUFFICIENT_CREDITS';
+    end if;
+
+    -- 6. Khóa transaction chung cho việc cấp thứ tự đẩy
+    perform pg_advisory_xact_lock(hashtext('campaign_push_order_lock'));
+
+    v_now := clock_timestamp();
+    v_business_date := (v_now at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_expires_at := (date_trunc('day', v_now at time zone 'Asia/Ho_Chi_Minh') + interval '1 day') at time zone 'Asia/Ho_Chi_Minh';
+
+    -- Kiểm tra lại điều kiện thời gian sau khi có khóa và đồng hồ mới
+    if v_camp.created_at <= v_now - interval '30 days' then
+        raise exception 'CAMPAIGN_WINDOW_EXPIRED';
+    end if;
+
+    if v_camp.slot_number > 1 then
+        if not exists (
+            select 1 from public.user_slots
+            where user_id = v_camp.owner_id
+              and slot_number = v_camp.slot_number
+              and expires_at > v_now
+        ) then
+            raise exception 'SLOT_EXPIRED';
+        end if;
+    end if;
+
+    v_push_order := nextval('public.campaign_push_order_seq');
+
+    -- 7. Trừ đúng 100 Credit, ghi log, cập nhật metadata campaign, ghi receipt
+    update public.profiles
+    set credits = credits - 100
+    where id = v_uid
+    returning credits into v_balance_after;
+
+    v_note := format('Đẩy ứng dụng "%s" lên đầu danh sách (hạn đến hết %s)',
+                     coalesce(nullif(v_camp.app_name, ''), 'của bạn'),
+                     to_char(v_business_date, 'DD/MM/YYYY'));
+
+    insert into public.credit_logs (user_id, amount, action, note, balance)
+    values (v_uid, -100, 'campaign_push', v_note, v_balance_after)
+    returning id into v_credit_log_id;
+
+    perform set_config('app.allow_push_metadata_write', 'true', true);
+
+    update public.campaigns
+    set push_business_date = v_business_date,
+        push_expires_at = v_expires_at,
+        push_order = v_push_order
+    where id = p_campaign_id;
+
+    perform set_config('app.allow_push_metadata_write', 'false', true);
+
+    insert into public.campaign_push_receipts (
+        user_id,
+        campaign_id,
+        target_campaign_id,
+        client_request_id,
+        cost_credits,
+        balance_after,
+        business_date,
+        pushed_at,
+        expires_at,
+        push_order,
+        credit_log_id
+    )
+    values (
+        v_uid,
+        p_campaign_id,
+        p_campaign_id,
+        p_client_request_id,
+        100,
+        v_balance_after,
+        v_business_date,
+        v_now,
+        v_expires_at,
+        v_push_order,
+        v_credit_log_id
+    )
+    returning id into v_receipt_id;
+
+    -- 8. Trả kết quả
+    return jsonb_build_object(
+        'success', true,
+        'receipt_id', v_receipt_id,
+        'client_request_id', p_client_request_id,
+        'campaign_id', p_campaign_id,
+        'charged_credits', 100,
+        'balance_after', v_balance_after,
+        'business_date', to_char(v_business_date, 'YYYY-MM-DD'),
+        'expires_at', to_char(v_expires_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'push_order', v_push_order,
+        'replayed', false
+    );
+end;
+$$;
+
+revoke execute on function public.push_campaign(uuid, uuid) from public, anon;
+grant execute on function public.push_campaign(uuid, uuid) to authenticated, service_role;
+
+-- 4. R04: Bảng Audit chính sách cộng dồn và bảo vệ bất biến
+create table if not exists public.daily_task_carryover_policy_audit (
+    id bigint generated always as identity primary key,
+    policy_id bigint,
+    effective_from date not null,
+    old_is_enabled boolean,
+    new_is_enabled boolean not null,
+    old_operator_note text,
+    new_operator_note text not null,
+    changed_by text not null default current_user,
+    changed_at timestamptz not null default clock_timestamp()
+);
+
+alter table public.daily_task_carryover_policy_audit enable row level security;
+revoke all on public.daily_task_carryover_policy_audit from public, anon, authenticated;
+grant all on public.daily_task_carryover_policy_audit to service_role;
+
+create or replace function public.set_daily_task_carryover_policy(
+    p_effective_from date,
+    p_is_enabled boolean default true,
+    p_operator_note text default 'Configured carryover policy'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_old public.daily_task_carryover_policies;
+    v_row public.daily_task_carryover_policies;
+    v_allow_retro boolean := (current_setting('test.allow_policy_retroactive_write', true) = 'true');
+begin
+    if p_effective_from is null then
+        raise exception 'INVALID_EFFECTIVE_DATE';
+    end if;
+
+    select * into v_old
+    from public.daily_task_carryover_policies
+    where effective_from = p_effective_from;
+
+    -- Chặn sửa hồi tố chính sách quá khứ đã áp dụng (trừ khi bật cờ test)
+    if p_effective_from <= v_today and v_old.id is not null and not v_allow_retro then
+        raise exception 'CANNOT_MODIFY_HISTORICAL_POLICY: Chinh sach da co hieu luc khong the sua doi hoi to';
+    end if;
+
+    insert into public.daily_task_carryover_policies (
+        effective_from, is_enabled, operator_note
+    ) values (
+        p_effective_from,
+        coalesce(p_is_enabled, true),
+        coalesce(btrim(p_operator_note), 'Configured carryover policy')
+    )
+    on conflict (effective_from) do update
+    set is_enabled = excluded.is_enabled,
+        operator_note = excluded.operator_note
+    returning * into v_row;
+
+    insert into public.daily_task_carryover_policy_audit (
+        policy_id, effective_from, old_is_enabled, new_is_enabled,
+        old_operator_note, new_operator_note, changed_by, changed_at
+    ) values (
+        v_row.id, p_effective_from, v_old.is_enabled, v_row.is_enabled,
+        v_old.operator_note, v_row.operator_note, current_user, clock_timestamp()
+    );
+
+    return to_jsonb(v_row);
+end;
+$$;
+
+revoke execute on function public.set_daily_task_carryover_policy(date, boolean, text) from public, anon, authenticated;
+grant execute on function public.set_daily_task_carryover_policy(date, boolean, text) to service_role;
+
+-- 5. R01, R02, R04: Cập nhật public.get_daily_task_status
+create or replace function public.get_daily_task_status(
+    p_user_id uuid,
+    p_date date
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+    v_policy public.daily_task_policies;
+    v_carry_policy public.daily_task_carryover_policies;
+    v_role text;
+    v_last_login date;
+    v_streak int := 0;
+    v_exempt boolean := false;
+    v_k int := 0;
+    v_a int := 0;
+    v_d int := 0;
+    v_base_required int := 0;
+    v_carry_in int := 0;
+    v_required int := 0;
+    v_effective int := 0;
+    v_logged_in boolean := false;
+    v_met boolean := false;
+    v_next_pct int := 1;
+    v_mode text;
+    v_day_start timestamptz;
+    v_next_day_start timestamptz;
+    v_window_start timestamptz;
+    v_carryover_ready boolean := true;
+    v_carry_remaining int := 0;
+    v_carry_effective_from date := null;
+    v_prev_finalized timestamptz;
+    v_prev_carry_out int;
+    v_last_carry_out int;
+    v_q int := 0;
+    v_first_policy_effective date;
+    v_has_prior_history boolean := false;
+begin
+    if p_user_id is null or p_date is null then
+        return null;
+    end if;
+
+    select lower(p.role), p.last_login_date, p.daily_missed_streak
+    into v_role, v_last_login, v_streak
+    from public.profiles p
+    where p.id = p_user_id;
+
+    if not found then
+        return null;
+    end if;
+
+    v_streak := coalesce(v_streak, 0);
+    v_exempt := coalesce(v_role in ('admin', 'moderator'), false);
+
+    v_day_start := (p_date::timestamp at time zone 'Asia/Ho_Chi_Minh');
+    v_next_day_start := ((p_date + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh');
+    v_window_start := ((p_date - 30)::timestamp at time zone 'Asia/Ho_Chi_Minh');
+
+    -- R02: Tái dựng K chính xác: App được tính cho ngày p_date nếu được tạo trước v_day_start
+    -- và trong khoảng [v_day_start, v_next_day_start] chưa bị completed/production.
+    -- Nếu hiện tại completed nhưng completed_at >= v_next_day_start thì vào ngày p_date app vẫn active!
+    select count(*) into v_k
+    from public.campaigns c
+    where c.owner_id = p_user_id
+      and c.created_at < v_day_start
+      and c.created_at > v_window_start
+      and (
+          c.status = 'open'
+          or (c.status = 'paused' and c.paused_reason = 'owner_inactive')
+          or (c.completed_at is not null and c.completed_at >= v_next_day_start)
+      );
+
+    -- R02: Tái dựng A chính xác: App open của người khác trong ngày p_date
+    select count(*) into v_a
+    from public.campaigns c
+    where c.owner_id <> p_user_id
+      and c.created_at < v_next_day_start
+      and c.created_at > v_window_start
+      and (
+          c.status = 'open'
+          or (c.completed_at is not null and c.completed_at >= v_next_day_start)
+      );
+
+    -- D: số app khác nhau user đã test trong ngày p_date
+    select count(distinct campaign_id) into v_d
+    from (
+        select ci.campaign_id
+        from public.checkins ci
+        join public.campaigns c on c.id = ci.campaign_id
+        where ci.user_id = p_user_id
+          and ci.checkin_date = p_date
+          and c.owner_id <> p_user_id
+          and (
+              ci.note is null
+              or (
+                  ci.note not like 'Đã kiểm thử%'
+                  and ci.note not like 'Đã nộp kết quả%'
+                  and ci.note not like '%tạm tính%'
+                  and ci.note not like 'Tự động duyệt%'
+                  and ci.note not like '%Tự động duyệt%'
+                  and ci.note not like '%chủ app duyệt%'
+              )
+          )
+
+        union
+
+        select tr.campaign_id
+        from public.tester_reports tr
+        join public.campaigns c on c.id = tr.campaign_id
+        where tr.user_id = p_user_id
+          and (tr.created_at at time zone 'Asia/Ho_Chi_Minh')::date = p_date
+          and tr.status in ('pending', 'approved')
+          and c.owner_id <> p_user_id
+    ) t;
+
+    -- Login lấy từ lịch sử theo ngày hoặc profile
+    select (v_last_login = p_date) or exists (
+        select 1
+        from public.user_daily_tasks t
+        where t.user_id = p_user_id
+          and t.task_date = p_date
+          and t.logged_in = true
+    ) into v_logged_in;
+
+    v_policy := public.get_daily_task_policy(p_date);
+    v_base_required := coalesce(v_policy.tests_per_active_app, 3) * v_k;
+    v_mode := case when v_k > 0 then 'owner' else 'member' end;
+
+    -- Tính toán phần thiếu chuyển tiếp (Carryover)
+    v_carry_policy := public.get_daily_task_carryover_policy(p_date);
+
+    if v_carry_policy is not null and v_carry_policy.is_enabled and p_date >= v_carry_policy.effective_from then
+        v_carry_effective_from := v_carry_policy.effective_from;
+
+        -- Tìm ngày kích hoạt lần đầu của hệ thống
+        select min(effective_from) into v_first_policy_effective
+        from public.daily_task_carryover_policies
+        where is_enabled = true;
+
+        -- Tìm xem user đã từng có row carryover nào đã finalized trước đó hay chưa (kể cả trước khi policy bị tắt)
+        select t.carry_out_tests into v_last_carry_out
+        from public.user_daily_tasks t
+        where t.user_id = p_user_id
+          and t.task_date < p_date
+          and t.finalized_at is not null
+          and t.carryover_version is not null
+        order by t.task_date desc
+        limit 1;
+
+        v_has_prior_history := (v_last_carry_out is not null);
+
+        if p_date = v_carry_effective_from and not v_has_prior_history then
+            -- Chỉ ngày kích hoạt đầu tiên của hệ thống mới bắt đầu C = 0
+            v_carry_in := 0;
+            v_carryover_ready := true;
+        elsif p_date = v_carry_effective_from and v_has_prior_history then
+            -- Bật lại chính sách sau một khoảng thời gian tắt: nối tiếp checkpoint nợ cũ đã bảo lưu
+            v_carry_in := coalesce(v_last_carry_out, 0);
+            v_carryover_ready := true;
+        else
+            -- p_date > effective_from: nguồn bắt buộc phải từ ngày liền trước (p_date - 1)
+            select t.finalized_at, t.carry_out_tests
+            into v_prev_finalized, v_prev_carry_out
+            from public.user_daily_tasks t
+            where t.user_id = p_user_id and t.task_date = (p_date - 1);
+
+            if v_prev_finalized is not null then
+                v_carry_in := coalesce(v_prev_carry_out, 0);
+                v_carryover_ready := true;
+            else
+                -- Ngày hôm qua chưa finalized -> nguồn chưa sẵn sàng
+                v_carryover_ready := false;
+                v_carry_in := 0;
+            end if;
+        end if;
+    else
+        -- Chính sách cộng dồn chưa có hiệu lực hoặc đang bị tắt
+        v_carry_in := 0;
+        v_carryover_ready := true;
+        v_carry_effective_from := null;
+    end if;
+
+    -- R01: Tách trạng thái member hoàn thành bằng đăng nhập khỏi điều kiện đủ nguồn chốt ledger
+    if v_carryover_ready then
+        if v_exempt then
+            v_required := v_base_required + v_carry_in;
+            v_effective := least(v_required, v_a);
+            v_carry_remaining := greatest(0, v_carry_in - v_d);
+            v_met := true;
+        elsif v_mode = 'member' then
+            v_required := 0;
+            v_effective := 0;
+            v_carry_remaining := greatest(0, v_carry_in - v_d);
+            v_met := v_logged_in or v_d > 0;
+        else
+            -- mode = 'owner'
+            v_required := v_base_required + v_carry_in;
+            v_effective := least(v_required, v_a);
+            v_q := greatest(v_carry_in, v_effective);
+            v_carry_remaining := greatest(0, v_q - v_d);
+            v_met := (v_d >= v_effective);
+        end if;
+    else
+        -- Khi pending:
+        if v_mode = 'member' then
+            -- Member vẫn thấy mình hoàn thành nhiệm vụ đăng nhập trên UI
+            v_required := 0;
+            v_effective := 0;
+            v_carry_remaining := 0;
+            v_met := v_logged_in or v_d > 0;
+        else
+            -- Owner: nhiệm vụ chưa xác định, met = false
+            v_required := v_base_required;
+            v_effective := least(v_required, v_a);
+            v_carry_remaining := 0;
+            v_met := false;
+        end if;
+    end if;
+
+    v_next_pct := case
+        when v_streak <= 0 then 1
+        when v_streak = 1 then 2
+        when v_streak = 2 then 5
+        else 10
+    end;
+
+    return jsonb_build_object(
+        'status_date', to_char(p_date, 'YYYY-MM-DD'),
+        'mode', v_mode,
+        'active_app_count', v_k,
+        'required_tests', v_required,
+        'available_apps', v_a,
+        'effective_required_tests', v_effective,
+        'completed_tests', v_d,
+        'logged_in_today', v_logged_in,
+        'is_penalty_exempt', v_exempt,
+        'missed_streak', v_streak,
+        'next_penalty_percent', v_next_pct,
+        'met', v_met,
+        'base_required_tests', v_base_required,
+        'carry_in_tests', v_carry_in,
+        'carryover_remaining_tests', coalesce(v_carry_remaining, 0),
+        'carryover_ready', v_carryover_ready,
+        'carryover_effective_from', case when v_carry_effective_from is not null then to_char(v_carry_effective_from, 'YYYY-MM-DD') else null end
+    );
+end;
+$$;
+
+revoke execute on function public.get_daily_task_status(uuid, date) from public, anon, authenticated;
+grant execute on function public.get_daily_task_status(uuid, date) to service_role;
+
+-- 6. R01, R10: Cập nhật public._apply_daily_inactivity_penalty
+create or replace function public._apply_daily_inactivity_penalty(p_eval date)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_policy public.daily_task_policies;
+    v_carry_policy public.daily_task_carryover_policies;
+    v_is_carryover_active boolean := false;
+    v_effective_from date := null;
+    r record;
+    v_status jsonb;
+    v_ready boolean;
+    v_met boolean;
+    v_mode text;
+    v_required int;
+    v_effective int;
+    v_completed int;
+    v_logged_in boolean;
+    v_exempt boolean;
+    v_prev_streak int;
+    v_new_streak int;
+    v_pct numeric;
+    v_ratio numeric;
+    v_deduction int;
+    v_new_balance int;
+    v_rows int;
+    v_note text;
+    v_base_req int;
+    v_carry_in int;
+    v_carry_out int;
+    v_source_date date;
+begin
+    if p_eval is null then
+        return;
+    end if;
+
+    -- Giới hạn không chốt ngày hôm nay hoặc tương lai (trừ cờ test)
+    if p_eval >= v_today and current_setting('test.allow_future_finalize', true) is distinct from 'true' then
+        return;
+    end if;
+
+    -- Chống chạy song song giữa nhiều phiên / cron retry
+    perform pg_advisory_xact_lock(hashtextextended('daily_inactivity_penalty', 0));
+
+    v_policy := public.get_daily_task_policy(p_eval);
+    v_carry_policy := public.get_daily_task_carryover_policy(p_eval);
+    v_is_carryover_active := (v_carry_policy is not null and v_carry_policy.is_enabled and p_eval >= v_carry_policy.effective_from);
+    v_effective_from := case when v_is_carryover_active then v_carry_policy.effective_from else null end;
+
+    -- Khóa tuần tự từng profile
+    for r in
+        select p.id, p.credits, p.daily_missed_streak, lower(p.role) as role, p.created_at
+        from public.profiles p
+        where p.created_at < ((p_eval + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh')
+        for update of p
+    loop
+        -- 1. R10: Tài khoản đăng ký trong chính ngày p_eval: miễn cho ngày đăng ký, tạo checkpoint
+        if r.created_at >= (p_eval::timestamp at time zone 'Asia/Ho_Chi_Minh') then
+            insert into public.user_daily_tasks as t (
+                user_id, task_date, mode, active_app_count, required_tests,
+                effective_required_tests, available_apps, completed_tests,
+                logged_in, is_exempt, met, missed_streak, penalty_credits, finalized_at,
+                policy_id, tests_per_active_app,
+                carryover_version, base_required_tests, carry_in_tests, carry_out_tests,
+                carry_source_date, carryover_effective_from
+            ) values (
+                r.id, p_eval, 'member',
+                0, 0, 0, 0, 0,
+                true, true, true, 0, 0, now(),
+                v_policy.id, v_policy.tests_per_active_app,
+                case when v_is_carryover_active then 1 else null end,
+                0, 0, 0, null, v_effective_from
+            )
+            on conflict (user_id, task_date) do update
+            set mode = 'member',
+                active_app_count = 0,
+                required_tests = 0,
+                effective_required_tests = 0,
+                available_apps = 0,
+                completed_tests = 0,
+                logged_in = true,
+                is_exempt = true,
+                met = true,
+                missed_streak = 0,
+                penalty_credits = 0,
+                finalized_at = now(),
+                policy_id = excluded.policy_id,
+                tests_per_active_app = excluded.tests_per_active_app,
+                carryover_version = case when v_is_carryover_active then 1 else null end,
+                base_required_tests = 0,
+                carry_in_tests = 0,
+                carry_out_tests = 0,
+                carry_source_date = null,
+                carryover_effective_from = v_effective_from
+            where t.finalized_at is null;
+
+            continue;
+        end if;
+
+        -- 2. Đã finalized trước đó -> bỏ qua (idempotent, không trừ Credit lần hai)
+        if exists (
+            select 1
+            from public.user_daily_tasks t
+            where t.user_id = r.id
+              and t.task_date = p_eval
+              and t.finalized_at is not null
+        ) then
+            continue;
+        end if;
+
+        v_status := public.get_daily_task_status(r.id, p_eval);
+        if v_status is null then
+            continue;
+        end if;
+
+        v_ready := coalesce((v_status ->> 'carryover_ready')::boolean, true);
+
+        -- R01: Finalizer từ chối/hoãn riêng user-day thiếu nguồn chuyển tiếp
+        -- Không finalized, không phạt, không ghi carry_out = 0 khi carryover_ready = false
+        if v_is_carryover_active and not v_ready then
+            continue;
+        end if;
+
+        v_met := coalesce((v_status ->> 'met')::boolean, false);
+        v_mode := coalesce(v_status ->> 'mode', 'member');
+        v_required := coalesce((v_status ->> 'required_tests')::int, 0);
+        v_effective := coalesce((v_status ->> 'effective_required_tests')::int, 0);
+        v_completed := coalesce((v_status ->> 'completed_tests')::int, 0);
+        v_logged_in := coalesce((v_status ->> 'logged_in_today')::boolean, false);
+        v_exempt := coalesce((v_status ->> 'is_penalty_exempt')::boolean, false);
+        v_base_req := coalesce((v_status ->> 'base_required_tests')::int, 0);
+        v_carry_in := coalesce((v_status ->> 'carry_in_tests')::int, 0);
+        v_carry_out := coalesce((v_status ->> 'carryover_remaining_tests')::int, 0);
+        v_source_date := case when v_is_carryover_active and p_eval > v_effective_from then (p_eval - 1) else null end;
+
+        -- Lấy missed_streak từ row finalized gần nhất
+        select coalesce(
+            (select t.missed_streak
+             from public.user_daily_tasks t
+             where t.user_id = r.id
+               and t.task_date < p_eval
+               and t.finalized_at is not null
+             order by t.task_date desc
+             limit 1),
+            r.daily_missed_streak,
+            0
+        ) into v_prev_streak;
+
+        -- Xác định streak mới và phạt
+        if v_exempt then
+            v_new_streak := 0;
+            v_deduction := 0;
+        elsif v_met then
+            v_new_streak := 0;
+            v_deduction := 0;
+        else
+            -- Khi owner có effective_required_tests = 0 (do nguồn app = 0): không phạt và không tăng chuỗi
+            if v_mode = 'owner' and v_effective <= 0 then
+                v_new_streak := v_prev_streak;
+                v_deduction := 0;
+            else
+                v_new_streak := v_prev_streak + 1;
+                v_pct := case
+                    when v_new_streak = 1 then 0.01
+                    when v_new_streak = 2 then 0.02
+                    when v_new_streak = 3 then 0.05
+                    else 0.10
+                end;
+
+                if v_mode = 'owner' and v_effective > 0 then
+                    v_ratio := greatest(
+                        0,
+                        least(
+                            1,
+                            (v_effective - v_completed)::numeric / v_effective::numeric
+                        )
+                    );
+                elsif v_mode = 'member' then
+                    v_ratio := case when v_logged_in then 0 else 1 end;
+                else
+                    v_ratio := 0;
+                end if;
+
+                if v_ratio <= 0 then
+                    v_deduction := 0;
+                else
+                    v_deduction := least(
+                        r.credits,
+                        greatest(1, ceil(r.credits * v_pct * v_ratio)::int)
+                    );
+                end if;
+            end if;
+        end if;
+
+        v_new_balance := r.credits - v_deduction;
+
+        -- Ghi bản ghi vào user_daily_tasks
+        insert into public.user_daily_tasks as t (
+            user_id, task_date, mode, active_app_count, required_tests,
+            effective_required_tests, available_apps, completed_tests,
+            logged_in, is_exempt, met, missed_streak, penalty_credits, finalized_at,
+            policy_id, tests_per_active_app,
+            carryover_version, base_required_tests, carry_in_tests, carry_out_tests,
+            carry_source_date, carryover_effective_from
+        ) values (
+            r.id, p_eval, v_mode,
+            coalesce((v_status ->> 'active_app_count')::int, 0),
+            v_required,
+            v_effective,
+            coalesce((v_status ->> 'available_apps')::int, 0),
+            v_completed,
+            v_logged_in,
+            v_exempt,
+            v_met,
+            v_new_streak,
+            v_deduction,
+            now(),
+            v_policy.id,
+            v_policy.tests_per_active_app,
+            case when v_is_carryover_active then 1 else null end,
+            v_base_req,
+            v_carry_in,
+            v_carry_out,
+            v_source_date,
+            v_effective_from
+        )
+        on conflict (user_id, task_date) do update
+        set mode = excluded.mode,
+            active_app_count = excluded.active_app_count,
+            required_tests = excluded.required_tests,
+            effective_required_tests = excluded.effective_required_tests,
+            available_apps = excluded.available_apps,
+            completed_tests = excluded.completed_tests,
+            logged_in = excluded.logged_in,
+            is_exempt = excluded.is_exempt,
+            met = excluded.met,
+            missed_streak = excluded.missed_streak,
+            penalty_credits = excluded.penalty_credits,
+            finalized_at = now(),
+            policy_id = excluded.policy_id,
+            tests_per_active_app = excluded.tests_per_active_app,
+            carryover_version = excluded.carryover_version,
+            base_required_tests = excluded.base_required_tests,
+            carry_in_tests = excluded.carry_in_tests,
+            carry_out_tests = excluded.carry_out_tests,
+            carry_source_date = excluded.carry_source_date,
+            carryover_effective_from = excluded.carryover_effective_from
+        where t.finalized_at is null;
+
+        get diagnostics v_rows = row_count;
+        if v_rows = 0 then
+            continue;
+        end if;
+
+        if not v_exempt then
+            update public.profiles
+            set credits = v_new_balance,
+                daily_missed_streak = v_new_streak
+            where id = r.id;
+
+            if v_deduction > 0 then
+                if v_mode = 'owner' then
+                    v_note := format(
+                        'Không đạt chỉ tiêu ngày %s: %s/%s app (thiếu %s). Trừ %s Credit.',
+                        to_char(p_eval, 'DD/MM/YYYY'),
+                        v_completed,
+                        v_effective,
+                        greatest(0, v_effective - v_completed),
+                        v_deduction
+                    );
+                else
+                    v_note := format(
+                        'Không đăng nhập ngày %s. Trừ %s Credit.',
+                        to_char(p_eval, 'DD/MM/YYYY'),
+                        v_deduction
+                    );
+                end if;
+
+                insert into public.credit_logs (user_id, amount, action, note, balance)
+                values (r.id, -v_deduction, 'inactivity_penalty', v_note, v_new_balance);
+            end if;
+
+            if not v_met then
+                insert into public.notifications (user_id, title, message, type, data)
+                values (
+                    r.id,
+                    'Không đạt nhiệm vụ ngày',
+                    case
+                        when v_deduction = 0 and v_mode = 'owner' then format(
+                            'Ngày %s bạn mới test %s/%s app. Số dư hiện tại là 0 nên không trừ Credit, nhưng chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_completed,
+                            v_effective,
+                            v_new_streak
+                        )
+                        when v_deduction = 0 then format(
+                            'Ngày %s bạn không mở app. Số dư hiện tại là 0 nên không trừ Credit, nhưng chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_new_streak
+                        )
+                        when v_mode = 'owner' then format(
+                            'Ngày %s bạn mới test %s/%s app. Bạn bị trừ %s Credit và chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_completed,
+                            v_effective,
+                            v_deduction,
+                            v_new_streak
+                        )
+                        else format(
+                            'Ngày %s bạn không mở app. Bạn bị trừ %s Credit và chuỗi thiếu nhiệm vụ tăng lên %s ngày.',
+                            to_char(p_eval, 'DD/MM/YYYY'),
+                            v_deduction,
+                            v_new_streak
+                        )
+                    end,
+                    'credit',
+                    jsonb_build_object(
+                        'task_date', to_char(p_eval, 'YYYY-MM-DD'),
+                        'penalty_credits', v_deduction
+                    )
+                );
+            end if;
+
+            -- Nếu hôm nay (v_today) đã hoàn thành, reset streak ngay
+            perform public.refresh_daily_completion(r.id, v_today);
+        end if;
+    end loop;
+end;
+$$;
+
+revoke execute on function public._apply_daily_inactivity_penalty(date) from public, anon, authenticated;
+grant execute on function public._apply_daily_inactivity_penalty(date) to service_role;
+
+-- 7. R03: Cập nhật pause_inactive_owner_campaigns chặn auto-pause khi pending
+create or replace function public.pause_inactive_owner_campaigns()
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    r record;
+    v_count int := 0;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_status jsonb;
+begin
+    for r in
+        select c.id, c.owner_id, c.app_name
+        from public.campaigns c
+        join public.profiles p on p.id = c.owner_id
+        where c.status = 'open'
+          and coalesce(c.admin_resumed, false) = false
+          and c.created_at <= now() - interval '24 hours'
+          and lower(p.role) not in ('admin', 'moderator')
+          and p.daily_missed_streak >= 7
+        for update of c
+    loop
+        v_status := public.get_daily_task_status(r.owner_id, v_today);
+
+        -- R03: Pending không được kích hoạt auto-pause vì nhiệm vụ chưa xác định
+        if coalesce((v_status ->> 'carryover_ready')::boolean, true) = false then
+            continue;
+        end if;
+
+        -- Người vừa hoạt động lại trong hôm nay thì không pause oan
+        if coalesce((v_status ->> 'met')::boolean, false) = true then
+            continue;
+        end if;
+
+        update public.campaigns
+        set status = 'paused',
+            paused_reason = 'owner_inactive'
+        where id = r.id;
+
+        insert into public.notifications (user_id, title, message, type, data)
+        values (
+            r.owner_id,
+            'Ứng dụng đã bị tạm dừng ⏸',
+            format(
+                'Ứng dụng "%s" đã bị tạm dừng vì bạn không hoàn thành chỉ tiêu test trong 7 ngày liên tục. Hãy hoàn thành chỉ tiêu hôm nay, sau đó bấm "Tiếp tục nhận tester" trong màn hình quản lý app để hiển thị lại.',
+                coalesce(nullif(r.app_name, ''), 'của bạn')
+            ),
+            'campaign',
+            jsonb_build_object('campaign_id', r.id, 'reason', 'owner_inactive')
+        );
+
+        v_count := v_count + 1;
+    end loop;
+
+    return v_count;
+end;
+$$;
+
+revoke execute on function public.pause_inactive_owner_campaigns() from public, anon;
+grant execute on function public.pause_inactive_owner_campaigns() to authenticated, service_role;
+
+-- 8. R03: Cập nhật resume_campaign chặn resume khi pending
+create or replace function public.resume_campaign(p_campaign_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_uid uuid := auth.uid();
+    v_camp record;
+    v_missed int;
+    v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+    v_status jsonb;
+begin
+    if v_uid is null then
+        raise exception 'NOT_AUTHENTICATED';
+    end if;
+
+    select * into v_camp from public.campaigns where id = p_campaign_id for update;
+    if v_camp.id is null then
+        raise exception 'CAMPAIGN_NOT_FOUND';
+    end if;
+    if v_camp.owner_id <> v_uid then
+        raise exception 'PERMISSION_DENIED';
+    end if;
+    if v_camp.status <> 'paused' then
+        raise exception 'CAMPAIGN_NOT_PAUSED';
+    end if;
+
+    if v_camp.paused_reason = 'admin_manual' then
+        raise exception 'PAUSED_BY_ADMIN';
+    end if;
+
+    if v_camp.created_at <= now() - interval '30 days' then
+        update public.campaigns
+        set status = 'completed',
+            completed_at = now(),
+            paused_reason = null,
+            admin_note = null,
+            admin_resumed = false
+        where id = p_campaign_id;
+
+        return jsonb_build_object(
+            'success', true,
+            'campaign_id', p_campaign_id,
+            'status', 'completed'
+        );
+    end if;
+
+    if v_camp.slot_number > 1 then
+        if not exists (
+            select 1 from public.user_slots s
+            where s.user_id = v_camp.owner_id
+              and s.slot_number = v_camp.slot_number
+              and expires_at > now()
+        ) then
+            raise exception 'SLOT_EXPIRED';
+        end if;
+    end if;
+
+    -- R03: Nếu bị pause vì owner_inactive, bắt buộc phải kiểm tra nhiệm vụ hôm nay
+    if v_camp.paused_reason = 'owner_inactive' then
+        v_status := public.get_daily_task_status(v_uid, v_today);
+        if coalesce((v_status ->> 'carryover_ready')::boolean, true) = false then
+            raise exception 'DAILY_TASK_PENDING';
+        end if;
+        if coalesce((v_status ->> 'met')::boolean, false) = false then
+            raise exception 'OWNER_INACTIVE';
+        end if;
+    end if;
+
+    perform public.refresh_daily_completion(v_uid, v_today);
+
+    select daily_missed_streak into v_missed
+    from public.profiles
+    where id = v_uid;
+
+    if coalesce(v_missed, 0) >= 7 then
+        raise exception 'OWNER_INACTIVE';
+    end if;
+
+    update public.campaigns
+    set status = 'open',
+        paused_reason = null,
+        completed_at = null,
+        admin_note = null,
+        admin_resumed = false
+    where id = p_campaign_id;
+
+    return jsonb_build_object(
+        'success', true,
+        'campaign_id', p_campaign_id,
+        'status', 'open'
+    );
+end;
+$$;
+
+revoke execute on function public.resume_campaign(uuid) from public, anon;
+grant execute on function public.resume_campaign(uuid) to authenticated, service_role;
+
+notify pgrst, 'reload schema';

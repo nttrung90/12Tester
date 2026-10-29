@@ -57,6 +57,8 @@ class ReportSubmitManager(
         /** Kết quả RPC khi nộp thành công (số Credit tạm nhận thực tế, trạng thái báo cáo). */
         val result: SubmitTesterReportResult? = null,
         val requestId: String? = null,
+        val isMissionReport: Boolean = false,
+        val missionTitle: String? = null,
     )
 
     data class SubmitRequest(
@@ -70,6 +72,8 @@ class ReportSubmitManager(
         val fallbackImageHash: String?,
         val needsJoin: Boolean,
         val clientSubmitId: String = preparedScreenshot?.uploadId ?: UUID.randomUUID().toString(),
+        val missionId: String? = null,
+        val missionTitle: String? = null,
     )
 
     sealed interface SubmitEvent {
@@ -77,9 +81,17 @@ class ReportSubmitManager(
             val campaignId: String,
             val appName: String,
             val provisionalAmount: Int,
+            val isMissionReport: Boolean = false,
+            val missionTitle: String? = null,
         ) : SubmitEvent
 
-        data class Failed(val campaignId: String, val appName: String, val error: Exception?) : SubmitEvent
+        data class Failed(
+            val campaignId: String,
+            val appName: String,
+            val error: Exception?,
+            val isMissionReport: Boolean = false,
+            val missionTitle: String? = null,
+        ) : SubmitEvent
     }
 
     /** Scope sống theo process; không cancel để bài nộp chạy nền qua điều hướng. */
@@ -130,6 +142,8 @@ class ReportSubmitManager(
             stage = Stage.SENDING,
             attempt = 1,
             requestId = request.clientSubmitId,
+            isMissionReport = request.missionId != null,
+            missionTitle = request.missionTitle,
         )
         scope.launch { prepareAndEnqueue(request) }
     }
@@ -155,6 +169,8 @@ class ReportSubmitManager(
                 stage = Stage.SENDING,
                 attempt = 1,
                 requestId = report.id,
+                isMissionReport = report.missionId != null,
+                missionTitle = report.missionTitle,
             )
             try {
                 enqueueAndObserve(report, replace = true)
@@ -167,6 +183,8 @@ class ReportSubmitManager(
                     requestId = report.id,
                     attempt = 1,
                     error = e,
+                    isMissionReport = report.missionId != null,
+                    missionTitle = report.missionTitle,
                 )
             }
         }
@@ -197,6 +215,8 @@ class ReportSubmitManager(
                 requestId = request.clientSubmitId,
                 attempt = 1,
                 error = e,
+                isMissionReport = request.missionId != null,
+                missionTitle = request.missionTitle,
             )
         }
     }
@@ -251,6 +271,8 @@ class ReportSubmitManager(
             fallbackImageHash = request.fallbackImageHash,
             needsJoin = request.needsJoin,
             screenshotSha256 = pendingScreenshotPath?.let { PendingReportStore.screenshotSha256(java.io.File(it)) },
+            missionId = request.missionId,
+            missionTitle = request.missionTitle,
         )
         PendingReportStore.write(appContext, report)
         return report
@@ -289,6 +311,8 @@ class ReportSubmitManager(
                     requestId = report.id,
                     attempt = 1,
                     error = Exception("work_info_not_found"),
+                    isMissionReport = report.missionId != null,
+                    missionTitle = report.missionTitle,
                 )
                 return
             }
@@ -316,6 +340,8 @@ class ReportSubmitManager(
                             info.outputData.getString(ReportUploadWorker.KEY_ERROR)
                                 ?: "report_submit_failed"
                         ),
+                        isMissionReport = report.missionId != null,
+                        missionTitle = report.missionTitle,
                     )
                     return
                 }
@@ -327,6 +353,8 @@ class ReportSubmitManager(
                         requestId = report.id,
                         attempt = attempt,
                         error = Exception("report_submit_cancelled"),
+                        isMissionReport = report.missionId != null,
+                        missionTitle = report.missionTitle,
                     )
                     return
                 }
@@ -342,6 +370,8 @@ class ReportSubmitManager(
             stage = mapped.stage,
             attempt = mapped.attempt,
             requestId = report.id,
+            isMissionReport = report.missionId != null,
+            missionTitle = report.missionTitle,
         )
     }
 
@@ -351,6 +381,14 @@ class ReportSubmitManager(
             withContext(Dispatchers.IO) { PendingReportStore.delete(appContext, report.id) }
         }
 
+        val isMission = data.getBoolean(ReportUploadWorker.KEY_IS_MISSION_REPORT, report.missionId != null)
+        val missionId = data.getString(ReportUploadWorker.KEY_MISSION_ID) ?: report.missionId
+        val missionTitle = data.getString(ReportUploadWorker.KEY_MISSION_TITLE) ?: report.missionTitle
+        val missionRewardCredits = if (data.keyValueMap.containsKey(ReportUploadWorker.KEY_MISSION_REWARD_CREDITS)) {
+            data.getInt(ReportUploadWorker.KEY_MISSION_REWARD_CREDITS, 0)
+        } else null
+        val missionEndsAt = data.getString(ReportUploadWorker.KEY_MISSION_ENDS_AT)
+
         val result = SubmitTesterReportResult(
             success = data.getBoolean(ReportUploadWorker.KEY_SUCCESS, true),
             reportId = data.getString(ReportUploadWorker.KEY_REPORT_ID).orEmpty(),
@@ -359,6 +397,12 @@ class ReportSubmitManager(
             provisionalAmount = data.getInt(ReportUploadWorker.KEY_PROVISIONAL_AMOUNT, 0),
             screenshotUrl = data.getString(ReportUploadWorker.KEY_SCREENSHOT_URL),
             imageHash = data.getString(ReportUploadWorker.KEY_IMAGE_HASH),
+            thumbnailUrl = data.getString(ReportUploadWorker.KEY_THUMBNAIL_URL),
+            submissionContext = if (isMission) "mission" else "app_test",
+            missionId = missionId,
+            missionTitle = missionTitle,
+            missionRewardCredits = missionRewardCredits,
+            missionEndsAt = missionEndsAt,
         )
         // Phát event TRƯỚC khi guard request hiện tại: khi tester nộp 2 app liên tiếp,
         // success của app đầu không được nuốt (Credit server vẫn cộng, overlay phải hiện).
@@ -367,6 +411,8 @@ class ReportSubmitManager(
                 campaignId = report.campaignId,
                 appName = report.appName,
                 provisionalAmount = if (result.provisionalGranted) result.provisionalAmount else 0,
+                isMissionReport = isMission,
+                missionTitle = missionTitle,
             )
         )
         if (!isCurrentRequest(report.id)) return
@@ -377,6 +423,8 @@ class ReportSubmitManager(
             attempt = attempt,
             result = result,
             requestId = report.id,
+            isMissionReport = isMission,
+            missionTitle = missionTitle,
         )
     }
 
@@ -386,6 +434,8 @@ class ReportSubmitManager(
         requestId: String,
         attempt: Int,
         error: Exception,
+        isMissionReport: Boolean = false,
+        missionTitle: String? = null,
     ) {
         if (isCurrentRequest(requestId)) {
             lastFailedRequestId = requestId
@@ -395,9 +445,11 @@ class ReportSubmitManager(
                 attempt = attempt,
                 error = error,
                 requestId = requestId,
+                isMissionReport = isMissionReport,
+                missionTitle = missionTitle,
             )
         }
-        _events.tryEmit(SubmitEvent.Failed(campaignId, appName, error))
+        _events.tryEmit(SubmitEvent.Failed(campaignId, appName, error, isMissionReport, missionTitle))
     }
 
     private fun isCurrentRequest(requestId: String): Boolean =

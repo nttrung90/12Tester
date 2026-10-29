@@ -24,6 +24,9 @@ class DailyHomeOrderTest {
         hasTestedToday: Boolean = false,
         isInstalledLocally: Boolean = false,
         ownerName: String = "Owner",
+        pushBusinessDate: String? = null,
+        pushExpiresAt: String? = null,
+        pushOrder: Long? = null,
     ): CampaignDisplayItem {
         val campaign = Campaign(
             id = id,
@@ -35,6 +38,9 @@ class DailyHomeOrderTest {
             tipCredits = tipCredits,
             slotNumber = slotNumber,
             status = "open",
+            pushBusinessDate = pushBusinessDate,
+            pushExpiresAt = pushExpiresAt,
+            pushOrder = pushOrder,
         )
         return CampaignDisplayItem(
             campaign = campaign,
@@ -412,5 +418,147 @@ class DailyHomeOrderTest {
         val fallbackKey0 = "disc_fallback_${itemNoId.campaign.ownerId}_${itemNoId.campaign.packageName}_${itemNoId.campaign.slotNumber}_0"
         val fallbackKey1 = "disc_fallback_${itemNoId.campaign.ownerId}_${itemNoId.campaign.packageName}_${itemNoId.campaign.slotNumber}_1"
         assertNotEquals(fallbackKey0, fallbackKey1)
+    }
+
+    @Test
+    fun testBumpedAppAheadOfNormalAppsEvenIfTargetReachedAndNormalHasTip() {
+        val today = "2026-10-29"
+
+        // App thông thường: Chưa đủ chỉ tiêu (reached = false), có Tip 10, isBoosted = true
+        val normalSuperApp = createDisplayItem(
+            id = "normal_super",
+            todayTestedCount = 2,
+            targetTesters = 12,
+            isBoosted = true,
+            tipCredits = 10,
+        )
+
+        // App được đẩy hôm nay: ĐÃ đủ chỉ tiêu (reached = true), không có Tip, isBoosted = false
+        val bumpedApp = createDisplayItem(
+            id = "bumped_app",
+            todayTestedCount = 12,
+            targetTesters = 12,
+            isBoosted = false,
+            tipCredits = 0,
+            pushBusinessDate = today,
+            pushExpiresAt = "2026-10-29T17:00:00Z",
+            pushOrder = 1L,
+        )
+
+        val result = DailyHomeOrder.sortOpenCampaigns(listOf(normalSuperApp, bumpedApp), today)
+
+        assertEquals("App được đẩy phải đứng trước app thông thường dù đã đạt target và app kia có tip",
+            "bumped_app", result[0].campaign.id)
+        assertEquals("normal_super", result[1].campaign.id)
+    }
+
+    @Test
+    fun testMultipleBumpedAppsOrder_NewerBumpStandsAboveOlderBump() {
+        val today = "2026-10-29"
+
+        // A đẩy lúc 09:00 (pushOrder = 10)
+        val appA_first = createDisplayItem(
+            id = "app_a",
+            pushBusinessDate = today,
+            pushExpiresAt = "2026-10-29T17:00:00Z",
+            pushOrder = 10L,
+        )
+
+        // B đẩy lúc 10:00 (pushOrder = 20)
+        val appB = createDisplayItem(
+            id = "app_b",
+            pushBusinessDate = today,
+            pushExpiresAt = "2026-10-29T17:00:00Z",
+            pushOrder = 20L,
+        )
+
+        val appNormal = createDisplayItem(id = "app_normal")
+
+        // Thứ tự mong đợi: B (20) -> A (10) -> Normal
+        val round1 = DailyHomeOrder.sortOpenCampaigns(listOf(appA_first, appB, appNormal), today)
+        assertEquals(listOf("app_b", "app_a", "app_normal"), round1.map { it.campaign.id })
+
+        // A mua lượt mới lúc 11:00 (pushOrder = 30)
+        val appA_repushed = createDisplayItem(
+            id = "app_a",
+            pushBusinessDate = today,
+            pushExpiresAt = "2026-10-29T17:00:00Z",
+            pushOrder = 30L,
+        )
+
+        // Thứ tự mong đợi: A (30) -> B (20) -> Normal
+        val round2 = DailyHomeOrder.sortOpenCampaigns(listOf(appB, appA_repushed, appNormal), today)
+        assertEquals(listOf("app_a", "app_b", "app_normal"), round2.map { it.campaign.id })
+    }
+
+    @Test
+    fun testMidnightRollover_LosesPushPriorityAutomatically() {
+        val yesterday = "2026-10-28"
+        val today = "2026-10-29"
+
+        // App A được đẩy hôm qua (yesterday)
+        val appA = createDisplayItem(
+            id = "app_a",
+            pushBusinessDate = yesterday,
+            pushExpiresAt = "2026-10-28T17:00:00Z",
+            pushOrder = 100L,
+            todayTestedCount = 12,
+            targetTesters = 12,
+        )
+
+        // App B là app thông thường, chưa đạt target
+        val appB = createDisplayItem(
+            id = "app_b",
+            todayTestedCount = 2,
+            targetTesters = 12,
+        )
+
+        // Hôm qua: App A được đẩy nên đứng trước App B dù App A đã đạt target
+        val yesterdaySorted = DailyHomeOrder.sortOpenCampaigns(listOf(appA, appB), yesterday)
+        assertEquals("app_a", yesterdaySorted[0].campaign.id)
+        assertEquals("app_b", yesterdaySorted[1].campaign.id)
+
+        // Sang hôm nay: Lượt đẩy của hôm qua hết hiệu lực -> Cả hai quay lại thuật toán cũ
+        // Vì appB chưa đạt target còn appA đã đạt target (hoặc nếu chưa sanitize thì appB đứng trước vì targetReached)
+        val todaySorted = DailyHomeOrder.sortOpenCampaigns(listOf(appA, appB), today)
+        assertEquals("Sang ngày mới, app được đẩy hôm qua mất ưu tiên và quay về luật cũ",
+            "app_b", todaySorted[0].campaign.id)
+        assertEquals("app_a", todaySorted[1].campaign.id)
+    }
+
+    @Test
+    fun testRevertToExactOldAlgorithmWhenNoPushedApps() {
+        val date = "2026-10-29"
+        val items = (1..15).map { idx ->
+            createDisplayItem(
+                id = "camp_$idx",
+                todayTestedCount = if (idx % 3 == 0) 12 else idx % 10,
+                targetTesters = 12,
+                isBoosted = idx % 2 == 0,
+                tipCredits = idx % 5,
+            )
+        }
+
+        val sorted = DailyHomeOrder.sortOpenCampaigns(items, date)
+        val sortedReversedInput = DailyHomeOrder.sortOpenCampaigns(items.reversed(), date)
+
+        // Tính xác định: kết quả giống nhau bất kể thứ tự input
+        assertEquals(sorted.map { it.campaign.id }, sortedReversedInput.map { it.campaign.id })
+
+        // Toàn bộ app chưa đạt target phải đứng trước app đã đạt target
+        val notReached = sorted.filter { !it.isTargetReached }
+        val reached = sorted.filter { it.isTargetReached }
+        assertEquals(sorted, notReached + reached)
+    }
+
+    @Test
+    fun testBumpedAppTieBreaker_ByStableId() {
+        val today = "2026-10-29"
+        val appZ = createDisplayItem(id = "uuid_z", pushBusinessDate = today, pushOrder = 50L)
+        val appA = createDisplayItem(id = "uuid_a", pushBusinessDate = today, pushOrder = 50L)
+
+        val result = DailyHomeOrder.sortOpenCampaigns(listOf(appZ, appA), today)
+        assertEquals("Cùng pushOrder thì phá hòa ổn định theo stableId ASC",
+            listOf("uuid_a", "uuid_z"), result.map { it.campaign.id })
     }
 }

@@ -197,7 +197,7 @@
     <string name="daily_task_goal">Daily task: test enough different apps to meet today\'s target, or log in if you don\'t post apps.</string>
     <string name="daily_penalty_info_btn">Penalty Rules</string>
     <string name="daily_penalty_dialog_title">Daily Inactivity Penalty Policy</string>
-    <string name="daily_penalty_dialog_content" formatted="false">The system checks at 00:05 daily.\n\n• App owners: test the number of different apps shown on today\'s task card. The target depends on your active posted apps and the current policy, and is capped by the number of other apps available.\n• Members: open the app at least once a day.\n• A new app starts counting the next day; a new account is free on signup day.\n• Admin/Moderator accounts are exempt.\n\nMissed-day penalty:\n• Day 1: -1% Credits\n• Day 2: -2% Credits\n• Day 3: -5% Credits\n• Day 4+: -10% Credits\nThe percentage is multiplied by the shortfall ratio (minimum 1 Credit, never more than your balance).\n\n7 consecutive missed days: your posted apps are automatically paused until you complete today\'s target and resume them.\n\n💡 Pending/approved reports count as tests. Rejected reports do not.</string>
+    <string name="daily_penalty_dialog_content" formatted="false">The system checks at 00:05 daily (Vietnam time).\n\n• App owners: test enough different apps according to today\'s target. The target includes today\'s base requirement plus any incomplete test requirements carried over from previous days. If not enough apps are available, today\'s target is capped at available apps and any unfulfilled carryover remains preserved.\n• Members: open the app at least once a day.\n• A new app starts counting the next day; a new account is free on signup day.\n• Admin/Moderator accounts are exempt.\n\nPenalties when missing daily tasks:\n• Day 1: -1% Credits\n• Day 2: -2% Credits\n• Day 3: -5% Credits\n• Day 4+: -10% Credits\nThe rate is scaled by the missing ratio (minimum 1 Credit, not exceeding current balance). Unfinished test requirements continue carrying over to the next day and do not replace Credit penalties.\n\nMissing 7 consecutive days: your posted apps are automatically paused until you meet today\'s target and resume them.\n\n💡 Pending and approved reports count as tested. Rejected reports do not count.</string>
     <string name="daily_task_test_now">Find App to Test</string>
     <string name="daily_browse_apps">Browse Apps</string>
     <string name="daily_missed_streak_alert">Missed %1$d days in a row! You will lose up to %2$d%% Credits if you don\'t complete today\'s task.</string>
@@ -212,6 +212,11 @@
     <string name="daily_owner_goal_format">You have %1$d active posted app(s). Test %2$d different apps today to protect your Credits.</string>
     <string name="daily_owner_missed_alert">You tested %1$d/%2$d apps today. Missed %3$d days in a row — finish today\'s target to reset your streak and avoid a -%4$d%% penalty.</string>
     <string name="daily_member_goal">Open the app every day to keep your account active. Testing apps is optional.</string>
+    <string name="daily_task_carryover_badge">Updating Target</string>
+    <string name="daily_task_carryover_pending_note">Today\'s target is being updated from yesterday. You can still test apps normally; your tests will count for today.</string>
+    <string name="daily_owner_goal_with_carryover">Today\'s target: %1$d apps (%2$d today + %3$d carried over from before).</string>
+    <string name="daily_task_carryover_limited_note">Only %1$d apps are available. Today\'s target is %2$d apps; %3$d remaining carried-over apps stay preserved.</string>
+    <string name="daily_task_waived_with_carryover_note">Not enough apps open to assign a goal today. Today is waived; %1$d carried-over apps remain preserved.</string>
 
     <!-- Quests System -->
     <string name="quest_section_title">Testing Quests</string>
@@ -1162,5 +1167,74 @@
     <string name="admin_home_stats_saved_success">Home stats cycle configuration saved successfully.</string>
     <string name="admin_home_stats_load_failed">Failed to load cycle configuration: %1$s</string>
     <string name="admin_home_stats_save_failed">Failed to save cycle configuration: %1$s</string>
+
+    <!-- Mission Reports (Báo cáo nhiệm vụ) -->
+    <string name="mission_report_title">Mission report</string>
+    <string name="mission_report_badge">Mission report</string>
+    <string name="mission_report_submitted_waiting">Mission report submitted — awaiting review</string>
+    <string name="mission_report_deadline_format">Deadline: %1$s</string>
+    <string name="mission_report_reward_format">Mission reward: +%1$d Credits</string>
+    <string name="mission_expired_error">This mission has expired</string>
+    <string name="filter_all_reports">All</string>
+    <string name="filter_app_test_reports">App test</string>
+    <string name="filter_mission_reports">Mission report</string>
+
+    <!-- App Update Reward Feature (Thưởng cập nhật phiên bản app) -->
+    <string name="oad_app_update_title">New version updated</string>
+    <string name="oad_app_update_subtitle">Pay 6 Credits per updater</string>
+    <string name="app_update_screen_title">Publish new version</string>
+    <string name="app_update_current_round">Current update round</string>
+    <string name="app_update_status_active">Active</string>
+    <string name="app_update_status_exhausted">Full (20/20)</string>
+    <string name="app_update_status_superseded">Superseded</string>
+    <string name="app_update_status_closed">Closed</string>
+    <string name="app_update_progress_format">%1$d/20 people received reward</string>
+    <string name="app_update_held_format">Held: %1$d Credits</string>
+    <string name="app_update_spent_format">Spent: %1$d Credits</string>
+    <string name="app_update_close_round_btn">End round &amp; refund remaining</string>
+    <string name="app_update_close_dialog_title">End update round?</string>
+    <string name="app_update_close_dialog_desc_format">Are you sure you want to end this update round? All %1$d unused Credits will be refunded to your wallet immediately.</string>
+    <string name="app_update_form_title">Publish new version</string>
+    <string name="app_update_version_name_label">Version name</string>
+    <string name="app_update_version_name_placeholder">e.g. 1.2.0</string>
+    <string name="app_update_version_code_label">Version code (versionCode)</string>
+    <string name="app_update_version_code_placeholder">e.g. 12</string>
+    <string name="app_update_version_code_hint">Integer code on Google Play Console, must be greater than previous</string>
+    <string name="app_update_version_code_hint_greater_format">Must be greater than previous version code (%1$d)</string>
+    <string name="app_update_features_label">New update features</string>
+    <string name="app_update_features_placeholder">Describe changes, bug fixes, improvements…</string>
+    <string name="app_update_budget_rule">Hold 120 Credits • 6 Credits/person • Max 20 people</string>
+    <string name="app_update_available_balance">Available balance</string>
+    <string name="app_update_refund_from_old">Refund from previous round</string>
+    <string name="app_update_reserve_cost">Hold for new round</string>
+    <string name="app_update_projected_balance">Projected remaining balance</string>
+    <string name="app_update_insufficient_credits_format">Insufficient credits to hold 120 Credits (need %1$d more Credits).</string>
+    <string name="app_update_apply_btn">Apply</string>
+    <string name="app_update_client_limit_notice">Notice: Version code is verified via device PackageManager. Does not claim Google Play or server certified 3rd-party app installation.</string>
+    <string name="app_update_history_title">Update release history</string>
+    <string name="tester_update_title">Update new version</string>
+    <string name="tester_update_reward_badge">+6 Credits</string>
+    <string name="tester_update_btn">Update new version (+6 Credits)</string>
+    <string name="tester_update_already_updated">Updated</string>
+    <string name="tester_update_verifying">Verifying reward…</string>
+    <string name="tester_update_reward_success_format">Received +%1$d Credits update reward!</string>
+
+    <!-- Push Campaign -->
+    <string name="oad_push_title">Push App</string>
+    <string name="oad_push_subtitle">Pay 100 Credits to move your app to the top of the test list</string>
+    <string name="oad_push_helper">Valid until 00:00 (Vietnam time). Costs 100 Credits (non-refundable). Does not count toward daily task or exempt auto-pause.</string>
+    <string name="oad_push_badge">Pushed</string>
+    <string name="oad_push_active_info_format">Priority active until 00:00 tomorrow. Repush costs 100 Credits.</string>
+    <string name="oad_push_dialog_title">Confirm App Push</string>
+    <string name="oad_push_dialog_content">You will pay 100 Credits to move this app to the top of the test list until 00:00 (Vietnam time). Later pushed apps will be placed above yours. Push fee is non-refundable and does not count toward your daily task. Pushed apps may still be auto-paused if you miss your daily test goal.</string>
+    <string name="oad_push_dialog_app_format">Application: %1$s</string>
+    <string name="oad_push_dialog_current_balance_format">Current balance: %1$d Credits</string>
+    <string name="oad_push_dialog_expected_balance_format">Balance after purchase: %1$d Credits</string>
+    <string name="oad_push_dialog_confirm">Confirm Push</string>
+    <string name="oad_push_dialog_cancel">Cancel</string>
+    <string name="oad_push_paused_warning">Application is paused. Please resume testing before pushing the app.</string>
+    <string name="oad_push_insufficient_credits">You need at least 100 Credits to push your app.</string>
+    <string name="oad_push_success">App pushed to the top of the list. Deducted 100 Credits.</string>
+    <string name="oad_push_replayed_success">Confirmed previous push request. App is active at the top of the list.</string>
 
 </resources>

@@ -1,0 +1,14 @@
+allprojects {
+    afterEvaluate { p ->
+        if (p.path == ':app') {
+            p.android.sourceSets.test.kotlin.srcDir(new File(rootProject.projectDir, 'audit/two-plans-review-2026-10-29/tests'))
+        }
+    }
+}
+gradle.projectsEvaluated {
+    def p = gradle.rootProject.project(':app')
+    p.tasks.withType(Test).configureEach {
+        reports.junitXml.outputLocation = p.file(new File(p.rootProject.projectDir, 'audit/two-plans-review-2026-10-29/android-results'))
+        reports.html.outputLocation = p.file(new File(p.rootProject.projectDir, 'audit/two-plans-review-2026-10-29/android-html'))
+    }
+}

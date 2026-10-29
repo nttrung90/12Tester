@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.Campaign
+import com.ntt.crosstest.data.Mission
 import com.ntt.crosstest.data.CampaignDetailResult
 import com.ntt.crosstest.data.CampaignMember
 import com.ntt.crosstest.data.CampaignRepository
@@ -31,6 +32,8 @@ import com.ntt.crosstest.data.UserWarning
 import com.ntt.crosstest.ui.components.CreditReward
 import com.ntt.crosstest.ui.components.CreditRewardType
 import com.ntt.crosstest.util.FirebaseStorageHelper
+import com.ntt.crosstest.util.InstalledAppVersionReader
+import com.ntt.crosstest.util.InstalledVersionResult
 import com.ntt.crosstest.util.PreparedScreenshot
 import com.ntt.crosstest.util.VnTime
 import io.github.jan.supabase.auth.status.SessionStatus
@@ -95,7 +98,40 @@ data class CampaignDetailUiState(
     val submitError: String? = null,
     /** Remote approval banner (pending → approved for the same report in this session). */
     val reward: CreditReward? = null,
-)
+    /** Nhiệm vụ app đang áp dụng (nếu có và tester đã nhận/hợp lệ). */
+    val activeMission: Mission? = null,
+    val isMissionReport: Boolean = false,
+    val missionDeadlinePassed: Boolean = false,
+    val intendedMissionId: String? = null,
+    val missionContextError: String? = null,
+    val appUpdate: com.ntt.crosstest.data.AppUpdateRelease? = null,
+    val installedVersionCode: Long? = null,
+    val installedVersionName: String? = null,
+    val isCheckingInstalledVersion: Boolean = false,
+    val isClaimingUpdateReward: Boolean = false,
+    val updateClaimSuccessMessage: String? = null,
+    val updateClaimError: String? = null,
+) {
+    val isAppUpdated: Boolean
+        get() {
+            val target = appUpdate?.targetVersionCode ?: return false
+            val installed = installedVersionCode ?: return false
+            return installed >= target
+        }
+
+    val showAppUpdateBlock: Boolean
+        get() {
+            if (isOwner) return false
+            val rel = appUpdate ?: return false
+            if (!rel.isEligible) return false
+            if (campaign?.status != null && campaign.status != "open") return false
+            if (rel.isExhausted) return false
+            if (rel.status != "active") return false
+            if (rel.paidCount >= rel.maxClaims) return false
+            if (rel.remainingCredits < rel.rewardPerClaim) return false
+            return true
+        }
+}
 
 class CampaignDetailViewModel(
     private val campaignId: String,
@@ -104,10 +140,16 @@ class CampaignDetailViewModel(
     private val myUserId: String?,
     private val localizer: Localizer,
     private val appContext: Context? = null,
+    private val initialMissionId: String? = null,
 ) : ViewModel() {
 
     private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
-    private val _uiState = MutableStateFlow(CampaignDetailUiState())
+    private val _uiState = MutableStateFlow(
+        CampaignDetailUiState(
+            intendedMissionId = initialMissionId,
+            isMissionReport = initialMissionId != null,
+        )
+    )
     val uiState: StateFlow<CampaignDetailUiState> = _uiState.asStateFlow()
 
     /**
@@ -302,7 +344,14 @@ class CampaignDetailViewModel(
                     if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
                         return@launch
                     }
-                    applyDetail(detail)
+                    val todayReport = if (effectiveUserId() != null) {
+                        detail.reports.firstOrNull { it.isCreatedToday() && it.userId == effectiveUserId() }
+                    } else null
+                    val res = resolveMissionContext(todayReport)
+                    if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
+                        return@launch
+                    }
+                    applyDetail(detail, res.mission, res.isMission, res.deadlinePassed, res.intendedMissionId, res.contextError)
                     return@launch
                 }
                 val campaign = repository.getCampaign(campaignId, forceRefresh = forceRefresh)
@@ -370,6 +419,10 @@ class CampaignDetailViewModel(
                     return@launch
                 }
 
+                val res = resolveMissionContext(myTodayReport)
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
+                    return@launch
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -394,10 +447,20 @@ class CampaignDetailViewModel(
                         isUserLocked = myProfile?.isLocked == true,
                         isAdmin = myProfile?.isAdmin == true,
                         reward = remoteReward ?: it.reward,
+                        activeMission = res.mission,
+                        isMissionReport = res.isMission,
+                        missionDeadlinePassed = res.deadlinePassed,
+                        intendedMissionId = res.intendedMissionId ?: it.intendedMissionId,
+                        missionContextError = res.contextError,
                         error = null,
                     ).withReportPrefill(myTodayReport)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
+                if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != effectiveUserId()) {
+                    return@launch
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -409,8 +472,72 @@ class CampaignDetailViewModel(
         }
     }
 
+    private data class MissionResolution(
+        val mission: Mission?,
+        val isMission: Boolean,
+        val deadlinePassed: Boolean,
+        val intendedMissionId: String?,
+        val contextError: String? = null,
+    )
+
+    private suspend fun resolveMissionContext(todayReport: TesterReport?): MissionResolution {
+        val targetMissionId = initialMissionId ?: (if (todayReport?.isMissionReport == true) todayReport.missionId else _uiState.value.intendedMissionId)
+        val hasMissionIntent = targetMissionId != null || todayReport?.isMissionReport == true
+
+        var contextError: String? = null
+        val mission = try {
+            repository.getCampaignMission(campaignId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            contextError = e.message ?: "Failed to load mission"
+            null
+        }
+
+        if (contextError != null) {
+            return MissionResolution(
+                mission = null,
+                isMission = hasMissionIntent,
+                deadlinePassed = false,
+                intendedMissionId = targetMissionId,
+                contextError = contextError,
+            )
+        }
+
+        if (mission == null) {
+            val isReportMission = todayReport?.isMissionReport == true
+            return MissionResolution(
+                mission = null,
+                isMission = isReportMission || (targetMissionId != null),
+                deadlinePassed = false,
+                intendedMissionId = targetMissionId,
+                contextError = null,
+            )
+        }
+
+        val isExpired = !repository.isMissionActiveAndUnexpired(mission)
+        val hasJoined = mission.hasJoined || (targetMissionId != null && mission.id == targetMissionId)
+        val deadlinePassed = hasJoined && isExpired
+        val isMission = hasMissionIntent || (hasJoined && !isExpired)
+
+        return MissionResolution(
+            mission = mission,
+            isMission = isMission,
+            deadlinePassed = deadlinePassed,
+            intendedMissionId = targetMissionId ?: (if (isMission) mission.id else null),
+            contextError = null,
+        )
+    }
+
     /** Áp kết quả RPC `get_campaign_detail` (1 round-trip) vào UI state. */
-    private fun applyDetail(detail: CampaignDetailResult) {
+    private fun applyDetail(
+        detail: CampaignDetailResult,
+        mission: Mission? = null,
+        isMission: Boolean = false,
+        deadlinePassed: Boolean = false,
+        intendedMissionId: String? = null,
+        contextError: String? = null,
+    ) {
         val campaign = detail.campaign
         val ownerProfile = campaign.ownerId?.let { detail.profiles[it] }
         val memberProgress = detail.testers.map { tester ->
@@ -455,6 +582,12 @@ class CampaignDetailViewModel(
                 isUserLocked = detail.myProfile?.isLocked == true,
                 isAdmin = detail.myProfile?.isAdmin == true,
                 reward = remoteReward ?: it.reward,
+                activeMission = mission,
+                isMissionReport = isMission,
+                missionDeadlinePassed = deadlinePassed,
+                intendedMissionId = intendedMissionId ?: it.intendedMissionId,
+                missionContextError = contextError,
+                appUpdate = detail.appUpdate,
                 error = null,
             ).withReportPrefill(myTodayReport)
         }
@@ -775,6 +908,40 @@ class CampaignDetailViewModel(
         val alreadyRewarded = (state.checkedInToday || state.myTodayReport?.isApproved == true) &&
             state.myTodayReport?.isRejected != true
 
+        val hasMissionIntent = state.isMissionReport || state.intendedMissionId != null || state.myTodayReport?.isMissionReport == true
+        val mission = state.activeMission
+
+        if (hasMissionIntent) {
+            if (state.missionContextError != null && mission == null) {
+                _uiState.update {
+                    it.copy(submitError = localizer.get(R.string.repo_connection_failed))
+                }
+                return
+            }
+            val isExpired = state.missionDeadlinePassed || (mission != null && !repository.isMissionActiveAndUnexpired(mission))
+            if (isExpired && !alreadyRewarded) {
+                _uiState.update {
+                    it.copy(
+                        submitError = localizer.get(R.string.mission_expired_error),
+                        missionDeadlinePassed = true,
+                    )
+                }
+                return
+            }
+            if (mission == null && state.myTodayReport?.isMissionReport != true) {
+                _uiState.update {
+                    it.copy(submitError = localizer.get(R.string.mission_expired_error))
+                }
+                return
+            }
+            if (mission != null && !mission.hasJoined && state.myTodayReport?.isMissionReport != true) {
+                _uiState.update {
+                    it.copy(submitError = localizer.get(R.string.mission_joined_cta))
+                }
+                return
+            }
+        }
+
         // Báo cáo bị từ chối: bắt buộc chọn ảnh mới trước khi nộp lại.
         if (rejectedToday && state.preparedScreenshot == null) {
             _uiState.update {
@@ -791,6 +958,22 @@ class CampaignDetailViewModel(
                 R.string.campaign_report_submit_success_format,
                 ReportSubmitManager.PROVISIONAL_CREDITS,
             )
+        }
+
+        val submitMissionId = if (alreadyRewarded) {
+            if (state.myTodayReport?.isMissionReport == true) state.myTodayReport.missionId else null
+        } else if (hasMissionIntent) {
+            state.intendedMissionId ?: mission?.id ?: state.myTodayReport?.missionId
+        } else {
+            null
+        }
+
+        val submitMissionTitle = if (alreadyRewarded) {
+            if (state.myTodayReport?.isMissionReport == true) state.myTodayReport.missionTitle else null
+        } else if (hasMissionIntent) {
+            mission?.title ?: state.myTodayReport?.missionTitle
+        } else {
+            null
         }
 
         _uiState.update {
@@ -811,6 +994,8 @@ class CampaignDetailViewModel(
                 fallbackScreenshotUrl = state.myTodayReport?.screenshotUrl,
                 fallbackImageHash = state.myTodayReport?.imageHash,
                 needsJoin = !state.isMember,
+                missionId = submitMissionId,
+                missionTitle = submitMissionTitle,
             )
         )
     }
@@ -890,6 +1075,109 @@ class CampaignDetailViewModel(
                 _uiState.update { it.copy(isActionLoading = false, error = friendlyError(e, localizer)) }
             } finally {
                 refresh()
+            }
+        }
+    }
+
+    fun clearUpdateClaimMessages() {
+        _uiState.update { it.copy(updateClaimSuccessMessage = null, updateClaimError = null) }
+    }
+
+    fun checkInstalledAppVersion(context: Context) {
+        val packageName = _uiState.value.campaign?.packageName ?: return
+        val currentRel = _uiState.value.appUpdate ?: return
+        if (currentRel.isExhausted || currentRel.status != "active" || _uiState.value.isOwner) return
+        if (!currentRel.isEligible || _uiState.value.campaign?.status != "open") return
+
+        val targetReleaseId = currentRel.id
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCheckingInstalledVersion = true) }
+            val res = InstalledAppVersionReader.readInstalledVersion(context, packageName)
+            when (res) {
+                is InstalledVersionResult.Installed -> {
+                    _uiState.update {
+                        it.copy(
+                            installedVersionCode = res.versionCode,
+                            installedVersionName = res.versionName,
+                            isCheckingInstalledVersion = false,
+                        )
+                    }
+                    val liveRel = _uiState.value.appUpdate
+                    if (liveRel != null && liveRel.id == targetReleaseId) {
+                        val target = liveRel.targetVersionCode
+                        if (res.versionCode >= target && !liveRel.hasClaimed && liveRel.isEligible && !_uiState.value.isClaimingUpdateReward) {
+                            claimAppUpdateReward(liveRel.id, res.versionCode)
+                        }
+                    }
+                }
+                is InstalledVersionResult.NotInstalled -> {
+                    _uiState.update {
+                        it.copy(
+                            installedVersionCode = null,
+                            installedVersionName = null,
+                            isCheckingInstalledVersion = false,
+                        )
+                    }
+                }
+                is InstalledVersionResult.Unverifiable -> {
+                    _uiState.update {
+                        it.copy(
+                            installedVersionCode = null,
+                            installedVersionName = null,
+                            isCheckingInstalledVersion = false,
+                            updateClaimError = res.reason,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun claimAppUpdateReward(releaseId: String, observedVersionCode: Long) {
+        if (_uiState.value.isClaimingUpdateReward) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isClaimingUpdateReward = true, updateClaimError = null) }
+            try {
+                val result = repository.claimAppUpdateReward(releaseId, observedVersionCode, campaignId = campaignId).getOrThrow()
+                if (result.success) {
+                    _uiState.update { current ->
+                        val currentRel = current.appUpdate
+                        val updatedAppUpdate = if (currentRel?.id == releaseId) {
+                            currentRel.copy(
+                                hasClaimed = true,
+                                paidCount = result.paidCount,
+                                status = result.releaseStatus,
+                                claimReceipt = result.receipt,
+                            )
+                        } else {
+                            currentRel
+                        }
+                        current.copy(
+                            isClaimingUpdateReward = false,
+                            appUpdate = updatedAppUpdate,
+                            updateClaimSuccessMessage = if (result.newlyAwarded && currentRel?.id == releaseId) {
+                                "Đã nhận +${result.reward} Credit thưởng cập nhật phiên bản!"
+                            } else null,
+                        )
+                    }
+                    refresh(forceRefresh = true)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isClaimingUpdateReward = false,
+                            updateClaimError = result.message ?: "Chưa thể xác nhận thưởng cập nhật.",
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _uiState.update {
+                    it.copy(
+                        isClaimingUpdateReward = false,
+                        updateClaimError = e.localizedMessage ?: "Lỗi kết nối khi xác nhận thưởng.",
+                    )
+                }
             }
         }
     }

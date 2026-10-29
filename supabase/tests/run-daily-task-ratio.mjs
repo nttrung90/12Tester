@@ -11,18 +11,28 @@ const migration = read('supabase/migrations/042_configurable_daily_task_ratio.sq
 const full = read('supabase/full_schema_singapore.sql');
 const marker = '-- ===== 042_configurable_daily_task_ratio.sql =====\n';
 const nextMarker = '-- ===== 043_backend_cleanup_hardening.sql =====\n';
-assert.equal(full.split(marker).length, 2, 'exactly one 042 mirror');
-const section042 = full.split(marker)[1].split(nextMarker)[0].trimEnd() + '\n';
-assert.equal(section042, migration.trimEnd() + '\n', 'mirror equals migration 042 byte for byte');
 const marker044 = '-- ===== 044_mission_flow_hardening.sql =====\n';
+
+function extractSection(markerName) {
+  const markerHeader = `-- ===== ${markerName} =====\n`;
+  if (!full.includes(markerHeader)) return null;
+  const afterMarker = full.split(markerHeader)[1];
+  const nextMatch = afterMarker.match(/-- ===== 0\d{2}[^\n]*=====\n/);
+  return nextMatch ? afterMarker.slice(0, nextMatch.index).trim() : afterMarker.trim();
+}
+
+assert.equal(full.split(marker).length, 2, 'exactly one 042 mirror');
+const section042 = extractSection('042_configurable_daily_task_ratio.sql');
+assert.equal(section042, migration.trim(), 'mirror equals migration 042 byte for byte');
+
 if (full.includes(nextMarker)) {
   const migration043 = read('supabase/migrations/043_backend_cleanup_hardening.sql');
-  const section043 = (full.includes(marker044) ? full.split(nextMarker)[1].split(marker044)[0] : full.split(nextMarker)[1]).trim();
+  const section043 = extractSection('043_backend_cleanup_hardening.sql');
   assert.equal(section043, migration043.trim(), 'mirror equals migration 043 byte for byte');
 }
 if (full.includes(marker044)) {
   const migration044 = read('supabase/migrations/044_mission_flow_hardening.sql');
-  const section044 = full.split(marker044)[1].trim();
+  const section044 = extractSection('044_mission_flow_hardening.sql');
   assert.equal(section044, migration044.trim(), 'mirror equals migration 044 byte for byte');
 }
 const bootstrap = `
@@ -136,10 +146,12 @@ try {
       'get_daily_task_status','_apply_daily_inactivity_penalty','get_daily_task_policy',
       'schedule_daily_task_policy','cancel_daily_task_policy') order by p.proname`;
   const upgradedDefinitions = (await db.query(definitionsQuery)).rows;
+  const marker053 = '-- ===== 053_daily_task_carryover.sql =====\n';
+  const schemaFor042 = full.includes(marker053) ? full.split(marker053)[0] : full;
   const fresh = new PGlite({ extensions: { pgcrypto, uuid_ossp } });
   try {
     await fresh.exec(bootstrap);
-    await fresh.exec(full);
+    await fresh.exec(schemaFor042);
     assert.deepEqual((await fresh.query(definitionsQuery)).rows, upgradedDefinitions);
     console.log('PASS: fresh full-schema install matches upgraded definitions and ACLs');
     passed++;

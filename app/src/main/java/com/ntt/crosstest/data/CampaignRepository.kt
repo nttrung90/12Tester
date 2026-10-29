@@ -5,6 +5,8 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.util.VnTime
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.exceptions.RestException
+import io.github.jan.supabase.postgrest.exception.PostgrestRestException
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -97,6 +99,7 @@ class CampaignRepository(
             "description", "target_testers", "target_days", "start_date", "status",
             "icon_url", "test_username", "test_password", "tip_credits", "is_boosted",
             "slot_number", "paused_reason", "admin_note", "completed_at", "created_at",
+            "push_business_date", "push_expires_at", "push_order",
         )
     }
 
@@ -299,6 +302,7 @@ class CampaignRepository(
     fun invalidateProfile(uid: String? = null) {
         bumpMutationVersion("profile")
         cachedMyProfile = null
+        cachedCreditLogs = null
         if (uid != null) {
             profileCache.remove(uid)
         } else {
@@ -528,6 +532,8 @@ class CampaignRepository(
             ResumeCampaignParams(campaignId = campaignId)
         ).decodeAs<ResumeCampaignResult>()
         invalidateCampaign(campaignId)
+        invalidateProfile()
+        invalidateDashboardCache()
         return result
     }
     suspend fun getCampaign(id: String, forceRefresh: Boolean = false): Campaign? {
@@ -832,6 +838,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         clientSubmitId: String? = null,
         requireIdempotency: Boolean = false,
         thumbnailUrl: String? = null,
+        missionId: String? = null,
     ): SubmitTesterReportResult {
         val params = SubmitTesterReportParams(
             campaignId = campaignId,
@@ -841,6 +848,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             imageHash = imageHash,
             clientSubmitId = clientSubmitId,
             thumbnailUrl = thumbnailUrl,
+            missionId = missionId,
         )
         val result = try {
             supabase.postgrest.rpc(
@@ -848,33 +856,69 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 parameters = params,
             ).decodeAs<SubmitTesterReportResult>()
         } catch (e: Exception) {
-            if (clientSubmitId == null || !isMissingSubmitRpc(e)) throw e
-            if (requireIdempotency) throw IllegalStateException("report_idempotency_unavailable", e)
-            supabase.postgrest.rpc(
-                function = "submit_tester_report",
-                parameters = SubmitTesterReportLegacyParams(
-                    campaignId = campaignId,
-                    content = params.content,
-                    screenshotUrl = params.screenshotUrl,
-                    rating = params.rating,
-                    imageHash = params.imageHash,
-                ),
-            ).decodeAs<SubmitTesterReportResult>()
+            if (e is CancellationException) throw e
+            if (!isMissingSubmitRpc(e)) throw e
+
+            // Với yêu cầu mission mới: nếu backend chưa có RPC hỗ trợ thì báo lỗi, KHÔNG fallback bỏ missionId
+            if (missionId != null) {
+                throw IllegalStateException("server_update_required", e)
+            }
+
+            // 7 tham số thất bại do thiếu hàm trong schema cache (chưa có migration 045).
+            // Thử chữ ký 6 tham số (migration 033/037): giữ nguyên clientSubmitId để bảo toàn idempotency, chỉ bỏ thumbnailUrl.
+            try {
+                supabase.postgrest.rpc(
+                    function = "submit_tester_report",
+                    parameters = SubmitTesterReportSixParams(
+                        campaignId = campaignId,
+                        content = params.content,
+                        screenshotUrl = params.screenshotUrl,
+                        rating = params.rating,
+                        imageHash = params.imageHash,
+                        clientSubmitId = clientSubmitId,
+                    ),
+                ).decodeAs<SubmitTesterReportResult>()
+            } catch (e2: Exception) {
+                if (e2 is CancellationException) throw e2
+                if (!isMissingSubmitRpc(e2)) throw e2
+
+                // Cả chữ ký 7 tham số và 6 tham số đều không tồn tại trong schema cache.
+                if (requireIdempotency) {
+                    throw IllegalStateException("report_idempotency_unavailable", e2)
+                }
+
+                // Chỉ khi caller cho phép (requireIdempotency = false) mới fallback về 5 tham số cũ (pre-033).
+                supabase.postgrest.rpc(
+                    function = "submit_tester_report",
+                    parameters = SubmitTesterReportLegacyParams(
+                        campaignId = campaignId,
+                        content = params.content,
+                        screenshotUrl = params.screenshotUrl,
+                        rating = params.rating,
+                        imageHash = params.imageHash,
+                    ),
+                ).decodeAs<SubmitTesterReportResult>()
+            }
         }
         val uid = uid()
         invalidateReportsAndStats(campaignId)
         invalidateProfile(uid)
         invalidateMembership(campaignId)
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
         cachedCreditLogs = null
         return result
     }
 
     private fun isMissingRpc(error: Exception, functionName: String? = null): Boolean {
         if (error is CancellationException) return false
-        val message = error.message.orEmpty().lowercase()
-        val isPgrst202 = "pgrst202" in message || "could not find the function" in message
-        val isSchemaCache = functionName != null && functionName.lowercase() in message && ("schema cache" in message || "not found" in message)
-        return isPgrst202 || isSchemaCache
+        if (error is PostgrestRestException) {
+            return error.code.equals("PGRST202", ignoreCase = true) && error.statusCode == 404
+        }
+        if (error is RestException && error.statusCode != 404) return false
+        val message = error.message.orEmpty()
+        return message.contains("PGRST202", ignoreCase = true) &&
+            message.contains("could not find the function", ignoreCase = true)
     }
 
     private fun isMissingSubmitRpc(error: Exception): Boolean {
@@ -1530,6 +1574,70 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         val uid = supabase.auth.currentUserOrNull()?.id
         invalidateProfile(uid)
         cachedCreditLogs = null
+        return result
+    }
+
+    /**
+     * Mua lượt Đẩy app lên đầu danh sách kiểm thử (RPC push_campaign, migration 052).
+     * Trừ đúng 100 Credit và cập nhật thứ tự ưu tiên trong cùng 1 transaction nguyên tử.
+     * Chặn race condition đổi tài khoản bằng expectedUid và expectedGeneration.
+     */
+    suspend fun pushCampaign(campaignId: String, clientRequestId: String): PushCampaignResult {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+
+        val result = supabase.postgrest.rpc(
+            function = "push_campaign",
+            parameters = buildJsonObject {
+                put("p_campaign_id", campaignId)
+                put("p_client_request_id", clientRequestId)
+            }
+        ).decodeAs<PushCampaignResult>()
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+
+        // R05: Nếu tài khoản hoặc session đã thay đổi trong khi chờ RPC, tuyệt đối không
+        // ghi số dư hay metadata vào snapshot/cache của tài khoản mới.
+        if (currentUid == expectedUid && currentGeneration == expectedGeneration) {
+            invalidateProfile(expectedUid)
+            cachedCreditLogs = null
+            invalidateCampaign(campaignId)
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("credit_logs")
+            bumpMutationVersion("dashboard")
+
+            // Đồng bộ in-memory snapshot có guard tài khoản và generation
+            SessionCacheManager.updateCachedData(
+                expectedUserId = expectedUid,
+                expectedGeneration = expectedGeneration
+            ) { cached ->
+                val updatedProfile = cached.userProfile?.copy(credits = result.balanceAfter)
+                val updatedDisplay = cached.displayItems.map { d ->
+                    if (d.campaign.id == campaignId) {
+                        d.copy(
+                            campaign = d.campaign.copy(
+                                pushBusinessDate = result.businessDate,
+                                pushExpiresAt = result.expiresAt,
+                                pushOrder = result.pushOrder
+                            )
+                        )
+                    } else d
+                }
+                val reSorted = com.ntt.crosstest.ui.viewmodels.DailyHomeOrder.sortOpenCampaigns(
+                    updatedDisplay,
+                    cached.dateVn ?: VnTime.today().toString()
+                )
+                cached.copy(
+                    userProfile = updatedProfile,
+                    userCredits = result.balanceAfter,
+                    displayItems = reSorted
+                )
+            }
+        }
+
         return result
     }
 
@@ -2249,21 +2357,61 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
 
     // ---------------------------------------------------------------- missions (migration 039)
 
-    /** Danh sách nhiệm vụ cho tab "Nhiệm vụ App"; RPC tự expire nhiệm vụ quá hạn. */
+    @Volatile
+    private var serverTimeOffsetMs: Long? = null
+
+    fun updateServerClock(serverNowIso: String?) {
+        if (serverNowIso.isNullOrBlank()) return
+        try {
+            val serverEpochMs = java.time.Instant.parse(serverNowIso).toEpochMilli()
+            val mono = monotonicNow()
+            serverTimeOffsetMs = serverEpochMs - mono
+        } catch (_: Exception) {}
+    }
+
+    fun estimatedServerEpochMs(): Long {
+        val offset = serverTimeOffsetMs
+        return if (offset != null) {
+            monotonicNow() + offset
+        } else {
+            System.currentTimeMillis()
+        }
+    }
+
+    fun isMissionActiveAndUnexpired(mission: Mission, nowEpochMs: Long = estimatedServerEpochMs()): Boolean {
+        if (!mission.isActive && !mission.isPaused) return false
+        val endsAt = mission.endsAt ?: return true
+        return try {
+            val endEpochMs = java.time.Instant.parse(endsAt).toEpochMilli()
+            nowEpochMs < endEpochMs
+        } catch (_: Exception) {
+            true
+        }
+    }
+
+    /** Danh sách nhiệm vụ cho tab "Nhiệm vụ App"; lọc bỏ nhiệm vụ quá hạn theo deadline. */
     suspend fun getOpenMissions(forceRefresh: Boolean = false): List<Mission> {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("quests")
         val curUid = supabase.auth.currentUserOrNull()?.id
-        val isFresh = { cachedOpenMissions?.isFresh(CACHE_TTL_MS, gen, mutVer, curUid, nowMs = monotonicNow()) == true }
-        return deduped("quests", "openMissions", forceRefresh, isFresh, { cachedOpenMissions?.value }) {
+        val isFresh = {
+            cachedOpenMissions?.isFresh(CACHE_TTL_MS, gen, mutVer, curUid, nowMs = monotonicNow()) == true &&
+                cachedOpenMissions?.value?.all { isMissionActiveAndUnexpired(it) } == true
+        }
+        val cachedFiltered = {
+            cachedOpenMissions?.value?.filter { isMissionActiveAndUnexpired(it) }
+        }
+        return deduped("quests", "openMissions", forceRefresh, isFresh, cachedFiltered) {
             val result = supabase.postgrest.rpc("get_open_missions").decodeAs<OpenMissionsResult>()
+            updateServerClock(result.serverNow)
+            val filtered = result.missions.filter { isMissionActiveAndUnexpired(it) }
             if (gen == sessionGeneration.get() &&
                 curUid == supabase.auth.currentUserOrNull()?.id &&
                 mutVer == getMutationVersion("quests")
             ) {
-                cachedOpenMissions = CacheEntry(result.missions, monotonicNow(), gen, mutVer, curUid)
+                cachedOpenMissions = CacheEntry(filtered, monotonicNow(), gen, mutVer, curUid)
             }
-            result.missions
+            filtered
         }
     }
 
@@ -2333,6 +2481,91 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         bumpMutationVersion("quests")
         cachedOpenMissions = null
         return result
+    }
+
+    // =========================================================================
+    // THƯỞNG CẬP NHẬT PHIÊN BẢN APP (APP UPDATE REWARD)
+    // =========================================================================
+
+    suspend fun publishAppUpdate(
+        campaignId: String,
+        versionName: String,
+        targetVersionCode: Long,
+        releaseNotes: String,
+        clientOperationId: String? = null,
+        expectedCurrentReleaseId: String? = null,
+    ): Result<PublishAppUpdateResult> = runCatching {
+        val params = PublishAppUpdateParams(
+            campaignId = campaignId,
+            versionName = versionName,
+            targetVersionCode = targetVersionCode,
+            releaseNotes = releaseNotes,
+            clientOperationId = clientOperationId,
+            expectedCurrentReleaseId = expectedCurrentReleaseId,
+        )
+        val result = supabase.postgrest.rpc("publish_app_update", params).decodeAs<PublishAppUpdateResult>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        cachedCreditLogs = null
+        invalidateCampaign(campaignId)
+        result
+    }.recoverCatching { e ->
+        if (e is CancellationException) throw e
+        throw e
+    }
+
+    suspend fun claimAppUpdateReward(
+        releaseId: String,
+        observedVersionCode: Long,
+        campaignId: String? = null,
+    ): Result<ClaimAppUpdateResult> = runCatching {
+        val params = ClaimAppUpdateParams(
+            releaseId = releaseId,
+            observedVersionCode = observedVersionCode,
+        )
+        val result = supabase.postgrest.rpc("claim_app_update_reward", params).decodeAs<ClaimAppUpdateResult>()
+        if (result.success) {
+            val uid = supabase.auth.currentUserOrNull()?.id
+            invalidateProfile(uid)
+            cachedCreditLogs = null
+            detailCache.entries.removeIf { it.value.value.appUpdate?.id == releaseId }
+            campaignId?.let { invalidateDetailCache(it) }
+        }
+        result
+    }.recoverCatching { e ->
+        if (e is CancellationException) throw e
+        throw e
+    }
+
+    suspend fun closeAppUpdateRelease(
+        releaseId: String,
+        reason: String = "manual_close",
+        campaignId: String? = null,
+    ): Result<CloseAppUpdateReleaseResult> = runCatching {
+        val params = CloseAppUpdateReleaseParams(
+            releaseId = releaseId,
+            reason = reason,
+        )
+        val result = supabase.postgrest.rpc("close_app_update_release", params).decodeAs<CloseAppUpdateReleaseResult>()
+        if (result.success) {
+            val uid = supabase.auth.currentUserOrNull()?.id
+            invalidateProfile(uid)
+            cachedCreditLogs = null
+            detailCache.entries.removeIf { it.value.value.appUpdate?.id == releaseId }
+            campaignId?.let { invalidateDetailCache(it) }
+        }
+        result
+    }.recoverCatching { e ->
+        if (e is CancellationException) throw e
+        throw e
+    }
+
+    suspend fun getCampaignUpdateHistory(campaignId: String): Result<List<AppUpdateRelease>> = runCatching {
+        val params = CampaignIdParams(campaignId = campaignId)
+        supabase.postgrest.rpc("get_campaign_update_history", params).decodeAs<List<AppUpdateRelease>>()
+    }.recoverCatching { e ->
+        if (e is CancellationException) throw e
+        throw e
     }
 
 }

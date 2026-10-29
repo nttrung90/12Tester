@@ -1,5 +1,6 @@
 package com.ntt.crosstest.ui.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.R
@@ -7,6 +8,7 @@ import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignDetailResult
 import com.ntt.crosstest.data.CampaignMember
 import com.ntt.crosstest.data.CampaignOwnerStats
+import com.ntt.crosstest.data.CampaignPushStore
 import com.ntt.crosstest.data.CampaignRepository
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.Localizer
@@ -49,9 +51,18 @@ data class OwnerAppDetailUiState(
     val isMissionLoading: Boolean = false,
     val missionError: String? = null,
     val isMissionActionLoading: Boolean = false,
+    /** Đợt cập nhật phiên bản app hiện tại. */
+    val appUpdate: com.ntt.crosstest.data.AppUpdateRelease? = null,
     /** Reward overlay shown inside [TesterReportsDialog]. */
     val reward: CreditReward? = null,
-)
+    /** Trạng thái đang gửi yêu cầu đẩy app (RPC push_campaign). */
+    val isPushLoading: Boolean = false,
+    /** Lỗi phát sinh riêng của thao tác đẩy app. */
+    val pushError: String? = null,
+) {
+    val isPushActiveToday: Boolean
+        get() = campaign?.isPushActive() == true
+}
 
 class OwnerAppDetailViewModel(
     private val campaignId: String,
@@ -217,6 +228,7 @@ class OwnerAppDetailViewModel(
                 reports = reports,
                 isAdmin = detail.myProfile?.isAdmin == true,
                 isActualOwner = detail.isActualOwner,
+                appUpdate = detail.appUpdate,
                 error = null,
             )
         }
@@ -686,5 +698,151 @@ class OwnerAppDetailViewModel(
 
     fun clearReward() {
         _uiState.update { it.copy(reward = null) }
+    }
+
+    private val isPushActionInProgress = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Mua lượt Đẩy app (RPC push_campaign, migration 052).
+     * Chỉ gửi yêu cầu sau khi người dùng đã xác nhận trong hộp thoại.
+     */
+    fun pushApp(context: Context, onSuccess: (() -> Unit)? = null) {
+        // Khóa đồng bộ trong ViewModel ngay trước khi launch coroutine,
+        // ngăn chặn việc double-tap tạo 2 UUID hoặc gửi song song 2 request.
+        if (!isPushActionInProgress.compareAndSet(false, true)) {
+            return
+        }
+
+        val userId = repository.currentUserId()
+        if (userId == null) {
+            isPushActionInProgress.set(false)
+            _uiState.update {
+                it.copy(
+                    isPushLoading = false,
+                    pushError = localizer.get(R.string.error_permission_denied)
+                )
+            }
+            return
+        }
+
+        // R06: Tách mua mới khỏi xác minh/replay request cũ
+        val pendingRequestId = CampaignPushStore.peekPendingRequestId(context, userId, campaignId)
+        val isResolvingPending = pendingRequestId != null
+
+        val currentCamp = _uiState.value.campaign
+        if (currentCamp == null) {
+            isPushActionInProgress.set(false)
+            _uiState.update { it.copy(isPushLoading = false, pushError = localizer.get(R.string.oad_not_found)) }
+            return
+        }
+
+        // Chỉ kiểm tra điều kiện mua mới (không paused, credits >= 100) khi ĐÂY LÀ MUA MỚI
+        if (!isResolvingPending) {
+            if (currentCamp.isPaused) {
+                isPushActionInProgress.set(false)
+                _uiState.update {
+                    it.copy(
+                        isPushLoading = false,
+                        pushError = localizer.get(R.string.oad_push_paused_warning)
+                    )
+                }
+                return
+            }
+
+            val currentCredits = _uiState.value.ownerProfile?.credits ?: 0
+            if (currentCredits < 100) {
+                isPushActionInProgress.set(false)
+                _uiState.update {
+                    it.copy(
+                        isPushLoading = false,
+                        pushError = localizer.get(R.string.oad_push_insufficient_credits)
+                    )
+                }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isPushLoading = true, pushError = null) }
+
+                // Sử dụng lại request ID cũ nếu đang giải quyết pending, hoặc tạo mới có commit bền vững
+                val requestId = pendingRequestId ?: CampaignPushStore.getOrCreatePendingRequestId(context, userId, campaignId)
+
+                // Gọi RPC push_campaign trên backend
+                val result = repository.pushCampaign(campaignId, requestId)
+
+                // Đã nhận phản hồi thành công từ server -> Xóa request ID đang chờ
+                CampaignPushStore.clearPendingRequestId(context, userId, campaignId)
+
+                // R05: Kiểm tra phiên/user vẫn khớp trước khi publish state
+                val currentUid = repository.currentUserId()
+                if (currentUid != userId) {
+                    return@launch
+                }
+
+                // Phân biệt thông báo replay vs mua mới (không báo trừ 100 khi là replay)
+                val successMessage = if (result.replayed) {
+                    localizer.get(R.string.oad_push_replayed_success)
+                } else {
+                    localizer.get(R.string.oad_push_success)
+                }
+
+                // Áp ngay kết quả và số dư mới vào UI State
+                _uiState.update { state ->
+                    val updatedCamp = state.campaign?.copy(
+                        pushBusinessDate = result.businessDate,
+                        pushExpiresAt = result.expiresAt,
+                        pushOrder = result.pushOrder
+                    )
+                    val updatedProfile = state.ownerProfile?.copy(
+                        credits = result.balanceAfter
+                    )
+                    state.copy(
+                        isPushLoading = false,
+                        campaign = updatedCamp,
+                        ownerProfile = updatedProfile,
+                        message = successMessage,
+                        pushError = null
+                    )
+                }
+
+                onSuccess?.invoke()
+                refresh(forceRefresh = true)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _uiState.update {
+                    it.copy(
+                        isPushLoading = false,
+                        pushError = friendlyPushError(e)
+                    )
+                }
+            } finally {
+                isPushActionInProgress.set(false)
+            }
+        }
+    }
+
+    private fun friendlyPushError(e: Throwable): String {
+        val msg = e.message.orEmpty()
+        return when {
+            msg.contains("INSUFFICIENT_CREDITS") ->
+                localizer.get(R.string.oad_push_insufficient_credits)
+            msg.contains("CAMPAIGN_NOT_OPEN") ->
+                localizer.get(R.string.oad_push_paused_warning)
+            msg.contains("CAMPAIGN_WINDOW_EXPIRED") ->
+                localizer.get(R.string.campaign_admin_error_finalized)
+            msg.contains("SLOT_EXPIRED") ->
+                localizer.get(R.string.oad_paused_slot_desc, _uiState.value.campaign?.slotNumber ?: 1)
+            msg.contains("NOT_OWNER") ->
+                localizer.get(R.string.error_permission_denied)
+            msg.contains("ACCOUNT_LOCKED") || msg.contains("USER_LOCKED") ->
+                localizer.get(R.string.error_account_locked)
+            else -> friendlyError(e as? Exception ?: Exception(msg), localizer)
+        }
+    }
+
+    fun clearPushError() {
+        _uiState.update { it.copy(pushError = null) }
     }
 }

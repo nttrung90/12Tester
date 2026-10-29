@@ -52,6 +52,19 @@ class PendingReportStoreTest {
     @Test(expected = IOException::class) fun missingRecordCannotPretendToPersistUploadedUrl() {
         PendingReportStore.markUploaded(context, "missing", "url", "hash")
     }
+    @Test fun missionMetadataPreservedInStore() {
+        val rep = report().copy(
+            id = "mission-req-1",
+            missionId = "m-uuid-123",
+            missionTitle = "Test Nhiệm vụ đặc biệt",
+        )
+        PendingReportStore.write(context, rep)
+        val read = PendingReportStore.read(context, "mission-req-1")
+        assertNotNull(read)
+        assertEquals("m-uuid-123", read!!.missionId)
+        assertEquals("Test Nhiệm vụ đặc biệt", read.missionTitle)
+    }
+
     @Test fun fingerprintDetectsChangedBytes() {
         val image = PendingReportStore.newScreenshotFile(context, "id").apply { writeText("original") }
         val original = PendingReportStore.screenshotSha256(image)

@@ -84,7 +84,7 @@ fun QuestsScreen(
     missionsError: String? = null,
     joiningMissionId: String? = null,
     onJoinMission: (String) -> Unit = {},
-    onMissionAppClick: (String) -> Unit = {},
+    onMissionAppClick: (String, String?) -> Unit = { _, _ -> },
     onRetryMissions: () -> Unit = {},
     isAuthenticated: Boolean,
     isLoading: Boolean,
@@ -542,7 +542,7 @@ fun QuestsScreen(
                             isJoining = joiningMissionId == mission.id,
                             isAuthenticated = isAuthenticated,
                             onJoin = { onJoinMission(mission.id) },
-                            onOpenApp = { onMissionAppClick(mission.campaignId) },
+                            onOpenApp = { onMissionAppClick(mission.campaignId, mission.id) },
                             onRequireLogin = onRequireLogin,
                         )
                     }

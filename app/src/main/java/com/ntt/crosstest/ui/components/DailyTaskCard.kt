@@ -77,7 +77,8 @@ fun DailyTaskCard(
     val exempt = isPenaltyExempt || dailyTask?.isPenaltyExempt == true
     val ownerMode = dailyTask?.isOwner == true
     val memberMode = dailyTask?.isMember == true
-    val waived = ownerMode && dailyTask?.isWaived == true
+    val pendingCarryover = dailyTask?.isPendingCarryover == true
+    val waived = ownerMode && !pendingCarryover && dailyTask?.isWaived == true
     val target = when {
         exempt || waived -> 0
         ownerMode -> dailyTask?.effectiveRequiredTests ?: 1
@@ -90,6 +91,7 @@ fun DailyTaskCard(
     val met = when {
         !isAuthenticated -> false
         exempt || waived -> true
+        pendingCarryover -> false
         dailyTask != null -> dailyTask.met
         else -> todayCheckinCount >= 1
     }
@@ -110,6 +112,7 @@ fun DailyTaskCard(
     val accentColor = when {
         !isAuthenticated -> MaterialTheme.colorScheme.primary
         exempt -> accentAmber
+        pendingCarryover -> accentAmber
         waived -> accentGreen
         streak > 0 -> accentRed
         else -> accentAmber
@@ -117,6 +120,7 @@ fun DailyTaskCard(
     val accentContainer = when {
         !isAuthenticated -> MaterialTheme.colorScheme.primaryContainer
         exempt -> statusColors.warningContainer
+        pendingCarryover -> statusColors.warningContainer
         waived -> statusColors.successContainer
         streak > 0 -> MaterialTheme.colorScheme.errorContainer
         else -> statusColors.warningContainer
@@ -305,6 +309,11 @@ fun DailyTaskCard(
                         statusColors.warningContainer,
                         accentAmber
                     )
+                    pendingCarryover -> Triple(
+                        stringResource(R.string.daily_task_carryover_badge),
+                        statusColors.warningContainer,
+                        accentAmber
+                    )
                     waived -> Triple(
                         stringResource(R.string.daily_task_waived_badge),
                         statusColors.successContainer,
@@ -397,42 +406,86 @@ fun DailyTaskCard(
                     Text(stringResource(R.string.login_now), fontWeight = FontWeight.Bold)
                 }
             } else {
-                val warningMsg = when {
-                    exempt -> stringResource(R.string.daily_exempt_note)
-                    waived -> stringResource(R.string.daily_task_waived_note)
+                val messages = mutableListOf<String>()
+                when {
+                    exempt -> messages.add(stringResource(R.string.daily_exempt_note))
+                    pendingCarryover -> messages.add(stringResource(R.string.daily_task_carryover_pending_note))
+                    waived -> {
+                        val remaining = dailyTask?.carryoverRemainingTests ?: 0
+                        if (dailyTask?.hasCarryIn == true && remaining > 0) {
+                            messages.add(stringResource(R.string.daily_task_waived_with_carryover_note, remaining))
+                        } else {
+                            messages.add(stringResource(R.string.daily_task_waived_note))
+                        }
+                    }
                     ownerMode -> {
                         if (streak > 0) {
-                            stringResource(
-                                R.string.daily_owner_missed_alert,
-                                completed,
-                                target,
-                                streak,
-                                nextPct,
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_owner_missed_alert,
+                                    completed,
+                                    target,
+                                    streak,
+                                    nextPct,
+                                )
                             )
-                        } else {
-                            stringResource(
-                                R.string.daily_owner_goal_format,
-                                dailyTask?.activeAppCount ?: 0,
-                                target,
+                        }
+                        val hasCarryIn = dailyTask?.hasCarryIn == true
+                        val isSourceLimited = (dailyTask?.availableApps ?: 0) < (dailyTask?.requiredTests ?: 0)
+                        if (hasCarryIn && isSourceLimited) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_task_carryover_limited_note,
+                                    dailyTask?.availableApps ?: target,
+                                    target,
+                                    dailyTask?.carryoverRemainingTests ?: 0,
+                                )
+                            )
+                        } else if (hasCarryIn) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_owner_goal_with_carryover,
+                                    target,
+                                    dailyTask?.baseRequiredTests ?: 0,
+                                    dailyTask?.carryInTests ?: 0,
+                                )
+                            )
+                        } else if (streak == 0) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_owner_goal_format,
+                                    dailyTask?.activeAppCount ?: 0,
+                                    target,
+                                )
                             )
                         }
                     }
-                    memberMode -> stringResource(R.string.daily_member_goal)
-                    streak > 0 -> stringResource(
-                        R.string.daily_missed_streak_alert,
-                        streak,
-                        nextPct,
-                    )
-                    else -> stringResource(R.string.daily_quest_warning)
+                    memberMode -> messages.add(stringResource(R.string.daily_member_goal))
+                    else -> {
+                        if (streak > 0) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_missed_streak_alert,
+                                    streak,
+                                    nextPct,
+                                )
+                            )
+                        } else {
+                            messages.add(stringResource(R.string.daily_quest_warning))
+                        }
+                    }
                 }
 
-                Text(
-                    text = warningMsg,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = accentColor,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 18.sp,
-                )
+                messages.forEachIndexed { index, msg ->
+                    if (index > 0) Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = msg,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = accentColor,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 18.sp,
+                    )
+                }
 
                 Spacer(Modifier.height(4.dp))
 

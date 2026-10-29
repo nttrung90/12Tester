@@ -250,14 +250,15 @@ object FirebaseStorageHelper {
         }
         val metadata = metadataBuilder.build()
 
+        val upload = storageRef.putFile(Uri.fromFile(thumbnailFile), metadata)
         try {
-            val upload = storageRef.putFile(Uri.fromFile(thumbnailFile), metadata)
             upload.await()
             storageRef.awaitDownloadUrlWithRetry(maxAttempts = 3, initialDelayMs = 500L)
         } catch (e: CancellationException) {
+            upload.cancel()
             throw e
         } catch (e: Exception) {
-            ReportSubmitPolicy.cancellationCause(e)?.let { throw it }
+            ReportSubmitPolicy.cancellationCause(e)?.let { upload.cancel(); throw it }
             if (BuildConfig.DEBUG) Log.w(TAG, "uploadReportThumbnail failed non-fatal: ${e.message}")
             null
         }

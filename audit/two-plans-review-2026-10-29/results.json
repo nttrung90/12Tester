@@ -1,0 +1,177 @@
+[
+  {
+    "name": "C01_finalizer_seals_pending_without_source",
+    "status": "REPRODUCED",
+    "evidence": {
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-10-28",
+        "missed_streak": 0,
+        "available_apps": 1,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": false,
+        "completed_tests": 0,
+        "logged_in_today": false,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-24",
+        "effective_required_tests": 1,
+        "carryover_remaining_tests": 0
+      },
+      "row": {
+        "carry_in_tests": 0,
+        "carry_out_tests": 0,
+        "met": false,
+        "penalty_credits": 10,
+        "sealed": true
+      }
+    }
+  },
+  {
+    "name": "C02_auto_pause_during_pending",
+    "status": "REPRODUCED",
+    "evidence": {
+      "ready": false,
+      "row": {
+        "status": "paused",
+        "paused_reason": "owner_inactive"
+      }
+    }
+  },
+  {
+    "name": "C03_resume_allowed_while_owner_pending",
+    "status": "REPRODUCED",
+    "evidence": {
+      "ready": false,
+      "result": {
+        "status": "open",
+        "success": true,
+        "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+      }
+    }
+  },
+  {
+    "name": "C04_policy_reenable_discards_frozen_debt",
+    "status": "REPRODUCED",
+    "evidence": {
+      "previous_debt": 8,
+      "status": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-10-29",
+        "missed_streak": 0,
+        "available_apps": 1,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-29",
+        "effective_required_tests": 1,
+        "carryover_remaining_tests": 1
+      }
+    }
+  },
+  {
+    "name": "C05_past_day_recomputed_from_current_campaign_state",
+    "status": "REPRODUCED",
+    "evidence": {
+      "same_past_date": "2026-10-29 minus 2",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-10-27",
+        "missed_streak": 0,
+        "available_apps": 1,
+        "carry_in_tests": 2,
+        "required_tests": 5,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-24",
+        "effective_required_tests": 1,
+        "carryover_remaining_tests": 2
+      },
+      "after": {
+        "met": true,
+        "mode": "member",
+        "status_date": "2026-10-27",
+        "missed_streak": 0,
+        "available_apps": 1,
+        "carry_in_tests": 2,
+        "required_tests": 0,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 0,
+        "is_penalty_exempt": false,
+        "base_required_tests": 0,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-24",
+        "effective_required_tests": 0,
+        "carryover_remaining_tests": 2
+      },
+      "sealed": {
+        "mode": "member",
+        "met": true,
+        "penalty_credits": 0,
+        "carry_in_tests": 2,
+        "carry_out_tests": 2
+      }
+    }
+  },
+  {
+    "name": "C06_policy_can_be_rewritten_retroactively",
+    "status": "REPRODUCED",
+    "evidence": {
+      "is_enabled": false
+    }
+  },
+  {
+    "name": "P01_receipt_blocks_account_deletion",
+    "status": "REPRODUCED",
+    "evidence": {
+      "code": "23001",
+      "message": "update or delete on table \"profiles\" violates RESTRICT setting of foreign key constraint \"campaign_push_receipts_user_id_fkey\" on table \"campaign_push_receipts\""
+    }
+  },
+  {
+    "name": "P02_deleted_campaign_receipt_cannot_replay",
+    "status": "REPRODUCED",
+    "evidence": {
+      "message": "REQUEST_ID_CONFLICT"
+    }
+  },
+  {
+    "name": "P03_authenticated_can_bypass_guard_with_custom_setting",
+    "status": "REPRODUCED",
+    "evidence": {
+      "sql_role_scope": "authenticated SQL session; not a demonstrated PostgREST exploit",
+      "credits": 1000,
+      "push_order": 999999,
+      "receipts": 0
+    }
+  },
+  {
+    "name": "C07_signup_existing_login_row_not_marked_exempt",
+    "status": "REPRODUCED",
+    "evidence": {
+      "is_exempt": false,
+      "met": false,
+      "carryover_version": null,
+      "sealed": true
+    }
+  }
+]

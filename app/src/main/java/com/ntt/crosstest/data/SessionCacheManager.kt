@@ -111,6 +111,22 @@ object SessionCacheManager {
     fun currentGeneration(): Long = generation.get()
 
     /**
+     * Cập nhật nhanh in-memory cache sau các thao tác thay đổi số dư hoặc ưu tiên hiển thị.
+     * Chặn ghi nhầm dữ liệu giữa các phiên/tài khoản bằng expectedUserId và expectedGeneration.
+     */
+    fun updateCachedData(
+        expectedUserId: String? = null,
+        expectedGeneration: Long? = null,
+        transform: (CachedSessionData) -> CachedSessionData
+    ): Boolean {
+        val current = inMemoryCache ?: return false
+        if (expectedUserId != null && current.userId != expectedUserId) return false
+        if (expectedGeneration != null && generation.get() != expectedGeneration) return false
+        inMemoryCache = transform(current)
+        return true
+    }
+
+    /**
      * Synchronously returns the in-memory cache without performing any disk I/O.
      */
     fun peekMemory(): CachedSessionData? = if (isTombstoned) null else inMemoryCache?.sanitizeForDate()

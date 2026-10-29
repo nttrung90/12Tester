@@ -61,6 +61,7 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
@@ -141,6 +142,7 @@ import com.ntt.crosstest.ui.viewmodels.CampaignDetailViewModel
 @Composable
 fun CampaignDetailScreen(
     campaignId: String,
+    initialMissionId: String? = null,
     onBack: () -> Unit,
     onOwnerManageClick: ((String) -> Unit)? = null,
     onNavigateToCampaign: ((String) -> Unit)? = null,
@@ -151,7 +153,7 @@ fun CampaignDetailScreen(
     val app = context.applicationContext as TestCheoApp
     val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
     val viewModel: CampaignDetailViewModel = viewModel(
-        key = campaignId,
+        key = if (initialMissionId != null) "$campaignId:$initialMissionId" else campaignId,
         factory = viewModelFactory {
             initializer {
                 CampaignDetailViewModel(
@@ -161,6 +163,7 @@ fun CampaignDetailScreen(
                     app.authRepository.currentUserId(),
                     Localizer(app),
                     app,
+                    initialMissionId = initialMissionId,
                 )
             }
         }
@@ -189,15 +192,29 @@ fun CampaignDetailScreen(
         viewModel.onScreenshotSelected(uri, context)
     }
 
-    LifecycleResumeEffect(campaignId, uiState.campaign?.packageName) {
+    LifecycleResumeEffect(campaignId, uiState.campaign?.packageName, uiState.appUpdate?.id) {
         val pkg = uiState.campaign?.packageName.orEmpty()
         if (pkg.isNotBlank()) {
             isInstalledLocally = try {
                 context.packageManager.getLaunchIntentForPackage(pkg) != null
             } catch (_: Exception) { false }
+            viewModel.checkInstalledAppVersion(context)
         }
         viewModel.refresh()
         onPauseOrDispose { }
+    }
+
+    LaunchedEffect(uiState.appUpdate?.id, uiState.appUpdate?.targetVersionCode) {
+        if (uiState.appUpdate != null && !uiState.isOwner) {
+            viewModel.checkInstalledAppVersion(context)
+        }
+    }
+
+    LaunchedEffect(uiState.updateClaimSuccessMessage) {
+        uiState.updateClaimSuccessMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearUpdateClaimMessages()
+        }
     }
 
     LaunchedEffect(uiState.message) {
@@ -336,7 +353,11 @@ fun CampaignDetailScreen(
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
-                                text = stringResource(R.string.campaign_submit_sent_ok),
+                                text = if (uiState.isMissionReport) {
+                                    stringResource(R.string.mission_report_submitted_waiting)
+                                } else {
+                                    stringResource(R.string.campaign_submit_sent_ok)
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF2E7D32),
                             )
@@ -653,11 +674,30 @@ fun CampaignDetailScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Text(
-                                                text = stringResource(R.string.campaign_history_date_format, rep.createdAt?.take(10) ?: stringResource(R.string.today)),
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.campaign_history_date_format, rep.createdAt?.take(10) ?: stringResource(R.string.today)),
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                )
+                                                if (rep.isMissionReport) {
+                                                    Surface(
+                                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                                        shape = RoundedCornerShape(4.dp),
+                                                    ) {
+                                                        Text(
+                                                            text = stringResource(R.string.mission_report_badge),
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
                                             val badgeText = when {
                                                 rep.isApproved -> stringResource(R.string.campaign_history_status_approved_format, rep.approvedReward)
                                                 rep.isPending -> stringResource(R.string.campaign_history_status_pending_format, rep.remainingHoursUntilAutoAccept())
@@ -669,6 +709,16 @@ fun CampaignDetailScreen(
                                                 else -> MaterialTheme.colorScheme.error
                                             }
                                             Text(text = badgeText, color = badgeColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+                                        }
+                                        if (rep.isMissionReport && !rep.missionTitle.isNullOrBlank()) {
+                                            Text(
+                                                text = rep.missionTitle,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
                                         }
                                         if (rep.content.isNotBlank()) {
                                             Text(text = rep.content, style = MaterialTheme.typography.bodySmall)
@@ -1490,6 +1540,190 @@ fun CampaignDetailScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // Khối Cập nhật phiên bản mới (+6 Credit) dành cho Tester
+                    if (uiState.showAppUpdateBlock && isInstalledLocally) {
+                        val rel = uiState.appUpdate!!
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (uiState.isAppUpdated) {
+                                    Color(0xFF2E7D32).copy(alpha = 0.08f)
+                                } else {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                                }
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                if (uiState.isAppUpdated) Color(0xFF2E7D32).copy(alpha = 0.35f)
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                            ),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = if (uiState.isAppUpdated) Icons.Filled.CheckCircle else Icons.Filled.SystemUpdate,
+                                            contentDescription = null,
+                                            tint = if (uiState.isAppUpdated) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp),
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.tester_update_title),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = if (uiState.isAppUpdated) Color(0xFF2E7D32).copy(alpha = 0.15f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.tester_update_reward_badge),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (uiState.isAppUpdated) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = "v${rel.versionName}: ${rel.releaseNotes}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+
+                                if (uiState.isAppUpdated) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color(0xFF2E7D32).copy(alpha = 0.12f))
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.CheckCircle,
+                                            contentDescription = null,
+                                            tint = Color(0xFF2E7D32),
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = if (rel.hasClaimed) {
+                                                stringResource(R.string.tester_update_already_updated)
+                                            } else if (uiState.isClaimingUpdateReward) {
+                                                stringResource(R.string.tester_update_verifying)
+                                            } else {
+                                                stringResource(R.string.tester_update_already_updated)
+                                            },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF2E7D32),
+                                        )
+                                        if (uiState.isClaimingUpdateReward) {
+                                            Spacer(Modifier.width(8.dp))
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(14.dp),
+                                                strokeWidth = 2.dp,
+                                                color = Color(0xFF2E7D32),
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (uiState.updateClaimError != null) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                        ) {
+                                            Text(
+                                                text = uiState.updateClaimError ?: "",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            if (uiState.isAppUpdated && !rel.hasClaimed) {
+                                                TextButton(
+                                                    onClick = {
+                                                        uiState.installedVersionCode?.let { code ->
+                                                            viewModel.claimAppUpdateReward(rel.id, code)
+                                                        } ?: viewModel.checkInstalledAppVersion(context)
+                                                    },
+                                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.campaign_submit_retry_btn),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            val pkg = campaign.packageName
+                                            val marketUri = Uri.parse("market://details?id=$pkg")
+                                            val webUri = Uri.parse("https://play.google.com/store/apps/details?id=$pkg")
+                                            try {
+                                                val intent = Intent(Intent.ACTION_VIEW, marketUri).apply {
+                                                    setPackage("com.android.vending")
+                                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                }
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {
+                                                try {
+                                                    val browserIntent = Intent(Intent.ACTION_VIEW, webUri).apply {
+                                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                    }
+                                                    context.startActivity(browserIntent)
+                                                } catch (_: Exception) {}
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.SystemUpdate,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.tester_update_btn),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Blue pill button: Test app
                     Button(
                         onClick = {
@@ -1631,6 +1865,38 @@ fun CampaignDetailScreen(
                             stringResource(R.string.campaign_today_ready)
                         }
 
+                        if (todayReport?.isMissionReport == true || (uiState.isMissionReport && !isApprovedToday && !isPendingToday && !isRejectedToday)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    shape = RoundedCornerShape(6.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.mission_report_badge),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                                val mTitle = todayReport?.missionTitle ?: uiState.activeMission?.title
+                                if (!mTitle.isNullOrBlank()) {
+                                    Text(
+                                        text = mTitle,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1714,6 +1980,8 @@ fun CampaignDetailScreen(
                             stringResource(R.string.campaign_action_pending)
                         } else if (isRejectedToday) {
                             stringResource(R.string.campaign_action_rejected)
+                        } else if (uiState.isMissionReport) {
+                            stringResource(R.string.mission_report_title)
                         } else {
                             stringResource(R.string.campaign_action_submit)
                         }
@@ -2130,6 +2398,7 @@ private fun SubmitReportBottomSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = when {
+                            uiState.isMissionReport -> stringResource(R.string.mission_report_title)
                             alreadyRewarded -> stringResource(R.string.campaign_send_extra_btn)
                             isPendingToday -> stringResource(R.string.campaign_sheet_update_title)
                             else -> stringResource(R.string.campaign_sheet_submit_title)
@@ -2146,6 +2415,50 @@ private fun SubmitReportBottomSheet(
                 }
                 IconButton(onClick = onDismiss, enabled = !uiState.isActionLoading) {
                     Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
+                }
+            }
+
+            if (uiState.isMissionReport && uiState.activeMission != null) {
+                val mission = uiState.activeMission
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("🎯", fontSize = 16.sp)
+                            Text(
+                                text = mission.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        if (mission.rewardCredits > 0) {
+                            Text(
+                                text = stringResource(R.string.mission_report_reward_format, mission.rewardCredits),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        mission.endsAt?.let { deadline ->
+                            Text(
+                                text = stringResource(R.string.mission_report_deadline_format, formatIsoUtcToLocal(deadline)),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
 

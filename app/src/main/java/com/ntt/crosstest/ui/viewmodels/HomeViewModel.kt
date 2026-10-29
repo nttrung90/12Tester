@@ -226,6 +226,15 @@ class HomeViewModel(
                     val delayMs = java.time.Duration.between(now, nextMidnight).toMillis().coerceIn(1000L, 86_400_000L)
                     kotlinx.coroutines.delay(delayMs)
                     refresh(forceRefresh = true)
+
+                    // Chờ thêm đến 00:05:05 VN để tự động tải lại chỉ tiêu cộng dồn khi cron chốt ngày xong
+                    val nextCronFinalize = currentDay.plusDays(1).atStartOfDay(zone).plusMinutes(5).plusSeconds(5)
+                    val nowAfterMidnight = java.time.ZonedDateTime.now(zone)
+                    if (nowAfterMidnight.isBefore(nextCronFinalize)) {
+                        val waitCronMs = java.time.Duration.between(nowAfterMidnight, nextCronFinalize).toMillis()
+                        kotlinx.coroutines.delay(waitCronMs.coerceIn(1000L, 360_000L))
+                        refresh(forceRefresh = true)
+                    }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -238,6 +247,7 @@ class HomeViewModel(
     fun stopMidnightScheduler() {
         midnightJob?.cancel()
         midnightJob = null
+        stopPendingCarryoverRetry()
     }
 
     /** Gom dữ liệu cá nhân của Trang chủ, dùng chung cho fast path (dashboard RPC) và legacy. */
@@ -372,6 +382,7 @@ class HomeViewModel(
                     is SessionStatus.Authenticated -> {
                         val uid = repository.currentUserId()
                         if (uid != null && uid != lastSyncedUid) {
+                            stopPendingCarryoverRetry()
                             refreshWhenSessionReady = false
                             refresh(forceRefresh = false)
                         } else if (uid != null && refreshWhenSessionReady) {
@@ -382,6 +393,7 @@ class HomeViewModel(
                         }
                     }
                     is SessionStatus.NotAuthenticated -> {
+                        stopPendingCarryoverRetry()
                         refreshWhenSessionReady = false
                         val ctx = context
                         val hadSnapshot = ctx != null && SessionCacheManager.hasCachedSession(ctx)
@@ -834,6 +846,7 @@ class HomeViewModel(
                         error = null,
                     )
                 }
+                checkAndSchedulePendingCarryoverRetry(finalDailyTask)
                 renderedUserId = initialUid
                 lastSyncedUid = initialUid
 
@@ -1256,6 +1269,7 @@ class HomeViewModel(
                     return@launch
                 }
                 _uiState.update { it.copy(missions = missions, isMissionsLoading = false, missionsError = null) }
+                scheduleNextMissionDeadlineCheck()
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 if (seq != missionRefreshSequence.get() ||
@@ -1351,5 +1365,99 @@ class HomeViewModel(
                 onResult(false, msg)
             }
         }
+    }
+
+    private var missionDeadlineJob: kotlinx.coroutines.Job? = null
+
+    /**
+     * Lọc bỏ ngay các nhiệm vụ đã đến hoặc quá hạn (ends_at <= server_now)
+     * khỏi danh sách đang hiển thị, không chờ kéo refresh (mục 5 kế hoạch).
+     */
+    fun pruneExpiredMissions() {
+        val now = repository.estimatedServerEpochMs()
+        _uiState.update { state ->
+            val unexpired = state.missions.filter { repository.isMissionActiveAndUnexpired(it, now) }
+            if (unexpired.size != state.missions.size) {
+                state.copy(missions = unexpired)
+            } else {
+                state
+            }
+        }
+        scheduleNextMissionDeadlineCheck()
+    }
+
+    private fun scheduleNextMissionDeadlineCheck() {
+        missionDeadlineJob?.cancel()
+        val currentMissions = _uiState.value.missions
+        if (currentMissions.isEmpty()) return
+        val now = repository.estimatedServerEpochMs()
+        val nextDeadlineDelay = currentMissions.mapNotNull { m ->
+            val endsAt = m.endsAt ?: return@mapNotNull null
+            val epoch = runCatching { java.time.Instant.parse(endsAt).toEpochMilli() }.getOrNull() ?: return@mapNotNull null
+            val delayMs = epoch - now
+            if (delayMs > 0) delayMs else null
+        }.minOrNull() ?: return
+
+        missionDeadlineJob = viewModelScope.launch {
+            kotlinx.coroutines.delay((nextDeadlineDelay + 200).coerceAtLeast(100L))
+            pruneExpiredMissions()
+        }
+    }
+
+    fun stopMissionDeadlineScheduler() {
+        missionDeadlineJob?.cancel()
+        missionDeadlineJob = null
+    }
+
+    private var pendingCarryoverJob: kotlinx.coroutines.Job? = null
+
+    fun stopPendingCarryoverRetry() {
+        pendingCarryoverJob?.cancel()
+        pendingCarryoverJob = null
+    }
+
+    private fun checkAndSchedulePendingCarryoverRetry(dailyTask: DailyTaskStatus?) {
+        if (dailyTask == null || dailyTask.carryoverReady != false) {
+            stopPendingCarryoverRetry()
+            return
+        }
+        if (pendingCarryoverJob?.isActive == true) return
+
+        val targetUid = repository.currentUserId() ?: return
+        val backoffDelaysMs = longArrayOf(5_000L, 10_000L, 20_000L, 30_000L, 30_000L)
+
+        pendingCarryoverJob = viewModelScope.launch {
+            for (delayMs in backoffDelaysMs) {
+                kotlinx.coroutines.delay(delayMs)
+                if (repository.currentUserId() != targetUid) break
+                try {
+                    val freshStatus = repository.getMyDailyTaskStatus().forCurrentUi()
+                    if (repository.currentUserId() != targetUid) break
+                    if (freshStatus != null) {
+                        _uiState.update { state ->
+                            state.copy(
+                                dailyTask = freshStatus,
+                                missedStreak = freshStatus.missedStreak
+                            )
+                        }
+                        if (freshStatus.carryoverReady != false) {
+                            break
+                        }
+                    }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // Tiếp tục thử lần sau
+                }
+            }
+            pendingCarryoverJob = null
+        }
+    }
+
+    override fun onCleared() {
+        stopMidnightScheduler()
+        stopMissionDeadlineScheduler()
+        stopPendingCarryoverRetry()
+        super.onCleared()
     }
 }

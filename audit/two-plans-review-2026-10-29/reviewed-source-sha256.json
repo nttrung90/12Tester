@@ -1,0 +1,38 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\052_campaign_push_priority.sql",
+    "Hash": "73465BF21C7DE928E9951D8C2C51BE0B9107760B0F260DABC342A0E43903D59E"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\053_daily_task_carryover.sql",
+    "Hash": "ABDF878B045378413CD00F4D7F8C9446D917A353F869E9DF756E9F7BAD69635D"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "Hash": "D030C3CF653974E12B9FF0C8A8DBC6BB28737CF89D0608A79D196955AEB7F76E"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignPushStore.kt",
+    "Hash": "93E4E97BAD632BA7D16F5898E572E0C1CE9BD7D45DCA81133FFEA693BDD9F5D6"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "Hash": "C738F00FB751F270B83FDEB576414770BA6C5D2977E0A75A64309F95ECF61A41"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "Hash": "8C3B44FF883806E57432C59040C69E48333833369D65E2A931141296A043D8E0"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "Hash": "66E85A08C563D95CF120C40E6C6D78F84A15F9941310870EF69635EE7E02B2F4"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "Hash": "6DE9015B7947519ED0C1A3B07130466238F0FC50C4493ECE354807B327FD789F"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "Hash": "DCE2E26E97A02099E01AA0375653333663231BF4E4523D73C31548BA4B4850AE"
+  }
+]
