@@ -1,0 +1,12 @@
+{
+  "logName": "review-session-identity-first",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T00:13:46.0226421Z",
+  "finishedUtc": "2026-11-05T00:14:08.4366476Z",
+  "currentRunXmlCount": 0
+}

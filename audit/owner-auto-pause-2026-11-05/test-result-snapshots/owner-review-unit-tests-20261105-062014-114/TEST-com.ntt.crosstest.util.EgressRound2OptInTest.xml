@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.EgressRound2OptInTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:20:08.963Z" hostname="PC-5700X3D" time="0.223">
+  <properties/>
+  <testcase name="optedOutDirectManagerMemoryHitDoesNotCollect" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.012"/>
+  <testcase name="runtimeAuthObserverBindsRestoredSessionAndPurgesOnSignOutAndSwitch" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.015"/>
+  <testcase name="contextlessSignOutThenContextfulSignOutStillPurgesDisk" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.018"/>
+  <testcase name="contextlessAccountSwitchDoesNotForgetPreviousAccountFiles" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.02"/>
+  <testcase name="enabledButUnconfiguredGatewayDoesNotFallBackToPublicDownload" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.01"/>
+  <testcase name="appCheckObservationTracksTokensAndMaintainsMonitorOnlySafety" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.113"/>
+  <testcase name="imageFetchSuccessDoesNotProveAnAppCheckTokenWasObserved" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.021"/>
+  <testcase name="optedOutRuntimeLoaderMemoryHitDoesNotCollect" classname="com.ntt.crosstest.util.EgressRound2OptInTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

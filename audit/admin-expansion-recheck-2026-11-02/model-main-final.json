@@ -1,0 +1,11 @@
+{
+  "session": "ses_e6692a9d2ffeVerBnVRg37dr7M",
+  "assistantMessages": 108,
+  "models": [
+    {
+      "provider": "google",
+      "model": "antigravity-gemini-3.8-flash",
+      "variant": "high"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+PASS through 77: admin resume preserves JSON fields and owner_inactive flag
+PASS through 77: admin resume audit preserves original reason
+PASS through 77: owner resume allows streak 4 with configured threshold 7
+PASS through 77: owner resume blocks streak 1 with configured threshold 1
+Resume contract failures: 0

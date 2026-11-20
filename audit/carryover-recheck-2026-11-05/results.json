@@ -1,0 +1,406 @@
+{
+  "generatedAt": "2026-11-05T10:58:09.515Z",
+  "environment": "Disposable PGlite, active migrations in order, no live server",
+  "results": [
+    {
+      "name": "Four days: partial, partial, clears all debt, over-completion",
+      "result": "PASS",
+      "evidence": [
+        {
+          "carry_in_tests": 0,
+          "carry_out_tests": 2,
+          "completed_tests": 4,
+          "required_tests": 6,
+          "met": false,
+          "penalty_credits": 34
+        },
+        {
+          "carry_in_tests": 2,
+          "carry_out_tests": 3,
+          "completed_tests": 5,
+          "required_tests": 8,
+          "met": false,
+          "penalty_credits": 75
+        },
+        {
+          "carry_in_tests": 3,
+          "carry_out_tests": 0,
+          "completed_tests": 9,
+          "required_tests": 9,
+          "met": true,
+          "penalty_credits": 0
+        },
+        {
+          "carry_in_tests": 0,
+          "carry_out_tests": 0,
+          "completed_tests": 10,
+          "required_tests": 6,
+          "met": true,
+          "penalty_credits": 0
+        }
+      ]
+    },
+    {
+      "name": "Seven unfinished days accumulate without a reset",
+      "result": "PASS",
+      "evidence": {
+        "finalDebt": 14
+      }
+    },
+    {
+      "name": "Supply matrix C=2, A=5, D=5",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 2,
+        "available_apps": 5,
+        "completed_tests": 5,
+        "effective_required_tests": 5,
+        "carryover_remaining_tests": 0,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Supply matrix C=8, A=5, D=5",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 8,
+        "available_apps": 5,
+        "completed_tests": 5,
+        "effective_required_tests": 5,
+        "carryover_remaining_tests": 3,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Supply matrix C=8, A=0, D=0",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 8,
+        "available_apps": 0,
+        "completed_tests": 0,
+        "effective_required_tests": 0,
+        "carryover_remaining_tests": 8,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Supply matrix C=0, A=20, D=0",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 0,
+        "available_apps": 20,
+        "completed_tests": 0,
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 6,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Supply matrix C=8, A=20, D=20",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 8,
+        "available_apps": 20,
+        "completed_tests": 20,
+        "effective_required_tests": 14,
+        "carryover_remaining_tests": 0,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Disable, pay only voluntary excess, re-enable with remaining debt",
+      "result": "PASS",
+      "evidence": [
+        {
+          "carry_in_tests": 8,
+          "carry_out_tests": 9,
+          "completed_tests": 5,
+          "required_tests": 14,
+          "met": false,
+          "penalty_credits": 65
+        },
+        {
+          "carry_in_tests": 9,
+          "carry_out_tests": 7,
+          "completed_tests": 8,
+          "required_tests": 6,
+          "met": true,
+          "penalty_credits": 0
+        },
+        {
+          "carry_in_tests": 7,
+          "carry_out_tests": 7,
+          "completed_tests": 6,
+          "required_tests": 6,
+          "met": true,
+          "penalty_credits": 0
+        },
+        {
+          "carry_in_tests": 7,
+          "carry_out_tests": 0,
+          "completed_tests": 13,
+          "required_tests": 13,
+          "met": true,
+          "penalty_credits": 0
+        }
+      ]
+    },
+    {
+      "name": "Member transition retains debt and voluntary tests reduce it",
+      "result": "PASS",
+      "evidence": {
+        "mode": "member",
+        "base_required_tests": 0,
+        "carry_in_tests": 8,
+        "available_apps": 20,
+        "completed_tests": 2,
+        "effective_required_tests": 0,
+        "carryover_remaining_tests": 6,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Duplicate checkins and reports for one app count once",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 0,
+        "available_apps": 20,
+        "completed_tests": 2,
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 4,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Current report pending and approved count; rejected no longer counts",
+      "result": "PASS",
+      "evidence": {
+        "pending": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 2,
+          "available_apps": 20,
+          "completed_tests": 1,
+          "effective_required_tests": 8,
+          "carryover_remaining_tests": 7,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        },
+        "approved": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 2,
+          "available_apps": 20,
+          "completed_tests": 1,
+          "effective_required_tests": 8,
+          "carryover_remaining_tests": 7,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        },
+        "rejected": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 2,
+          "available_apps": 20,
+          "completed_tests": 0,
+          "effective_required_tests": 8,
+          "carryover_remaining_tests": 8,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        }
+      }
+    },
+    {
+      "name": "Late source changes do not rewrite an already finalized historical day",
+      "result": "PASS",
+      "evidence": {
+        "carry_in_tests": 0,
+        "carry_out_tests": 2,
+        "completed_tests": 4,
+        "required_tests": 6,
+        "met": false,
+        "penalty_credits": 34
+      }
+    },
+    {
+      "name": "Backfill three missing days and retry finalization preserve debt and credits",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 3,
+        "available_apps": 20,
+        "completed_tests": 0,
+        "effective_required_tests": 9,
+        "carryover_remaining_tests": 9,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Unfinalized yesterday stays pending and does not fabricate cleared debt",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 0,
+        "available_apps": 20,
+        "completed_tests": 0,
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0,
+        "met": false,
+        "carryover_ready": false,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Report-context defect reproduced through real mission submission RPC",
+      "result": "PASS",
+      "evidence": {
+        "before": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 8,
+          "available_apps": 20,
+          "completed_tests": 0,
+          "effective_required_tests": 14,
+          "carryover_remaining_tests": 14,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        },
+        "after": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 8,
+          "available_apps": 20,
+          "completed_tests": 1,
+          "effective_required_tests": 14,
+          "carryover_remaining_tests": 13,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        },
+        "report": {
+          "submission_context": "mission",
+          "status": "pending"
+        },
+        "response": {
+          "success": true,
+          "submission_context": "mission"
+        },
+        "alternateFixtureWithOneOldDebt": {
+          "mode": "member",
+          "base_required_tests": 0,
+          "carry_in_tests": 1,
+          "available_apps": 20,
+          "completed_tests": 1,
+          "effective_required_tests": 0,
+          "carryover_remaining_tests": 0,
+          "met": true,
+          "carryover_ready": true,
+          "history_ready": true
+        },
+        "resumedStatus": "open"
+      }
+    },
+    {
+      "name": "UI defect reproduced: completed compact card hides remaining debt",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "base_required_tests": 6,
+        "carry_in_tests": 8,
+        "available_apps": 5,
+        "completed_tests": 5,
+        "effective_required_tests": 5,
+        "carryover_remaining_tests": 3,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true,
+        "compactBranchReturnsBeforeDebtMessage": true
+      }
+    },
+    {
+      "name": "UI defect reproduced: member card hides preserved old debt",
+      "result": "PASS",
+      "evidence": {
+        "mode": "member",
+        "base_required_tests": 0,
+        "carry_in_tests": 8,
+        "available_apps": 20,
+        "completed_tests": 0,
+        "effective_required_tests": 0,
+        "carryover_remaining_tests": 8,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Long-gap defect reproduced: cron cannot recover a covered gap outside its 31-day window",
+      "result": "PASS",
+      "evidence": {
+        "sealed": 0,
+        "status": {
+          "mode": "owner",
+          "base_required_tests": 6,
+          "carry_in_tests": 0,
+          "available_apps": 20,
+          "completed_tests": 0,
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0,
+          "met": false,
+          "carryover_ready": false,
+          "history_ready": true
+        },
+        "gapDays": 39,
+        "coverageDays": 60
+      }
+    },
+    {
+      "name": "Coverage defect reproduced: reapplying 066 replaces current getter and finalizer",
+      "result": "PASS",
+      "evidence": {
+        "before": {
+          "getter": "fb31dc02a08ed57ca66a2cd11e9dea7f",
+          "finalizer": "4683c65f198eb7fde1209da763588fb8"
+        },
+        "after": {
+          "getter": "afe708b2d0e0fbd3dfb6ad9959526c75",
+          "finalizer": "cffcfff3732a89e588ce635d82e1cd3f"
+        }
+      }
+    }
+  ]
+}

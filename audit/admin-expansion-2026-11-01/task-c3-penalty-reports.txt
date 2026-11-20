@@ -1,0 +1,24 @@
+Continue SAME businessGemini high after quote fix accepted. THIS TURN implement ONLY daily penalty + reportreward lifecycle consumers; appupdatepublish/claim/release consumers are nextC4. Preservewelcome/push/slot and opaqueeffectivequote token fixes. No othermodels/agents/productionsecrets/reset/commit/deploy. Ownstaged071 + businessrunner/contract/docs only; core070 stable now, audit073isbeingcreatedelsewhere, Androidownedelsewhere.
+
+Work<=200linepatches or SHORT build-time generation scripts extracting correcteffectiveSQL withassertedchanges; append actualconcrete revieweddefinitions into071, no runtimepg_get_functiondef textrewriting. Don'tgeneratehugecopiedfunctiontoolargs andstall. Testeachfunctiongroup immediately. ALLfinancialconsumers eventuallyrequired, butstopthisturn afterpenalty/reportgroupcompleteandtested.
+
+EFFECTIVE SQL SOURCE CHAIN: base062, submit065, daily066, approve/reject069, warningexclusions+dashboard070. Your current071 built062-069 needs integrate070 NOW for reports: extract effective rejectfrom070, not069, so warningrevocationlogicretained. Tests now load062-070 + staged071; alsodefaultisolated062-069 canrunifgracefully no070table? Fullchain062-070 is authoritative. Do notedit070. Staged073willwrapfinaleffectiveadmin/reportfunctionsafter071, don'tedit073.
+
+1 DAILY PENALTY: _apply_daily_inactivity_penalty(p_eval) usesbusinesspolicy FOR p_eval VNdate (nottoday), tiers1/2/3/4. Snapshotbusinesspolicyid/actualpenaltypercentage/terms atfinalization; finalizedpastrowsremainimmutable andnotrecomputed. get_daily_task_status next_penalty_percent mustusecorrectevaluatedpolicy/snapshotforhistory, preserveall066carryover/provenance/roleexemption/campaigncountlogic. 0%mustdeduct0 (existinggreatest1onlypositivepct), 100%andgapratio boundsactualbalance nooverflow, legitimatepartialcompletionratio unchanged. Noeditofhistoricalcreditlogs.
+
+2 REPORT SNAPSHOTS: addprotectednullablebonus/policyfields review_tester_bonus/review_owner_bonus/business_policy_id; legacyrowsfallback2manualbonus, existingprovisional_granted_creditsactual amounts preserved. submissionfreshusescurrentpolicybase/bonuses, storesnapshotandreceipt actualreward. Reward0valid: no phantomgrantorclawback. Missionrewardcommitment remainsseparateandunchanged. Preserve064context/fingerprint/idempotencycancellation/mediareceipts+065dhashhardblockremoval, no oldresponseafterpolicychangealteringreceipt. Newfinancialmetadata cannotbechosen/updated byauthenticateddirecttablewrites (inspectgrants/RLS/triggers; addguardasneeded). Testforgedcolumnsdenied.
+
+3 APPROVE/REJECT/AUTO: approve_tester_report uses submittedbonus snapshot andexistingp_bonus parametersemantics; trueowner getsownerbonus, staffreviewownerbonus0; lock-aware069authretained. No retroactivebonuschange onexistingpendingreports. reject_tester_report clawback boundedtoactualprovisionalgranted(andavailablebalance), nothardcoded10 andnotlegacy2mismatch; preservemetadata/defaultreasonrules, noextradeduction onlegacy/zero. Preserve070warningrevocationexclusions/thresholdrules andcompleteRPCJSONcontracts. auto_accept_expired_reports retainsprovisionalonly+existingtip/missionlogic, no extra manualreviewbonus, allamountsbasedactualsnapshot and8hwindowunchanged. Ledgers/profilebalanceconsistent.
+
+4 PROJECTIONS: get_campaign_reports_for_owner/get_campaign_detail reportJSON shouldinclude optionalnewactualsnapshotfieldsrequiredbyAndroid, while preservingALLexistingkeys/nestedtypes/eligibility. NooldDTOdrops like initial070bug. Appupdate nestedreleaseexistingdataunchanged. Updatebusinesscontractfieldnames; communicategapsviabusiness-c3-handover.
+
+TESTS actualSQL in run-business-policies-test.mjs:
+- defaultunchangedexisting069admin/report suites.
+- nondefaultreportbase andmanualbonuses atsubmission, thenchangeeffectivepolicy inisolatedfixture beforeowner/staffapprove/reject/auto; usesOLDsnapshotamounts.
+- legacyprovisional2, zero provisional0/bonus0, positive>10, lowtesterbalance/clawbackactualdelta, tip+missionrewards unchanged.
+- invaliddirectclientfinancialmetadatawritesrejected; helpers notcallablebyauthenticated.
+- finalizeddailyhistoryunchangedacrosspolicyupdates, evaluationdatebefore/afterpolicydate,0%vspositive min1,partialcompletionratio.
+- fullchain070revokedwarningstaysabsentinHome/detail andnotrecountedinnewrejectthreshold.
+- Requestreplay doesnotduplicatecredits/ledger, cancellationandcontextreceipts unaffected.
+
+Runbackendbusiness and existingreport/admin/daily/carryoversuites without weakeningthem. Write business-c3-handover.md with exactconsumercoverage/tests andremainingAPPUPDATEgroup. Keep071staged; noAndroidedits. Ifscopefeelslargefinishoneconsumerthenpatchnext, don'tstopatstorage-only foundation.

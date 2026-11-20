@@ -1,0 +1,12 @@
+{
+  "logName": "review-missing-rpc-first",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T00:18:05.3957689Z",
+  "finishedUtc": "2026-11-05T00:18:28.0316867Z",
+  "currentRunXmlCount": 1
+}

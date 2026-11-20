@@ -1,0 +1,14 @@
+{
+  "logName": "root-android-newer-draft-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T05:30:41.9107256Z",
+  "finishedUtc": "2026-11-02T05:31:13.8607417Z",
+  "currentRunXmlCount": 1
+}

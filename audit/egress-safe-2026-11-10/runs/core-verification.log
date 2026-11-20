@@ -1,0 +1,167 @@
+.\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest --offline
+Command exited with code 0.
+
+Command output:
+Starting a Gradle Daemon, 1 busy and 1 incompatible and 6 stopped Daemons could not be reused, use --status for details
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugHelpAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt:662:89 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///F:/AI/12Tester/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 26s
+32 actionable tasks: 5 executed, 27 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+.\gradlew.bat testDebugUnitTest --offline
+Command exited with code 0.
+
+Command output:
+Starting a Gradle Daemon, 1 busy and 1 incompatible and 7 stopped Daemons could not be reused, use --status for details
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugHelpAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:testDebugUnitTest
+
+BUILD SUCCESSFUL in 44s
+32 actionable tasks: 1 executed, 31 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+.\gradlew.bat assembleDebug --offline
+Command exited with code 0.
+
+Command output:
+Starting a Gradle Daemon, 1 busy and 1 incompatible and 8 stopped Daemons could not be reused, use --status for details
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugHelpAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+
+BUILD SUCCESSFUL in 15s
+40 actionable tasks: 3 executed, 37 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+

@@ -1,0 +1,38 @@
+{
+  "passed": 8,
+  "total": 8,
+  "results": [
+    {
+      "name": "Fresh baseline has the same final schema, function bodies, ACLs, RLS, indexes and triggers as all 65 migrations",
+      "passed": true
+    },
+    {
+      "name": "Existing 061 without 046, restricted default grants: preserve all business data, ACLs, sequence values and settings",
+      "passed": true
+    },
+    {
+      "name": "Existing 061 with 046, restricted default grants: preserve all business data, ACLs, sequence values and settings",
+      "passed": true
+    },
+    {
+      "name": "Existing 061 without 046, legacy default grants: preserve all business data, ACLs, sequence values and settings",
+      "passed": true
+    },
+    {
+      "name": "Existing 061 with 046, legacy default grants: preserve all business data, ACLs, sequence values and settings",
+      "passed": true
+    },
+    {
+      "name": "An older/partial schema fails atomically before business changes",
+      "passed": true
+    },
+    {
+      "name": "Conflicting constraint definition causes a full rollback including the missing 046 column",
+      "passed": true
+    },
+    {
+      "name": "Archived history remains the exact reviewed 65 files",
+      "passed": true
+    }
+  ]
+}

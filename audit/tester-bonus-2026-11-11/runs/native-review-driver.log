@@ -1,0 +1,27 @@
+=== SETTING UP REAL PG FIXTURE ===
+--- SCENARIO 1: Two apps of same owner reserving wallet concurrently ---
+PASS: Wallet contention serialized correctly with zero overdraft.
+--- SCENARIO 2: Last slot race (1 slot, 2 concurrent approvals) ---
+=== CLEANING UP CONCURRENCY FIXTURE ===
+CLEANUP COMPLETED.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+undefined !== 0
+
+    at file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:223:12
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async withClient (file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:66:12)
+    at async file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:220:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

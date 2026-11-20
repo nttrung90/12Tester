@@ -1,0 +1,107 @@
+[
+  {
+    "name": "campaign detail preserves full DTO keys",
+    "beforeKeys": [
+      "app_update",
+      "avg_rating",
+      "campaign",
+      "can_manage",
+      "checked_in_confirmed_today",
+      "feedbacks",
+      "is_actual_owner",
+      "is_member",
+      "is_owner",
+      "my_checkin_dates",
+      "my_profile",
+      "pending_reports_count",
+      "profiles",
+      "reports",
+      "reports_count",
+      "tester_reports_count",
+      "testers",
+      "today_tested_count",
+      "unread_warnings",
+      "weekly_warnings_count"
+    ],
+    "afterKeys": [
+      "app_update",
+      "avg_rating",
+      "campaign",
+      "can_manage",
+      "checked_in_confirmed_today",
+      "feedbacks",
+      "is_actual_owner",
+      "is_member",
+      "is_owner",
+      "my_checkin_dates",
+      "my_profile",
+      "pending_reports_count",
+      "profiles",
+      "reports",
+      "reports_count",
+      "tester_reports_count",
+      "testers",
+      "today_tested_count",
+      "unread_warnings",
+      "weekly_warnings_count"
+    ],
+    "missing": [],
+    "added": []
+  },
+  {
+    "name": "warning revocation consistent on dashboard and detail",
+    "beforeDashboardKeys": [
+      "slots",
+      "profile",
+      "daily_task",
+      "credit_logs",
+      "leaderboard",
+      "owner_stats",
+      "my_campaigns",
+      "notifications",
+      "quest_summary",
+      "topup_packages",
+      "unread_warnings",
+      "joined_campaigns",
+      "today_checkin_count",
+      "pending_reports_count",
+      "weekly_warnings_count"
+    ],
+    "beforeDashboardWarnings": 1,
+    "detailWarnings": 0,
+    "dashboardWarnings": 1,
+    "dashboardUnread": 1
+  },
+  {
+    "name": "carryover schedule and cancellation succeed",
+    "error": "null value in column \"new_is_enabled\" of relation \"daily_task_carryover_policy_audit\" violates not-null constraint"
+  },
+  {
+    "name": "existing admin adjustment is audited",
+    "newAuditEvents": 0
+  },
+  {
+    "name": "member overview has actual slot data",
+    "keys": [
+      "id",
+      "role",
+      "email",
+      "credits",
+      "is_locked",
+      "avatar_url",
+      "created_at",
+      "slots_total",
+      "display_name",
+      "slots_active",
+      "campaigns_open",
+      "campaigns_total",
+      "last_login_date",
+      "warnings_active",
+      "warnings_revoked",
+      "daily_missed_streak",
+      "tester_reports_count",
+      "contact_reports_count"
+    ],
+    "hasSlotsArray": false
+  }
+]

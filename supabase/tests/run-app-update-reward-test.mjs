@@ -8,14 +8,14 @@ import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, 'utf8').replaceAll('\r\n', '\n');
 
-const fullSchema = read('supabase/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
-const migration045 = read('supabase/migrations/045_thumbnail_support.sql');
-const migration046 = read('supabase/migrations/046_media_access_gateway.sql');
-const migration047 = read('supabase/migrations/047_home_stats_cycle.sql');
-const migration048 = read('supabase/migrations/048_mission_report_and_expiration.sql');
-const migration049 = read('supabase/migrations/049_mission_report_hardening.sql');
-const migration050 = read('supabase/migrations/050_app_update_reward.sql');
-const migration051 = read('supabase/migrations/051_app_update_reward_hardening.sql');
+const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
+const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');
+const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');
+const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');
+const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');
+const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');
+const migration050 = read('supabase/migrations_archive/pre_baseline_062/050_app_update_reward.sql');
+const migration051 = read('supabase/migrations_archive/pre_baseline_062/051_app_update_reward_hardening.sql');
 
 const bootstrap = `
   create role anon nologin;

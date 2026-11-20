@@ -26,6 +26,10 @@ object ReportSubmitPolicy {
     )
 
     private val permanentLocalErrors = listOf(
+        "report_request_requires_review",
+        "server_update_required",
+        "report_context_conflict",
+        "invalid_report_context",
         "image_read_failed",
         "bitmap compression failed",
         "invalid bitmap dimensions",
@@ -47,6 +51,8 @@ object ReportSubmitPolicy {
     fun isRetryable(error: Exception, operation: Operation = Operation.WORKER): Boolean {
         if (cancellationCause(error) != null) return false
         val chain = causes(error)
+        if (chain.any { ReportSubmissionFailure.isCryptoConfigurationError(it.message.orEmpty()) ||
+                (it as? ReportSubmissionFailure)?.code == ReportSubmissionFailure.SERVER_CONFIG }) return false
 
         // Phân loại StorageException theo errorCode
         val storageError = chain.filterIsInstance<StorageException>().firstOrNull()

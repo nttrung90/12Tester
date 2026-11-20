@@ -10,18 +10,25 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +52,8 @@ fun CampaignCard(
     item: CampaignDisplayItem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onUninstallClick: (() -> Unit)? = null,
+    showTesterBonusBadge: Boolean = false,
 ) {
     CampaignCard(
         campaign = item.campaign,
@@ -55,6 +64,8 @@ fun CampaignCard(
         isInstalledLocally = item.isInstalledLocally,
         displayTestedCount = item.displayTestedCount,
         onClick = onClick,
+        onUninstallClick = onUninstallClick,
+        showTesterBonusBadge = showTesterBonusBadge,
         modifier = modifier,
     )
 }
@@ -71,8 +82,19 @@ fun CampaignCard(
     hasTestedToday: Boolean = false,
     isInstalledLocally: Boolean? = null,
     displayTestedCount: Int? = null,
+    onUninstallClick: (() -> Unit)? = null,
+    showTesterBonusBadge: Boolean = false,
 ) {
     val statusColors = MaterialTheme.statusColors
+    val shouldShowBonus = showTesterBonusBadge &&
+        campaign.isOpen &&
+        campaign.testerBonusStatus == "active" &&
+        (campaign.testerBonusCredits ?: 0) > 0 &&
+        (campaign.testerBonusRemainingSlots ?: 0) > 0
+
+    val bonusCredits = campaign.testerBonusCredits ?: 0
+    val hasUninstall = isInstalledLocally == true && onUninstallClick != null
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -87,7 +109,10 @@ fun CampaignCard(
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = if (shouldShowBonus) Alignment.Top else Alignment.CenterVertically,
+            ) {
                 AppIcon(
                     iconUrl = campaign.safeIconUrl,
                     packageName = campaign.packageName,
@@ -97,9 +122,9 @@ fun CampaignCard(
                 )
                 Spacer(Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    // Wrap individual labels on narrow windows and with larger fonts.
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = campaign.appName,
@@ -107,7 +132,14 @@ fun CampaignCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth(),
                         )
+                    }
+
+                    // Wrap individual labels on narrow windows and with larger fonts.
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(
                             text = ownerName.ifBlank { stringResource(R.string.campaign_owner_fallback) },
                             style = MaterialTheme.typography.bodySmall,
@@ -180,6 +212,26 @@ fun CampaignCard(
                         }
                     }
                 }
+
+                if (shouldShowBonus) {
+                    Spacer(Modifier.width(8.dp))
+                    Column(horizontalAlignment = Alignment.End) {
+                        // Match the icon's 44dp row and keep the badge at the card's right edge.
+                        Box(
+                            modifier = Modifier.height(44.dp),
+                            contentAlignment = Alignment.CenterEnd,
+                        ) {
+                            TesterBonusBadge(credits = bonusCredits)
+                        }
+                        if (hasUninstall) {
+                            Spacer(Modifier.height(2.dp))
+                            UninstallButton(onClick = onUninstallClick)
+                        }
+                    }
+                } else if (hasUninstall) {
+                    Spacer(Modifier.width(8.dp))
+                    UninstallButton(onClick = onUninstallClick)
+                }
             }
 
             // Full-width statistics avoid the narrow column beside the app icon.
@@ -232,6 +284,42 @@ fun CampaignCard(
 }
 
 @Composable
+private fun UninstallButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.35f)),
+        modifier = modifier,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.DeleteOutline,
+                contentDescription = stringResource(R.string.campaign_uninstall_btn),
+                modifier = Modifier.size(15.dp),
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Text(
+                text = stringResource(R.string.campaign_uninstall_btn),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+    }
+}
+
+@Composable
 private fun StatusBadge(
     label: String,
     background: Color,
@@ -250,5 +338,55 @@ private fun StatusBadge(
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
         )
+    }
+}
+
+/**
+ * Huy hiệu thưởng thêm cam kèm icon Credit, hiển thị ở góc phải của tên ứng dụng.
+ * Tương phản cao trên cả theme Sáng và Tối, có ngữ nghĩa hỗ trợ TalkBack đầy đủ.
+ */
+@Composable
+fun TesterBonusBadge(
+    credits: Int,
+    modifier: Modifier = Modifier,
+) {
+    val surface = MaterialTheme.colorScheme.surface
+    val isDark = (0.299f * surface.red + 0.587f * surface.green + 0.114f * surface.blue) < 0.5f
+    val badgeBg = if (isDark) Color(0xFF422100) else Color(0xFFFFECE0)
+    val badgeContent = if (isDark) Color(0xFFFFB74D) else Color(0xFFB54700)
+    val borderStroke = BorderStroke(
+        1.dp,
+        if (isDark) Color(0xFFFFB74D).copy(alpha = 0.5f) else Color(0xFFB54700).copy(alpha = 0.4f),
+    )
+    val talkBack = stringResource(R.string.campaign_bonus_badge_talkback, credits)
+
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = badgeBg,
+        border = borderStroke,
+        modifier = modifier.semantics {
+            contentDescription = talkBack
+        },
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MonetizationOn,
+                contentDescription = null,
+                tint = badgeContent,
+                modifier = Modifier.size(13.dp),
+            )
+            Text(
+                text = "+$credits",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = badgeContent,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
     }
 }

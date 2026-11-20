@@ -1,0 +1,28 @@
+{
+    "logName":  "full-core-suite-run",
+    "arguments":  [
+                      "-I",
+                      "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MemberDetailPaginationIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.CarryoverStreamsIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.AdminDailyTask*"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T15:59:59.6408497Z",
+    "finishedUtc":  "2026-11-01T16:00:27.8726429Z",
+    "currentRunXmlCount":  9
+}

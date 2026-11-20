@@ -1,0 +1,99 @@
+Bạn đang làm việc trong dự án F:\AI\12Tester.
+
+Hãy SỬA HOÀN CHỈNH các lỗi còn lại của tính năng popup thông báo riêng admin, chạy kiểm thử và viết báo cáo vòng 2. Không chỉ phân tích hoặc viết lại kế hoạch.
+
+ĐỌC TRƯỚC
+
+1. AGENTS.md áp dụng nếu có, git status và source thực tế. Workspace có nhiều thay đổi của công việc khác; không reset/checkout/revert hoặc ghi đè mất chúng.
+2. Bắt buộc đọc toàn bộ:
+   F:\AI\12Tester\RECHECK_VA_KE_HOACH_SUA_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+3. Đối chiếu yêu cầu gốc và báo cáo triển khai:
+   F:\AI\12Tester\KE_HOACH_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+   F:\AI\12Tester\BAO_CAO_TRIEN_KHAI_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+4. Đọc bộ test tái hiện và bằng chứng:
+   app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupReviewRegressionTest.kt
+   audit/admin-popup-review-2026-10-30/regression-results.xml
+   audit/admin-popup-review-2026-10-30/android-regression.log
+
+KẾT QUẢ RECHECK ĐÃ CÓ
+
+- Backend hiện tại: 11 test PGlite pass.
+- Android hiện tại: 9 test popup ViewModel + 2 pending store + 12 localization pass.
+- assembleDebug pass.
+- 6 test regression bổ sung đều FAIL bằng assertion hành vi, không phải lỗi compile.
+
+SỬA ĐỦ 6 LỖI
+
+F1 — Ack không retry khi phiên đã consumed:
+- tick đang return vì consumedSessions trước khi sync pending. Khi Đã đọc gặp lỗi mạng, dùng app tiếp trong cùng phiên không retry được.
+- Tách worker pending ack khỏi điều kiện còn suất popup. Retry khi kết nối hoạt động lại/foreground dù popup đã đóng; việc UI đang bận không được chặn sync ack không cần UI.
+- Đồng bộ có single-flight/mutex phù hợp; giữ pending khi lỗi; không xóa pending chỉ để hết retry.
+
+F2 — Pending ack chưa sync mà vẫn claim:
+- syncPendingAcksInternal nuốt lỗi rồi caller tiếp tục claim, tiêu thêm lượt của bản tin đã đọc local nhưng không hiển thị.
+- Trả kết quả sync rõ ràng và kiểm tra pending lại. Còn pending chưa đồng bộ của user hiện tại thì tạm không claim; retry ack sau. Không hoàn lượt ở client, không tăng giới hạn 5.
+
+F3 — Để sau sau khi background/resume mở lại ngay:
+- Popup claim ở S1 đi qua background sang S2 nhưng vẫn giữ sessionId=S1. Khi đóng chỉ consume S1, tick S2 lại claim.
+- Tách claim session khỏi presentation session. Phiên hiện tại đã tiếp tục trình bày popup cũ cũng phải được coi là đã dùng suất local. Không tạo lượt server mới chỉ vì resume.
+- Bao phủ dismiss later, Đã đọc và đóng bởi sự kiện/remote read-delete. Chỉ phiên foreground mới sau khi đã đóng mới có thể nhắc lại.
+
+F4 — Blocker xuất hiện sau lúc bắt đầu claim không ngăn hiển thị:
+- Hiện chỉ kiểm tra blocker trước await; host render mọi Showing và không quan sát coordinator.
+- Kiểm tra lại điều kiện presentation sau await và ngay tại host. Khi blocker xuất hiện, tạm giữ/ẩn popup; gỡ blocker thì tiếp tục cùng lượt đã claim, không claim lại hoặc đánh mất nội dung.
+- Blocker bật khi popup đã hiện cũng phải tạm ẩn đúng.
+- Chặn màn account_locked ở cấp route/profile phù hợp, không phụ thuộc boolean bị reset khi Home dispose.
+- Nối các modal/dialog thực sự đang mở như notifications/topup và các dialog thao tác cần ưu tiên. Giữ giải pháp gọn, không viết lại toàn bộ UI ngoài phạm vi.
+- Tránh claim sớm khi config/profile/cảnh cáo chưa sẵn sàng. Phân biệt trạng thái chưa tải với không có blocker.
+- Test regression hiện đo Showing do host cũ render mọi Showing. Nếu thiết kế mới giữ Showing như candidate nhưng host có cờ presentation riêng, được cập nhật test sang đo visibility/cờ presentation hoặc Compose UI tương đương. Phải giữ nguyên yêu cầu không hiển thị khi blocked và giữ cùng lượt; không xóa/disable/giảm assertion để test xanh giả.
+
+F5 — Callback lifecycle thật cập nhật foreground trước ID:
+- onActivityStarted hiện báo isForeground=true trước khi ghi UUID, làm collector thấy null/ID cũ, chậm claim đến poll kế tiếp.
+- Publish snapshot ID+foreground nhất quán, ưu tiên một StateFlow chứa trạng thái liên quan; ít nhất tạo ID trước khi phát foreground.
+- Test callback thật cho cold start, background/resume và config change. Không chỉ dùng simulateForeground vì hook đang ghi theo thứ tự khác production.
+
+F6 — Đọc qua popup không cập nhật Home/badge:
+- Repository phát MarkedRead nhưng HomeViewModel không collect notificationEvents. Invalidate cache không tự đổi HomeUiState đang giữ.
+- Đồng bộ danh sách/badge bằng state chung hoặc events có scope UID/generation. Khi đọc popup, phản ánh ý định local bền vững ngay cả khi offline.
+- Chồng pending read lên snapshot/fetch để dữ liệu cũ không khôi phục unread. Khi ack thành công và pending được xóa vẫn phải chống fetch cũ ghi đè.
+- Không dùng refresh dashboard nặng làm giải pháp bắt buộc cho mỗi thao tác đọc.
+
+YÊU CẦU XUYÊN SUỐT
+
+- Giữ nguyên luồng gửi admin hiện tại, broadcast không popup, mọi loại gửi riêng được hỗ trợ, nội dung tự nhập giữ nguyên, tối đa 5 lượt server cho mỗi thông báo/người nhận và một popup mỗi phiên foreground.
+- Lượt thứ 5 vẫn được đọc; hết lượt không tự đánh dấu đọc hoặc xóa bản tin.
+- Offline Đã đọc phải bền qua restart, không nhắc lại trên thiết bị vừa xác nhận.
+- Scope mọi job/request/event theo danh tính và session generation. Kiểm tra trước khi gửi request, sau await và trước khi sửa UI/cache/xóa pending. Test A→B→A cùng UID cuối nhưng generation đã đổi.
+- Không gửi pending ack A bằng JWT B. Không để MarkedAllRead hoặc response cũ của A tác động popup/danh sách B.
+- Quản lý toàn bộ job sync đang chạy; không chỉ lưu một syncJob mới nhất rồi để các job trước chạy ngoài cơ chế hủy khi logout.
+- Không mở thêm quyền ghi state/receipt cho client, không dùng metadata admin giả làm bằng chứng hợp lệ.
+- Chỉ thêm migration tiếp nối nếu thực sự cần sửa SQL; không sửa lịch sử 067 như cách duy nhất để vá database có thể đã áp dụng migration. Không cần tạo migration nếu chỉ sửa Android/tests.
+- Giữ UI VI/EN/default, sáng/tối, nội dung cuộn được. Không thêm FCM hoặc quyền vẽ đè ứng dụng khác.
+
+KIỂM THỬ CẦN HOÀN TẤT
+
+1. Làm xanh 6 bài NotificationPopupReviewRegressionTest với đúng hành vi, giữ xanh bộ test ban đầu và build.
+2. Thêm coverage khi ack lỗi rồi thành công trong cùng phiên, pending chưa sync không claim, carried popup đóng theo mọi cách, blocker xuất hiện trong/ngoài request, nhiều blocker cùng lúc và app startup chưa ready.
+3. Thêm kiểm tra response/event cũ qua đổi tài khoản và session generation, late status response, fetch cũ sau read.
+4. Sửa backend test “beyond top 50”: tạo popup cũ, có >=50 bản tin mới hơn, assert popup không nằm trong query lấy 50 bản mới nhất rồi mới claim. Fixture hiện đặt filler cũ hơn popup nên chưa chứng minh được tình huống này.
+5. Kiểm tra EXECUTE bằng SET ROLE anon thật, không chỉ gọi không JWT ở role fixture mặc định.
+6. Chạy PostgreSQL nhiều connection cho tranh lượt cuối nếu có môi trường local/test. Không tuyên bố PGlite tuần tự đã kiểm chứng concurrency thật. Nếu thiếu môi trường, bổ sung runner dùng database test do người dùng cung cấp và ghi rõ chưa chạy; không tự dùng production.
+7. Kiểm thử presentation thực tế bằng Compose/Robolectric UI hoặc thiết bị/emulator khi có. Không gọi các bài ViewModel/store là kiểm thử render Compose. Nêu rõ phần chưa xác minh.
+
+Lệnh tham khảo từ root dự án:
+
+node supabase/tests/run-admin-direct-notification-popup-test.mjs
+
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+.\gradlew.bat testDebugUnitTest --tests 'com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest' --tests 'com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest' --tests 'com.ntt.crosstest.data.NotificationPendingAckStoreTest' --tests 'com.ntt.crosstest.localization.LocalizationHardeningTest' assembleDebug
+
+Chọn thêm test liên quan khi thay đổi thực tế đòi hỏi. Nếu lệnh lỗi môi trường, phân biệt rõ với lỗi sản phẩm. Không bỏ qua test, không sửa expectation thành chấp nhận lỗi để lấy kết quả pass.
+
+BÀN GIAO
+
+- Sửa source/tests trong workspace; giữ nguyên thay đổi không liên quan.
+- Không tự migrate production, deploy, phát hành APK, commit hoặc push.
+- Tạo báo cáo:
+  F:\AI\12Tester\BAO_CAO_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_2_2026-10-30.md
+- Báo cáo phải có bảng F1–F6: nguyên nhân, cách sửa, test chứng minh; danh sách file thay đổi; lệnh đã chạy và số test pass/fail thực tế; mọi migration/triển khai cần làm; phần UI/concurrency/live chưa kiểm chứng.
+- Đối chiếu lại source cuối cùng, không chỉ ghi kế hoạch đã định làm. Hoàn thành code, tests và báo cáo trước khi kết thúc.

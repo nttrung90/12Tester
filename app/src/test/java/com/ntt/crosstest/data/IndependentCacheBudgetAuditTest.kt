@@ -66,12 +66,14 @@ class IndependentCacheBudgetAuditTest {
                 }
             }
         """.trimIndent()
+        client.auth.awaitInitialization()
         client.auth.importSession(json.decodeFromString<UserSession>(sessionJson))
     }
 
     private fun createTestClient(handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData): io.github.jan.supabase.SupabaseClient {
         return createSupabaseClient("https://fixture.invalid", "dummy-key") {
             install(Auth) {
+                enableLifecycleCallbacks = false
                 sessionManager = MemorySessionManager()
                 codeVerifierCache = MemoryCodeVerifierCache()
                 autoLoadFromStorage = false

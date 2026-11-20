@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.ReportComparisonSelectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:41:25.335Z" hostname="PC-5700X3D" time="0.006">
+  <properties/>
+  <testcase name="selectsMostRecentPreviousDayReportInSameContext" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.002"/>
+  <testcase name="ignoresOtherUsersAndOtherCampaigns" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.002"/>
+  <testcase name="separatesMissionFromAppTest" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="stableTieBreakByIdWhenTimestampsMatch" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.001"/>
+  <testcase name="handlesResubmissionOfRejectedReportToday" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="formatIsoUtcToVnDateFormatsCorrectly" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.001"/>
+  <testcase name="handlesVnTimezoneCorrectlyAcrossUtcDayBoundaries" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="partialHistoryFlagPreservedEvenWhenMatchFound" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="rejectsArbitraryOrMismatchedRejectedOverride" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="partialHistoryReportsSpecialStatus" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <testcase name="invalidTimestampDoesNotClaimFirstReport" classname="com.ntt.crosstest.util.ReportComparisonSelectorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

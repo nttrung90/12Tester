@@ -1,0 +1,22 @@
+[
+  {
+    "old": "async function check(id, title, fn, database = true) {",
+    "value": "await sql(\"insert into public.storage_trusted_hosts(host) values('example.supabase.co'); update public.storage_organization_usage set local_project_ref='aaaaaaaaaaaaaaaaaaaa';\");\nasync function check(id, title, fn, database = true) {"
+  },
+  {
+    "old": "set updated_at=now()-interval '1 hour' where upload_id='retry'",
+    "value": "set updated_at=now()-interval '1 hour',lease_expires_at=now()-interval '1 second' where upload_id='retry'"
+  },
+  {
+    "old": "return { data: (await one('select public.get_expired_report_media_for_cleanup(50,300) as r')).r, error: null };",
+    "value": "return { data: (await one('select public.get_expired_report_media_for_cleanup(50,300,true) as r')).r, error: null };"
+  },
+  {
+    "old": "update public.storage_organization_usage set used_storage_bytes=1000;",
+    "value": "update public.storage_organization_usage set used_storage_bytes=1000; update public.report_media_uploads set quota_accounted_bytes=100 where upload_id='deleted';"
+  },
+  {
+    "old": "supabaseClient: { rpc: async () => ({ data: {}, error: null }) },",
+    "value": "supabaseClient: { rpc: async () => ({ data: { success: true }, error: null }) },"
+  }
+]

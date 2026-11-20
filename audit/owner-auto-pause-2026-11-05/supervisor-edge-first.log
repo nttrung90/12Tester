@@ -1,0 +1,10 @@
+Loaded 062_consolidated_baseline.sql through 079_owner_auto_pause_debt_and_timestamp_guard.sql; actual SQL functions, no function stubs.
+DEFECT: private ledger diagnostics deny ordinary members Missing expected rejection.
+DEFECT: client cannot authorize timestamp mutation through custom settings Missing expected rejection.
+DEFECT: disabled carryover cannot treat unknown yesterday as debt-free ready history Missing expected rejection.
+DEFECT: locked owner cannot resume through SECURITY DEFINER RPC Missing expected rejection.
+DEFECT: backfilling an older gap cannot overwrite profile with an older-day streak Current summary must match the latest immutable finalized ledger, not an older backfilled day
+
+0 !== 7
+
+Supervisor edge defects: 5

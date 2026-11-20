@@ -1,0 +1,78 @@
+[
+  {
+    "status": "modified",
+    "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt"
+  },
+  {
+    "status": "added",
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminPauseDialogController.kt"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/res/values-en/strings.xml"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/res/values-vi/strings.xml"
+  },
+  {
+    "status": "modified",
+    "path": "app/src/main/res/values/strings.xml"
+  },
+  {
+    "status": "added",
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignPauseReasonTest.kt"
+  },
+  {
+    "status": "added",
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminPauseDialogControllerTest.kt"
+  },
+  {
+    "status": "added",
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminPauseSessionIdentityReviewTest.kt"
+  },
+  {
+    "status": "added",
+    "path": "supabase/migrations/078_admin_pause_reason_popup.sql"
+  },
+  {
+    "status": "modified",
+    "path": "supabase/tests/package.json"
+  },
+  {
+    "status": "added",
+    "path": "supabase/tests/run-admin-pause-reason-concurrency-test.mjs"
+  },
+  {
+    "status": "added",
+    "path": "supabase/tests/run-admin-pause-reason-popup-test.mjs"
+  },
+  {
+    "status": "added",
+    "path": "supabase/tests/run-admin-pause-resume-compatibility-test.mjs"
+  },
+  {
+    "status": "modified",
+    "path": "supabase/tests/run-daily-task-carryover.mjs"
+  },
+  {
+    "status": "modified",
+    "path": "supabase/tests/run-push-and-carryover-baseline062-regression-test.mjs"
+  }
+]

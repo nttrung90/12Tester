@@ -1,0 +1,25 @@
+Bạn đang làm việc trong F:\AI\12Tester.
+
+Hãy sửa tiếp theo kết quả kiểm tra độc lập:
+F:\AI\12Tester\RECHECK_VA_KE_HOACH_SUA_TIEP_BAO_CAO_CHO_OPENCODE_2026-10-29.md
+
+Đọc toàn bộ tài liệu và source hiện tại trước khi sửa. Bản hiện tại qua 277 unit test và 5 ca ledger nhưng vẫn thất bại 4 probe Android và 2 probe nâng cấp DB. Không coi bộ test xanh hiện có là đã hoàn tất.
+
+Ưu tiên:
+1. Completion không được xóa nháp của màn khác hoặc revision mới, kể cả file ảnh.
+2. Chỉ trả Accepted sau khi snapshot và enqueue đã được xác nhận; lỗi lưu ảnh/metadata phải giữ form và draft.
+3. Route mission mới khác mission của report cũ phải báo xung đột, không âm thầm gửi sang mission cũ hoặc report thường.
+4. Bảo vệ request legacy trước khi mã cũ bị ghi đè; A trước nâng cấp -> B sau nâng cấp -> replay A không được ghi đè B.
+5. Legacy fallback không được chứng thực payload mới chỉ vì comment giống nhau. Hoàn thiện tính nguyên tử ledger với request cạnh tranh.
+6. Đăng ký runner vào npm test, kiểm thử completion thật và hoàn thiện trạng thái/reconcile cho ca kẹt nền theo N07/N08.
+
+Evidence/probe:
+F:\AI\12Tester\.tmp\report-overlap-recheck-2026-10-29\
+
+Giữ ý nghĩa assertions của probe; không hạ expected, không tăng retry để che lỗi. Giữ một báo cáo/ngày và chính sách Credit hiện tại, bảo toàn thay đổi chưa commit và các sửa gửi nền đã có.
+
+Chạy lại probe rồi unit test Android, DB test và npm test. Kiểm tra nâng cấp từ schema cũ; không chỉ bootstrap database mới. Nếu không có PostgreSQL nhiều kết nối/thiết bị thật, ghi rõ giới hạn, không tuyên bố đã kiểm chứng race hoặc hết kẹt trên máy thật.
+
+Giữ versionName=1.0.2, versionCode=22. Không build APK/AAB hoặc chạy assemble/bundle nếu chưa có chỉ dẫn mới. Không deploy production, commit hoặc push.
+
+Kết thúc bằng báo cáo file đã sửa, nguyên nhân, kết quả thực chạy và phần chưa xác minh. Không chỉ trả lại kế hoạch.

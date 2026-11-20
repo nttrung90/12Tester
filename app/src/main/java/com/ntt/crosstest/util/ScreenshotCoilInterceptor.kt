@@ -33,8 +33,8 @@ class ScreenshotCoilInterceptor(
             val descriptor = request.tags.tag(ScreenshotDescriptor::class.java)
             val genAtStart = ScreenshotManager.sessionGeneration.get()
 
-            // 1. Kiểm tra hết hạn báo cáo (>= 30 ngày hoặc media_expired)
-            if (ScreenshotManager.isExpired(data, descriptor?.createdAt, descriptor?.mediaExpired)) {
+            // 1. Kiểm tra hết hạn báo cáo (216h đối với Supabase, 30 ngày đối với Google, hoặc media_expired)
+            if (ScreenshotManager.isExpired(data, descriptor?.createdAt, descriptor?.mediaExpired, descriptor?.provider, descriptor?.viewExpiresAt)) {
                 return ErrorResult(
                     drawable = null,
                     request = request,
@@ -44,7 +44,7 @@ class ScreenshotCoilInterceptor(
 
             // 2. Tái sử dụng RAM session cache cho chính URL này
             val cached = ScreenshotManager.getCachedBitmap(data, genAtStart)
-            if (cached != null && !cached.isRecycled && !ScreenshotManager.isExpired(data, descriptor?.createdAt, descriptor?.mediaExpired)) {
+            if (cached != null && !cached.isRecycled && !ScreenshotManager.isExpired(data, descriptor?.createdAt, descriptor?.mediaExpired, descriptor?.provider, descriptor?.viewExpiresAt)) {
                 if (ScreenshotManager.sessionGeneration.get() == genAtStart) {
                     ImageInstrumentation.recordMemoryHit()
                     return SuccessResult(
@@ -71,7 +71,7 @@ class ScreenshotCoilInterceptor(
             if (isTombstoned && hasThumbnailFallback) {
                 val fallbackUrl = descriptor.fallbackUrl
                 val cachedFallback = ScreenshotManager.getCachedBitmap(fallbackUrl, genAtStart)
-                if (cachedFallback != null && !cachedFallback.isRecycled && !ScreenshotManager.isExpired(fallbackUrl, descriptor.createdAt, descriptor.mediaExpired)) {
+                if (cachedFallback != null && !cachedFallback.isRecycled && !ScreenshotManager.isExpired(fallbackUrl, descriptor.createdAt, descriptor.mediaExpired, descriptor.provider, descriptor.viewExpiresAt)) {
                     if (ScreenshotManager.sessionGeneration.get() == genAtStart) {
                         ImageInstrumentation.recordMemoryHit()
                         return SuccessResult(
@@ -98,7 +98,7 @@ class ScreenshotCoilInterceptor(
                 // E02/F06 Fallback: Nếu thumbnail không tồn tại (404/null) và có fallbackUrl sang ảnh full
                 if (bitmap == null && hasThumbnailFallback) {
                     val fallbackUrl = descriptor.fallbackUrl
-                    if (!ScreenshotManager.isExpired(fallbackUrl, descriptor.createdAt, descriptor.mediaExpired)) {
+                    if (!ScreenshotManager.isExpired(fallbackUrl, descriptor.createdAt, descriptor.mediaExpired, descriptor.provider, descriptor.viewExpiresAt)) {
                         val fallbackDesc = descriptor.copy(
                             url = fallbackUrl,
                             variant = ScreenshotVariant.FULL,

@@ -1,0 +1,63 @@
+{
+  "at": "2026-11-12T10:10:20.612Z",
+  "changed": [
+    {
+      "path": "supabase/tests\\package.json",
+      "sha256": "1f5da91ee95c2300ead9ee8ec721b464f9964575e1866c42228ce19738778776"
+    },
+    {
+      "path": "app/src\\main\\res\\values-vi\\strings.xml",
+      "sha256": "e7bae1e7d60be195d0bb1b1394a1164d765d5a5ec77bc3b0b36d294e7d1e7197"
+    },
+    {
+      "path": "app/src\\main\\res\\values\\strings.xml",
+      "sha256": "72800b0d808cf4b2365590ea40bc966e4e09867fb0ebcd36be8310bc6fb64a09"
+    },
+    {
+      "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+      "sha256": "1c12e8decb801a011109525723e4d95bb8ccf23116dc53b239decd10fb42adf2"
+    },
+    {
+      "path": "app/src\\main\\res\\values-en\\strings.xml",
+      "sha256": "de1a74fcfb881ed3ce3560a1dbd509178cd855e90cabcd1d74378de59b9d7b46"
+    },
+    {
+      "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+      "sha256": "fea288295c0805e953b44c0cc00fd1409fcd968d9ab3702eb574f752e833ead9"
+    },
+    {
+      "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+      "sha256": "ceef65b663de928ff752c23face44a91ae54115694ac2462f1a971536ee50195"
+    },
+    {
+      "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+      "sha256": "3e3bb067262347833ed3cbe5f906460a32258c36fde205d3044e7c368070b291"
+    },
+    {
+      "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+      "sha256": "82f44a86d620897f8a020cca6e9d24bb83e31065b998ff486ac7008590343cdd"
+    }
+  ],
+  "added": [
+    {
+      "path": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "path": "supabase/tests/run-immediate-daily-quota-acceptance-test.mjs",
+      "sha256": "ddbc1d1864956d2f47c3319f1261af6c5d34e7d395ea94b5e4cbf25f965ef60a"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/DailyTaskChangeEvent.kt",
+      "sha256": "2170e57c6faa5dd707a98aa95ccf07f0646391fc88929340db9778a1dd0b73a7"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/ImmediateDailyQuotaUnitTest.kt",
+      "sha256": "1bd91b4d3af32ff8b07c93cb0ee6fb0b0ea8d61de92b11b9efc11baeb6966718"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/SupervisorImmediateQuotaRaceTest.kt",
+      "sha256": "2649303608f3c506bf28e3be0d10a0c9248e8de0f5e00c55ce8fbaf78c522abd"
+    }
+  ]
+}

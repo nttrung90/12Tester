@@ -1,0 +1,2 @@
+FAIL independent daily coexistence: app_test -> mission P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily coexistence: mission -> app_test P0001 REPORT_CONTEXT_CONFLICT

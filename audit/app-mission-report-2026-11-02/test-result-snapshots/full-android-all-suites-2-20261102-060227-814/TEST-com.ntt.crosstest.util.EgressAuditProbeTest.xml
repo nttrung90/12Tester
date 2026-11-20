@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.EgressAuditProbeTest" tests="4" skipped="1" failures="0" errors="0" timestamp="2026-11-02T05:58:46.638Z" hostname="PC-5700X3D" time="219.391">
+  <properties/>
+  <testcase name="probe01_preparedThumbnailMustSurviveDurablePendingPersistence" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.029"/>
+  <testcase name="probe03_diskCacheMustRequireTrustedExpiry" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.008"/>
+  <testcase name="probe04_diskCacheMustRespectServerMaxAge" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.02"/>
+  <testcase name="probe07_runtimeLoaderMustCountOneMemoryHitOnce" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="219.332">
+    <skipped/>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

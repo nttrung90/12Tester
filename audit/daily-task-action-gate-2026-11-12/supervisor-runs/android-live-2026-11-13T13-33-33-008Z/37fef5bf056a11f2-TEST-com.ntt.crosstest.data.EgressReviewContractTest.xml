@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.EgressReviewContractTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-13T13:38:13.213Z" hostname="PC-5700X3D" time="0.045">
+  <properties/>
+  <testcase name="missingRpcErrorForDifferentFunctionMustNotSilentlyFallback" classname="com.ntt.crosstest.data.EgressReviewContractTest" time="0.01"/>
+  <testcase name="changedBlockWithoutValue_repairsOnceInsteadOfPublishingEmptyList" classname="com.ntt.crosstest.data.EgressReviewContractTest" time="0.012"/>
+  <testcase name="evictingPayloadEvictsCorrespondingRequestTokens" classname="com.ntt.crosstest.data.EgressReviewContractTest" time="0.01"/>
+  <testcase name="previousGenerationResponseCannotOverwriteNewGenerationTokens" classname="com.ntt.crosstest.data.EgressReviewContractTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

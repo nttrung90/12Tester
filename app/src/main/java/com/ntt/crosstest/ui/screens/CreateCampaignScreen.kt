@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.ui.components.AppIcon
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.util.PlayStoreHelper
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,6 +102,7 @@ import com.ntt.crosstest.ui.viewmodels.CreateCampaignViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCampaignScreen(
+    isGuideConfirmed: Boolean,
     onBack: () -> Unit,
     onCreated: () -> Unit,
     onNavigateToGuide: () -> Unit = {},
@@ -110,12 +112,13 @@ fun CreateCampaignScreen(
     val app = context.applicationContext as TestCheoApp
     val viewModel: CreateCampaignViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { CreateCampaignViewModel(app.campaignRepository, app.settingsRepository, Localizer(app)) }
+            initializer { CreateCampaignViewModel(app.campaignRepository, Localizer(app)) }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSlotInfoDialog by remember { mutableStateOf(false) }
-    var slotToUnlock by remember { mutableStateOf<SlotInfo?>(null) }
+    var slotNumberToUnlock by remember { mutableStateOf<Int?>(null) }
+    var showPostConfirmation by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -133,15 +136,136 @@ fun CreateCampaignScreen(
         uiState.unlockSuccessMsg?.let { msg ->
             android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
             viewModel.clearUnlockSuccess()
-            slotToUnlock = null
+            slotNumberToUnlock = null
         }
     }
 
+    if (showPostConfirmation && isGuideConfirmed) {
+        AlertDialog(
+            onDismissRequest = { showPostConfirmation = false },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.post_app_group_confirmation_message))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.create_confirm_fee_breakdown_title),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            if (uiState.slotPostCost > 0) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.create_confirm_slot_1_fee_label),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    Text(
+                                        text = "${uiState.slotPostCost} Credit",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                            if (uiState.targetCost > 0) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.create_confirm_target_fee_label_format, uiState.targetTesters),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    Text(
+                                        text = "${uiState.targetCost} Credit",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.create_confirm_total_deduct_label),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = "${uiState.totalPostCost} Credit",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.create_confirm_balance_after_label_format, uiState.minCreditsToPostApp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                                Text(
+                                    text = "${uiState.userCredits - uiState.totalPostCost} Credit",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPostConfirmation = false
+                    viewModel.create()
+                }) {
+                    Text(stringResource(R.string.post_app_group_confirmation_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPostConfirmation = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
     if (showSlotInfoDialog) {
+        val slot1Desc = if (uiState.slotFees.slot1 == 0) {
+            stringResource(R.string.create_slot_1_free_post)
+        } else {
+            stringResource(R.string.create_slot_1_paid_post_format, uiState.slotFees.slot1)
+        }
         AlertDialog(
             onDismissRequest = { showSlotInfoDialog = false },
             title = { Text(stringResource(R.string.post_app_slot_dialog_title)) },
-            text = { Text(stringResource(R.string.post_app_slot_dialog_msg)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.create_slot_info_dynamic_msg,
+                        slot1Desc,
+                        uiState.slotFees.slot2,
+                        uiState.slotFees.slot3,
+                        uiState.slotFees.slot4Plus,
+                        uiState.slotFees.renewalDays,
+                        uiState.minCreditsToPostApp,
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { showSlotInfoDialog = false }) {
                     Text(stringResource(R.string.confirm))
@@ -150,15 +274,18 @@ fun CreateCampaignScreen(
         )
     }
 
-    slotToUnlock?.let { slot ->
+    val activeSlotToUnlock = slotNumberToUnlock?.let { num -> uiState.slots.find { it.slotNumber == num } }
+    if (activeSlotToUnlock != null) {
+        val slot = activeSlotToUnlock
         val cost = slot.cost
         val hasEnoughCredits = uiState.userCredits >= cost
         val isPrevSlotActive = slot.slotNumber <= 2 ||
                 uiState.slots.find { it.slotNumber == slot.slotNumber - 1 }?.isAvailable == true ||
                 uiState.slots.find { it.slotNumber == slot.slotNumber - 1 }?.isOccupied == true
+        val hasQuote = slot.policyRevision != null
 
         AlertDialog(
-            onDismissRequest = { if (!uiState.isUnlockingSlot) slotToUnlock = null },
+            onDismissRequest = { if (!uiState.isUnlockingSlot) slotNumberToUnlock = null },
             title = {
                 Text(
                     text = if (slot.isUnlocked && !slot.isExpired)
@@ -172,9 +299,9 @@ fun CreateCampaignScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = if (slot.isUnlocked && !slot.isExpired)
-                            stringResource(R.string.slot_renew_dialog_desc, slot.slotNumber, cost)
+                            stringResource(R.string.slot_renew_dialog_desc, slot.slotNumber, slot.renewalDays, cost)
                         else
-                            stringResource(R.string.slot_unlock_dialog_desc, slot.slotNumber, cost),
+                            stringResource(R.string.slot_unlock_dialog_desc, slot.slotNumber, slot.renewalDays, cost),
                         style = MaterialTheme.typography.bodyMedium,
                     )
 
@@ -193,7 +320,7 @@ fun CreateCampaignScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(stringResource(R.string.create_slot_duration_label), style = MaterialTheme.typography.bodySmall)
-                                Text(stringResource(R.string.create_slot_duration_days), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.admin_policy_slot_renewal_days_format, slot.renewalDays), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -217,6 +344,20 @@ fun CreateCampaignScreen(
                         }
                     }
 
+                    if (!hasQuote) {
+                        Text(
+                            text = stringResource(R.string.admin_policy_quote_unavailable),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    } else if (!uiState.error.isNullOrBlank()) {
+                        Text(
+                            text = uiState.error.orEmpty(),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+
                     if (!hasEnoughCredits) {
                         Text(
                             text = stringResource(R.string.error_insufficient_credits_for_slot, cost, uiState.userCredits),
@@ -236,8 +377,8 @@ fun CreateCampaignScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = { viewModel.unlockOrRenewSlot(slot.slotNumber) },
-                    enabled = hasEnoughCredits && isPrevSlotActive && !uiState.isUnlockingSlot,
+                    onClick = { viewModel.unlockOrRenewSlot(slot.slotNumber, expectedCost = cost, expectedRevision = slot.policyRevision) },
+                    enabled = hasEnoughCredits && isPrevSlotActive && !uiState.isUnlockingSlot && hasQuote,
                 ) {
                     if (uiState.isUnlockingSlot) {
                         CircularProgressIndicator(
@@ -257,7 +398,7 @@ fun CreateCampaignScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { slotToUnlock = null },
+                    onClick = { slotNumberToUnlock = null },
                     enabled = !uiState.isUnlockingSlot,
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -292,14 +433,13 @@ fun CreateCampaignScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 1. Instructions Banner Card
-            val isDark = isSystemInDarkTheme()
-            val bannerStatusColor = if (uiState.isGuideConfirmed) {
-                if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
+            val bannerStatusColor = if (isGuideConfirmed) {
+                MaterialTheme.statusColors.success
             } else {
-                if (isDark) Color(0xFFFFB74D) else Color(0xFFE65100)
+                MaterialTheme.statusColors.warning
             }
 
             Card(
@@ -309,14 +449,14 @@ fun CreateCampaignScreen(
                     .clickable { onNavigateToGuide() },
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (uiState.isGuideConfirmed) {
+                    containerColor = if (isGuideConfirmed) {
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
                     } else {
-                        if (isDark) Color(0xFF3E2723).copy(alpha = 0.45f) else Color(0xFFFFF3E0)
+                        MaterialTheme.statusColors.warningContainer
                     },
                 ),
-                border = if (!uiState.isGuideConfirmed) {
-                    BorderStroke(1.dp, bannerStatusColor.copy(alpha = 0.6f))
+                border = if (!isGuideConfirmed) {
+                    BorderStroke(1.dp, bannerStatusColor.copy(alpha = 0.5f))
                 } else null,
             ) {
                 Row(
@@ -339,7 +479,7 @@ fun CreateCampaignScreen(
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = if (uiState.isGuideConfirmed) {
+                            text = if (isGuideConfirmed) {
                                 stringResource(R.string.post_app_guide_banner_confirmed)
                             } else {
                                 stringResource(R.string.post_app_guide_banner_unconfirmed)
@@ -358,7 +498,7 @@ fun CreateCampaignScreen(
                 }
             }
 
-            // 2. Slot Selector Section (Up to 6 slots, 30 days duration)
+            // 2. Slot Selector Section (Up to 6 slots)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -401,7 +541,7 @@ fun CreateCampaignScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Info,
-                                contentDescription = "Info",
+                                contentDescription = stringResource(R.string.cd_slot_info),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -423,7 +563,8 @@ fun CreateCampaignScreen(
                                     slotNumber = num,
                                     isPermanent = num == 1,
                                     isUnlocked = num == 1,
-                                    cost = SlotInfo.costForSlot(num)
+                                    cost = uiState.slotFees.feeForSlot(num),
+                                    renewalDays = uiState.slotFees.renewalDays,
                                 )
                             }
                         }
@@ -454,7 +595,7 @@ fun CreateCampaignScreen(
                                         if (isAvailable) {
                                             viewModel.selectSlot(slot.slotNumber)
                                         } else if (slot.canUnlock) {
-                                            slotToUnlock = slot
+                                            slotNumberToUnlock = slot.slotNumber
                                         }
                                     },
                                 shape = RoundedCornerShape(12.dp),
@@ -495,26 +636,34 @@ fun CreateCampaignScreen(
                                             Text(
                                                 text = if (isOccupied) stringResource(R.string.create_slot_running) else stringResource(R.string.create_slot_ready),
                                                 style = MaterialTheme.typography.labelSmall,
-                                                color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF2E7D32),
+                                                color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.statusColors.success,
                                                 fontWeight = FontWeight.SemiBold,
                                             )
+                                            val showSlot1FeeBadge = !isOccupied && uiState.slot1PostFee > 0
                                             Text(
-                                                text = stringResource(R.string.create_slot_permanent),
+                                                text = if (showSlot1FeeBadge) {
+                                                    stringResource(R.string.create_slot_1_post_fee_badge, uiState.slot1PostFee)
+                                                } else {
+                                                    stringResource(R.string.create_slot_permanent)
+                                                },
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                color = if (showSlot1FeeBadge) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontWeight = if (showSlot1FeeBadge) FontWeight.Bold else FontWeight.Normal,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
                                             )
                                         }
                                         slot.isUnlocked && !slot.isExpired -> {
                                             Text(
                                                 text = if (isOccupied) stringResource(R.string.create_slot_running) else stringResource(R.string.create_slot_ready),
                                                 style = MaterialTheme.typography.labelSmall,
-                                                color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF2E7D32),
+                                                color = if (isOccupied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.statusColors.success,
                                                 fontWeight = FontWeight.SemiBold,
                                             )
                                             Text(
                                                 text = stringResource(R.string.create_slot_remaining_days_format, slot.remainingDays),
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                                                color = Color(0xFF2E7D32),
+                                                color = MaterialTheme.statusColors.success,
                                                 fontWeight = FontWeight.Bold,
                                             )
                                         }
@@ -526,7 +675,7 @@ fun CreateCampaignScreen(
                                                 fontWeight = FontWeight.Bold,
                                             )
                                             Text(
-                                                text = stringResource(R.string.create_slot_unlock_short),
+                                                text = stringResource(R.string.create_slot_unlock_short, slot.renewalDays),
                                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
                                                 color = MaterialTheme.colorScheme.primary,
                                             )
@@ -543,7 +692,7 @@ fun CreateCampaignScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .alpha(if (uiState.isGuideConfirmed) 1f else 0.38f),
+                    .alpha(if (isGuideConfirmed) 1f else 0.38f),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // 3. Play Store Link Input
@@ -551,7 +700,7 @@ fun CreateCampaignScreen(
                     OutlinedTextField(
                         value = uiState.playUrl,
                         onValueChange = { viewModel.onPlayUrlChanged(it, context) },
-                        enabled = uiState.isGuideConfirmed,
+                        enabled = isGuideConfirmed,
                         label = { Text(stringResource(R.string.label_play_store_link)) },
                         placeholder = { Text(stringResource(R.string.hint_play_store_link)) },
                         leadingIcon = {
@@ -569,7 +718,7 @@ fun CreateCampaignScreen(
                                         viewModel.onPlayUrlChanged(clipText, context)
                                     }
                                 },
-                                enabled = uiState.isGuideConfirmed,
+                                enabled = isGuideConfirmed,
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.ContentPaste,
@@ -595,7 +744,7 @@ fun CreateCampaignScreen(
                     OutlinedTextField(
                         value = uiState.testingUrl,
                         onValueChange = { viewModel.onTestingUrlChanged(it) },
-                        enabled = uiState.isGuideConfirmed,
+                        enabled = isGuideConfirmed,
                         label = { Text(stringResource(R.string.label_testing_url)) },
                         placeholder = { Text("https://play.google.com/apps/testing/...") },
                         leadingIcon = {
@@ -629,7 +778,7 @@ fun CreateCampaignScreen(
                     OutlinedTextField(
                         value = uiState.packageName,
                         onValueChange = { viewModel.onPackageNameChanged(it, context) },
-                        enabled = uiState.isGuideConfirmed,
+                        enabled = isGuideConfirmed,
                         label = { Text(stringResource(R.string.label_package_name)) },
                         placeholder = { Text("com.example.myapp") },
                         leadingIcon = {
@@ -668,7 +817,7 @@ fun CreateCampaignScreen(
                     OutlinedTextField(
                         value = uiState.appName,
                         onValueChange = { viewModel.update(appName = it) },
-                        enabled = uiState.isGuideConfirmed,
+                        enabled = isGuideConfirmed,
                         label = { Text(stringResource(R.string.label_app_name_optional)) },
                         placeholder = { Text(stringResource(R.string.label_app_name_optional)) },
                         leadingIcon = {
@@ -749,7 +898,7 @@ fun CreateCampaignScreen(
                         OutlinedTextField(
                             value = uiState.iconUrl,
                             onValueChange = { viewModel.update(iconUrl = it) },
-                            enabled = uiState.isGuideConfirmed,
+                            enabled = isGuideConfirmed,
                             label = { Text(stringResource(R.string.label_icon_link_optional)) },
                             placeholder = { Text(stringResource(R.string.label_icon_link_optional)) },
                             shape = RoundedCornerShape(14.dp),
@@ -772,7 +921,7 @@ fun CreateCampaignScreen(
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .clickable(enabled = uiState.isGuideConfirmed) {
+                            .clickable(enabled = isGuideConfirmed) {
                                 imagePickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
@@ -783,7 +932,7 @@ fun CreateCampaignScreen(
                         Icon(
                             imageVector = Icons.Filled.FileUpload,
                             contentDescription = null,
-                            tint = if (uiState.isGuideConfirmed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isGuideConfirmed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(6.dp))
@@ -791,7 +940,7 @@ fun CreateCampaignScreen(
                             text = stringResource(R.string.btn_upload_icon_from_device),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = if (uiState.isGuideConfirmed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isGuideConfirmed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -814,7 +963,7 @@ fun CreateCampaignScreen(
                 OutlinedTextField(
                     value = uiState.testUsername,
                     onValueChange = { viewModel.update(testUsername = it) },
-                    enabled = uiState.isGuideConfirmed,
+                    enabled = isGuideConfirmed,
                     label = { Text(stringResource(R.string.label_test_username)) },
                     placeholder = { Text(stringResource(R.string.label_test_username)) },
                     leadingIcon = {
@@ -837,7 +986,7 @@ fun CreateCampaignScreen(
                 OutlinedTextField(
                     value = uiState.testPassword,
                     onValueChange = { viewModel.update(testPassword = it) },
-                    enabled = uiState.isGuideConfirmed,
+                    enabled = isGuideConfirmed,
                     label = { Text(stringResource(R.string.label_test_password)) },
                     placeholder = { Text(stringResource(R.string.label_test_password)) },
                     leadingIcon = {
@@ -873,11 +1022,15 @@ fun CreateCampaignScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        val targets = listOf(
-                            Triple(12, stringResource(R.string.create_target_option_format, 12), stringResource(R.string.create_target_default_cost)),
-                            Triple(15, stringResource(R.string.create_target_option_format, 15), "+10 Credit"),
-                            Triple(20, stringResource(R.string.create_target_option_format, 20), "+20 Credit"),
-                        )
+                        val targets = listOf(12, 15, 20).map { targetVal ->
+                            val fee = uiState.targetFees.feeForTarget(targetVal)
+                            val costLabel = when {
+                                targetVal == 12 && fee == 0 -> stringResource(R.string.create_target_default_cost)
+                                fee == 0 -> stringResource(R.string.create_target_free_cost)
+                                else -> stringResource(R.string.create_target_plus_credit_format, fee)
+                            }
+                            Triple(targetVal, stringResource(R.string.create_target_option_format, targetVal), costLabel)
+                        }
 
                         targets.forEach { (targetValue, title, costLabel) ->
                             val isSelected = uiState.targetTesters == targetValue
@@ -885,7 +1038,7 @@ fun CreateCampaignScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable(enabled = uiState.isGuideConfirmed) {
+                                    .clickable(enabled = isGuideConfirmed) {
                                         viewModel.selectTarget(targetValue)
                                     },
                                 shape = RoundedCornerShape(12.dp),
@@ -921,16 +1074,28 @@ fun CreateCampaignScreen(
                         }
                     }
 
-                    if (uiState.targetCost > 0) {
-                        val hasEnoughForUpgrade = uiState.userCredits >= uiState.targetCost + 10
+                    val isQuoteReady = !uiState.isLoadingPolicyQuote && uiState.policyRevision != null
+
+                    if (uiState.totalPostCost > 0 && !uiState.isLoadingCredits && isQuoteReady) {
                         Text(
-                            text = if (hasEnoughForUpgrade) {
-                                stringResource(R.string.create_target_fee_format, uiState.targetCost, uiState.userCredits)
+                            text = if (uiState.hasEnoughCredits) {
+                                stringResource(
+                                    R.string.create_posting_cost_summary_format,
+                                    uiState.totalPostCost,
+                                    uiState.minCreditsToPostApp,
+                                    uiState.userCredits,
+                                )
                             } else {
-                                stringResource(R.string.create_target_insufficient_format, uiState.targetCost + 10, uiState.userCredits)
+                                stringResource(
+                                    R.string.create_posting_insufficient_summary_format,
+                                    uiState.requiredCredits,
+                                    uiState.totalPostCost,
+                                    uiState.minCreditsToPostApp,
+                                    uiState.userCredits,
+                                )
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (hasEnoughForUpgrade) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                            color = if (uiState.hasEnoughCredits) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 4.dp),
                         )
@@ -947,7 +1112,7 @@ fun CreateCampaignScreen(
                     OutlinedTextField(
                         value = uiState.description,
                         onValueChange = { viewModel.update(description = it) },
-                        enabled = uiState.isGuideConfirmed,
+                        enabled = isGuideConfirmed,
                         label = { Text(stringResource(R.string.create_guide_label)) },
                         placeholder = { Text(stringResource(R.string.create_guide_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
@@ -967,9 +1132,45 @@ fun CreateCampaignScreen(
                     )
                 }
 
-                // Credit warning if user has <= 10 credits or not enough for target upgrade
-                val hasEnoughCreditsForSubmission = uiState.userCredits >= (uiState.targetCost + 10)
-                if (!uiState.isLoadingCredits && !hasEnoughCreditsForSubmission) {
+                val isQuoteReady = !uiState.isLoadingPolicyQuote && uiState.policyRevision != null
+
+                // Fail-closed banner when server pricing quote is unavailable
+                if (!uiState.isLoadingPolicyQuote && uiState.policyRevision == null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                text = stringResource(R.string.admin_policy_quote_unavailable),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(
+                                onClick = { viewModel.retryLoadData() },
+                                enabled = !uiState.isLoadingPolicyQuote,
+                            ) {
+                                Text(stringResource(R.string.admin_policy_retry_pending_btn))
+                            }
+                        }
+                    }
+                }
+
+                // Credit warning if user balance is below requiredCredits (totalPostCost + minCreditsToPostApp)
+                if (isQuoteReady && !uiState.isLoadingCredits && !uiState.hasEnoughCredits) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -987,10 +1188,20 @@ fun CreateCampaignScreen(
                                 tint = MaterialTheme.colorScheme.error,
                             )
                             Spacer(Modifier.width(12.dp))
-                            val warningText = if (uiState.targetCost > 0) {
-                                stringResource(R.string.create_target_cost_format, uiState.targetCost + 10, uiState.targetTesters, uiState.targetCost, uiState.userCredits)
+                            val warningText = if (uiState.totalPostCost > 0) {
+                                stringResource(
+                                    R.string.create_posting_insufficient_summary_format,
+                                    uiState.requiredCredits,
+                                    uiState.totalPostCost,
+                                    uiState.minCreditsToPostApp,
+                                    uiState.userCredits,
+                                )
                             } else {
-                                stringResource(R.string.create_campaign_credit_warning, uiState.userCredits)
+                                stringResource(
+                                    R.string.create_posting_min_balance_only_warning_format,
+                                    uiState.minCreditsToPostApp,
+                                    uiState.userCredits,
+                                )
                             }
                             Text(
                                 text = warningText,
@@ -1033,7 +1244,7 @@ fun CreateCampaignScreen(
                             }
                             if (nextLockedSlot != null) {
                                 Button(
-                                    onClick = { slotToUnlock = nextLockedSlot },
+                                    onClick = { slotNumberToUnlock = nextLockedSlot.slotNumber },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary
@@ -1046,7 +1257,14 @@ fun CreateCampaignScreen(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(Modifier.width(8.dp))
-                                    Text(stringResource(R.string.create_unlock_slot_btn_format, nextLockedSlot.slotNumber, nextLockedSlot.cost))
+                                    Text(
+                                        stringResource(
+                                            R.string.create_unlock_slot_btn_dynamic_format,
+                                            nextLockedSlot.slotNumber,
+                                            nextLockedSlot.cost,
+                                            nextLockedSlot.renewalDays,
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -1101,15 +1319,16 @@ fun CreateCampaignScreen(
                 val isSelectedSlotReady = selectedSlot != null && selectedSlot.isAvailable
                 val canSubmit = !uiState.isSaving &&
                         !uiState.isLoadingCredits &&
-                        uiState.userCredits >= (uiState.targetCost + 10) &&
+                        isQuoteReady &&
+                        uiState.hasEnoughCredits &&
                         !uiState.isLoadingSlots &&
                         isSelectedSlotReady &&
                         hasAvailableSlot &&
                         uiState.packageName.isNotBlank()
 
                 Button(
-                    onClick = viewModel::create,
-                    enabled = uiState.isGuideConfirmed && canSubmit,
+                    onClick = { showPostConfirmation = true },
+                    enabled = isGuideConfirmed && canSubmit,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()

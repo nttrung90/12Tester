@@ -1,0 +1,6 @@
+{
+  "hash": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5",
+  "appliedAt": "2026-11-12T00:34:55.824Z",
+  "database": "immediate_quota_test",
+  "environment": "Private task-local native PostgreSQL"
+}

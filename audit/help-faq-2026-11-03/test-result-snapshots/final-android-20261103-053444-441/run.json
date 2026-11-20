@@ -1,0 +1,11 @@
+{
+  "logName": "final-android",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-03T05:33:44.1746808Z",
+  "finishedUtc": "2026-11-03T05:34:44.5934417Z",
+  "currentRunXmlCount": 68
+}

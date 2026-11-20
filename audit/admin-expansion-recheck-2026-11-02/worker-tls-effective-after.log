@@ -1,0 +1,39 @@
+﻿{
+  "connectedToDatabase": false,
+  "results": [
+    {
+      "mode": "plain URL",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": true
+    },
+    {
+      "mode": "?sslmode=disable",
+      "safelyRejected": true
+    },
+    {
+      "mode": "?sslmode=no-verify",
+      "safelyRejected": true
+    },
+    {
+      "mode": "?ssl=false",
+      "safelyRejected": true
+    },
+    {
+      "mode": "?sslmode=verify-ca",
+      "safelyRejected": true
+    },
+    {
+      "mode": "?sslmode=require",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": true
+    },
+    {
+      "mode": "?sslmode=verify-full",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": true
+    }
+  ]
+}

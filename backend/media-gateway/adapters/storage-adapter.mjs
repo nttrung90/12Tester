@@ -1,87 +1,124 @@
-/**
- * Storage Adapter cho Media Access Gateway (E04).
- *
- * Tải trực tiếp dữ liệu nhị phân của ảnh từ Cloud Storage thông qua authenticated client,
- * tuyệt đối KHÔNG redirect về client và KHÔNG phụ thuộc vào download token công khai.
- */
-
+// Authenticated report bytes only. Never fetch arbitrary URLs or forward service credentials.
+const SUPABASE_BUCKET = 'report-screenshots';
+function objectPath(value) {
+    let path;
+    try { path = decodeURIComponent(value); } catch { return null; }
+    if (!/^reports\/(?:[a-zA-Z0-9_-]+\/){1,2}[a-zA-Z0-9_.-]+\.(?:jpg|jpeg|png|webp)$/.test(path) ||
+        path.includes('%') || path.split('/').some(p=>p==='.' || p==='..')) return null;
+    return path;
+}
+export function parseReportStorageLocation(value, { supabaseUrl, googleBuckets = [], provider, bucket } = {}) {
+    if (typeof value !== 'string' || !value || value.length > 4096) return null;
+    let parsedProvider, parsedBucket, raw;
+    if (value.startsWith('reports/')) {
+        parsedProvider=provider; parsedBucket=bucket; raw=value;
+    } else if (value.startsWith('supabase://') || value.startsWith('/storage/')) {
+        const m=value.startsWith('supabase://')
+            ? value.match(/^supabase:\/\/([^/]+)\/(.+)$/)
+            : value.match(/^\/storage\/v1\/object\/(?:(?:authenticated|public)\/)?([^/]+)\/([^?#]+)$/);
+        if (!m) return null;
+        parsedProvider='supabase'; parsedBucket=m[1]; raw=m[2];
+    } else {
+        let url;
+        try { url=new URL(value); } catch { return null; }
+        if (url.username || url.password || url.protocol!=='https:') return null;
+        let origin=null;
+        try { if(supabaseUrl) origin=new URL(supabaseUrl).origin; } catch { return null; }
+        const supa=url.pathname.match(/^\/storage\/v1\/object\/(?:(?:authenticated|public)\/)?([^/]+)\/(.+)$/);
+        if (origin && url.origin===origin && supa) {
+            parsedProvider='supabase'; parsedBucket=supa[1]; raw=supa[2];
+        } else if (url.hostname==='storage.googleapis.com' && !url.port) {
+            const parts=url.pathname.slice(1).split('/');
+            parsedProvider='gcs'; parsedBucket=parts.shift(); raw=parts.join('/');
+        } else if (url.hostname==='firebasestorage.googleapis.com' && !url.port) {
+            const m=url.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+            if(!m) return null;
+            parsedProvider='gcs'; parsedBucket=m[1]; raw=m[2];
+        } else if (googleBuckets.includes(url.hostname) && !url.port) {
+            const m=url.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+            if(m) { parsedBucket=m[1]; raw=m[2]; }
+            else if(url.pathname.startsWith('/o/')) { parsedBucket=url.hostname; raw=url.pathname.slice(3); }
+            else return null;
+            if(parsedBucket!==url.hostname) return null;
+            parsedProvider='gcs';
+        } else return null;
+    }
+    const path=objectPath(raw || '');
+    if(!path || (provider && provider!==parsedProvider) || (bucket && bucket!==parsedBucket)) return null;
+    if(parsedProvider==='supabase' && parsedBucket===SUPABASE_BUCKET && supabaseUrl) {
+        return { provider:parsedProvider, bucket:parsedBucket, path };
+    }
+    if(parsedProvider==='gcs' && googleBuckets.includes(parsedBucket)) {
+        return { provider:parsedProvider, bucket:parsedBucket, path };
+    }
+    return null;
+}
 export class FirebaseStorageAdapter {
-    constructor({ bucketName, storageClient = null, logger = console }) {
-        this.bucketName = bucketName;
-        this.storageClient = storageClient;
-        this.logger = logger;
+    constructor({ bucketName, storageClient, allowedBuckets = [bucketName], logger = console }) {
+        this.bucketName=bucketName; this.storageClient=storageClient;
+        this.allowedBuckets=[...new Set(allowedBuckets.filter(Boolean))]; this.logger=logger;
     }
-
-    /**
-     * Tải nhị phân của đối tượng từ authenticated Cloud Storage client.
-     */
-    async getObject({ reportId, variant, storagePath }) {
-        if (!storagePath) {
-            return null;
-        }
-
-        // Tiền điều kiện 1: Bắt buộc phải có authenticated storageClient.
-        // Tuyệt đối không fallback gọi fetch() với public token đã bị revoke.
-        if (!this.storageClient || !this.bucketName) {
-            this.logger.warn?.('StorageAdapter: Cần storageClient hợp lệ để truy cập storage xác thực. Không dùng token công khai.');
-            return null;
-        }
-
+    async getObject(params) {
+        const location=parseReportStorageLocation(params.storagePath, {
+            provider:'gcs', bucket:params.bucket, googleBuckets:this.allowedBuckets,
+            ...(params.storagePath?.startsWith('reports/') ? { bucket:params.bucket || this.bucketName } : {}),
+        });
+        if(!location || !this.storageClient) return null;
+        const file=this.storageClient.bucket(location.bucket).file(location.path);
         try {
-            let objectName = storagePath;
-
-            // Kiểm tra bucket allowlist từ URL trước khi gọi storageClient
-            if (storagePath.startsWith('http')) {
-                const urlObj = new URL(storagePath);
-                let urlBucket = null;
-
-                if (urlObj.hostname === 'storage.googleapis.com') {
-                    // Định dạng: https://storage.googleapis.com/<bucket>/<object_path>
-                    const parts = urlObj.pathname.split('/').filter(Boolean);
-                    urlBucket = parts[0];
-                    objectName = parts.slice(1).join('/');
-                } else if (urlObj.hostname === 'firebasestorage.googleapis.com') {
-                    // Định dạng: https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<object_path>
-                    const match = urlObj.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
-                    if (match) {
-                        urlBucket = match[1];
-                        objectName = decodeURIComponent(match[2].replace(/\+/g, ' '));
-                    }
-                } else if (urlObj.hostname.endsWith('.firebasestorage.app')) {
-                    urlBucket = urlObj.hostname;
-                    const match = urlObj.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
-                    if (match) {
-                        urlBucket = match[1];
-                        objectName = decodeURIComponent(match[2].replace(/\+/g, ' '));
-                    } else if (urlObj.pathname.startsWith('/o/')) {
-                        objectName = decodeURIComponent(urlObj.pathname.slice(3));
-                    }
-                }
-
-                // Nếu URL chứa bucket nhưng không khớp với bucket cấu hình -> từ chối ngay lập tức
-                if (urlBucket && urlBucket !== this.bucketName) {
-                    this.logger.warn?.(`StorageAdapter: Bucket "${urlBucket}" trong URL không khớp với bucket cấu hình "${this.bucketName}".`);
-                    return null;
-                }
-            }
-
-            const bucket = this.storageClient.bucket(this.bucketName);
-            const file = bucket.file(objectName);
-            const [exists] = await file.exists();
-            if (!exists) {
-                return null;
-            }
-
-            const [metadata] = await file.getMetadata();
-            const [bytes] = await file.download();
-
-            return {
-                bytes,
-                contentType: metadata.contentType || 'image/jpeg',
-            };
-        } catch (err) {
-            this.logger.error?.(`StorageAdapter getObject error: ${err.message}`);
-            return null;
+            const [exists]=await file.exists();
+            if(!exists) return null;
+            const [metadata]=await file.getMetadata();
+            const [bytes]=await file.download();
+            return { bytes, contentType:metadata.contentType || 'image/jpeg' };
+        } catch(e) {
+            if(Number(e.code)===404) return null;
+            this.logger.error?.('Firebase report download failed');
+            throw e;
         }
     }
+}
+export class SupabaseStorageAdapter {
+    constructor({ supabaseClient, supabaseUrl, bucketName=SUPABASE_BUCKET, logger=console }) {
+        if(bucketName!==SUPABASE_BUCKET) throw Error('UNEXPECTED_SUPABASE_BUCKET');
+        this.supabaseClient=supabaseClient;
+        this.supabaseUrl=supabaseUrl || supabaseClient?.supabaseUrl;
+        this.bucketName=bucketName; this.logger=logger;
+    }
+    async getObject(params) {
+        const location=parseReportStorageLocation(params.storagePath, {
+            provider:'supabase', bucket:this.bucketName, supabaseUrl:this.supabaseUrl,
+        });
+        if(!location || !this.supabaseClient) return null;
+        const { data,error }=await this.supabaseClient.storage.from(location.bucket).download(location.path);
+        if(error) {
+            if(Number(error.statusCode ?? error.status)===404) return null;
+            this.logger.error?.('Supabase report download failed');
+            throw error;
+        }
+        if(!data) return null;
+        return { bytes:Buffer.from(await data.arrayBuffer()), contentType:data.type || 'image/jpeg' };
+    }
+}
+export class DualStorageAdapter {
+    constructor({ firebaseAdapter, supabaseAdapter }) {
+        this.firebaseAdapter=firebaseAdapter; this.supabaseAdapter=supabaseAdapter;
+    }
+    async getObject(params) {
+        const location=parseReportStorageLocation(params?.storagePath, {
+            supabaseUrl:this.supabaseAdapter?.supabaseUrl,
+            googleBuckets:this.firebaseAdapter?.allowedBuckets || [],
+            provider:params?.provider, bucket:params?.bucket,
+        });
+        if(!location) return null;
+        const adapter=location.provider==='supabase' ? this.supabaseAdapter : this.firebaseAdapter;
+        return adapter?.getObject({ ...params, provider:location.provider, bucket:location.bucket, storagePath:location.path }) ?? null;
+    }
+}
+export function createDualStorageAdapter({ supabaseClient, supabaseUrl, storageClient, bucketName,
+    allowedGoogleBuckets=[bucketName], logger=console }) {
+    return new DualStorageAdapter({
+        firebaseAdapter:new FirebaseStorageAdapter({ bucketName, allowedBuckets:allowedGoogleBuckets, storageClient, logger }),
+        supabaseAdapter:new SupabaseStorageAdapter({ supabaseClient, supabaseUrl, logger }),
+    });
 }

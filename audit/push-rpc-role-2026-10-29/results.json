@@ -1,0 +1,45 @@
+[
+  {
+    "authenticated": false,
+    "role": {
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "active_role": "none"
+    },
+    "before": {
+      "credits": 1000
+    },
+    "outcome": {
+      "success": true,
+      "replayed": false
+    },
+    "after": {
+      "credits": 900,
+      "receipt_count": 1,
+      "log_count": 1,
+      "push_order": 1
+    }
+  },
+  {
+    "authenticated": true,
+    "role": {
+      "current_user": "authenticated",
+      "session_user": "postgres",
+      "active_role": "authenticated"
+    },
+    "before": {
+      "credits": 1000
+    },
+    "outcome": {
+      "success": false,
+      "code": "P0001",
+      "message": "PUSH_METADATA_READ_ONLY: Client khong duoc phep thay doi metadata day app truc tiep"
+    },
+    "after": {
+      "credits": 1000,
+      "receipt_count": 0,
+      "log_count": 0,
+      "push_order": null
+    }
+  }
+]

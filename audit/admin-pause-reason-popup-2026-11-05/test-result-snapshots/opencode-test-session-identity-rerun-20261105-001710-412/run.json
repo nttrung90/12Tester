@@ -1,0 +1,10 @@
+{
+    "logName":  "opencode-test-session-identity-rerun",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T00:17:00.6114668Z",
+    "finishedUtc":  "2026-11-05T00:17:10.4182123Z",
+    "currentRunXmlCount":  0
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:41:20.564Z" hostname="PC-5700X3D" time="0.684">
+  <properties/>
+  <testcase name="action_ownerChangedDuringConfirmation_abortsAndRequiresFreshConfirm" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.029"/>
+  <testcase name="compensation_requestIdReusedOnFailureRetry_andNewIdOnPayloadChange" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.076"/>
+  <testcase name="navigation_adminRoutes_contractAndConstruction" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.006"/>
+  <testcase name="memberDetail_staleActionPreflightAfterSessionReset_doesNotReleaseNewSessionGuard" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.033"/>
+  <testcase name="carryoverPolicy_revisionConflict_reloadsWithoutLosingDraft" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.085"/>
+  <testcase name="memberSearch_staleLoadMoreAfterQueryChange_isIgnored" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.035"/>
+  <testcase name="sameUID_newGeneration_rejectsStalePage_andPreservesFreshState" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.169"/>
+  <testcase name="adminManagementDto_exactJsonParsingAgainstRealBackendContract" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.025"/>
+  <testcase name="compensation_doubleSubmitBeforeCoroutineStarts_isGuarded" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.038"/>
+  <testcase name="carryoverPolicy_futurePagination125Items_noDuplicatesOrOmissions" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.062"/>
+  <testcase name="compensation_heldRpcProcessRecreate_noCatchRan_restoresOriginalRequestForReplay" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.061"/>
+  <testcase name="compensation_savedStateHandleRestoration_persistsIntentAndRequestId_noAutoSubmit" classname="com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest" time="0.063"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

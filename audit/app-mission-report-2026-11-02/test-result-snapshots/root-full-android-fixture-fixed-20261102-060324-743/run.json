@@ -1,0 +1,13 @@
+{
+  "logName": "root-full-android-fixture-fixed",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-02T06:02:29.8344852Z",
+  "finishedUtc": "2026-11-02T06:03:24.9094553Z",
+  "currentRunXmlCount": 74
+}

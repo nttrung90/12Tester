@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.NextCampaignSelectorTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:59.022Z" hostname="PC-5700X3D" time="0.002">
+  <properties/>
+  <testcase name="firstTimeTester_lowInstalledCountDoesNotCrossGroupBoundaries" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.001"/>
+  <testcase name="firstTimeTester_tiesWithinWinningGroup_pickedRandomlyAmongTies" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="mandatorySpecExample_uninstalledUnderTargetBeatsInstalledFull" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="targetBoundaries_underTarget_classifiedAsNotMet" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="strictOrdering_groups1And2Empty_group3Selected" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.001"/>
+  <testcase name="targetBoundaries_invalidTargetNormalizedTo12" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="strictOrdering_onlyGroup4Present_stillSelectsGroup4" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="strictOrdering_group1Empty_group2Selected" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="groupClassification_allFourGroupsDistinct" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="strictOrdering_emptyCandidates_returnsNull" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="regularTester_noInstalledCountBiasWithinGroup" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="firstTimeTester_lowInstalledCountWinsInsideWinningGroup" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="strictOrdering_allFourGroupsPresent_onlyGroup1Selected" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="targetBoundaries_reachedOrExceeded_classifiedAsMet" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <testcase name="targetBoundaries_invalidOrMissingCount_notAssumedZero" classname="com.ntt.crosstest.util.NextCampaignSelectorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

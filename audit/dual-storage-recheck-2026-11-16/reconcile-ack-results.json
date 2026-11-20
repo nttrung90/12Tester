@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-16T13:08:44.933Z",
+  "scope": "Injected RPC; no network or database writes",
+  "status": "PASS",
+  "expected": {
+    "is_metric_valid": false,
+    "cliExitCode": 1
+  },
+  "observed": {
+    "is_metric_valid": false,
+    "cliExitCode": 1,
+    "dispatch_mode_result": "google_overflow",
+    "fail_safe_triggered": true
+  },
+  "databaseAcknowledgement": {
+    "success": true,
+    "is_org_metric_valid": false,
+    "dispatch_mode": "google_overflow"
+  }
+}

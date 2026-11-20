@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-11-16T14:25:52.824Z",
+  "files": [
+    {
+      "path": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "sha256": "3a1dc6f2a5998fb697fe2c841af46532f5df885a777c3617bc37d71215b69486"
+    },
+    {
+      "path": "backend/storage-cleanup/cleanup-supabase-storage.mjs",
+      "sha256": "429684ff553eab821a80f41c658d2927d5bb27e28454d4439c6c06d6d9fc8b20"
+    },
+    {
+      "path": "backend/storage-cleanup/reconcile-org-storage.mjs",
+      "sha256": "7529d5be2cd07eafce3e4f81370145b40736427f050a4845066127ba745d80ed"
+    },
+    {
+      "path": "backend/media-gateway/server.mjs",
+      "sha256": "3ae63e0e0fbefffc8835fa2bb30ec8e1563beb922a3c4681f721070bf7789fee"
+    },
+    {
+      "path": "backend/media-gateway/adapters/storage-adapter.mjs",
+      "sha256": "98f2d92df3f6574f66d12fff92ee7acb5bbc38879ed41a56571da3ecc937f3c5"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/util/ScreenshotManager.kt",
+      "sha256": "9290cdb5fb820c54a13df83ac7af6e7b0a34d86d46d6b2b8a238d5d28accd6cd"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/util/SupabaseStorageHelper.kt",
+      "sha256": "3e240dc34a003620ff697749c78a8103e7e3cf328a82f1ea6d7a6a0063afb899"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+      "sha256": "aea66902ebc95da62023d83c4a2bd34d4f1ffc915805554c8a01f8eee2be577e"
+    }
+  ]
+}

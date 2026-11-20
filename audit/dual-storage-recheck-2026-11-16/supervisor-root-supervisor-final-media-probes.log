@@ -1,0 +1,77 @@
+{
+  "scope": "PGlite + injected fake Storage; no production",
+  "results": [
+    {
+      "id": "URL-HOST",
+      "title": "Reject foreign host despite matching bucket/path",
+      "status": "PASS"
+    },
+    {
+      "id": "CONTROL-GOOGLE",
+      "title": "Existing Google screenshot URL remains accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "SUBMIT-PROVENANCE",
+      "title": "Reject Supabase screenshot without reservation or object",
+      "status": "PASS"
+    },
+    {
+      "id": "OBJECT-CLOCK",
+      "title": "Keep expiry based on actual Storage creation time",
+      "status": "PASS"
+    },
+    {
+      "id": "QUOTA-FINALIZE",
+      "title": "Retain uploaded bytes in U+R before next reconciliation",
+      "status": "PASS"
+    },
+    {
+      "id": "RLS-EXPIRY",
+      "title": "Deny direct Storage read after expiry even for uploader",
+      "status": "PASS"
+    },
+    {
+      "id": "CLEANUP-RETRY",
+      "title": "Reclaim cleanup job after failed worker/expired lease",
+      "status": "PASS"
+    },
+    {
+      "id": "CLEANUP-DRY-RUN",
+      "title": "Dry run leaves cleanup state unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "ORPHAN-EXPIRED",
+      "title": "Cleanup discovers reservation marked expired by allocator",
+      "status": "PASS"
+    },
+    {
+      "id": "CLEANUP-PROVIDER",
+      "title": "Supabase cleanup must not claim GCS orphan",
+      "status": "PASS"
+    },
+    {
+      "id": "DELETE-IDEMPOTENT",
+      "title": "Retry acknowledgement does not decrement quota twice",
+      "status": "PASS"
+    },
+    {
+      "id": "METRICS-VALIDATION",
+      "title": "Invalid project byte count fails safe",
+      "status": "PASS"
+    },
+    {
+      "id": "DELETE-PARTIAL",
+      "title": "Partial deletion response must not finalize whole pair",
+      "status": "PASS"
+    },
+    {
+      "id": "DELETE-PATH",
+      "title": "Reject deletion candidate outside allowed prefix",
+      "status": "PASS"
+    }
+  ],
+  "passed": 14,
+  "failed": 0
+}

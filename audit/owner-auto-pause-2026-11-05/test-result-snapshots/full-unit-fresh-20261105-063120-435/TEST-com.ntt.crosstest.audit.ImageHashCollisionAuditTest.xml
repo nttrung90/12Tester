@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.ImageHashCollisionAuditTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:30:55.190Z" hostname="PC-5700X3D" time="3.68">
+  <properties/>
+  <testcase name="changedPixelsWithSameBrightnessOrderingStillScore100" classname="com.ntt.crosstest.audit.ImageHashCollisionAuditTest" time="2.538"/>
+  <testcase name="differentSolidColorsAreReportedAs100Percent" classname="com.ntt.crosstest.audit.ImageHashCollisionAuditTest" time="1.059"/>
+  <testcase name="score100IsHashEqualityRatherThanRounding" classname="com.ntt.crosstest.audit.ImageHashCollisionAuditTest" time="0.012"/>
+  <testcase name="invalidOrMissingHashReturnsUnknownAndMinusOne" classname="com.ntt.crosstest.audit.ImageHashCollisionAuditTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

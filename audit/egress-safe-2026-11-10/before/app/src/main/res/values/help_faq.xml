@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="help_faq_title">User Guide &amp; FAQ</string>
+    <string name="help_faq_desc">Learn how to use 12 Cross Testers and find answers</string>
+    <string name="help_tab_guide">User Guide</string>
+    <string name="help_tab_faq">FAQ</string>
+    <string name="help_action_expand">Expand answer</string>
+    <string name="help_action_collapse">Collapse answer</string>
+    <string name="help_state_expanded">Expanded</string>
+    <string name="help_state_collapsed">Collapsed</string>
+</resources>

@@ -1,6 +1,7 @@
 package com.ntt.crosstest.data
 
 import android.os.SystemClock
+import android.util.Log
 import com.ntt.crosstest.R
 import com.ntt.crosstest.util.VnTime
 import io.github.jan.supabase.SupabaseClient
@@ -20,10 +21,17 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
@@ -34,10 +42,7 @@ import java.util.concurrent.atomic.AtomicLong
  * [installedCount] lÃ  sá»‘ ngÆ°á»i Ä‘Ã£ cÃ i app (campaign_members) â€” dÃ¹ng Ä‘á»ƒ Æ°u tiÃªn
  * app cÃ³ lÆ°á»£t cÃ i tháº¥p cho tÃ i khoáº£n má»›i.
  */
-data class NextCampaignCandidate(
-    val campaign: Campaign,
-    val installedCount: Int = 0,
-)
+
 
 /**
  * Entry lÆ°u trong bá»™ nhá»› RAM kÃ¨m metadata xÃ¡c thá»±c tÃ­nh tÆ°Æ¡i má»›i (C01, C04).
@@ -84,37 +89,107 @@ class CampaignRepository(
 ) {
 
     companion object {
+        private const val TAG = "CampaignRepository"
         const val CACHE_TTL_MS = 3 * 60 * 1000L // 3 minutes cache TTL
+        const val DAILY_TASK_RPC_TIMEOUT_MS = 10_000L
         private const val SHORT_CACHE_TTL_MS = 60 * 1000L // warnings/notifications/logs
         private const val PACKAGES_CACHE_TTL_MS = 10 * 60 * 1000L
         private const val AUTO_ACCEPT_THROTTLE_MS = 10 * 60 * 1000L
         private const val MAX_MAP_ENTRIES = 200
 
         /**
-         * Danh sÃ¡ch cá»™t cá»§a báº£ng `campaigns` khá»›p model [Campaign].
-         * Chá»n cá»™t tÆ°á»ng minh thay vÃ¬ `select *` giÃºp giáº£m payload cho Ä‘Æ°á»ng legacy.
+         * Danh sách cột của bảng `campaigns` khớp model [Campaign].
+         * Chọn cột tường minh thay vì `select *` giúp giảm payload cho đường legacy.
+         * Lưu ý: admin_pause_reason_code là trường presentation mới từ 078, không đưa vào projection mặc định
+         * để tránh lỗi schema cache với backend pre-078; các RPC mới (AdminCampaignControlResult) vẫn decode đầy đủ.
          */
-        private val CAMPAIGN_COLUMNS = Columns.list(
+        val LEGACY_CAMPAIGN_COLUMNS = Columns.list(
             "id", "owner_id", "app_name", "package_name", "play_url", "testing_url",
             "description", "target_testers", "target_days", "start_date", "status",
             "icon_url", "test_username", "test_password", "tip_credits", "is_boosted",
             "slot_number", "paused_reason", "admin_note", "completed_at", "created_at",
             "push_business_date", "push_expires_at", "push_order",
         )
+        val FULL_CAMPAIGN_COLUMNS = Columns.list(
+            "id", "owner_id", "app_name", "package_name", "play_url", "testing_url",
+            "description", "target_testers", "target_days", "start_date", "status",
+            "icon_url", "test_username", "test_password", "tip_credits", "is_boosted",
+            "slot_number", "paused_reason", "admin_note", "completed_at", "created_at",
+            "push_business_date", "push_expires_at", "push_order",
+            "tester_bonus_round_id", "tester_bonus_credits", "tester_bonus_remaining_slots",
+            "tester_bonus_paid_count", "tester_bonus_status",
+        )
+        val CAMPAIGN_COLUMNS = FULL_CAMPAIGN_COLUMNS
+        private const val BONUS_COLUMNS_RECHECK_INTERVAL_MS = 5 * 60 * 1000L
+    }
+
+    @Volatile
+    var bonusColumnsSupported: Boolean = true
+    @Volatile
+    var bonusColumnsCheckedAtMs: Long = 0L
+
+    fun isMissingBonusColumn(error: Exception): Boolean {
+        if (error is CancellationException) return false
+        val msg = error.message.orEmpty()
+        val code = (error as? PostgrestRestException)?.code.orEmpty()
+        val isMissingColumnCode = code.equals("42703", ignoreCase = true) ||
+            code.equals("PGRST204", ignoreCase = true) ||
+            msg.contains("42703")
+
+        val missingColumnRegexes = listOf(
+            Regex("""column\s+([^\s]+\.)?["']?(tester_bonus_[^\s"']+)["']?\s+does\s+not\s+exist""", RegexOption.IGNORE_CASE),
+            Regex("""Could\s+not\s+find\s+the\s+'(tester_bonus_[^']+)'\s+column""", RegexOption.IGNORE_CASE),
+        )
+        return isMissingColumnCode && missingColumnRegexes.any { it.containsMatchIn(msg) }
+    }
+
+    suspend fun <T> queryCampaignsSafe(block: suspend (Columns) -> T): T {
+        val now = monotonicNow()
+        val shouldTryFull = bonusColumnsSupported || (now - bonusColumnsCheckedAtMs >= BONUS_COLUMNS_RECHECK_INTERVAL_MS)
+        if (shouldTryFull) {
+            try {
+                val result = block(FULL_CAMPAIGN_COLUMNS)
+                bonusColumnsSupported = true
+                return result
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (isMissingBonusColumn(e)) {
+                    bonusColumnsSupported = false
+                    bonusColumnsCheckedAtMs = monotonicNow()
+                    Log.w(TAG, "Backend schema missing tester bonus columns; falling back to legacy campaign columns: ${e.message}")
+                    return block(LEGACY_CAMPAIGN_COLUMNS)
+                }
+                throw e
+            }
+        } else {
+            return block(LEGACY_CAMPAIGN_COLUMNS)
+        }
     }
 
     val sessionGeneration get() = sessionCacheManager.generation
     private val mutationVersions = ConcurrentHashMap<String, AtomicLong>()
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val _notificationEvents = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 64)
+    val notificationEvents = _notificationEvents.asSharedFlow()
+    private val _dailyTaskEvents = MutableSharedFlow<DailyTaskChangeEvent>(extraBufferCapacity = 64)
+    val dailyTaskEvents = _dailyTaskEvents.asSharedFlow()
+
+    internal fun publishDailyTaskEvent(event: DailyTaskChangeEvent) {
+        _dailyTaskEvents.tryEmit(event)
+    }
 
     fun monotonicNow(): Long = monotonicClock()
     fun businessDay(): LocalDate = businessDayClock()
 
     fun getMutationVersion(domain: String): Long =
-        mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.get()
+        if (domain == "daily_task") SessionCacheManager.currentDailyTaskVersion()
+        else mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.get()
 
     fun bumpMutationVersion(domain: String): Long =
-        mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.incrementAndGet()
+        if (domain == "daily_task") SessionCacheManager.nextDailyTaskVersion()
+        else mutationVersions.computeIfAbsent(domain) { AtomicLong(1L) }.incrementAndGet()
+
+
 
     private fun <K, V> evictOldEntries(map: ConcurrentHashMap<K, CacheEntry<V>>, maxCapacity: Int = MAX_MAP_ENTRIES) {
         if (map.size > maxCapacity) {
@@ -173,6 +248,8 @@ class CampaignRepository(
     private var cachedSlotsInfo: CacheEntry<List<SlotInfo>>? = null
     @Volatile
     private var cachedUserSlots: CacheEntry<List<UserSlot>>? = null
+    @Volatile
+    private var cachedAllBusinessQuote: CacheEntry<AllBusinessQuote>? = null
 
     private val reportsCache = ConcurrentHashMap<String, CacheEntry<List<TesterReport>>>()
     private val testersCache = ConcurrentHashMap<String, CacheEntry<List<TesterItem>>>()
@@ -184,6 +261,7 @@ class CampaignRepository(
     private val checkinsCache = ConcurrentHashMap<String, CacheEntry<List<Checkin>>>()
     private val feedbacksCache = ConcurrentHashMap<String, CacheEntry<List<Feedback>>>()
     private val detailCache = ConcurrentHashMap<String, CacheEntry<CampaignDetailResult>>()
+    private val ownerActivityStatsCache = ConcurrentHashMap<String, CacheEntry<OwnerActivityStats>>()
 
     @Volatile
     private var cachedUnreadWarnings: CacheEntry<List<UserWarning>>? = null
@@ -195,12 +273,42 @@ class CampaignRepository(
     private var cachedTopupPackages: CacheEntry<List<TopupPackage>>? = null
     @Volatile
     private var cachedNotifications: CacheEntry<List<UserNotification>>? = null
+    private val localReadNotificationIds = ConcurrentHashMap<String, MutableSet<String>>()
+
+    fun recordLocalReadNotification(userId: String, notificationId: String) {
+        if (userId.isNotBlank() && notificationId.isNotBlank()) {
+            localReadNotificationIds.computeIfAbsent(userId) { ConcurrentHashMap.newKeySet() }.add(notificationId)
+        }
+    }
+
+    fun isNotificationLocallyRead(userId: String, notificationId: String): Boolean {
+        if (userId.isBlank() || notificationId.isBlank()) return false
+        return localReadNotificationIds[userId]?.contains(notificationId) == true
+    }
+
+    fun notifyNotificationLocallyRead(userId: String, notificationId: String) {
+        recordLocalReadNotification(userId, notificationId)
+        _notificationEvents.tryEmit(
+            NotificationEvent.MarkedRead(
+                id = notificationId,
+                ownerId = userId,
+                generation = sessionGeneration.get()
+            )
+        )
+    }
+
     @Volatile
     private var cachedHomeFeed: CacheEntry<HomeFeedResult>? = null
     @Volatile
     private var cachedDashboard: CacheEntry<MyDashboardResult>? = null
     @Volatile
     private var cachedOpenMissions: CacheEntry<List<Mission>>? = null
+
+    @Volatile
+    private var homeFeedSnapshot: ScopedSyncSnapshot<HomeFeedResult>? = null
+    @Volatile
+    private var dashboardSnapshot: ScopedSyncSnapshot<MyDashboardResult>? = null
+    private val detailSnapshots = ConcurrentHashMap<String, ScopedSyncSnapshot<CampaignDetailResult>>()
 
     @Volatile
     private var lastAutoAcceptRunMs: Long = 0L
@@ -213,22 +321,33 @@ class CampaignRepository(
         forceRefresh: Boolean,
         isFresh: () -> Boolean,
         getCached: () -> T?,
+        staticRpcName: String? = null,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
         fetch: suspend () -> T,
     ): T {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion(domain)
         val curUid = supabase.auth.currentUserOrNull()?.id
+        val bizDate = businessDay().toString()
 
         if (!forceRefresh && isFresh()) {
             getCached()?.let { return it }
         }
 
-        val flightKey = "$domain:$key:$gen:$mutVer:$curUid"
+        val flightKey = "$domain:$key:$gen:$mutVer:$curUid:$bizDate"
 
         var isNew = false
         val deferred = flightMap.computeIfAbsent(flightKey) {
             isNew = true
             CompletableDeferred()
+        }
+
+        if (!isNew && staticRpcName != null) {
+            EgressTelemetry.recordEvent(
+                rpcName = staticRpcName,
+                syncType = EgressSyncType.SINGLE_FLIGHT_DEDUP,
+                triggerSource = triggerSource,
+            )
         }
 
         if (isNew) {
@@ -282,6 +401,7 @@ class CampaignRepository(
         campaignCache.clear()
         cachedSlotsInfo = null
         cachedUserSlots = null
+        cachedAllBusinessQuote = null
         cachedOpenMissions = null
         reportsCache.clear()
         testersCache.clear()
@@ -290,13 +410,18 @@ class CampaignRepository(
         checkinsCache.clear()
         feedbacksCache.clear()
         detailCache.clear()
+        ownerActivityStatsCache.clear()
         cachedUnreadWarnings = null
         cachedWeeklyWarnings = null
         cachedCreditLogs = null
         cachedTopupPackages = null
         cachedNotifications = null
+        localReadNotificationIds.clear()
         cachedHomeFeed = null
         cachedDashboard = null
+        homeFeedSnapshot = null
+        dashboardSnapshot = null
+        detailSnapshots.clear()
     }
 
     fun invalidateProfile(uid: String? = null) {
@@ -354,6 +479,7 @@ class CampaignRepository(
         bumpMutationVersion("membership")
         bumpMutationVersion("campaigns")
         bumpMutationVersion("dashboard")
+        bumpMutationVersion("daily_task")
         reportsCache.keys.removeIf { it.startsWith(campaignId) }
         checkinsCache.remove(campaignId)
         feedbacksCache.remove(campaignId)
@@ -363,6 +489,7 @@ class CampaignRepository(
         cachedPendingReports = null
         cachedTodayCheckins = null
         cachedHomeFeed = null
+        dashboardSnapshot = null
         invalidateDetailCache(campaignId)
         invalidateDashboardCache()
     }
@@ -411,10 +538,12 @@ class CampaignRepository(
         val mutVer = getMutationVersion("campaigns")
         val isFresh = { cachedOpenCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "open", forceRefresh, isFresh, { cachedOpenCampaigns?.value }) {
-            val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                filter { eq("status", "open") }
-                order("created_at", Order.DESCENDING)
-            }.decodeList<Campaign>()
+            val result = queryCampaignsSafe { cols ->
+                supabase.from("campaigns").select(columns = cols) {
+                    filter { eq("status", "open") }
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<Campaign>()
+            }
             if (gen == sessionGeneration.get()) {
                 cachedOpenCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
@@ -429,10 +558,12 @@ class CampaignRepository(
         val isFresh = { cachedPausedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "paused", forceRefresh, isFresh, { cachedPausedCampaigns?.value }) {
             val result = try {
-                supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                    filter { eq("status", "paused") }
-                    order("created_at", Order.DESCENDING)
-                }.decodeList<Campaign>()
+                queryCampaignsSafe { cols ->
+                    supabase.from("campaigns").select(columns = cols) {
+                        filter { eq("status", "paused") }
+                        order("created_at", Order.DESCENDING)
+                    }.decodeList<Campaign>()
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -454,10 +585,12 @@ class CampaignRepository(
         val isFresh = { cachedCompletedCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "completed", forceRefresh, isFresh, { cachedCompletedCampaigns?.value }) {
             val result = try {
-                supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                    filter { isIn("status", listOf("production", "completed")) }
-                    order("created_at", Order.DESCENDING)
-                }.decodeList<Campaign>()
+                queryCampaignsSafe { cols ->
+                    supabase.from("campaigns").select(columns = cols) {
+                        filter { isIn("status", listOf("production", "completed")) }
+                        order("created_at", Order.DESCENDING)
+                    }.decodeList<Campaign>()
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -485,11 +618,14 @@ class CampaignRepository(
         cachedHomeFeed = null
     }
 
-    /** Dashboard tá»•ng há»£p pháº£i táº£i láº¡i khi dá»¯ liá»‡u cÃ¡ nhÃ¢n thay Ä‘á»•i. */
+    /** Dashboard tổng hợp phải tải lại khi dữ liệu cá nhân thay đổi. */
     private fun invalidateDashboardCache() {
         bumpMutationVersion("dashboard")
         cachedDashboard = null
+        dashboardSnapshot = null
     }
+
+    internal fun invalidateDailyTaskDashboardCache() = invalidateDashboardCache()
 
     /** XÃ³a cache fast-path cá»§a mÃ n chi tiáº¿t cho má»i ngÆ°á»i dÃ¹ng hiá»‡n cÃ³. */
     private fun invalidateDetailCache(campaignId: String) {
@@ -536,6 +672,39 @@ class CampaignRepository(
         invalidateDashboardCache()
         return result
     }
+
+    /** Xác nhận app lên production (RPC confirm_campaign_production kiểm tra quyền và daily task action gate). */
+    suspend fun confirmCampaignProduction(campaignId: String): ConfirmProductionResult {
+        val capturedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val capturedGen = sessionGeneration.get()
+        val result = supabase.postgrest.rpc(
+            "confirm_campaign_production",
+            CampaignIdParams(campaignId = campaignId)
+        ).decodeAs<ConfirmProductionResult>()
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGen = sessionGeneration.get()
+        if (currentUid == capturedUid && currentGen == capturedGen) {
+            invalidateCampaign(campaignId)
+            invalidateReportsAndStats(campaignId)
+            invalidateProfile(capturedUid)
+            cachedCreditLogs = null
+            homeFeedSnapshot = null
+            invalidateCampaignLists()
+            invalidateDashboardCache()
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("daily_task")
+            try {
+                refreshDailyTaskAfterCampaignChange(capturedUid, capturedGen, "confirm_production")
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Log.w(TAG, "Postcommit daily task refresh failed for confirmCampaignProduction: ${e.message}")
+            }
+        }
+        return result
+    }
     suspend fun getCampaign(id: String, forceRefresh: Boolean = false): Campaign? {
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("campaigns")
@@ -544,20 +713,123 @@ class CampaignRepository(
         }
         val isFresh = { campaignCache[id]?.isFresh(CACHE_TTL_MS, gen, mutVer, null, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "get:$id", forceRefresh, isFresh, { campaignCache[id]?.value }) {
-            val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                filter { eq("id", id) }
-                limit(1)
-            }.decodeList<Campaign>().firstOrNull()
+            val result = queryCampaignsSafe { cols ->
+                supabase.from("campaigns").select(columns = cols) {
+                    filter { eq("id", id) }
+                    limit(1)
+                }.decodeList<Campaign>().firstOrNull()
+            }
             if (gen == sessionGeneration.get() && result != null) {
                 campaignCache[id] = CacheEntry(result, monotonicNow(), gen, mutVer, null, isPublic = true)
             }
             result
         }
     }
-suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampaignCandidate> {
-        // Prefetch chỉ chạy khi người dùng mở form nộp bài, nên lấy dữ liệu mới
-        // để trạng thái "đã test hôm nay" không bị cũ theo TTL 3 phút.
-        val feed = getHomeFeed(forceRefresh = true)
+    suspend fun getNextCampaignCandidates(
+        currentCampaignId: String,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.PREFETCH,
+    ): List<NextCampaignCandidate> {
+        val startUid = supabase.auth.currentUserOrNull()?.id
+        val startGen = sessionGeneration.get()
+        val startDay = businessDay()
+        val startDayStr = startDay.toString()
+        val startMutation = getMutationVersion("campaigns")
+
+        val rpcName = "get_next_campaign_candidates_v2"
+        if (EgressOptimizationConfig.isCandidatesV2Enabled && EgressOptimizationConfig.isRpcAvailable(rpcName)) {
+            try {
+                EgressTelemetry.noteNetworkAttempt(rpcName)
+                val params = buildJsonObject {
+                    if (currentCampaignId.isNotBlank()) {
+                        put("p_current_campaign_id", currentCampaignId)
+                    }
+                }
+                val response = supabase.postgrest.rpc(rpcName, params)
+                val rawJson = response.data
+                val decodedBytes = rawJson.toByteArray(Charsets.UTF_8).size.toLong()
+                val rawCandidates = Json { ignoreUnknownKeys = true }.decodeFromString<List<NextCampaignCandidate>>(rawJson)
+                for (c in rawCandidates) {
+                    if (c.campaign.id.isNullOrBlank()) {
+                        throw IllegalStateException("MALFORMED_CANDIDATE_PAYLOAD: campaign id is null or blank")
+                    }
+                }
+                val candidates = rawCandidates
+
+                val curUid = supabase.auth.currentUserOrNull()?.id
+                val curGen = sessionGeneration.get()
+                val curDay = businessDay()
+                if (curGen != startGen || curUid != startUid || curDay != startDay ||
+                    getMutationVersion("campaigns") != startMutation) {
+                    return emptyList()
+                }
+
+                // Kiểm tra tính đầy đủ của số liệu hôm nay (tương thích backward khi server cũ chưa trả 2 trường mới)
+                val needsStats = candidates.filter { it.todayTestedCount == null || it.todayTestedCount < 0 || it.statsDate != startDayStr }
+                val completeCandidates = if (needsStats.isEmpty()) {
+                    candidates
+                } else {
+                    // Nạp thống kê cho các campaign còn thiếu bằng đúng 1 lần gọi theo lô
+                    val missingIds = needsStats.map { it.campaign.id!! }.distinct()
+                    val statsMap = getCampaignsStatsMap(missingIds, forceRefresh = true)
+
+                    val afterUid = supabase.auth.currentUserOrNull()?.id
+                    val afterGen = sessionGeneration.get()
+                    val afterDay = businessDay()
+                    if (afterGen != startGen || afterUid != startUid || afterDay != startDay ||
+                        getMutationVersion("campaigns") != startMutation) {
+                        throw IllegalStateException("CONCURRENT_STATE_CHANGED_DURING_BATCH_REPAIR")
+                    }
+
+                    candidates.mapNotNull { candidate ->
+                        if (candidate.todayTestedCount != null && candidate.todayTestedCount >= 0 && candidate.statsDate == startDayStr) {
+                            candidate
+                        } else {
+                            val id = candidate.campaign.id!!
+                            val stat = statsMap[id]
+                            if (stat == null || stat.statsDate != startDayStr || stat.todayTestedCount < 0) {
+                                throw IllegalStateException("Missing or stale stats for candidate campaign: $id (expected $startDayStr)")
+                            }
+                            if (stat.hasTestedToday) {
+                                // Người dùng đã test kể từ lúc fetch ứng viên -> loại bỏ ngay
+                                return@mapNotNull null
+                            }
+                            candidate.copy(
+                                installedCount = candidate.installedCount.takeIf { it > 0 } ?: stat.installedCount,
+                                todayTestedCount = stat.todayTestedCount,
+                                statsDate = stat.statsDate,
+                            )
+                        }
+                    }
+                }
+
+                completeCandidates.forEach { c ->
+                    require(!c.campaign.id.isNullOrBlank()) { "Candidate campaign id must not be null or blank" }
+                    require(c.todayTestedCount != null && c.todayTestedCount >= 0) { "Candidate todayTestedCount must be non-null and non-negative" }
+                    require(c.statsDate == startDayStr) { "Candidate statsDate must match $startDayStr" }
+                }
+
+                EgressTelemetry.recordEvent(
+                    rpcName = rpcName,
+                    syncType = EgressSyncType.NETWORK_FULL_SYNC,
+                    triggerSource = triggerSource,
+                    wireBytesEstimate = null,
+                    decodedBytesEstimate = decodedBytes,
+                    changedBlockCount = 1,
+                    totalBlockCount = 1,
+                )
+                return completeCandidates
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (EgressOptimizationConfig.isStrictMissingRpc(e, rpcName)) {
+                    EgressOptimizationConfig.markRpcUnavailable(rpcName)
+                } else {
+                    throw e
+                }
+            }
+        }
+
+        val feed = getHomeFeed(forceRefresh = true, triggerSource = EgressTriggerSource.PREFETCH)
         // Đọc uid sau khi gọi feed: nếu phiên vừa khôi phục xong thì vẫn lọc
         // đúng app của chính tester.
         val currentUid = supabase.auth.currentUserOrNull()?.id
@@ -574,15 +846,29 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             )
         }
 
+        val curUid = supabase.auth.currentUserOrNull()?.id
+        val curGen = sessionGeneration.get()
+        val curDay = businessDay()
+        if (curGen != startGen || curUid != startUid || curDay != startDay ||
+            getMutationVersion("campaigns") != startMutation) {
+            return emptyList()
+        }
+
         return open.mapNotNull { camp ->
             val id = camp.id ?: return@mapNotNull null
             if (id == currentCampaignId) return@mapNotNull null
             if (currentUid != null && camp.ownerId == currentUid) return@mapNotNull null
-            // Thiếu stats nghĩa là chưa chắc chắn trạng thái hôm nay — bỏ qua
-            // còn hơn gợi ý lại một app người dùng đã test.
-            val stat = stats[id] ?: return@mapNotNull null
+            val stat = stats[id]
+            if (stat == null || stat.statsDate != startDayStr || stat.todayTestedCount < 0) {
+                throw IllegalStateException("Missing or stale stats for legacy candidate campaign: $id (expected $startDayStr, got ${stat?.statsDate})")
+            }
             if (stat.hasTestedToday) return@mapNotNull null
-            NextCampaignCandidate(campaign = camp, installedCount = stat.installedCount)
+            NextCampaignCandidate(
+                campaign = camp,
+                installedCount = stat.installedCount,
+                todayTestedCount = stat.todayTestedCount,
+                statsDate = stat.statsDate,
+            )
         }
     }
 
@@ -620,32 +906,79 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         return reportCount > 0
     }
 
+    suspend fun createCampaignV2(params: CreateCampaignV2Params): CreateCampaignV2Result {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("NOT_AUTHENTICATED")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+
+        val result = supabase.postgrest.rpc(
+            "create_campaign_v2",
+            params
+        ).decodeAs<CreateCampaignV2Result>()
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+        if (currentUid == expectedUid && currentGeneration == expectedGeneration) {
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("dashboard")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("user_slots")
+            bumpMutationVersion("credit_logs")
+            bumpMutationVersion("notifications")
+            bumpMutationVersion("daily_task")
+            cachedOpenCampaigns = null
+            cachedMyCampaigns = null
+            cachedMyProfile = null
+            cachedHomeFeed = null
+            cachedSlotsInfo = null
+            cachedUserSlots = null
+            cachedCreditLogs = null
+            invalidateBusinessQuote()
+            invalidateProfile(expectedUid)
+            invalidateDashboardCache()
+
+            SessionCacheManager.updateCachedData(
+                expectedUserId = expectedUid,
+                expectedGeneration = expectedGeneration
+            ) { cached ->
+                cached.copy(
+                    userProfile = cached.userProfile?.copy(credits = result.balanceAfter),
+                    userCredits = result.balanceAfter
+                )
+            }
+            refreshDailyTaskAfterCampaignChange(expectedUid, expectedGeneration, "create_campaign_v2")
+        }
+        return result
+    }
+
     suspend fun createCampaign(campaign: Campaign) {
-        // getMyProfile() ném lỗi mạng khi fetch thất bại (nổi lên UI là lỗi mạng),
-        // chỉ trả null khi chưa đăng nhập / không tìm thấy hồ sơ.
         val myProfile = getMyProfile() ?: throw IllegalStateException("NOT_AUTHENTICATED")
-        if (myProfile.credits <= 10) {
+        val quote = getAllBusinessQuote(forceRefresh = true)
+        val slotNum = campaign.slotNumber.coerceIn(1, 6)
+        val target = if (campaign.targetTesters in listOf(12, 15, 20)) campaign.targetTesters else 12
+        val totalCost = (if (slotNum == 1) quote.slotFees.slot1 else 0) + quote.targetFees.feeForTarget(target)
+        val required = totalCost + quote.minCreditsToPostApp
+        if (myProfile.credits < required) {
             throw IllegalStateException("INSUFFICIENT_CREDITS")
         }
-        val toInsert = campaign.copy(
-            ownerId = uid(),
-            startDate = campaign.startDate?.takeIf { it.isNotBlank() } ?: LocalDate.now().toString(),
-            status = "open",
+        createCampaignV2(
+            CreateCampaignV2Params(
+                appName = campaign.appName,
+                packageName = campaign.packageName,
+                playUrl = campaign.playUrl,
+                testingUrl = campaign.testingUrl,
+                description = campaign.description,
+                targetTesters = target,
+                iconUrl = campaign.iconUrl.orEmpty(),
+                testUsername = campaign.testUsername.orEmpty(),
+                testPassword = campaign.testPassword.orEmpty(),
+                slotNumber = slotNum,
+                clientRequestId = java.util.UUID.randomUUID().toString(),
+                expectedTotalCost = totalCost,
+                expectedMinCredits = quote.minCreditsToPostApp,
+                expectedRevision = quote.revision,
+            )
         )
-        supabase.from("campaigns").insert(toInsert)
-        // Invalidate campaign caches
-        bumpMutationVersion("campaigns")
-        bumpMutationVersion("dashboard")
-        bumpMutationVersion("profile")
-        bumpMutationVersion("user_slots")
-        cachedOpenCampaigns = null
-        cachedMyCampaigns = null
-        cachedMyProfile = null
-        cachedHomeFeed = null
-        cachedSlotsInfo = null
-        cachedUserSlots = null
-        toInsert.ownerId?.let { invalidateProfile(it) }
-        invalidateDashboardCache()
     }
 
     /**
@@ -689,10 +1022,12 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         val mutVer = getMutationVersion("campaigns")
         val isFresh = { cachedMyCampaigns?.isFresh(CACHE_TTL_MS, gen, mutVer, user.id, nowMs = monotonicNow()) == true }
         return deduped("campaigns", "myCampaigns", forceRefresh, isFresh, { cachedMyCampaigns?.value }) {
-            val result = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                filter { eq("owner_id", user.id) }
-                order("created_at", Order.DESCENDING)
-            }.decodeList<Campaign>()
+            val result = queryCampaignsSafe { cols ->
+                supabase.from("campaigns").select(columns = cols) {
+                    filter { eq("owner_id", user.id) }
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<Campaign>()
+            }
             if (gen == sessionGeneration.get() && user.id == supabase.auth.currentUserOrNull()?.id) {
                 cachedMyCampaigns = CacheEntry(result, monotonicNow(), gen, mutVer, user.id)
             }
@@ -762,10 +1097,12 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                 }
                 return@deduped emptyList()
             }
-            val campaigns = supabase.from("campaigns").select(columns = CAMPAIGN_COLUMNS) {
-                filter { isIn("id", ids) }
-                order("created_at", Order.DESCENDING)
-            }.decodeList<Campaign>()
+            val campaigns = queryCampaignsSafe { cols ->
+                supabase.from("campaigns").select(columns = cols) {
+                    filter { isIn("id", ids) }
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<Campaign>()
+            }
             val filtered = campaigns.filter { it.ownerId != user.id }
             if (gen == sessionGeneration.get() && user.id == supabase.auth.currentUserOrNull()?.id) {
                 cachedMyJoinedCampaigns = CacheEntry(filtered, monotonicNow(), gen, mutVer, user.id)
@@ -829,6 +1166,14 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
     // ---------------------------------------------------------------- feedback
 
     /** One feedback row per user per campaign (upsert = update my own review). */
+    suspend fun reconcileLegacyReport(requestId: String): SubmitTesterReportResult {
+        val result = supabase.postgrest.rpc("reconcile_legacy_report", buildJsonObject {
+            put("p_client_submit_id", requestId)
+        }).decodeAs<SubmitTesterReportResult>()
+        if (!result.success) throw IllegalStateException("report_request_requires_review")
+        return result
+    }
+
     suspend fun submitFeedback(
         campaignId: String,
         rating: Int,
@@ -839,8 +1184,10 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
         requireIdempotency: Boolean = false,
         thumbnailUrl: String? = null,
         missionId: String? = null,
+        submissionContext: String = if (missionId == null) "app_test" else "mission",
     ): SubmitTesterReportResult {
         val params = SubmitTesterReportParams(
+            submissionContext = submissionContext,
             campaignId = campaignId,
             content = comment?.trim()?.ifBlank { null },
             screenshotUrl = screenshotUrl,
@@ -851,54 +1198,90 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             missionId = missionId,
         )
         val result = try {
-            supabase.postgrest.rpc(
-                function = "submit_tester_report",
-                parameters = params,
-            ).decodeAs<SubmitTesterReportResult>()
+            supabase.postgrest.rpc("submit_tester_report_v2", params).decodeAs<SubmitTesterReportResult>()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            if (!isMissingSubmitRpc(e)) throw e
-
-            // Với yêu cầu mission mới: nếu backend chưa có RPC hỗ trợ thì báo lỗi, KHÔNG fallback bỏ missionId
-            if (missionId != null) {
+            if (isMissingRpc(e)) {
+                val postgrestCode = (e as? PostgrestRestException)?.code ?: "PGRST202"
+                val statusCode = (e as? PostgrestRestException)?.statusCode ?: (e as? RestException)?.statusCode ?: 404
+                val payloadKeys = try {
+                    Json.encodeToJsonElement(SubmitTesterReportParams.serializer(), params).jsonObject.keys.sorted()
+                } catch (_: Exception) {
+                    emptyList()
+                }
+                Log.w(TAG, "submit_tester_report_v2 RPC missing/unmatched signature: code=$postgrestCode status=$statusCode keys=$payloadKeys req=${params.clientSubmitId}")
                 throw IllegalStateException("server_update_required", e)
             }
+            throw e
+        }
+        val uid = uid()
+        invalidateReportsAndStats(campaignId)
+        invalidateProfile(uid)
+        invalidateMembership(campaignId)
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
+        cachedCreditLogs = null
+        return result
+    }
 
-            // 7 tham số thất bại do thiếu hàm trong schema cache (chưa có migration 045).
-            // Thử chữ ký 6 tham số (migration 033/037): giữ nguyên clientSubmitId để bảo toàn idempotency, chỉ bỏ thumbnailUrl.
-            try {
-                supabase.postgrest.rpc(
-                    function = "submit_tester_report",
-                    parameters = SubmitTesterReportSixParams(
-                        campaignId = campaignId,
-                        content = params.content,
-                        screenshotUrl = params.screenshotUrl,
-                        rating = params.rating,
-                        imageHash = params.imageHash,
-                        clientSubmitId = clientSubmitId,
-                    ),
-                ).decodeAs<SubmitTesterReportResult>()
-            } catch (e2: Exception) {
-                if (e2 is CancellationException) throw e2
-                if (!isMissingSubmitRpc(e2)) throw e2
+    suspend fun requestMediaReservation(
+        campaignId: String,
+        uploadId: String,
+        estimatedSize: Long,
+        hasThumbnail: Boolean = true,
+        attachmentId: String? = null,
+    ): MediaReservationResult {
+        val params = RequestReportMediaReservationParams(
+            campaignId = campaignId,
+            uploadId = uploadId,
+            estimatedSize = estimatedSize,
+            hasThumbnail = hasThumbnail,
+            attachmentId = attachmentId,
+        )
+        return try {
+            supabase.postgrest.rpc("request_report_media_reservation", params).decodeAs<MediaReservationResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w(TAG, "request_report_media_reservation failed: ${e.message}")
+            throw e
+        }
+    }
 
-                // Cả chữ ký 7 tham số và 6 tham số đều không tồn tại trong schema cache.
-                if (requireIdempotency) {
-                    throw IllegalStateException("report_idempotency_unavailable", e2)
-                }
-
-                // Chỉ khi caller cho phép (requireIdempotency = false) mới fallback về 5 tham số cũ (pre-033).
-                supabase.postgrest.rpc(
-                    function = "submit_tester_report",
-                    parameters = SubmitTesterReportLegacyParams(
-                        campaignId = campaignId,
-                        content = params.content,
-                        screenshotUrl = params.screenshotUrl,
-                        rating = params.rating,
-                        imageHash = params.imageHash,
-                    ),
-                ).decodeAs<SubmitTesterReportResult>()
+    suspend fun submitFeedbackV3(
+        campaignId: String,
+        rating: Int,
+        comment: String?,
+        attachments: List<ReportAttachmentInput>,
+        clientSubmitId: String? = null,
+        missionId: String? = null,
+        submissionContext: String = if (missionId == null) "app_test" else "mission",
+        expectedDate: String? = null,
+    ): SubmitTesterReportResult {
+        val attachmentsJson = Json.encodeToJsonElement(
+            ListSerializer(ReportAttachmentInput.serializer()),
+            attachments
+        )
+        val params = SubmitTesterReportV3Params(
+            submissionContext = submissionContext,
+            campaignId = campaignId,
+            content = comment?.trim()?.ifBlank { null },
+            rating = rating.coerceIn(1, 5),
+            clientSubmitId = clientSubmitId,
+            attachments = attachmentsJson,
+            missionId = missionId,
+            expectedDate = expectedDate,
+        )
+        val result = try {
+            supabase.postgrest.rpc("submit_tester_report_v3", params).decodeAs<SubmitTesterReportResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingRpc(e)) {
+                val postgrestCode = (e as? PostgrestRestException)?.code ?: "PGRST202"
+                val statusCode = (e as? PostgrestRestException)?.statusCode ?: (e as? RestException)?.statusCode ?: 404
+                Log.w(TAG, "submit_tester_report_v3 RPC missing: code=$postgrestCode status=$statusCode req=${params.clientSubmitId}")
+                throw IllegalStateException("server_update_required", e)
             }
+            throw e
         }
         val uid = uid()
         invalidateReportsAndStats(campaignId)
@@ -1028,7 +1411,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
                     limit(50)
                 }.decodeList<TesterReport>()
                 val pendingOrApprovedReportCampIds = reports
-                    .filter { it.isCreatedToday() && (it.isPending || it.isApproved) }
+                    .filter { it.isCreatedToday() && (it.isPending || it.isApproved) && !it.isMissionReport }
                     .map { it.campaignId }
 
                 (checkedInCampIds + pendingOrApprovedReportCampIds).distinct().size
@@ -1257,7 +1640,7 @@ suspend fun getNextCampaignCandidates(currentCampaignId: String): List<NextCampa
             val reports = getCampaignReports(campaignId, canManage = true, forceRefresh = forceRefresh)
             val todayCheckins = (
                 checkins.filter { it.checkinDate == today }.map { it.userId } +
-                reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.userId }
+                reports.filter { it.isCreatedToday() && !it.isRejected && !it.isMissionReport }.map { it.userId }
             ).distinct().size
             val pendingCount = reports.count { it.status == "pending" }
             val totalReports = reports.size
@@ -1412,22 +1795,82 @@ suspend fun getMyLatestReport(campaignId: String): TesterReport? {
         }
     }
 
-    suspend fun getMyTodayReport(campaignId: String): TesterReport? {
+    suspend fun getMyTodayReport(
+        campaignId: String,
+        missionId: String? = null,
+        reportDate: String? = null,
+    ): TesterReport? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        val targetDate = reportDate ?: VnTime.todayString()
         return try {
             val list = supabase.from("tester_reports").select {
                 filter {
                     eq("campaign_id", campaignId)
                     eq("user_id", uid)
+                    eq("report_date", targetDate)
                 }
                 order("created_at", Order.DESCENDING)
-                limit(5)
+                limit(10)
             }.decodeList<TesterReport>()
-            list.firstOrNull { it.isCreatedToday() }
+            if (missionId != null) {
+                list.firstOrNull { (it.reportDate == targetDate || it.isCreatedToday()) && it.missionId == missionId }
+            } else {
+                list.firstOrNull { (it.reportDate == targetDate || it.isCreatedToday()) && !it.isMissionReport }
+            }
         } catch (_: Exception) {
-            null
+            try {
+                val list = supabase.from("tester_reports").select {
+                    filter {
+                        eq("campaign_id", campaignId)
+                        eq("user_id", uid)
+                    }
+                    order("created_at", Order.DESCENDING)
+                    limit(10)
+                }.decodeList<TesterReport>()
+                if (missionId != null) {
+                    list.firstOrNull { it.isCreatedToday() && it.missionId == missionId }
+                } else {
+                    list.firstOrNull { it.isCreatedToday() && !it.isMissionReport }
+                }
+            } catch (_: Exception) {
+                null
+            }
         }
     }
+
+    suspend fun getMyMissionReport(
+        campaignId: String,
+        missionId: String,
+        isOnceMode: Boolean = false,
+        reportDate: String? = null,
+    ): TesterReport? {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        val targetDate = reportDate ?: VnTime.todayString()
+        return try {
+            val list = supabase.from("tester_reports").select {
+                filter {
+                    eq("campaign_id", campaignId)
+                    eq("user_id", uid)
+                    eq("submission_context", "mission")
+                    eq("mission_id", missionId)
+                    if (!isOnceMode) {
+                        eq("report_date", targetDate)
+                    }
+                }
+                order("created_at", Order.DESCENDING)
+                limit(10)
+            }.decodeList<TesterReport>()
+            list.firstOrNull {
+                if (isOnceMode) it.missionId == missionId
+                else (it.reportDate == targetDate || it.isCreatedToday()) && it.missionId == missionId
+            }
+        } catch (_: Exception) {
+            getMyTodayReport(campaignId, missionId, reportDate)
+        }
+    }
+
+    suspend fun getMyTodayMissionReport(campaignId: String, missionId: String, reportDate: String? = null): TesterReport? =
+        getMyMissionReport(campaignId, missionId, isOnceMode = false, reportDate = reportDate)
 
         suspend fun approveReport(report: TesterReport, bonusCredits: Int = 0): ApproveReportResult {
         val reportId = report.id ?: return ApproveReportResult(false)
@@ -1641,6 +2084,325 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         return result
     }
 
+    /**
+     * Mua lượt Đẩy app v2 với kiểm tra báo giá và revision chính sách nghiệp vụ (RPC push_campaign_v2).
+     */
+    suspend fun pushCampaignV2(
+        campaignId: String,
+        clientRequestId: String,
+        expectedCost: Int? = null,
+        expectedRevision: String? = null,
+    ): PushCampaignResult {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+
+        val params = PushCampaignV2Params(
+            campaignId = campaignId,
+            clientRequestId = clientRequestId,
+            expectedCost = expectedCost,
+            expectedRevision = expectedRevision,
+        )
+        val result = supabase.postgrest.rpc(
+            function = "push_campaign_v2",
+            parameters = params,
+        ).decodeAs<PushCampaignResult>()
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+
+        if (currentUid == expectedUid && currentGeneration == expectedGeneration) {
+            invalidateProfile(expectedUid)
+            cachedCreditLogs = null
+            invalidateCampaign(campaignId)
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("credit_logs")
+            bumpMutationVersion("dashboard")
+
+            SessionCacheManager.updateCachedData(
+                expectedUserId = expectedUid,
+                expectedGeneration = expectedGeneration
+            ) { cached ->
+                val updatedProfile = cached.userProfile?.copy(credits = result.balanceAfter)
+                val updatedDisplay = cached.displayItems.map { d ->
+                    if (d.campaign.id == campaignId) {
+                        d.copy(
+                            campaign = d.campaign.copy(
+                                pushBusinessDate = result.businessDate,
+                                pushExpiresAt = result.expiresAt,
+                                pushOrder = result.pushOrder
+                            )
+                        )
+                    } else d
+                }
+                val reSorted = com.ntt.crosstest.ui.viewmodels.DailyHomeOrder.sortOpenCampaigns(
+                    updatedDisplay,
+                    cached.dateVn ?: VnTime.today().toString()
+                )
+                cached.copy(
+                    userProfile = updatedProfile,
+                    userCredits = result.balanceAfter,
+                    displayItems = reSorted
+                )
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Tra cứu và đối soát biên lai Đẩy app (RPC reconcile_campaign_push_receipt, migration 066).
+     * Là RPC chỉ đọc/đối soát, không kiểm tra điều kiện mua mới, không trừ tiền, không tạo giao dịch mới.
+     * Chặn race condition đổi tài khoản bằng expectedUid và expectedGeneration.
+     */
+    suspend fun reconcilePushReceipt(campaignId: String, clientRequestId: String): ReconcilePushReceiptResult {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+
+        val result = supabase.postgrest.rpc(
+            function = "reconcile_campaign_push_receipt",
+            parameters = buildJsonObject {
+                put("p_campaign_id", campaignId)
+                put("p_client_request_id", clientRequestId)
+            }
+        ).decodeAs<ReconcilePushReceiptResult>()
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+
+        if (currentUid == expectedUid && currentGeneration == expectedGeneration && result.found) {
+            invalidateProfile(expectedUid)
+            cachedCreditLogs = null
+            invalidateCampaign(campaignId)
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("credit_logs")
+            bumpMutationVersion("dashboard")
+
+            SessionCacheManager.updateCachedData(
+                expectedUserId = expectedUid,
+                expectedGeneration = expectedGeneration
+            ) { cached ->
+                val updatedProfile = cached.userProfile?.copy(credits = result.currentCredits)
+                val updatedDisplay = cached.displayItems.map { d ->
+                    if (d.campaign.id == campaignId) {
+                        d.copy(
+                            campaign = d.campaign.copy(
+                                pushBusinessDate = result.businessDate,
+                                pushExpiresAt = result.expiresAt,
+                                pushOrder = result.pushOrder
+                            )
+                        )
+                    } else d
+                }
+                val reSorted = com.ntt.crosstest.ui.viewmodels.DailyHomeOrder.sortOpenCampaigns(
+                    updatedDisplay,
+                    cached.dateVn ?: VnTime.today().toString()
+                )
+                cached.copy(
+                    userProfile = updatedProfile,
+                    userCredits = result.currentCredits,
+                    displayItems = reSorted
+                )
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Tạo đợt thưởng thêm cho tester (RPC create_campaign_tester_bonus, migration 087).
+     * Giữ trước toàn bộ ngân sách (reward_credits * max_recipients) nguyên tử từ ví chủ app.
+     * Chặn race condition đổi tài khoản bằng expectedUid và expectedGeneration.
+     */
+    suspend fun createCampaignTesterBonus(
+        campaignId: String,
+        rewardCredits: Int,
+        maxRecipients: Int,
+        clientRequestId: String,
+    ): CreateTesterBonusResult {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+        val expectedWalletMutationVersion = getMutationVersion("profile")
+
+        val params = CreateTesterBonusParams(
+            campaignId = campaignId,
+            rewardCredits = rewardCredits,
+            maxRecipients = maxRecipients,
+            clientRequestId = clientRequestId,
+        )
+
+        val result = try {
+            supabase.postgrest.rpc(
+                function = "create_campaign_tester_bonus",
+                parameters = params,
+            ).decodeAs<CreateTesterBonusResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingRpc(e)) {
+                val postgrestCode = (e as? PostgrestRestException)?.code ?: "PGRST202"
+                val statusCode = (e as? PostgrestRestException)?.statusCode ?: (e as? RestException)?.statusCode ?: 404
+                Log.w(TAG, "create_campaign_tester_bonus RPC missing: code=$postgrestCode status=$statusCode")
+                throw IllegalStateException("server_update_required", e)
+            }
+            throw e
+        }
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+        val currentWalletMutation = getMutationVersion("profile")
+
+        val isValidEvidence = result.isValidEvidenceFor(
+            expectedClientRequestId = clientRequestId,
+            expectedCampaignId = campaignId,
+            expectedRewardCredits = rewardCredits,
+            expectedMaxRecipients = maxRecipients,
+        )
+
+        if (isValidEvidence && currentUid == expectedUid && currentGeneration == expectedGeneration) {
+            invalidateProfile(expectedUid)
+            cachedCreditLogs = null
+            invalidateCampaign(campaignId)
+            bumpMutationVersion("campaigns")
+            homeFeedSnapshot = null
+
+            // Guard against newer same-session wallet mutations before writing balance
+            if (currentWalletMutation == expectedWalletMutationVersion) {
+                val newBalance = result.safeOwnerBalanceInt
+                if (newBalance != null) {
+                    bumpMutationVersion("profile")
+                    bumpMutationVersion("credit_logs")
+                    bumpMutationVersion("dashboard")
+
+                    SessionCacheManager.updateCachedData(
+                        expectedUserId = expectedUid,
+                        expectedGeneration = expectedGeneration
+                    ) { cached ->
+                        val updatedProfile = cached.userProfile?.copy(credits = newBalance) ?: cached.userProfile
+                        cached.copy(
+                            userProfile = updatedProfile,
+                            userCredits = newBalance,
+                        )
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Đối soát yêu cầu tạo đợt thưởng thêm (RPC reconcile_campaign_tester_bonus, migration 087).
+     * Chỉ đọc kết quả theo client_request_id, không trừ tiền và không tạo đợt mới.
+     * Chặn race condition đổi tài khoản bằng expectedUid và expectedGeneration.
+     */
+    suspend fun reconcileCampaignTesterBonus(
+        campaignId: String,
+        clientRequestId: String,
+        expectedRewardCredits: Int,
+        expectedMaxRecipients: Int,
+    ): ReconcileTesterBonusResult {
+        val expectedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val expectedGeneration = SessionCacheManager.currentGeneration()
+        val expectedWalletMutationVersion = getMutationVersion("profile")
+
+        val params = ReconcileTesterBonusParams(
+            campaignId = campaignId,
+            clientRequestId = clientRequestId,
+        )
+
+        val result = try {
+            supabase.postgrest.rpc(
+                function = "reconcile_campaign_tester_bonus",
+                parameters = params,
+            ).decodeAs<ReconcileTesterBonusResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingRpc(e)) {
+                val postgrestCode = (e as? PostgrestRestException)?.code ?: "PGRST202"
+                val statusCode = (e as? PostgrestRestException)?.statusCode ?: (e as? RestException)?.statusCode ?: 404
+                Log.w(TAG, "reconcile_campaign_tester_bonus RPC missing: code=$postgrestCode status=$statusCode")
+                throw IllegalStateException("server_update_required", e)
+            }
+            throw e
+        }
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGeneration = SessionCacheManager.currentGeneration()
+        val currentWalletMutation = getMutationVersion("profile")
+
+        val isValidEvidence = result.isValidEvidenceFor(
+            expectedClientRequestId = clientRequestId,
+            expectedCampaignId = campaignId,
+            expectedRewardCredits = expectedRewardCredits,
+            expectedMaxRecipients = expectedMaxRecipients,
+        )
+
+        if (isValidEvidence && currentUid == expectedUid && currentGeneration == expectedGeneration) {
+            invalidateProfile(expectedUid)
+            cachedCreditLogs = null
+            invalidateCampaign(campaignId)
+            bumpMutationVersion("campaigns")
+            homeFeedSnapshot = null
+
+            // Guard against newer same-session wallet mutations before writing balance
+            if (currentWalletMutation == expectedWalletMutationVersion) {
+                val newBalance = result.safeOwnerBalanceInt
+                if (newBalance != null) {
+                    bumpMutationVersion("profile")
+                    bumpMutationVersion("credit_logs")
+                    bumpMutationVersion("dashboard")
+
+                    SessionCacheManager.updateCachedData(
+                        expectedUserId = expectedUid,
+                        expectedGeneration = expectedGeneration
+                    ) { cached ->
+                        val updatedProfile = cached.userProfile?.copy(credits = newBalance) ?: cached.userProfile
+                        cached.copy(
+                            userProfile = updatedProfile,
+                            userCredits = newBalance,
+                        )
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Tra cứu thông tin đợt thưởng của chiến dịch (RPC get_campaign_tester_bonus, migration 087).
+     * Trả về góc nhìn chi tiết ngân sách cho chủ app, hoặc góc nhìn tóm tắt + trạng thái nhận thưởng cho tester.
+     */
+    suspend fun getCampaignTesterBonus(campaignId: String): GetTesterBonusResult {
+        val params = GetTesterBonusParams(campaignId = campaignId)
+        val result = try {
+            supabase.postgrest.rpc(
+                function = "get_campaign_tester_bonus",
+                parameters = params,
+            ).decodeAs<GetTesterBonusResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingRpc(e)) {
+                Log.w(TAG, "get_campaign_tester_bonus RPC missing on server")
+                throw IllegalStateException("server_update_required", e)
+            }
+            throw e
+        }
+
+        if (result.hasError) {
+            val errCode = result.error ?: result.code ?: "UNKNOWN_ERROR"
+            Log.w(TAG, "get_campaign_tester_bonus returned error: $errCode")
+            throw IllegalStateException(errCode)
+        }
+
+        return result
+    }
+
     suspend fun updateCampaignDetails(
         campaignId: String,
         appName: String,
@@ -1663,12 +2425,34 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         )
     }
 
-        suspend fun adminDeleteCampaign(campaignId: String, reason: String? = null): AdminDeleteCampaignResult {
+    suspend fun adminDeleteCampaign(campaignId: String, reason: String? = null): AdminDeleteCampaignResult {
+        val capturedUid = supabase.auth.currentUserOrNull()?.id
+        val capturedGen = sessionGeneration.get()
+
         val result = supabase.postgrest.rpc(
             "admin_delete_campaign",
             AdminDeleteCampaignParams(campaignId = campaignId, reason = reason)
         ).decodeAs<AdminDeleteCampaignResult>()
-        invalidateCampaign(campaignId)
+
+        if (!result.success || (!result.isPendingRemoval && !result.isRemoved)) {
+            throw IllegalStateException(localizer.get(com.ntt.crosstest.R.string.error_generic))
+        }
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGen = sessionGeneration.get()
+        if (currentUid == capturedUid && currentGen == capturedGen) {
+            invalidateCampaign(campaignId)
+            invalidateReportsAndStats(campaignId)
+            if (capturedUid != null) invalidateProfile(capturedUid)
+            cachedCreditLogs = null
+            homeFeedSnapshot = null
+            invalidateDashboardCache()
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("daily_task")
+            if (capturedUid != null) {
+                refreshDailyTaskAfterCampaignChange(capturedUid, capturedGen, "admin_delete_campaign")
+            }
+        }
         return result
     }
 
@@ -1676,6 +2460,15 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         val result = supabase.postgrest.rpc(
             "admin_pause_campaign",
             AdminPauseCampaignParams(campaignId = campaignId, reason = reason?.trim()?.ifBlank { null })
+        ).decodeAs<AdminCampaignControlResult>()
+        invalidateCampaign(campaignId)
+        return result
+    }
+
+    suspend fun adminPauseCampaignWithReason(campaignId: String, reasonCode: String): AdminCampaignControlResult {
+        val result = supabase.postgrest.rpc(
+            "admin_pause_campaign_with_reason",
+            AdminPauseCampaignWithReasonParams(campaignId = campaignId, reasonCode = reasonCode.trim())
         ).decodeAs<AdminCampaignControlResult>()
         invalidateCampaign(campaignId)
         return result
@@ -1695,24 +2488,76 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         invalidateReportsAndStats(campaignId)
     }
 
-    suspend fun deleteCampaign(campaignId: String) {
+    suspend fun deleteCampaign(campaignId: String): AdminDeleteCampaignResult {
+        val capturedUid = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Not authenticated")
+        val capturedGen = sessionGeneration.get()
+
+        fun ensureDeletionSession() {
+            if (capturedUid != supabase.auth.currentUserOrNull()?.id || capturedGen != sessionGeneration.get()) {
+                throw CancellationException("Session changed during campaign removal")
+            }
+        }
+
         val myProfile = getMyProfile()
+        ensureDeletionSession()
         if (myProfile?.isAdmin == true) {
-            try {
-                adminDeleteCampaign(campaignId)
-                return
-            } catch (_: Exception) {
-            }
+            // Admin must use adminDeleteCampaign; DO NOT fallback administrative errors into table DELETE!
+            return adminDeleteCampaign(campaignId)
         }
-        supabase.from("campaigns").delete {
-            filter {
-                eq("id", campaignId)
-                if (myProfile?.isAdmin != true) {
-                    eq("owner_id", uid())
+
+        val params = DeleteOwnedCampaignParams(campaignId = campaignId)
+        val result = try {
+            supabase.postgrest.rpc(
+                function = "delete_owned_campaign",
+                parameters = params,
+            ).decodeAs<AdminDeleteCampaignResult>()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingRpc(e, "delete_owned_campaign")) {
+                ensureDeletionSession()
+                // OLD server fallback direct DELETE ONLY genuine PGRST202/404 missing THAT RPC
+                Log.w(TAG, "delete_owned_campaign RPC missing on server, falling back to direct DELETE")
+                supabase.from("campaigns").delete {
+                    filter {
+                        eq("id", campaignId)
+                        eq("owner_id", capturedUid)
+                    }
                 }
+                AdminDeleteCampaignResult(
+                    success = true,
+                    status = "removed",
+                    campaignId = campaignId,
+                    ownerId = capturedUid,
+                )
+            } else {
+                // Never broad catch auth/network/500/timeout/validation. Keep unsettled financial guard server-side.
+                throw e
             }
         }
-        invalidateCampaign(campaignId)
+
+        if (!result.success || result.campaignId != campaignId ||
+            result.status !in setOf("removed", "pending_removal")) {
+            throw IllegalStateException(localizer.get(com.ntt.crosstest.R.string.error_generic))
+        }
+
+        val currentUid = supabase.auth.currentUserOrNull()?.id
+        val currentGen = sessionGeneration.get()
+        if (currentUid == capturedUid && currentGen == capturedGen) {
+            invalidateCampaign(campaignId)
+            invalidateReportsAndStats(campaignId)
+            invalidateProfile(capturedUid)
+            cachedCreditLogs = null
+            homeFeedSnapshot = null
+            invalidateDashboardCache()
+            bumpMutationVersion("campaigns")
+            bumpMutationVersion("profile")
+            bumpMutationVersion("credit_logs")
+            bumpMutationVersion("daily_task")
+            refreshDailyTaskAfterCampaignChange(capturedUid, capturedGen, "delete_campaign")
+        }
+
+        return result
     }
     suspend fun getCampaignsStatsMap(campaignIds: List<String>, forceRefresh: Boolean = false): Map<String, CampaignStats> {
         if (campaignIds.isEmpty()) return emptyMap()
@@ -1744,6 +2589,7 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
                 }
             }
             try {
+                EgressTelemetry.noteNetworkAttempt("get_campaigns_stats")
                 val rpcStats = supabase.postgrest.rpc(
                     "get_campaigns_stats",
                     CampaignIdsParams(campaignIds = distinctSorted)
@@ -1783,7 +2629,7 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
                     }
                     order("created_at", Order.DESCENDING)
                 }.decodeList<TesterReport>()
-                reports.filter { it.isCreatedToday() && !it.isRejected }.map { it.campaignId }.toSet()
+                reports.filter { it.isCreatedToday() && !it.isRejected && !it.isMissionReport }.map { it.campaignId }.toSet()
             } else emptySet()
 
             val testedTodayIds = userCheckedInIds + userSubmittedTodayCampIds
@@ -1802,7 +2648,167 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         }
     }
 
-    suspend fun getHomeFeed(forceRefresh: Boolean = false): HomeFeedResult? {
+    private suspend fun <T : Any> fetchConditionalSync(
+        v2RpcName: String,
+        legacyRpcName: String,
+        isV2Enabled: Boolean,
+        extraParams: Map<String, Any> = emptyMap(),
+        domain: String,
+        scopeUid: String?,
+        sessionGen: Long,
+        mutationVer: Long,
+        businessDate: LocalDate,
+        triggerSource: EgressTriggerSource,
+        baseSnapshot: ScopedSyncSnapshot<T>?,
+        validator: (rawJson: String, base: ScopedSyncSnapshot<T>?, date: LocalDate) -> MergeResult<T>,
+        onSuccessSnapshot: (ScopedSyncSnapshot<T>) -> Unit,
+        onClearSnapshot: () -> Unit,
+        legacyFetch: suspend () -> T?,
+    ): T? {
+        if (!isV2Enabled || !EgressOptimizationConfig.isRpcAvailable(v2RpcName)) {
+            return fetchLegacy(legacyRpcName, legacyFetch, onClearSnapshot, triggerSource)
+        }
+
+        val effectiveBase = baseSnapshot
+        val syncParams = buildJsonObject {
+            val tokensObj = buildJsonObject {
+                if (effectiveBase != null) {
+                    for ((k, v) in effectiveBase.tokens) {
+                        put(k, v)
+                    }
+                }
+            }
+            put("p_tokens", tokensObj)
+            for ((k, v) in extraParams) {
+                when (v) {
+                    is String -> put(k, v)
+                    is Boolean -> put(k, v)
+                    is Number -> put(k, v)
+                }
+            }
+        }
+
+        EgressTelemetry.noteNetworkAttempt(v2RpcName)
+        val rawJson = try {
+            supabase.postgrest.rpc(v2RpcName, syncParams).data
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (EgressOptimizationConfig.isStrictMissingRpc(e, v2RpcName)) {
+                EgressOptimizationConfig.markRpcUnavailable(v2RpcName)
+                return fetchLegacy(legacyRpcName, legacyFetch, onClearSnapshot, triggerSource)
+            }
+            throw e
+        }
+
+        val initialDecodedBytes = rawJson.toByteArray(Charsets.UTF_8).size.toLong()
+        var mergeResult = validator(rawJson, effectiveBase, businessDate)
+        var repairDecodedBytes = 0L
+
+        if (mergeResult !is MergeResult.Success) {
+            val repairParams = buildJsonObject {
+                put("p_tokens", buildJsonObject {})
+                for ((k, v) in extraParams) {
+                    when (v) {
+                        is String -> put(k, v)
+                        is Boolean -> put(k, v)
+                        is Number -> put(k, v)
+                    }
+                }
+            }
+            EgressTelemetry.noteNetworkAttempt(v2RpcName)
+            val repairRawJson = try {
+                supabase.postgrest.rpc(v2RpcName, repairParams).data
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (EgressOptimizationConfig.isStrictMissingRpc(e, v2RpcName)) {
+                    EgressOptimizationConfig.markRpcUnavailable(v2RpcName)
+                    return fetchLegacy(legacyRpcName, legacyFetch, onClearSnapshot, triggerSource)
+                }
+                throw IllegalStateException("Repair RPC failed for $v2RpcName", e)
+            }
+            repairDecodedBytes = repairRawJson.toByteArray(Charsets.UTF_8).size.toLong()
+            mergeResult = validator(repairRawJson, null, businessDate)
+            if (mergeResult !is MergeResult.Success) {
+                throw IllegalStateException("Protocol failure in repair for $v2RpcName: $mergeResult")
+            }
+        }
+
+        val success = mergeResult as MergeResult.Success<T>
+        val finalPayload = success.payload
+
+        val now = monotonicNow()
+        if (sessionGeneration.get() == sessionGen &&
+            getMutationVersion(domain) == mutationVer &&
+            businessDay() == businessDate &&
+            supabase.auth.currentUserOrNull()?.id == scopeUid
+        ) {
+            val newSnapshot = ScopedSyncSnapshot(
+                payload = finalPayload,
+                tokens = success.tokens,
+                scopeUid = scopeUid,
+                sessionGeneration = sessionGen,
+                mutationVersion = mutationVer,
+                businessDate = businessDate,
+                monotonicCreatedAtMs = now,
+            )
+            onSuccessSnapshot(newSnapshot)
+        }
+
+        val syncType = when {
+            success.isAllUnchanged -> EgressSyncType.NETWORK_UNCHANGED_304
+            success.changedBlockCount == success.totalBlockCount -> EgressSyncType.NETWORK_FULL_SYNC
+            else -> EgressSyncType.NETWORK_PARTIAL_SYNC
+        }
+        val totalDecodedBytes = if (repairDecodedBytes > 0L) {
+            initialDecodedBytes + repairDecodedBytes
+        } else {
+            success.decodedBytesEstimate
+        }
+        EgressTelemetry.recordEvent(
+            rpcName = v2RpcName,
+            syncType = syncType,
+            triggerSource = triggerSource,
+            wireBytesEstimate = success.wireBytesEstimate,
+            decodedBytesEstimate = totalDecodedBytes,
+            changedBlockCount = success.changedBlockCount,
+            totalBlockCount = success.totalBlockCount,
+        )
+
+        return finalPayload
+    }
+
+    private suspend fun <T : Any> fetchLegacy(
+        legacyRpcName: String,
+        legacyFetch: suspend () -> T?,
+        onClearSnapshot: () -> Unit,
+        triggerSource: EgressTriggerSource,
+    ): T? {
+        onClearSnapshot()
+        EgressTelemetry.noteNetworkAttempt(legacyRpcName)
+        val result = try {
+            legacyFetch()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (!isMissingRpc(e, legacyRpcName)) throw e
+            return null
+        }
+        EgressTelemetry.recordEvent(
+            rpcName = legacyRpcName,
+            syncType = EgressSyncType.FALLBACK_LEGACY_RPC,
+            triggerSource = triggerSource,
+            wireBytesEstimate = null,
+            decodedBytesEstimate = 0L,
+        )
+        return result
+    }
+
+    suspend fun getHomeFeed(
+        forceRefresh: Boolean = false,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
+    ): HomeFeedResult? {
         val currentUid = supabase.auth.currentUserOrNull()?.id
         val requestDate = businessDay()
         val gen = sessionGeneration.get()
@@ -1810,15 +2816,50 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         val campMutVer = getMutationVersion("campaigns")
         val statsMutVer = getMutationVersion("stats")
         val isFresh = { cachedHomeFeed?.isFresh(CACHE_TTL_MS, gen, dashboardMutVer, currentUid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
-        return deduped("dashboard", "homeFeed", forceRefresh, isFresh, { cachedHomeFeed?.value }) {
-            val result = try {
-                supabase.postgrest.rpc("get_home_feed").decodeAs<HomeFeedResult>()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (!isMissingRpc(e, "get_home_feed")) throw e
-                return@deduped null
+        if (!forceRefresh && isFresh()) {
+            cachedHomeFeed?.value?.let {
+                EgressTelemetry.recordEvent(
+                    rpcName = "get_home_feed_sync_v2",
+                    syncType = EgressSyncType.LOCAL_CACHE_HIT,
+                    triggerSource = triggerSource,
+                )
+                return it
             }
+        }
+        return deduped(
+            domain = "dashboard",
+            key = "homeFeed",
+            forceRefresh = forceRefresh,
+            isFresh = isFresh,
+            getCached = { cachedHomeFeed?.value },
+            staticRpcName = "get_home_feed_sync_v2",
+            triggerSource = triggerSource,
+        ) {
+            val result = fetchConditionalSync(
+                v2RpcName = "get_home_feed_sync_v2",
+                legacyRpcName = "get_home_feed",
+                isV2Enabled = EgressOptimizationConfig.isHomeFeedSyncV2Enabled,
+                domain = "dashboard",
+                scopeUid = currentUid,
+                sessionGen = gen,
+                mutationVer = dashboardMutVer,
+                businessDate = requestDate,
+                triggerSource = triggerSource,
+                baseSnapshot = homeFeedSnapshot?.takeIf {
+                    it.sessionGeneration == gen &&
+                    it.scopeUid == currentUid &&
+                    it.businessDate == requestDate
+                },
+                validator = { rawJson, base, date ->
+                    EgressSyncProtocol.validateAndMergeHomeFeed(rawJson, base, date)
+                },
+                onSuccessSnapshot = { homeFeedSnapshot = it },
+                onClearSnapshot = { homeFeedSnapshot = null },
+                legacyFetch = {
+                    supabase.postgrest.rpc("get_home_feed").decodeAs<HomeFeedResult>()
+                }
+            ) ?: return@deduped null
+
             val now = monotonicNow()
             val hasStaleStats = result.stats.values.any { it.statsDate != null && it.statsDate != requestDate.toString() }
             if (!hasStaleStats && gen == sessionGeneration.get() && dashboardMutVer == getMutationVersion("dashboard") && currentUid == supabase.auth.currentUserOrNull()?.id) {
@@ -1841,7 +2882,10 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         }
     }
 
-    suspend fun getMyDashboard(forceRefresh: Boolean = false): MyDashboardResult? {
+    suspend fun getMyDashboard(
+        forceRefresh: Boolean = false,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
+    ): MyDashboardResult? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
         val requestDate = businessDay()
         val gen = sessionGeneration.get()
@@ -1849,37 +2893,206 @@ suspend fun updateCampaignStatus(campaignId: String, newStatus: String, pausedRe
         val campMutVer = getMutationVersion("campaigns")
         val profMutVer = getMutationVersion("profile")
         val isFresh = { cachedDashboard?.isFresh(SHORT_CACHE_TTL_MS, gen, dashboardMutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
-        return deduped("dashboard", "myDashboard", forceRefresh, isFresh, { cachedDashboard?.value }) {
-            val result = try {
-                supabase.postgrest.rpc("get_my_dashboard").decodeAs<MyDashboardResult>()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (!isMissingRpc(e, "get_my_dashboard")) throw e
-                return@deduped null
+        val getCached = {
+            cachedDashboard?.value?.let { d ->
+                val mapped = d.notifications.map { n ->
+                    if (isNotificationLocallyRead(uid, n.id)) n.copy(isRead = true) else n
+                }
+                d.copy(notifications = mapped)
             }
+        }
+        if (!forceRefresh && isFresh()) {
+            getCached()?.let {
+                EgressTelemetry.recordEvent(
+                    rpcName = "get_my_dashboard_sync_v2",
+                    syncType = EgressSyncType.LOCAL_CACHE_HIT,
+                    triggerSource = triggerSource,
+                )
+                return it
+            }
+        }
+        return deduped(
+            domain = "dashboard",
+            key = "myDashboard",
+            forceRefresh = forceRefresh,
+            isFresh = isFresh,
+            getCached = getCached,
+            staticRpcName = "get_my_dashboard_sync_v2",
+            triggerSource = triggerSource,
+        ) {
+            val result = fetchConditionalSync(
+                v2RpcName = "get_my_dashboard_sync_v2",
+                legacyRpcName = "get_my_dashboard",
+                isV2Enabled = EgressOptimizationConfig.isDashboardSyncV2Enabled,
+                extraParams = mapOf("p_include_leaderboard" to true),
+                domain = "dashboard",
+                scopeUid = uid,
+                sessionGen = gen,
+                mutationVer = dashboardMutVer,
+                businessDate = requestDate,
+                triggerSource = triggerSource,
+                baseSnapshot = dashboardSnapshot?.takeIf {
+                    it.sessionGeneration == gen &&
+                        it.scopeUid == uid && it.businessDate == requestDate
+                },
+                validator = { body, base, date -> EgressSyncProtocol.validateAndMergeDashboard(body, base, date) },
+                onSuccessSnapshot = { dashboardSnapshot = it },
+                onClearSnapshot = { dashboardSnapshot = null },
+                legacyFetch = { supabase.postgrest.rpc("get_my_dashboard").decodeAs<MyDashboardResult>() },
+            ) ?: return@deduped null
+            val mappedNotifs = result.notifications.map {
+                if (isNotificationLocallyRead(uid, it.id)) it.copy(isRead = true) else it
+            }
+            val mappedResult = result.copy(notifications = mappedNotifs)
             val now = monotonicNow()
             if (gen == sessionGeneration.get() && dashboardMutVer == getMutationVersion("dashboard") && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedDashboard = CacheEntry(result, now, gen, dashboardMutVer, uid, businessDate = requestDate)
+                cachedDashboard = CacheEntry(mappedResult, now, gen, dashboardMutVer, uid, businessDate = requestDate)
             }
             if (gen == sessionGeneration.get() && campMutVer == getMutationVersion("campaigns") && uid == supabase.auth.currentUserOrNull()?.id) {
-                cachedMyCampaigns = CacheEntry(result.myCampaigns, now, gen, campMutVer, uid)
-                cachedMyJoinedCampaigns = CacheEntry(result.joinedCampaigns, now, gen, campMutVer, uid)
+                cachedMyCampaigns = CacheEntry(mappedResult.myCampaigns, now, gen, campMutVer, uid)
+                cachedMyJoinedCampaigns = CacheEntry(mappedResult.joinedCampaigns, now, gen, campMutVer, uid)
             }
             if (gen == sessionGeneration.get() && profMutVer == getMutationVersion("profile") && uid == supabase.auth.currentUserOrNull()?.id) {
-                result.profile?.let {
+                mappedResult.profile?.let {
                     cachedMyProfile = CacheEntry(it, now, gen, profMutVer, uid)
                     profileCache[uid] = CacheEntry(it, now, gen, profMutVer, null)
                 }
             }
-            result
+            mappedResult
         }
     }
-suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
+    suspend fun getMyDailyTaskStatus(throwOnError: Boolean = false): DailyTaskStatus? {
         if (supabase.auth.currentUserOrNull() == null) return null
         return try {
-            supabase.postgrest.rpc("get_my_daily_task_status").decodeAs<DailyTaskStatus>()
-        } catch (_: Exception) {
+            val status = withTimeoutOrNull(DAILY_TASK_RPC_TIMEOUT_MS) {
+                supabase.postgrest.rpc("get_my_daily_task_status").decodeAs<DailyTaskStatus>()
+            }
+            if (status == null) {
+                val timeoutEx = java.util.concurrent.TimeoutException("get_my_daily_task_status timed out after $DAILY_TASK_RPC_TIMEOUT_MS ms")
+                Log.w(TAG, "Lỗi khi tải get_my_daily_task_status: timeout", timeoutEx)
+                if (throwOnError) throw timeoutEx
+                null
+            } else {
+                status
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Lỗi khi tải get_my_daily_task_status", e)
+            if (throwOnError) throw e
+            null
+        }
+    }
+
+    suspend fun fetchMyDailyTaskStatus(): Result<DailyTaskStatus?> {
+        if (supabase.auth.currentUserOrNull() == null) return Result.success(null)
+        return try {
+            val status = withTimeoutOrNull(DAILY_TASK_RPC_TIMEOUT_MS) {
+                supabase.postgrest.rpc("get_my_daily_task_status").decodeAs<DailyTaskStatus>()
+            }
+            if (status == null) {
+                val timeoutEx = java.util.concurrent.TimeoutException("get_my_daily_task_status timed out after $DAILY_TASK_RPC_TIMEOUT_MS ms")
+                Log.w(TAG, "Lỗi khi tải get_my_daily_task_status: timeout", timeoutEx)
+                Result.failure(timeoutEx)
+            } else {
+                Result.success(status)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            Log.w(TAG, "Lỗi khi tải get_my_daily_task_status", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Làm mới chỉ tiêu ngày sau khi đăng hoặc gỡ ứng dụng của chính tài khoản.
+     * Áp dụng fencing chặn race conditions theo UID, generation, ngày VN và mutation version.
+     * Nếu lỗi mạng xảy ra sau khi commit, đánh dấu stale/pending thay vì làm hỏng thao tác chính.
+     */
+    suspend fun refreshDailyTaskAfterCampaignChange(
+        expectedUid: String,
+        expectedGeneration: Long,
+        triggerSource: String = "campaign_change"
+    ): DailyTaskStatus? {
+        val expectedDay = businessDay().toString()
+        val mutVer = if (triggerSource == "stale_pending_retry") {
+            getMutationVersion("daily_task")
+        } else {
+            bumpMutationVersion("daily_task")
+        }
+        if (triggerSource != "stale_pending_retry") {
+            invalidateDashboardCache()
+        }
+        return try {
+            val fresh = withTimeoutOrNull(DAILY_TASK_RPC_TIMEOUT_MS) {
+                supabase.postgrest.rpc("get_my_daily_task_status").decodeAs<DailyTaskStatus>()
+            } ?: throw java.util.concurrent.TimeoutException("get_my_daily_task_status timed out after $DAILY_TASK_RPC_TIMEOUT_MS ms")
+            if (fresh.statusDate != expectedDay) {
+                throw IllegalStateException("Invalid statusDate ${fresh.statusDate}, expected $expectedDay")
+            }
+            val currentUid = supabase.auth.currentUserOrNull()?.id
+            val currentGen = sessionGeneration.get()
+            val currentDay = businessDay().toString()
+            val currentMutVer = getMutationVersion("daily_task")
+            if (currentUid == expectedUid &&
+                currentGen == expectedGeneration &&
+                currentDay == expectedDay &&
+                currentMutVer == mutVer
+            ) {
+                SessionCacheManager.updateCachedData(
+                    expectedUserId = expectedUid,
+                    expectedGeneration = expectedGeneration
+                ) { cached ->
+                    cached.copy(
+                        dailyTask = fresh,
+                        missedStreak = fresh.missedStreak,
+                        isDailyTaskPendingRefresh = false
+                    )
+                }
+                _dailyTaskEvents.tryEmit(
+                    DailyTaskChangeEvent.Updated(
+                        ownerId = expectedUid,
+                        generation = expectedGeneration,
+                        businessDate = expectedDay,
+                        mutationVersion = mutVer,
+                        triggerSource = triggerSource,
+                        status = fresh
+                    )
+                )
+                fresh
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w(TAG, "Lỗi khi cập nhật chỉ tiêu ngày sau $triggerSource", e)
+            val currentUid = supabase.auth.currentUserOrNull()?.id
+            val currentGen = sessionGeneration.get()
+            val currentDay = businessDay().toString()
+            val currentMutVer = getMutationVersion("daily_task")
+            if (currentUid == expectedUid &&
+                currentGen == expectedGeneration &&
+                currentDay == expectedDay &&
+                currentMutVer == mutVer
+            ) {
+                SessionCacheManager.updateCachedData(
+                    expectedUserId = expectedUid,
+                    expectedGeneration = expectedGeneration
+                ) { cached ->
+                    cached.copy(isDailyTaskPendingRefresh = true)
+                }
+                _dailyTaskEvents.tryEmit(
+                    DailyTaskChangeEvent.StalePending(
+                        ownerId = expectedUid,
+                        generation = expectedGeneration,
+                        businessDate = expectedDay,
+                        mutationVersion = mutVer,
+                        triggerSource = triggerSource,
+                        cause = e
+                    )
+                )
+            }
             null
         }
     }
@@ -1902,7 +3115,11 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
      * Một round-trip lấy toàn bộ dữ liệu màn chi tiết (campaign, members, checkins,
      * feedbacks, reports, profiles, cảnh báo...). Trả null khi chưa deploy RPC.
      */
-        suspend fun getCampaignDetailPage(campaignId: String, forceRefresh: Boolean = false): CampaignDetailResult? {
+    suspend fun getCampaignDetailPage(
+        campaignId: String,
+        forceRefresh: Boolean = false,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
+    ): CampaignDetailResult? {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return null
         val requestDate = businessDay()
         val cacheKey = "${campaignId}|${uid}"
@@ -1911,20 +3128,72 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val reportsMutVer = getMutationVersion("reports")
         val profMutVer = getMutationVersion("profile")
         val isFresh = { detailCache[cacheKey]?.isFresh(CACHE_TTL_MS, gen, campMutVer, uid, currentBusinessDate = requestDate, nowMs = monotonicNow()) == true }
-        return deduped("campaigns", "detail:$cacheKey", forceRefresh, isFresh, { detailCache[cacheKey]?.value }) {
-            val now = monotonicNow()
-            val result = try {
-                supabase.postgrest.rpc("get_campaign_detail", CampaignIdParams(campaignId = campaignId))
-                    .decodeAs<CampaignDetailResult>()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (!isMissingRpc(e, "get_campaign_detail")) throw e
-                return@deduped null
+        if (!forceRefresh && isFresh()) {
+            detailCache[cacheKey]?.value?.let {
+                EgressTelemetry.recordEvent(
+                    rpcName = "get_campaign_detail_sync_v2",
+                    syncType = EgressSyncType.LOCAL_CACHE_HIT,
+                    triggerSource = triggerSource,
+                )
+                return it
             }
+        }
+        return deduped(
+            domain = "campaigns",
+            key = "detail:$cacheKey",
+            forceRefresh = forceRefresh,
+            isFresh = isFresh,
+            getCached = { detailCache[cacheKey]?.value },
+            staticRpcName = "get_campaign_detail_sync_v2",
+            triggerSource = triggerSource,
+        ) {
+            val now = monotonicNow()
+            val result = fetchConditionalSync(
+                v2RpcName = "get_campaign_detail_sync_v2",
+                legacyRpcName = "get_campaign_detail",
+                isV2Enabled = EgressOptimizationConfig.isCampaignDetailSyncV2Enabled,
+                extraParams = mapOf("p_campaign_id" to campaignId),
+                domain = "campaigns",
+                scopeUid = uid,
+                sessionGen = gen,
+                mutationVer = campMutVer,
+                businessDate = requestDate,
+                triggerSource = triggerSource,
+                baseSnapshot = detailSnapshots[cacheKey]?.takeIf {
+                    it.sessionGeneration == gen &&
+                        it.scopeUid == uid && it.businessDate == requestDate
+                },
+                validator = { body, base, date -> EgressSyncProtocol.validateAndMergeCampaignDetail(body, base, date) },
+                onSuccessSnapshot = {
+                    detailSnapshots[cacheKey] = it
+                    if (detailSnapshots.size > MAX_MAP_ENTRIES) {
+                        val oldestKey = detailSnapshots.entries.minByOrNull { entry -> entry.value.monotonicCreatedAtMs }?.key
+                        if (oldestKey != null) detailSnapshots.remove(oldestKey)
+                    }
+                },
+                onClearSnapshot = { detailSnapshots.remove(cacheKey) },
+                legacyFetch = {
+                    supabase.postgrest.rpc("get_campaign_detail", CampaignIdParams(campaignId = campaignId))
+                        .decodeAs<CampaignDetailResult>()
+                },
+            ) ?: return@deduped null
             if (gen == sessionGeneration.get() && campMutVer == getMutationVersion("campaigns") && uid == supabase.auth.currentUserOrNull()?.id) {
                 detailCache[cacheKey] = CacheEntry(result, now, gen, campMutVer, uid, businessDate = requestDate)
                 result.campaign.id?.let { campaignCache[it] = CacheEntry(result.campaign, now, gen, campMutVer, null, businessDate = requestDate) }
+                val ownerId = result.campaign.ownerId
+                val ownerStats = result.ownerStats
+                if (!ownerId.isNullOrBlank() && ownerStats != null) {
+                    ownerActivityStatsCache[ownerId] = CacheEntry(
+                        value = ownerStats,
+                        monotonicCreatedAtMs = now,
+                        sessionGeneration = gen,
+                        mutationVersion = campMutVer,
+                        scopeUid = null,
+                        isPublic = true,
+                        businessDate = requestDate,
+                    )
+                    evictOldEntries(ownerActivityStatsCache)
+                }
                 evictOldEntries(detailCache)
                 evictOldEntries(campaignCache)
             }
@@ -1951,6 +3220,64 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
                 }
             }
             result
+        }
+    }
+
+    /**
+     * Tổng lượt đã test (checkins) và số app đã cài (campaign_members) của chủ app cho app của người khác.
+     * Dùng khi `get_campaign_detail` từ server cũ chưa trả `owner_stats` hoặc khi đi qua nhánh fallback rời.
+     */
+    suspend fun getOwnerActivityStats(ownerId: String, forceRefresh: Boolean = false): OwnerActivityStats {
+        if (ownerId.isBlank()) return OwnerActivityStats(0, 0)
+        val requestDate = businessDay()
+        val gen = sessionGeneration.get()
+        val mutVer = getMutationVersion("campaigns")
+        val isFresh = {
+            ownerActivityStatsCache[ownerId]?.isFresh(
+                CACHE_TTL_MS,
+                gen,
+                mutVer,
+                null,
+                currentBusinessDate = requestDate,
+                nowMs = monotonicNow(),
+            ) == true
+        }
+        if (!forceRefresh && isFresh()) {
+            ownerActivityStatsCache[ownerId]?.value?.let { return it }
+        }
+        return deduped(
+            domain = "campaigns",
+            key = "ownerActivityStats:$ownerId",
+            forceRefresh = forceRefresh,
+            isFresh = isFresh,
+            getCached = { ownerActivityStatsCache[ownerId]?.value },
+        ) {
+            val checkins = supabase.from("checkins").select {
+                filter { eq("user_id", ownerId) }
+            }.decodeList<Checkin>()
+            val memberRows = supabase.from("campaign_members").select {
+                filter { eq("user_id", ownerId) }
+            }.decodeList<CampaignMember>()
+            val ownCampaignIds = supabase.from("campaigns").select {
+                filter { eq("owner_id", ownerId) }
+            }.decodeList<Campaign>().mapNotNull { it.id }.toSet()
+
+            val testedCount = checkins.count { it.campaignId !in ownCampaignIds }
+            val installedCount = memberRows.map { it.campaignId }.distinct().count { it !in ownCampaignIds }
+            val stats = OwnerActivityStats(testedCount = testedCount, installedCount = installedCount)
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("campaigns")) {
+                ownerActivityStatsCache[ownerId] = CacheEntry(
+                    value = stats,
+                    monotonicCreatedAtMs = monotonicNow(),
+                    sessionGeneration = gen,
+                    mutationVersion = mutVer,
+                    scopeUid = null,
+                    isPublic = true,
+                    businessDate = requestDate,
+                )
+                evictOldEntries(ownerActivityStatsCache)
+            }
+            stats
         }
     }
 
@@ -1998,36 +3325,107 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         return result
     }
 
+    suspend fun unlockOrRenewSlotV2(
+        slotNumber: Int,
+        clientRequestId: String,
+        expectedCost: Int? = null,
+        expectedRevision: String? = null,
+    ): UnlockSlotResult {
+        val result = supabase.postgrest.rpc(
+            "unlock_or_renew_slot_v2",
+            UnlockOrRenewSlotV2Params(
+                slotNumber = slotNumber,
+                clientRequestId = clientRequestId,
+                expectedCost = expectedCost,
+                expectedRevision = expectedRevision,
+            )
+        ).decodeAs<UnlockSlotResult>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        bumpMutationVersion("user_slots")
+        cachedSlotsInfo = null
+        cachedUserSlots = null
+        cachedAllProfiles = null
+        invalidateDashboardCache()
+        return result
+    }
+
+    fun invalidateBusinessQuote() {
+        bumpMutationVersion("business_quote")
+        bumpMutationVersion("user_slots")
+        cachedAllBusinessQuote = null
+        cachedSlotsInfo = null
+    }
+
+    suspend fun getAllBusinessQuote(forceRefresh: Boolean = false): AllBusinessQuote {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: throw IllegalStateException("NOT_AUTHENTICATED")
+        val gen = sessionGeneration.get()
+        val mutVer = getMutationVersion("business_quote")
+        val quoteTtlMs = 30_000L
+        val isFresh = { cachedAllBusinessQuote?.isFresh(quoteTtlMs, gen, mutVer, uid, nowMs = monotonicNow()) == true }
+        return deduped("business_quote", "all", forceRefresh, isFresh, { cachedAllBusinessQuote?.value }) {
+            val quote = supabase.postgrest.rpc(
+                "get_business_quote",
+                buildJsonObject { put("p_quote_type", "all") }
+            ).decodeAs<AllBusinessQuote>()
+            if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
+                cachedAllBusinessQuote = CacheEntry(quote, monotonicNow(), gen, mutVer, uid)
+            }
+            quote
+        }
+    }
+
     suspend fun getMySlotsInfo(forceRefresh: Boolean = false): List<SlotInfo> {
         val uid = supabase.auth.currentUserOrNull()?.id ?: return emptyList()
         val gen = sessionGeneration.get()
         val mutVer = getMutationVersion("user_slots")
-        val isFresh = { cachedSlotsInfo?.isFresh(CACHE_TTL_MS, gen, mutVer, uid, nowMs = monotonicNow()) == true }
+        val quoteTtlMs = 30_000L
+        val isFresh = { cachedSlotsInfo?.isFresh(quoteTtlMs, gen, mutVer, uid, nowMs = monotonicNow()) == true }
         return deduped("user_slots", "slotsInfo", forceRefresh, isFresh, { cachedSlotsInfo?.value }) {
             val userSlots = getUserSlots(forceRefresh = forceRefresh)
             val myCamps = myCampaigns(forceRefresh = forceRefresh)
             val activeCamps = myCamps.filter { it.isOpen || it.isPaused }
+
+            // Lấy báo giá chính sách hiện hành từ server (C03)
+            val slotQuote = runCatching {
+                getAllBusinessQuote(forceRefresh = forceRefresh)
+            }.getOrNull()
+
+            val renewalDays = slotQuote?.slotFees?.renewalDays ?: 30
             val result = (1..6).map { slotNum ->
                 if (slotNum == 1) {
                     val camp = activeCamps.find { it.slotNumber == 1 }
-                    SlotInfo(slotNumber = 1, isPermanent = true, isUnlocked = true, currentCampaign = camp)
+                    SlotInfo(
+                        slotNumber = 1,
+                        isPermanent = true,
+                        isUnlocked = true,
+                        cost = slotQuote?.slotFees?.slot1 ?: 0,
+                        currentCampaign = camp,
+                        renewalDays = renewalDays,
+                        policyRevision = slotQuote?.revision,
+                    )
                 } else {
                     val userSlot = userSlots.find { it.slotNumber == slotNum }
                     val isUnlocked = userSlot != null
                     val isExpired = userSlot?.isExpired ?: true
                     val camp = if (isUnlocked && !isExpired) activeCamps.find { it.slotNumber == slotNum } else null
+                    val cost = slotQuote?.slotFees?.feeForSlot(slotNum) ?: SlotInfo.costForSlot(slotNum)
                     SlotInfo(
                         slotNumber = slotNum,
                         isPermanent = false,
                         isUnlocked = isUnlocked,
-                        cost = SlotInfo.costForSlot(slotNum),
+                        isExpired = isUnlocked && isExpired,
+                        cost = cost,
                         expiresAt = userSlot?.expiresAt,
                         remainingDays = userSlot?.remainingDays ?: 0,
                         currentCampaign = camp,
+                        renewalDays = renewalDays,
+                        policyRevision = slotQuote?.revision,
                     )
                 }
             }
-            if (gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
+            // Không lưu kết quả mất báo giá (slotQuote == null) vào cache để tránh kẹt trạng thái khoá nút suốt TTL
+            if (slotQuote != null && gen == sessionGeneration.get() && uid == supabase.auth.currentUserOrNull()?.id) {
                 cachedSlotsInfo = CacheEntry(result, monotonicNow(), gen, mutVer, uid)
             }
             result
@@ -2081,6 +3479,87 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             "admin_set_home_stats_cycle",
             AdminSetHomeStatsCycleParams(cycleDays = cycleDays, expectedRevision = expectedRevision)
         ).decodeAs<HomeStatsPolicyConfig>()
+    }
+
+    suspend fun adminGetOwnerAutoPauseConfig(): OwnerAutoPauseConfig {
+        return supabase.postgrest.rpc("admin_get_owner_auto_pause_config").decodeAs<OwnerAutoPauseConfig>()
+    }
+
+    suspend fun adminSetOwnerAutoPauseConfig(
+        missedDays: Int,
+        expectedRevision: String,
+    ): SetOwnerAutoPauseConfigResult {
+        return supabase.postgrest.rpc(
+            "admin_set_owner_auto_pause_config",
+            SetOwnerAutoPauseConfigParams(
+                missedDays = missedDays,
+                expectedRevision = expectedRevision,
+            )
+        ).decodeAs<SetOwnerAutoPauseConfigResult>()
+    }
+
+    suspend fun adminGetDailyTaskConfig(): AdminDailyTaskConfig {
+        return supabase.postgrest.rpc("admin_get_daily_task_config").decodeAs<AdminDailyTaskConfig>()
+    }
+
+    suspend fun adminScheduleDailyTaskPolicy(
+        testsPerActiveApp: Int,
+        effectiveFrom: String,
+        operatorNote: String,
+        expectedRevision: String,
+    ): AdminDailyTaskMutationResult {
+        return supabase.postgrest.rpc(
+            "admin_schedule_daily_task_policy",
+            AdminScheduleDailyTaskPolicyParams(
+                testsPerActiveApp = testsPerActiveApp,
+                effectiveFrom = effectiveFrom,
+                operatorNote = operatorNote,
+                expectedRevision = expectedRevision,
+            )
+        ).decodeAs<AdminDailyTaskMutationResult>()
+    }
+
+    suspend fun adminCancelDailyTaskPolicy(
+        effectiveFrom: String,
+        operatorNote: String,
+        expectedRevision: String,
+    ): AdminDailyTaskMutationResult {
+        return supabase.postgrest.rpc(
+            "admin_cancel_daily_task_policy",
+            AdminCancelDailyTaskPolicyParams(
+                effectiveFrom = effectiveFrom,
+                operatorNote = operatorNote,
+                expectedRevision = expectedRevision,
+            )
+        ).decodeAs<AdminDailyTaskMutationResult>()
+    }
+
+    suspend fun adminListDailyTaskPolicies(
+        limit: Int = 50,
+        cursorDate: String? = null,
+        cursorId: Long? = null,
+    ): AdminDailyTaskListResult {
+        return supabase.postgrest.rpc(
+            "admin_list_daily_task_policies",
+            AdminListDailyTaskPoliciesParams(
+                limit = limit,
+                cursorDate = cursorDate,
+                cursorId = cursorId,
+            )
+        ).decodeAs<AdminDailyTaskListResult>()
+    }
+
+    suspend fun adminGetDailyTaskPolicyHistory(
+        limit: Int = 20,
+        cursorId: Long? = null,
+    ): AdminDailyTaskPolicyHistoryResult {
+        return supabase.postgrest.rpc(
+            "admin_get_daily_task_policy_history",
+            AdminGetDailyTaskPolicyHistoryParams(
+                limit = limit,
+                cursorId = cursorId,
+            )
+        ).decodeAs<AdminDailyTaskPolicyHistoryResult>()
     }
 
     suspend fun adminAdjustCredits(
@@ -2209,7 +3688,11 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         val isFresh = {
             cachedNotifications?.isFresh(SHORT_CACHE_TTL_MS, gen, mutVer, currentUid, requestedLimit = limit, nowMs = monotonicNow()) == true
         }
-        val cachedSlice = { cachedNotifications?.value?.take(limit.toInt()) }
+        val cachedSlice = {
+            cachedNotifications?.value?.map {
+                if (isNotificationLocallyRead(currentUid, it.id)) it.copy(isRead = true) else it
+            }?.take(limit.toInt())
+        }
         return deduped("notifications", "notifications:$limit", forceRefresh, isFresh, cachedSlice) {
             val result = try {
                 supabase.from("notifications").select {
@@ -2222,60 +3705,140 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             } catch (e: Exception) {
                 val existing = cachedNotifications?.takeIf {
                     it.sessionGeneration == gen && it.scopeUid == currentUid && it.mutationVersion == getMutationVersion("notifications")
-                }?.value?.take(limit.toInt())
+                }?.value?.map {
+                    if (isNotificationLocallyRead(currentUid, it.id)) it.copy(isRead = true) else it
+                }?.take(limit.toInt())
                 if (existing != null) return@deduped existing
                 throw e
             }
-            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("notifications") && currentUid == supabase.auth.currentUserOrNull()?.id) {
-                cachedNotifications = CacheEntry(result, monotonicNow(), gen, mutVer, currentUid, limit = limit)
+            val mapped = result.map {
+                if (isNotificationLocallyRead(currentUid, it.id)) it.copy(isRead = true) else it
             }
-            result
+            if (gen == sessionGeneration.get() && mutVer == getMutationVersion("notifications") && currentUid == supabase.auth.currentUserOrNull()?.id) {
+                cachedNotifications = CacheEntry(mapped, monotonicNow(), gen, mutVer, currentUid, limit = limit)
+            }
+            mapped
         }.take(limit.toInt())
     }
 
     suspend fun getNotifications(limit: Long = 30, forceRefresh: Boolean = false): List<UserNotification> =
         getMyNotifications(limit = limit, forceRefresh = forceRefresh)
 
-    /** Cáº­p nháº­t server trÆ°á»›c, cache sau. NÃ©m lá»—i khi máº¡ng tháº¥t báº¡i (caller tá»± hoÃ n tÃ¡c UI). */
+    /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun markNotificationAsRead(id: String) {
-        val currentUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestGen = sessionGeneration.get()
+        recordLocalReadNotification(requestUid, id)
         supabase.from("notifications").update(buildJsonObject { put("is_read", true) }) {
             filter {
                 eq("id", id)
-                eq("user_id", currentUid)
+                eq("user_id", requestUid)
             }
+        }
+        if (supabase.auth.currentUserOrNull()?.id != requestUid || sessionGeneration.get() != requestGen) {
+            return
         }
         bumpMutationVersion("notifications")
         cachedNotifications = null
         invalidateDashboardCache()
+        _notificationEvents.tryEmit(NotificationEvent.MarkedRead(id, ownerId = requestUid, generation = requestGen))
     }
 
-    /** Cáº­p nháº­t server trÆ°á»›c, cache sau. NÃ©m lá»—i khi máº¡ng tháº¥t báº¡i (caller tá»± hoÃ n tÃ¡c UI). */
+    /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun markAllNotificationsAsRead() {
-        val currentUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestGen = sessionGeneration.get()
+        val currentCachedIds = cachedNotifications?.takeIf {
+            it.scopeUid == requestUid && it.sessionGeneration == requestGen
+        }?.value?.map { it.id } ?: emptyList()
+
         supabase.from("notifications").update(buildJsonObject { put("is_read", true) }) {
             filter {
-                eq("user_id", currentUid)
+                eq("user_id", requestUid)
                 eq("is_read", false)
             }
         }
+        if (supabase.auth.currentUserOrNull()?.id != requestUid || sessionGeneration.get() != requestGen) {
+            return
+        }
+        currentCachedIds.forEach { recordLocalReadNotification(requestUid, it) }
         bumpMutationVersion("notifications")
         cachedNotifications = null
         invalidateDashboardCache()
+        _notificationEvents.tryEmit(NotificationEvent.MarkedAllRead(ownerId = requestUid, generation = requestGen))
     }
 
-    /** Cáº­p nháº­t server trÆ°á»›c, cache sau. NÃ©m lá»—i khi máº¡ng tháº¥t báº¡i (caller tá»± hoÃ n tÃ¡c UI). */
+    /** Cập nhật server trước, cache sau. Ném lỗi khi mạng thất bại (caller tự hoàn tác UI). */
     suspend fun deleteNotification(id: String) {
-        val currentUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestUid = supabase.auth.currentUserOrNull()?.id ?: return
+        val requestGen = sessionGeneration.get()
+        localReadNotificationIds[requestUid]?.remove(id)
         supabase.from("notifications").delete {
             filter {
                 eq("id", id)
-                eq("user_id", currentUid)
+                eq("user_id", requestUid)
             }
+        }
+        if (supabase.auth.currentUserOrNull()?.id != requestUid || sessionGeneration.get() != requestGen) {
+            return
         }
         bumpMutationVersion("notifications")
         cachedNotifications = null
         invalidateDashboardCache()
+        _notificationEvents.tryEmit(NotificationEvent.Deleted(id, ownerId = requestUid, generation = requestGen))
+    }
+
+    suspend fun claimNotificationPopup(foregroundSessionId: String): NotificationPopupClaimResult {
+        return supabase.postgrest.rpc(
+            "claim_my_notification_popup",
+            buildJsonObject { put("p_foreground_session_id", foregroundSessionId) }
+        ).decodeAs<NotificationPopupClaimResult>()
+    }
+
+    suspend fun acknowledgeNotification(notificationId: String): NotificationAckResult {
+        val requestUid = supabase.auth.currentUserOrNull()?.id ?: return NotificationAckResult(success = false)
+        val requestGen = sessionGeneration.get()
+        recordLocalReadNotification(requestUid, notificationId)
+        val result = supabase.postgrest.rpc(
+            "acknowledge_my_notification",
+            buildJsonObject { put("p_notification_id", notificationId) }
+        ).decodeAs<NotificationAckResult>()
+        if (supabase.auth.currentUserOrNull()?.id != requestUid || sessionGeneration.get() != requestGen) {
+            return result
+        }
+        bumpMutationVersion("notifications")
+        cachedNotifications = null
+        invalidateDashboardCache()
+        _notificationEvents.tryEmit(NotificationEvent.MarkedRead(notificationId, ownerId = requestUid, generation = requestGen))
+        return result
+    }
+
+    suspend fun getNotificationStatus(notificationId: String): NotificationStatusResult {
+        return try {
+            supabase.postgrest.rpc(
+                "get_my_notification_status",
+                buildJsonObject { put("p_notification_id", notificationId) }
+            ).decodeAs<NotificationStatusResult>()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            val uid = supabase.auth.currentUserOrNull()?.id
+            if (uid == null) {
+                NotificationStatusResult(exists = false, isRead = false)
+            } else {
+                val found = supabase.from("notifications").select {
+                    filter {
+                        eq("id", notificationId)
+                        eq("user_id", uid)
+                    }
+                    limit(1)
+                }.decodeList<UserNotification>().firstOrNull()
+                NotificationStatusResult(
+                    exists = found != null,
+                    isRead = found?.isRead ?: false
+                )
+            }
+        }
     }
 
     suspend fun adminSendNotification(
@@ -2402,7 +3965,21 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             cachedOpenMissions?.value?.filter { isMissionActiveAndUnexpired(it) }
         }
         return deduped("quests", "openMissions", forceRefresh, isFresh, cachedFiltered) {
-            val result = supabase.postgrest.rpc("get_open_missions").decodeAs<OpenMissionsResult>()
+            val result = try {
+                supabase.postgrest.rpc("get_open_missions").decodeAs<OpenMissionsResult>()
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                val msg = e.message.orEmpty()
+                if (curUid == null && (
+                        msg.contains("42501") ||
+                        msg.contains("permission denied", ignoreCase = true) ||
+                        msg.contains("NOT_AUTHENTICATED", ignoreCase = true)
+                    )
+                ) {
+                    return@deduped emptyList()
+                }
+                throw e
+            }
             updateServerClock(result.serverNow)
             val filtered = result.missions.filter { isMissionActiveAndUnexpired(it) }
             if (gen == sessionGeneration.get() &&
@@ -2429,7 +4006,67 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         }
     }
 
-    /** Chá»§ app má»Ÿ nhiá»‡m vá»¥: server trá»« phÃ­ 50 Credit Ã— sá»‘ ngÃ y vÃ  kiá»ƒm tra sá»‘ dÆ° â‰¥ 300. */
+    /** Chủ app mở nhiệm vụ v2 (hỗ trợ chế độ once / daily và giữ trước quỹ thưởng). */
+    suspend fun createMissionV2(params: CreateMissionV2Params): CreateMissionV2Result {
+        val result = supabase.postgrest.rpc("create_mission_v2", params).decodeAs<CreateMissionV2Result>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        cachedCreditLogs = null
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
+        invalidateDashboardCache()
+        return result
+    }
+
+    /** Đọc bản nháp sao chép từ nhiệm vụ nguồn đã hết hạn của chính chủ app. */
+    suspend fun getMissionCopyDraft(sourceMissionId: String, campaignId: String? = null): MissionCopyDraft {
+        val params = GetMissionCopyDraftParams(
+            sourceMissionId = sourceMissionId,
+            campaignId = campaignId,
+        )
+        return supabase.postgrest.rpc("get_mission_copy_draft", params).decodeAs<MissionCopyDraft>()
+    }
+
+    /** Tạo nhiệm vụ mới bằng cách sao chép từ nhiệm vụ nguồn với client_operation_id chống trừ tiền hai lần. */
+    suspend fun createMissionFromSource(params: CreateMissionFromSourceParams): CreateMissionFromSourceResult {
+        val result = supabase.postgrest.rpc("create_mission_from_source", params).decodeAs<CreateMissionFromSourceResult>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        cachedCreditLogs = null
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
+        invalidateDashboardCache()
+        invalidateDetailCache(params.campaignId)
+        return result
+    }
+
+    /** Xem trước chênh lệch chi phí và thời hạn khi sửa nhiệm vụ. */
+    suspend fun previewEditMission(params: PreviewEditMissionParams): PreviewEditMissionResult {
+        return supabase.postgrest.rpc("preview_edit_mission", params).decodeAs<PreviewEditMissionResult>()
+    }
+
+    /** Chủ app cập nhật nhiệm vụ (trước khi nhận được sửa điều khoản; sau khi nhận chỉ sửa văn bản). */
+    suspend fun editMission(params: EditMissionParams): EditMissionResult {
+        val result = supabase.postgrest.rpc("edit_mission", params).decodeAs<EditMissionResult>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        cachedCreditLogs = null
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
+        invalidateDashboardCache()
+        return result
+    }
+
+    /** Quản trị viên xóa nhiệm vụ với lý do bắt buộc. */
+    suspend fun adminDeleteMission(missionId: String, reason: String): AdminDeleteMissionResult {
+        val params = AdminDeleteMissionParams(missionId = missionId, reason = reason)
+        val result = supabase.postgrest.rpc("admin_delete_mission", params).decodeAs<AdminDeleteMissionResult>()
+        bumpMutationVersion("quests")
+        cachedOpenMissions = null
+        return result
+    }
+
+    /** Chủ app mở nhiệm vụ: server trừ phí 50 Credit × số ngày và kiểm tra số dư ≥ 300. */
     suspend fun createMission(params: CreateMissionParams): CreateMissionResult {
         val result = supabase.postgrest.rpc("create_mission", params).decodeAs<CreateMissionResult>()
         val uid = supabase.auth.currentUserOrNull()?.id
@@ -2452,12 +4089,20 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
         return result
     }
 
-    /** Nhiá»‡m vá»¥ hiá»‡n táº¡i cá»§a 1 app cho mÃ n quáº£n lÃ½ cá»§a chá»§ nhiá»‡m vá»¥ (migration 040). */
-    suspend fun getCampaignMission(campaignId: String): Mission? {
-        val result = supabase.postgrest.rpc(
-            "get_campaign_mission",
-            CampaignIdParams(campaignId = campaignId)
-        ).decodeAs<CampaignMissionResult>()
+    /** Nhiệm vụ hiện tại của 1 app hoặc nhiệm vụ cụ thể theo missionId (migration 040 & 057). */
+    suspend fun getCampaignMission(campaignId: String, missionId: String? = null): Mission? {
+        val result = if (missionId != null) {
+            supabase.postgrest.rpc(
+                "get_campaign_mission",
+                CampaignMissionParams(campaignId = campaignId, missionId = missionId)
+            ).decodeAs<CampaignMissionResult>()
+        } else {
+            supabase.postgrest.rpc(
+                "get_campaign_mission",
+                CampaignIdParams(campaignId = campaignId)
+            ).decodeAs<CampaignMissionResult>()
+        }
+        updateServerClock(result.serverNow)
         return result.mission
     }
 
@@ -2487,6 +4132,28 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
     // THƯỞNG CẬP NHẬT PHIÊN BẢN APP (APP UPDATE REWARD)
     // =========================================================================
 
+    suspend fun getAppUpdateQuote(): AppUpdateQuote {
+        return supabase.postgrest.rpc(
+            "get_business_quote",
+            GetBusinessQuoteParams(quoteType = "app_update")
+        ).decodeAs<AppUpdateQuote>()
+    }
+
+    suspend fun getPushQuote(): PushQuote {
+        return supabase.postgrest.rpc(
+            "get_business_quote",
+            GetBusinessQuoteParams(quoteType = "push")
+        ).decodeAs<PushQuote>()
+    }
+
+    suspend fun getSlotQuote(slotNumber: Int): SlotQuote {
+        val params = buildJsonObject { put("slot_number", slotNumber) }
+        return supabase.postgrest.rpc(
+            "get_business_quote",
+            GetBusinessQuoteParams(quoteType = "slot", params = params)
+        ).decodeAs<SlotQuote>()
+    }
+
     suspend fun publishAppUpdate(
         campaignId: String,
         versionName: String,
@@ -2504,6 +4171,37 @@ suspend fun getMyDailyTaskStatus(): DailyTaskStatus? {
             expectedCurrentReleaseId = expectedCurrentReleaseId,
         )
         val result = supabase.postgrest.rpc("publish_app_update", params).decodeAs<PublishAppUpdateResult>()
+        val uid = supabase.auth.currentUserOrNull()?.id
+        invalidateProfile(uid)
+        cachedCreditLogs = null
+        invalidateCampaign(campaignId)
+        result
+    }.recoverCatching { e ->
+        if (e is CancellationException) throw e
+        throw e
+    }
+
+    suspend fun publishAppUpdateV2(
+        campaignId: String,
+        versionName: String,
+        targetVersionCode: Long,
+        releaseNotes: String,
+        clientOperationId: String,
+        expectedBudget: Int? = null,
+        expectedRevision: String? = null,
+        expectedCurrentReleaseId: String? = null,
+    ): Result<PublishAppUpdateResult> = runCatching {
+        val body = buildJsonObject {
+            put("p_campaign_id", campaignId)
+            put("p_version_name", versionName)
+            put("p_target_version_code", targetVersionCode)
+            put("p_release_notes", releaseNotes)
+            put("p_client_operation_id", clientOperationId)
+            if (expectedBudget != null) put("p_expected_budget", expectedBudget) else put("p_expected_budget", kotlinx.serialization.json.JsonNull)
+            if (expectedRevision != null) put("p_expected_revision", expectedRevision) else put("p_expected_revision", kotlinx.serialization.json.JsonNull)
+            if (expectedCurrentReleaseId != null) put("p_expected_current_release_id", expectedCurrentReleaseId) else put("p_expected_current_release_id", kotlinx.serialization.json.JsonNull)
+        }
+        val result = supabase.postgrest.rpc("publish_app_update_v2", body).decodeAs<PublishAppUpdateResult>()
         val uid = supabase.auth.currentUserOrNull()?.id
         invalidateProfile(uid)
         cachedCreditLogs = null

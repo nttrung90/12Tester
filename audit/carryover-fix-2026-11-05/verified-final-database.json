@@ -1,0 +1,10 @@
+{
+  "command": "npm test",
+  "workdir": "supabase/tests",
+  "exitCode": 0,
+  "startedUtc": "2026-11-05T12:29:04.4770000Z",
+  "endedUtc": "2026-11-05T12:33:02.1200000Z",
+  "migrationSha256": "F3BBF9ED3E841462BDD67D247AA2480FE507E67443D162340D3AD7EA93B51106",
+  "untruncatedOutputCopied": true,
+  "logSha256": "7E95C612F97E5A54EE6260409CDBA24E1906C75292F4619AF88045DC6179A68F"
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "name": "migration_must_not_backdate_current_state_as_proven_history",
+    "passed": true,
+    "evidence": {
+      "met": false,
+      "mode": "member",
+      "status_date": "2026-10-29",
+      "history_ready": false,
+      "missed_streak": 0,
+      "available_apps": 0,
+      "carry_in_tests": 0,
+      "required_tests": 0,
+      "carryover_ready": true,
+      "completed_tests": 0,
+      "logged_in_today": false,
+      "active_app_count": 0,
+      "is_penalty_exempt": false,
+      "base_required_tests": 0,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": null,
+      "effective_required_tests": 0,
+      "carryover_remaining_tests": 0
+    }
+  },
+  {
+    "name": "deleted_campaign_must_not_remove_proven_past_tests",
+    "passed": true,
+    "beforeD": 0,
+    "afterD": 0,
+    "historyReady": false
+  },
+  {
+    "name": "moving_historical_policy_to_future_must_be_rejected",
+    "passed": true
+  }
+]

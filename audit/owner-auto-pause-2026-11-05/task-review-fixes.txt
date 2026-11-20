@@ -1,0 +1,13 @@
+Continue the SAME OpenCode session using google/antigravity-gemini-3.8-flash variant high. The task is NOT complete yet. Read audit/owner-auto-pause-2026-11-05/supervisor-review-notes.md and the real SQL failures in supervisor-edge-first.log. Read any additional review notes at the end of that file.
+
+The independent supervisor acceptance audit passed the principal reproduced bugs, but five edge probes failed the first 079 draft. You must implement and verify all valid findings before declaring completion. Keep the original scope and all safeguards from task-implementation.txt. No production access, no commits or pushes, no changing model or creating other sessions/agents.
+
+Run:
+node audit/owner-auto-pause-2026-11-05/independent-acceptance.mjs
+node audit/owner-auto-pause-2026-11-05/supervisor-edge-probes.mjs
+
+Do NOT edit/weaken either supervisor generator or the before/ snapshot. If an expectation is genuinely incompatible with the agreed product rules, explain the exact reason and propose the correct invariant; don't silently bypass it.
+
+Re-run focused SQL/Android regressions affected by each fix. At completion ensure full supabase/tests npm test and full Android testDebugUnitTest plus assembleDebug have passed on final sources, with fresh logs/JUnit snapshot. Review new diagnostic permissions, auth/lock checks, disabled-carryover history readiness, absence of client-controllable timestamp bypass settings, and profile/ledger consistency when filling a gap before an already-finalized newer day. Record concrete recovery diagnostics for unready or inconsistent histories without fabricating or rewriting finalized ledger rows.
+
+Write updated implementation-handover.md and progress.md. Report honestly which concurrency/live deployment checks remain unrun, but finish local code and all available verification.

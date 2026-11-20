@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-16T12:38:29.976Z",
+  "items": [
+    {
+      "path": "audit/dual-storage-recheck-2026-11-16/storage-contract-probes.mjs",
+      "sha256": "48db60c479bee28bfdf77867143f1a87b711bfa27cd548f9d7f7ace13af2737b"
+    },
+    {
+      "path": "audit/dual-storage-recheck-2026-11-16/storage-contract-results.json",
+      "sha256": "94de4d1433918a6c0343042617137af68f5d9c9baebbe06b1fb7200da4a3c32e",
+      "original_result": {
+        "at": "2026-11-16T12:10:32.864Z",
+        "scope": "PGlite contract probes; no production/no provider calls; product source unchanged",
+        "results": [
+          {
+            "id": "CONTROL-SIZE",
+            "title": "Existing test metadata fixture is accepted",
+            "status": "PASS",
+            "accepted": true
+          },
+          {
+            "id": "STORAGE-PREFLIGHT",
+            "title": "Actual Storage binary preflight contentLength metadata must pass",
+            "status": "FAIL",
+            "expected": {
+              "helper": true,
+              "inserted": true
+            },
+            "observed": {
+              "helper": false,
+              "inserted": false,
+              "error": {
+                "code": "42501",
+                "message": "new row violates row-level security policy for table \"objects\""
+              }
+            },
+            "input": {
+              "mimetype": "image/jpeg",
+              "contentLength": 100
+            }
+          },
+          {
+            "id": "STORAGE-LEGACY-PREFLIGHT",
+            "title": "Unknown-length/older Storage preflight metadata is handled intentionally",
+            "status": "OBSERVED",
+            "observed": false,
+            "scope": "Unknown-length compatibility observation only. Rejecting unknown length can be intentional; the deployed version was not queried. Not counted as a separate defect."
+          },
+          {
+            "id": "QUOTA-LATE-THUMB",
+            "title": "Rolled-back policy probe is not equivalent to holding its lock until final commit",
+            "status": "FAIL",
+            "observed": {
+              "u": 0,
+              "r": 100,
+              "actual": 150
+            },
+            "unaccountedBytes": 50,
+            "scope": "Sequential event-order model, not a real Storage API or multi-connection execution. Final-probe size metadata isolates this from the earlier preflight denial."
+          }
+        ]
+      }
+    },
+    {
+      "path": "audit/dual-storage-recheck-2026-11-16/reconcile-ack-probe.mjs",
+      "sha256": "708913c52bc021abd7498d432fa2d3494cedafe08947928c6a978d2ab4d4919d"
+    },
+    {
+      "path": "audit/dual-storage-recheck-2026-11-16/reconcile-ack-results.json",
+      "sha256": "301cfe5a7e306f86ab22fad67ca1eb2c01697321613c5a2b5ad276740bcbe3cf",
+      "original_result": {
+        "at": "2026-11-16T12:06:21.977Z",
+        "scope": "Injected RPC; no network or database writes",
+        "status": "FAIL",
+        "expected": {
+          "is_metric_valid": false,
+          "cliExitCode": 1
+        },
+        "observed": {
+          "is_metric_valid": true,
+          "cliExitCode": 0,
+          "dispatch_mode_result": "google_overflow",
+          "fail_safe_triggered": false
+        },
+        "databaseAcknowledgement": {
+          "success": true,
+          "is_org_metric_valid": false,
+          "dispatch_mode": "google_overflow"
+        }
+      }
+    },
+    {
+      "path": "supabase/migrations/092_dual_storage_hardening.sql",
+      "sha256": "4b8a71520e975d4e4380a15eb85e1360da20fb37b963e4c67cf13c5b54a28c2f"
+    }
+  ]
+}

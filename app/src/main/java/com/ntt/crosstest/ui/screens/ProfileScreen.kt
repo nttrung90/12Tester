@@ -1,9 +1,6 @@
 package com.ntt.crosstest.ui.screens
 
 import androidx.activity.compose.LocalActivity
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
@@ -82,6 +80,8 @@ import com.ntt.crosstest.data.AppConfig
 import com.ntt.crosstest.data.UpdateStatus
 import kotlinx.coroutines.launch
 import com.ntt.crosstest.data.SlotInfo
+import com.ntt.crosstest.data.EgressTriggerSource
+import com.ntt.crosstest.ui.theme.statusColors
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,28 +104,17 @@ import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.ui.components.AnimatedCreditBalance
 import com.ntt.crosstest.ui.viewmodels.ProfileViewModel
+import com.ntt.crosstest.util.CreditLogRenderer
 import com.ntt.crosstest.util.PlayStoreUpdateChecker
 import com.ntt.crosstest.util.PlayUpdateResult
 import com.ntt.crosstest.util.formatIsoUtcToLocal
+import com.ntt.crosstest.util.CommunityLinks
+import com.ntt.crosstest.util.openExternalLink
 import kotlinx.coroutines.async
 
 private const val WEBSITE_URL = "https://app.netvn.net/vi/apps/12-cross-testers"
-private const val ZALO_URL = "https://zalo.me/g/cc0vbi7igt77w10yikch"
+private const val ZALO_URL = CommunityLinks.ZALO_GROUP_URL
 private const val FACEBOOK_URL = "https://www.facebook.com/groups/1661150262357027"
-
-private fun openExternalLink(context: Context, url: String) {
-    try {
-        context.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                // LocalContext is a localized wrapper (not an Activity), so the
-                // intent needs NEW_TASK just like openStore().
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        )
-    } catch (_: Exception) {
-        Toast.makeText(context, R.string.oad_open_link_failed, Toast.LENGTH_SHORT).show()
-    }
-}
 
 private data class UpdatePrompt(
     val config: AppConfig,
@@ -145,6 +134,7 @@ fun ProfileScreen(
     isActive: Boolean = false,
     onAdminPanelClick: () -> Unit = {},
     onAdminReportsClick: () -> Unit = {},
+    onHelpClick: () -> Unit = {},
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -161,20 +151,21 @@ fun ProfileScreen(
 
     // Quay lại app hoặc mở lại tab Hồ sơ: đồng bộ nền để số dư/slot/danh sách không bị cũ.
     LifecycleResumeEffect(Unit) {
-        viewModel.refresh(forceRefresh = false)
+        viewModel.refresh(forceRefresh = false, triggerSource = EgressTriggerSource.RESUME)
         onPauseOrDispose { }
     }
     LaunchedEffect(isActive) {
-        if (isActive) viewModel.refresh(forceRefresh = false)
+        if (isActive) viewModel.refresh(forceRefresh = false, triggerSource = EgressTriggerSource.TAB_SWITCH)
     }
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     var showCreditHistoryDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
     var showThemeDialog by rememberSaveable { mutableStateOf(false) }
+    var showTestModeDialog by rememberSaveable { mutableStateOf(false) }
     var showChangePasswordDialog by rememberSaveable { mutableStateOf(false) }
     var showContactDialog by rememberSaveable { mutableStateOf(false) }
     var showSlotsDialog by rememberSaveable { mutableStateOf(false) }
-    var slotToUnlock by remember { mutableStateOf<SlotInfo?>(null) }
+    var slotNumberToUnlock by remember { mutableStateOf<Int?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
     var isCheckingUpdate by remember { mutableStateOf(false) }
@@ -284,7 +275,7 @@ fun ProfileScreen(
         uiState.unlockSuccessMsg?.let { msg ->
             android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
             viewModel.clearUnlockSuccess()
-            slotToUnlock = null
+            slotNumberToUnlock = null
         }
     }
 
@@ -292,12 +283,14 @@ fun ProfileScreen(
         SlotsManagementDialog(
             slots = uiState.slots,
             userCredits = uiState.profile?.credits ?: 0,
-            onUnlockClick = { slot -> slotToUnlock = slot },
+            onUnlockClick = { slot -> slotNumberToUnlock = slot.slotNumber },
             onDismiss = { showSlotsDialog = false },
         )
     }
 
-    slotToUnlock?.let { slot ->
+    val activeSlotToUnlock = slotNumberToUnlock?.let { num -> uiState.slots.find { it.slotNumber == num } }
+    if (activeSlotToUnlock != null) {
+        val slot = activeSlotToUnlock
         val cost = slot.cost
         val userCredits = uiState.profile?.credits ?: 0
         val hasEnoughCredits = userCredits >= cost
@@ -306,7 +299,7 @@ fun ProfileScreen(
                 uiState.slots.find { it.slotNumber == slot.slotNumber - 1 }?.isOccupied == true
 
         AlertDialog(
-            onDismissRequest = { if (!uiState.isUnlockingSlot) slotToUnlock = null },
+            onDismissRequest = { if (!uiState.isUnlockingSlot) slotNumberToUnlock = null },
             title = {
                 Text(
                     text = if (slot.isUnlocked && !slot.isExpired)
@@ -320,9 +313,9 @@ fun ProfileScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = if (slot.isUnlocked && !slot.isExpired)
-                            stringResource(R.string.slot_renew_dialog_desc, slot.slotNumber, cost)
+                            stringResource(R.string.slot_renew_dialog_desc, slot.slotNumber, slot.renewalDays, cost)
                         else
-                            stringResource(R.string.slot_unlock_dialog_desc, slot.slotNumber, cost),
+                            stringResource(R.string.slot_unlock_dialog_desc, slot.slotNumber, slot.renewalDays, cost),
                         style = MaterialTheme.typography.bodyMedium,
                     )
 
@@ -341,7 +334,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(stringResource(R.string.slot_duration_label), style = MaterialTheme.typography.bodySmall)
-                                Text(stringResource(R.string.slot_duration_value), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.admin_policy_slot_renewal_days_format, slot.renewalDays), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -365,6 +358,20 @@ fun ProfileScreen(
                         }
                     }
 
+                    if (slot.policyRevision == null) {
+                        Text(
+                            text = stringResource(R.string.admin_policy_quote_unavailable),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    } else if (!uiState.error.isNullOrBlank()) {
+                        Text(
+                            text = uiState.error.orEmpty(),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+
                     if (!hasEnoughCredits) {
                         Text(
                             text = stringResource(R.string.error_insufficient_credits_for_slot, cost, userCredits),
@@ -384,8 +391,8 @@ fun ProfileScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = { viewModel.unlockOrRenewSlot(slot.slotNumber) },
-                    enabled = hasEnoughCredits && isPrevSlotActive && !uiState.isUnlockingSlot,
+                    onClick = { viewModel.unlockOrRenewSlot(slot.slotNumber, expectedCost = cost, expectedRevision = slot.policyRevision) },
+                    enabled = hasEnoughCredits && isPrevSlotActive && !uiState.isUnlockingSlot && slot.policyRevision != null,
                 ) {
                     if (uiState.isUnlockingSlot) {
                         CircularProgressIndicator(
@@ -405,7 +412,7 @@ fun ProfileScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { slotToUnlock = null },
+                    onClick = { slotNumberToUnlock = null },
                     enabled = !uiState.isUnlockingSlot,
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -427,6 +434,14 @@ fun ProfileScreen(
             currentTheme = uiState.appTheme,
             onThemeSelected = viewModel::setAppTheme,
             onDismiss = { showThemeDialog = false },
+        )
+    }
+
+    if (showTestModeDialog) {
+        TestModeSelectionDialog(
+            currentTestMode = uiState.testMode,
+            onTestModeSelected = viewModel::setTestMode,
+            onDismiss = { showTestModeDialog = false },
         )
     }
 
@@ -530,7 +545,7 @@ fun ProfileScreen(
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 Card(
@@ -605,6 +620,8 @@ fun ProfileScreen(
                 SettingsSection(
                     currentLanguage = uiState.appLanguage,
                     currentTheme = uiState.appTheme,
+                    currentTestMode = uiState.testMode,
+                    onTestModeClick = { showTestModeDialog = true },
                     onLanguageClick = { showLanguageDialog = true },
                     onThemeClick = { showThemeDialog = true },
                     reminderEnabled = uiState.reminderEnabled,
@@ -619,19 +636,19 @@ fun ProfileScreen(
 
     PullToRefreshBox(
         isRefreshing = uiState.isBackgroundSyncing,
-        onRefresh = { viewModel.refresh(forceRefresh = true) },
+        onRefresh = { viewModel.refresh(forceRefresh = true, triggerSource = EgressTriggerSource.PULL_REFRESH) },
         modifier = modifier.fillMaxSize(),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
                 if (uiState.profile == null) {
                     ProfileLoadErrorCard(
                         message = uiState.error,
-                        onRetry = { viewModel.refresh(forceRefresh = true) },
+                        onRetry = { viewModel.refresh(forceRefresh = true, triggerSource = EgressTriggerSource.MANUAL) },
                     )
                 } else {
                     ProfileHeader(
@@ -757,11 +774,14 @@ fun ProfileScreen(
                 SettingsSection(
                     currentLanguage = uiState.appLanguage,
                     currentTheme = uiState.appTheme,
+                    currentTestMode = uiState.testMode,
+                    onTestModeClick = { showTestModeDialog = true },
                     onLanguageClick = { showLanguageDialog = true },
                     onThemeClick = { showThemeDialog = true },
                     reminderEnabled = uiState.reminderEnabled,
                     onReminderChange = viewModel::setReminderEnabled,
                     onChangePasswordClick = { showChangePasswordDialog = true },
+                    onHelpClick = onHelpClick,
                     onContactClick = {
                         if (uiState.profile?.isAdmin == true) {
                             onAdminReportsClick()
@@ -1023,7 +1043,7 @@ internal fun CreditHistoryDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = log.note ?: log.action,
+                                        text = CreditLogRenderer.render(log, Localizer(LocalContext.current)),
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Medium,
                                     )
@@ -1059,11 +1079,14 @@ internal fun CreditHistoryDialog(
 private fun SettingsSection(
     currentLanguage: String,
     currentTheme: String,
+    currentTestMode: String,
+    onTestModeClick: () -> Unit,
     onLanguageClick: () -> Unit,
     onThemeClick: () -> Unit,
     reminderEnabled: Boolean,
     onReminderChange: (Boolean) -> Unit,
     onChangePasswordClick: (() -> Unit)? = null,
+    onHelpClick: (() -> Unit)? = null,
     onContactClick: (() -> Unit)? = null,
     isCheckingUpdate: Boolean = false,
     onCheckUpdateClick: () -> Unit = {},
@@ -1073,6 +1096,10 @@ private fun SettingsSection(
         SettingsRepository.THEME_LIGHT -> stringResource(R.string.theme_light)
         SettingsRepository.THEME_DARK -> stringResource(R.string.theme_dark)
         else -> stringResource(R.string.theme_system_default)
+    }
+    val testModeLabel = when (currentTestMode) {
+        SettingsRepository.TEST_MODE_TURBO -> stringResource(R.string.test_mode_turbo)
+        else -> stringResource(R.string.test_mode_normal)
     }
 
     Card(
@@ -1086,10 +1113,14 @@ private fun SettingsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(role = Role.Button) { onTestModeClick() }
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
@@ -1103,6 +1134,20 @@ private fun SettingsSection(
                     text = stringResource(R.string.settings_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = testModeLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -1213,6 +1258,45 @@ private fun SettingsSection(
                         )
                         Text(
                             text = stringResource(R.string.change_password_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Help & FAQ Row (if logged in)
+            if (onHelpClick != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onHelpClick() }
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Help,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.help_faq_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                        )
+                        Text(
+                            text = stringResource(R.string.help_faq_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1775,6 +1859,93 @@ private fun ThemeSelectionDialog(
 }
 
 @Composable
+private fun TestModeSelectionDialog(
+    currentTestMode: String,
+    onTestModeSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        Triple(
+            SettingsRepository.TEST_MODE_NORMAL,
+            stringResource(R.string.test_mode_normal),
+            stringResource(R.string.test_mode_normal_desc),
+        ),
+        Triple(
+            SettingsRepository.TEST_MODE_TURBO,
+            stringResource(R.string.test_mode_turbo),
+            stringResource(R.string.test_mode_turbo_desc),
+        ),
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.dialog_select_test_mode))
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                options.forEach { (code, title, desc) ->
+                    val isSelected = currentTestMode == code
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                onTestModeSelected(code)
+                                onDismiss()
+                            }
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = {
+                                onTestModeSelected(code)
+                                onDismiss()
+                            },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            )
+                            Text(
+                                text = desc,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun SlotsManagementDialog(
     slots: List<SlotInfo>,
     userCredits: Int,
@@ -1857,15 +2028,24 @@ private fun SlotsManagementDialog(
                                                 Text(
                                                     text = stringResource(R.string.slot_default_short),
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = Color(0xFF2E7D32),
+                                                    color = MaterialTheme.statusColors.success,
                                                     fontWeight = FontWeight.SemiBold,
                                                 )
+                                                if (slot.cost > 0) {
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text(
+                                                        text = stringResource(R.string.create_slot_1_post_fee_badge, slot.cost),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        fontWeight = FontWeight.Bold,
+                                                    )
+                                                }
                                             }
                                             slot.isUnlocked && !slot.isExpired -> {
                                                 Text(
                                                     text = stringResource(R.string.slot_active_days, slot.remainingDays),
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = Color(0xFF2E7D32),
+                                                    color = MaterialTheme.statusColors.success,
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             }
@@ -1873,7 +2053,7 @@ private fun SlotsManagementDialog(
                                                 Text(
                                                     text = stringResource(R.string.slot_expired_badge),
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = Color(0xFFC62828),
+                                                    color = MaterialTheme.colorScheme.error,
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                                 Spacer(Modifier.width(6.dp))
@@ -1916,13 +2096,13 @@ private fun SlotsManagementDialog(
                                         Text(
                                             text = stringResource(R.string.slot_available_desc),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF2E7D32),
+                                            color = MaterialTheme.statusColors.success,
                                         )
                                     } else if (slot.isExpired) {
                                         Text(
                                             text = stringResource(R.string.slot_expired_desc, slot.cost),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFFC62828),
+                                            color = MaterialTheme.colorScheme.error,
                                         )
                                     } else {
                                         Text(
@@ -1957,7 +2137,7 @@ private fun SlotsManagementDialog(
                                         modifier = Modifier.height(34.dp),
                                     ) {
                                         Text(
-                                            text = stringResource(R.string.slot_renew_plus_days),
+                                            text = stringResource(R.string.slot_renew_plus_days, slot.renewalDays),
                                             style = MaterialTheme.typography.labelSmall,
                                         )
                                     }

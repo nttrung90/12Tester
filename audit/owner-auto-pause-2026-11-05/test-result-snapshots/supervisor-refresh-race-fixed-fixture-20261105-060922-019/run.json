@@ -1,0 +1,13 @@
+{
+  "logName": "supervisor-refresh-race-fixed-fixture",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyRefreshRaceReviewTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T06:08:58.1070898Z",
+  "finishedUtc": "2026-11-05T06:09:22.0320264Z",
+  "currentRunXmlCount": 1
+}

@@ -1,0 +1,9 @@
+{
+  "suites": 75,
+  "tests": 567.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "earliestResultUtc": "2026-11-05T12:01:23.9832792Z",
+  "latestResultUtc": "2026-11-05T12:01:24.0228251Z"
+}

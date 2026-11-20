@@ -1,0 +1,277 @@
+{
+  "at": "2026-11-16T12:51:17.041Z",
+  "migrationSha256": "11fc762c6c60ee2eec2505db748865bb9a3fcb6ea75f57d3205a5781fa0c7b4f",
+  "results": {
+    "supervisor-followup-results.json": {
+      "at": "2026-11-16T12:50:37.548Z",
+      "scope": "Independent isolated PGlite metadata/event-order checks, not actual provider or concurrent sessions",
+      "results": [
+        {
+          "name": "contentLength cap",
+          "status": "PASS"
+        },
+        {
+          "name": "size cap",
+          "status": "PASS"
+        },
+        {
+          "name": "zero length",
+          "status": "PASS"
+        },
+        {
+          "name": "negative length",
+          "status": "PASS"
+        },
+        {
+          "name": "fractional length",
+          "status": "PASS"
+        },
+        {
+          "name": "boolean length",
+          "status": "PASS"
+        },
+        {
+          "name": "null length",
+          "status": "PASS"
+        },
+        {
+          "name": "empty length",
+          "status": "PASS"
+        },
+        {
+          "name": "oversize length",
+          "status": "PASS"
+        },
+        {
+          "name": "huge length",
+          "status": "PASS"
+        },
+        {
+          "name": "unknown length",
+          "status": "PASS"
+        },
+        {
+          "name": "contentLength reaches authenticated RLS INSERT",
+          "status": "PASS"
+        },
+        {
+          "name": "contentLength does not bypass owner or exact path",
+          "status": "PASS"
+        },
+        {
+          "name": "contentLength does not bypass expiry or bucket",
+          "status": "PASS"
+        },
+        {
+          "name": "thumbnail contentLength uses its own strict cap",
+          "status": "PASS"
+        },
+        {
+          "name": "authenticated client retains reservation RPC permission",
+          "status": "FAIL",
+          "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+        },
+        {
+          "name": "reconcile global R equals newly updated ledger holds",
+          "status": "PASS",
+          "evidence": {
+            "actual_r": "150000",
+            "expected_r": "150000"
+          }
+        },
+        {
+          "name": "finalized missing thumbnail remains covered after repeated reconciliation and expiry",
+          "status": "PASS",
+          "evidence": {
+            "afterSubmit": {
+              "u": "0",
+              "r": "150100",
+              "actual": "100"
+            },
+            "beforeExpiry": {
+              "u": "100",
+              "r": "150000",
+              "actual": "100"
+            },
+            "beforeLateWrite": {
+              "u": "100",
+              "r": "150000",
+              "actual": "100"
+            },
+            "afterLateWrite": {
+              "u": "100",
+              "r": "150000",
+              "actual": "150"
+            },
+            "afterReconcile": {
+              "u": "150",
+              "r": "0",
+              "actual": "150"
+            }
+          }
+        },
+        {
+          "name": "cleanup absence ACK cannot erase capacity for an already authorized delayed write",
+          "status": "PASS",
+          "evidence": {
+            "beforeWrite": {
+              "u": "0",
+              "r": "150100",
+              "actual": "0"
+            },
+            "afterWrite": {
+              "u": "0",
+              "r": "150100",
+              "actual": "50"
+            },
+            "afterReconcile": {
+              "u": "50",
+              "r": "150050",
+              "actual": "50"
+            }
+          }
+        },
+        {
+          "name": "accounted main deletion cannot erase pending thumbnail hold",
+          "status": "FAIL",
+          "error": "U+R undercounts live bytes: {\"u\":\"0\",\"r\":\"0\",\"actual\":\"50\"}"
+        },
+        {
+          "name": "unrelated report submission preserves tombstone hold in global R",
+          "status": "FAIL",
+          "error": "U+R undercounts live bytes: {\"u\":\"0\",\"r\":\"100\",\"actual\":\"150\"}"
+        },
+        {
+          "name": "resurrected old object never receives a later physical deletion deadline",
+          "status": "FAIL",
+          "error": "cleanup extended original deletion deadline"
+        }
+      ]
+    },
+    "supervisor-upgrade-093-results.json": {
+      "at": "2026-11-16T12:50:17.578Z",
+      "scope": "Isolated PGlite, pre-existing metadata rows only",
+      "results": [
+        {
+          "name": "092 to latest upgrade",
+          "status": "FAIL",
+          "error": "Upgrade lost legacy pending-write capacity: {\"u\":\"100\",\"r\":\"150100\",\"actual\":\"300300\"}"
+        }
+      ]
+    },
+    "supervisor-ack-matrix-results.json": {
+      "at": "2026-11-16T12:48:50.230Z",
+      "scope": "Injected RPC only, no network",
+      "results": [
+        {
+          "name": "valid ACK",
+          "status": "PASS",
+          "observed": {
+            "valid": true,
+            "failSafe": false,
+            "calls": 1
+          }
+        },
+        {
+          "name": "SQL rejects metric",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "missing ACK flag",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "null ACK flag",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "string false ACK",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "string true ACK",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "numeric zero ACK",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "numeric one ACK",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "array ACK flag",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "object ACK flag",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "collector invalid cannot become valid",
+          "status": "PASS",
+          "observed": {
+            "valid": false,
+            "failSafe": true,
+            "calls": 1
+          }
+        },
+        {
+          "name": "dry run remains read only",
+          "status": "PASS",
+          "observed": {
+            "valid": true,
+            "failSafe": false,
+            "calls": 0
+          }
+        }
+      ]
+    }
+  }
+}

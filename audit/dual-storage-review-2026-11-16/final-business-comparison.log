@@ -1,0 +1,41 @@
+{
+  "scope": "Business behavior, isolated PGlite through 090 vs current",
+  "results": [
+    {
+      "name": "regular_report_credit",
+      "status": "PASS"
+    },
+    {
+      "name": "locked_account",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong_expected_date",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid_image_hash",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid_submission_context",
+      "status": "PASS"
+    },
+    {
+      "name": "missing_mission",
+      "status": "PASS"
+    },
+    {
+      "name": "app_test_with_mission",
+      "status": "PASS"
+    },
+    {
+      "name": "same_request_changed_payload",
+      "status": "PASS"
+    },
+    {
+      "name": "same_request_retry_once",
+      "status": "PASS"
+    }
+  ]
+}

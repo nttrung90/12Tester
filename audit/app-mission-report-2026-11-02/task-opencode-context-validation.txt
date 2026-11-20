@@ -1,0 +1,12 @@
+Focused follow-up in your SAME SQL corrective session, exact google/antigravity-gemini-3.8-flash --variant medium. User still requires this model and has authorized related source transmission excluding secrets. Do not touch quota/account/model configuration.
+
+Primary session is fixing Android only now. Your EXCLUSIVE write scope remains supabase/migrations/074_app_mission_window_and_multi_attachments.sql and your own backend-context-state/handover/log files. No Android, other migrations, root probes or other tests, Gradle, production DB, commit/push, dependencies or secrets.
+
+Root reviewed the explicit-context invariant and added TWO required real acceptance cases to root-three-image-probe.mjs (now13 groups; overall root SQL25 cases). Both currently FAIL, evidence root-three-image-context-review.log:
+- submit_tester_report_v3 with p_submission_context=>null::text and valid mission ID/client ID/attachments is accepted.
+- explicit submit_tester_report_v2 with null context and valid mission ID is also accepted.
+The shared core uses coalesce(p_submission_context,case when missionId...) and silently infers caller intent. This regresses the deployed064 strict explicit-context API and violates the accepted plan's no-inference contract.
+
+Fix null-context rejection in v2/v3/core without breaking the SEPARATE legacy endpoint, whose wrapper already supplies an explicit derived context and has its legacy replay/update rules. Normal app_test/mission values and all previous receipts/fingerprints/ACL/backfill/attachment validations must remain correct. Keep published invalid-context error compatibility where appropriate. Do not weaken the tests, reject valid query strings, or alter ordinary/mission daily quota.
+
+Run UPDATED unchanged root-three-image-probe.mjs (13 groups), root-daily-coexistence-probe.mjs, root-daily-state-matrix.mjs, root-migration-upgrade-probe.mjs, mission-window suite and latest-chain admin integration. Inspect actual individual exit/results, not just last exit in a semicolon chain. Scope is a small validation correction; do not rewrite unrelated SQL or redo Android work. Final audit backend-context-handover.md must report exact outcomes and changes. Other source writers are not touching SQL during this follow-up.

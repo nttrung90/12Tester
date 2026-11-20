@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:53.686Z" hostname="PC-5700X3D" time="1.721">
+  <properties/>
+  <testcase name="inspectingBlockedActionPreservesOtherOperationLoading" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.075"/>
+  <testcase name="olderConfirmationReadCannotOverwriteNewerTaskRefresh" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.064"/>
+  <testcase name="oldAccountProductionResponseDoesNotRefreshNewAccountPage" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.508"/>
+  <testcase name="duplicateProductionTapsShareOneInFlightOperation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.395"/>
+  <testcase name="oldRefreshCannotReenableEligibilityAfterNewerConfirmationDeadline" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.51"/>
+  <testcase name="confirmationReadsFreshTaskBeforeProductionMutation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.054"/>
+  <testcase name="serverUnmetRejectionInvalidatesEligibilityAndShowsReadableMessage" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.061"/>
+  <testcase name="actualFreshReadDeadlineShowsPendingInsteadOfSilentCancellation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.052"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

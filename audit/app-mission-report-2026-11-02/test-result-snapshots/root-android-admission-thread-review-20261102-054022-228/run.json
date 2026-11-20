@@ -1,0 +1,14 @@
+{
+  "logName": "root-android-admission-thread-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.ReportOverlapTest.round2AdmissionMustNotPerformStorageIoOnCallingThread"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T05:39:57.6447971Z",
+  "finishedUtc": "2026-11-02T05:40:22.2461709Z",
+  "currentRunXmlCount": 1
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowDayRolloverIndependentTest.kt",
+    "sha256": "4991C2B28AC39C665B9522D5EBBB9CABAF1C49D7C2F31F5A031938BF88039E65",
+    "testMethods": 1
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowDraftIndependentTest.kt",
+    "sha256": "6566A2B53A5961137AEAB560D3D2DBA16C63075474E81F7183D6DEEB099B9B88",
+    "testMethods": 4
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowManagerIndependentTest.kt",
+    "sha256": "36D7E1427D91A52827BBECEC7D8DBBCF53E44F6291271411E132613FF923596C",
+    "testMethods": 8
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowMediaIndependentTest.kt",
+    "sha256": "1797D658528B7E2F4E93C7DC10973605543C1CAFDE03EA9975D341DE1964C87B",
+    "testMethods": 4
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowPersistenceIndependentTest.kt",
+    "sha256": "2E720174362333807DCD56C844058CB1124D4EC82424DFD5BB6CBBF2ACDA20C6",
+    "testMethods": 5
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowWorkerIndependentTest.kt",
+    "sha256": "04AE393D413B4A482A01568538519C0FFA9262B66A88DB18A284CDE315DFE114",
+    "testMethods": 2
+  }
+]

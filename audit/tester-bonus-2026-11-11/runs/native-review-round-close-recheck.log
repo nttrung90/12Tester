@@ -1,0 +1,2 @@
+{"probe":"unrelated-tester-financial-round-read","expected":"no rows or permission denied","actualRows":0,"denied":null}
+{"probe":"lifecycle-versus-round-close","lifecycle":{"ok":true},"other":{"ok":true}}

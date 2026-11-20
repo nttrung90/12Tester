@@ -69,6 +69,7 @@ export function createMediaGatewayHandler({
         const variant = url.searchParams.get('variant') || 'full';
         const expiresAtRaw = url.searchParams.get('expires_at');
         const grantToken = url.searchParams.get('grant_token');
+        const attachmentId = url.searchParams.get('attachment_id') || null;
 
         if (!reportId || !grantToken || !expiresAtRaw) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -82,15 +83,15 @@ export function createMediaGatewayHandler({
             return;
         }
 
-        const expiresAtEpoch = Number.parseInt(expiresAtRaw, 10);
-        if (Number.isNaN(expiresAtEpoch) || !Number.isFinite(expiresAtEpoch)) {
+        const expiresAtEpoch = Number(expiresAtRaw);
+        if (!/^\d+$/.test(expiresAtRaw) || !Number.isSafeInteger(expiresAtEpoch)) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'BAD_REQUEST', message: 'expires_at phải là số nguyên epoch seconds.' }));
             return;
         }
 
         const nowEpoch = Math.floor(Date.now() / 1000);
-        if (nowEpoch > expiresAtEpoch) {
+        if (nowEpoch >= expiresAtEpoch) {
             res.writeHead(410, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'MEDIA_EXPIRED', message: 'Grant token đã hết hạn truy cập.' }));
             return;
@@ -105,12 +106,13 @@ export function createMediaGatewayHandler({
                 expiresAtEpoch,
                 grantToken,
                 gatewaySecret,
+                attachmentId,
             });
 
             if (!verification.isValid) {
                 if (verification.reason === 'MEDIA_EXPIRED') {
                     res.writeHead(410, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'MEDIA_EXPIRED', message: 'Ảnh báo cáo đã quá hạn SLA 30 ngày.' }));
+                    res.end(JSON.stringify({ error: 'MEDIA_EXPIRED', message: 'Ảnh báo cáo đã hết thời gian lưu trữ.' }));
                     return;
                 }
                 res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -123,7 +125,15 @@ export function createMediaGatewayHandler({
                 reportId,
                 variant,
                 storagePath: verification.storagePath,
+                provider: verification.provider,
+                bucket: verification.bucket,
             });
+
+            if (verification.viewExpiresAt && Date.now() >= Date.parse(verification.viewExpiresAt)) {
+                res.writeHead(410, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'MEDIA_EXPIRED' }));
+                return;
+            }
 
             if (!objectData || !objectData.bytes) {
                 res.writeHead(404, { 'Content-Type': 'application/json' });

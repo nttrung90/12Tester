@@ -1,0 +1,404 @@
+{
+  "at": "2026-11-13T19:01:34.407Z",
+  "dataDirectory": "f:/ai/12tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+  "database": "action_gate_native_test_r4_1794596493264",
+  "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "pids": {
+    "root": 24320,
+    "a": 22524,
+    "b": 1808
+  },
+  "cases": [
+    {
+      "name": "direct-pause-before-slot-versus-resume",
+      "pass": true,
+      "initial": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "atBarrier": {
+        "pid": 22524,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          24320
+        ]
+      },
+      "competingWait": {
+        "pid": 1808,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          22524
+        ]
+      },
+      "action": {
+        "ok": true,
+        "rows": [
+          {
+            "id": "0d420f9e-3d61-479f-b412-db7fc130d642"
+          }
+        ]
+      },
+      "resume": {
+        "ok": true,
+        "rows": [
+          {
+            "r": {
+              "status": "open",
+              "message": "Chiến dịch đã được kích hoạt lại",
+              "success": true,
+              "app_name": "Native reviewer app",
+              "campaign_id": "0d420f9e-3d61-479f-b412-db7fc130d642"
+            }
+          }
+        ]
+      },
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      }
+    },
+    {
+      "name": "delete-gate-before-physical-delete-versus-create-v2",
+      "pass": true,
+      "initial": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 26,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "atBarrier": {
+        "pid": 22524,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          24320
+        ]
+      },
+      "competingWait": {
+        "pid": 1808,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          22524
+        ]
+      },
+      "remove": {
+        "reason": "Gỡ bỏ bởi Chủ sở hữu",
+        "status": "removed",
+        "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+        "success": true,
+        "app_name": "Native reviewer app",
+        "owner_id": "65c9905c-76c2-4df0-aa42-5be53ae4ff0f",
+        "campaign_id": "2500001e-aa5a-4200-87da-cffb8841fbcf"
+      },
+      "create": {
+        "success": true,
+        "replayed": false,
+        "receipt_id": "b5b71388-be5a-4304-bfd9-fa6f741a893b",
+        "campaign_id": "f4aad5bb-6012-4096-aeaa-f06d2c166ae3",
+        "slot_1_cost": 0,
+        "slot_number": 3,
+        "target_cost": 0,
+        "balance_after": 10000,
+        "target_testers": 12,
+        "charged_credits": 0,
+        "client_request_id": "c8b7c824-afd0-48e2-9245-48cfb366d9f0",
+        "min_credits_required": 10
+      },
+      "walletBefore": 10000,
+      "walletAfter": 10000,
+      "refund": false,
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 26,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "retry": {
+        "reason": "Admin or system direct deletion",
+        "status": "removed",
+        "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+        "success": true,
+        "app_name": "Native reviewer app",
+        "owner_id": "65c9905c-76c2-4df0-aa42-5be53ae4ff0f",
+        "replayed": true,
+        "campaign_id": "2500001e-aa5a-4200-87da-cffb8841fbcf"
+      }
+    },
+    {
+      "name": "delete-refund-before-slot-versus-create-v2",
+      "pass": true,
+      "initial": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 40,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "atBarrier": {
+        "pid": 22524,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          24320
+        ]
+      },
+      "competingWait": {
+        "pid": 1808,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          22524
+        ]
+      },
+      "remove": {
+        "reason": "Gỡ bỏ bởi Chủ sở hữu",
+        "status": "pending_removal",
+        "message": "Chiến dịch đã được đóng để giải quyết các báo cáo tester đang chờ trước khi hoàn tất gỡ bỏ",
+        "success": true,
+        "app_name": "Native reviewer app",
+        "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+        "campaign_id": "010b14a7-0ba4-4343-8079-fcfbe2498521"
+      },
+      "create": {
+        "success": true,
+        "replayed": false,
+        "receipt_id": "9098e1bf-7278-48d5-a346-0fa28aab00c9",
+        "campaign_id": "243a91ba-755e-4c89-91ae-b7657fc6d5ed",
+        "slot_1_cost": 0,
+        "slot_number": 3,
+        "target_cost": 0,
+        "balance_after": 10000,
+        "target_testers": 12,
+        "charged_credits": 0,
+        "client_request_id": "b947347e-5437-4c02-8c82-8f3e15244270",
+        "min_credits_required": 10
+      },
+      "walletBefore": 9500,
+      "walletAfter": 10000,
+      "refund": true,
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 40,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "retry": {
+        "reason": "Gỡ bỏ bởi Chủ sở hữu",
+        "status": "pending_removal",
+        "message": "Chiến dịch đã được đóng để giải quyết các báo cáo tester đang chờ trước khi hoàn tất gỡ bỏ",
+        "success": true,
+        "app_name": "Native reviewer app",
+        "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+        "replayed": true,
+        "campaign_id": "010b14a7-0ba4-4343-8079-fcfbe2498521"
+      }
+    },
+    {
+      "name": "accepted-removal-worker-after-new-today-obligation",
+      "pass": true,
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 40,
+        "carry_in_tests": 0,
+        "required_tests": 9,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 3,
+        "is_penalty_exempt": false,
+        "base_required_tests": 9,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 9,
+        "carryover_remaining_tests": 3
+      },
+      "worker": {
+        "ok": true,
+        "rows": [
+          {
+            "r": 0
+          }
+        ]
+      },
+      "receipt": {
+        "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+        "status": "removed"
+      },
+      "after": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 40,
+        "carry_in_tests": 0,
+        "required_tests": 9,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 3,
+        "is_penalty_exempt": false,
+        "base_required_tests": 9,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 9,
+        "carryover_remaining_tests": 3
+      },
+      "wallet": 10000,
+      "refundLogs": {
+        "n": 1,
+        "amount": 500
+      }
+    },
+    {
+      "name": "real-finalizer-profile-lock-versus-owner-resume",
+      "pass": true,
+      "finalized": {
+        "ok": true,
+        "rows": [
+          {
+            "r": ""
+          }
+        ]
+      },
+      "competingWait": {
+        "pid": 1808,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          22524
+        ]
+      },
+      "resumed": {
+        "ok": true,
+        "rows": [
+          {
+            "r": {
+              "status": "open",
+              "message": "Chiến dịch đã được kích hoạt lại",
+              "success": true,
+              "app_name": "Native reviewer app",
+              "campaign_id": "f9db4c4b-853b-4c7b-8cdc-ac0030666452"
+            }
+          }
+        ]
+      },
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 55,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "walletBefore": 10000
+    }
+  ],
+  "pass": true
+}

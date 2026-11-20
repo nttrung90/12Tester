@@ -1,0 +1,8 @@
+{
+  "roles": {
+    "session_user": "postgres",
+    "current_user": "authenticated"
+  },
+  "rejected": true,
+  "error": "permission denied for table tester_reports"
+}

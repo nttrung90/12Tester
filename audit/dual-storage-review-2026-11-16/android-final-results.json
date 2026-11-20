@@ -1,0 +1,189 @@
+{
+  "timestamp": "2026-11-16T09:24:55.030Z",
+  "environment": {
+    "java_home": "C:\\Program Files\\Android\\Android Studio\\jbr",
+    "runner": "Gradle 9.3.1 (testDebugUnitTest)",
+    "command": ".\\gradlew testDebugUnitTest --tests com.ntt.crosstest.data.DualStorageUploadRegressionTest --tests com.ntt.crosstest.data.PendingReportStoreTest --tests com.ntt.crosstest.data.ReportSubmitPolicyTest --tests com.ntt.crosstest.data.ReportSubmissionFailureTest --tests com.ntt.crosstest.work.ReportUploadWorkerTest --tests com.ntt.crosstest.util.*"
+  },
+  "totals": {
+    "suite_count": 17,
+    "tests": 170,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "pass_rate": "100.00%",
+    "duration_seconds": 14.664
+  },
+  "suites": [
+    {
+      "file": "TEST-com.ntt.crosstest.data.DualStorageUploadRegressionTest.xml",
+      "suite": "com.ntt.crosstest.data.DualStorageUploadRegressionTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:19.458Z",
+      "time": 6.188
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.data.PendingReportStoreTest.xml",
+      "suite": "com.ntt.crosstest.data.PendingReportStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:25.650Z",
+      "time": 0.125
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.data.ReportSubmissionFailureTest.xml",
+      "suite": "com.ntt.crosstest.data.ReportSubmissionFailureTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:25.777Z",
+      "time": 0.153
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.data.ReportSubmitPolicyTest.xml",
+      "suite": "com.ntt.crosstest.data.ReportSubmitPolicyTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:25.933Z",
+      "time": 0.399
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.ComparisonStateCoordinatorTest.xml",
+      "suite": "com.ntt.crosstest.util.ComparisonStateCoordinatorTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:26.335Z",
+      "time": 2.778
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.DetailedImageComparatorTest.xml",
+      "suite": "com.ntt.crosstest.util.DetailedImageComparatorTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:29.115Z",
+      "time": 0.142
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.EgressAuditProbeTest.xml",
+      "suite": "com.ntt.crosstest.util.EgressAuditProbeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:29.259Z",
+      "time": 2.087
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.EgressFinalPolicyAuditTest.xml",
+      "suite": "com.ntt.crosstest.util.EgressFinalPolicyAuditTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:31.349Z",
+      "time": 0.045
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.EgressGatewayClientAuditTest.xml",
+      "suite": "com.ntt.crosstest.util.EgressGatewayClientAuditTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:31.398Z",
+      "time": 0.343
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.EgressRound2OptInTest.xml",
+      "suite": "com.ntt.crosstest.util.EgressRound2OptInTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:31.743Z",
+      "time": 0.274
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.FirebaseEgressOptimizationTest.xml",
+      "suite": "com.ntt.crosstest.util.FirebaseEgressOptimizationTest",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:32.024Z",
+      "time": 1.629
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.NetworkRecoveryTest.xml",
+      "suite": "com.ntt.crosstest.util.NetworkRecoveryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.656Z",
+      "time": 0.056
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.NextCampaignSelectorTest.xml",
+      "suite": "com.ntt.crosstest.util.NextCampaignSelectorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.713Z",
+      "time": 0.007
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.ReportComparisonSelectorTest.xml",
+      "suite": "com.ntt.crosstest.util.ReportComparisonSelectorTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.722Z",
+      "time": 0.007
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.ReportUrlRetryTest.xml",
+      "suite": "com.ntt.crosstest.util.ReportUrlRetryTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.730Z",
+      "time": 0.043
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.util.SelectedMediaRegressionTest.xml",
+      "suite": "com.ntt.crosstest.util.SelectedMediaRegressionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.775Z",
+      "time": 0.117
+    },
+    {
+      "file": "TEST-com.ntt.crosstest.work.ReportUploadWorkerTest.xml",
+      "suite": "com.ntt.crosstest.work.ReportUploadWorkerTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-16T09:24:33.897Z",
+      "time": 0.271
+    }
+  ]
+}

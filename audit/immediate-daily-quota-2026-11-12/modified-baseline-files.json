@@ -1,0 +1,38 @@
+[
+  {
+    "path": "supabase/tests\\package.json",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\strings.xml",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\strings.xml",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\strings.xml",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "change": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "change": "modified"
+  }
+]

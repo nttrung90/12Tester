@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Ordinary members cannot execute privileged finalization: select public.apply_daily_inactivity_penalty()",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Ordinary members cannot execute privileged finalization: select public.finalize_daily_tasks_for_date((now() at time zone 'Asia/Ho_Chi_Minh')::date-1)",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Unlocked administrator can inspect private diagnostic: diagnose_daily_task_stuck_users",
+    "result": "PASS",
+    "evidence": {
+      "authorized": true,
+      "rows": 0
+    }
+  },
+  {
+    "name": "Trusted service can inspect private diagnostic: diagnose_daily_task_stuck_users",
+    "result": "PASS",
+    "evidence": {
+      "authorized": true,
+      "rows": 0
+    }
+  },
+  {
+    "name": "Unidentified client cannot inspect all users: diagnose_daily_task_stuck_users",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Locked administrator cannot use private diagnostic: diagnose_daily_task_stuck_users",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Unlocked administrator can inspect private diagnostic: audit_carryover_journal_reconciliation",
+    "result": "PASS",
+    "evidence": {
+      "authorized": true,
+      "rows": 0
+    }
+  },
+  {
+    "name": "Trusted service can inspect private diagnostic: audit_carryover_journal_reconciliation",
+    "result": "PASS",
+    "evidence": {
+      "authorized": true,
+      "rows": 0
+    }
+  },
+  {
+    "name": "Unidentified client cannot inspect all users: audit_carryover_journal_reconciliation",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Locked administrator cannot use private diagnostic: audit_carryover_journal_reconciliation",
+    "result": "PASS",
+    "evidence": {
+      "denied": true
+    }
+  },
+  {
+    "name": "Trusted service retains access to scheduled and explicit finalization",
+    "result": "PASS",
+    "evidence": {
+      "authorized": true
+    }
+  },
+  {
+    "name": "An unresolved old user cannot starve healthy users awaiting recent finalization",
+    "result": "PASS",
+    "evidence": {
+      "met": true,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": true,
+      "missed_streak": 0,
+      "available_apps": 21,
+      "carry_in_tests": 0,
+      "required_tests": 3,
+      "carryover_ready": true,
+      "completed_tests": 0,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": true,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-10-30",
+      "effective_required_tests": 3,
+      "carryover_remaining_tests": 0
+    }
+  },
+  {
+    "name": "Unprovable coverage boundary cannot starve healthy users: partial=false",
+    "result": "PASS",
+    "evidence": {
+      "partial": false,
+      "healthyReady": true
+    }
+  },
+  {
+    "name": "Unprovable coverage boundary cannot starve healthy users: partial=true",
+    "result": "PASS",
+    "evidence": {
+      "partial": true,
+      "healthyReady": true
+    }
+  }
+]

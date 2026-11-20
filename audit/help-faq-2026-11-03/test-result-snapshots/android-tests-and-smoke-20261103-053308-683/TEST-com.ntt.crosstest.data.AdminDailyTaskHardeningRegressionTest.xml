@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-03T05:32:51.117Z" hostname="PC-5700X3D" time="0.479">
+  <properties/>
+  <testcase name="mutationInvalidatesHistoryAndRefreshFetchesNewAudit" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.067"/>
+  <testcase name="paginatingAll55FutureSchedulesMergesWithoutLossOrDuplicate" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.05"/>
+  <testcase name="conflictPreservesDraftAndMaintainsErrorMessageAcrossReload" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.04"/>
+  <testcase name="staleConfigResponseMustNotOverwriteNewerMutationSnapshot" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.195"/>
+  <testcase name="initialLoadFailureMustNotExposeFakeLevelsOrAllowMutation" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.032"/>
+  <testcase name="cancelFailurePreservesCancelTargetAndReason" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.046"/>
+  <testcase name="concurrentSaveAndCancelMustBeDebounced" classname="com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

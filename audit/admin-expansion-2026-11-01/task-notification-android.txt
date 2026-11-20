@@ -1,0 +1,25 @@
+Continue SAME notification session/model/variant after review1 fixes. Independentprobe now payloadMismatchRejected=true and emptyrecipientcount stays0; preserve fixes. User still requires frontend integration. Implement real Android notification management now, plus finish commonaudit hook on YOUR staged072. No other agents/models, no commit/reset/push/secrets/deploy. Otheragents own070,071 and coreAndroid. Scopeisolation strict.
+
+Backend lastgap: own072 dedicated notification_campaign_events needs common070 admin_action_events integration. Add backendtrigger/helper using known record_admin_action_event(uuid,text,text,text,text,jsonb,jsonb,uuid) if070installed; nofakeactorsforworkerevents. All admincreate/update/schedule/cancel/processwrapper intent events should appear in commonaudit exactlyonce. Preserveisolated062-069+072 tests (conditionalhookwhen070absent isfine) and ADD integrated test062-070+staged072. Don't edit070. Stage072stilloutsideactive untilCodexintegrates.
+
+ANDROID OWNERSHIP ONLY NEW FILES:
+- app/.../data/AdminNotificationCampaignModels.kt and AdminNotificationCampaignRepository.kt
+- app/.../ui/viewmodels/AdminNotificationCampaignViewModel.kt
+- app/.../ui/screens/AdminNotificationCampaignScreen.kt
+- app/src/main/res/values{,-vi,-en}/admin_notifications.xml
+- new tests specifically for your classes.
+Do NOT edit shared AdminUsersScreen/ViewModel, TestCheoApp, NavGraph, existingModels/Repository, commonstrings or othercoreAndroidfiles. CoreAndroidsession is active; finalnavigation/wiring will be assignedlater. Expose AdminNotificationCampaignScreen(onBack:()->Unit) entry and createitsownedrepo via SupabaseHolder singleton in screenfactory, reusingappauthrepo/localizer. No fakeinactivebuttonplaceholder.
+
+Read exact updated notification-api-contract.md and realstaged072 for DTOs/signatures including detail p_events_limit and scheduler_ready. Implement modularUI:
+- Paginated campaignhistory with status/audience filters, loading/empty/error/retry.
+- Create/edit draft VI/ENtitle/body, defaultlocale and previewofrealresolvedcontent/actualrecipientcount, audiences all/role/selected users.
+- Selectedusers picked by servermembersearch (existing admin_search_members, can reuse core AdminManagementRepository/DTO readonly) and selectedchips names/emails; support loadmore, not just rawUUIDtextarea. No displayed technicalJSON dump.
+- Save draft, schedulefuture VN time, sendnow and cancelfuture with confirmation, reason and CASrevision. Preserveuserdraftonrevisionconflict and refreshserverstate. Details show receipts/campaignstatus/counts and bounded eventlist; loadmore recipients. Distinguish notification-created from actuallyread and popupack; no broadcastpopupstateclaims.
+- Schedulerhealth readonly with readinesswarning whenworker/cronunavailable; don't promisefutureauto delivery solelybecausequeuedsaved. Bounded manualprocessdueaction via permittedRPC with adminconfirmation if backendprovides.
+- AlltextVI/EN/base localized; readable320dp/font200%, scrollableforms andIME. Enums translated, friendlylocalizederrors, no rawSQLkeys/stacktraces toadmin.
+- ViewModel requestownership perstream and UID+generation; never let stale query/loadmore/filter/session responses mutate list/cursors/errors/loading. Snapshotfilter+cursorwhenrequestsstart. Captureauthownerbeforerequest; atomicallygateactionsbeforecoroutine; staleoldactioncannotreleasecurrentaction'sguard.
+- UUIDidempotencyforEVERYwrite, stableforunchangedintent afterambiguousnetworkfailure including state restoration, newUUIDwhenpayloadchanges/afterresolvedsuccess, canonicalstructuredequality. Passoriginalexpectedrevisiononreplay; serverchecksrequestreplayfirst. No automaticfinancial ornotificationresubmit. Never reportcancellation successuntilbackendconfirms.
+
+Tests with MockEngine/suppliedtestableRepo for exactactualJSON DTOs, requestID reuse+mismatch andno double-submit, CASconflict draftretention, stale search/list/recipientpagination afterfilterchange/sessionchange, loadmore errorsreleaseflags, schedulerunreadyUIstate. RuncompileDebugKotlin and specificnewtests using localJAVA_HOME=C:/Users/nguye/.gradle/jdks/eclipse_adoptium-25-amd64-windows.2 offline. ConcurrentcoreAndroidmaybrieflybeuncompilable; identifyownership and documentratherthaneditingtheirfiles. You maycompileagainaftertheirstabilization.
+
+Write notification-android-handover.md with actualimplementedAPI/UI/tests and precise finalwiringinstructions (whichcallbacktoaddmainexistingbroadcastcard andNavGraphroute). FullstageisnotaccepteduntilCodexintegrateswiring; don't claimvisiblefeaturesbeforewired. BackendandAndroidworkscopefilelistincluded. KeepSQLconsumerbusiness untouched.

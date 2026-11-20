@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:12:56.047Z" hostname="PC-5700X3D" time="0.005">
+  <properties/>
+  <testcase name="actionSuccess_closesDialogAndClearsDraftAndError" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.004"/>
+  <testcase name="logout_resetsDialog" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="adminSwitch_fromAdminAToAdminB_resetsDialogAndDraftAndError" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="openDialog_withAdminIdentity_initializesCleanStateAndInstanceId" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="actionError_keepsDialogVisible_preservesSelectionAndDraft_andSetsInModalError" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="staleActionCallback_fromOldSession_cannotAffectNewAdmin" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="stateSurvivesRecompositionAndRotation" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="openDialog_withNonAdminOrNullUid_isRejected" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="sessionGenerationChange_sameUid_resetsDialogAndDraftAndError" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <testcase name="staleActionCallback_fromOldDialogInstance_cannotCloseOrAffectNewerDialog" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-13T18:38:39.595Z",
+  "environment": "Windows Native PostgreSQL 17.11",
+  "dataDirectory": "f:/ai/12tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+  "port": 55444,
+  "probes": [],
+  "error": {
+    "code": "42804",
+    "message": "column \"task_date\" is of type date but expression is of type integer",
+    "stack": "error: column \"task_date\" is of type date but expression is of type integer\n    at F:\\AI\\12Tester\\supabase\\tests\\node_modules\\pg\\lib\\client.js:694:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async run (file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/native-postgres-concurrency-driver.mjs:182:5)"
+  },
+  "success": false
+}

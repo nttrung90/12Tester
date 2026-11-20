@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Titles & Navigation -->
+    <string name="admin_notif_title">Notification Campaigns</string>
+    <string name="admin_notif_subtitle">Manage and schedule system broadcasts</string>
+    <string name="admin_notif_tab_history">History</string>
+    <string name="admin_notif_tab_composer">Composer</string>
+    <string name="admin_notif_tab_monitor">Scheduler &amp; Monitor</string>
+
+    <!-- Filters & Search -->
+    <string name="admin_notif_filter_status">Status</string>
+    <string name="admin_notif_filter_audience">Audience</string>
+    <string name="admin_notif_filter_all">All</string>
+    <string name="admin_notif_empty_history">No campaigns found matching current filters</string>
+    <string name="admin_notif_load_more">Load More</string>
+    <string name="admin_notif_loading">Loading...</string>
+    <string name="admin_notif_refresh">Refresh</string>
+
+    <!-- Status Labels -->
+    <string name="admin_notif_status_draft">Draft</string>
+    <string name="admin_notif_status_queued">Scheduled</string>
+    <string name="admin_notif_status_sending">Sending</string>
+    <string name="admin_notif_status_completed">Completed</string>
+    <string name="admin_notif_status_cancelled">Cancelled</string>
+    <string name="admin_notif_status_failed">Failed</string>
+
+    <!-- Audience Labels -->
+    <string name="admin_notif_aud_all">All Members</string>
+    <string name="admin_notif_aud_role">By Role</string>
+    <string name="admin_notif_aud_selected">Selected Users</string>
+
+    <!-- Locales -->
+    <string name="admin_notif_locale_vi">Vietnamese (VI)</string>
+    <string name="admin_notif_locale_en">English (EN)</string>
+    <string name="admin_notif_locale_bilingual">Bilingual (VI + EN)</string>
+
+    <!-- Composer Form -->
+    <string name="admin_notif_composer_heading">Compose Campaign</string>
+    <string name="admin_notif_edit_heading">Edit Campaign Draft</string>
+    <string name="admin_notif_field_title_vi">Title (VI)</string>
+    <string name="admin_notif_field_title_en">Title (EN)</string>
+    <string name="admin_notif_field_body_vi">Message Body (VI)</string>
+    <string name="admin_notif_field_body_en">Message Body (EN)</string>
+    <string name="admin_notif_field_default_locale">Delivery Locale</string>
+    <string name="admin_notif_field_audience">Audience</string>
+    <string name="admin_notif_field_role">Target Role</string>
+    <string name="admin_notif_field_reason">Administrative Note / Reason</string>
+    <string name="admin_notif_selected_users_title">Selected Users (%1$d)</string>
+    <string name="admin_notif_search_users_placeholder">Search user by name or email...</string>
+    <string name="admin_notif_no_users_found">No members found</string>
+    <string name="admin_notif_user_already_selected">User is already selected</string>
+    <string name="admin_notif_remove_user">Remove</string>
+    <string name="admin_notif_search_users_load_more">Load More Users</string>
+
+    <!-- Preview Section -->
+    <string name="admin_notif_preview_section">Live Delivery Preview</string>
+    <string name="admin_notif_preview_recipients_count">Target recipients: %1$d users</string>
+    <string name="admin_notif_preview_vi_tab">VI Preview</string>
+    <string name="admin_notif_preview_en_tab">EN Preview</string>
+    <string name="admin_notif_preview_effective_tab">Effective Delivery</string>
+
+    <!-- Actions -->
+    <string name="admin_notif_action_save_draft">Save Draft</string>
+    <string name="admin_notif_action_update_draft">Save Changes</string>
+    <string name="admin_notif_action_schedule">Schedule Delivery</string>
+    <string name="admin_notif_action_send_now">Send Immediately</string>
+    <string name="admin_notif_action_cancel">Cancel Campaign</string>
+    <string name="admin_notif_action_view_detail">View Details</string>
+    <string name="admin_notif_action_reset_composer">New Campaign</string>
+
+    <!-- Detail Dialog / Screen -->
+    <string name="admin_notif_detail_title">Campaign Details</string>
+    <string name="admin_notif_stat_total">Total Recipients: %1$d</string>
+    <string name="admin_notif_stat_sent">Delivered: %1$d</string>
+    <string name="admin_notif_stat_read">Currently Read: %1$d</string>
+    <string name="admin_notif_stat_failed">Failed: %1$d</string>
+    <string name="admin_notif_stat_read_note">(in remaining notification inboxes)</string>
+    <string name="admin_notif_recipients_list_title">Recipient Deliveries</string>
+    <string name="admin_notif_events_list_title">Audit History</string>
+    <string name="admin_notif_empty_recipients">No delivery receipts yet</string>
+    <string name="admin_notif_empty_events">No audit events</string>
+
+    <!-- Scheduler & Monitor -->
+    <string name="admin_notif_monitor_title">Notification Scheduler Health</string>
+    <string name="admin_notif_cron_status">pg_cron Status: %1$s</string>
+    <string name="admin_notif_cron_active">Active (1 min interval)</string>
+    <string name="admin_notif_cron_unavailable">Unavailable / Not Installed</string>
+    <string name="admin_notif_scheduler_ready">Automated scheduler is ready and active</string>
+    <string name="admin_notif_scheduler_unready">Automated scheduler is NOT ready. Scheduled campaigns require pg_cron or background worker daemon.</string>
+    <string name="admin_notif_pending_due_count">Pending Due Campaigns: %1$d</string>
+    <string name="admin_notif_inflight_count">In-Flight Processing: %1$d</string>
+    <string name="admin_notif_last_worker_run">Last Worker Run: %1$s</string>
+    <string name="admin_notif_lifetime_processed">Lifetime Processed: %1$d campaigns</string>
+    <string name="admin_notif_lifetime_sent">Lifetime Delivered: %1$d notifications</string>
+    <string name="admin_notif_action_process_due">Process Due Batches Now</string>
+    <string name="admin_notif_confirm_process_due">Trigger immediate processing for all due campaigns?</string>
+    <string name="admin_notif_process_due_success">Worker processed %1$d campaigns (%2$d notifications delivered)</string>
+
+    <!-- Confirmations & Dialogs -->
+    <string name="admin_notif_schedule_dialog_title">Schedule Notification Campaign</string>
+    <string name="admin_notif_schedule_date">Date (YYYY-MM-DD)</string>
+    <string name="admin_notif_schedule_time">Time (HH:mm, 24h VN time)</string>
+    <string name="admin_notif_schedule_must_be_future">Scheduled time must be strictly in the future</string>
+    <string name="admin_notif_send_now_confirm_title">Confirm Immediate Send</string>
+    <string name="admin_notif_send_now_confirm_body">Are you sure you want to queue this campaign for immediate delivery to %1$d recipients?</string>
+    <string name="admin_notif_cancel_confirm_title">Cancel Campaign</string>
+    <string name="admin_notif_cancel_confirm_body">Are you sure you want to cancel this campaign? Only future scheduled deliveries can be cancelled.</string>
+    <string name="admin_notif_cancel_reason_label">Cancellation reason (required)</string>
+    <string name="admin_notif_btn_confirm">Confirm</string>
+    <string name="admin_notif_btn_dismiss">Dismiss</string>
+    <string name="admin_notif_btn_close">Close</string>
+
+    <!-- Labels & Placeholders -->
+    <string name="admin_notif_field_audience_label">Audience: %1$s</string>
+    <string name="admin_notif_role_member">Member</string>
+    <string name="admin_notif_role_moderator">Moderator</string>
+    <string name="admin_notif_role_admin">Admin</string>
+    <string name="admin_notif_placeholder_title_empty">(Untitled)</string>
+    <string name="admin_notif_placeholder_body_empty">(No message body)</string>
+    <string name="admin_notif_placeholder_user_unnamed">(Unnamed user)</string>
+    <string name="admin_notif_label_english_version">English: %1$s</string>
+    <string name="admin_notif_label_worker_never">Never executed</string>
+    <string name="admin_notif_status_read_badge">(Read)</string>
+    <string name="admin_notif_error_date_invalid">Invalid date or time format. Please use YYYY-MM-DD and HH:mm.</string>
+    <string name="admin_notif_error_cancel_in_flight">Cannot cancel campaign that is currently sending, completed, or already due.</string>
+    <string name="admin_notif_error_not_authenticated">Session expired. Please sign in again.</string>
+    <string name="admin_notif_btn_retry">Retry</string>
+    <string name="admin_notif_error_title_required">Both Vietnamese and English titles are required (1–200 characters)</string>
+    <string name="admin_notif_error_body_required">Both Vietnamese and English message bodies are required (1–2000 characters)</string>
+    <string name="admin_notif_error_selected_users_empty">Please select at least one recipient user</string>
+    <string name="admin_notif_error_revision_conflict">This campaign has been updated by another admin. Your current draft was preserved; please re-verify and save.</string>
+    <string name="admin_notif_error_request_conflict">Request conflict: request ID was reused with a different action or payload.</string>
+    <string name="admin_notif_error_generic">An error occurred: %1$s</string>
+    <string name="admin_notif_success_draft_saved">Campaign draft saved successfully</string>
+    <string name="admin_notif_success_scheduled">Campaign scheduled successfully</string>
+    <string name="admin_notif_success_sent">Campaign queued for immediate sending</string>
+    <string name="admin_notif_success_cancelled">Campaign cancelled successfully</string>
+    <string name="admin_notif_replayed_note">(Replayed from previous request)</string>
+</resources>

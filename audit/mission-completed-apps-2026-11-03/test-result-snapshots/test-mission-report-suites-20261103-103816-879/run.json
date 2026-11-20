@@ -1,0 +1,14 @@
+{
+    "logName":  "test-mission-report-suites",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionReportRecheckProbeTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionReportMultiAttachmentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-03T10:38:00.5195307Z",
+    "finishedUtc":  "2026-11-03T10:38:16.8897736Z",
+    "currentRunXmlCount":  2
+}

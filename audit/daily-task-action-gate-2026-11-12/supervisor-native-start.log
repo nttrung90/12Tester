@@ -1,0 +1,14 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+Error: connect EACCES 127.0.0.1:55449
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16) {
+  errno: -4092,
+  code: 'EACCES',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 55449
+}
+
+Node.js v24.15.0

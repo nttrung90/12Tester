@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:55.414Z" hostname="PC-5700X3D" time="0.729">
+  <properties/>
+  <testcase name="delayed create response arriving after account change is safely gated" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.046"/>
+  <testcase name="closed or exhausted round allows creating a next round while displaying historical progress" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.031"/>
+  <testcase name="reconcile pending intent executes independently of deleted campaign" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.043"/>
+  <testcase name="coherent wrong reconcile payload retains intent and does not acknowledge success" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.047"/>
+  <testcase name="typed HTTP 503 with INSUFFICIENT_CREDITS retains UUID and does not clear intent" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.046"/>
+  <testcase name="non-typed or non-P0001 JSON validation error retains intent" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.045"/>
+  <testcase name="malformed or empty response retains intent and does not clear store" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.042"/>
+  <testcase name="submitCreateBonus persists intent before calling RPC and clears on confirmed valid evidence" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.048"/>
+  <testcase name="getCampaignTesterBonus with SQL error CAMPAIGN_NOT_FOUND propagates and does not offer create" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.032"/>
+  <testcase name="budget calculation checks boundaries, bounds, and wallet balance" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.032"/>
+  <testcase name="terminal closed or exhausted prior round allows creating next round" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.028"/>
+  <testcase name="genuine P0001 400 fresh rejection known handled and releases intent" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.046"/>
+  <testcase name="ambiguous network error retains intent and triggers reconcile" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.048"/>
+  <testcase name="initial load sets campaign and wallet balance" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.03"/>
+  <testcase name="corrupted store state flags isStoreCorrupted and retains record" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.015"/>
+  <testcase name="existing active round opens in read-only progress mode" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.029"/>
+  <testcase name="CLIENT_REQUEST_ID_CONFLICT retains original UUID and intent" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.045"/>
+  <testcase name="missing RPC get_campaign_tester_bonus sets isNotSupported" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.029"/>
+  <testcase name="definitive server validation error releases intent" classname="com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest" time="0.043"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

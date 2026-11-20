@@ -1,0 +1,13 @@
+{
+  "logName": "root-final-all-android",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-01T23:54:17.2611870Z",
+  "finishedUtc": "2026-11-01T23:55:23.0902225Z",
+  "currentRunXmlCount": 68
+}

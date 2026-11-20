@@ -1,0 +1,12 @@
+{
+    "logName":  "broader-android-tests-3",
+    "arguments":  [
+                      "-I",
+                      "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:41:46.5811536Z",
+    "finishedUtc":  "2026-11-02T04:42:40.4080867Z",
+    "currentRunXmlCount":  69
+}

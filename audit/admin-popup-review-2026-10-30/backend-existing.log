@@ -1,0 +1,20 @@
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 067) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+=== RUNNING ADMIN DIRECT NOTIFICATION POPUP TESTS ===
+PASS: Admin direct send registers notification and popup state with count 0
+PASS: Broadcast does NOT register popup state
+PASS: Member and anon are forbidden from sending notifications
+PASS: Client directly inserting fake notification cannot get popup
+PASS: Trigger prevents client from modifying protected fields and unmarking read
+PASS: User B cannot claim or acknowledge User A notification
+PASS: Claim quotas 1-5, retry idempotency, and session 6 blocked
+PASS: Acknowledge stops popup and subsequent claim/session retry returns stopped
+PASS: Deleting notification sets receipt notification_id null and stops replay without picking another
+PASS: Finds eligible notification beyond top 50 items and preserves created_at order
+PASS: Locked account cannot claim popup
+=== ALL ADMIN DIRECT NOTIFICATION POPUP TESTS PASSED ===

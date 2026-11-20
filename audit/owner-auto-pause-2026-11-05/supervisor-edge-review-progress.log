@@ -1,0 +1,10 @@
+Loaded 062_consolidated_baseline.sql through 079_owner_auto_pause_debt_and_timestamp_guard.sql; actual SQL functions, no function stubs.
+PASS: private ledger diagnostics deny ordinary members
+DEFECT: private ledger diagnostics deny authenticated sessions without an identity Missing expected rejection.
+PASS: client cannot authorize timestamp mutation through custom settings
+PASS: disabled carryover cannot treat unknown yesterday as debt-free ready history
+PASS: locked owner cannot resume through SECURITY DEFINER RPC
+PASS: new account creation-day exemption does not require nonexistent yesterday history
+PASS: backfilling an older gap cannot overwrite profile with an older-day streak
+DEFECT: daily penalty credit log action retains its existing contract Nonzero daily penalty must retain action=daily_missed_penalty from migration 071
+Supervisor edge defects: 2

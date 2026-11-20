@@ -2,6 +2,7 @@ package com.ntt.crosstest.data
 
 import android.app.Application
 import com.ntt.crosstest.ui.viewmodels.MissionCreateUiState
+import com.ntt.crosstest.ui.viewmodels.MissionCreateViewModel
 import com.ntt.crosstest.ui.viewmodels.HomeUiState
 import com.ntt.crosstest.ui.viewmodels.OwnerAppDetailUiState
 import io.github.jan.supabase.createSupabaseClient
@@ -9,13 +10,20 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.MemoryCodeVerifierCache
 import io.github.jan.supabase.auth.MemorySessionManager
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.Postgrest
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -25,6 +33,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [34])
 class MissionRegressionTest {
@@ -33,12 +42,14 @@ class MissionRegressionTest {
 
     @Before
     fun setup() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         SessionCacheManager.clear(context)
     }
 
     @After
     fun tearDown() {
         SessionCacheManager.clear(context)
+        Dispatchers.resetMain()
     }
 
     /**
@@ -155,6 +166,7 @@ class MissionRegressionTest {
         val supabase = createSupabaseClient("https://mock.supabase.co", "anon-key") {
             httpEngine = mockEngine
             install(Auth) {
+                enableLifecycleCallbacks = false
                 sessionManager = MemorySessionManager()
                 codeVerifierCache = MemoryCodeVerifierCache()
             }
@@ -178,5 +190,153 @@ class MissionRegressionTest {
         val m3 = repo.getOpenMissions(forceRefresh = false)
         assertEquals(1, m3.size)
         assertEquals("Đổi session generation phải kích hoạt gọi lại network", 2, callCount)
+    }
+
+    /**
+     * Kiểm tra Campaign.isMissionEligible:
+     * - isOpen ("open") -> true
+     * - isProduction ("production") -> true
+     * - isCompleted ("completed") -> true
+     * - isPaused ("paused") -> false
+     * - hidden / other -> false
+     */
+    @Test
+    fun `campaign mission eligibility for open, production, completed and exclusion of paused`() {
+        val openCamp = Campaign(id = "c1", status = "open")
+        val prodCamp = Campaign(id = "c2", status = "production")
+        val compCamp = Campaign(id = "c3", status = "completed")
+        val pausedCamp = Campaign(id = "c4", status = "paused")
+        val hiddenCamp = Campaign(id = "c5", status = "hidden")
+
+        assertTrue("Open campaign must be mission eligible", openCamp.isMissionEligible)
+        assertTrue("Production campaign must be mission eligible", prodCamp.isMissionEligible)
+        assertTrue("Completed campaign must be mission eligible", compCamp.isMissionEligible)
+        assertFalse("Paused campaign must NOT be mission eligible", pausedCamp.isMissionEligible)
+        assertFalse("Hidden campaign must NOT be mission eligible", hiddenCamp.isMissionEligible)
+
+        assertTrue(openCamp.isOpen)
+        assertFalse(openCamp.isFinalized)
+
+        assertTrue(prodCamp.isProduction)
+        assertTrue(prodCamp.isFinalized)
+        assertFalse(prodCamp.isOpen)
+
+        assertTrue(compCamp.isCompleted)
+        assertTrue(compCamp.isFinalized)
+        assertFalse(compCamp.isOpen)
+    }
+
+    /**
+     * Kiểm tra MissionCreateViewModel picker:
+     * Tải danh sách app đủ điều kiện (open + finalized), loại bỏ app có mission đang bận.
+     */
+    @Test
+    fun `MissionCreateViewModel picker selects open and finalized apps and excludes busy apps`() = runBlocking {
+        val mockEngine = MockEngine { request ->
+            val path = request.url.encodedPath
+            when {
+                path.contains("profiles") -> respond(
+                    content = """[{"id":"user1","email":"user1@test.com","credits":1000}]""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+                path.contains("campaigns") -> respond(
+                    content = """[
+                        {"id":"c_open","owner_id":"user1","app_name":"Open App","status":"open"},
+                        {"id":"c_prod","owner_id":"user1","app_name":"Prod App","status":"production"},
+                        {"id":"c_comp","owner_id":"user1","app_name":"Comp App","status":"completed"},
+                        {"id":"c_paused","owner_id":"user1","app_name":"Paused App","status":"paused"}
+                    ]""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+                path.contains("get_my_active_mission_campaign_ids") -> respond(
+                    content = """["c_open"]""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+                else -> respond("[]", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+            }
+        }
+
+        val supabase = createSupabaseClient("https://mock.supabase.co", "anon-key") {
+            httpEngine = mockEngine
+            install(Auth) {
+                enableLifecycleCallbacks = false
+                sessionManager = MemorySessionManager()
+                codeVerifierCache = MemoryCodeVerifierCache()
+                autoLoadFromStorage = false
+                autoSaveToStorage = false
+            }
+            install(Postgrest)
+        }
+
+        val sessionJson = """
+            {
+                "access_token": "token-user1",
+                "refresh_token": "ref-user1",
+                "token_type": "bearer",
+                "expires_in": 3600,
+                "user": {
+                    "id": "user1",
+                    "aud": "authenticated"
+                }
+            }
+        """.trimIndent()
+        supabase.auth.awaitInitialization()
+        supabase.auth.importSession(Json { ignoreUnknownKeys = true }.decodeFromString<UserSession>(sessionJson))
+
+        val repo = CampaignRepository(supabase, Localizer(context))
+        val vm = MissionCreateViewModel(repo, Localizer(context))
+
+        // Chờ coroutine nạp dữ liệu ban đầu
+        for (i in 1..20) {
+            if (!vm.uiState.value.isLoading) break
+            kotlinx.coroutines.delay(50)
+        }
+
+        val state = vm.uiState.value
+        assertFalse("Quá trình nạp dữ liệu hoàn tất", state.isLoading)
+
+        // c_open bị busy -> c_prod và c_comp được chọn, c_paused bị loại
+        val eligibleIds = state.myCampaigns.map { it.id }
+        assertEquals(listOf("c_prod", "c_comp"), eligibleIds)
+        assertFalse(state.allAppsBusy)
+        assertEquals("c_prod", state.selectedCampaignId)
+    }
+
+    /**
+     * Kiểm tra MissionCreateViewModel validation:
+     * Nếu app được chọn không đủ điều kiện (ví dụ paused), submit bị chặn ngay tại client.
+     */
+    @Test
+    fun `MissionCreateViewModel create validation rejects non-eligible campaign`() = runBlocking {
+        val mockEngine = MockEngine { request ->
+            respond("[]", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        }
+        val supabase = createSupabaseClient("https://mock.supabase.co", "anon-key") {
+            httpEngine = mockEngine
+            install(Auth) {
+                enableLifecycleCallbacks = false
+                sessionManager = MemorySessionManager()
+                codeVerifierCache = MemoryCodeVerifierCache()
+            }
+            install(Postgrest)
+        }
+
+        val repo = CampaignRepository(supabase, Localizer(context))
+        val vm = MissionCreateViewModel(repo, Localizer(context))
+
+        vm.updateTitle("Valid Title")
+        vm.updateDescription("Valid Description")
+        vm.updateReward("15")
+
+        // Khi chưa chọn app hoặc app không nằm trong danh sách myCampaigns hợp lệ
+        vm.selectCampaign("non_existent_or_paused")
+        vm.create()
+
+        val state = vm.uiState.value
+        assertNotNull("Báo lỗi khi campaign không hợp lệ", state.error)
+        assertFalse("Không gọi sang createMission", state.created)
     }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.localization.ComposeLocaleRegressionTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:52.068Z" hostname="PC-5700X3D" time="0.787">
+  <properties/>
+  <testcase name="reportDialogsKeepAppLanguageAcrossLanguageSwitches" classname="com.ntt.crosstest.localization.ComposeLocaleRegressionTest" time="0.774"/>
+  <testcase name="vietnameseUiOnEnglishDeviceUsesVietnameseResources" classname="com.ntt.crosstest.localization.ComposeLocaleRegressionTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

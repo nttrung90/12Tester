@@ -1,0 +1,10 @@
+# Ghi chú kiểm tra độc lập để OpenCode xử lý trước bàn giao
+
+1. Kế hoạch đã được cập nhật sau lúc đính kèm prompt. Đọc lại mục 6 và `independent-before-probe.log`: admin bị khóa UPDATE trực tiếp app_configs được; anon database role có TRUNCATE app_configs bỏ qua RLS. Cần chặn qua RLS và revoke TRUNCATE/TRIGGER client roles ở public tables (kể cả PUBLIC nếu có); giữ service role/owner. Không diễn đạt đây là endpoint PostgREST sẵn có.
+2. Đọc và chạy `node audit/admin-flow-2026-11-01/independent-after-verification.mjs`. Đây là oracle độc lập cho 17 admin RPC, RLS, grants, effective credit ledger, not-found lock và approve/reject của admin/moderator khóa/mở. Nếu oracle lỗi fixture/SQL thì sửa đúng fixture thay vì đổi kỳ vọng bảo mật/nghiệp vụ.
+3. `approve_tester_report` và `reject_tester_report` ở 062 chỉ đọc role, không kiểm tra khóa caller. Cần chặn locked actor, giữ owner/moderator hợp lệ và credit thưởng owner=0 khi admin/mod không phải owner. Kiểm tra `get_campaign_detail` can_manage với locked staff và quyền cập nhật trực tiếp tester_reports (hiện client không có UPDATE grant, nên đừng vô tình mở quyền).
+4. `CampaignDetailViewModel.adminDeleteCampaign/adminPauseCampaign/adminResumeCampaign` hiện chưa guard uid/generation/duplicate/cancellation; ghi rõ coverage và sửa lỗi stale admin actions nếu còn. Đặc biệt callback onDeleted không chạy từ response phiên cũ.
+5. `AppConfigRepository.getAppConfig` có thể nhận response đọc cũ rồi ghi RAM/đĩa sau `updateAppConfig` thành công. Guard chỉ ở VM không ngăn cache global bị rollback. Kiểm tra request/mutation ordering và cancellation của repository, thêm test hành vi nếu chứng minh được. Không làm mất public config cache khi chỉ đổi user vì đây là global public configuration.
+6. Hai VM admin cần xóa state khi đổi UID và generation cùng UID (logout/login cùng tài khoản), stale responses không được clear flags thuộc request mới. Nếu coroutine bị hủy mà VM còn sống, cần flags không kẹt. UI dialog ID/draft nên gắn session identity+target, đủ stable khi rotation.
+
+Baseline existing daily-policy và popup suite đã qua trong `baseline-daily-policy.log` và `baseline-popup.log`.

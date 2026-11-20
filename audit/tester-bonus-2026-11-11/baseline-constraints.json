@@ -1,0 +1,152 @@
+[
+  {
+    "name": "campaigns_admin_pause_reason_code_check",
+    "relation": "campaigns",
+    "definition": "CHECK (((admin_pause_reason_code IS NULL) OR (admin_pause_reason_code = ANY (ARRAY['missing_google_group'::text, 'policy_violation'::text]))))"
+  },
+  {
+    "name": "campaigns_creation_policy_id_fkey",
+    "relation": "campaigns",
+    "definition": "FOREIGN KEY (creation_policy_id) REFERENCES business_policies(id)"
+  },
+  {
+    "name": "campaigns_owner_id_fkey",
+    "relation": "campaigns",
+    "definition": "FOREIGN KEY (owner_id) REFERENCES profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "campaigns_pkey",
+    "relation": "campaigns",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "name": "campaigns_slot_1_fee_paid_check",
+    "relation": "campaigns",
+    "definition": "CHECK ((slot_1_fee_paid >= 0))"
+  },
+  {
+    "name": "campaigns_slot_number_check",
+    "relation": "campaigns",
+    "definition": "CHECK (((slot_number >= 1) AND (slot_number <= 6)))"
+  },
+  {
+    "name": "campaigns_status_check",
+    "relation": "campaigns",
+    "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'closed'::text, 'paused'::text, 'production'::text, 'completed'::text])))"
+  },
+  {
+    "name": "campaigns_target_fee_paid_check",
+    "relation": "campaigns",
+    "definition": "CHECK ((target_fee_paid >= 0))"
+  },
+  {
+    "name": "chk_campaign_push_metadata_consistency",
+    "relation": "campaigns",
+    "definition": "CHECK ((((push_business_date IS NULL) AND (push_expires_at IS NULL) AND (push_order IS NULL)) OR ((push_business_date IS NOT NULL) AND (push_expires_at IS NOT NULL) AND (push_order IS NOT NULL) AND (push_order > 0))))"
+  },
+  {
+    "name": "check_credits_non_negative",
+    "relation": "profiles",
+    "definition": "CHECK ((credits >= 0))"
+  },
+  {
+    "name": "profiles_credits_check",
+    "relation": "profiles",
+    "definition": "CHECK ((credits >= 0))"
+  },
+  {
+    "name": "profiles_id_fkey",
+    "relation": "profiles",
+    "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "profiles_pkey",
+    "relation": "profiles",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "name": "profiles_role_check",
+    "relation": "profiles",
+    "definition": "CHECK ((lower(role) = ANY (ARRAY['member'::text, 'moderator'::text, 'admin'::text])))"
+  },
+  {
+    "name": "chk_tester_reports_bonus_awarded",
+    "relation": "tester_reports",
+    "definition": "CHECK ((bonus_awarded >= 0))"
+  },
+  {
+    "name": "chk_tester_reports_provisional_clawed",
+    "relation": "tester_reports",
+    "definition": "CHECK ((provisional_clawed >= 0))"
+  },
+  {
+    "name": "chk_tester_reports_provisional_granted_credits",
+    "relation": "tester_reports",
+    "definition": "CHECK ((provisional_granted_credits >= 0))"
+  },
+  {
+    "name": "chk_tester_reports_review_owner_bonus",
+    "relation": "tester_reports",
+    "definition": "CHECK (((review_owner_bonus IS NULL) OR (review_owner_bonus >= 0)))"
+  },
+  {
+    "name": "chk_tester_reports_review_tester_bonus",
+    "relation": "tester_reports",
+    "definition": "CHECK (((review_tester_bonus IS NULL) OR (review_tester_bonus >= 0)))"
+  },
+  {
+    "name": "tester_reports_business_policy_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (business_policy_id) REFERENCES business_policies(id)"
+  },
+  {
+    "name": "tester_reports_campaign_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "tester_reports_image_hash_format",
+    "relation": "tester_reports",
+    "definition": "CHECK (((image_hash IS NULL) OR (image_hash ~ '^[0-9a-f]{16}$'::text))) NOT VALID"
+  },
+  {
+    "name": "tester_reports_mission_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (mission_id) REFERENCES missions(id) ON DELETE SET NULL"
+  },
+  {
+    "name": "tester_reports_mission_participant_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (mission_participant_id) REFERENCES mission_participants(id) ON DELETE SET NULL"
+  },
+  {
+    "name": "tester_reports_pkey",
+    "relation": "tester_reports",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "name": "tester_reports_rating_check",
+    "relation": "tester_reports",
+    "definition": "CHECK (((rating >= 1) AND (rating <= 5)))"
+  },
+  {
+    "name": "tester_reports_report_type_check",
+    "relation": "tester_reports",
+    "definition": "CHECK ((report_type = ANY (ARRAY['daily_test'::text, 'bug_report'::text, 'feedback'::text])))"
+  },
+  {
+    "name": "tester_reports_status_check",
+    "relation": "tester_reports",
+    "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])))"
+  },
+  {
+    "name": "tester_reports_submission_context_check",
+    "relation": "tester_reports",
+    "definition": "CHECK ((submission_context = ANY (ARRAY['app_test'::text, 'mission'::text])))"
+  },
+  {
+    "name": "tester_reports_user_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+  }
+]

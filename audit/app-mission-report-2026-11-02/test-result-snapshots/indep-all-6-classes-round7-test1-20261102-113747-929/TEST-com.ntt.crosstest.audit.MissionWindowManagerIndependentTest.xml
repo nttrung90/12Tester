@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-02T11:37:36.883Z" hostname="PC-5700X3D" time="7.604">
+  <properties/>
+  <testcase name="admissionBlocksBeforeExceedingPendingBudgetWithoutEvictingAcceptedWork" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="3.869"/>
+  <testcase name="committedWorkPublishesTheWholeDurableReceiptBeforeDeletingPendingMetadata" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.604"/>
+  <testcase name="ordinaryDetailDoesNotAdoptAnotherMissionSendingState" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="1.114"/>
+  <testcase name="ordinaryAdmissionFreezesItsDayBeforeWorkIsEnqueued" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.051"/>
+  <testcase name="concurrentAdmissionsShareOnePhysicalPendingBudget" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.409"/>
+  <testcase name="sameCampaignKindsAdmitIndependentlyAndLogoutPurgesBothScopes" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.08"/>
+  <testcase name="photoOnlyNewerDraftSurvivesEarlierReceiptWithoutAnOpenWindow" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.58"/>
+  <testcase name="admissionCountsActualMetadataWithoutDeletingTheUnsentDraft" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.367"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

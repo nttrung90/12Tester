@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:48:54.496Z" hostname="PC-5700X3D" time="5.616">
+  <properties/>
+  <testcase name="timeoutOnFreshReadFailsClosedWithoutMutation" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="4.538"/>
+  <testcase name="dayRolloverAbortsMutationAndFailsClosed" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.087"/>
+  <testcase name="duplicateDeleteTapsShareSingleInFlightOperation" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.307"/>
+  <testcase name="freshReadBlocksDeleteWhenDailyTaskBecomesUnmet" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.073"/>
+  <testcase name="freshReadBlocksResumeWhenCarryoverDebtAppears" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.068"/>
+  <testcase name="inspectGateDoesNotTriggerMutations" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.06"/>
+  <testcase name="duplicateTogglePauseResumeTapsShareSingleInFlightOperation" classname="com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest" time="0.307"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

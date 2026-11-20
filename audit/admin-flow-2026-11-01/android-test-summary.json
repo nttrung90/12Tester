@@ -1,0 +1,86 @@
+[
+  {
+    "suite": "com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.AdminDailyTaskPolicyTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest",
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.CacheRegressionTest",
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.CampaignPushUnitTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.IndependentCachePublicationAuditTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.data.OwnerReportCountBehavioralTest",
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest",
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest",
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest",
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:40:37.323Z" hostname="PC-5700X3D" time="6.793">
+  <properties/>
+  <testcase name="inspectingBlockedActionPreservesOtherOperationLoading" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="4.038"/>
+  <testcase name="olderConfirmationReadCannotOverwriteNewerTaskRefresh" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.86"/>
+  <testcase name="oldAccountProductionResponseDoesNotRefreshNewAccountPage" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.529"/>
+  <testcase name="duplicateProductionTapsShareOneInFlightOperation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.42"/>
+  <testcase name="oldRefreshCannotReenableEligibilityAfterNewerConfirmationDeadline" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.533"/>
+  <testcase name="confirmationReadsFreshTaskBeforeProductionMutation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.075"/>
+  <testcase name="serverUnmetRejectionInvalidatesEligibilityAndShowsReadableMessage" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.078"/>
+  <testcase name="actualFreshReadDeadlineShowsPendingInsteadOfSilentCancellation" classname="com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

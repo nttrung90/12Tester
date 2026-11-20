@@ -1,0 +1,3 @@
+{"probe":"unrelated-tester-financial-round-read","expected":"no rows or permission denied","actualRows":0,"denied":null}
+{"probe":"owner-delete-versus-batch-close","lifecycle":{"ok":true},"other":{"ok":true}}
+PASS owner request remains reconcilable after native concurrent removal

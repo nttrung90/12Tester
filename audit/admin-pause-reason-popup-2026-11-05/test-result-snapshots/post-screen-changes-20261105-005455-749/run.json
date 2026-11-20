@@ -1,0 +1,14 @@
+{
+    "logName":  "post-screen-changes",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T00:54:15.6887925Z",
+    "finishedUtc":  "2026-11-05T00:54:55.7591495Z",
+    "currentRunXmlCount":  2
+}

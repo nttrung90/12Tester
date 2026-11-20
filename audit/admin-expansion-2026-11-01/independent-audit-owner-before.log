@@ -1,0 +1,27 @@
+{
+  "ownerBonus": 2,
+  "commonEvents": [
+    {
+      "action": "staff_approve_tester_report",
+      "target_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    }
+  ]
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Owner-mode review must retain owner semantics even if owner also has admin role
+
+1 !== 0
+
+    at file:///F:/AI/12Tester/audit/admin-expansion-2026-11-01/independent-audit-owner-probe.mjs:21:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

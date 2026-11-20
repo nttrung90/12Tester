@@ -1,0 +1,42 @@
+=== LOADING ALL MIGRATIONS IN ORDER (INCLUDING 087) ===
+MIGRATIONS LOADED SUCCESSFULLY (27 migrations).
+=== BASE FIXTURES SEEDED ===
+--- TEST 1: Validation, Balance Bounds & Overflow Prevention ---
+PASS: Input validation & overflow protection verified.
+--- TEST 2: Authorization & Ownership Guards ---
+PASS: Ownership & authorization guards verified.
+--- TEST 3: Creation, Atomic Budget Reserve & Idempotency ---
+PASS: Successful creation, atomic budget reservation and idempotency verified.
+--- TEST 4: Reconcile RPC ---
+PASS: Reconcile RPC verified.
+--- TEST 5: Dual Read API (Owner vs Tester/Public) ---
+PASS: Dual read API verified.
+--- TEST 6: Report Snapshot Attachment Rules & Immutability ---
+PASS: Report snapshot attachment rules & immutability verified.
+--- TEST 7: Manual Settlement & Single Award per Tester ---
+PASS: Manual settlement & strict 1 award per tester per round verified.
+--- TEST 8: 8h Auto-Accept Settlement ---
+PASS: 8h auto-accept settlement verified.
+--- TEST 9: Capacity Exhaustion & N+1 Base Reward ---
+PASS: Capacity exhaustion & N+1 base rewards verified.
+--- TEST 10: Closing, Escrow Refund & Obligation Preservation ---
+PASS: Closing, obligation preservation and single exact refund verified.
+--- TEST 11: Hard Delete Campaign Guard ---
+PASS: Hard delete campaign guard & audit retention verified.
+--- TEST 12: Feed Sync V2 Token Invalidation ---
+PASS: Feed sync v2 token invalidation verified.
+--- TEST 13: Report Read Projection APIs Include Bonus Fields ---
+PASS: Report read projection APIs verified with tester_bonus_awarded and tester_bonus_round_id.
+--- TEST 14: Valid Large Bonus Approval & Cumulative Response Arithmetic ---
+PASS: Valid large bonus response arithmetic verified without 22003 overflow.
+--- TEST 15: Overflow Worker Retry & Isolation ---
+PASS: Overflow worker retry and escrow isolation verified.
+--- TEST 16: Deferred Admin Deletion when Fully Consumed ---
+PASS: Deferred admin deletion when fully consumed verified.
+--- TEST 17: Post-Physical-Deletion Reconcile & Replay ---
+PASS: Post-physical-deletion durable reconcile & replay verified.
+
+======================================================
+ALL CAMPAIGN TESTER BONUS BEHAVIORAL & RLS TESTS PASSED!
+======================================================
+

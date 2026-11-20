@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowDraftIndependentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-03T13:20:57.736Z" hostname="PC-5700X3D" time="1.874">
+  <properties/>
+  <testcase name="newlyPreparedPrimaryIsAllowedWhenOnlyPerceptualHashMatchesRejectedPhoto" classname="com.ntt.crosstest.audit.MissionWindowDraftIndependentTest" time="0.105"/>
+  <testcase name="participantWhoseFirstDayWasApprovedRemainsJoinedDuringTheMissionWindow" classname="com.ntt.crosstest.audit.MissionWindowDraftIndependentTest" time="0.302"/>
+  <testcase name="unsubmittedDraftSurvivesPoppingRouteAndStaysPrivateToItsAccount" classname="com.ntt.crosstest.audit.MissionWindowDraftIndependentTest" time="1.371"/>
+  <testcase name="expiredMissionRejectsLocallyBeforeCreatingAnUploadAndKeepsTheDraft" classname="com.ntt.crosstest.audit.MissionWindowDraftIndependentTest" time="0.094"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

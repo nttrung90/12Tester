@@ -1,0 +1,808 @@
+I1111 06:23:32.896722       1 resolver.go:85] Model ID gemini-3.8-flash-high not in local config, defaulting to CCPA
+I1111 06:23:32.897887       1 resolver.go:111] Model resolved via default
+I1111 06:23:32.903190      10 server.go:2335] Starting language server process with pid 7544
+I1111 06:23:32.913703      10 server.go:2394] Language server version: 1.5.4
+I1111 06:23:32.913703      10 server.go:1086] Language server will attempt to listen on host localhost
+I1111 06:23:32.925135      10 server.go:1101] Language server listening on random port at 60414 for HTTPS (gRPC)
+I1111 06:23:32.925135      10 server.go:1109] Language server listening on random port at 60415 for HTTP
+W1111 06:23:33.043500      45 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+I1111 06:23:33.041941      53 model_configs.go:195] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1111 06:23:33.044032      45 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+E1111 06:23:33.045076      53 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1111 06:23:33.069632      59 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1111 06:23:33.073639      59 store_client.go:764] summary store: reconciliation complete, synced 10 records
+W1111 06:23:33.087785     108 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 06:23:33.087785     108 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1111 06:23:33.096210      10 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1111 06:23:33.096210      10 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1111 06:23:33.108302     146 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1111 06:23:33.110422     146 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.110422     146 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1111 06:23:33.112517     146 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.112517     146 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1111 06:23:33.114088     146 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.114088     146 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1111 06:23:33.114088     146 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1111 06:23:33.114088     146 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1111 06:23:33.114088     146 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1111 06:23:33.147945      10 server.go:3632] initialized server successfully in 241.1213ms
+I1111 06:23:33.147945     149 server.go:4329] Auth succeeded, refreshing features and managers
+W1111 06:23:33.148991     178 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 06:23:33.148991     178 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1111 06:23:33.148991     178 rpcs_plugin_auth.go:105] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+W1111 06:23:33.149505     179 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 06:23:33.149505     179 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+E1111 06:23:33.149505     149 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1111 06:23:33.150019     149 server.go:4348] State refresh took 1ms
+I1111 06:23:33.150019     149 server.go:4363] [RemoteControl] Subscription callback triggered.
+I1111 06:23:33.151062     149 server.go:4366] [RemoteControl] RemoteControlEnabled value: false
+I1111 06:23:33.151062     149 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1111 06:23:33.151591     149 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1111 06:23:33.151591     188 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1111 06:23:33.152117     185 reconcile_summaries.go:94] [Summaries] reconcile checked 10 conversations, restored 0, cached 10, skipped 0, dropped 0, cancelled false in 0ms (resident: 0 -> 0)
+I1111 06:23:33.151591     149 profiler.go:231] Continuous pprof profiling is disabled.
+I1111 06:23:33.152647     188 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.153175     188 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1111 06:23:33.153701     188 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.153701     188 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1111 06:23:33.155210     188 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 06:23:33.155210     188 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1111 06:23:33.155210     188 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1111 06:23:33.155210     188 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1111 06:23:33.155210     188 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1111 06:23:33.156217       1 auto_updater.go:334] Spawned background update process with PID 5268
+I1111 06:23:33.157224       1 common.go:191] Launching CLI mode
+E1111 06:23:33.157224       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1111 06:23:33.157224       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1111 06:23:33.157224       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1111 06:23:33.158225       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1111 06:23:33.176929       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1111 06:23:33.176929       1 analytics.go:249] CLI startup completed (took 294.9825ms, phases [main_entered=1ms ls_start=21ms ls_ready=266ms launch_cli=275ms backend_created=283ms project_resolved=294ms])
+I1111 06:23:33.177463       1 printmode.go:208] Print mode: starting (promptLength=5876, model="gemini-3.8-flash-high", conversationID="")
+I1111 06:23:33.177991       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+I1111 06:23:33.187385       1 cli_setting_manager.go:159] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1111 06:23:33.209457       1 cli_setting_manager.go:96] CLI settings initialized: permissions=&{Allow:[read_file(F:/AI/12Tester) write_file(F:/AI/12Tester) command(regex:.*gradlew\.bat (?:testDebugUnitTest|assembleDebug|compileDebugKotlin).*) command(regex:node (?:--check )?(?:supabase[/\\]tests[/\\])?run-[A-Za-z0-9_-]+\.mjs) command(regex:npm run test:[A-Za-z0-9_-]+) command(regex:git (?:status|diff).*) command(regex:rg .*) command(regex:Get-Content .*) command(regex:Get-ChildItem .*) command(regex:Select-String .*) command(regex:Select-Object .*) command(regex:Sort-Object .*) command(regex:Test-Path .*) command(regex:Measure-Object .*) command(regex:.*gradlew(?:\.bat)? .*) command(regex:Tee-Object .*) command(regex:Write-Output .*) command(regex:Out-File .*)] Deny:[write_file(F:/AI/12Tester/.git) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before-hashes.json) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/SESSION_SETTINGS.json) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/TASK_GEMINI.txt) command(git reset) command(git clean) command(git checkout) command(git push) command(Remove-Item) command(Stop-Process) command(Invoke-WebRequest) command(Invoke-RestMethod)] Ask:[]}, toolPermission=request-review
+I1111 06:23:33.288363       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1111 06:23:33.288363       1 manager.go:727] CLI store manager initialized successfully
+W1111 06:23:33.288363       1 printmode.go:873] Print mode: --mode auto is unavailable (rollout flag off), continuing in the default mode
+I1111 06:23:33.288925       1 printmode.go:409] Print mode: not authenticated, trying silent auth
+I1111 06:23:33.290057     232 keyring.go:64] keyringAuth: loaded token, expiry=2026-11-10 23:39:48.9203199 +0700 +07 expired=true
+I1111 06:23:33.489946     232 browser.go:265] token refreshed, new expiry=2026-11-11 07:23:32.4899464 +0700 +07 m=+3600.027878501
+I1111 06:23:33.492064       1 auth.go:157] ChainedAuth: authenticated via keyring (effective: keyring)
+I1111 06:23:33.492064       1 server_oauth.go:221] applyAuthResult: email=nguyenthieutrung@gmail.com, authMethod=consumer, quotaProject=
+I1111 06:23:33.492586       1 server_oauth.go:226] OAuth: authenticated successfully as nguyenthieutrung@gmail.com
+I1111 06:23:33.492586       1 server_oauth.go:235] b.codeAssistClient.AuthProvider (0x23782318bc20) is same as b.cliAuth (0x23782318bc20)
+W1111 06:23:33.492586     261 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+W1111 06:23:33.492586     278 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+I1111 06:23:34.314154      80 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x1a2d807ef7d93041
+I1111 06:23:34.835166      81 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0xd495654293892bf2
+I1111 06:23:34.849282       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1111 06:23:34.849282       1 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 06:23:34.849807     221 experiment_manager.go:66] Starting experiment refresh after login
+I1111 06:23:34.849807       1 printmode.go:411] Print mode: silent auth succeeded
+I1111 06:23:34.849807     220 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 06:23:34.971312     221 http_helpers.go:104] UseAICodeMendel routing switch changed: false -> true
+I1111 06:23:34.971834     221 remote_agent.go:204] Remote agent fastpush pin gate changed: false -> true
+I1111 06:23:34.971834     221 server.go:4975] [RemoteControl] Mendel flags changed (remote-control-setting-enabled=true, remote-control-proxy-server-url="jetski-webchannel.googleapis.com:443"), re-evaluating the connection
+I1111 06:23:34.975469     221 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1111 06:23:34.975469     221 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1111 06:23:34.975469     221 experiment_manager.go:70] Experiments refreshed after login
+I1111 06:23:34.975974     286 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1111 06:23:34.975974     286 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1111 06:23:34.975974     223 manager.go:1751] SetCycleMode called: auto
+I1111 06:23:34.976493     338 manager.go:1658] Reloading system slash commands
+I1111 06:23:35.552557     273 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x3d1e0cffd68ceb71
+I1111 06:23:36.158642     273 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x47844d0e95a6e8f
+I1111 06:23:36.239978     273 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 06:23:36.239978     221 experiment_manager.go:66] Starting experiment refresh after login
+I1111 06:23:36.239978     220 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 06:23:36.239978     397 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 06:23:36.250138       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1111 06:23:36.250138       1 conversation_manager.go:657] Starting new conversation (agent=false)
+I1111 06:23:36.250138       1 server.go:1190] Creating new cascade trajectory (agentScript=false)
+I1111 06:23:36.250138       1 server.go:1216] Conversation using project ID: default-cli-project
+I1111 06:23:36.270067       1 server.go:1233] Created conversation a156386f-f531-4304-9506-306e96ad5f0e (backend=BACKEND_TYPE_UNSPECIFIED)
+I1111 06:23:36.270594       1 server.go:3366] GetConversationDetail: found conversation a156386f-f531-4304-9506-306e96ad5f0e (active=true)
+I1111 06:23:36.271126       1 server.go:3366] GetConversationDetail: found conversation a156386f-f531-4304-9506-306e96ad5f0e (active=true)
+I1111 06:23:36.271126       1 conversation_manager.go:711] project: switching to conversation belonging to project ID: default-cli-project
+I1111 06:23:36.271697       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1111 06:23:36.271697       1 cli_setting_manager.go:226] ApplyProjectPermissionGrants: no grants for project "CLI Project", cleared project permissions
+I1111 06:23:36.271697       1 conversation_manager.go:727] project: synced active project to "CLI Project" (id=default-cli-project) from conversation switch
+I1111 06:23:36.271697       1 conversation_manager.go:1044] Streaming conversation a156386f-f531-4304-9506-306e96ad5f0e
+I1111 06:23:36.271697     428 manager.go:1702] Reloading system slash commands and skills
+I1111 06:23:36.271697     428 manager.go:1658] Reloading system slash commands
+I1111 06:23:36.272218       1 server.go:3366] GetConversationDetail: found conversation a156386f-f531-4304-9506-306e96ad5f0e (active=true)
+I1111 06:23:36.272752       1 server.go:1251] Starting conversation update stream for a156386f-f531-4304-9506-306e96ad5f0e
+I1111 06:23:36.272752       1 session.go:201] Print mode: conversation=a156386f-f531-4304-9506-306e96ad5f0e, sending message
+I1111 06:23:36.272752       1 manager.go:1658] Reloading system slash commands
+I1111 06:23:36.291300     428 manager.go:1667] Slash commands unchanged, skipping update
+I1111 06:23:36.292353       1 manager.go:1667] Slash commands unchanged, skipping update
+I1111 06:23:36.293412       1 conversation_manager.go:846] Forwarding user message to conversation a156386f-f531-4304-9506-306e96ad5f0e (items=1, media=0)
+I1111 06:23:36.293412       1 server.go:1817] Sending user message to conversation a156386f-f531-4304-9506-306e96ad5f0e (items=1, media=0)
+I1111 06:23:36.295006       1 latency_breakdown.go:168] SEND_USER_CASCADE_MESSAGE_LATENCY latency breakdown: map[active_user_state_latency_ms:0 blocking:false cascade_id:a156386f-f531-4304-9506-306e96ad5f0e cascade_send_latency_ms:0 hydrate_slash_commands_latency_ms:0 load_trajectory_latency_ms:0 media_count:0 media_summaries_latency_ms:0 message_origin:AGENT_MESSAGE_ORIGIN_UNSPECIFIED resolve_agent_config_latency_ms:0 save_media_latency_ms:0 saved_media_count:0 status:OK total_latency_ms:1 trajectory_id:f0838855-dfb5-46e6-a51c-b4c512c558cc]
+I1111 06:23:36.488364     221 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1111 06:23:36.488364     221 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1111 06:23:36.488364     221 experiment_manager.go:70] Experiments refreshed after login
+I1111 06:23:36.488868     825 manager.go:1658] Reloading system slash commands
+I1111 06:23:36.488868     221 experiment_manager.go:66] Starting experiment refresh after login
+I1111 06:23:36.492853     221 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1111 06:23:36.492853     221 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1111 06:23:36.492853     221 experiment_manager.go:70] Experiments refreshed after login
+I1111 06:23:36.492853     882 manager.go:1658] Reloading system slash commands
+I1111 06:23:36.500702     502 monitor_config_manager_external.go:53] externalMonitorConfigManager: initialized with embedded config (3 monitors)
+I1111 06:23:36.501709     502 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_auto policy_guardian sonar_skip_tags] (detected surface: "")
+I1111 06:23:36.502709     502 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_auto policy_guardian sonar_skip_tags] (detected surface: "")
+I1111 06:23:36.508286     825 manager.go:1667] Slash commands unchanged, skipping update
+I1111 06:23:36.510863     882 manager.go:1667] Slash commands unchanged, skipping update
+I1111 06:23:36.716100     220 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 06:23:36.850374     396 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xc66315e2ec4c328f
+E1111 06:23:37.256773     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/assemble-debug-final-2.log: bytes are not valid utf8
+E1111 06:23:37.265721     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/assemble-debug-final.log: bytes are not valid utf8
+E1111 06:23:37.917770     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:37.921389     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:37.925557     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:37.929192     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:37.933357     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:37.937670     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:37.942011     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:37.946762     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:37.951276     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:37.955192     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:37.959245     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:37.963322     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:37.968155     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:37.971954     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:37.976694     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:37.980378     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+E1111 06:23:38.897000     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-2.log: bytes are not valid utf8
+E1111 06:23:38.906183     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-3.log: bytes are not valid utf8
+E1111 06:23:38.915890     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-4.log: bytes are not valid utf8
+E1111 06:23:38.923925     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-5.log: bytes are not valid utf8
+E1111 06:23:38.932457     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-6.log: bytes are not valid utf8
+E1111 06:23:38.941158     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile.log: bytes are not valid utf8
+E1111 06:23:38.976277     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-tests.log: bytes are not valid utf8
+E1111 06:23:39.062107     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-2.log: bytes are not valid utf8
+E1111 06:23:39.070436     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-3.log: bytes are not valid utf8
+E1111 06:23:39.070942     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-4.log: bytes are not valid utf8
+E1111 06:23:39.079535     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-5.log: bytes are not valid utf8
+E1111 06:23:39.089555     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile.log: bytes are not valid utf8
+E1111 06:23:39.137029     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/compile-check-all.log: bytes are not valid utf8
+E1111 06:23:39.145797     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/compile-core-status.log: bytes are not valid utf8
+E1111 06:23:39.153643     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-author-all.log: bytes are not valid utf8
+E1111 06:23:39.163771     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-author-tests.log: bytes are not valid utf8
+E1111 06:23:39.216568     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-session-independent.log: bytes are not valid utf8
+E1111 06:23:39.241499     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/full-core-suite-final.log: bytes are not valid utf8
+E1111 06:23:39.250543     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/full-core-suite-run.log: bytes are not valid utf8
+E1111 06:23:39.502442     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-all-android-tests.log: bytes are not valid utf8
+E1111 06:23:39.511582     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-all-integrated-tests.log: bytes are not valid utf8
+E1111 06:23:39.542426     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile-check.log: bytes are not valid utf8
+E1111 06:23:39.543511     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile-verify.log: bytes are not valid utf8
+E1111 06:23:39.551270     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile.log: bytes are not valid utf8
+E1111 06:23:39.559512     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-independent-test.log: bytes are not valid utf8
+E1111 06:23:39.566970     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-repo-test.log: bytes are not valid utf8
+E1111 06:23:39.611956     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-vm-test.log: bytes are not valid utf8
+E1111 06:23:39.792456     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/run-core-management-tests.log: bytes are not valid utf8
+E1111 06:23:39.881149     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-bp-vm-fixed-2.log: bytes are not valid utf8
+E1111 06:23:39.890501     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-bp-vm-fixed.log: bytes are not valid utf8
+E1111 06:23:39.899106     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm-2.log: bytes are not valid utf8
+E1111 06:23:39.906767     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm-4.log: bytes are not valid utf8
+E1111 06:23:39.914650     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm.log: bytes are not valid utf8
+E1111 06:23:39.923185     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-reward.log: bytes are not valid utf8
+E1111 06:23:39.930721     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-2.log: bytes are not valid utf8
+E1111 06:23:39.939432     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-3.log: bytes are not valid utf8
+E1111 06:23:39.947481     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-4.log: bytes are not valid utf8
+E1111 06:23:39.955431     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-debug.log: bytes are not valid utf8
+E1111 06:23:39.962970     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-debug2.log: bytes are not valid utf8
+E1111 06:23:39.971939     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass-2.log: bytes are not valid utf8
+E1111 06:23:39.979746     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass-3.log: bytes are not valid utf8
+E1111 06:23:39.986784     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass.log: bytes are not valid utf8
+E1111 06:23:39.995638     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm.log: bytes are not valid utf8
+E1111 06:23:40.003730     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo-2.log: bytes are not valid utf8
+E1111 06:23:40.012240     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo-3.log: bytes are not valid utf8
+E1111 06:23:40.020418     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo.log: bytes are not valid utf8
+E1111 06:23:40.028929     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-cache-regression.log: bytes are not valid utf8
+E1111 06:23:40.037120     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-campaign-race.log: bytes are not valid utf8
+E1111 06:23:40.045543     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-carryover-independent-2.log: bytes are not valid utf8
+E1111 06:23:40.054059     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-carryover-independent.log: bytes are not valid utf8
+E1111 06:23:40.062181     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-combined-business-all.log: bytes are not valid utf8
+E1111 06:23:40.069726     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-combined-business-final.log: bytes are not valid utf8
+E1111 06:23:40.079370     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-check.log: bytes are not valid utf8
+E1111 06:23:40.087865     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-member-fixed.log: bytes are not valid utf8
+E1111 06:23:40.095770     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-member.log: bytes are not valid utf8
+E1111 06:23:40.105167     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-run.log: bytes are not valid utf8
+E1111 06:23:40.113063     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-unit-check.log: bytes are not valid utf8
+E1111 06:23:40.123287     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile.log: bytes are not valid utf8
+E1111 06:23:40.131901     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-financial-v2.log: bytes are not valid utf8
+E1111 06:23:40.140066     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-flow-race.log: bytes are not valid utf8
+E1111 06:23:40.148462     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-helper.log: bytes are not valid utf8
+E1111 06:23:40.156270     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-layout-probe.log: bytes are not valid utf8
+E1111 06:23:40.164491     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-member-pagination.log: bytes are not valid utf8
+E1111 06:23:40.165492     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-push-carryover.log: bytes are not valid utf8
+I1111 06:23:41.786421    1125 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xdbc4bb46d1e1cfa3 ResponseID: e6fzat2UBMq81e8Px_L1qQY
+E1111 06:23:42.358741     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-run-core-all-fixed.log: bytes are not valid utf8
+E1111 06:23:42.366393     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-run-core-all.log: bytes are not valid utf8
+E1111 06:23:42.374050     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-2.log: bytes are not valid utf8
+E1111 06:23:42.381760     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-3.log: bytes are not valid utf8
+E1111 06:23:42.389844     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-4.log: bytes are not valid utf8
+E1111 06:23:42.390966     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-5.log: bytes are not valid utf8
+E1111 06:23:42.399376     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-6.log: bytes are not valid utf8
+E1111 06:23:42.407343     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass.log: bytes are not valid utf8
+E1111 06:23:42.425682     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/backend-admin-audit.log: bytes are not valid utf8
+E1111 06:23:44.156304     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-1.log: bytes are not valid utf8
+E1111 06:23:44.164600     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-2.log: bytes are not valid utf8
+E1111 06:23:44.172440     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-3.log: bytes are not valid utf8
+E1111 06:23:44.180681     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-4.log: bytes are not valid utf8
+E1111 06:23:44.187512     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-5.log: bytes are not valid utf8
+E1111 06:23:44.195442     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-6.log: bytes are not valid utf8
+E1111 06:23:44.204061     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-7.log: bytes are not valid utf8
+E1111 06:23:44.212323     425 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-8.log: bytes are not valid utf8
+E1111 06:23:46.339860     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:46.343911     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:46.347505     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:46.348588     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:46.349260     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:46.353737     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:46.357564     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:46.362160     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:46.366021     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:46.370076     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:46.374016     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:46.378465     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:46.382308     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:46.386539     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:46.390294     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:46.394611     425 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+I1111 06:23:46.697270    1150 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:23:46.697270    1150 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:23:47.405144     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/assemble-debug.log: bytes are not valid utf8
+sboxserve: <nil>
+E1111 06:23:48.204327     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:48.208360     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:48.212093     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:48.212598     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:48.213640     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:48.214156     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:48.218721     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:48.222630     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:48.226748     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:48.230360     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:48.235007     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:48.238635     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:48.243547     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:23:48.247578     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:23:48.251615     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:23:48.255473     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+E1111 06:23:49.228269     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/controller-tests.log: bytes are not valid utf8
+E1111 06:23:49.266136     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/fresh-targeted-verification.log: bytes are not valid utf8
+E1111 06:23:49.275733     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/full-unit-tests.log: bytes are not valid utf8
+E1111 06:23:49.283649     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/initial-identity-check.log: bytes are not valid utf8
+E1111 06:23:49.305069     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-assemble-debug.log: bytes are not valid utf8
+E1111 06:23:49.313085     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-baseline-compile.log: bytes are not valid utf8
+E1111 06:23:49.321469     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-compile-android.log: bytes are not valid utf8
+E1111 06:23:49.330111     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-final-assemble-debug.log: bytes are not valid utf8
+E1111 06:23:49.351344     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-admin-pause-clean.log: bytes are not valid utf8
+E1111 06:23:49.359235     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-admin-pause-reason.log: bytes are not valid utf8
+E1111 06:23:49.367038     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-all.log: bytes are not valid utf8
+E1111 06:23:49.375086     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-fresh-run.log: bytes are not valid utf8
+E1111 06:23:49.382374     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-fresh.log: bytes are not valid utf8
+E1111 06:23:49.390275     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-pass.log: bytes are not valid utf8
+E1111 06:23:49.398077     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite.log: bytes are not valid utf8
+E1111 06:23:49.406068     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-check.log: bytes are not valid utf8
+E1111 06:23:49.413463     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-perm.log: bytes are not valid utf8
+E1111 06:23:49.414803     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-rerun.log: bytes are not valid utf8
+E1111 06:23:49.415532     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity.log: bytes are not valid utf8
+E1111 06:23:49.434548     425 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/post-screen-changes.log: bytes are not valid utf8
+I1111 06:23:50.998253    1225 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcc635249db7d20fd ResponseID: hafzaqO7O6Hb9tMPmpSeqQ4
+I1111 06:23:51.041043    1268 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:23:51.041043    1268 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:23:52.472256     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/all-combined-android-tests.log: bytes are not valid utf8
+E1111 06:23:52.479729     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-atomic-ack-final.log: bytes are not valid utf8
+E1111 06:23:52.487772     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-exact-retry-final.log: bytes are not valid utf8
+E1111 06:23:52.496015     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-final.log: bytes are not valid utf8
+E1111 06:23:52.503805     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round5.log: bytes are not valid utf8
+E1111 06:23:52.511794     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round6-final.log: bytes are not valid utf8
+E1111 06:23:52.519674     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round7-final.log: bytes are not valid utf8
+E1111 06:23:52.527925     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round8-final.log: bytes are not valid utf8
+E1111 06:23:52.535656     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug.log: bytes are not valid utf8
+E1111 06:23:52.575321     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/baseline-test.log: bytes are not valid utf8
+I1111 06:23:54.795553    1295 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9fba3b60b3eb725 ResponseID: iqfzatPIDM322roP1pf9gAE
+E1111 06:23:54.837187     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/broader-android-tests-2.log: bytes are not valid utf8
+E1111 06:23:54.845779     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/broader-android-tests-3.log: bytes are not valid utf8
+E1111 06:23:54.854737     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/broader-android-tests.log: bytes are not valid utf8
+E1111 06:23:54.873439     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/compile-check-2.log: bytes are not valid utf8
+E1111 06:23:54.882052     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/compile-check-3.log: bytes are not valid utf8
+E1111 06:23:54.891090     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/compile-check.log: bytes are not valid utf8
+E1111 06:23:54.900057     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/compile-round5-fix.log: bytes are not valid utf8
+E1111 06:23:54.908068     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/egress-probe-check.log: bytes are not valid utf8
+E1111 06:23:54.915105     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-all-rerun-pass.log: bytes are not valid utf8
+E1111 06:23:54.924009     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-all-suites-2.log: bytes are not valid utf8
+E1111 06:23:54.932393     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-all-suites.log: bytes are not valid utf8
+E1111 06:23:54.940261     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-atomic-ack-final.log: bytes are not valid utf8
+E1111 06:23:54.948344     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-exact-retry-final.log: bytes are not valid utf8
+E1111 06:23:54.956534     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-regression-final.log: bytes are not valid utf8
+E1111 06:23:54.964783     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-round6-all.log: bytes are not valid utf8
+E1111 06:23:54.972389     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-round6-final.log: bytes are not valid utf8
+E1111 06:23:54.972893     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-round7-all.log: bytes are not valid utf8
+E1111 06:23:54.981056     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-round8-all.log: bytes are not valid utf8
+E1111 06:23:54.989488     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-tests-rerun.log: bytes are not valid utf8
+E1111 06:23:54.997416     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/full-android-tests.log: bytes are not valid utf8
+E1111 06:23:55.010965     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-12.log: bytes are not valid utf8
+E1111 06:23:55.018776     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-final.log: bytes are not valid utf8
+E1111 06:23:55.026324     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-fixed-2.log: bytes are not valid utf8
+E1111 06:23:55.034242     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-fixed-3.log: bytes are not valid utf8
+E1111 06:23:55.041925     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-fixed.log: bytes are not valid utf8
+E1111 06:23:55.049304     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-pass.log: bytes are not valid utf8
+E1111 06:23:55.057663     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-round5-check2.log: bytes are not valid utf8
+E1111 06:23:55.065441     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-round5-pass.log: bytes are not valid utf8
+E1111 06:23:55.075025     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-round5.log: bytes are not valid utf8
+E1111 06:23:55.082864     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-round6-test.log: bytes are not valid utf8
+E1111 06:23:55.090279     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes-round6-test2.log: bytes are not valid utf8
+E1111 06:23:55.098200     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-5-classes.log: bytes are not valid utf8
+E1111 06:23:55.106247     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-6-classes-round7-test1.log: bytes are not valid utf8
+E1111 06:23:55.114088     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-6-classes-round7-test2.log: bytes are not valid utf8
+E1111 06:23:55.121555     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-6-classes-round7-test3.log: bytes are not valid utf8
+E1111 06:23:55.129395     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-6-classes-round8-test1.log: bytes are not valid utf8
+E1111 06:23:55.137172     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-all-6-classes-round8-test2.log: bytes are not valid utf8
+E1111 06:23:55.144709     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-draft-2.log: bytes are not valid utf8
+E1111 06:23:55.152013     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-draft-check.log: bytes are not valid utf8
+E1111 06:23:55.160066     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-draft-fixed-2.log: bytes are not valid utf8
+E1111 06:23:55.168630     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-draft-fixed.log: bytes are not valid utf8
+E1111 06:23:55.176130     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-draft.log: bytes are not valid utf8
+E1111 06:23:55.184202     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-manager-fixed.log: bytes are not valid utf8
+E1111 06:23:55.192216     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-manager.log: bytes are not valid utf8
+E1111 06:23:55.200144     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-media-2.log: bytes are not valid utf8
+E1111 06:23:55.208181     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-media.log: bytes are not valid utf8
+E1111 06:23:55.216388     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-persistence.log: bytes are not valid utf8
+E1111 06:23:55.224388     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/indep-worker.log: bytes are not valid utf8
+I1111 06:23:57.591212    1337 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb1d7580b57429571 ResponseID: jafzasP_CsKj9tMP4sypmAQ
+I1111 06:24:00.051219    1374 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6153b69e7c0e850e ResponseID: j6fzatCwIODhrfcP7an_0Ao
+I1111 06:24:00.090653    1425 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:00.090653    1425 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:24:00.196597     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/test-overlap-and-manager.log: bytes are not valid utf8
+sboxserve: <nil>
+I1111 06:24:03.998768    1461 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x53de5cb1888cba74 ResponseID: k6fzaq2wCJGx1e8PivvpQA
+E1111 06:24:07.317448     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-integration.log: bytes are not valid utf8
+E1111 06:24:07.324994     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-multi-attachment-2.log: bytes are not valid utf8
+E1111 06:24:07.332748     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-multi-attachment.log: bytes are not valid utf8
+E1111 06:24:07.340624     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-overlap.log: bytes are not valid utf8
+E1111 06:24:07.348460     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-probe.log: bytes are not valid utf8
+E1111 06:24:07.356205     425 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/unit-test-worker.log: bytes are not valid utf8
+I1111 06:24:08.316539    1516 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7ea911613cff6da6 ResponseID: lqfzatHAHIn71e8PxZepyQ8
+E1111 06:24:10.851093     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:10.855617     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:10.859676     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:10.860290     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:10.861350     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:10.865468     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:10.869411     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:10.873672     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:10.877384     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:10.881622     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:10.885813     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:10.889922     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:10.894038     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:10.898049     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:10.902784     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:10.906814     425 repo.go:368] failed to create patch for untracked file audit/egress-safe-2026-11-10/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+E1111 06:24:13.295206     425 repo.go:368] failed to create patch for untracked file audit/mission-completed-apps-2026-11-03/compile-check.log: bytes are not valid utf8
+E1111 06:24:13.327766     425 repo.go:368] failed to create patch for untracked file audit/mission-completed-apps-2026-11-03/test-mission-and-owner-suites.log: bytes are not valid utf8
+E1111 06:24:13.335555     425 repo.go:368] failed to create patch for untracked file audit/mission-completed-apps-2026-11-03/test-mission-regression.log: bytes are not valid utf8
+E1111 06:24:13.343839     425 repo.go:368] failed to create patch for untracked file audit/mission-completed-apps-2026-11-03/test-mission-report-suites.log: bytes are not valid utf8
+E1111 06:24:13.351906     425 repo.go:368] failed to create patch for untracked file audit/mission-completed-apps-2026-11-03/test-report-rpc-fallback.log: bytes are not valid utf8
+E1111 06:24:13.480305     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/compile-check.log: bytes are not valid utf8
+E1111 06:24:13.493826     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/full-android-all-tests.log: bytes are not valid utf8
+E1111 06:24:13.501464     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/indep-day-rollover.log: bytes are not valid utf8
+E1111 06:24:13.533321     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-all-mission-suites.log: bytes are not valid utf8
+E1111 06:24:13.541297     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-mission-reward-modes.log: bytes are not valid utf8
+E1111 06:24:13.549163     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-modes-unit-pass.log: bytes are not valid utf8
+E1111 06:24:13.557101     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-modes-unit-pass2.log: bytes are not valid utf8
+E1111 06:24:13.564623     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-modes-unit.log: bytes are not valid utf8
+E1111 06:24:13.572673     425 repo.go:368] failed to create patch for untracked file audit/mission-reward-modes-2026-11-03/test-probe.log: bytes are not valid utf8
+I1111 06:24:15.196724    1550 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x47384ee2ec2bd1d1 ResponseID: mqfzatPhFLXb9tMP1oKwuQY
+I1111 06:24:15.282182    1583 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:15.282182    1583 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:24:16.861513     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/assemble-debug-final.log: bytes are not valid utf8
+E1111 06:24:16.869140     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/assemble-debug.log: bytes are not valid utf8
+E1111 06:24:17.654288     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:17.659985     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:17.663641     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:17.664696     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:17.668916     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:17.669982     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:17.674206     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:17.677879     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:17.682098     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:17.687392     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:17.691908     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:17.695832     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:17.700453     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1111 06:24:17.704440     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1111 06:24:17.708387     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1111 06:24:17.712572     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+E1111 06:24:18.691560     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/compile-check.log: bytes are not valid utf8
+E1111 06:24:18.698933     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/compile-unit-check.log: bytes are not valid utf8
+E1111 06:24:18.706982     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/focused-unit-tests.log: bytes are not valid utf8
+E1111 06:24:18.714651     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/full-unit-clean.log: bytes are not valid utf8
+E1111 06:24:18.723004     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/full-unit-fresh.log: bytes are not valid utf8
+E1111 06:24:18.730920     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/full-unit-tests-fresh.log: bytes are not valid utf8
+E1111 06:24:18.738549     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/full-unit-tests-rerun.log: bytes are not valid utf8
+E1111 06:24:18.745925     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/full-unit-tests.log: bytes are not valid utf8
+I1111 06:24:18.755349    1606 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9f5903898c10385f ResponseID: oafzau33PNndvr0PssuOiAE
+I1111 06:24:18.780652    1628 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:18.780652    1628 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:24:18.796896     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/owner-autopause-unit-test.log: bytes are not valid utf8
+E1111 06:24:18.804142     425 repo.go:368] failed to create patch for untracked file audit/owner-auto-pause-2026-11-05/owner-review-unit-tests.log: bytes are not valid utf8
+sboxserve: <nil>
+I1111 06:24:22.112658    1663 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb41a1af0d60c4004 ResponseID: pafzaqG3JfOw0-kPwf3qaQ
+I1111 06:24:22.142388    1689 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:22.142388    1689 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:24:23.501523     425 repo.go:368] failed to create patch for untracked file audit/push-carryover-review-2026-10-30/android-binary/results-generic.bin: bytes are not valid utf8
+I1111 06:24:27.094858    1708 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xad327ad310217d99 ResponseID: qafzaqfvIrSX0-kP4cnSoQI
+I1111 06:24:27.364362    1792 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:27.364362    1792 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:30.691818    1840 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x652eb8e1fa454afb ResponseID: rqfzaozrBOuM1e8P4teV-QY
+I1111 06:24:30.717359    1859 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:30.717359    1859 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:34.497178    1897 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x14550933d26bebe8 ResponseID: safzauGRGJbY9tMP67uj8AE
+I1111 06:24:34.530210    1913 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:34.530210    1913 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:40.022923    1944 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd00c65e5fa959095 ResponseID: tafzari9Fvev9tMPwebyyA0
+I1111 06:24:40.048164    1959 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:40.048164    1959 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:45.404782    1995 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x55e37ffa939b7d2b ResponseID: uqfzavS3L8aN0-kPjLHp6AE
+I1111 06:24:45.498357    2032 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:45.498357    2032 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:49.031228    2079 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x39219cff76a1e974 ResponseID: wKfzatjJG4n71e8Po7uwiQE
+I1111 06:24:49.060074    2102 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:49.060074    2102 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:51.999737    2115 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8dc07bfa3ae14678 ResponseID: w6fzatOvNd_frfcPwL_PwQI
+I1111 06:24:52.036330    2166 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:52.036330    2166 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:24:55.843862    2185 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6256f6bd605048f7 ResponseID: x6fzaqqODee01e8P5r2GqAo
+I1111 06:24:55.871908    2217 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:55.871908    2217 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:24:56.557325      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+sboxserve: <nil>
+I1111 06:24:58.829367    2244 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x14cdb8ad61bcec85 ResponseID: yqfzap-HIf-x1e8Pgo73sAs
+I1111 06:24:58.857392    2277 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:24:58.857392    2277 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:25:01.898467    2301 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9697bbf7bab14aaa ResponseID: zafzaoOlIPi30-kP3Za5qQ4
+I1111 06:25:01.925619    2318 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:01.925619    2318 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:05.367570    2350 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcf73aef22d15c369 ResponseID: 0Kfzav3oI8Sx1e8PksLbyQM
+I1111 06:25:05.395886    2378 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:05.395886    2378 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:09.715992    2427 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x34a367c927a60a67 ResponseID: 1Kfzav_MM9DJrfcP09vf0A0
+I1111 06:25:09.750449    2455 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:09.750449    2455 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:13.703510    2488 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe92a2942d245d8b ResponseID: 2KfzasHCO9XkrfcP36TzuAg
+I1111 06:25:13.747753    2520 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:13.747753    2520 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:17.537230    2547 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc1f5db2941f836a2 ResponseID: 3Kfzau7eOc2c0-kPiLvwgAo
+I1111 06:25:17.570540    2585 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:17.570540    2585 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:26.561630    2601 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4cc995002434edc1 ResponseID: 4KfzatHQMa621e8PvpmxsAI
+I1111 06:25:26.596058    2652 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:26.596058    2652 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:30.472410    2669 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa0663634cca0ab00 ResponseID: 6afzaoiyEZrA1e8P8pjK4Qc
+I1111 06:25:30.504223    2703 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:30.504223    2703 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:25:31.607425      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+sboxserve: <nil>
+I1111 06:25:34.750801    2730 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5ba38b295b2a597a ResponseID: 7afzaqieJYqy1e8Pro-5oAs
+I1111 06:25:34.782249    2752 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:34.782249    2752 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:25:39.563986    2780 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4724ca19353deea0 ResponseID: 8afzaomvLdml0-kPp9aa-Q8
+I1111 06:25:39.664221    2819 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:39.664221    2819 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:45.747454    2848 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6de09dd595298fe4 ResponseID: 9qfzavzVNpW-1e8P3a2LuA0
+I1111 06:25:45.841030    2888 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:45.841030    2888 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:51.951908    2902 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x232126e57673d300 ResponseID: _afzaozBBqvB0-kP5rTyiAc
+I1111 06:25:53.601019    2950 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:53.601019    2950 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:25:59.496143    2942 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3069651325d236a5 ResponseID: BKjzauacLu2_1e8P7PK2qAc
+I1111 06:25:59.652632    3034 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:25:59.652632    3034 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:26:03.207483    3048 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x86762fc200eaae63 ResponseID: CqjzaqKqMZbY9tMP67uj8AE
+I1111 06:26:03.251325    3066 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:03.251325    3066 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:26:06.656796      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:26:09.748727    3095 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x20ba18a666829ff5 ResponseID: DajzauXzOfG_1e8P1tHNsQQ
+I1111 06:26:17.592878    3170 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:17.592878    3170 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:26:20.617245    3206 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa75bea7e508a0f98 ResponseID: HKjzaumvFMq81e8Px_L1qQY
+I1111 06:26:20.650232    3229 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:20.650232    3229 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:26:26.504271    3246 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2f05b39c1979be27 ResponseID: H6jzaqDSGIex1e8Po-fyqQo
+I1111 06:26:26.901918    3300 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:26.901918    3300 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:26:32.895884    3332 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x63013923f31b1811 ResponseID: Jqjzaq-OBYuz1e8PgZGdoQs
+E1111 06:26:41.705402      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:26:42.194647    3392 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:42.194647    3392 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:26:46.243701    3424 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x996a7d38b8655ac4 ResponseID: NKjzap6jO_ev9tMPwebyyA0
+I1111 06:26:46.343510    3450 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:46.343510    3450 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:26:51.790146    3481 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3dc97b84dc8af041 ResponseID: OajzavOkB4O-vr0P44WT-QE
+I1111 06:26:52.621088    3515 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:52.621088    3515 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:26:56.467469    3543 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6a03fb5f0e742fcc ResponseID: P6jzarWUO6vB0-kP5rTyiAc
+I1111 06:26:56.514640    3568 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:26:56.514640    3568 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:03.552644    3587 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x828f9cb07958459f ResponseID: Q6jzasfOEu3jrfcPw7fswAY
+E1111 06:27:16.764577      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:27:19.743750    3680 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:19.744274    3680 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:25.309581    3716 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5d6dbdd49a8b7757 ResponseID: Wqjzaq2AIs7t2roPu7zt-Ag
+I1111 06:27:25.403574    3757 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:25.403574    3757 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:31.531273    3775 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x12774f4bc0d221d2 ResponseID: YKjzavrYCKik0-kP6vKsmAg
+I1111 06:27:31.629087    3811 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:31.629087    3811 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:27:36.008474    3713 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd3cf2c7507e6dda5 ResponseID: ZqjzauTDG_-x1e8Pgo73sAs
+I1111 06:27:36.048129    3858 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:36.048129    3858 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:41.315924    3888 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe0bced8fb5c5458c ResponseID: aqjzao_TNcvQosUP-M3zgQQ
+I1111 06:27:41.417528    3925 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:41.417528    3925 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:45.261097    3951 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x586b46a54ae81439 ResponseID: cKjzas7jC83Z9tMPzO-uqQI
+I1111 06:27:45.298516    3976 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:45.298516    3976 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:27:50.981761    4010 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb581a338bcbb01f5 ResponseID: dKjzasqOCNml0-kPp9aa-Q8
+E1111 06:27:51.817212      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded
+I1111 06:27:53.173465    4074 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:53.173465    4074 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:27:56.754593    4091 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe2a518af7b4dc7a7 ResponseID: e6jzasC0OsSx1e8PksLbyQM
+I1111 06:27:56.792024    4112 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:27:56.792024    4112 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:00.208914    4131 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x897e8b1632bf04c6 ResponseID: f6jzaqzYJ7SX0-kP4cnSoQI
+I1111 06:28:00.254575    4156 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:00.254575    4156 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:04.225882    4186 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf6f21ec7c27548c2 ResponseID: g6jzasSGBdXkrfcP36TzuAg
+I1111 06:28:04.317166    4241 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:04.317166    4241 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:07.964651    4261 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x66997460f82ccdca ResponseID: h6jzarGJCcvQosUPxIb0-QY
+I1111 06:28:08.006095    4296 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:08.006620    4296 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:11.816423    4317 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x26fb51a1c41677b5 ResponseID: iqjzasuSNJD01e8P6ra-sAc
+I1111 06:28:11.854124    4354 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:11.854124    4354 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:15.869025    4388 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb173dcb404a070f0 ResponseID: jqjzar2CJrCB2roPjJ6vqAc
+I1111 06:28:15.909615    4419 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:15.909615    4419 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:19.398673    4439 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe201c893f3dc55b2 ResponseID: kqjzar2OL_aB2roPldXukQE
+I1111 06:28:19.455841    4458 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:19.455841    4458 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:28:22.950351    4480 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x55bc56bc39944908 ResponseID: lqjzauTSEtjA1e8PoquV6Qg
+I1111 06:28:22.992468    4515 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:22.992468    4515 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:28:26.869234      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:28:27.668640    4534 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xea51550df28683e3 ResponseID: majzatTUMc3Z9tMP8e-uqQI
+I1111 06:28:27.761863    4569 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:27.761863    4569 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:31.134561    4585 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x73341d6b4c92b8d3 ResponseID: nqjzaqzNJPvNrfcP-PTNoAE
+I1111 06:28:31.177257    4610 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:31.177257    4610 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:28:37.418811    4650 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x110999f598850941 ResponseID: oqjzapyEGIPRosUPn7GlmQw
+I1111 06:28:39.698548    4708 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:39.698548    4708 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:28:39.970020    4615 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0xb2ea48a976dabe42
+I1111 06:28:40.126732    4693 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x3b39afa54f3f497b
+sboxserve: <nil>
+I1111 06:28:46.258782    4743 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbbb6a7995ded4169 ResponseID: qqjzaurSIsKj9tMP4sypmAQ
+I1111 06:28:55.160438    4789 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:28:55.160438    4789 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:29:01.659633    4826 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xeeb4c762d098e8b8 ResponseID: uqjzaoeyBNn11e8PlreeqQo
+E1111 06:29:01.916776      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:29:15.764268    4899 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:29:15.764268    4899 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:29:22.781839    4930 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x58f4322bf3730ec4 ResponseID: z6jzas-ICYbcvr0Pn7-BsA4
+E1111 06:29:36.967881      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:29:53.466474    5045 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:29:53.466474    5045 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:29:59.334317    4912 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xac1af43d24357a11 ResponseID: 9ajzauv8FsvQosUP-M3zgQQ
+I1111 06:30:02.903960    5136 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x73fd90b4341b01 ResponseID: -ajzaoj-NNWMvr0Py_CxKA
+I1111 06:30:02.967992    5176 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:02.967992    5176 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:30:06.749227    5167 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x21c9e6c5ebb7ad2b ResponseID: _ajzaoH5MszLrfcP95qdgQI
+I1111 06:30:06.797431    5236 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:06.797431    5236 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:30:12.018723      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:30:13.387406    5252 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x450435c983be7fe4 ResponseID: AanzasGaK5G30-kPsuiGkAU
+I1111 06:30:13.834157    5289 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:13.834157    5289 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:30:18.902374    5319 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xdd7d6db994d3d81f ResponseID: CKnzapWPLOe01e8P39OM6AE
+I1111 06:30:20.642959    5376 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:20.642959    5376 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:30:25.849296    5411 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3e196e4d81586965 ResponseID: D6nzavudHvaB2roPldXukQE
+I1111 06:30:30.654274    5471 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x89d29b49cb0f7643 ResponseID: Fanzasv3K4qf0-kPoYTT6AE
+I1111 06:30:30.703786    5500 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:30.703786    5500 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:30:35.461999    5522 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5d11b68555e841c3 ResponseID: GanzatCtKJD01e8P6ra-sAc
+I1111 06:30:39.325548    5566 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3aecaa07398514fe ResponseID: HanzasakMcvQosUPxIb0-QY
+I1111 06:30:41.939261    5618 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb348c08610da0986 ResponseID: IanzapOsHrKv1e8PtoDQiA4
+I1111 06:30:41.993738    5638 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:41.993738    5638 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:30:47.067596      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:30:51.363313    5652 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2d4d0150c87018fc ResponseID: JKnzas_6N6us9tMP8K3KuQU
+I1111 06:30:54.753751    5703 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd46c47c0b901571 ResponseID: LanzauWdI4Ss1e8Pw9-byAY
+I1111 06:30:54.808119    5757 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:30:54.808119    5757 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:31:01.502977    5785 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc9d06ef2f049742e ResponseID: ManzaqfXLcS01e8Pnb3E2Q4
+I1111 06:31:01.572255    5821 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:01.572255    5821 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:31:05.524520    5840 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe3bc6eb88fee3438 ResponseID: OKnzauWnKcSx1e8PksLbyQM
+I1111 06:31:05.584060    5868 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:05.584060    5868 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:31:12.135721    5807 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xde8766ed3f59861a ResponseID: PKnzasrRMrHNrfcPl43juQw
+I1111 06:31:15.343045    5954 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfed68c99c0f45a63 ResponseID: QqnzaremIPi-1e8P3JXT-Ao
+I1111 06:31:15.401174    5978 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:15.401174    5978 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:31:20.770732    5998 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7807705d61140fcb ResponseID: RqnzavG9LpbA1e8P67yE0QY
+E1111 06:31:22.116687      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:31:25.175235    6057 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf22a6ad371bcdf2f ResponseID: S6nzaqGNG8S01e8Pnb3E2Q4
+I1111 06:31:25.309438    6094 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:25.309438    6094 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:31:31.534932    6134 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xebf1bdddb0cf6472 ResponseID: UKnzapTZDdXkrfcP36TzuAg
+I1111 06:31:31.662497    6162 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:31.662497    6162 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:31:37.637052    6188 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcbf245c882c633c9 ResponseID: VqnzatfyJqbq2roP74ij6Q8
+I1111 06:31:46.641312    6262 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:31:46.641312    6262 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:31:57.166275      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:31:58.605528    6280 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd3f4a9fa5386d593 ResponseID: ZanzauzNKZPrrfcP1M-Z4Ac
+I1111 06:32:02.261322    6316 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcaebffbf90ef01cc ResponseID: cKnzaunKObCz1e8P9LCOyQQ
+I1111 06:32:02.316229    6352 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:02.316229    6352 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:32:08.554196    6399 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x519cd97a07d38f3b ResponseID: danzaoXjCqe_vr0PyNHFgQM
+I1111 06:32:25.191633    6476 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe94401dfc5d93a7e ResponseID: hanzap7OG77I0-kPtfmI4Qc
+I1111 06:32:25.317662    6498 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:25.317662    6498 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:32:29.120801    6515 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbc9dedfb6a2a7263 ResponseID: jKnzasH-DLi30-kPuc_JkQk
+I1111 06:32:29.181034    6548 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:29.181034    6548 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:32:32.216990      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:32:33.162749    6598 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x14e0360ff8e5604a ResponseID: kKnzar3ZCavB0-kP5rTyiAc
+I1111 06:32:33.238598    6634 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:33.238598    6634 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:32:40.174177    6560 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf4b8b642a24bf8ad ResponseID: lKnzapmdDZiY0-kPpoK-mA4
+I1111 06:32:42.558162    6709 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:42.558162    6709 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:32:48.892498    6741 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xaddff8780176f5c4 ResponseID: nanzapGvI4qx1e8Pg46A2Q4
+I1111 06:32:48.957076    6764 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:32:48.957076    6764 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:32:54.729073    6785 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc7d8ab9a0480636e ResponseID: o6nzasujN7rnrfcP7ZmzmQU
+E1111 06:33:07.262314      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:33:09.843530    6852 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:33:09.843530    6852 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:33:29.185016    6890 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa62ec2d15949c7f3 ResponseID: uKnzap-bK-Gl0-kPkafl-Qs
+I1111 06:33:33.662072    6955 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x64a0c31a5be8a5de ResponseID: y6nzasnSJ4ix2roPhYyysAk
+I1111 06:33:33.811451    7019 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:33:33.811967    7019 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:33:42.309116      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:33:43.151004    7049 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf129bb4fbdab04b5 ResponseID: 1KnzapdBpuzaug_UtufRCQ
+I1111 06:33:43.291703    7111 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:33:43.291703    7111 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+I1111 06:33:43.819077    7091 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x6b3889d531230fb2
+I1111 06:33:43.934766    7034 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xfc08c16679901d66
+sboxserve: <nil>
+I1111 06:33:50.887912    7161 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x67b21d17252a8268 ResponseID: 3anzarX0F6bq2roP74ij6Q8
+I1111 06:33:53.693254    7168 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8770a9ead8e790b6 ResponseID: 4anzauaGFfHvrfcPuf3p0Qg
+I1111 06:33:53.759814    7232 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:33:53.759814    7232 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:33:57.771203    7251 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x45465063c49f3c9a ResponseID: 5anzatKyDa_82roPvKG_iQw
+I1111 06:33:57.837382    7291 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:33:57.837382    7291 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:04.863819    7264 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x65845e37bd84e347 ResponseID: 6anzarLSK9jcvr0P_f2JmQo
+I1111 06:34:05.004236    7350 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:05.004236    7350 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+E1111 06:34:17.362172      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 06:34:17.903845    7386 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6683906136cdd33e ResponseID: 86nzap7nGv7orfcPjKfKwAs
+I1111 06:34:19.833279    7415 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:19.833279    7415 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:27.239514    7468 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5e4d627439b145f2 ResponseID: _6nzauXRM-Ps2roPpLSd6A8
+I1111 06:34:27.381818    7510 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:27.381818    7510 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:34.396731    7544 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x69e007e90d988cee ResponseID: CarzaoSlHte30-kPn9LWwQE
+I1111 06:34:37.694439    7536 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5225f4faa250a0b3 ResponseID: DKrzatr0N6Dw2roPkuDq8Q4
+I1111 06:34:37.759130    7585 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:37.759130    7585 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:43.062467    7651 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc4e0dfdd7bccfd6 ResponseID: EKrzapanO-DhrfcP7an_0Ao
+I1111 06:34:43.200213    7690 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:43.200213    7690 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:47.644321    7699 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe2b6c2b6058d58d3 ResponseID: FqrzauiMC8G21e8PrYSSqAc
+I1111 06:34:47.697619    7738 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:47.697619    7738 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:34:52.036391    7712 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x78334af15d9c1d41 ResponseID: GqrzauGHMJGx1e8PivvpQA
+I1111 06:34:52.121298    7806 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:52.121298    7806 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+E1111 06:34:52.414013      15 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+sboxserve: <nil>
+I1111 06:34:56.748891    7828 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf23cf936e6341521 ResponseID: H6rzaseyB-3jrfcPw7fswAY
+I1111 06:34:56.892003    7846 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:34:56.892003    7846 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:35:01.206026    7873 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x35777af55fbeb613 ResponseID: I6rzaouGPMiZ0-kPj_PwgQk
+I1111 06:35:01.278619    7911 trusted_escape.go:172] [trusted-cli-escape] escapable binaries=[]
+I1111 06:35:01.278619    7911 trusted_escape.go:174] [trusted-cli-escape] no escapable binaries; escape wiring skipped
+sboxserve: <nil>
+I1111 06:35:05.630623    7950 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6ea3517608851289 ResponseID: KKrzatCuKIn71e8PxZepyQ8
+I1111 06:35:12.338498    7937 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x294c8f1fb94c9c15 ResponseID: LKrzatP_BPi-1e8P3JXT-Ao
+E1111 06:35:27.469815      15 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 06:35:29.109767    8047 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x78c243463fbc7e4f ResponseID: Mqrzap-PLdyL0-kPxdLXsQ4
+I1111 06:35:31.955718    8124 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbdb4810a17d2c97 ResponseID: Q6rzarXFHsaN0-kPjLHp6AE
+I1111 06:35:35.405525    8143 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x49a3e8d8ca336ed7 ResponseID: Rqrzat3TEciZ0-kPj_PwgQk
+I1111 06:35:45.628364       1 manager.go:965] CLI store manager shutting down
+I1111 06:35:45.634397       1 conversation_manager.go:985] Stopping conversation stream
+I1111 06:35:45.634397     431 server.go:1314] Stream goroutine exited for a156386f-f531-4304-9506-306e96ad5f0e, sending completion signal
+E1111 06:35:45.808019    8538 telemetry.go:141] error recording trajectory segment analytics: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:recordTrajectoryAnalytics": context canceled
+I1111 06:35:45.816528    8508 server.go:4046] Language server shutting down
+I1111 06:35:45.816528    8508 server.go:4068] Waiting for migrations to complete to prevent partial migration state...
+E1111 06:35:45.821611     130 file_watcher.go:194] skipping empty or temp file: 
+E1111 06:35:45.821611     130 file_watcher.go:194] skipping empty or temp file: 
+E1111 06:35:50.818036      10 server.go:4039] Language server shutdown timed out

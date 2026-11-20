@@ -1,0 +1,219 @@
+[
+  {
+    "name": "exact_migration_055",
+    "success": true
+  },
+  {
+    "name": "function_overloads_after_migration",
+    "rows": [
+      {
+        "proname": "admin_update_app_config",
+        "args": "p_min_version_code integer, p_latest_version_code integer, p_latest_version_name text, p_force_update boolean, p_title text, p_message text, p_store_url text, p_title_vi text, p_title_en text, p_message_vi text, p_message_en text"
+      },
+      {
+        "proname": "reject_tester_report",
+        "args": "p_report_id uuid, p_reason text, p_reason_code text"
+      }
+    ]
+  },
+  {
+    "name": "legacy_admin_call",
+    "rows": [
+      {
+        "result": {
+          "id": "android_client",
+          "title": "Legacy title",
+          "message": "Legacy message",
+          "title_en": "New Update Available",
+          "title_vi": "Đã có bản cập nhật mới",
+          "store_url": "market://details?id=com.ntt.crosstest",
+          "message_en": "A new update with improvements and bug fixes is ready. Please update now for the best experience.",
+          "message_vi": "Phiên bản mới với nhiều tính năng nâng cấp và sửa lỗi đã sẵn sàng. Vui lòng cập nhật để tiếp tục sử dụng ứng dụng mượt mà nhất.",
+          "updated_at": "2026-10-29T12:08:52.64+00:00",
+          "force_update": false,
+          "min_version_code": 1,
+          "latest_version_code": 2,
+          "latest_version_name": "0.0.2"
+        }
+      }
+    ]
+  },
+  {
+    "name": "legacy_reject_call_used_by_current_client",
+    "rows": [
+      {
+        "result": {
+          "status": "rejected",
+          "success": true,
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "tester_id": "22222222-2222-2222-2222-222222222222",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "new_balance": 90,
+          "reason_code": "REASON_DUPLICATE_OR_OLD",
+          "owner_locked": false,
+          "owner_warned": false,
+          "tester_locked": false,
+          "tester_warned": false,
+          "clawed_credits": 10,
+          "tester_balance": 90,
+          "is_owner_locked": false,
+          "credits_deducted": 10,
+          "is_tester_locked": false,
+          "owner_warning_msg": null,
+          "tester_warning_msg": null,
+          "owner_today_rejections": 1,
+          "tester_today_rejections": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "report_after_legacy_call",
+    "rows": [
+      {
+        "status": "rejected",
+        "rejection_reason": "[CODE:REASON_DUPLICATE_OR_OLD]",
+        "reason_code": "REASON_DUPLICATE_OR_OLD"
+      }
+    ]
+  },
+  {
+    "name": "explicit_new_reject_overload",
+    "rows": [
+      {
+        "result": {
+          "status": "rejected",
+          "success": true,
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "tester_id": "22222222-2222-2222-2222-222222222222",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "new_balance": 90,
+          "reason_code": "REASON_DUPLICATE_OR_OLD",
+          "owner_locked": false,
+          "owner_warned": false,
+          "tester_locked": false,
+          "tester_warned": false,
+          "clawed_credits": 10,
+          "tester_balance": 90,
+          "is_owner_locked": false,
+          "credits_deducted": 10,
+          "is_tester_locked": false,
+          "owner_warning_msg": null,
+          "tester_warning_msg": null,
+          "owner_today_rejections": 2,
+          "tester_today_rejections": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "newly_generated_notifications",
+    "rows": [
+      {
+        "title": "Biến động số dư: -10 Credit 🪙",
+        "message": "Thu hồi 10 Credit tạm nhận do báo cáo bị từ chối: [CODE:REASON_DUPLICATE_OR_OLD]",
+        "type": "credit",
+        "data": {
+          "action": "test_rejected_clawback",
+          "amount": -10,
+          "balance": 90,
+          "event_code": "credit_change"
+        }
+      },
+      {
+        "title": "Báo cáo nộp lại 🔄",
+        "message": "Tester đã nộp lại báo cáo cho ứng dụng \"DemoApp\". Vui lòng kiểm tra lại.",
+        "type": "report",
+        "data": {
+          "status": "pending",
+          "app_name": "DemoApp",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "event_code": "resubmit_report",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      },
+      {
+        "title": "Báo cáo kiểm thử mới 📋",
+        "message": "Ứng dụng \"DemoApp\" vừa nhận được 1 báo cáo kiểm thử mới. Bạn có 8 giờ để kiểm tra và duyệt (+2 Credit thưởng cho tester và +2 Credit cho bạn nếu duyệt).",
+        "type": "report",
+        "data": {
+          "status": "pending",
+          "app_name": "DemoApp",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "event_code": "new_report",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      },
+      {
+        "title": "Biến động số dư: -10 Credit 🪙",
+        "message": "Thu hồi 10 Credit tạm nhận do báo cáo bị từ chối: [CODE:REASON_DUPLICATE_OR_OLD]",
+        "type": "credit",
+        "data": {
+          "action": "test_rejected_clawback",
+          "amount": -10,
+          "balance": 90,
+          "event_code": "credit_change"
+        }
+      },
+      {
+        "title": "Biến động số dư: +100 Credit 🪙",
+        "message": "Thưởng 100 Credit khi mở tài khoản",
+        "type": "credit",
+        "data": {
+          "action": "welcome",
+          "amount": 100,
+          "balance": 100,
+          "event_code": "credit_change"
+        }
+      },
+      {
+        "title": "Biến động số dư: +100 Credit 🪙",
+        "message": "Thưởng 100 Credit khi mở tài khoản",
+        "type": "credit",
+        "data": {
+          "action": "welcome",
+          "amount": 100,
+          "balance": 100,
+          "event_code": "credit_change"
+        }
+      }
+    ]
+  },
+  {
+    "name": "newly_generated_credit_logs",
+    "rows": [
+      {
+        "action": "test_rejected_clawback",
+        "note": "Thu hồi 10 Credit tạm nhận do báo cáo bị từ chối: [CODE:REASON_DUPLICATE_OR_OLD]",
+        "amount": -10,
+        "metadata": {
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "reason_code": "REASON_DUPLICATE_OR_OLD"
+        }
+      },
+      {
+        "action": "test_rejected_clawback",
+        "note": "Thu hồi 10 Credit tạm nhận do báo cáo bị từ chối: [CODE:REASON_DUPLICATE_OR_OLD]",
+        "amount": -10,
+        "metadata": {
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "reason_code": "REASON_DUPLICATE_OR_OLD"
+        }
+      },
+      {
+        "action": "welcome",
+        "note": "Thưởng 100 Credit khi mở tài khoản",
+        "amount": 100,
+        "metadata": null
+      },
+      {
+        "action": "welcome",
+        "note": "Thưởng 100 Credit khi mở tài khoản",
+        "amount": 100,
+        "metadata": null
+      }
+    ]
+  }
+]

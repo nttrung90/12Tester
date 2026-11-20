@@ -1,0 +1,21 @@
+{
+  "change": "Align bonus badge to card right edge, vertically centered opposite the 44dp app icon",
+  "tests": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "apk": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "D30280EDC24688CCDF5C298B97709B3151923557C32E2482C18C8930992F73EE",
+    "bytes": 32608569,
+    "modified": "2026-11-11T16:26:38.534Z"
+  },
+  "buildLog": "runs/badge-right-edge-build.log",
+  "visualInspection": [
+    "campaign_card_bonus_badge_light.png",
+    "campaign_card_narrow_longname_uninstall_large_reward.png"
+  ],
+  "sqlChanged": false
+}

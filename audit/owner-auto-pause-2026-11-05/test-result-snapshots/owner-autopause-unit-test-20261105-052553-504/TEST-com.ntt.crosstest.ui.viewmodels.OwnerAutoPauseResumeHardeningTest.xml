@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T05:25:25.308Z" hostname="PC-5700X3D" time="3.351">
+  <properties/>
+  <testcase name="owner_resume_succeeds_when_quota_met_and_debt_zero" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="2.692"/>
+  <testcase name="precheck_blocks_resume_when_carryover_debt_exists" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.048"/>
+  <testcase name="admin_resume_bypasses_owner_carryover_precheck" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.03"/>
+  <testcase name="server_refusal_with_daily_task_pending_displays_pending_error" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.028"/>
+  <testcase name="precheck_blocks_resume_when_carryover_pending" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.026"/>
+  <testcase name="uiState_flags_reflect_carryover_debt_and_pending" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.009"/>
+  <testcase name="server_refusal_with_owner_carryover_incomplete_displays_count_and_reloads_daily_task" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

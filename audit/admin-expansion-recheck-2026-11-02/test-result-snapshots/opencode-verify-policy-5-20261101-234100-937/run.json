@@ -1,0 +1,16 @@
+{
+    "logName":  "opencode-verify-policy-5",
+    "arguments":  [
+                      "-I",
+                      "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-01T23:40:46.8300455Z",
+    "finishedUtc":  "2026-11-01T23:41:00.9446558Z",
+    "currentRunXmlCount":  0
+}

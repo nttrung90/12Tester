@@ -1,0 +1,12 @@
+FAIL independent migration upgrade: 1 historical reports ERR_ASSERTION historical report must retain its original Vietnamese reporting day
++ actual - expected
+
++ '2026-11-02'
+- '2026-11-01'
+            ^
+
+FAIL independent migration upgrade: 2 historical reports 23505 could not create unique index "idx_tester_reports_daily_app_test"
+FAIL independent new ACL: ERR_ASSERTION authenticated clients must not execute the private submission core directly
+
+true !== false
+

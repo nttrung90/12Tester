@@ -1,0 +1,17 @@
+{
+  "app/src/main/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModel.kt": "FF1C924C3475C048F4042AD5E70540A9835176E4D0B27B23C0530F534D60786B",
+  "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminFlowSessionRaceTest.kt": "7FD07AC8031C5BD9CB3E47220399BE616571AE7167A83A65BFBDFDB825956D14",
+  "app/src/test/java/com/ntt/crosstest/data/AdminRelatedRepositoryRaceTest.kt": "E9CF85C9D66188D2F1FCB337B75CFDD1E15176F2E955234D545BD42B41708882",
+  "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminReportsViewModel.kt": "9739A063AD2A62E3C8EB4537DE5FC6F113451E8A1337C59DD0CB133C47689911",
+  "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt": "F9DE9B72893BEDCF23D108F77D2BF2D8FBEC2641B42D88FA4D5442A4FC721ED8",
+  "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt": "52DDB29D0B1459ABE3094BA232D9DECF56216D081002CEFB0AE449DF39E43B63",
+  "supabase/tests/run-admin-direct-notification-popup-test.mjs": "82478B1C4DCE4539CC3289EADC63991E59F37190F4A15FFA5D283A20FBF29BA6",
+  "app/src/main/java/com/ntt/crosstest/ui/screens/AdminReportsScreen.kt": "5D0BA1766189B3EFAF3788D2B19051C0308DE6034611EA5F1DB9F10DA94EC1B5",
+  "supabase/tests/run-admin-audit-hardening-test.mjs": "F065F5C51837A8E4DDF0B05D654107215D99A6722211A1C0605C5037E0B27D63",
+  "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignActionRaceTest.kt": "276786344B6C2D4605229552302A0C73EA83F0C7C664D050CF51DF40C2F82945",
+  "supabase/tests/package.json": "BBADA2E3EDC082657130798C796D3A765B2E429817CA9BC1B91B9514BD9A16F4",
+  "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminUsersViewModel.kt": "7F8FFA3478BAFF4CDA3D9D8B73378FE5824ED9626BFE52133C7D7C448A8B8933",
+  "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModelTest.kt": "A6868034EFEDA122E1A688F9081CA9DFE12C6F4A71466C654BB3AFA5F9295E52",
+  "app/src/main/java/com/ntt/crosstest/ui/screens/AdminUsersScreen.kt": "2F49B45069BBD3FD8AE1AA06270B748F7840BE7F5F6C2D75B3AA24ECD3F96695",
+  "supabase/migrations/069_admin_audit_hardening.sql": "1ED9E26C18B4454368267E826728FF00C44B2F726B2B387703D5C7AF20293E7B"
+}

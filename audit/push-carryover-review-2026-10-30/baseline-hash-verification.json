@@ -1,0 +1,26 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\062_consolidated_baseline.sql",
+    "Before": "C4814564D27FA43406C7D79A8982C3167C7BC8F20F8BC65A7160B505E4FC45F2",
+    "After": "C4814564D27FA43406C7D79A8982C3167C7BC8F20F8BC65A7160B505E4FC45F2",
+    "Unchanged": true
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\063_report_crypto_search_path.sql",
+    "Before": "A14FDD0D9805B1FC48F83CB6B0C87A73EB076612FC21DD21CF58A4610D4D0A41",
+    "After": "A14FDD0D9805B1FC48F83CB6B0C87A73EB076612FC21DD21CF58A4610D4D0A41",
+    "Unchanged": true
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\064_explicit_report_context.sql",
+    "Before": "047DBA110F2AAEC70B0CA8D8C4A31D432EBE7B57D60BEB84522CDC1FCB670341",
+    "After": "047DBA110F2AAEC70B0CA8D8C4A31D432EBE7B57D60BEB84522CDC1FCB670341",
+    "Unchanged": true
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\065_remove_dhash_hardblock.sql",
+    "Before": "53CE688F80CF96532C3C3895046EDADCC30CD3C4499AFEFC81B92ED38BDB76A9",
+    "After": "53CE688F80CF96532C3C3895046EDADCC30CD3C4499AFEFC81B92ED38BDB76A9",
+    "Unchanged": true
+  }
+]

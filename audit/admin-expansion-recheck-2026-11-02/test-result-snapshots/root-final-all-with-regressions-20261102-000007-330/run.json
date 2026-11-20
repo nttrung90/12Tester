@@ -1,0 +1,13 @@
+{
+  "logName": "root-final-all-with-regressions",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-01T23:59:25.9344491Z",
+  "finishedUtc": "2026-11-02T00:00:07.4536932Z",
+  "currentRunXmlCount": 68
+}

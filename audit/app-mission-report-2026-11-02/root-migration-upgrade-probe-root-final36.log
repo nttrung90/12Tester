@@ -1,0 +1,3 @@
+PASS independent migration upgrade: preserves 1 historical reporting days
+PASS independent migration upgrade: preserves 2 historical reporting days
+PASS independent private-helper and attachment write ACL

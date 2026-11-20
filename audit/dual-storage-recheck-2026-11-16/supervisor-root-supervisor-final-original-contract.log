@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-16T14:25:52.637Z",
+  "scope": "PGlite contract probes; no production/no provider calls; product source unchanged",
+  "results": [
+    {
+      "id": "CONTROL-SIZE",
+      "title": "Existing test metadata fixture is accepted",
+      "status": "PASS",
+      "accepted": true
+    },
+    {
+      "id": "STORAGE-PREFLIGHT",
+      "title": "Actual Storage binary preflight contentLength metadata must pass",
+      "status": "PASS",
+      "expected": {
+        "helper": true,
+        "inserted": true
+      },
+      "observed": {
+        "helper": true,
+        "inserted": true
+      },
+      "input": {
+        "mimetype": "image/jpeg",
+        "contentLength": 100
+      }
+    },
+    {
+      "id": "STORAGE-LEGACY-PREFLIGHT",
+      "title": "Unknown-length/older Storage preflight metadata is handled intentionally",
+      "status": "OBSERVED",
+      "observed": false,
+      "scope": "Unknown-length compatibility observation only. Rejecting unknown length can be intentional; the deployed version was not queried. Not counted as a separate defect."
+    },
+    {
+      "id": "QUOTA-LATE-THUMB",
+      "title": "Rolled-back policy probe is not equivalent to holding its lock until final commit",
+      "status": "PASS",
+      "observed": {
+        "u": 0,
+        "r": 150100,
+        "actual": 150
+      },
+      "unaccountedBytes": -149950,
+      "scope": "Sequential event-order model, not a real Storage API or multi-connection execution. Final-probe size metadata isolates this from the earlier preflight denial."
+    }
+  ]
+}

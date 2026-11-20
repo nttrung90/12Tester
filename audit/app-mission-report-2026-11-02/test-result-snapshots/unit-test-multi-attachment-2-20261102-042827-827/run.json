@@ -1,0 +1,12 @@
+{
+    "logName":  "unit-test-multi-attachment-2",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionReportMultiAttachmentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:28:02.7925317Z",
+    "finishedUtc":  "2026-11-02T04:28:27.8408854Z",
+    "currentRunXmlCount":  1
+}

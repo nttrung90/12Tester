@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import com.ntt.crosstest.ui.theme.statusColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -87,6 +90,7 @@ fun ForceUpdateScreen(
     currentVersionCode: Int,
 ) {
     val context = LocalContext.current
+    val isVi = LocalConfiguration.current.locales[0]?.language?.equals("vi", ignoreCase = true) == true
     val activity = LocalActivity.current
 
     // Block back button from bypassing update requirement
@@ -101,6 +105,7 @@ fun ForceUpdateScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .safeDrawingPadding()
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,7 +131,7 @@ fun ForceUpdateScreen(
 
             // Title
             Text(
-                text = config.title ?: stringResource(R.string.update_required_title),
+                text = config.localizedTitle(isVi) ?: stringResource(R.string.update_required_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -163,14 +168,14 @@ fun ForceUpdateScreen(
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF2E7D32).copy(alpha = 0.15f),
+                    color = MaterialTheme.statusColors.successContainer,
                     modifier = Modifier.padding(horizontal = 4.dp),
                 ) {
                     Text(
                         text = "v${config.latestVersionName} (${config.latestVersionCode})",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32),
+                        color = MaterialTheme.statusColors.onSuccessContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
@@ -187,7 +192,7 @@ fun ForceUpdateScreen(
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Text(
-                    text = config.message ?: stringResource(R.string.update_required_desc),
+                    text = config.localizedMessage(isVi) ?: stringResource(R.string.update_required_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -251,6 +256,7 @@ fun OptionalUpdateDialog(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val isVi = LocalConfiguration.current.locales[0]?.language?.equals("vi", ignoreCase = true) == true
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -264,7 +270,7 @@ fun OptionalUpdateDialog(
         },
         title = {
             Text(
-                text = config.title ?: stringResource(R.string.update_available_title),
+                text = config.localizedTitle(isVi) ?: stringResource(R.string.update_available_title),
                 fontWeight = FontWeight.Bold,
             )
         },
@@ -295,7 +301,7 @@ fun OptionalUpdateDialog(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = config.message ?: stringResource(R.string.update_required_desc),
+                    text = config.localizedMessage(isVi) ?: stringResource(R.string.update_required_desc),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Text(

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AppUpdateRewardTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-03T13:21:08.228Z" hostname="PC-5700X3D" time="0.067">
+  <properties/>
+  <testcase name="tester_show_app_update_block_rules" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.006"/>
+  <testcase name="owner_ui_state_calculates_budget_correctly_without_old_release" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.005"/>
+  <testcase name="reader_returns_not_installed_when_package_missing" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.008"/>
+  <testcase name="accounting_invariant_holds_across_all_lifecycle_states" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.006"/>
+  <testcase name="reader_returns_unverifiable_on_blank_package" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.006"/>
+  <testcase name="owner_ui_state_calculates_budget_correctly_with_refund_from_old_release" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.005"/>
+  <testcase name="tester_is_app_updated_checks_greater_or_equal" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.005"/>
+  <testcase name="owner_can_publish_validates_blank_fields_and_lengths" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.006"/>
+  <testcase name="owner_can_publish_requires_version_code_greater_than_current" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.005"/>
+  <testcase name="reader_returns_installed_version_code_and_name" classname="com.ntt.crosstest.data.AppUpdateRewardTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

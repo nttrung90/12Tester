@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:10:14.161Z" hostname="PC-5700X3D" time="0.093">
+  <properties/>
+  <testcase name="testScheduleAndCancelDecodesExactResponse" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.027"/>
+  <testcase name="testUpdateCampaignDecodesExactResponse" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.012"/>
+  <testcase name="testGetSchedulerHealthDecodesExactDto" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.01"/>
+  <testcase name="testPreviewCampaignDecodesExactResponse" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.013"/>
+  <testcase name="testListCampaignsAndRecipientsPagination" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.018"/>
+  <testcase name="testCreateCampaignDecodesExactResponse" classname="com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

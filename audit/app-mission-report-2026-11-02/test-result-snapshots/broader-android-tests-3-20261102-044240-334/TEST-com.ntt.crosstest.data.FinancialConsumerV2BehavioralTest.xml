@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:42:24.822Z" hostname="PC-5700X3D" time="0.055">
+  <properties/>
+  <testcase name="slotV2_passesDisplayedQuoteCostAndOpaqueRevisionToken" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.019"/>
+  <testcase name="appUpdate_quoteUnavailable_blocksCanPublish" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.007"/>
+  <testcase name="appUpdateV2_dynamicBudgetCalculationAndPreservationOfOldReleaseSnapshot" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.007"/>
+  <testcase name="pushV2_passesExpectedCostAndRevisionAndPreservesReplayProvenance" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.007"/>
+  <testcase name="slotInfo_requiresQuoteRevisionForValidPurchase" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.006"/>
+  <testcase name="slotV2_onQuoteConflict_throwsExceptionAndDoesNotCharge" classname="com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

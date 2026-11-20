@@ -1,0 +1,10 @@
+{
+    "logName":  "opencode-test-all",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-05T00:20:59.1098088Z",
+    "finishedUtc":  "2026-11-05T00:21:38.3596526Z",
+    "currentRunXmlCount":  71
+}

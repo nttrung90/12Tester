@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:42:25.852Z" hostname="PC-5700X3D" time="0.316">
+  <properties/>
+  <testcase name="sessionGenerationChangeCancelsCurrentOperation" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.014"/>
+  <testcase name="validExecutionReturnsDetailedResult" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.022"/>
+  <testcase name="supersededOperationIsNoLongerCurrent" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.008"/>
+  <testcase name="tombstoned404UrlReturnsNull" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.009"/>
+  <testcase name="expiredReportFailsImmediately" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.01"/>
+  <testcase name="largeLocalImageIsDecodedWithBoundedDimensions" classname="com.ntt.crosstest.util.ComparisonStateCoordinatorTest" time="0.252"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

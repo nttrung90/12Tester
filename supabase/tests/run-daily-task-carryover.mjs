@@ -8,16 +8,16 @@ import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, 'utf8').replaceAll('\r\n', '\n');
 
-const fullSchema = read('supabase/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
-const migration045 = read('supabase/migrations/045_thumbnail_support.sql');
-const migration046 = read('supabase/migrations/046_media_access_gateway.sql');
-const migration047 = read('supabase/migrations/047_home_stats_cycle.sql');
-const migration048 = read('supabase/migrations/048_mission_report_and_expiration.sql');
-const migration049 = read('supabase/migrations/049_mission_report_hardening.sql');
-const migration050 = read('supabase/migrations/050_app_update_reward.sql');
-const migration051 = read('supabase/migrations/051_app_update_reward_hardening.sql');
-const migration052 = read('supabase/migrations/052_campaign_push_priority.sql');
-const migration053 = read('supabase/migrations/053_daily_task_carryover.sql');
+const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
+const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');
+const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');
+const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');
+const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');
+const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');
+const migration050 = read('supabase/migrations_archive/pre_baseline_062/050_app_update_reward.sql');
+const migration051 = read('supabase/migrations_archive/pre_baseline_062/051_app_update_reward_hardening.sql');
+const migration052 = read('supabase/migrations_archive/pre_baseline_062/052_campaign_push_priority.sql');
+const migration053 = read('supabase/migrations_archive/pre_baseline_062/053_daily_task_carryover.sql');
 
 const bootstrap = `
   create role anon nologin;
@@ -546,12 +546,25 @@ async function runTests() {
     {
       // 1. Mua đẩy không ảnh hưởng đến chỉ tiêu hoặc phần thiếu của chủ app
       const reqId = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+      // Make this compatibility case independent of the historical finalizers
+      // above: start with a known positive streak and verify it is unchanged.
+      await db.query(`update public.profiles set daily_missed_streak = 2 where id = $1;`, [ownerA]);
+      const streakBeforePush = (await db.query(`select daily_missed_streak from public.profiles where id = $1;`, [ownerA])).rows[0].daily_missed_streak;
       const balanceBeforePush = (await db.query(`select credits from public.profiles where id = $1;`, [ownerA])).rows[0].credits;
 
-      // ownerA mua đẩy cho campA1
-      const pushRes = await asUser(db, ownerA, async () => {
-        return (await db.query(`select public.push_campaign($1, $2) as r;`, [campA1, reqId])).rows[0].r;
-      });
+      // The carryover scenarios use historical dates. Give this current-time
+      // push scenario an unexpired app, then restore its historical timestamp
+      // before checking the unchanged historical daily-task snapshot below.
+      const originalCreatedAt = (await db.query(`select created_at from public.campaigns where id = $1;`, [campA1])).rows[0].created_at;
+      let pushRes;
+      try {
+        await db.query(`update public.campaigns set created_at = now() - interval '1 day' where id = $1;`, [campA1]);
+        pushRes = await asUser(db, ownerA, async () => {
+          return (await db.query(`select public.push_campaign($1, $2) as r;`, [campA1, reqId])).rows[0].r;
+        });
+      } finally {
+        await db.query(`update public.campaigns set created_at = $2 where id = $1;`, [campA1, originalCreatedAt]);
+      }
       assert.equal(pushRes.success, true);
       assert.equal(pushRes.charged_credits, 100);
 
@@ -565,6 +578,7 @@ async function runTests() {
 
       // 2. Mua đẩy không giúp hoàn thành nhiệm vụ và không reset streak
       const profileAfterPush = (await db.query(`select daily_missed_streak from public.profiles where id = $1;`, [ownerA])).rows[0];
+      assert.equal(profileAfterPush.daily_missed_streak, streakBeforePush, 'Mua đẩy giữ nguyên chính xác streak trước giao dịch');
       assert.equal(profileAfterPush.daily_missed_streak > 0, true, 'Mua đẩy không reset streak');
 
       // 3. App bị paused (ví dụ do owner inactive) không được mua đẩy

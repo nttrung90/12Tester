@@ -1,0 +1,112 @@
+{
+  "at": "2026-11-16T14:26:24.369Z",
+  "scope": "Local Node and isolated PGlite/fake Storage only",
+  "results": [
+    {
+      "name": "ack-matrix",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:46.080Z",
+      "endedAt": "2026-11-16T14:25:46.134Z"
+    },
+    {
+      "name": "backend",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:46.066Z",
+      "endedAt": "2026-11-16T14:25:46.252Z"
+    },
+    {
+      "name": "independent-followup",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:46.075Z",
+      "endedAt": "2026-11-16T14:25:49.355Z"
+    },
+    {
+      "name": "original-ack",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:49.361Z",
+      "endedAt": "2026-11-16T14:25:49.412Z"
+    },
+    {
+      "name": "original-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:49.355Z",
+      "endedAt": "2026-11-16T14:25:52.687Z"
+    },
+    {
+      "name": "media-probes",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:49.366Z",
+      "endedAt": "2026-11-16T14:25:52.894Z"
+    },
+    {
+      "name": "sql-upgrade",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:52.911Z",
+      "endedAt": "2026-11-16T14:25:56.732Z"
+    },
+    {
+      "name": "sql-hardening",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:52.894Z",
+      "endedAt": "2026-11-16T14:25:56.873Z"
+    },
+    {
+      "name": "sql-quota",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:25:52.904Z",
+      "endedAt": "2026-11-16T14:26:06.810Z"
+    },
+    {
+      "name": "sql-upgrade-093",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:26:06.810Z",
+      "endedAt": "2026-11-16T14:26:10.678Z"
+    },
+    {
+      "name": "business-comparison",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:26:06.815Z",
+      "endedAt": "2026-11-16T14:26:13.605Z"
+    },
+    {
+      "name": "mission-rewards",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:26:06.819Z",
+      "endedAt": "2026-11-16T14:26:20.922Z"
+    },
+    {
+      "name": "tester-bonus",
+      "status": "PASS",
+      "exitCode": 0,
+      "startedAt": "2026-11-16T14:26:20.923Z",
+      "endedAt": "2026-11-16T14:26:24.364Z"
+    }
+  ],
+  "postgresConcurrency": "NOT RUN: TEST_DATABASE_URL absent/excluded",
+  "realStorageAndScheduler": "NOT RUN",
+  "hashes": {
+    "supabase/migrations/091_dual_storage_report_screenshots.sql": "3a1dc6f2a5998fb697fe2c841af46532f5df885a777c3617bc37d71215b69486",
+    "supabase/migrations/092_dual_storage_hardening.sql": "4b8a71520e975d4e4380a15eb85e1360da20fb37b963e4c67cf13c5b54a28c2f",
+    "supabase/migrations/093_dual_storage_runtime_recheck.sql": "ddbff20d4f7ba83bba451543c95fb3a63d8df35d4b5f91594d8bacdb99ea82a1",
+    "backend/storage-cleanup/reconcile-org-storage.mjs": "7529d5be2cd07eafce3e4f81370145b40736427f050a4845066127ba745d80ed",
+    "backend/storage-cleanup/reconcile-org-storage.test.mjs": "48e57daa4a2831983167f6a5d8412c671d1bd59cb673225828c8afa62720008a",
+    "supabase/tests/run-dual-storage-hardening-test.mjs": "0487b985612be1124a5da6d76a28ac88b0f184cb77d2afac6ddbcd404178bdc9",
+    "supabase/tests/run-dual-storage-concurrency-test.mjs": "ee5dfac5d20cbee9ea31ba313ac0d8c4ee236145995500c0deef354c4efbcc88",
+    "audit/dual-storage-recheck-2026-11-16/storage-contract-probes.mjs": "48db60c479bee28bfdf77867143f1a87b711bfa27cd548f9d7f7ace13af2737b",
+    "audit/dual-storage-recheck-2026-11-16/reconcile-ack-probe.mjs": "708913c52bc021abd7498d432fa2d3494cedafe08947928c6a978d2ab4d4919d",
+    "audit/dual-storage-recheck-2026-11-16/supervisor-followup-probes.mjs": "fc64a019ce9efa20d015207ee99572d0e014cb6ba0a2e5015c8931461316988a",
+    "audit/dual-storage-recheck-2026-11-16/supervisor-ack-matrix.mjs": "241aeafce3d59e31ebdf9ff4b13671fba7171f0373f5968987f5c936135318f5"
+  }
+}

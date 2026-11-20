@@ -1,0 +1,17 @@
+[
+  {
+    "file": "admin_management.xml",
+    "keys": 187,
+    "keysAndFormatsMatch": true
+  },
+  {
+    "file": "admin_business_policy.xml",
+    "keys": 77,
+    "keysAndFormatsMatch": true
+  },
+  {
+    "file": "admin_notifications.xml",
+    "keys": 113,
+    "keysAndFormatsMatch": true
+  }
+]

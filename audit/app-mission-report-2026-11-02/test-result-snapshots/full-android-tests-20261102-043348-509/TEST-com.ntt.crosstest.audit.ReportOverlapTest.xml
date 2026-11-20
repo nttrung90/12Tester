@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.ReportOverlapTest" tests="16" skipped="0" failures="3" errors="0" timestamp="2026-11-02T04:32:54.630Z" hostname="PC-5700X3D" time="35.863">
+  <properties/>
+  <testcase name="remainingCompletionMustPreserveNewerDraftInSameViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="2.328"/>
+  <testcase name="round2NewDraftUsingSubmittedPhotoMustKeepItsPhotoAfterCompletion" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.62"/>
+  <testcase name="round3DuplicateSubmitDuringPreparingDoesNotOverwriteOwnership" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.613"/>
+  <testcase name="alreadyInFlightSubmissionReturnsConflictReason" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.083"/>
+  <testcase name="round3CancelAllMustPreventLateEnqueueFromAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="1.054"/>
+  <testcase name="formSubmissionBlockedKeepsFormAndDraft" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="10.038">
+    <failure message="kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms" type="kotlinx.coroutines.TimeoutCancellationException">kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at com.ntt.crosstest.audit.ReportOverlapTest$until$2.invokeSuspend(ReportOverlapTest.kt:119)
+	at com.ntt.crosstest.audit.ReportOverlapTest.viewModel(ReportOverlapTest.kt:111)
+	at com.ntt.crosstest.audit.ReportOverlapTest$formSubmissionBlockedKeepsFormAndDraft$1.invokeSuspend(ReportOverlapTest.kt:178)
+	Suppressed: org.robolectric.android.internal.AndroidTestEnvironment$UnExecutedRunnablesException: Main looper has queued unexecuted runnables. This might be the cause of the test failure. You might need a shadowOf(Looper.getMainLooper()).idle() call.
+Caused by: kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:281)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:243)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:498)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:105)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+</failure>
+  </testcase>
+  <testcase name="explicitMissionMustNotSilentlyBecomeOrdinaryApprovedComment" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="10.049">
+    <failure message="kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms" type="kotlinx.coroutines.TimeoutCancellationException">kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at com.ntt.crosstest.audit.ReportOverlapTest$until$2.invokeSuspend(ReportOverlapTest.kt:119)
+	at com.ntt.crosstest.audit.ReportOverlapTest.viewModel(ReportOverlapTest.kt:111)
+	at com.ntt.crosstest.audit.ReportOverlapTest$explicitMissionMustNotSilentlyBecomeOrdinaryApprovedComment$1.invokeSuspend(ReportOverlapTest.kt:153)
+	Suppressed: org.robolectric.android.internal.AndroidTestEnvironment$UnExecutedRunnablesException: Main looper has queued unexecuted runnables. This might be the cause of the test failure. You might need a shadowOf(Looper.getMainLooper()).idle() call.
+Caused by: kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:281)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:243)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:498)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:105)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+</failure>
+  </testcase>
+  <testcase name="ordinaryPendingReportMustKeepItsTypeAfterJoiningMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.074"/>
+  <testcase name="remainingForeignCompletionMustPreserveDraftInOtherViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.641"/>
+  <testcase name="newDailyReportMustNotBecomeJoinedMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.062"/>
+  <testcase name="remainingExplicitDifferentMissionMustNotSubmitOldMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="10.032">
+    <failure message="kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms" type="kotlinx.coroutines.TimeoutCancellationException">kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at com.ntt.crosstest.audit.ReportOverlapTest$until$2.invokeSuspend(ReportOverlapTest.kt:119)
+	at com.ntt.crosstest.audit.ReportOverlapTest.viewModel(ReportOverlapTest.kt:111)
+	at com.ntt.crosstest.audit.ReportOverlapTest$remainingExplicitDifferentMissionMustNotSubmitOldMission$1.invokeSuspend(ReportOverlapTest.kt:235)
+	Suppressed: org.robolectric.android.internal.AndroidTestEnvironment$UnExecutedRunnablesException: Main looper has queued unexecuted runnables. This might be the cause of the test failure. You might need a shadowOf(Looper.getMainLooper()).idle() call.
+Caused by: kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 10000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:281)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:243)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:498)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:105)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+</failure>
+  </testcase>
+  <testcase name="missionContextMustMatchTheRequestedMissionIdentity" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.061"/>
+  <testcase name="remainingMissingScreenshotMustNotBeAcceptedBeforePersistence" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.024"/>
+  <testcase name="round2AdmissionMustNotPerformStorageIoOnCallingThread" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.034"/>
+  <testcase name="approvedMissionCommentMustNotDependOnLiveMissionFetch" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.071"/>
+  <testcase name="round3CallerCancellationDoesNotCancelManagerAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.072"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

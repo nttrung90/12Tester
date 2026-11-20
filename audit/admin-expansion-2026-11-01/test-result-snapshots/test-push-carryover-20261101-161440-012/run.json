@@ -1,0 +1,12 @@
+{
+    "logName":  "test-push-carryover",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.PushAndCarryoverHardeningTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T16:14:24.8855395Z",
+    "finishedUtc":  "2026-11-01T16:14:40.0210335Z",
+    "currentRunXmlCount":  1
+}

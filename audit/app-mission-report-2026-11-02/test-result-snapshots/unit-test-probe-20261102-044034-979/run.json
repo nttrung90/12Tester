@@ -1,0 +1,12 @@
+{
+    "logName":  "unit-test-probe",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionReportRecheckProbeTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:40:14.1673510Z",
+    "finishedUtc":  "2026-11-02T04:40:35.0012246Z",
+    "currentRunXmlCount":  1
+}

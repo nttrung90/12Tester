@@ -1,0 +1,34 @@
+=== SETTING UP REAL PG FIXTURE ===
+=== CLEANING UP CONCURRENCY FIXTURE ===
+CLEANUP COMPLETED.
+F:\AI\12Tester\supabase\tests\node_modules\pg\lib\client.js:694
+          Error.captureStackTrace(err)
+                ^
+
+error: new row for relation "user_slots" violates check constraint "user_slots_slot_number_check"
+    at F:\AI\12Tester\supabase\tests\node_modules\pg\lib\client.js:694:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async prepareBonusConcurrencyFixture (file:///F:/AI/12Tester/supabase/tests/campaign-tester-bonus-concurrency-fixture.mjs:51:5)
+    at async file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:91:7
+    at async withClient (file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:66:12)
+    at async file:///F:/AI/12Tester/supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs:88:3 {
+  length: 396,
+  severity: 'ERROR',
+  code: '23514',
+  detail: 'Failing row contains (f0de5b6e-44a9-40fa-88b4-c37b6bb1224c, a8a4b353-ed30-4c88-abf6-8cc5fc3531bc, 1, 2026-11-11 16:03:12.85858+07, 2026-12-11 16:03:12.85858+07, 2026-11-11 16:03:12.85858+07).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'user_slots',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'user_slots_slot_number_check',
+  file: 'execMain.c',
+  line: '2079',
+  routine: 'ExecConstraints'
+}
+
+Node.js v24.15.0

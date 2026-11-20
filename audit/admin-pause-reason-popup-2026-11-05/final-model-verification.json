@@ -1,0 +1,35 @@
+[
+  {
+    "sessionId": "ses_e57087968ffez2Rgp31xWtpWsP",
+    "assistantMessages": 230,
+    "models": [
+      {
+        "provider": "google",
+        "model": "antigravity-gemini-3.8-flash",
+        "variant": "high"
+      }
+    ]
+  },
+  {
+    "sessionId": "ses_e56f3e730ffeDFrVYyHgL6Hm6n",
+    "assistantMessages": 60,
+    "models": [
+      {
+        "provider": "google",
+        "model": "antigravity-gemini-3.8-flash",
+        "variant": "high"
+      }
+    ]
+  },
+  {
+    "sessionId": "ses_e56d6db8cffeuytCef94j48fdl",
+    "assistantMessages": 131,
+    "models": [
+      {
+        "provider": "google",
+        "model": "antigravity-gemini-3.8-flash",
+        "variant": "high"
+      }
+    ]
+  }
+]

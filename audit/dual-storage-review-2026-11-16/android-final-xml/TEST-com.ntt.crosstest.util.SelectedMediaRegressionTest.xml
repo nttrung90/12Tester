@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.SelectedMediaRegressionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-16T09:24:33.775Z" hostname="PC-5700X3D" time="0.117">
+  <properties/>
+  <testcase name="fetchUsesLiveChildInsteadOfExpiredParentMetadata" classname="com.ntt.crosstest.util.SelectedMediaRegressionTest" time="0.076"/>
+  <testcase name="detailedComparisonUsesSelectedChildLifetime" classname="com.ntt.crosstest.util.SelectedMediaRegressionTest" time="0.014"/>
+  <testcase name="expiredChildStopsFetchBeforeNetwork" classname="com.ntt.crosstest.util.SelectedMediaRegressionTest" time="0.014"/>
+  <testcase name="selectedChildHashDoesNotReusePrimaryHash" classname="com.ntt.crosstest.util.SelectedMediaRegressionTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

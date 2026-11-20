@@ -1,0 +1,18 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "Hash": "FAAB610010C562611CE5283BD96500A40DC3F90681973124F89676C9E08C8F92"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "Hash": "DEF8FAEAD0D4BF1F45E86D8E3BA40960D52CA7FC41BD7CEA4184D2F495B668DC"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "Hash": "C46B9E09136564C4C8010EACDDF442546D2382A576F999636651CD23721ECEEB"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "Hash": "FC9BC5EA949DB7996CB672A688CE02A19EAAB89EFB424B5E3207C9E589DEC664"
+  }
+]

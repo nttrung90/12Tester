@@ -1,0 +1,44 @@
+[
+  {
+    "path": "F:\\AI\\12Tester\\.tmp\\release\\12Tester-1.0.5-25-rpc-v2-fixed.apk",
+    "length": 5874507,
+    "lastWriteUtc": "2026-10-30T06:17:44.4212359Z",
+    "sha256": "7C1419DAC56A97845A1666FB4B0581C868AF5668ECFB8575054783E11130BA2F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\.tmp\\release\\12Tester-1.1.5-35-no-repeat-report-error.apk",
+    "length": 6571177,
+    "lastWriteUtc": "2026-11-05T10:23:31.3543792Z",
+    "sha256": "541640EB5BA94AEC2A7575CBCAABA0E7E6C13D89BB3422E14447298D0C19C552"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\intermediates\\intermediary_bundle\\release\\packageReleaseBundle\\intermediary-bundle.aab",
+    "length": 127320790,
+    "lastWriteUtc": "2026-11-11T15:58:49.2107791Z",
+    "sha256": "EAC98744AA6D4AF7E4B37CC240389E5AA5BCA742319A29F6696B7980287F50A1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+    "length": 36594496,
+    "lastWriteUtc": "2026-11-12T10:08:16.0744482Z",
+    "sha256": "CC6C8CE4A0FA76CB8BD90FD664FD3B86F3D4E1E54CDB2F05F5CBCAC504884704"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\release\\app-release.apk",
+    "length": 6571177,
+    "lastWriteUtc": "2026-11-05T10:23:31.3543792Z",
+    "sha256": "541640EB5BA94AEC2A7575CBCAABA0E7E6C13D89BB3422E14447298D0C19C552"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\bundle\\release\\app-release.aab",
+    "length": 12877860,
+    "lastWriteUtc": "2026-11-03T23:38:23.2174532Z",
+    "sha256": "05EC0BA9DEA2C28FB6B1A1D5D6883395A40107E4C1983DD0804BDF9708150B47"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\release\\app-release.aab",
+    "length": 13261645,
+    "lastWriteUtc": "2026-11-11T15:58:51.3668111Z",
+    "sha256": "C39B2F40C7EEAA55EBB6CB6236CF8C8B606397C1C4A99564475A17DC7AB83DA7"
+  }
+]

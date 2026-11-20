@@ -1,0 +1,71 @@
+{
+  "at": "2026-11-13T23:25:46.170Z",
+  "pass": true,
+  "note": "Integrity verification of completed runs; no new execution of Android/backend tests.",
+  "backend": {
+    "path": "supervisor-runs/r3-backend-2026-11-13T18-35-13-677Z/results.json",
+    "pass": true,
+    "scripts": 11,
+    "concurrency": false
+  },
+  "android": {
+    "path": "file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-runs/android-2026-11-13T19-03-26-279Z/",
+    "totals": {
+      "suites": 95,
+      "tests": 750,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "fullRunObserved": "Antigravity testDebugUnitTest: BUILD SUCCESSFUL in 51s; recorded in SUPERVISOR_PROGRESS_R4.md",
+    "sourceMatches": true
+  },
+  "native": {
+    "path": "supervisor-runs/native-r4-2026-11-13T19-01-31-648Z/results.json",
+    "reviewCases": 5,
+    "bonusConcurrencyScenarios": 7,
+    "pass": true,
+    "dataDirectory": "F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+    "ownedProcessPid": 2160,
+    "cleanup": {
+      "gracefulStop": true,
+      "exit": {
+        "code": 0,
+        "signal": null
+      }
+    }
+  },
+  "beforeAfter": {
+    "beforePath": "supervisor-runs/native-r4-before-2026-11-13T19-11-58-612Z/results.json",
+    "oldProductPass": false,
+    "expectedCounterexample": true,
+    "oldFailingCases": [
+      "delete-gate-before-physical-delete-versus-create-v2",
+      "delete-refund-before-slot-versus-create-v2"
+    ],
+    "dependentWorkerCase": "Not separately assessed on old source because its accepted-removal prerequisite failed",
+    "currentProductCasesPass": true,
+    "sourceStable": true,
+    "cleanup": {
+      "gracefulStop": true,
+      "exit": {
+        "code": 0,
+        "signal": null
+      }
+    }
+  },
+  "migrationsCurrentMatchBothRuns": true,
+  "reviewAssertionsPreserved": true,
+  "packages": {
+    "count": 7,
+    "changed": [],
+    "created": [],
+    "touched": []
+  },
+  "protectedChanged": [],
+  "limitations": [
+    "Local verification only; migrations 089/090 not deployed to production.",
+    "Native PASS applies to the recorded scenarios, not a proof of every possible interleaving or a load test.",
+    "No new APK/AAB was built. No on-device end-to-end run was performed in this recheck."
+  ]
+}

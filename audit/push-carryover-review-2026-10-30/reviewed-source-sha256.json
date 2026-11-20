@@ -1,0 +1,34 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\066_push_and_carryover_hardening.sql",
+    "Hash": "EBF02559A79A23AEB99C9953087F2A895C3B3E4A10F7B72BFDDCC40ECC5499A6"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\tests\\run-push-and-carryover-baseline062-regression-test.mjs",
+    "Hash": "1C0144DE8659DAB8EDDCB0D0BBC42B285B2D558455B629558178096057FAB9EE"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\tests\\package.json",
+    "Hash": "C78BC1D55D082529B30DDDAC45B90738E7970BE8031802D5039DD912424001C9"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "Hash": "59EC5DBC1983AC2C3822A63D8C63BD6B7C128103E5480255C50ED32C5CB945D5"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "Hash": "8ABD2F84D9619296024496C703F3EEB8DC4016BDAB3B449BF2A78E162AFED7AB"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "Hash": "35E1A112EBFD0C6D3CB0C524006EEECCDDE1C6646B8FE61E4EB62C05888D4396"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "Hash": "5AF79DC22FE7F3A2B84A717381834AEC9DA91DDC0B184447FC7C1BCE695D1006"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\PendingCarryoverRetryRegressionTest.kt",
+    "Hash": "1B81AFAD6B32934BDD44E466CF604D58C39B115AE331FAFD70F3249EA17681A0"
+  }
+]

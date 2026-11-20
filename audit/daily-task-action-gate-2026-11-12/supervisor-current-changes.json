@@ -1,0 +1,41 @@
+{
+  "at": "2026-11-12T15:17:38.956Z",
+  "sourceFiles": 370,
+  "changedSource": [
+    "app/build.gradle.kts",
+    "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/work/ReminderWorker.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values-vi/strings.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/test/java/com/ntt/crosstest/data/DailyTaskCarryoverUnitTest.kt",
+    "app/src/test/java/com/ntt/crosstest/data/OwnerRemovalLifecycleTest.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerAutoPauseResumeHardeningTest.kt",
+    "supabase/tests/run-immediate-daily-quota-acceptance-test.mjs"
+  ],
+  "newSource": [
+    "app/src/main/java/com/ntt/crosstest/data/DailyTaskActionGate.kt",
+    "app/src/test/java/com/ntt/crosstest/data/DailyTaskActionGateUnitTest.kt",
+    "supabase/migrations/090_daily_task_action_gate.sql"
+  ],
+  "packageFiles": 7,
+  "changedPackages": [
+    "app/release/app-release.aab",
+    "app/build/intermediates/intermediary_bundle/release/packageReleaseBundle/intermediary-bundle.aab"
+  ],
+  "newPackages": [],
+  "touchedPackages": [
+    "app/release/app-release.aab",
+    "app/build/intermediates/intermediary_bundle/release/packageReleaseBundle/intermediary-bundle.aab"
+  ],
+  "protectedChanged": [
+    "app/build.gradle.kts"
+  ],
+  "newMigrations": [
+    "090_daily_task_action_gate.sql"
+  ]
+}

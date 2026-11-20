@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AdminOwnerAutoPauseTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-03T13:04:30.248Z" hostname="PC-5700X3D" time="0.003">
+  <properties/>
+  <testcase name="testOwnerAutoPauseConfigDeserialization" classname="com.ntt.crosstest.data.AdminOwnerAutoPauseTest" time="0.001"/>
+  <testcase name="testSetOwnerAutoPauseConfigResultDeserialization" classname="com.ntt.crosstest.data.AdminOwnerAutoPauseTest" time="0.001"/>
+  <testcase name="testSetOwnerAutoPauseConfigParamsSerialization" classname="com.ntt.crosstest.data.AdminOwnerAutoPauseTest" time="0.001"/>
+  <testcase name="incompleteServerConfigDoesNotAppearAsSevenDays" classname="com.ntt.crosstest.data.AdminOwnerAutoPauseTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

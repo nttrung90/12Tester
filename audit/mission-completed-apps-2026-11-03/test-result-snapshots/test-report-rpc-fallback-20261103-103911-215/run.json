@@ -1,0 +1,12 @@
+{
+    "logName":  "test-report-rpc-fallback",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.ReportRpcFallbackAuditTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-03T10:38:56.9549993Z",
+    "finishedUtc":  "2026-11-03T10:39:11.2244897Z",
+    "currentRunXmlCount":  1
+}

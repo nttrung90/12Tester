@@ -1,0 +1,29 @@
+Finish the remaining focused correctness fixes for the user's next-app priority change in F:/AI/12Tester using Gemini 3.8 Flash High. The user explicitly authorized necessary source sharing to Google/Gemini and local code changes/tests. Do not deploy, change accounts/global configuration, read credentials, publish, commit, reset, clean or overwrite unrelated dirty changes. Parent controls final full-suite verification. No subagents.
+
+Current status confirmed by controller:
+- Migration 086 and SQL behavioral tests pass, including real report submission/reward for an already-full campaign.
+- Pure selector implements 4 strict groups: under-target installed, under-target uninstalled, full installed, full uninstalled. Keep it.
+- CampaignDetailNextAppPriorityTest now has 10 passing tests and bounded async gates. Preserve its working scheduler/WorkManager setup. STEP1_RESULT.md records it.
+- Controller ran all 3 focused classes together: 33 tests, 1 failure. Output runs/reviewer-focused-current.log. Failure: EgressFinalClientReviewTest.legacyServerPayloadMissingStats_triggersBatchStatsFill_populatesCorrectly, expected 2 total HTTP attempts but actual is 1. Candidate RPC is counted; getCampaignsStatsMap's actual get_campaigns_stats RPC is NOT counted. Fix actual telemetry at the point of the real network attempt inside getCampaignsStatsMap (not at call site, which would overcount single-flight/cache hits). Keep assertion expecting two real calls. This is a measurement bug, not a reason to weaken the test.
+
+Do these small concrete fixes and tests now:
+
+1. CampaignDetailViewModel currently handles current-owner invalidation during consume by only nextSuggestionLoading=false (near lines1510-1540), and handles scope/day change after fetch/catch similarly. With nextCampaignToTest null and nextSuggestionFailed false, UI says 'all apps done' despite discarded data. For a still-owning sequence whose snapshot scope/day/mutation became invalid, clear stale next selection and publish a retryable failed state (or close invalid identity's prompt). An old sequence must still do ZERO UI writes. Test invalidation during suspended consumption and stale day/session results don't become a genuine-empty success. Existing tests expecting loading=false/next=null should remain, with appropriate failure assertions added. Never remove valid full-app candidates.
+
+2. Validate the chosen suggestion again when user taps Test now. A dialog can stay open across day/account/mutation changes after selection; current Screen opens nextCamp.id unconditionally. Add a small ViewModel method that only returns a next campaign ID when the saved snapshot is still fresh for current identity/day/mutation and there is an actual selection; otherwise clear the stale choice, start/offer refresh and return null. Screen calls this method and navigates/dismisses only when ID is valid. Test a selected result followed by day change or mutation cannot navigate the stale ID, and a valid snapshot does return the ID. No polling, no request per candidate, no new Home sorting changes.
+
+3. Repository existing guards now reject null campaign IDs early and throw for session/day/mutation change during batch repair. Verify with meaningful MockEngine tests in EgressFinalClientReviewTest (reuse client/candidatesJson helpers):
+   - v2 old payload missing daily fields => exactly 1 stats batch, no Home request (existing test).
+   - stats repair says has_tested_today=true => exclude that candidate, but preserve any remaining full candidate.
+   - stats batch missing a candidate or stale stats_date => error, not empty success or assumed 0.
+   - null/blank ID with missing fields => error before stats request.
+   - pause stats reply using suspend CompletableDeferred gate; change business day/session generation/campaign mutation separately, release; results must not be published as valid candidates. Assert documented empty/error contract and no fallback to Home or marking RPC unavailable. All waits bounded.
+
+4. Existing firstSubmissionSnapshot_preservedAcrossSubmitCompletion test currently only prefetches and asserts the first choice; it never simulates completion. Strengthen it to actually exercise that race with existing state injection patterns or a narrow test seam, without probabilistic assertions. Preserve first-submission preference within the winning group and later normal selection behavior. Keep one identity/generation-scoped eager history snapshot; no duplicate history RPCs. Do not redesign unrelated submission logic.
+
+Avoid repeated whole-file reads. The ViewModel is ~90KB. For context use targeted shell slices, e.g. Get-Content ... | Select-Object -Skip 1308 -First 270. Screen Test now callback is near 520. Repository candidate function is near615-770; getCampaignsStatsMap network path near2180. Tests/helpers are already present. Use built-in edits or precise patches; do not repeatedly read the entire large source just to locate one method.
+
+Run the three focused classes offline after edits and fix failures:
+.\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.util.NextCampaignSelectorTest --tests com.ntt.crosstest.ui.viewmodels.CampaignDetailNextAppPriorityTest --tests com.ntt.crosstest.data.EgressFinalClientReviewTest --offline
+
+Use regular daemon first, not --no-daemon (a previous single-use daemon could not connect). If environment blocks build, record exact command and finish independent edits; parent can run it. Do not weaken tests, ignore failures, or claim skipped tests passed. Save output under audit/next-app-priority-2026-11-10/runs/step2-focused.log, update PROGRESS.md accurately, and finish with STEP2_RESULT.md giving files changed, exact outcome/counts and any unresolved issue. Parent will then run the full Android suite, assembleDebug, final SQL and write final report. Do not stop at another plan; make these fixes.

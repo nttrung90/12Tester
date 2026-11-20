@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-02T05:53:46.558Z" hostname="PC-5700X3D" time="0.002">
+  <properties/>
+  <testcase name="testWaivedStateOnlyWhenReadyAndZeroTarget" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.001"/>
+  <testcase name="testPendingCarryoverState" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.001"/>
+  <testcase name="testLegacyJsonCompatibility" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testCarryoverNewFieldsParsing" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testMemberStatusProperties" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

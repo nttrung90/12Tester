@@ -1,10 +1,13 @@
 package com.ntt.crosstest.data
 
+import com.ntt.crosstest.util.NetworkHttpFactory
+import com.ntt.crosstest.util.NetworkHttpFactory.applyResilient5GConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.ktor.client.engine.okhttp.OkHttp
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Single SupabaseClient for the whole app, created once in [com.ntt.crosstest.TestCheoApp].
@@ -27,11 +30,14 @@ object SupabaseHolder {
             supabaseUrl = url,
             supabaseKey = key,
         ) {
+            requestTimeout = 35.seconds
             install(Auth) {
                 // Persist the session on device and refresh it automatically.
                 autoSaveToStorage = true
                 autoLoadFromStorage = true
                 alwaysAutoRefresh = true
+                // Recover promptly after a brief radio/network transition.
+                retryDelay = 3.seconds
             }
             install(Postgrest)
             // Explicit engine: supabase-kt 3.x is built on Ktor 3.6.0.
@@ -45,15 +51,21 @@ object SupabaseHolder {
                             maxRequestsPerHost = 16
                         }
                     )
-                    connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-                    readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                    writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                    retryOnConnectionFailure(true)
+                    applyResilient5GConfig(
+                        connectTimeoutSeconds = 8L,
+                        readTimeoutSeconds = 30L,
+                        writeTimeoutSeconds = 30L,
+                        pingIntervalSeconds = 15L,
+                    )
                 }
             }
         }
         client = created
         return created
+    }
+
+    fun onNetworkChanged() {
+        NetworkHttpFactory.evictAllConnections()
     }
 
     fun get(): SupabaseClient =

@@ -1,0 +1,42 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "Hash": "C81D9B7D88BDA4088AB0716FCF938CF8B3B74814EE2951CE7ED2A150C15EBA40"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "Hash": "2D53D573DF14BEF695073B464D8201DEC3C0426644F65008146590D45597F768"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "Hash": "EA484A620497BE44DCE956B166E8459019AD0FD5E65E97F8EAF575B717101060"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "Hash": "C519822328B49CE56C2DB8AAFC41F84A1565E7E08B9F9A56005FDFE703BEDFCD"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignPushStore.kt",
+    "Hash": "263B150C3D14D44E22BACF3D7DB4783E7403732E300B9797F8F2BA9074D01AB8"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "Hash": "1937C4E113416FC3773B41ADCECD74E5360C5CF91748D240D86748C131E154FE"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\062_consolidated_baseline.sql",
+    "Hash": "C4814564D27FA43406C7D79A8982C3167C7BC8F20F8BC65A7160B505E4FC45F2"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\063_report_crypto_search_path.sql",
+    "Hash": "A14FDD0D9805B1FC48F83CB6B0C87A73EB076612FC21DD21CF58A4610D4D0A41"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\064_explicit_report_context.sql",
+    "Hash": "047DBA110F2AAEC70B0CA8D8C4A31D432EBE7B57D60BEB84522CDC1FCB670341"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\supabase\\migrations\\065_remove_dhash_hardblock.sql",
+    "Hash": "53CE688F80CF96532C3C3895046EDADCC30CD3C4499AFEFC81B92ED38BDB76A9"
+  }
+]

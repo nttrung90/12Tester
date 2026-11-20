@@ -21,7 +21,7 @@ class SettingsRepository(private val context: Context) {
     private val reminderEnabledKey = booleanPreferencesKey("reminder_enabled")
     private val appLanguageKey = stringPreferencesKey("app_language")
     private val appThemeKey = stringPreferencesKey("app_theme")
-    private val testingGuideConfirmedKey = booleanPreferencesKey("testing_guide_confirmed")
+    private val testModeKey = stringPreferencesKey("test_mode")
     private val updateNotifiedVersionCodeKey = intPreferencesKey("update_notified_version_code")
 
     val reminderEnabled: Flow<Boolean> =
@@ -42,13 +42,6 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { prefs -> prefs[updateNotifiedVersionCodeKey] = versionCode }
     }
 
-    val isTestingGuideConfirmed: Flow<Boolean> =
-        context.dataStore.data.map { prefs -> prefs[testingGuideConfirmedKey] ?: false }
-
-    suspend fun setTestingGuideConfirmed(confirmed: Boolean = true) {
-        context.dataStore.edit { prefs -> prefs[testingGuideConfirmedKey] = confirmed }
-    }
-
     /**
      * Stored language setting:
      * - "system": follow system language (Vietnamese if device is vi, else English)
@@ -57,16 +50,20 @@ class SettingsRepository(private val context: Context) {
      * Default is "system".
      */
     val appLanguage: Flow<String> =
-        context.dataStore.data.map { prefs -> prefs[appLanguageKey] ?: LANGUAGE_SYSTEM }
+        context.dataStore.data.map { prefs -> normalizeLanguageSetting(prefs[appLanguageKey] ?: LANGUAGE_SYSTEM) }
 
     suspend fun setAppLanguage(languageCode: String) {
+        val normalized = normalizeLanguageSetting(languageCode)
         // Save to SharedPreferences for fast synchronous bootstrap on app start
         context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
             .edit()
-            .putString(KEY_APP_LANGUAGE, languageCode)
+            .putString(KEY_APP_LANGUAGE, normalized)
             .apply()
 
-        context.dataStore.edit { prefs -> prefs[appLanguageKey] = languageCode }
+        context.dataStore.edit { prefs -> prefs[appLanguageKey] = normalized }
+        try {
+            com.ntt.crosstest.work.NotificationHelper.updateChannelsLocale(context)
+        } catch (_: Exception) {}
     }
 
     /**
@@ -89,6 +86,24 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { prefs -> prefs[appThemeKey] = theme }
     }
 
+    /**
+     * Stored tester workflow mode:
+     * - "normal": keep standard manual next-app suggestion & open/install steps (default)
+     * - "turbo": after submitting result, auto-select next app and auto-open/install it
+     */
+    val testMode: Flow<String> =
+        context.dataStore.data.map { prefs -> normalizeTestMode(prefs[testModeKey]) }
+
+    suspend fun setTestMode(mode: String) {
+        val normalized = normalizeTestMode(mode)
+        context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_TEST_MODE, normalized)
+            .apply()
+
+        context.dataStore.edit { prefs -> prefs[testModeKey] = normalized }
+    }
+
     companion object {
         const val LANGUAGE_SYSTEM = "system"
         const val LANGUAGE_VI = "vi"
@@ -98,14 +113,43 @@ class SettingsRepository(private val context: Context) {
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
 
+        const val TEST_MODE_NORMAL = "normal"
+        const val TEST_MODE_TURBO = "turbo"
+
         private const val PREFS_SYNC_NAME = "testcheo_settings_sync"
         private const val KEY_APP_LANGUAGE = "app_language"
         private const val KEY_APP_THEME = "app_theme"
+        private const val KEY_TEST_MODE = "test_mode"
+
+        /** Normalizes stored test mode to one of: "normal", "turbo". */
+        fun normalizeTestMode(mode: String?): String {
+            return when (mode?.trim()?.lowercase()) {
+                TEST_MODE_TURBO -> TEST_MODE_TURBO
+                else -> TEST_MODE_NORMAL
+            }
+        }
+
+        /** Reads saved test mode synchronously for instant UI initialization. */
+        fun getSavedTestModeSync(context: Context): String {
+            val raw = context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_TEST_MODE, TEST_MODE_NORMAL)
+            return normalizeTestMode(raw)
+        }
+
+        /** Normalizes stored language setting to one of: "system", "vi", "en". */
+        fun normalizeLanguageSetting(setting: String?): String {
+            return when (setting?.trim()?.lowercase()) {
+                LANGUAGE_VI -> LANGUAGE_VI
+                LANGUAGE_EN -> LANGUAGE_EN
+                else -> LANGUAGE_SYSTEM
+            }
+        }
 
         /** Read saved language synchronously for base context configuration. */
         fun getSavedLanguageSync(context: Context): String {
-            return context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
-                .getString(KEY_APP_LANGUAGE, LANGUAGE_SYSTEM) ?: LANGUAGE_SYSTEM
+            val raw = context.getSharedPreferences(PREFS_SYNC_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_APP_LANGUAGE, LANGUAGE_SYSTEM)
+            return normalizeLanguageSetting(raw)
         }
 
         /** Read the saved theme synchronously for the first frame / system bars. */
@@ -121,6 +165,18 @@ class SettingsRepository(private val context: Context) {
                 THEME_DARK -> true
                 else -> systemDark
             }
+        }
+
+        /**
+         * Returns the real system locale from device resources, unaffected
+         * by any in-app activity context overrides.
+         */
+        fun getSystemLocale(): Locale {
+            return try {
+                Resources.getSystem().configuration.locales[0]
+            } catch (_: Exception) {
+                null
+            } ?: Locale.getDefault()
         }
 
         /**
@@ -147,15 +203,11 @@ class SettingsRepository(private val context: Context) {
          *     If the device language is different from Vietnamese, returns Locale("en").
          */
         fun resolveLocale(setting: String, systemLocale: Locale? = null): Locale {
-            return when (setting) {
+            return when (normalizeLanguageSetting(setting)) {
                 LANGUAGE_VI -> Locale.forLanguageTag("vi")
                 LANGUAGE_EN -> Locale.forLanguageTag("en")
                 else -> {
-                    val sysLoc = systemLocale ?: try {
-                        Resources.getSystem().configuration.locales[0] ?: Locale.getDefault()
-                    } catch (_: Exception) {
-                        Locale.getDefault()
-                    }
+                    val sysLoc = getSystemLocale()
                     if (sysLoc.language.equals("vi", ignoreCase = true)) {
                         Locale.forLanguageTag("vi")
                     } else {
@@ -173,6 +225,7 @@ class SettingsRepository(private val context: Context) {
  * never goes stale after the user switches language).
  */
 class Localizer(private val appContext: Context) {
+    val context: Context get() = appContext
     fun get(@StringRes id: Int, vararg args: Any): String {
         val context = SettingsRepository.wrap(appContext)
         return if (args.isEmpty()) context.getString(id) else context.getString(id, *args)

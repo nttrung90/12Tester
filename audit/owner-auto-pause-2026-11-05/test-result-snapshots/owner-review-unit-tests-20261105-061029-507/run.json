@@ -1,0 +1,10 @@
+{
+    "logName":  "owner-review-unit-tests",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-05T06:09:43.0611271Z",
+    "finishedUtc":  "2026-11-05T06:10:29.5754507Z",
+    "currentRunXmlCount":  74
+}

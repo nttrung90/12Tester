@@ -13,7 +13,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -67,7 +68,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.UserNotification
+import com.ntt.crosstest.ui.theme.statusColors
+import com.ntt.crosstest.util.NotificationRenderer
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -109,13 +113,13 @@ fun NotificationBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        contentWindowInsets = { WindowInsets.safeDrawing },
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.85f)
-                .navigationBarsPadding(),
+                .fillMaxHeight(0.85f),
         ) {
             // Header
             Row(
@@ -278,7 +282,7 @@ private fun NotificationItemCard(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val config = remember(notification.type) { resolveNotificationConfig(notification.type) }
+    val config = resolveNotificationConfig(notification.type)
 
     Card(
         modifier = Modifier
@@ -297,7 +301,7 @@ private fun NotificationItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.Top,
         ) {
             // Category Icon Badge
@@ -329,7 +333,7 @@ private fun NotificationItemCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = notification.title,
+                        text = NotificationRenderer.renderTitle(notification, Localizer(LocalContext.current)),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = if (notification.isRead) FontWeight.SemiBold else FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -349,7 +353,7 @@ private fun NotificationItemCard(
                 }
 
                 Text(
-                    text = notification.message,
+                    text = NotificationRenderer.renderMessage(notification, Localizer(LocalContext.current)),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (notification.isRead) {
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -396,42 +400,45 @@ private data class NotificationConfig(
     val badgeBg: Color,
 )
 
+@Composable
 private fun resolveNotificationConfig(type: String): NotificationConfig {
+    val statusColors = MaterialTheme.statusColors
+    val colorScheme = MaterialTheme.colorScheme
     return when (type) {
-        "credit" -> NotificationConfig(
+        "tester_bonus", "credit" -> NotificationConfig(
             icon = Icons.Filled.MonetizationOn,
-            iconTint = Color(0xFFF57F17),
-            badgeBg = Color(0xFFFFF8E1),
+            iconTint = statusColors.warning,
+            badgeBg = statusColors.warningContainer,
         )
         "report" -> NotificationConfig(
             icon = Icons.AutoMirrored.Filled.Assignment,
-            iconTint = Color(0xFF1976D2),
-            badgeBg = Color(0xFFE3F2FD),
+            iconTint = statusColors.info,
+            badgeBg = statusColors.infoContainer,
         )
         "warning" -> NotificationConfig(
             icon = Icons.Filled.Warning,
-            iconTint = Color(0xFFD32F2F),
-            badgeBg = Color(0xFFFFEBEE),
+            iconTint = colorScheme.error,
+            badgeBg = colorScheme.errorContainer,
         )
         "account" -> NotificationConfig(
             icon = Icons.Filled.Lock,
-            iconTint = Color(0xFF7B1FA2),
-            badgeBg = Color(0xFFF3E5F5),
+            iconTint = colorScheme.tertiary,
+            badgeBg = colorScheme.tertiaryContainer,
         )
         "campaign" -> NotificationConfig(
             icon = Icons.Filled.RocketLaunch,
-            iconTint = Color(0xFF00897B),
-            badgeBg = Color(0xFFE0F2F1),
+            iconTint = colorScheme.primary,
+            badgeBg = colorScheme.primaryContainer,
         )
         "admin", "system" -> NotificationConfig(
             icon = Icons.Filled.Campaign,
-            iconTint = Color(0xFFE65100),
-            badgeBg = Color(0xFFFFF3E0),
+            iconTint = statusColors.warning,
+            badgeBg = statusColors.warningContainer,
         )
         else -> NotificationConfig(
             icon = Icons.Filled.Notifications,
-            iconTint = Color(0xFF455A64),
-            badgeBg = Color(0xFFECEFF1),
+            iconTint = colorScheme.onSurfaceVariant,
+            badgeBg = colorScheme.surfaceVariant,
         )
     }
 }

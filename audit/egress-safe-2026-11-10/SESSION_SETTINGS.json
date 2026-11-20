@@ -1,0 +1,47 @@
+{
+  "agentMode": "accept-edits",
+  "toolPermission": "request-review",
+  "allowNonWorkspaceAccess": false,
+  "permissions": {
+    "allow": [
+      "read_file(F:/AI/12Tester)",
+      "write_file(F:/AI/12Tester)",
+      "command(Get-ChildItem -Path . -Depth 1)",
+      "command(Get-ChildItem -Path . -Recurse -Filter *Egress*.kt)",
+      "command(Select-Object FullName)",
+      "command(.\\gradlew.bat assembleDebug --offline)",
+      "command(.\\gradlew.bat testDebugUnitTest --offline)",
+      "command(.\\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest --offline)",
+      "command(.\\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.data.EgressReviewContractTest --offline)",
+      "command(.\\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.data.EgressProtocolReviewTest --offline)",
+      "command(.\\gradlew.bat testDebugUnitTest assembleDebug --offline)",
+      "command(.\\gradlew.bat assembleDebug testDebugUnitTest --offline)",
+      "command(.\\gradlew.bat compileDebugKotlin --offline)",
+      "command(node audit/egress-safe-2026-11-10/apply-core-repair.mjs)",
+      "command(node audit/egress-safe-2026-11-10/apply-safe-diagnostics.mjs)",
+      "command(regex:node (?:--check )?supabase[/\\\\]tests[/\\\\]run-[A-Za-z0-9_-]+\\.mjs)",
+      "command(regex:node (?:--check )?run-[A-Za-z0-9_-]+\\.mjs)",
+      "command(node audit/egress-safe-2026-11-10/finish-client.mjs)",
+      "command(.\\gradlew.bat testDebugUnitTest --tests com.ntt.crosstest.data.EgressFinalClientReviewTest --offline)"
+    ],
+    "deny": [
+      "write_file(F:/AI/12Tester/.git)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/before)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/SESSION_SETTINGS.json)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/TASK_GEMINI.txt)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/apply-core-repair.mjs)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/apply-safe-diagnostics.mjs)",
+      "command(git reset)",
+      "command(git clean)",
+      "command(git checkout)",
+      "command(git push)",
+      "command(Remove-Item)",
+      "command(Stop-Process)",
+      "command(Invoke-WebRequest)",
+      "command(Invoke-RestMethod)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/finish-client.mjs)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/after-core)",
+      "write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/after-core-hashes.json)"
+    ]
+  }
+}

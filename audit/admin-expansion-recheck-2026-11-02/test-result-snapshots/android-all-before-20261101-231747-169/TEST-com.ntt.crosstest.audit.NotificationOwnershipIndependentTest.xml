@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.NotificationOwnershipIndependentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-01T23:17:16.843Z" hostname="PC-5700X3D" time="0.13">
+  <properties/>
+  <testcase name="confirmationFromAccountACannotBeExecutedAsAccountB" classname="com.ntt.crosstest.audit.NotificationOwnershipIndependentTest" time="0.054"/>
+  <testcase name="stalePageCannotPublishWhenProviderChangedBeforeCollectorRuns" classname="com.ntt.crosstest.audit.NotificationOwnershipIndependentTest" time="0.02"/>
+  <testcase name="unresolvedSendNowRetainsExactRequestIdAcrossRecreation" classname="com.ntt.crosstest.audit.NotificationOwnershipIndependentTest" time="0.029"/>
+  <testcase name="exactConfirmedReasonIsPersistedBeforeServerReply" classname="com.ntt.crosstest.audit.NotificationOwnershipIndependentTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

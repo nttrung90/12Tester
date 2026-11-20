@@ -1,0 +1,62 @@
+=== RUNNING MISSION REWARD MODES & MANAGEMENT TESTS (MIGRATION 077) ===
+Loading 26 migrations from 062 to 077...
+
+--- Test 1: Insufficient Credits & Balance Guards ---
+PASS: Mission creation rejected when total cost exceeds balance
+
+--- Test 2: Once Mode Across Multiple Days ---
+PASS: Owner created once-mode mission; 150 fee + 100 escrow held upfront atomically
+PASS: Tester 1 joined once-mode mission
+PASS: Tester 1 submitted once-mode report on Day 1
+PASS: Exact idempotent replay on once-mode returns committed receipt
+PASS: Day 2 once-mode submission safely updated pending report on same record across days
+PASS: Verified strictly 1 report in DB for once-mode participant across multiple days
+PASS: Ordinary app_test report submitted on same day coexists independently without collision
+PASS: Once-mode reward paid from escrow; owner balance unaffected; participant completed
+
+--- Test 3: Daily Mode for 3 Days Flow ---
+PASS: Daily mission created for production campaign; 150 fee + 90 escrow held
+PASS: Tester 1 joined daily mission
+TEST RUN FAILED: error: CAMPAIGN_NOT_OPEN
+    at pe.Oe (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:18162)
+    at pe.tt (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:15548)
+    at pe.parse (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:14222)
+    at D.Ne (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1763)
+    at file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1155
+    at wasm://wasm/0269dffe:wasm-function[10979]:0x5ad04f
+    at wasm://wasm/0269dffe:wasm-function[3598]:0x281dd2
+    at wasm://wasm/0269dffe:wasm-function[3640]:0x289ccf
+    at wasm://wasm/0269dffe:wasm-function[3650]:0x289f2b
+    at wasm://wasm/0269dffe:wasm-function[9956]:0x55697c {
+  length: 203,
+  severity: 'ERROR',
+  code: 'P0001',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: 'PL/pgSQL function _submit_tester_report_core(text,uuid,text,integer,uuid,text,text,text,uuid,jsonb,date) line 136 at RAISE',
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'pl_exec.c',
+  line: '3923',
+  routine: 'exec_stmt_raise',
+  query: '\n' +
+    '      select public._submit_tester_report_core(\n' +
+    "        'mission', 'bbbbbbbb-2222-bbbb-2222-bbbbbbbbbbbb'::uuid, 'Nộp ngày 1', 5,\n" +
+    "        '88888888-1111-8888-1111-888888888881'::uuid,\n" +
+    "        'https://firebasestorage.googleapis.com/v0/b/cross-testers.firebasestorage.app/o/reports%2Fbbbbbbbb-2222-bbbb-2222-bbbbbbbbbbbb%2F33333333-cccc-3333-cccc-333333333333%2Fday1.jpg?alt=media&token=fixture',\n" +
+    "        '1111222233334444',\n" +
+    '        null,\n' +
+    "        '2d89e1c7-a1c5-4b39-8258-58798f65a379'::uuid,\n" +
+    '        null,\n' +
+    '        null\n' +
+    '      ) as r;\n' +
+    '    ',
+  params: [],
+  queryOptions: undefined
+}

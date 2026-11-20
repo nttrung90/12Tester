@@ -274,4 +274,48 @@ class MissionReportAndExpirationTest {
         assertEquals(1, unexpired.size)
         assertEquals("m1", unexpired[0].id)
     }
+
+    @Test
+    fun testUnauthenticatedGetOpenMissionsAndRefreshMissionsHandleAnonRevokeGracefully() = runBlocking {
+        var rpcCalls = 0
+        val mockEngine = MockEngine { request ->
+            if (request.url.encodedPath.contains("get_open_missions")) {
+                rpcCalls++
+                respond(
+                    content = """{"code":"42501","details":null,"hint":null,"message":"permission denied for function get_open_missions"}""",
+                    status = HttpStatusCode.Unauthorized,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            } else {
+                respond("[]", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+            }
+        }
+
+        val supabase = createSupabaseClient("https://mock.supabase.co", "anon-key") {
+            httpEngine = mockEngine
+            install(Auth) {
+                sessionManager = MemorySessionManager()
+                codeVerifierCache = MemoryCodeVerifierCache()
+                enableLifecycleCallbacks = false
+            }
+            install(Postgrest)
+        }
+
+        val repo = CampaignRepository(supabase, Localizer(context))
+        val missions = repo.getOpenMissions(forceRefresh = true)
+        assertTrue("Unauthenticated getOpenMissions must return emptyList on 42501 instead of crashing", missions.isEmpty())
+        assertEquals(1, rpcCalls)
+
+        val vm = HomeViewModel(
+            repository = repo,
+            context = context,
+            localizer = Localizer(context),
+            reportSubmitManager = ReportSubmitManager(context),
+        )
+        rpcCalls = 0
+        vm.refreshMissions(forceRefresh = true)
+        assertEquals("HomeViewModel.refreshMissions must skip RPC when unauthenticated", 0, rpcCalls)
+        assertNull(vm.uiState.value.missionsError)
+        assertFalse(vm.uiState.value.isMissionsLoading)
+    }
 }

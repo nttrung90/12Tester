@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "androidTests": 551,
+  "androidSuites": 72,
+  "backendExitCode": 0,
+  "sourceHashesUnchanged": true,
+  "apkSha256": "EE0FA0B6713B3D275E6EEDF4AECB70A3021030C3A66A71EB426A321002883F73",
+  "productionDeployed": false,
+  "realPostgresConcurrency": "not run"
+}

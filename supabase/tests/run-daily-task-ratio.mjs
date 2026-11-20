@@ -7,8 +7,8 @@ import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = path => readFileSync(`${root}${path}`, 'utf8').replaceAll('\r\n', '\n');
-const migration = read('supabase/migrations/042_configurable_daily_task_ratio.sql');
-const full = read('supabase/full_schema_singapore.sql');
+const migration = read('supabase/migrations_archive/pre_baseline_062/042_configurable_daily_task_ratio.sql');
+const full = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');
 const marker = '-- ===== 042_configurable_daily_task_ratio.sql =====\n';
 const nextMarker = '-- ===== 043_backend_cleanup_hardening.sql =====\n';
 const marker044 = '-- ===== 044_mission_flow_hardening.sql =====\n';
@@ -26,12 +26,12 @@ const section042 = extractSection('042_configurable_daily_task_ratio.sql');
 assert.equal(section042, migration.trim(), 'mirror equals migration 042 byte for byte');
 
 if (full.includes(nextMarker)) {
-  const migration043 = read('supabase/migrations/043_backend_cleanup_hardening.sql');
+  const migration043 = read('supabase/migrations_archive/pre_baseline_062/043_backend_cleanup_hardening.sql');
   const section043 = extractSection('043_backend_cleanup_hardening.sql');
   assert.equal(section043, migration043.trim(), 'mirror equals migration 043 byte for byte');
 }
 if (full.includes(marker044)) {
-  const migration044 = read('supabase/migrations/044_mission_flow_hardening.sql');
+  const migration044 = read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql');
   const section044 = extractSection('044_mission_flow_hardening.sql');
   assert.equal(section044, migration044.trim(), 'mirror equals migration 044 byte for byte');
 }

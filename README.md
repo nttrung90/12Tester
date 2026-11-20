@@ -8,7 +8,7 @@ các developer khác tham gia test chéo lẫn nhau. Mỗi ngày mỗi người 
 **"Đã test hôm nay"** (mỗi người 1 lần/ngày — chống trùng ngay ở database), có thể để lại
 đánh giá sao + góp ý. App tự tính tiến độ: đủ 14 ngày và đủ 20 tester thì sẵn sàng nộp Play duyệt.
 
-**Cấu hình tỷ lệ test bằng Supabase:** migration `042_configurable_daily_task_ratio.sql`
+**Cấu hình tỷ lệ test bằng Supabase:** baseline `062_consolidated_baseline.sql` đã bao gồm chức năng của migration 042 cũ,
 giữ mức mặc định 3 app test / app đang hoạt động / ngày và cho phép đặt lịch tỷ lệ mới
 mà không phát hành lại Android. Xem [hướng dẫn vận hành](supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md).
 Source Android hiện dùng hướng dẫn theo chỉ tiêu hôm nay, không cố định số 3.
@@ -83,7 +83,9 @@ cross-test/
 │       │       ├── ReminderWorker.kt       # WorkManager: kiểm tra check-in, bắn notification
 │       │       └── NotificationHelper.kt   # tạo notification channel
 │       └── res/                     # strings VI (mặc định) + EN, theme, icon
-├── supabase/migrations/001_init.sql # toàn bộ schema + RLS + trigger tạo profile
+├── supabase/migrations/062_consolidated_baseline.sql # migration nền hiện hành; tiếp theo là 063
+├── supabase/migrations/063_report_crypto_search_path.sql # bản vá mới chạy sau 062
+├── supabase/migrations_archive/pre_baseline_062/    # 65 migration cũ và schema gộp cũ, chỉ lưu lịch sử/test
 └── README.md
 ```
 
@@ -100,25 +102,27 @@ cross-test/
 ### Bước B — Chạy file SQL tạo database
 
 1. Trong Supabase Dashboard, mở **SQL Editor** → **New query**.
-2. Chạy lần lượt **tất cả** file trong `supabase/migrations/` theo thứ tự tăng dần
-   (`001_init.sql` → `037_reward_10_credits.sql`). Mỗi file: mở ra, copy toàn bộ,
-   paste vào một query mới rồi bấm **Run**.
-3. Kiểm tra: vào **Table Editor** phải thấy các bảng chính `profiles`, `campaigns`,
+2. Mở **`supabase/migrations/062_consolidated_baseline.sql`**, copy **toàn bộ** file,
+   paste vào một query mới rồi bấm **Run** bằng quyền `postgres`/database owner.
+   File dùng được cho database mới và database đã áp dụng đến 061; cho phép còn thiếu 046.
+   Database hiện có được giữ dữ liệu, Credit, báo cáo, streak, cấu hình, lịch sử và bộ đếm sequence.
+   Nếu schema quá cũ hoặc ràng buộc khác bản đã kiểm tra, file dừng và rollback toàn bộ.
+3. Cuối kết quả phải có dòng `version = 062`. Khi có migration `063_*.sql`, `064_*.sql`,
+   chạy chúng tiếp nối theo thứ tự. **Không chạy lại các file trong `migrations_archive/`.**
+   Chạy lại 062 sẽ bỏ qua payload nếu đã có dấu mốc, giữ các thay đổi của 063 trở đi.
+   Workspace hiện đã có bản vá `063_report_crypto_search_path.sql`: chạy tiếp sau 062
+   để hàm nộp báo cáo tìm được `pgcrypto` khi extension nằm trong schema `extensions`.
+4. Kiểm tra: vào **Table Editor** phải thấy các bảng chính `profiles`, `campaigns`,
    `campaign_members`, `checkins`, `feedbacks`, `credit_logs`, `tester_reports`,
    `notifications`, `user_warnings`, `report_review_events`.
 
 > **Lưu ý quan trọng:**
-> - `supabase/full_schema_singapore.sql` chỉ gộp schema tới migration 014, **không** bao gồm
->   các migration mới. Nếu dùng file này cho project mới, vẫn phải chạy tiếp các migration
->   từ `015` → `037` theo đúng thứ tự.
-> - **Migration 030 → 037 là bắt buộc**: 030 chống lỗi hệ thống Credit (thu hồi Credit tạm,
->   Tip, cron auto-duyệt), 031 chống gian lận luồng duyệt báo cáo (bắt buộc ảnh mới sau khi bị
->   từ chối, khóa ảnh/rating sau khi duyệt, bộ đếm cảnh báo theo ngày Việt Nam), 032 bổ sung
->   quyền Admin tạm dừng/tiếp tục nhận tester cho app của người khác (không đổi chủ sở hữu),
->   033 chống nộp trùng khi retry (`client_submit_id`), bắt buộc `image_hash`/URL ảnh hợp lệ
->   và chặn client ghi thẳng bảng `tester_reports`; 034-036 bổ sung quyền Admin/Moderator và
->   nhiệm vụ ngày; 037 đổi cơ chế thưởng test (10 Credit tạm nhận, +2 khi chủ app duyệt,
->   +2 cho chủ app, auto 8h không thưởng, chặn duyệt sau 8h).
+> - 062 là **nguồn SQL triển khai duy nhất** cho baseline. Schema gộp cũ đã chuyển vào
+>   `supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql`, không dùng để triển khai.
+> - 062 chứa các định nghĩa cuối từ 001–061, bao gồm phần Media Gateway của 046 và bản sửa 061.
+>   Cấu hình secret/URL và triển khai service Media Gateway vẫn là bước vận hành riêng;
+>   SQL không tự đặt secret hoặc đổi cấu hình đang có.
+> - Xem [hướng dẫn chạy 062 và tạo migration tiếp theo](supabase/operations/HUONG_DAN_BASELINE_062.md).
 > - Nếu chưa bật được `pg_cron` cho `auto_accept_expired_reports`, không sao: từ migration 031
 >   hệ thống tự auto-duyệt khi mở chi tiết app hoặc tải Trang chủ.
 

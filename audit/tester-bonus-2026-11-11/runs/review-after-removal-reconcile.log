@@ -1,0 +1,22 @@
+PASS deferred removal recipients=1
+FAIL deferred removal recipients=1: original committed request must remain reconcilable after campaign removal
+
+false !== true
+
+PASS deferred removal recipients=2
+FAIL deferred removal recipients=2: original committed request must remain reconcilable after campaign removal
+
+false !== true
+
+{
+  "failures": [
+    {
+      "recipients": 1,
+      "error": "original committed request must remain reconcilable after campaign removal\n\nfalse !== true\n"
+    },
+    {
+      "recipients": 2,
+      "error": "original committed request must remain reconcilable after campaign removal\n\nfalse !== true\n"
+    }
+  ]
+}

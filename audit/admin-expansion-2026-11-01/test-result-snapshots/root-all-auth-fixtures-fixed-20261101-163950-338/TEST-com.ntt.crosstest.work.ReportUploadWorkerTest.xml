@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.work.ReportUploadWorkerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:39:47.811Z" hostname="PC-5700X3D" time="0.277">
+  <properties/>
+  <testcase name="changedFileFailsBeforeAnyNetworkOperation" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.028"/>
+  <testcase name="restartAfterReceiptDoesNotSubmitAgainAndWorksOffline" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.041"/>
+  <testcase name="cryptoConfigurationFailureKeepsImageAndRequestForManualRetry" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.035"/>
+  <testcase name="legacyUnknownRequestIsReconciledBeforeUploading" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.019"/>
+  <testcase name="finalAttemptStopsAndKeepsPendingForManualRetry" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.017"/>
+  <testcase name="checksumRetriesWithoutChangingBytesHashOrId" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.032"/>
+  <testcase name="accountChangeAfterUploadCannotSubmitForAnotherUser" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.021"/>
+  <testcase name="legacyCommittedReceiptDoesNotSubmitOrUploadAgain" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.027"/>
+  <testcase name="lostRpcResponseRetriesSameRequestAndSkipsSavedUpload" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.038"/>
+  <testcase name="cancellationDuringSubmissionIsNeverSwallowed" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

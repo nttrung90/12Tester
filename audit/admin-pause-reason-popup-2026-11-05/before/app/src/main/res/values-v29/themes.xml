@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TestCheo" parent="Theme.TestCheo.Legacy">
+        <item name="android:enforceNavigationBarContrast">true</item>
+    </style>
+</resources>

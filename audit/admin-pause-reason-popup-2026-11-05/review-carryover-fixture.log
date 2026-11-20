@@ -1,0 +1,12 @@
+=== BẮT ĐẦU KIỂM THỬ BACKEND MIGRATION 053: CỘNG DỒN APP TEST CÒN THIẾU ===
+PASS 1: Nạp thành công full schema và migrations 045 -> 053 (xác minh idempotent)
+PASS 2: Ngày đầu hiệu lực C=0; làm 4/6 -> carry_out = 2, phạt Credit và streak tăng
+PASS 3: Ngày 2 nhận 6+2=8, làm 5 -> carry_out = 3, streak tăng lên 2
+PASS 4: Ngày 3 nhận 6+3=9, làm đủ 9/9 -> carry_out = 0, streak reset về 0, không phạt
+PASS 5: Vượt chỉ tiêu không tạo số âm và không chuyển tín dụng sang ngày sau
+PASS 6: Ma trận nguồn app thiếu: Q=max(C, T), carry_out=max(0, Q-D), T=0 không phạt và giữ nguyên phần thiếu
+PASS 7: Member chỉ cần đăng nhập là hoàn thành; phần thiếu cũ được tạm giữ và giảm khi test tự nguyện
+PASS 8: 00:00 - 00:05 chưa chốt -> carryover_ready = false, test vẫn đếm, sau khi chốt chuyển ready
+PASS 9: Idempotency: retry finalizer không nhân đôi phạt hay nhân đôi phần thiếu
+PASS 10: Tương thích Đẩy app: Mua đẩy trừ 100 Credit, không đổi chỉ tiêu test, không reset streak
+=== TẤT CẢ 10 KIỂM THỬ BACKEND MIGRATION 053 CỘNG DỒN ĐỀU PASS 100% ===

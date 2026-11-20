@@ -1,0 +1,26 @@
+
+> crosstest-media-gateway@1.0.0 test
+> node --test media-gateway-server.test.mjs
+
+▶ Media Access Gateway Integration Tests (E04 & R2-02)
+  ✔ 1. Bị từ chối 401 khi thiếu Bearer token (17.8663ms)
+  ✔ 2. Bị từ chối 400 khi thiếu tham số query hoặc variant sai (5.2192ms)
+  ✔ 3. Bị từ chối 410 khi grant token đã hết hạn (1.9631ms)
+  ✔ 4. Bị từ chối 410 khi báo cáo quá hạn 30 ngày (DB SLA) (1.5366ms)
+  ✔ 5. Bị từ chối 403 khi chữ ký HMAC bị sửa đổi (tampered token) (1.5059ms)
+  ✔ 6. Bị từ chối 403 khi người lạ dùng trộm token của tác giả (replay/token sharing) (1.1283ms)
+  ✔ 7. Thành công 200: Tác giả tải ảnh full và nhận bytes trực tiếp (Không redirect 302) (2.1332ms)
+  ✔ 8. Thành công 200: Tác giả tải ảnh thumbnail (2.2732ms)
+  ✔ 9. Thành công 200: Campaign Owner tải ảnh báo cáo của tester (1.3989ms)
+  ✔ 10. Thành công 200: System Admin tải ảnh báo cáo (1.0891ms)
+  ✔ 11. Thành công 200: Tải ảnh attachment phụ cụ thể qua attachment_id (1.1961ms)
+  ✔ 12. Smoke test: server.mjs bootstrap fail-closed khi thiếu cấu hình môi trường (853.8297ms)
+✔ Media Access Gateway Integration Tests (E04 & R2-02) (906.6429ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 990.3279

@@ -1,0 +1,303 @@
+I1111 15:17:38.177081       1 resolver.go:85] Model ID gemini-3.8-flash-high not in local config, defaulting to CCPA
+I1111 15:17:38.177606       1 resolver.go:111] Model resolved via default
+I1111 15:17:38.177606      82 server.go:2341] Starting language server process with pid 13396
+I1111 15:17:38.178650      82 server.go:2400] Language server version: 1.5.5
+I1111 15:17:38.178650      82 server.go:1092] Language server will attempt to listen on host localhost
+I1111 15:17:38.187572      82 server.go:1107] Language server listening on random port at 64135 for HTTPS (gRPC)
+I1111 15:17:38.187572      82 server.go:1115] Language server listening on random port at 64136 for HTTP
+W1111 15:17:38.191149      41 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+I1111 15:17:38.191149      92 model_configs.go:201] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1111 15:17:38.191149      41 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+E1111 15:17:38.191670      92 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1111 15:17:38.199587     114 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1111 15:17:38.201692     114 store_client.go:764] summary store: reconciliation complete, synced 13 records
+W1111 15:17:38.208402     135 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 15:17:38.208402     135 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1111 15:17:38.209449      82 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1111 15:17:38.209449      82 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1111 15:17:38.214079     179 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1111 15:17:38.216436     179 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.216436     179 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1111 15:17:38.218437     179 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.218437     179 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1111 15:17:38.220570     179 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.220570     179 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1111 15:17:38.220570     179 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1111 15:17:38.220570     179 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1111 15:17:38.220570     179 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1111 15:17:38.242138      82 server.go:3649] initialized server successfully in 64.0794ms
+I1111 15:17:38.242138     104 server.go:4356] Auth succeeded, refreshing features and managers
+W1111 15:17:38.242138     180 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 15:17:38.242138     180 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1111 15:17:38.242138     181 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1111 15:17:38.242138     181 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1111 15:17:38.242138     180 rpcs_plugin_auth.go:105] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+E1111 15:17:38.242138     104 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1111 15:17:38.242138     104 server.go:4375] State refresh took 0ms
+I1111 15:17:38.242138     104 server.go:4390] [RemoteControl] Subscription callback triggered.
+I1111 15:17:38.242656       1 auto_updater.go:281] Last check was less than 15 minutes ago, skipping update (fast path)
+I1111 15:17:38.242656       1 common.go:191] Launching CLI mode
+E1111 15:17:38.242656       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1111 15:17:38.242656       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1111 15:17:38.242656       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1111 15:17:38.242656       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1111 15:17:38.243663     104 server.go:4393] [RemoteControl] RemoteControlEnabled value: false
+I1111 15:17:38.243663     104 server.go:5478] [RemoteControl] Session toggle is off, staying disconnected
+I1111 15:17:38.243663     104 server.go:5186] [RemoteControl] Resolved proxyServerURL: ""
+I1111 15:17:38.243663     104 profiler.go:231] Continuous pprof profiling is disabled.
+I1111 15:17:38.243663     190 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1111 15:17:38.245662     190 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.245662     190 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1111 15:17:38.247852     190 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.247852     190 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1111 15:17:38.249414     190 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1111 15:17:38.249414     190 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1111 15:17:38.249414     190 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1111 15:17:38.249414     190 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1111 15:17:38.249414     190 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1111 15:17:38.255664       1 server.go:3366] GetConversationDetail: found conversation a8eebef3-9717-422f-991d-503a1c19f1e7 (active=false)
+I1111 15:17:38.257239       1 projectresolve.go:97] project: resuming conversation belonging to project ID: default-cli-project
+I1111 15:17:38.257239       1 projectresolve.go:111] project: synced active project to "CLI Project" (id=default-cli-project) from resumed conversation
+I1111 15:17:38.257239       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1111 15:17:38.257239       1 analytics.go:249] CLI startup completed (took 81.5244ms, phases [main_entered=0ms ls_start=2ms ls_ready=66ms launch_cli=67ms backend_created=73ms project_resolved=81ms])
+I1111 15:17:38.257239       1 printmode.go:208] Print mode: starting (promptLength=2629, model="gemini-3.8-flash-high", conversationID="a8eebef3-9717-422f-991d-503a1c19f1e7")
+I1111 15:17:38.257239       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+I1111 15:17:38.258859       1 cli_setting_manager.go:159] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1111 15:17:38.263649     187 reconcile_summaries.go:94] [Summaries] reconcile checked 14 conversations, restored 1, cached 13, skipped 0, dropped 0, cancelled false in 20ms (resident: 0 -> 0)
+I1111 15:17:38.265163     258 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1111 15:17:38.265688     258 store_client.go:764] summary store: reconciliation complete, synced 14 records
+I1111 15:17:38.284103       1 cli_setting_manager.go:96] CLI settings initialized: permissions=&{Allow:[read_file(F:/AI/12Tester) write_file(F:/AI/12Tester) command(regex:.*gradlew\.bat (?:testDebugUnitTest|assembleDebug|compileDebugKotlin).*) command(regex:node (?:--check )?(?:supabase[/\\]tests[/\\])?run-[A-Za-z0-9_-]+\.mjs) command(regex:npm run test:[A-Za-z0-9_-]+) command(regex:git (?:status|diff).*) command(regex:rg .*) command(regex:Get-Content .*) command(regex:Get-ChildItem .*) command(regex:Select-String .*) command(regex:Select-Object .*) command(regex:Sort-Object .*) command(regex:Test-Path .*) command(regex:Measure-Object .*) command(regex:.*gradlew(?:\.bat)? .*) command(regex:Tee-Object .*) command(regex:Write-Output .*) command(regex:Out-File .*)] Deny:[write_file(F:/AI/12Tester/.git) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before-hashes.json) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/SESSION_SETTINGS.json) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/TASK_GEMINI.txt) command(git reset) command(git clean) command(git checkout) command(git push) command(Remove-Item) command(Stop-Process) command(Invoke-WebRequest) command(Invoke-RestMethod) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/before) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/before-hashes.json) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/SESSION_SETTINGS.json) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/TASK_GEMINI.txt) write_file(F:/AI/12Tester/supabase) write_file(F:/AI/12Tester/backend) write_file(F:/AI/12Tester/LOCK_ORDER.md) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/API_CONTRACT.md) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/BACKEND_RESULT.md) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/PROGRESS.md) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/TASK_ANDROID.txt) write_file(F:/AI/12Tester/audit/tester-bonus-2026-11-11/ANDROID_SETTINGS.json) write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10)] Ask:[]}, toolPermission=request-review
+I1111 15:17:38.295697       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1111 15:17:38.295697       1 manager.go:727] CLI store manager initialized successfully
+I1111 15:17:38.295697       1 printmode.go:889] Print mode: applying agent mode accept-edits
+I1111 15:17:38.295697       1 manager.go:1751] SetCycleMode called: accept-edits
+I1111 15:17:38.295697       1 printmode.go:409] Print mode: not authenticated, trying silent auth
+I1111 15:17:38.296223     221 keyring.go:64] keyringAuth: loaded token, expiry=2026-11-11 15:52:55.3264236 +0700 +07 expired=false
+I1111 15:17:38.296223       1 auth.go:157] ChainedAuth: authenticated via keyring (effective: keyring)
+I1111 15:17:38.296223       1 server_oauth.go:221] applyAuthResult: email=nguyenthieutrung@gmail.com, authMethod=consumer, quotaProject=
+I1111 15:17:38.296223       1 server_oauth.go:226] OAuth: authenticated successfully as nguyenthieutrung@gmail.com
+I1111 15:17:38.296223       1 server_oauth.go:235] b.codeAssistClient.AuthProvider (0xcc400f32b40) is same as b.cliAuth (0xcc400f32b40)
+W1111 15:17:38.296223     308 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+W1111 15:17:38.296223      63 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+I1111 15:17:39.370388     224 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x5ad613d6e9d84db7
+I1111 15:17:39.860697     224 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x6e1907f8bb4f7247
+I1111 15:17:39.872881       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1111 15:17:39.872881       1 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 15:17:39.872881       1 printmode.go:411] Print mode: silent auth succeeded
+I1111 15:17:39.872881     246 experiment_manager.go:66] Starting experiment refresh after login
+I1111 15:17:39.872881     245 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 15:17:40.344942     246 http_helpers.go:104] UseAICodeMendel routing switch changed: false -> true
+I1111 15:17:40.344942     246 server.go:5002] [RemoteControl] Mendel flags changed (remote-control-setting-enabled=true, remote-control-proxy-server-url="jetski-webchannel.googleapis.com:443"), re-evaluating the connection
+I1111 15:17:40.347069     246 server.go:5478] [RemoteControl] Session toggle is off, staying disconnected
+I1111 15:17:40.347069     246 server.go:5186] [RemoteControl] Resolved proxyServerURL: ""
+I1111 15:17:40.347069     246 experiment_manager.go:70] Experiments refreshed after login
+I1111 15:17:40.347069     150 server.go:5478] [RemoteControl] Session toggle is off, staying disconnected
+I1111 15:17:40.347069     150 server.go:5186] [RemoteControl] Resolved proxyServerURL: ""
+I1111 15:17:40.347069     154 manager.go:1658] Reloading system slash commands
+I1111 15:17:40.588172     296 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xc216f264b385f447
+I1111 15:17:41.295195     296 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xa8ce2af61c97f263
+I1111 15:17:41.378606     296 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 15:17:41.378606     245 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 15:17:41.378606     246 experiment_manager.go:66] Starting experiment refresh after login
+I1111 15:17:41.379214     418 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1111 15:17:41.423498       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1111 15:17:41.427991       1 server.go:3366] GetConversationDetail: found conversation a8eebef3-9717-422f-991d-503a1c19f1e7 (active=false)
+I1111 15:17:41.429048       1 session.go:163] Print mode: resuming conversation a8eebef3-9717-422f-991d-503a1c19f1e7
+I1111 15:17:41.429048       1 conversation_manager.go:1044] Streaming conversation a8eebef3-9717-422f-991d-503a1c19f1e7
+I1111 15:17:41.449856       1 server.go:3366] GetConversationDetail: found conversation a8eebef3-9717-422f-991d-503a1c19f1e7 (active=false)
+I1111 15:17:41.453083       1 server.go:1251] Starting conversation update stream for a8eebef3-9717-422f-991d-503a1c19f1e7
+I1111 15:17:41.454138       1 session.go:201] Print mode: conversation=a8eebef3-9717-422f-991d-503a1c19f1e7, sending message
+I1111 15:17:41.454138       1 manager.go:1658] Reloading system slash commands
+I1111 15:17:41.454875     246 server.go:5478] [RemoteControl] Session toggle is off, staying disconnected
+I1111 15:17:41.454875     246 server.go:5186] [RemoteControl] Resolved proxyServerURL: ""
+I1111 15:17:41.454875     246 experiment_manager.go:70] Experiments refreshed after login
+I1111 15:17:41.455407     246 experiment_manager.go:66] Starting experiment refresh after login
+I1111 15:17:41.455407     123 manager.go:1658] Reloading system slash commands
+I1111 15:17:41.458085     246 server.go:5478] [RemoteControl] Session toggle is off, staying disconnected
+I1111 15:17:41.458085     246 server.go:5186] [RemoteControl] Resolved proxyServerURL: ""
+I1111 15:17:41.458085     246 experiment_manager.go:70] Experiments refreshed after login
+I1111 15:17:41.458085     128 manager.go:1658] Reloading system slash commands
+I1111 15:17:41.478721       1 manager.go:1667] Slash commands unchanged, skipping update
+I1111 15:17:41.479786     123 manager.go:1667] Slash commands unchanged, skipping update
+I1111 15:17:41.482412     128 manager.go:1667] Slash commands unchanged, skipping update
+I1111 15:17:41.510196       1 conversation_manager.go:846] Forwarding user message to conversation a8eebef3-9717-422f-991d-503a1c19f1e7 (items=1, media=0)
+I1111 15:17:41.510196       1 server.go:1817] Sending user message to conversation a8eebef3-9717-422f-991d-503a1c19f1e7 (items=1, media=0)
+I1111 15:17:41.520356       1 latency_breakdown.go:168] SEND_USER_CASCADE_MESSAGE_LATENCY latency breakdown: map[active_user_state_latency_ms:0 blocking:false cascade_id:a8eebef3-9717-422f-991d-503a1c19f1e7 cascade_send_latency_ms:6 hydrate_slash_commands_latency_ms:0 load_trajectory_latency_ms:0 media_count:0 media_summaries_latency_ms:0 message_origin:AGENT_MESSAGE_ORIGIN_UNSPECIFIED resolve_agent_config_latency_ms:0 save_media_latency_ms:0 saved_media_count:0 status:OK total_latency_ms:7 trajectory_id:2b8de739-1561-4d29-9a63-7cf51ef3f1a3]
+I1111 15:17:41.529170     400 manager.go:651] Ignoring IDLE update at 307 steps; it predates the sent message (307 steps at send)
+I1111 15:17:41.567035     626 monitor_config_manager_external.go:53] externalMonitorConfigManager: initialized with embedded config (3 monitors)
+I1111 15:17:41.567035     626 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+I1111 15:17:41.567035     626 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+I1111 15:17:41.962224     245 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1111 15:17:42.145550     305 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x8cc448528f51e9fa
+I1111 15:17:49.958908     811 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2a0881cb00d6f7d0 ResponseID: pyT0aqLvAtCBvr0P4L_LmA4
+I1111 15:18:05.867143    1002 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8519eab1bbab83b6 ResponseID: uiT0auWRO-rf1e8Px8nT-Qc
+I1111 15:18:14.682735     271 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd4736b58ce084be4 ResponseID: vyT0arL9H8_brfcPxtnFmQ4
+I1111 15:18:21.301185    1086 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x50724954645532a1 ResponseID: yCT0aprJBbSX9tMPluOU-Qg
+I1111 15:18:25.870101    1170 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbcaca6d4ae99fe6f ResponseID: ziT0ap7DLsHs1e8Ph9i_6A4
+I1111 15:18:30.603260    1227 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xed5e4488fb1e02f1 ResponseID: 0yT0arfRH6SS9tMPjo_j4Qc
+I1111 15:18:37.530174    1286 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6f0502793545e0cf ResponseID: 2CT0asGKI__L2roPhPzLwA4
+I1111 15:18:55.878148    1330 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5fa7782a186f217b ResponseID: 5ST0aseaNe_wrfcP3vCFoAQ
+I1111 15:19:00.466312    1412 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xada57901b8555271 ResponseID: 8ST0arWiCM_qrfcP9ILHiAQ
+I1111 15:19:06.607203    1444 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc6785b2f394d071f ResponseID: 9ST0avSpHLPc9tMPmq2ryA4
+E1111 15:19:09.600893      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded
+I1111 15:19:19.986899     865 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x490bef3861d7266b ResponseID: BiX0avT7AYyn2roPqs3HwQI
+I1111 15:19:27.706564    1560 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x82dcf108ffc831c9 ResponseID: CSX0apa5EJSz1e8Pko67kQY
+I1111 15:19:32.681410    1612 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xee55f62baaeb447d ResponseID: ESX0avW0FfqX9tMP5L6ymAE
+I1111 15:19:38.174830    1655 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfbf091aa0f316a86 ResponseID: FiX0arrwEpus9tMP5tPzuA4
+I1111 15:19:42.988475    1694 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2fb7d3470e605e78 ResponseID: GyX0aqffIOqw1e8PpfrKwAs
+E1111 15:19:44.609142      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:19:53.031401    1788 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8275d7718af8b409 ResponseID: ICX0ao3SEZXb9tMP3anNuQY
+I1111 15:19:59.141588    1841 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd918d4500f8a4e14 ResponseID: LCX0at4ZpMO-vQ_2u9GJDw
+I1111 15:20:06.545425    1890 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x304a3df96bf5acd ResponseID: MCX0auWdFLDp1e8Pqdjs-Qw
+I1111 15:20:10.756357    1915 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x46835e0189e14930 ResponseID: OCX0arzsGPaj9tMPz86kiAM
+I1111 15:20:16.699089    1948 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x24ea361a9d4891fe ResponseID: PCX0avaYDviT1e8P_KqhwQ8
+E1111 15:20:19.622770      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:20:28.391671    2028 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x79f583d889bf0ed7 ResponseID: RiX0ar7xHr_trfcP7rmUyAg
+E1111 15:20:54.636222      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:21:19.286719    2129 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x58b11817cca9cefd ResponseID: eSX0auCSHefbrfcPoOmD0QU
+E1111 15:21:29.651030      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:22:00.767513    2261 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x1732eb2514a01b49 ResponseID: pCX0aqWeFanerfcP8PfEoQQ
+I1111 15:22:04.627966    2303 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9ac2ce6c38c5ad81 ResponseID: qiX0ao2qHOSV9tMPx4a3qQE
+E1111 15:22:04.665735      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:22:08.001640    2337 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe0ff40a9e932fb42 ResponseID: rSX0atTPMOnf9tMPoub1SQ
+I1111 15:22:12.004471    2408 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7f67ced10e309cc9 ResponseID: sSX0arnDB5zZrfcPqIqEsQs
+I1111 15:22:16.622177    2440 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd42323762b98c93f ResponseID: tSX0asOmDNOl2roPst3iwQM
+I1111 15:22:19.941646    2488 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd74c59bb4d53059a ResponseID: uSX0aq6PKoie2roP_-joyQ4
+I1111 15:22:24.208922    2532 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb93ec2405135af1 ResponseID: vSX0aqfqBurf1e8Px8nT-Qc
+I1111 15:22:28.039048    2566 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x18565149434e4e8f ResponseID: wSX0av-4HoXZrfcP7Jm_mQc
+I1111 15:22:36.319583    2600 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x51bc0dd646530c2c ResponseID: xiX0apkL55PV7w-VyrjwAQ
+E1111 15:22:39.680422      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:22:40.661201    2667 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6b155385c3aa0208 ResponseID: zSX0aob3JpSz1e8Pko67kQY
+I1111 15:22:41.130545    2708 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x5ba0037f594df212
+I1111 15:22:44.817222    2752 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xace38f96960dd5cc ResponseID: 0SX0atfjL93mrfcPwePfqAc
+I1111 15:22:45.347438    2761 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x28f9ae18a4277e6e
+I1111 15:22:48.361455    2819 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4066b339f3f4ab0f ResponseID: 1iX0aovjCujurfcP-riAmAQ
+I1111 15:22:52.158664    2854 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x54ea3b971762a576 ResponseID: 2SX0aqeFJNCBvr0P4L_LmA4
+I1111 15:22:56.962175    2899 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x59698b46b9e7541 ResponseID: 3SX0av21N-nf9tMPoub1SQ
+I1111 15:23:05.017083    2923 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6f274b9ff88bcab0 ResponseID: 4iX0avO2GfjbrfcPsvGRwQo
+I1111 15:23:08.684172    3002 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7afc5c718c5c0885 ResponseID: 6iX0av_QCO7urfcPyPD_iAQ
+I1111 15:23:12.697664    3045 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xde6b44af5b410047 ResponseID: 7SX0aoTDLIOv9tMPrcyXyA4
+E1111 15:23:14.699304      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:23:17.724511    3070 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9f29479edc1eb338 ResponseID: 8SX0aoOMNb6j9tMPkp6zoQY
+I1111 15:23:21.484504    3131 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x90b765b596f113c7 ResponseID: 9iX0avW2Lca01e8P0ba1sQ4
+I1111 15:23:25.007910    3169 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x437afdb068730c90 ResponseID: -iX0aqLlKtTbrfcPornHqQ4
+I1111 15:23:28.237270    3228 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xae07b72898e67701 ResponseID: _iX0arrUAtOl2roPst3iwQM
+I1111 15:23:39.623005    3260 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x84dd3cc7f14d5526 ResponseID: ASb0apHBH73a9tMPyfLzyQI
+I1111 15:23:44.466838    3330 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x58a3f7fb448b2924 ResponseID: DSb0asX9EtbXrfcPjY7TyAo
+E1111 15:23:49.716418      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:23:52.050216    3398 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8b901b020590494 ResponseID: ESb0ar-IMo-Y0-kPxOK9sQ4
+I1111 15:24:06.469249    3451 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xebb760a34d437494 ResponseID: Hyb0aqCdAtOMvr0Pn4iQ-QI
+I1111 15:24:10.151425    3528 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3aac509be79399 ResponseID: Jyb0arGWObu-vr0PysKEwAE
+I1111 15:24:15.264032    3571 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3c1f9433876052f4 ResponseID: Kyb0ap7sK93mrfcPwePfqAc
+I1111 15:24:23.116304    3606 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2ab17cb063550b77 ResponseID: MCb0aoqmHc_jrfcP0Y2DkQc
+E1111 15:24:24.730170      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:24:35.697013    3668 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd558064ff4029127 ResponseID: OCb0aq_5Le7urfcPyPD_iAQ
+I1111 15:24:42.620011    3733 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa8ddd378caa52373 ResponseID: RCb0aobaNffV9tMP5-jcmQE
+I1111 15:24:55.885357    3792 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xec822666f53a8413 ResponseID: VSb0ap67NaTf9tMP-_SPgA8
+E1111 15:24:59.748122      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:25:02.941214    3885 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xdd4a0775ee64a945 ResponseID: WSb0aqCqB73a9tMPyfLzyQI
+I1111 15:25:08.035894    3950 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5e3d0a4d69be89a8 ResponseID: YCb0aqjcCaGN1e8P9v27iQU
+I1111 15:25:22.438494    3996 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5e99cfab30f06f58 ResponseID: ZSb0are0J9Le9tMP07KrqQE
+I1111 15:25:28.644905    3469 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7f32e91d61dcfa27 ResponseID: cyb0aq6sM6fU9tMPqbmOsAE
+I1111 15:25:32.522607    4119 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x256eb80dbf46a520 ResponseID: eib0aomHCYvgrfcPsbKXmAQ
+E1111 15:25:34.769576      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:26:00.319408    4124 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9300caea3a9a9f4c ResponseID: kyb0auPQGa2gvr0PlerRuAE
+I1111 15:26:05.313175    4185 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3d9ef2baf39ea01f ResponseID: myb0atj_D9XlrfcP04_cyAc
+I1111 15:26:08.346541    4262 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcbea9e980e49b959 ResponseID: nib0aphrtd320w_29fSYAQ
+E1111 15:26:09.782638      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:26:11.140525    4303 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x737f5a62cc8fdf5b ResponseID: oCb0aqv9No6r9tMP7faDoAE
+I1111 15:26:13.669894    4348 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcb002c62014bc1e5 ResponseID: oyb0au3yLvaw0-kPzeO4uA0
+I1111 15:26:16.313880    4414 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x86f89fedd6c86a7a ResponseID: pib0aof2C5Sz1e8P4ubn6Ao
+I1111 15:26:26.449199    4450 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x73c600eea8f3268c ResponseID: qCb0atHlNueT1e8Plcq48AE
+I1111 15:26:30.379989    4486 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x96dbd114ec88fe91 ResponseID: syb0asnHKqnerfcP8PfEoQQ
+I1111 15:26:32.646953    4547 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x35609033d009e56c ResponseID: tib0aumSOf_L2roPhPzLwA4
+I1111 15:26:35.647340    4602 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x87872b11f7302e8c ResponseID: uSb0asKAErDp1e8Pqdjs-Qw
+E1111 15:26:44.795582      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:26:44.937056    4638 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x33ab2b450cbe579a ResponseID: vCb0asHkKduv9tMPgIfQoQ4
+I1111 15:26:48.651025    4657 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x58bcafd9e3a71c2d ResponseID: xSb0av36NIbvrfcP-9CzmAc
+I1111 15:26:51.048670    4748 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8da8c292cd034459 ResponseID: ySb0atS7EJXb9tMP3anNuQY
+I1111 15:26:54.343471    4791 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x73b6bcec686eec69 ResponseID: zCb0avLHBOuM1e8P3-fI8QY
+I1111 15:26:57.276405    4821 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x624298fa4f8e8aa ResponseID: zib0apuzOerprfcP8IzYgQQ
+I1111 15:26:59.984459    4874 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf363ef79067d302b ResponseID: 0Sb0aoSYN4HarfcP-sW88Q4
+I1111 15:27:02.780575    4909 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x21d5b45a1916822a ResponseID: 1Cb0aqj5J8fmrfcPntfOkQQ
+I1111 15:27:05.187775    4767 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5b6b16de427b8a7e ResponseID: 1yb0at-mGNyY0-kPzaOr8AM
+I1111 15:27:08.974347    5016 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5ac5da073096999c ResponseID: 2Sb0apuFLcXnrfcPr9KE-Q8
+I1111 15:27:11.849194    5053 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x32da59cc0c9c0516 ResponseID: 3Sb0avLeKfjd9tMP04ygkA8
+I1111 15:27:14.648376    5081 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6f346951105a0fa9 ResponseID: 4Cb0aq-NHaHnrfcP_sDz2AU
+I1111 15:27:18.256547    5142 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5fe621b575212558 ResponseID: 4yb0auyzFYj91e8Pvq2huAs
+E1111 15:27:19.809893      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:27:21.506588    5170 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe8e5563b74fc6860 ResponseID: 5yb0arCHGPWj9tMPkKzvmQ4
+I1111 15:27:25.289875    5223 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x1f12ff72d546d9e9 ResponseID: 6ib0aqHkC9OMvr0Pn4iQ-QI
+I1111 15:27:28.130898    5294 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x45fe5651e683316f ResponseID: 7Sb0asX0Ou_wrfcP3vCFoAQ
+I1111 15:27:32.066179    5340 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2d4efc2744b62975 ResponseID: 8Cb0asXXLurf1e8Px8nT-Qc
+I1111 15:27:36.018002    5380 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf4cef870f97bfd99 ResponseID: 9Cb0aq7iMKLhrfcPh5jksQ4
+I1111 15:27:40.766466    5451 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x1b77b5f1fc14318f ResponseID: -Cb0atPFLtLe9tMP07KrqQE
+I1111 15:27:44.460820    5493 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x411ad1f6e472d5ba ResponseID: _Sb0atS0Guqt9tMP47DHmQE
+I1111 15:27:45.047972    5511 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x527d352a374a4c50
+I1111 15:27:49.584110    5549 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x963c94f587b0b84b ResponseID: ASf0aqSgCLfsrfcP9JWekQQ
+I1111 15:27:50.081490    5403 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x2dba6894357f2e23
+E1111 15:27:54.828203      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:27:55.461789    5608 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6f1a4ad8cb3707dd ResponseID: Bif0apzDD_vorfcPoJrzwAQ
+I1111 15:27:59.752675    5672 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6bd27f2ae0007b0e ResponseID: DCf0aqevHIXZrfcP7Jm_mQc
+I1111 15:28:02.275938    5722 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8569bf1e9b7dfb36 ResponseID: ECf0arrnGZq12roP156V8Q0
+I1111 15:28:06.940294    5770 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4f661cb9dceb253d ResponseID: Eif0auGcOfaw0-kPzeO4uA0
+I1111 15:28:10.677682    5812 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x52ca31a0d0f02770 ResponseID: GCf0aufIA9yY0-kPzaOr8AM
+I1111 15:28:13.304243    5825 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xaffd790ed59f6941 ResponseID: Gyf0apqKEuqt9tMP47DHmQE
+I1111 15:28:18.315258    5885 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa12b733fce9e1664 ResponseID: Hif0aqeXELSX9tMPluOU-Qg
+E1111 15:28:29.841255      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:28:58.702680    5926 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x75ebe490654da9e0 ResponseID: Iyf0arrkDLLBvr0Pn_e_wQ4
+I1111 15:29:02.345761    6028 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8a7a7c214211703d ResponseID: Syf0av-_K_uu2roPlonX8A0
+E1111 15:29:04.852691      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:29:06.365806    6078 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x741c1b1cfa3e1ad0 ResponseID: Tyf0aouZDc_brfcPxtnFmQ4
+I1111 15:29:11.222622    6136 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x69517a04bdfcf4c ResponseID: Uyf0asD-FPqX9tMP5L6ymAE
+I1111 15:29:26.294169    6224 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2b523aee64ea6abb ResponseID: YSf0apDVOLm52roPzo6u4Q4
+I1111 15:29:30.620389    6289 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x65a2e9476e2b3ed2 ResponseID: Zyf0asrPKv-s9tMP4fD0sQE
+I1111 15:29:33.828531    6352 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa34ac1d02a87af69 ResponseID: ayf0arbJEZXb9tMP3anNuQY
+E1111 15:29:39.866091      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:29:52.654515    6421 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbede2dad868f346c ResponseID: bif0aubvIPzmrfcPv7-oyAc
+I1111 15:29:56.545209    6484 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5e57a1fa0786ecd9 ResponseID: gSf0aueUGo-Y0-kPxOK9sQ4
+I1111 15:30:04.261129    6540 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x887c07e6d3c8c78b ResponseID: hSf0aqPqDKHkrfcPj4jHmQ4
+I1111 15:30:07.523629    6574 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb4f09fa3244c8236 ResponseID: jSf0asbSAcuy9tMPi52TsAI
+I1111 15:30:10.514753    6630 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x19e8eb427789d61c ResponseID: kCf0ao7KCpSz1e8Pko67kQY
+I1111 15:30:14.185423    6666 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x917df95564bc647 ResponseID: kyf0arT4HpjhrfcPiJ_DsAw
+E1111 15:30:14.883437      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:30:17.778150    6712 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbaf7fdcb33682da2 ResponseID: lyf0aomXAvPprfcP59jDoQQ
+I1111 15:30:20.733025    6767 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x19024174de54d9e3 ResponseID: mif0aqbIIaGz2roPwvHm2Aw
+I1111 15:30:23.416553    6834 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xf274d86ba618e9b0 ResponseID: nSf0asTCGtja1e8Ppv_m4QE
+I1111 15:30:27.063640    6875 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe7da8c548c4d638d ResponseID: oCf0aq3vB46r9tMP7faDoAE
+I1111 15:30:30.772052    6921 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x11b47063d485009 ResponseID: oyf0atKxLZrJrfcP4_Gs8QU
+I1111 15:30:34.840516    6958 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xae1d35a3ce1fb7ca ResponseID: pyf0aojpNYOv9tMPrcyXyA4
+I1111 15:30:38.326498    7031 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xebf9c942c0697370 ResponseID: qyf0arzFKL_trfcP0tCW2A0
+I1111 15:30:43.409146    7065 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2a76e89039179cdd ResponseID: ryf0ar-rD8fmrfcPntfOkQQ
+E1111 15:30:49.898114      87 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1111 15:30:51.227453    7122 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xea56691ee07630b1 ResponseID: tSf0apaRKOzdvr0Pr5nb6QE
+I1111 15:30:57.967337    7194 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4cbeb5735582f4e9 ResponseID: vCf0aumSEo-Y0-kPxOK9sQ4
+I1111 15:31:01.350640    7244 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc25a3ebf0b485f9e ResponseID: wif0atj8KaLhrfcPh5jksQ4
+I1111 15:31:07.956756    7273 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8352a37b4ed13979 ResponseID: xif0aq6uB62gvr0PlerRuAE
+I1111 15:31:10.829744    7320 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4686e9108aef6be3 ResponseID: zCf0arSmJ93orfcPtpyIoAw
+I1111 15:31:14.565419    7370 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x9529fad9d870c3a2 ResponseID: zyf0at-BKa3d9tMP9fnXwA4
+I1111 15:31:18.614030    7105 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbeececc25fa8e291 ResponseID: 0yf0atitFPqX9tMP5L6ymAE
+I1111 15:31:23.989939    7423 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xac9674737d043949 ResponseID: 1yf0are0KKzBvr0P5YPc0QE
+E1111 15:31:24.910967      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:31:31.055517    7495 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2b193956b10ecd8b ResponseID: 3Cf0aobnKfjd9tMP04ygkA8
+E1111 15:31:59.925525      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded
+I1111 15:32:00.387810    7593 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8d68d428ed0d679f ResponseID: -Sf0asW8CYXZrfcP7Jm_mQc
+E1111 15:32:34.938627      87 client.go:98] Post "https://play.googleapis.com/log": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+I1111 15:32:39.490259    7686 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x57edfba274c28c07 ResponseID: Gyj0asqcJb_trfcP0tCW2A0
+I1111 15:32:44.831400    7751 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc9c8c1be5b9ab9a6 ResponseID: Kij0aqThFsyhvr0P1LPyyQs
+I1111 15:32:49.076390    7798 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x159ae822062f6129 ResponseID: Lij0avTuJM_jrfcP0Y2DkQc
+I1111 15:32:49.645035    7803 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x493c745ef2adf7a1
+I1111 15:32:53.115969    7852 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7df542b4a9111d4b ResponseID: Mij0ar60AtLe9tMP07KrqQE
+I1111 15:32:53.838761    7813 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xfb01f342fbe5ec40
+I1111 15:32:55.921732    7902 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x14f2158db1aad490 ResponseID: NSj0aoPKNqGz2roPwvHm2Aw
+I1111 15:33:01.351829    7984 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcacfbf43e9720c0c ResponseID: OCj0aunpMpOv9tMP-tn7wAE
+I1111 15:33:01.471682     400 tool_confirmation_manager.go:221] Print mode: soft-denying tool confirmation "RunCommand" at step 573
+I1111 15:33:01.471682    8014 server.go:2729] Tool confirmation for conversation a8eebef3-9717-422f-991d-503a1c19f1e7 step 573 (type=*gemini_coder_go_proto.Step_Generic approved=false)
+I1111 15:33:01.507098       1 manager.go:965] CLI store manager shutting down
+I1111 15:33:01.508628       1 conversation_manager.go:985] Stopping conversation stream
+I1111 15:33:01.508628     401 server.go:1314] Stream goroutine exited for a8eebef3-9717-422f-991d-503a1c19f1e7, sending completion signal
+E1111 15:33:01.768772    8017 telemetry.go:141] error recording trajectory segment analytics: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:recordTrajectoryAnalytics": context canceled
+I1111 15:33:01.770629    7948 server.go:4063] Language server shutting down
+I1111 15:33:01.770629    7948 server.go:4085] Waiting for migrations to complete to prevent partial migration state...
+E1111 15:33:01.778013     162 file_watcher.go:194] skipping empty or temp file: 
+E1111 15:33:06.770852      82 server.go:4056] Language server shutdown timed out

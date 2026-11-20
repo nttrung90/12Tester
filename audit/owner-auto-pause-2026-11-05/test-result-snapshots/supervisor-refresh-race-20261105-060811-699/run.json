@@ -1,0 +1,13 @@
+{
+  "logName": "supervisor-refresh-race",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyRefreshRaceReviewTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T06:07:58.1899109Z",
+  "finishedUtc": "2026-11-05T06:08:11.7078394Z",
+  "currentRunXmlCount": 0
+}

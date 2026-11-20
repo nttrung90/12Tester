@@ -169,6 +169,10 @@ object InstalledAppCache {
         }
     }
 
+    fun invalidateFreshness() {
+        lastRefreshAt = 0L
+    }
+
     /**
      * Retrieves cached user installed launcher apps (< 1ms).
      */

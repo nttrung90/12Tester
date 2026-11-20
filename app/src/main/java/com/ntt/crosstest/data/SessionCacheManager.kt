@@ -41,6 +41,7 @@ data class CachedSessionData(
     val todayCheckinCount: Int = 0,
     val missedStreak: Int = 0,
     val dailyTask: DailyTaskStatus? = null,
+    val isDailyTaskPendingRefresh: Boolean = false,
     val pendingReportsCount: Int = 0,
     val notifications: List<UserNotification> = emptyList(),
     val unreadNotificationsCount: Int = 0,
@@ -48,6 +49,7 @@ data class CachedSessionData(
     val timestamp: Long = 0L,
     val dateVn: String? = null,
     val sessionGeneration: Long = SessionCacheManager.currentGeneration(),
+    val dailyTaskMutationVersion: Long = 0L,
 ) {
     /**
      * Lọc và làm sạch dữ liệu nếu snapshot thuộc về ngày cũ ở Việt Nam.
@@ -75,10 +77,14 @@ data class CachedSessionData(
                 displayItems = displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
                 pausedDisplayItems = pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
                 completedDisplayItems = completedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) },
-                dailyTask = if (dailyTask?.statusDate != null && dailyTask.statusDate != todayStr) null else dailyTask,
+                dailyTask = dailyTask?.takeIf { it.statusDate == todayStr },
+                isDailyTaskPendingRefresh = false,
                 questSummary = questSummary?.copy(dailyCount = 0),
                 ownerStatsMap = ownerStatsMap.mapValues { (_, stats) -> stats.copy(testedTodayCount = 0) },
             )
+        }
+        if (dailyTask?.statusDate != null && dailyTask.statusDate != todayStr) {
+            return copy(dailyTask = null, isDailyTaskPendingRefresh = false)
         }
         return this
     }
@@ -100,7 +106,9 @@ object SessionCacheManager {
     }
 
     val generation = AtomicLong(1L)
+    private val dailyTaskVersion = AtomicLong(0L)
     private val diskLock = Any()
+    private val publicationLock = Any()
 
     @Volatile
     private var inMemoryCache: CachedSessionData? = null
@@ -109,6 +117,8 @@ object SessionCacheManager {
     private var isTombstoned = false
 
     fun currentGeneration(): Long = generation.get()
+    fun currentDailyTaskVersion(): Long = dailyTaskVersion.get()
+    fun nextDailyTaskVersion(): Long = dailyTaskVersion.incrementAndGet()
 
     /**
      * Cập nhật nhanh in-memory cache sau các thao tác thay đổi số dư hoặc ưu tiên hiển thị.
@@ -119,17 +129,40 @@ object SessionCacheManager {
         expectedGeneration: Long? = null,
         transform: (CachedSessionData) -> CachedSessionData
     ): Boolean {
-        val current = inMemoryCache ?: return false
-        if (expectedUserId != null && current.userId != expectedUserId) return false
-        if (expectedGeneration != null && generation.get() != expectedGeneration) return false
-        inMemoryCache = transform(current)
-        return true
+        synchronized(publicationLock) {
+            if (isTombstoned) return false
+            val currentGen = generation.get()
+            if (expectedGeneration != null && currentGen != expectedGeneration) return false
+
+            val current = inMemoryCache ?: if (expectedUserId != null) {
+                CachedSessionData(
+                    userId = expectedUserId,
+                    sessionGeneration = expectedGeneration ?: currentGen,
+                    dateVn = VnTime.today().toString()
+                )
+            } else {
+                return false
+            }
+
+            // Strict UID check: reject any mismatch, including null guest when expectedUserId is identified
+            if (expectedUserId != null && current.userId != expectedUserId) return false
+
+            val transformed = transform(current)
+            val newVer = dailyTaskVersion.get()
+            inMemoryCache = transformed.copy(dailyTaskMutationVersion = newVer)
+            return true
+        }
     }
 
     /**
      * Synchronously returns the in-memory cache without performing any disk I/O.
      */
-    fun peekMemory(): CachedSessionData? = if (isTombstoned) null else inMemoryCache?.sanitizeForDate()
+    fun peekMemory(): CachedSessionData? {
+        if (isTombstoned) return null
+        return synchronized(publicationLock) {
+            if (isTombstoned) null else inMemoryCache?.sanitizeForDate()
+        }
+    }
 
     /**
      * Fast O(1) synchronous check to know if an authenticated session exists on disk.
@@ -146,20 +179,24 @@ object SessionCacheManager {
     fun loadSync(context: Context): CachedSessionData? {
         val initialGen = generation.get()
         if (isTombstoned) return null
-        inMemoryCache?.let {
-            if (generation.get() == initialGen && !isTombstoned) return it.sanitizeForDate()
+        synchronized(publicationLock) {
+            inMemoryCache?.let {
+                if (generation.get() == initialGen && !isTombstoned) return it.sanitizeForDate()
+            }
         }
         val file = File(context.filesDir, FILE_NAME)
         if (!file.exists()) return null
         return synchronized(diskLock) {
-            if (generation.get() != initialGen || isTombstoned) return null
-            inMemoryCache?.let { return it.sanitizeForDate() }
+            if (generation.get() != initialGen) return null
+            synchronized(publicationLock) {
+                inMemoryCache?.let { return it.sanitizeForDate() }
+            }
             if (!file.exists()) return null
             try {
                 val content = file.readText()
-                if (generation.get() != initialGen || isTombstoned) return null
+                if (generation.get() != initialGen) return null
                 val data = json.decodeFromString<CachedSessionData>(content).sanitizeForDate()
-                if (generation.get() != initialGen || isTombstoned) return null
+                if (generation.get() != initialGen) return null
                 val expectedUid = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .getString(KEY_LAST_USER_ID, null)
                 if (data.userId != expectedUid) {
@@ -172,8 +209,32 @@ object SessionCacheManager {
                     } catch (_: Exception) {}
                     return null
                 }
-                inMemoryCache = data
-                data
+                synchronized(publicationLock) {
+                    if (generation.get() != initialGen) return null
+                    val currentInMem = inMemoryCache
+                    val finalData = if (currentInMem != null &&
+                        currentInMem.userId == data.userId &&
+                        currentInMem.dateVn == data.dateVn &&
+                        (currentInMem.dailyTask != null || currentInMem.isDailyTaskPendingRefresh) &&
+                        (currentInMem.dailyTaskMutationVersion > data.dailyTaskMutationVersion ||
+                         (currentInMem.dailyTaskMutationVersion == data.dailyTaskMutationVersion &&
+                          data.isDailyTaskPendingRefresh && !currentInMem.isDailyTaskPendingRefresh) ||
+                         dailyTaskVersion.get() > data.dailyTaskMutationVersion)
+                    ) {
+                        data.copy(
+                            dailyTask = currentInMem.dailyTask ?: data.dailyTask,
+                            missedStreak = currentInMem.dailyTask?.missedStreak ?: currentInMem.missedStreak,
+                            isDailyTaskPendingRefresh = currentInMem.isDailyTaskPendingRefresh,
+                            dailyTaskMutationVersion = currentInMem.dailyTaskMutationVersion
+                        )
+                    } else {
+                        data
+                    }
+                    isTombstoned = false
+                    inMemoryCache = finalData
+                    dailyTaskVersion.set(maxOf(dailyTaskVersion.get(), finalData.dailyTaskMutationVersion))
+                    finalData
+                }
             } catch (_: Exception) {
                 try {
                     file.delete()
@@ -202,6 +263,7 @@ object SessionCacheManager {
     suspend fun save(context: Context, data: CachedSessionData, targetGeneration: Long? = null) = withContext(Dispatchers.IO) {
         val genAtStart = targetGeneration ?: data.sessionGeneration
         if (genAtStart != generation.get()) return@withContext
+        val dailyTaskVerAtStart = dailyTaskVersion.get()
 
         val enrichedData = if (data.dateVn == null) {
             data.copy(dateVn = VnTime.today().toString())
@@ -211,9 +273,32 @@ object SessionCacheManager {
 
         synchronized(diskLock) {
             if (genAtStart != generation.get()) return@synchronized
+            val inMem = inMemoryCache
+            val finalData = if (inMem != null &&
+                inMem.userId == enrichedData.userId &&
+                inMem.dateVn == enrichedData.dateVn &&
+                (inMem.dailyTask != null || inMem.isDailyTaskPendingRefresh) &&
+                (inMem.dailyTaskMutationVersion > enrichedData.dailyTaskMutationVersion ||
+                 (inMem.dailyTaskMutationVersion == enrichedData.dailyTaskMutationVersion &&
+                  enrichedData.isDailyTaskPendingRefresh && !inMem.isDailyTaskPendingRefresh) ||
+                 dailyTaskVersion.get() != dailyTaskVerAtStart)
+            ) {
+                enrichedData.copy(
+                    dailyTask = inMem.dailyTask ?: enrichedData.dailyTask,
+                    missedStreak = inMem.dailyTask?.missedStreak ?: inMem.missedStreak,
+                    isDailyTaskPendingRefresh = inMem.isDailyTaskPendingRefresh,
+                    dailyTaskMutationVersion = inMem.dailyTaskMutationVersion
+                )
+            } else {
+                val assignedVer = maxOf(enrichedData.dailyTaskMutationVersion, dailyTaskVersion.get())
+                enrichedData.copy(
+                    dailyTaskMutationVersion = assignedVer
+                )
+            }
+
             val stagingFile = File(context.filesDir, "$FILE_NAME.${UUID.randomUUID()}.tmp")
             try {
-                val content = json.encodeToString(enrichedData)
+                val content = json.encodeToString(finalData)
                 stagingFile.writeText(content)
 
                 if (genAtStart != generation.get()) {
@@ -221,32 +306,56 @@ object SessionCacheManager {
                     return@synchronized
                 }
 
-                val targetFile = File(context.filesDir, FILE_NAME)
-                try {
-                    Files.move(
-                        stagingFile.toPath(),
-                        targetFile.toPath(),
-                        StandardCopyOption.ATOMIC_MOVE,
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
-                } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
-                    Files.move(
-                        stagingFile.toPath(),
-                        targetFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
-                }
+                synchronized(publicationLock) {
+                    if (genAtStart == generation.get()) {
+                        val currentInMem = inMemoryCache
+                        val publishedData = if (currentInMem != null &&
+                            currentInMem.userId == finalData.userId &&
+                            currentInMem.dateVn == finalData.dateVn &&
+                            (currentInMem.dailyTask != null || currentInMem.isDailyTaskPendingRefresh) &&
+                            (currentInMem.dailyTaskMutationVersion > finalData.dailyTaskMutationVersion ||
+                             (currentInMem.dailyTaskMutationVersion == finalData.dailyTaskMutationVersion &&
+                              finalData.isDailyTaskPendingRefresh && !currentInMem.isDailyTaskPendingRefresh) ||
+                             dailyTaskVersion.get() > finalData.dailyTaskMutationVersion)
+                        ) {
+                            val merged = finalData.copy(
+                                dailyTask = currentInMem.dailyTask ?: finalData.dailyTask,
+                                missedStreak = currentInMem.dailyTask?.missedStreak ?: currentInMem.missedStreak,
+                                isDailyTaskPendingRefresh = currentInMem.isDailyTaskPendingRefresh,
+                                dailyTaskMutationVersion = currentInMem.dailyTaskMutationVersion
+                            )
+                            stagingFile.writeText(json.encodeToString(merged))
+                            merged
+                        } else {
+                            finalData
+                        }
 
-                if (genAtStart == generation.get()) {
-                    isTombstoned = false
-                    inMemoryCache = enrichedData
-                    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                        .edit()
-                        .putBoolean(KEY_HAS_SESSION, enrichedData.userId != null)
-                        .putString(KEY_LAST_USER_ID, enrichedData.userId)
-                        .commit()
-                } else {
-                    targetFile.delete()
+                        val targetFile = File(context.filesDir, FILE_NAME)
+                        try {
+                            Files.move(
+                                stagingFile.toPath(),
+                                targetFile.toPath(),
+                                StandardCopyOption.ATOMIC_MOVE,
+                                StandardCopyOption.REPLACE_EXISTING
+                            )
+                        } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+                            Files.move(
+                                stagingFile.toPath(),
+                                targetFile.toPath(),
+                                StandardCopyOption.REPLACE_EXISTING
+                            )
+                        }
+
+                        isTombstoned = false
+                        inMemoryCache = publishedData
+                        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            .edit()
+                            .putBoolean(KEY_HAS_SESSION, publishedData.userId != null)
+                            .putString(KEY_LAST_USER_ID, publishedData.userId)
+                            .commit()
+                    } else {
+                        stagingFile.delete()
+                    }
                 }
             } catch (_: Exception) {
                 // Non-critical if disk write fails
@@ -266,8 +375,11 @@ object SessionCacheManager {
      */
     fun clear(context: Context) {
         val clearGen = generation.incrementAndGet()
-        isTombstoned = true
-        inMemoryCache = null
+        synchronized(publicationLock) {
+            isTombstoned = true
+            inMemoryCache = null
+            dailyTaskVersion.set(0L)
+        }
         val isMainThread = try {
             android.os.Looper.myLooper() == android.os.Looper.getMainLooper()
         } catch (_: Exception) {
@@ -282,14 +394,19 @@ object SessionCacheManager {
 
     fun clearSync(context: Context) {
         val clearGen = generation.incrementAndGet()
-        isTombstoned = true
-        inMemoryCache = null
+        synchronized(publicationLock) {
+            isTombstoned = true
+            inMemoryCache = null
+            dailyTaskVersion.set(0L)
+        }
         clearDisk(context, clearGen)
     }
 
     private fun clearDisk(context: Context, clearGen: Long) {
         synchronized(diskLock) {
             if (generation.get() != clearGen) return
+            // The generation change already reset the task token. A delayed disk
+            // cleanup must not reset tokens issued to the new current session.
             try {
                 val file = File(context.filesDir, FILE_NAME)
                 if (file.exists()) file.delete()

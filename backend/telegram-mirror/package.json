@@ -1,0 +1,17 @@
+{
+  "name": "@ntt/telegram-mirror",
+  "version": "1.0.0",
+  "description": "Telegram Bot API mirror bridge (polling & webhook) for CrossTest / 12Tester read-only group preview",
+  "type": "module",
+  "main": "mirror-worker.mjs",
+  "scripts": {
+    "start": "node mirror-worker.mjs --mode=polling",
+    "webhook": "node mirror-worker.mjs --mode=webhook",
+    "import": "node import-desktop-export.mjs",
+    "test": "node --test mirror-worker.test.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "private": true
+}

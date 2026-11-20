@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:00:14.086Z" hostname="PC-5700X3D" time="8.057">
+  <properties/>
+  <testcase name="testCurrentAdminCardHasNoSelfLockAction" classname="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" time="6.336"/>
+  <testcase name="testEnglishLocaleActionsNoEllipsisAcrossWidthsAndFontScales" classname="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" time="0.385"/>
+  <testcase name="creditAndLockActionsStayReadableAtNarrowWidthsAndLargeFonts" classname="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" time="0.341"/>
+  <testcase name="testLockedMemberUnlockActionNoEllipsisAcrossWidthsAndFontScales" classname="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" time="0.286"/>
+  <testcase name="testMemberListScrollabilityAtMax360dpWhenCardsAreTaller" classname="com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest" time="0.179"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

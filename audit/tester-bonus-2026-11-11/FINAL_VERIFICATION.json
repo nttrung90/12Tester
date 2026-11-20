@@ -1,0 +1,54 @@
+{
+  "scope": "Badge right-edge alignment follow-up; full acceptance retained as historical evidence",
+  "apk": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "D30280EDC24688CCDF5C298B97709B3151923557C32E2482C18C8930992F73EE",
+    "bytes": 32608569,
+    "modified": "2026-11-11T16:26:38.534Z"
+  },
+  "visualTests": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "previousFullAcceptance": {
+    "totals": {
+      "classes": 89,
+      "tests": 705,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "apk": {
+      "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+      "bytes": 36572260,
+      "sha256": "4AF80A4E8A976A42A23EF853A3F90557A200BF99A6B65558301F8EF0EECE491A",
+      "modified": "2026-11-11T10:45:40.163Z"
+    },
+    "latestSource": "2026-11-11T10:44:05.595Z",
+    "latestTestReport": "2026-11-11T10:45:25.633Z",
+    "apkAfterSources": true,
+    "testsAfterSources": true,
+    "preexistingChanged": [
+      "app/src/main/java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\data\\Models.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\CampaignCard.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\NotificationBottomSheet.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\navigation\\NavGraph.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\CampaignDetailScreen.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignDetailViewModel.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+      "app/src/main/java\\com\\ntt\\crosstest\\util\\CreditLogRenderer.kt",
+      "app/src/main/res\\values-en\\strings.xml",
+      "app/src/main/res\\values-vi\\strings.xml",
+      "app/src/main/res\\values\\strings.xml",
+      "app/src/test/java\\com\\ntt\\crosstest\\data\\CacheRegressionTest.kt",
+      "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignActionRaceTest.kt",
+      "app/src/test/java\\com\\ntt\\crosstest\\util\\NetworkRecoveryTest.kt"
+    ],
+    "oldMigrationsChanged": []
+  }
+}

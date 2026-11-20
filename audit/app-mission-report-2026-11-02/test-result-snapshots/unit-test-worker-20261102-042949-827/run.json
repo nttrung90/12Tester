@@ -1,0 +1,12 @@
+{
+    "logName":  "unit-test-worker",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.work.ReportUploadWorkerTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:29:28.4592009Z",
+    "finishedUtc":  "2026-11-02T04:29:49.8373566Z",
+    "currentRunXmlCount":  1
+}

@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-13T23:25:45.550Z",
+  "sourceFiles": 373,
+  "changedSource": [
+    "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values-vi/strings.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerAutoPauseResumeHardeningTest.kt",
+    "app/src/main/java/com/ntt/crosstest/data/DailyTaskActionGate.kt",
+    "app/src/test/java/com/ntt/crosstest/data/DailyTaskActionGateUnitTest.kt",
+    "supabase/migrations/090_daily_task_action_gate.sql"
+  ],
+  "newSource": [
+    "app/src/test/java/com/ntt/crosstest/data/SupervisorDailyTaskStatusCacheReviewTest.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailActionGateBehavioralTest.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/SupervisorOwnerActionGateReviewTest.kt"
+  ],
+  "packageFiles": 7,
+  "changedPackages": [],
+  "newPackages": [],
+  "touchedPackages": [],
+  "protectedChanged": [],
+  "newMigrations": [
+    "090_daily_task_action_gate.sql"
+  ]
+}

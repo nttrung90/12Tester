@@ -1,0 +1,82 @@
+[
+  {
+    "name": "reconcile then finalize does not double count",
+    "status": "PASS"
+  },
+  {
+    "name": "finalize then reconcile preserves unobserved bytes",
+    "status": "PASS"
+  },
+  {
+    "name": "partial pair snapshot holds remaining thumbnail capacity",
+    "status": "PASS"
+  },
+  {
+    "name": "stale local metric replaced by current metadata",
+    "status": "PASS"
+  },
+  {
+    "name": "invalid reconcile preserves prior measured U and B",
+    "status": "PASS"
+  },
+  {
+    "name": "expired pinned reservation never renewed or moved",
+    "status": "PASS"
+  },
+  {
+    "name": "exact 95 percent enters overflow; exact 90 does not recover",
+    "status": "PASS"
+  },
+  {
+    "name": "reservation reaching threshold remembers overflow until below ninety",
+    "status": "PASS"
+  },
+  {
+    "name": "oversized storage insert rejected by exact reservation cap",
+    "status": "PASS"
+  },
+  {
+    "name": "orphan inventory recovered with actual original clock",
+    "status": "PASS"
+  },
+  {
+    "name": "dry run is read only even with an untracked object",
+    "status": "PASS"
+  },
+  {
+    "name": "untracked old thumbnail cannot hide behind a younger main file",
+    "status": "PASS"
+  },
+  {
+    "name": "legacy acknowledgement never mutates Google ledger",
+    "status": "PASS"
+  },
+  {
+    "name": "ack rejects stale token and provider objects still present",
+    "status": "PASS"
+  },
+  {
+    "name": "service worker RPCs inaccessible to regular users",
+    "status": "PASS"
+  },
+  {
+    "name": "deleted owner does not destroy cleanup ledger",
+    "status": "PASS"
+  },
+  {
+    "name": "legacy Supabase clock cannot extend gateway grant",
+    "status": "PASS"
+  },
+  {
+    "name": "Google name containing supabase keeps thirty day grant",
+    "status": "PASS"
+  },
+  {
+    "name": "admin author signs and verifies the same role",
+    "status": "PASS"
+  },
+  {
+    "name": "cleanup of old file cannot expire a replacement attachment",
+    "status": "PASS"
+  }
+]

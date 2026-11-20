@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:43.507Z" hostname="PC-5700X3D" time="0.103">
+  <properties/>
+  <testcase name="different users and campaigns are completely isolated" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.029"/>
+  <testcase name="getOrCreatePendingIntent creates and persists new intent when empty" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.014"/>
+  <testcase name="clearPendingIntentIfMatching rejects stale or wrong clientRequestId" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.018"/>
+  <testcase name="corrupted JSON throws TesterBonusStoreCorruptedStateException and preserves record on disk" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.016"/>
+  <testcase name="peekPendingIntent returns null when store is empty" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.01"/>
+  <testcase name="getOrCreatePendingIntent reuses existing intent and retains same UUID and payload" classname="com.ntt.crosstest.data.CampaignTesterBonusStoreTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

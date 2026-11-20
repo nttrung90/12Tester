@@ -1,0 +1,137 @@
+=== LOADING ACTIVE MIGRATIONS (UP TO 999) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+=== RUNNING BEHAVIORAL VERIFICATION ===
+PASS: Effective credit delta: -50 on balance 5 clamps to 0 with delta -5 in result and ledger
+PASS: Credit adjustment input validation: null target, null amount, 0 amount, overflow
+PASS: Absent lock target raises error
+PASS: Unlocked admin and moderator can approve reports without owner reward
+PASS: Unlocked admin and moderator can reject reports
+PASS: member denied: adjust credits
+PASS: member denied: lock user
+PASS: member denied: contact list
+PASS: member denied: contact reply
+PASS: member denied: contact status
+PASS: member denied: notification
+PASS: member denied: app configuration
+PASS: member denied: home stats read
+PASS: member denied: home stats write
+PASS: member denied: daily task configuration
+PASS: member denied: daily task list
+PASS: member denied: daily task history
+PASS: member denied: daily task schedule
+PASS: member denied: daily task cancellation
+PASS: member denied: campaign pause
+PASS: member denied: campaign resume
+PASS: member denied: campaign delete
+PASS: moderator denied: adjust credits
+PASS: moderator denied: lock user
+PASS: moderator denied: contact list
+PASS: moderator denied: contact reply
+PASS: moderator denied: contact status
+PASS: moderator denied: notification
+PASS: moderator denied: app configuration
+PASS: moderator denied: home stats read
+PASS: moderator denied: home stats write
+PASS: moderator denied: daily task configuration
+PASS: moderator denied: daily task list
+PASS: moderator denied: daily task history
+PASS: moderator denied: daily task schedule
+PASS: moderator denied: daily task cancellation
+PASS: moderator denied: campaign pause
+PASS: moderator denied: campaign resume
+PASS: moderator denied: campaign delete
+PASS: missing-profile denied: adjust credits
+PASS: missing-profile denied: lock user
+PASS: missing-profile denied: contact list
+PASS: missing-profile denied: contact reply
+PASS: missing-profile denied: contact status
+PASS: missing-profile denied: notification
+PASS: missing-profile denied: app configuration
+PASS: missing-profile denied: home stats read
+PASS: missing-profile denied: home stats write
+PASS: missing-profile denied: daily task configuration
+PASS: missing-profile denied: daily task list
+PASS: missing-profile denied: daily task history
+PASS: missing-profile denied: daily task schedule
+PASS: missing-profile denied: daily task cancellation
+PASS: missing-profile denied: campaign pause
+PASS: missing-profile denied: campaign resume
+PASS: missing-profile denied: campaign delete
+PASS: anonymous denied: adjust credits
+PASS: anonymous denied: lock user
+PASS: anonymous denied: contact list
+PASS: anonymous denied: contact reply
+PASS: anonymous denied: contact status
+PASS: anonymous denied: notification
+PASS: anonymous denied: app configuration
+PASS: anonymous denied: home stats read
+PASS: anonymous denied: home stats write
+PASS: anonymous denied: daily task configuration
+PASS: anonymous denied: daily task list
+PASS: anonymous denied: daily task history
+PASS: anonymous denied: daily task schedule
+PASS: anonymous denied: daily task cancellation
+PASS: anonymous denied: campaign pause
+PASS: anonymous denied: campaign resume
+PASS: anonymous denied: campaign delete
+PASS: locked admin denied: adjust credits
+PASS: locked admin denied: lock user
+PASS: locked admin denied: contact list
+PASS: locked admin denied: contact reply
+PASS: locked admin denied: contact status
+PASS: locked admin denied: notification
+PASS: locked admin denied: app configuration
+PASS: locked admin denied: home stats read
+PASS: locked admin denied: home stats write
+PASS: locked admin denied: daily task configuration
+PASS: locked admin denied: daily task list
+PASS: locked admin denied: daily task history
+PASS: locked admin denied: daily task schedule
+PASS: locked admin denied: daily task cancellation
+PASS: locked admin denied: campaign pause
+PASS: locked admin denied: campaign resume
+PASS: locked admin denied: campaign delete
+PASS: locked admin cannot approve reports
+PASS: locked admin cannot reject reports
+PASS: locked moderator cannot approve reports
+PASS: locked moderator cannot reject reports
+PASS: Locked admin cannot update app_configs directly
+PASS: Locked admin cannot delete campaigns directly
+PASS: anon has no TRUNCATE capability on public tables
+PASS: anon has no TRIGGER capability on public tables
+PASS: authenticated has no TRUNCATE capability on public tables
+PASS: authenticated has no TRIGGER capability on public tables
+PASS: Unlocked admin can send direct notification to locked recipient and popup state is registered
+PASS: get_campaign_detail preserves exact DTO keys and excludes locked callers from can_manage
+PASS: reject_tester_report: bounded clawback, ledger metadata, checkin note preservation, warning rules
+FAIL: Locked admin cannot bypass moderation through UPDATE on their own campaign Locked owner/admin must not reopen a moderated campaign directly
+
+1 !== 0
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Locked owner/admin must not reopen a moderated campaign directly
+
+1 !== 0
+
+    at file:///F:/AI/12Tester/supabase/tests/run-admin-audit-hardening-test.mjs:387:10
+    at async test (file:///F:/AI/12Tester/supabase/tests/run-admin-audit-hardening-test.mjs:56:5)
+    at async file:///F:/AI/12Tester/supabase/tests/run-admin-audit-hardening-test.mjs:372:1 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

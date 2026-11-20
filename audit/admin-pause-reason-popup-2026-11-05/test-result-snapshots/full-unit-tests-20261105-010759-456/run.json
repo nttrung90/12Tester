@@ -1,0 +1,11 @@
+{
+    "logName":  "full-unit-tests",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--rerun-tasks"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T01:05:48.7878777Z",
+    "finishedUtc":  "2026-11-05T01:07:59.5504167Z",
+    "currentRunXmlCount":  72
+}

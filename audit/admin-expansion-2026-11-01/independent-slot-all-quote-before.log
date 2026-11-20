@@ -1,0 +1,27 @@
+{
+  "firstSuccess": true,
+  "originalToken": "835aa00d58a6b8a35bc4ff8fd89a3367",
+  "receiptToken": "25132da07d48d513b9b9b895724b5739",
+  "error": "REQUEST_ID_CONFLICT: Yêu cầu bị trùng với điều khoản báo giá khác",
+  "balance": 950
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The actual Android all-quote token must replay with the exact originally confirmed token
++ actual - expected
+
++ undefined
+- true
+
+    at file:///F:/AI/12Tester/audit/admin-expansion-2026-11-01/independent-slot-all-quote-replay-probe.mjs:21:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

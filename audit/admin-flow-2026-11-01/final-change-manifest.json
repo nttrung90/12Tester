@@ -1,0 +1,21 @@
+{
+  "changedExisting": [
+    "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/AdminReportsScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/AdminUsersScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminReportsViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminUsersViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModel.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModelTest.kt",
+    "supabase/tests/package.json",
+    "supabase/tests/run-admin-direct-notification-popup-test.mjs"
+  ],
+  "newSourceFiles": [
+    "app/src/test/java/com/ntt/crosstest/data/AdminRelatedRepositoryRaceTest.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignActionRaceTest.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminFlowSessionRaceTest.kt",
+    "supabase/migrations/069_admin_audit_hardening.sql",
+    "supabase/tests/run-admin-audit-hardening-test.mjs"
+  ]
+}

@@ -1,0 +1,25 @@
+=== LOADING ALL MIGRATIONS IN ORDER (INCLUDING 087) ===
+MIGRATIONS LOADED SUCCESSFULLY (28 migrations).
+=== BASE FIXTURES SEEDED ===
+
+--- TEST 1: Authorization, Ownership & Denial Checks ---
+PASS: Authorization, ownership and denial guards verified.
+--- TEST 2: Ordinary Campaign Removal (No Financial Obligations) ---
+PASS: Ordinary campaign removal without financial obligations verified.
+--- TEST 3: No-Pending Immediate Refund & Deletion ---
+PASS: No-pending immediate refund and deletion verified.
+--- TEST 4: Pending Bonus Manual Approval -> Worker Pays/Refunds/Deletes Exactly Once ---
+PASS: Pending bonus manual approval and worker exact settlement verified.
+--- TEST 5: Fully Consumed Last Slot Case ---
+PASS: Fully consumed last slot deferred deletion verified.
+--- TEST 6: Replay Old Create & Reconcile After Physical Removal ---
+PASS: Replay and reconcile after physical removal verified.
+--- TEST 7: Overflow Retry & Recovery ---
+PASS: Overflow retry and recovery verified.
+--- TEST 8: Admin Delete Path Preserved & Distinct ---
+PASS: Admin delete path preserved and distinct.
+
+================================================================
+ALL OWNER TESTER BONUS REMOVAL TESTS PASSED SUCCESSFULLY!
+================================================================
+

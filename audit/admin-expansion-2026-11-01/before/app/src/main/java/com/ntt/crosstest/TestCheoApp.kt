@@ -1,0 +1,273 @@
+package com.ntt.crosstest
+
+import android.app.Application
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.annotation.ExperimentalCoilApi
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
+import com.ntt.crosstest.data.AppConfigRepository
+import com.ntt.crosstest.data.AuthRepository
+import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.PendingReportStore
+import com.ntt.crosstest.data.ReportSubmitManager
+import com.ntt.crosstest.data.SessionCacheManager
+import com.ntt.crosstest.data.SettingsRepository
+import com.ntt.crosstest.data.SupabaseHolder
+import com.ntt.crosstest.util.InstalledAppCache
+import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ImageInstrumentation
+import com.ntt.crosstest.util.ScreenshotCoilInterceptor
+import com.ntt.crosstest.util.PrivateScreenshotDiskCache
+import com.ntt.crosstest.util.ScreenshotManager
+import com.ntt.crosstest.util.AppCheckObservationConfig
+import com.ntt.crosstest.util.CoinSoundPlayer
+import okhttp3.OkHttpClient
+import com.ntt.crosstest.util.PreparedScreenshotCache
+import com.ntt.crosstest.work.ReminderWorker
+import com.ntt.crosstest.work.UpdateCheckWorker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.concurrent.TimeUnit
+
+class TestCheoApp : Application(), ImageLoaderFactory {
+
+    private val appScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Main.immediate)
+
+    lateinit var authRepository: AuthRepository
+        private set
+    lateinit var campaignRepository: CampaignRepository
+        private set
+    lateinit var settingsRepository: SettingsRepository
+        private set
+    lateinit var appConfigRepository: AppConfigRepository
+        private set
+    lateinit var reportSubmitManager: ReportSubmitManager
+        private set
+    lateinit var notificationPendingAckStore: com.ntt.crosstest.data.NotificationPendingAckStore
+        private set
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .components {
+                add(ScreenshotCoilInterceptor(this@TestCheoApp))
+            }
+            .okHttpClient {
+                OkHttpClient.Builder()
+                    .addInterceptor(ImageInstrumentation.createTrackingInterceptor())
+                    .build()
+            }
+            .eventListener(ImageInstrumentation.createEventListener())
+            .memoryCache {
+                MemoryCache.Builder(this)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(50L * 1024 * 1024)
+                    .build()
+            }
+            .crossfade(true)
+            .allowHardware(true)
+            .build()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+
+        InstalledAppCache.init(this)
+        CoinSoundPlayer.preload(this)
+        com.ntt.crosstest.util.AppForegroundTracker.init(this)
+        notificationPendingAckStore = com.ntt.crosstest.data.NotificationPendingAckStore(this)
+        // Làm nóng snapshot session trên IO để loadSync trong constructor
+        // ViewModel (main thread) gáº§n nhÆ° chá»‰ Ä‘á»c báº£n trong RAM.
+        SessionCacheManager.preload(this)
+
+        // Secrets come from local.properties (see README). Without them the app
+        // shows a setup screen instead of crashing (checked in MainActivity).
+        val url = BuildConfig.SUPABASE_URL
+        val key = BuildConfig.SUPABASE_ANON_KEY
+        if (url.isNotBlank() && key.isNotBlank()) {
+            val client = SupabaseHolder.init(url, key)
+            authRepository = AuthRepository(client, this)
+            campaignRepository = CampaignRepository(client, Localizer(this))
+            appConfigRepository = AppConfigRepository(client, this)
+            reportSubmitManager = ReportSubmitManager(this)
+            appScope.launch {
+                authRepository.sessionStatus.collect { status ->
+                    if (status is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
+                        val userId = status.session.user?.id ?: authRepository.currentUserId()
+                        if (userId != null) {
+                            reportSubmitManager.restorePendingReports(userId)
+                        }
+                    }
+                }
+            }
+
+            // R2-02 & E04: Đăng ký SupabaseMediaAccessGrantProvider thật cho ScreenshotCachePolicy
+            com.ntt.crosstest.util.ScreenshotCachePolicy.mediaAccessGrantProvider =
+                com.ntt.crosstest.data.SupabaseMediaAccessGrantProvider(client)
+
+            // R2-04: Quan sát sessionStatus trong application scope để bind sau async session restoration
+            // và cấp application Context cho logout/account switch
+            observeAuthSession(appScope, this, authRepository)
+        }
+
+        settingsRepository = SettingsRepository(this)
+        // Dá»n áº£nh pending/prepared quÃ¡ háº¡n sau khi process khá»Ÿi Ä‘á»™ng láº¡i.
+        PreparedScreenshotCache.cleanup(this)
+        PendingReportStore.cleanup(this)
+        PrivateScreenshotDiskCache.cleanupOnStartupOrResume(this)
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            override fun onActivityResumed(activity: android.app.Activity) {
+                PrivateScreenshotDiskCache.cleanupOnStartupOrResume(this@TestCheoApp)
+            }
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
+            override fun onActivityStarted(activity: android.app.Activity) {}
+            override fun onActivityPaused(activity: android.app.Activity) {}
+            override fun onActivityStopped(activity: android.app.Activity) {}
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
+            override fun onActivityDestroyed(activity: android.app.Activity) {}
+        })
+        AppCheckObservationConfig.initObservation(this)
+        scheduleDailyReminder()
+        scheduleUpdateCheck()
+    }
+
+    /**
+     * Schedules the daily 20:00 check-in reminder. The first run is aligned to
+     * the next 20:00, then repeats every 24h. Note: WorkManager guarantees
+     * *at-least-daily* delivery, not an exact clock time â€” on some devices the
+     * notification may arrive a bit after 20:00 (Doze / battery optimization).
+     */
+    fun scheduleDailyReminder() {
+        val now = LocalDateTime.now()
+        var nextRun = now.toLocalDate().atTime(LocalTime.of(20, 0))
+        if (!nextRun.isAfter(now)) {
+            nextRun = nextRun.plusDays(1)
+        }
+        val initialDelayMinutes = Duration.between(now, nextRun).toMinutes().coerceAtLeast(1)
+
+        val request = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS)
+            .setInitialDelay(initialDelayMinutes, TimeUnit.MINUTES)
+            .addTag(REMINDER_TAG)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            REMINDER_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    }
+
+    fun cancelDailyReminder() {
+        WorkManager.getInstance(this).cancelUniqueWork(REMINDER_WORK_NAME)
+    }
+
+    /**
+     * Checks the remote app config in the background (every 12h, first run after
+     * ~10 minutes) and notifies when a newer version is available. The in-app
+     * launch check (MainActivity) still handles blocking force updates.
+     */
+    fun scheduleUpdateCheck() {
+        val request = PeriodicWorkRequestBuilder<UpdateCheckWorker>(12, TimeUnit.HOURS)
+            .setInitialDelay(10, TimeUnit.MINUTES)
+            .addTag(UPDATE_CHECK_TAG)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            UPDATE_CHECK_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    }
+
+    /**
+     * Single sign-out path used by every screen: clears the remote session
+     * (best effort), the in-memory repository cache and the on-disk session
+     * snapshot so the next user/guest never sees the previous account's data.
+     */
+    @OptIn(ExperimentalCoilApi::class)
+    suspend fun performSignOut() {
+        try {
+            authRepository.signOut()
+        } catch (_: Exception) {
+            // Even if the remote sign-out fails (e.g. offline), clear local state.
+        }
+        campaignRepository.clearMemoryCache()
+        SessionCacheManager.clear(this)
+        ScreenshotManager.clear(this)
+        ImageHashHelper.clearCache()
+        if (::reportSubmitManager.isInitialized) {
+            reportSubmitManager.cancelAllPendingWork()
+        }
+        withContext(Dispatchers.IO) {
+            // áº¢nh remote (screenshot/icon) vÃ  áº£nh Ä‘ang chá» ná»™p khÃ´ng Ä‘Æ°á»£c
+            // tá»“n táº¡i sau khi Ä‘á»•i tÃ i khoáº£n.
+            val loader = coil.Coil.imageLoader(this@TestCheoApp)
+            loader.memoryCache?.clear()
+            loader.diskCache?.clear()
+            PreparedScreenshotCache.clear(this@TestCheoApp)
+            PendingReportStore.clear(this@TestCheoApp)
+        }
+    }
+
+    companion object {
+        @Volatile
+        private var instance: TestCheoApp? = null
+
+        fun get(): TestCheoApp? = instance
+
+        const val REMINDER_WORK_NAME = "daily_checkin_reminder"
+        const val REMINDER_TAG = "checkin_reminder"
+        const val UPDATE_CHECK_WORK_NAME = "app_update_check"
+        const val UPDATE_CHECK_TAG = "app_update_check"
+
+        fun observeAuthSession(
+            scope: kotlinx.coroutines.CoroutineScope,
+            context: android.content.Context,
+            authRepository: AuthRepository
+        ): kotlinx.coroutines.Job {
+            return observeAuthSession(scope, context, authRepository.sessionStatus) {
+                authRepository.currentUserId()
+            }
+        }
+
+        fun observeAuthSession(
+            scope: kotlinx.coroutines.CoroutineScope,
+            context: android.content.Context,
+            sessionStatus: kotlinx.coroutines.flow.Flow<io.github.jan.supabase.auth.status.SessionStatus>,
+            currentUserIdProvider: () -> String? = { null }
+        ): kotlinx.coroutines.Job {
+            return scope.launch {
+                sessionStatus.collect { status ->
+                    when (status) {
+                        is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
+                            val uid = status.session.user?.id ?: currentUserIdProvider()
+                            if (!uid.isNullOrBlank()) {
+                                ScreenshotManager.onUserSessionChanged(uid, context)
+                            }
+                        }
+                        is io.github.jan.supabase.auth.status.SessionStatus.NotAuthenticated -> {
+                            ScreenshotManager.onUserSignedOut(context)
+                        }
+                        else -> {
+                            // Initializing hoặc RefreshFailure: chờ trạng thái tiếp theo
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

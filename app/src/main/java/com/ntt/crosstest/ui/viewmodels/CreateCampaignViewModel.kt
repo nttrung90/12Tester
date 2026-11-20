@@ -1,16 +1,22 @@
-﻿package com.ntt.crosstest.ui.viewmodels
+package com.ntt.crosstest.ui.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ntt.crosstest.R
-import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.CreateCampaignV2Params
+import com.ntt.crosstest.data.FinancialIntentStore
 import com.ntt.crosstest.data.Localizer
-import com.ntt.crosstest.data.SettingsRepository
+import com.ntt.crosstest.data.PendingCreateCampaignIntent
+import com.ntt.crosstest.data.PendingSlotIntent
+import com.ntt.crosstest.data.SessionCacheManager
+import com.ntt.crosstest.data.SlotFees
 import com.ntt.crosstest.data.SlotInfo
+import com.ntt.crosstest.data.TargetFees
 import com.ntt.crosstest.util.FirebaseStorageHelper
 import com.ntt.crosstest.util.PlayStoreHelper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +24,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.io.IOException
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 data class CreateCampaignUiState(
     val playUrl: String = "",
@@ -35,6 +43,12 @@ data class CreateCampaignUiState(
     val usedSlots: Int = 0,
     val maxSlots: Int = 1,
     val isLoadingSlots: Boolean = true,
+    val isLoadingPolicyQuote: Boolean = true,
+    val policyRevision: String? = null,
+    val minCreditsToPostApp: Int = 10,
+    val slot1PostFee: Int = 0,
+    val slotFees: SlotFees = SlotFees(),
+    val targetFees: TargetFees = TargetFees(),
     val isUnlockingSlot: Boolean = false,
     val unlockSuccessMsg: String? = null,
     val isLoadingMetadata: Boolean = false,
@@ -43,20 +57,27 @@ data class CreateCampaignUiState(
     val created: Boolean = false,
     val userCredits: Int = 0,
     val isLoadingCredits: Boolean = true,
-    val isGuideConfirmed: Boolean = false,
     val installedApps: List<PlayStoreHelper.InstalledAppItem> = emptyList(),
     val isLoadingInstalledApps: Boolean = false,
 ) {
-    val targetCost: Int get() = when (targetTesters) {
-        15 -> 10
-        20 -> 20
-        else -> 0
-    }
+    val slotPostCost: Int
+        get() = if (selectedSlotNumber == 1) slot1PostFee else 0
+
+    val targetCost: Int
+        get() = targetFees.feeForTarget(targetTesters)
+
+    val totalPostCost: Int
+        get() = slotPostCost + targetCost
+
+    val requiredCredits: Int
+        get() = totalPostCost + minCreditsToPostApp
+
+    val hasEnoughCredits: Boolean
+        get() = userCredits >= requiredCredits
 }
 
 class CreateCampaignViewModel(
     private val repository: CampaignRepository,
-    private val settingsRepository: SettingsRepository,
     private val localizer: Localizer,
 ) : ViewModel() {
 
@@ -64,48 +85,70 @@ class CreateCampaignViewModel(
     val uiState: StateFlow<CreateCampaignUiState> = _uiState.asStateFlow()
 
     private var metadataJob: Job? = null
+    private var activeUserId: String? = repository.currentUserId()
+    private var activeGeneration: Long = SessionCacheManager.currentGeneration()
+    private val isSlotActionInProgress = AtomicBoolean(false)
+    private val isCreateInProgress = AtomicBoolean(false)
 
     init {
         loadCredits()
         loadSlots()
-        observeGuideConfirmed()
-    }
 
-    private fun observeGuideConfirmed() {
         viewModelScope.launch {
-            settingsRepository.isTestingGuideConfirmed.collect { confirmed ->
-                _uiState.update { it.copy(isGuideConfirmed = confirmed) }
+            repository.sessionStatus.collect {
+                val currentUid = repository.currentUserId()
+                val currentGen = SessionCacheManager.currentGeneration()
+                if (currentUid != activeUserId || currentGen != activeGeneration) {
+                    activeUserId = currentUid
+                    activeGeneration = currentGen
+                    isSlotActionInProgress.set(false)
+                    isCreateInProgress.set(false)
+                    metadataJob?.cancel()
+                    _uiState.update { CreateCampaignUiState() }
+                    if (currentUid != null) {
+                        loadCredits()
+                        loadSlots(forceRefresh = true)
+                    }
+                }
             }
         }
     }
 
-    fun confirmGuide() {
-        viewModelScope.launch {
-            settingsRepository.setTestingGuideConfirmed(true)
-        }
-    }
-
-    private fun loadCredits() {
+    private fun loadCredits(forceRefresh: Boolean = false) {
+        val uid = repository.currentUserId()
+        val gen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
             try {
-                val profile = repository.getMyProfile()
+                val profile = repository.getMyProfile(forceRefresh = forceRefresh)
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
                 _uiState.update {
                     it.copy(
                         userCredits = profile?.credits ?: 0,
                         isLoadingCredits = false,
                     )
                 }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoadingCredits = false) }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (repository.currentUserId() == uid && SessionCacheManager.currentGeneration() == gen) {
+                    _uiState.update { it.copy(isLoadingCredits = false) }
+                }
             }
         }
     }
 
-    fun loadSlots() {
+    fun loadSlots(forceRefresh: Boolean = false) {
+        val uid = repository.currentUserId()
+        val gen = SessionCacheManager.currentGeneration()
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingSlots = true) }
+            _uiState.update { it.copy(isLoadingSlots = true, isLoadingPolicyQuote = true) }
             try {
-                val slotsInfo = repository.getMySlotsInfo()
+                val slotsInfo = repository.getMySlotsInfo(forceRefresh = forceRefresh)
+                val quote = runCatching {
+                    repository.getAllBusinessQuote(forceRefresh = forceRefresh)
+                }.getOrNull()
+
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
                 val used = slotsInfo.count { it.isOccupied }
                 val unlocked = slotsInfo.count { it.isPermanent || (it.isUnlocked && !it.isExpired) }
 
@@ -124,49 +167,137 @@ class CreateCampaignViewModel(
                         maxSlots = unlocked,
                         selectedSlotNumber = newSelected,
                         isLoadingSlots = false,
+                        isLoadingPolicyQuote = false,
+                        policyRevision = quote?.revision,
+                        minCreditsToPostApp = quote?.minCreditsToPostApp ?: it.minCreditsToPostApp,
+                        slot1PostFee = quote?.slotFees?.slot1 ?: it.slot1PostFee,
+                        slotFees = quote?.slotFees ?: it.slotFees,
+                        targetFees = quote?.targetFees ?: it.targetFees,
                     )
                 }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoadingSlots = false) }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (repository.currentUserId() == uid && SessionCacheManager.currentGeneration() == gen) {
+                    _uiState.update {
+                        it.copy(
+                            isLoadingSlots = false,
+                            isLoadingPolicyQuote = false,
+                            policyRevision = null,
+                        )
+                    }
+                }
             }
         }
+    }
+
+    /** Tải lại đồng thời số dư và báo giá/Slot (dùng cho nút "Tải lại" khi thiếu báo giá). */
+    fun retryLoadData() {
+        repository.invalidateBusinessQuote()
+        loadCredits(forceRefresh = true)
+        loadSlots(forceRefresh = true)
     }
 
     fun selectSlot(slotNumber: Int) {
         _uiState.update { it.copy(selectedSlotNumber = slotNumber, error = null) }
     }
 
-    fun unlockOrRenewSlot(slotNumber: Int) {
-        if (_uiState.value.isUnlockingSlot) return
-        val slotCost = SlotInfo.costForSlot(slotNumber)
+    fun unlockOrRenewSlot(
+        slotNumber: Int,
+        expectedCost: Int? = null,
+        expectedRevision: String? = null,
+    ) {
+        if (!isSlotActionInProgress.compareAndSet(false, true)) return
+        val currentSlot = _uiState.value.slots.find { it.slotNumber == slotNumber }
+        val slotCost = expectedCost ?: currentSlot?.cost ?: SlotInfo.costForSlot(slotNumber)
+        val revision = expectedRevision ?: currentSlot?.policyRevision ?: _uiState.value.policyRevision
+
+        if (revision == null) {
+            isSlotActionInProgress.set(false)
+            _uiState.update {
+                it.copy(error = localizer.get(R.string.admin_policy_quote_unavailable))
+            }
+            loadSlots(forceRefresh = true)
+            return
+        }
+
         if (_uiState.value.userCredits < slotCost) {
+            isSlotActionInProgress.set(false)
             _uiState.update {
                 it.copy(error = localizer.get(R.string.create_slot_cost_format, slotCost, slotNumber, _uiState.value.userCredits))
             }
             return
         }
 
+        val uid = repository.currentUserId() ?: run {
+            isSlotActionInProgress.set(false)
+            return
+        }
+        val gen = SessionCacheManager.currentGeneration()
+
+        val pending = FinancialIntentStore.peekSlotIntent(localizer.context, uid, slotNumber)
+        val intentToUse = if (pending != null && pending.expectedCost == slotCost && pending.expectedRevision == revision) {
+            pending
+        } else {
+            val newIntent = PendingSlotIntent(
+                userId = uid,
+                slotNumber = slotNumber,
+                expectedCost = slotCost,
+                expectedRevision = revision,
+                renewalDays = currentSlot?.renewalDays ?: _uiState.value.slotFees.renewalDays,
+                clientRequestId = UUID.randomUUID().toString(),
+            )
+            FinancialIntentStore.saveSlotIntent(localizer.context, newIntent)
+            newIntent
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isUnlockingSlot = true, error = null) }
             try {
-                val result = repository.unlockOrRenewSlot(slotNumber)
+                val result = repository.unlockOrRenewSlotV2(
+                    slotNumber = intentToUse.slotNumber,
+                    clientRequestId = intentToUse.clientRequestId,
+                    expectedCost = intentToUse.expectedCost,
+                    expectedRevision = intentToUse.expectedRevision,
+                )
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                FinancialIntentStore.clearSlotIntent(localizer.context, uid, slotNumber)
+
                 _uiState.update {
                     it.copy(
                         userCredits = result.balance,
-                        unlockSuccessMsg = localizer.get(R.string.create_slot_unlock_success_format, slotNumber),
+                        unlockSuccessMsg = localizer.get(R.string.create_slot_unlock_success_format, slotNumber, result.renewalDays),
                         selectedSlotNumber = slotNumber,
                     )
                 }
                 loadSlots()
             } catch (e: Exception) {
-                val msg = when {
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.create_insufficient_credits_slot)
-                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
-                    else -> friendlyError(e, localizer)
+                if (e is CancellationException) throw e
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                val isConflict = e.message?.contains("BUSINESS_POLICY_CONFLICT", ignoreCase = true) == true ||
+                        e.message?.contains("BUSINESS_POLICY_PRICE_MISMATCH", ignoreCase = true) == true
+
+                if (isConflict) {
+                    FinancialIntentStore.clearSlotIntent(localizer.context, uid, slotNumber)
+                    repository.invalidateBusinessQuote()
+                    loadSlots(forceRefresh = true)
+                    _uiState.update {
+                        it.copy(error = friendlyBusinessPolicyError(e, localizer))
+                    }
+                } else {
+                    val msg = when {
+                        e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.create_insufficient_credits_slot)
+                        e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
+                        else -> friendlyBusinessPolicyError(e, localizer)
+                    }
+                    _uiState.update { it.copy(error = msg) }
                 }
-                _uiState.update { it.copy(error = msg) }
             } finally {
-                _uiState.update { it.copy(isUnlockingSlot = false) }
+                if (repository.currentUserId() == uid && SessionCacheManager.currentGeneration() == gen) {
+                    isSlotActionInProgress.set(false)
+                    _uiState.update { it.copy(isUnlockingSlot = false) }
+                }
             }
         }
     }
@@ -326,7 +457,8 @@ class CreateCampaignViewModel(
                         )
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 // Ignore silent scraping errors
             } finally {
                 _uiState.update { it.copy(isLoadingMetadata = false) }
@@ -386,34 +518,75 @@ class CreateCampaignViewModel(
         }
     }
 
+    private fun isDefinitiveCreateError(e: Throwable): Boolean {
+        if (e is IOException) return false
+        val lower = e.message.orEmpty().lowercase()
+        return "business_policy_conflict" in lower ||
+                "business_policy_price_mismatch" in lower ||
+                "request_id_conflict" in lower ||
+                "insufficient_credits" in lower ||
+                "slot_not_active_or_expired" in lower ||
+                "slot_already_in_use" in lower ||
+                "package_already_active" in lower ||
+                "invalid_package_name" in lower ||
+                "invalid_slot_number" in lower ||
+                "invalid_target_testers" in lower ||
+                "invalid_app_name" in lower ||
+                "invalid_description" in lower ||
+                "invalid_url" in lower ||
+                "invalid_test_credentials" in lower ||
+                "invalid_icon_url" in lower ||
+                "permission_denied" in lower ||
+                "account_locked" in lower ||
+                "not_authenticated" in lower
+    }
+
     fun create() {
         val s = _uiState.value
-        if (s.isSaving) return
+        if (s.isSaving || !isCreateInProgress.compareAndSet(false, true)) return
 
-        if (s.isLoadingCredits || s.isLoadingSlots) {
+        if (s.isLoadingCredits || s.isLoadingSlots || s.isLoadingPolicyQuote) {
+            isCreateInProgress.set(false)
             _uiState.update {
                 it.copy(error = localizer.get(R.string.create_loading_data))
             }
             return
         }
 
-        val targetUpgradeCost = s.targetCost
-        if (s.userCredits <= 10) {
+        val revision = s.policyRevision
+        if (revision.isNullOrBlank()) {
+            isCreateInProgress.set(false)
             _uiState.update {
-                it.copy(error = localizer.get(R.string.create_min_credits_format, s.userCredits))
+                it.copy(error = localizer.get(R.string.admin_policy_quote_unavailable))
             }
+            loadSlots(forceRefresh = true)
             return
         }
 
-        if (targetUpgradeCost > 0 && s.userCredits < targetUpgradeCost + 10) {
-            _uiState.update {
-                it.copy(error = localizer.get(R.string.create_target_cost_format, targetUpgradeCost + 10, s.targetTesters, targetUpgradeCost, s.userCredits))
+        if (!s.hasEnoughCredits) {
+            isCreateInProgress.set(false)
+            val errMsg = if (s.totalPostCost > 0) {
+                localizer.get(
+                    R.string.create_posting_insufficient_summary_format,
+                    s.requiredCredits,
+                    s.totalPostCost,
+                    s.minCreditsToPostApp,
+                    s.userCredits,
+                )
+            } else {
+                localizer.get(
+                    R.string.create_posting_min_balance_only_warning_format,
+                    s.minCreditsToPostApp,
+                    s.userCredits,
+                )
             }
+            _uiState.update { it.copy(error = errMsg) }
             return
         }
 
         val chosenSlot = s.slots.find { it.slotNumber == s.selectedSlotNumber }
         if (chosenSlot != null && !chosenSlot.isAvailable) {
+            isCreateInProgress.set(false)
             if (chosenSlot.isOccupied) {
                 _uiState.update {
                     it.copy(error = localizer.get(R.string.create_slot_in_use_format, chosenSlot.slotNumber))
@@ -427,6 +600,7 @@ class CreateCampaignViewModel(
         }
 
         if (s.slots.isNotEmpty() && s.slots.none { it.isAvailable }) {
+            isCreateInProgress.set(false)
             _uiState.update {
                 it.copy(error = localizer.get(R.string.create_all_slots_used))
             }
@@ -435,57 +609,195 @@ class CreateCampaignViewModel(
 
         val cleanPkg = PlayStoreHelper.extractPackageName(s.packageName) ?: s.packageName.trim()
         if (cleanPkg.isBlank()) {
+            isCreateInProgress.set(false)
             _uiState.update { it.copy(error = localizer.get(R.string.create_package_required)) }
             return
         }
 
         if (!cleanPkg.contains(".") || !PlayStoreHelper.isValidPackageName(cleanPkg)) {
+            isCreateInProgress.set(false)
             _uiState.update { it.copy(error = localizer.get(R.string.create_package_invalid)) }
             return
         }
 
-        // Check if user already has an active campaign with this package name
-        val alreadyActive = s.slots.any { it.currentCampaign?.packageName?.equals(cleanPkg, ignoreCase = true) == true }
+        val alreadyActive = s.slots.any {
+            it.currentCampaign?.packageName?.equals(cleanPkg, ignoreCase = true) == true
+        }
         if (alreadyActive) {
+            isCreateInProgress.set(false)
             _uiState.update {
                 it.copy(error = localizer.get(R.string.create_package_duplicate_format, cleanPkg))
             }
             return
         }
 
+        val uid = repository.currentUserId() ?: run {
+            isCreateInProgress.set(false)
+            _uiState.update { it.copy(error = friendlyError(IllegalStateException("NOT_AUTHENTICATED"), localizer)) }
+            return
+        }
+        val gen = SessionCacheManager.currentGeneration()
+
         val finalAppName = s.appName.trim().ifBlank { cleanPkg }
         val finalTestingUrl = s.testingUrl.trim().ifBlank { "https://play.google.com/apps/testing/$cleanPkg" }
         val finalPlayUrl = s.playUrl.trim().ifBlank { "https://play.google.com/store/apps/details?id=$cleanPkg" }
+        // Hash nội dung form khớp v_payload_hash phía server: gửi lại y hệt -> giữ clientRequestId,
+        // sửa nội dung sau lỗi mạng mập mờ -> xoay clientRequestId mới.
+        val currentMetadataHash = PendingCreateCampaignIntent.computeMetadataHash(
+            appName = finalAppName,
+            packageName = cleanPkg,
+            playUrl = finalPlayUrl,
+            testingUrl = finalTestingUrl,
+            description = s.description,
+            iconUrl = s.iconUrl,
+            testUsername = s.testUsername,
+            testPassword = s.testPassword,
+        )
+
+        val pending = FinancialIntentStore.peekCreateCampaignIntent(
+            context = localizer.context,
+            userId = uid,
+            packageName = cleanPkg,
+            slotNumber = s.selectedSlotNumber,
+        )
+        val intentToUse = if (
+            pending != null &&
+            pending.targetTesters == s.targetTesters &&
+            pending.expectedTotalCost == s.totalPostCost &&
+            pending.expectedMinCredits == s.minCreditsToPostApp &&
+            pending.expectedRevision == revision &&
+            pending.metadataHash == currentMetadataHash
+        ) {
+            pending
+        } else {
+            val freshIntent = PendingCreateCampaignIntent(
+                userId = uid,
+                packageName = cleanPkg,
+                slotNumber = s.selectedSlotNumber,
+                targetTesters = s.targetTesters,
+                expectedTotalCost = s.totalPostCost,
+                expectedMinCredits = s.minCreditsToPostApp,
+                expectedRevision = revision,
+                clientRequestId = UUID.randomUUID().toString(),
+                metadataHash = currentMetadataHash,
+            )
+            FinancialIntentStore.saveCreateCampaignIntent(localizer.context, freshIntent)
+            freshIntent
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
             try {
-                repository.createCampaign(
-                    Campaign(
+                val res = repository.createCampaignV2(
+                    CreateCampaignV2Params(
                         appName = finalAppName,
                         packageName = cleanPkg,
                         playUrl = finalPlayUrl,
                         testingUrl = finalTestingUrl,
                         description = s.description.trim(),
-                        targetTesters = s.targetTesters,
+                        targetTesters = intentToUse.targetTesters,
                         iconUrl = s.iconUrl.trim(),
                         testUsername = s.testUsername.trim(),
                         testPassword = s.testPassword.trim(),
-                        slotNumber = s.selectedSlotNumber,
-                        startDate = LocalDate.now().toString(),
+                        slotNumber = intentToUse.slotNumber,
+                        clientRequestId = intentToUse.clientRequestId,
+                        expectedTotalCost = intentToUse.expectedTotalCost,
+                        expectedMinCredits = intentToUse.expectedMinCredits,
+                        expectedRevision = intentToUse.expectedRevision,
                     )
                 )
-                _uiState.update { it.copy(isSaving = false, created = true) }
-            } catch (e: Exception) {
-                val errorMsg = when {
-                    e.message?.contains("INSUFFICIENT_CREDITS_FOR_TARGET") == true ->
-                        localizer.get(R.string.create_insufficient_target_credits_format, targetUpgradeCost)
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.create_min_credits)
-                    e.message?.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") == true -> localizer.get(R.string.create_slot_not_active)
-                    e.message?.contains("SLOT_ALREADY_IN_USE") == true -> localizer.get(R.string.create_slot_busy)
-                    else -> friendlyError(e, localizer)
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                FinancialIntentStore.clearCreateCampaignIntent(
+                    context = localizer.context,
+                    userId = uid,
+                    packageName = cleanPkg,
+                    slotNumber = intentToUse.slotNumber,
+                )
+
+                _uiState.update {
+                    it.copy(
+                        userCredits = res.balanceAfter,
+                        isSaving = false,
+                        created = true,
+                    )
                 }
-                _uiState.update { it.copy(isSaving = false, error = errorMsg) }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                if (isDefinitiveCreateError(e)) {
+                    FinancialIntentStore.clearCreateCampaignIntent(
+                        context = localizer.context,
+                        userId = uid,
+                        packageName = cleanPkg,
+                        slotNumber = intentToUse.slotNumber,
+                    )
+                }
+
+                val isPolicyConflict = e.message?.contains("BUSINESS_POLICY_CONFLICT", ignoreCase = true) == true ||
+                        e.message?.contains("BUSINESS_POLICY_PRICE_MISMATCH", ignoreCase = true) == true
+
+                if (isPolicyConflict) {
+                    repository.invalidateBusinessQuote()
+                    loadCredits()
+                    loadSlots(forceRefresh = true)
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            error = friendlyBusinessPolicyError(e, localizer),
+                        )
+                    }
+                } else {
+                    val msg = e.message.orEmpty()
+                    val isInsufficient = msg.contains("INSUFFICIENT_CREDITS")
+                    val isSlotError = msg.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") || msg.contains("SLOT_ALREADY_IN_USE")
+                    if (isInsufficient) {
+                        // Số dư trên máy có thể đã lệch so với server: làm mới rồi mới hiển thị lỗi theo số dư thật.
+                        val freshCredits = runCatching {
+                            repository.getMyProfile(forceRefresh = true)?.credits
+                        }.getOrNull()
+                        if (repository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+                        val currentCredits = freshCredits ?: s.userCredits
+                        _uiState.update { it.copy(userCredits = currentCredits) }
+                        val errorMsg = if (msg.contains("INSUFFICIENT_CREDITS_FOR_TARGET") || s.totalPostCost > 0) {
+                            localizer.get(
+                                R.string.create_posting_insufficient_summary_format,
+                                s.requiredCredits,
+                                s.totalPostCost,
+                                s.minCreditsToPostApp,
+                                currentCredits,
+                            )
+                        } else {
+                            localizer.get(
+                                R.string.create_posting_min_balance_only_warning_format,
+                                s.minCreditsToPostApp,
+                                currentCredits,
+                            )
+                        }
+                        _uiState.update { it.copy(isSaving = false, error = errorMsg) }
+                        return@launch
+                    }
+                    if (isSlotError) {
+                        loadSlots(forceRefresh = true)
+                    }
+                    val errorMsg = when {
+                        msg.contains("SLOT_NOT_ACTIVE_OR_EXPIRED") ->
+                            localizer.get(R.string.create_slot_not_active)
+                        msg.contains("SLOT_ALREADY_IN_USE") ->
+                            localizer.get(R.string.create_slot_busy)
+                        msg.contains("PACKAGE_ALREADY_ACTIVE") ->
+                            localizer.get(R.string.create_package_duplicate_format, cleanPkg)
+                        msg.contains("INVALID_PACKAGE_NAME") ->
+                            localizer.get(R.string.create_package_invalid)
+                        else -> friendlyBusinessPolicyError(e, localizer)
+                    }
+                    _uiState.update { it.copy(isSaving = false, error = errorMsg) }
+                }
+            } finally {
+                if (repository.currentUserId() == uid && SessionCacheManager.currentGeneration() == gen) {
+                    isCreateInProgress.set(false)
+                }
             }
         }
     }

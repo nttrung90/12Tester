@@ -1,0 +1,79 @@
+[
+  {
+    "name": "futurePagination",
+    "expected": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "observed": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "cursor": 3,
+    "bug": false
+  },
+  {
+    "name": "historyPagination",
+    "expected": [
+      56,
+      55,
+      54,
+      53
+    ],
+    "observed": [
+      56,
+      55,
+      54,
+      53
+    ],
+    "cursor": 55,
+    "bug": false
+  },
+  {
+    "name": "configTruncation",
+    "totalFuture": 55,
+    "returned": 50,
+    "keys": [
+      "today",
+      "has_more",
+      "revision",
+      "timezone",
+      "active_policy",
+      "next_cursor_id",
+      "future_policies",
+      "next_cursor_date",
+      "total_future_policies"
+    ],
+    "bug": false
+  },
+  {
+    "name": "sameTransactionHistory",
+    "bug": false
+  },
+  {
+    "name": "sameTransactionFutureList",
+    "bug": false
+  },
+  {
+    "name": "standaloneMigrationPreservesData",
+    "preservesData": true,
+    "functionBodiesMatchMirror": true
+  },
+  {
+    "name": "documentedOldPreflightOnCurrentSchema",
+    "checks": [
+      {
+        "signature": "public.get_daily_task_status(uuid,date)",
+        "status": "STOP_REVIEW_CUSTOM_DEFINITION"
+      },
+      {
+        "signature": "public._apply_daily_inactivity_penalty(date)",
+        "status": "STOP_REVIEW_CUSTOM_DEFINITION"
+      }
+    ]
+  }
+]

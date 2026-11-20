@@ -1,0 +1,452 @@
+ M README.md
+ M app/build.gradle.kts
+ M app/src/main/AndroidManifest.xml
+ M app/src/main/java/com/ntt/crosstest/MainActivity.kt
+ M app/src/main/java/com/ntt/crosstest/TestCheoApp.kt
+ M app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt
+ M app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt
+ M app/src/main/java/com/ntt/crosstest/data/Models.kt
+ M app/src/main/java/com/ntt/crosstest/data/PendingReportStore.kt
+ M app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt
+ M app/src/main/java/com/ntt/crosstest/data/ReportSubmitPolicy.kt
+ M app/src/main/java/com/ntt/crosstest/data/SessionCacheManager.kt
+ M app/src/main/java/com/ntt/crosstest/data/SettingsRepository.kt
+ M app/src/main/java/com/ntt/crosstest/data/SupabaseMediaAccessGrantProvider.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/CampaignCard.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/CreditRewardOverlay.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/CreditTopupBottomSheet.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/ImageViewerComponents.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/NotificationBottomSheet.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/QuestHeroBanner.kt
+ M app/src/main/java/com/ntt/crosstest/ui/components/QuestSection.kt
+ M app/src/main/java/com/ntt/crosstest/ui/navigation/NavGraph.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/AccountLockedScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/AdminReportsScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/AdminUsersScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/AppUpdateReleaseScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/AuthScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/CreateCampaignScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/GoogleSignIn.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/HomeScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/MissingConfigScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/MissionCreateScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/PostAppGuideScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/ProfileScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/QuestsScreen.kt
+ M app/src/main/java/com/ntt/crosstest/ui/screens/UpdateScreens.kt
+ M app/src/main/java/com/ntt/crosstest/ui/theme/Color.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminReportsViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminUsersViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/AuthViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/CreateCampaignViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/HomeViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/MissionCreateViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/ui/viewmodels/ProfileViewModel.kt
+ M app/src/main/java/com/ntt/crosstest/util/ImageHashHelper.kt
+ M app/src/main/java/com/ntt/crosstest/util/InstalledAppCache.kt
+ M app/src/main/java/com/ntt/crosstest/util/PreparedScreenshot.kt
+ M app/src/main/java/com/ntt/crosstest/util/PrivateScreenshotDiskCache.kt
+ M app/src/main/java/com/ntt/crosstest/util/ScreenshotManager.kt
+ M app/src/main/java/com/ntt/crosstest/util/ScreenshotRequestFactory.kt
+ M app/src/main/java/com/ntt/crosstest/util/TimeFormat.kt
+ M app/src/main/java/com/ntt/crosstest/util/TopupConfig.kt
+ M app/src/main/java/com/ntt/crosstest/work/NotificationHelper.kt
+ M app/src/main/java/com/ntt/crosstest/work/ReminderWorker.kt
+ M app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt
+ M app/src/main/res/values-en/strings.xml
+ M app/src/main/res/values-vi/strings.xml
+ M app/src/main/res/values/strings.xml
+ M app/src/main/res/values/themes.xml
+ M app/src/test/java/com/ntt/crosstest/data/AppUpdateRegressionTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/AppUpdateRewardTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/CacheRegressionTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/DailyTaskCarryoverUnitTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheBudgetAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheClockAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheCompositeAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheFinalAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheMutationAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCachePublicationAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotIntegrityAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/MissionRegressionTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/MissionReportAndExpirationTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/PushAndCarryoverHardeningTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/ReportRpcCompatibilityTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/data/ReportSubmitManagerIntegrationTest.kt
+ M app/src/test/java/com/ntt/crosstest/util/EgressGatewayClientAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/work/EgressThumbnailPipelineAuditTest.kt
+ M app/src/test/java/com/ntt/crosstest/work/ReportSubmissionLatencyTest.kt
+ M app/src/test/java/com/ntt/crosstest/work/ReportUploadWorkerTest.kt
+ M backend/media-gateway/adapters/supabase-authority-adapter.mjs
+ M backend/media-gateway/media-gateway-handler.mjs
+ M backend/media-gateway/media-gateway-server.test.mjs
+ M privacy_policy.html
+ M supabase/check_mirror.sh
+ D supabase/full_schema_singapore.sql
+ D supabase/migrations/001_init.sql
+ D supabase/migrations/002_credit_system.sql
+ D supabase/migrations/002_guest_and_leaderboard.sql
+ D supabase/migrations/003_app_submission_fields.sql
+ D supabase/migrations/004_owner_app_management.sql
+ D supabase/migrations/005_multi_slots_system.sql
+ D supabase/migrations/006_auth_roles_and_admin_management.sql
+ D supabase/migrations/007_fix_auto_confirm_and_existing_users.sql
+ D supabase/migrations/007_test_review_warnings_and_penalties.sql
+ D supabase/migrations/008_admin_delete_campaign.sql
+ D supabase/migrations/008_credit_topup_system.sql
+ D supabase/migrations/009_notifications_system.sql
+ D supabase/migrations/010_quest_system.sql
+ D supabase/migrations/011_fix_review_rewards_and_streak.sql
+ D supabase/migrations/012_fix_owner_report_receiving_and_rpc.sql
+ D supabase/migrations/013_daily_test_targets_and_sorting.sql
+ D supabase/migrations/013_fix_interaction_flow_and_retest.sql
+ D supabase/migrations/014_eight_hour_review_and_provisional_credits.sql
+ D supabase/migrations/015_image_hash_duplicate_detection.sql
+ D supabase/migrations/016_fix_owner_tester_flow.sql
+ D supabase/migrations/017_home_tabs_campaign_lifecycle.sql
+ D supabase/migrations/018_app_version_and_update_config.sql
+ D supabase/migrations/019_admin_update_app_config.sql
+ D supabase/migrations/020_query_optimization.sql
+ D supabase/migrations/021_query_optimization_round2.sql
+ D supabase/migrations/022_credit_integrity.sql
+ D supabase/migrations/023_credit_and_privilege_hardening.sql
+ D supabase/migrations/024_hash_url_consistency.sql
+ D supabase/migrations/025_contact_reports.sql
+ D supabase/migrations/026_leaderboard_top_test.sql
+ D supabase/migrations/027_fix_owner_tester_flow.sql
+ D supabase/migrations/028_apply_missing_schema.sql
+ D supabase/migrations/029_thirty_day_appearance_window.sql
+ D supabase/migrations/030_credit_hardening_tip_cron.sql
+ D supabase/migrations/031_fix_report_review_integrity.sql
+ D supabase/migrations/032_admin_campaign_controls.sql
+ D supabase/migrations/033_media_integrity.sql
+ D supabase/migrations/034_admin_tester_flow.sql
+ D supabase/migrations/035_admin_penalty_exemption.sql
+ D supabase/migrations/036_daily_task_quota.sql
+ D supabase/migrations/037_reward_10_credits.sql
+ D supabase/migrations/038_my_rank.sql
+ D supabase/migrations/039_missions.sql
+ D supabase/migrations/040_mission_management.sql
+ D supabase/migrations/041_campaign_retention.sql
+ D supabase/migrations/042_configurable_daily_task_ratio.sql
+ D supabase/migrations/043_backend_cleanup_hardening.sql
+ D supabase/migrations/044_mission_flow_hardening.sql
+ D supabase/migrations/045_thumbnail_support.sql
+ D supabase/migrations/046_media_access_gateway.sql
+ D supabase/migrations/047_home_stats_cycle.sql
+ D supabase/migrations/048_mission_report_and_expiration.sql
+ D supabase/migrations/049_mission_report_hardening.sql
+ D supabase/migrations/050_app_update_reward.sql
+ D supabase/migrations/051_app_update_reward_hardening.sql
+ D supabase/migrations/052_campaign_push_priority.sql
+ D supabase/migrations/053_daily_task_carryover.sql
+ D supabase/migrations/054_push_and_carryover_hardening.sql
+ M supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md
+ M supabase/operations/daily_task_ratio_preflight.sql
+ M supabase/tests/package-lock.json
+ M supabase/tests/package.json
+ M supabase/tests/run-app-update-reward-test.mjs
+ M supabase/tests/run-backend-cleanup-hardening.mjs
+ M supabase/tests/run-campaign-push-test.mjs
+ M supabase/tests/run-daily-task-carryover.mjs
+ M supabase/tests/run-daily-task-ratio.mjs
+ M supabase/tests/run-home-stats-cycle-test.mjs
+ M supabase/tests/run-media-gateway-test.mjs
+ M supabase/tests/run-mission-flow-hardening.mjs
+ M supabase/tests/run-mission-report-and-expiration-test.mjs
+ M supabase/tests/run-push-and-carryover-hardening-test.mjs
+ M supabase/tests/run-thumbnail-migration.mjs
+?? .zcode/plans/plan-session_5a60f1148291c6139d17594f87d35ac4.md
+?? BAO_CAO_BAT_LA_TOP_TEST_2026-10-31.md
+?? BAO_CAO_GEMINI_SUA_RPC_V2_2026-10-30.md
+?? BAO_CAO_KIEM_TRA_LAI_BO_CUC_ADMIN_2026-11-01.md
+?? BAO_CAO_KIEM_TRA_NOP_BAO_CAO_2026-10-30.md
+?? BAO_CAO_KIEM_TRA_SO_SANH_ANH_2026-10-30.md
+?? BAO_CAO_KIEM_TRA_VA_SUA_CONG_DON_DAY_APP_2026-10-30.md
+?? BAO_CAO_KIEM_TRA_VA_SUA_LUONG_ADMIN_2026-11-01.md
+?? BAO_CAO_NGUYEN_NHAN_NHIEU_MIGRATIONS_2026-10-30.md
+?? BAO_CAO_SUA_DA_NGON_NGU_2026-10-29.md
+?? BAO_CAO_SUA_DEM_BAO_CAO_TESTER_2026-11-01.md
+?? BAO_CAO_SUA_GUI_BAO_CAO_NEN_2026-10-29.md
+?? BAO_CAO_SUA_LOI_DAY_APP_RPC_2026-10-29.md
+?? BAO_CAO_SUA_MATERIAL_GON_TOAN_DU_AN_2026-10-30.md
+?? BAO_CAO_SUA_NOP_BAO_CAO_1.0.5_BUILD_25_2026-10-30.md
+?? BAO_CAO_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_2_2026-10-30.md
+?? BAO_CAO_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_3_2026-10-30.md
+?? BAO_CAO_SUA_SO_SANH_ANH_BAO_CAO_2026-10-30.md
+?? BAO_CAO_SUA_TACH_LUONG_TEST_NGAY_NHIEM_VU_2026-10-30.md
+?? BAO_CAO_SUA_THONG_BAO_LOI_NOP_BAO_CAO_LAP_2026-11-05.md
+?? BAO_CAO_TRIEN_KHAI_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+?? CAU_HOI_THUONG_GAP_12_CROSS_TESTERS.md
+?? HUONG_DAN_SU_DUNG_12_CROSS_TESTERS.md
+?? HUONG_DAN_TRIEN_KHAI_MO_RONG_ADMIN_2026-11-01.md
+?? KET_QUA_KIEM_TRA_SUA_ADMIN_2026-11-02.md
+?? KET_QUA_MO_RONG_ADMIN_OPENCODE_2026-11-01.md
+?? KET_QUA_SUA_CONG_DON_NHIEM_VU_2026-11-05.md
+?? KET_QUA_SUA_TU_DUNG_APP_THIEU_NHIEM_VU_2026-11-05.md
+?? KET_QUA_TAM_DUNG_APP_VA_THONG_BAO_NOI_2026-11-05.md
+?? KE_HOACH_BO_CUC_BANG_QUAN_TRI_VIEN_2026-11-01.md
+?? KE_HOACH_CAU_HINH_NGUONG_TAM_DUNG_APP_2026-11-03.md
+?? KE_HOACH_CAU_HINH_NHIEM_VU_NGAY_TRONG_ADMIN_2026-10-29.md
+?? KE_HOACH_CHO_GEMINI_SUA_RPC_V2_THIEU_CONTEXT_2026-10-30.md
+?? KE_HOACH_CUA_SO_BAO_CAO_NHIEM_VU_APP_2026-11-02.md
+?? KE_HOACH_HUONG_DAN_VA_FAQ_TRONG_HO_SO.md
+?? KE_HOACH_KIEM_TRA_SUA_ADMIN_OPENCODE_2026-11-02.md
+?? KE_HOACH_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+?? KE_HOACH_SUA_CHONG_LAN_TEST_NGAY_VA_NHIEM_VU_APP_2026-10-30.md
+?? KE_HOACH_SUA_CHONG_LAN_VA_KET_GUI_BAO_CAO_2026-10-29.md
+?? KE_HOACH_SUA_DA_NGON_NGU_CHO_GEMINI_2026-10-29.md
+?? KE_HOACH_SUA_DEM_BAO_CAO_TESTER_2026-11-01.md
+?? KE_HOACH_SUA_LOI_DAY_APP_RPC_2026-10-29.md
+?? KE_HOACH_SUA_LOI_NOP_BAO_CAO_2026-10-30.md
+?? KE_HOACH_SUA_LUONG_ADMIN_2026-11-01.md
+?? KE_HOACH_SUA_SO_SANH_ANH_BAO_CAO_CHO_GEMINI_2026-10-30.md
+?? KE_HOACH_THONG_BAO_NOI_KHI_ADMIN_TAM_DUNG_APP_2026-11-05.md
+?? KE_HOACH_TOI_UU_EGRESS_GIU_NGUYEN_TRAI_NGHIEM_2026-11-10.md
+?? KE_HOACH_TRIEN_KHAI_MO_RONG_ADMIN_OPENCODE_2026-11-01.md
+?? KE_HOACH_UU_TIEN_GOI_Y_APP_CHUA_DU_CHI_TIEU_2026-11-10.md
+?? NGHIEN_CUU_MO_RONG_BANG_QUAN_TRI_VIEN_2026-11-01.md
+?? NGHIEN_CUU_PHAN_TAI_SUPABASE_SANG_FIREBASE_2026-11-10.md
+?? NGHIEN_CUU_VA_KE_HOACH_SUA_TU_DUNG_APP_THIEU_NHIEM_VU_2026-11-05.md
+?? PROMPT_GEMINI_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.txt
+?? PROMPT_GEMINI_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_2_2026-10-30.txt
+?? PROMPT_GEMINI_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_3_2026-10-30.txt
+?? PROMPT_GEMINI_SUA_SO_SANH_ANH_BAO_CAO_2026-10-30.txt
+?? PROMPT_OPENCODE_SUA_BAO_CAO_VONG_2_2026-10-29.txt
+?? PROMPT_OPENCODE_SUA_BAO_CAO_VONG_3_2026-10-30.txt
+?? PROMPT_OPENCODE_SUA_TIEP_BAO_CAO_2026-10-29.txt
+?? RECHECK_VA_KE_HOACH_SUA_CAU_HINH_NHIEM_VU_NGAY_2026-10-30.md
+?? RECHECK_VA_KE_HOACH_SUA_CONG_DON_NHIEM_VU_2026-11-05.md
+?? RECHECK_VA_KE_HOACH_SUA_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+?? RECHECK_VA_KE_HOACH_SUA_TIEP_BAO_CAO_CHO_OPENCODE_2026-10-29.md
+?? RECHECK_VA_KE_HOACH_SUA_TIEP_DA_NGON_NGU_2026-10-29.md
+?? RECHECK_VONG_2_VA_KE_HOACH_SUA_BAO_CAO_CHO_OPENCODE_2026-10-29.md
+?? RECHECK_VONG_2_VA_KE_HOACH_SUA_DA_NGON_NGU_2026-10-29.md
+?? RECHECK_VONG_3_VA_KE_HOACH_SUA_BAO_CAO_CHO_OPENCODE_2026-10-30.md
+?? RECHECK_VONG_3_VA_KE_HOACH_SUA_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+?? REVIEW_VA_KE_HOACH_MATERIAL_GON_TOAN_DU_AN_2026-10-30.md
+?? android-backend-gaps.md
+?? android-core-handover.md
+?? app/src/main/java/com/ntt/crosstest/data/AdminManagementModels.kt
+?? app/src/main/java/com/ntt/crosstest/data/AdminManagementRepository.kt
+?? app/src/main/java/com/ntt/crosstest/data/AdminNotificationCampaignModels.kt
+?? app/src/main/java/com/ntt/crosstest/data/AdminNotificationCampaignRepository.kt
+?? app/src/main/java/com/ntt/crosstest/data/BusinessPolicyModels.kt
+?? app/src/main/java/com/ntt/crosstest/data/BusinessPolicyRepository.kt
+?? app/src/main/java/com/ntt/crosstest/data/EgressOptimization.kt
+?? app/src/main/java/com/ntt/crosstest/data/EgressSyncProtocol.kt
+?? app/src/main/java/com/ntt/crosstest/data/FinancialIntentStore.kt
+?? app/src/main/java/com/ntt/crosstest/data/MissionReportDraftStore.kt
+?? app/src/main/java/com/ntt/crosstest/data/NotificationPendingAckStore.kt
+?? app/src/main/java/com/ntt/crosstest/data/ReportSubmissionFailure.kt
+?? app/src/main/java/com/ntt/crosstest/data/help/
+?? app/src/main/java/com/ntt/crosstest/ui/LocalizedAppContent.kt
+?? app/src/main/java/com/ntt/crosstest/ui/components/AdminDailyTaskPolicySheet.kt
+?? app/src/main/java/com/ntt/crosstest/ui/components/AdminNotificationPopupHost.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminAuditScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminBusinessPolicyScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminCampaignsScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminNotificationCampaignScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminSystemMonitorScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/AdminTesterReportsQueueScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/CarryoverPolicyScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/HelpScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/MemberDetailScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/screens/MissionReportScreen.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminAuditViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignsViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminPauseDialogController.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminSystemMonitorViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminTesterReportsQueueViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/CarryoverPolicyViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/MemberDetailViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/MissionReportViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModel.kt
+?? app/src/main/java/com/ntt/crosstest/util/AppForegroundTracker.kt
+?? app/src/main/java/com/ntt/crosstest/util/ComparisonStateCoordinator.kt
+?? app/src/main/java/com/ntt/crosstest/util/CreditLogRenderer.kt
+?? app/src/main/java/com/ntt/crosstest/util/DetailedImageComparator.kt
+?? app/src/main/java/com/ntt/crosstest/util/NotificationPopupBlockerCoordinator.kt
+?? app/src/main/java/com/ntt/crosstest/util/NotificationRenderer.kt
+?? app/src/main/java/com/ntt/crosstest/util/RejectionReasonRenderer.kt
+?? app/src/main/java/com/ntt/crosstest/util/ReportComparisonSelector.kt
+?? app/src/main/java/com/ntt/crosstest/util/UiStateMessageResolver.kt
+?? app/src/main/java/com/ntt/crosstest/util/UiText.kt
+?? app/src/main/java/com/ntt/crosstest/util/WarningRenderer.kt
+?? app/src/main/res/values-en/admin_business_policy.xml
+?? app/src/main/res/values-en/admin_management.xml
+?? app/src/main/res/values-en/admin_notifications.xml
+?? app/src/main/res/values-en/help_faq.xml
+?? app/src/main/res/values-v29/
+?? app/src/main/res/values-v35/
+?? app/src/main/res/values-vi/admin_business_policy.xml
+?? app/src/main/res/values-vi/admin_management.xml
+?? app/src/main/res/values-vi/admin_notifications.xml
+?? app/src/main/res/values-vi/help_faq.xml
+?? app/src/main/res/values/admin_business_policy.xml
+?? app/src/main/res/values/admin_management.xml
+?? app/src/main/res/values/admin_notifications.xml
+?? app/src/main/res/values/help_faq.xml
+?? app/src/main/res/xml/
+?? app/src/test/java/com/ntt/crosstest/audit/
+?? app/src/test/java/com/ntt/crosstest/data/AdminDailyTaskHardeningRegressionTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/AdminDailyTaskPolicyTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/AdminNotificationCampaignRepositoryTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/AdminOwnerAutoPauseTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/AdminRelatedRepositoryRaceTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/EgressFinalClientReviewTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/EgressProtocolReviewTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/EgressReviewContractTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/FinancialConsumerV2BehavioralTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/FinancialIntentStoreTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/MissionReportMultiAttachmentTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/NotificationPendingAckStoreTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/OwnerReportCountBehavioralTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/ReportSubmissionFailureTest.kt
+?? app/src/test/java/com/ntt/crosstest/data/help/
+?? app/src/test/java/com/ntt/crosstest/localization/
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModelTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignActionRaceTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignPauseReasonTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminFlowSessionRaceTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminManagementCoreTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminOwnerAutoPauseViewModelTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminPauseDialogControllerTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminPauseSessionIdentityReviewTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModelBehavioralTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/CampaignPostingPolicyViewModelTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupReviewRegressionTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupRound3RegressionTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModelTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerAutoPauseResumeHardeningTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerDailyRefreshRaceReviewTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerDailyTaskOrderingReviewTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/PendingCarryoverRetryRegressionTest.kt
+?? app/src/test/java/com/ntt/crosstest/ui/viewmodels/SlotAndPushDurabilityBehavioralTest.kt
+?? app/src/test/java/com/ntt/crosstest/util/ComparisonStateCoordinatorTest.kt
+?? app/src/test/java/com/ntt/crosstest/util/DetailedImageComparatorTest.kt
+?? app/src/test/java/com/ntt/crosstest/util/ReportComparisonSelectorTest.kt
+?? app/src/test/java/com/ntt/crosstest/work/ReportBackgroundSubmissionTest.kt
+?? audit-role-stage-handover.md
+?? audit-stage-final-handover.md
+?? audit/admin-daily-task-review-2026-10-30/
+?? audit/admin-expansion-2026-11-01/
+?? audit/admin-expansion-recheck-2026-11-02/
+?? audit/admin-flow-2026-11-01/
+?? audit/admin-panel-layout-2026-11-01/
+?? audit/admin-panel-layout-recheck-2026-11-01/
+?? audit/admin-pause-reason-popup-2026-11-05/
+?? audit/admin-popup-review-2026-10-30/
+?? audit/admin-popup-review-round3-2026-10-30/
+?? audit/app-mission-report-2026-11-02/
+?? audit/carryover-fix-2026-11-05/
+?? audit/carryover-recheck-2026-11-05/
+?? audit/egress-safe-2026-11-10/
+?? audit/gemini-rpc-v2-final-2026-10-30/
+?? audit/help-faq-2026-11-03/
+?? audit/localization-2026-10-29/
+?? audit/localization-recheck-2026-10-29/
+?? audit/localization-recheck-round2-2026-10-29/
+?? audit/migration-baseline-062-2026-10-30/
+?? audit/migration-review-2026-10-30/
+?? audit/mission-completed-apps-2026-11-03/
+?? audit/mission-reward-modes-2026-11-03/
+?? audit/next-app-priority-2026-11-10/
+?? audit/opencode-image-comparison-2026-10-30/
+?? audit/owner-auto-pause-2026-11-05/
+?? audit/owner-report-count-2026-11-01/
+?? audit/push-carryover-review-2026-10-30/
+?? audit/push-rpc-role-2026-10-29/
+?? audit/report-context-fix-2026-10-30/
+?? audit/report-failure-notification-2026-11-05/
+?? audit/report-submit-fix-2026-10-30/
+?? audit/report-v2-wire-2026-10-30/
+?? audit/two-plans-review-2026-10-30-backend.log
+?? backend-core-handover.md
+?? backend/notification-worker/
+?? business-android-handover.md
+?? core-dashboard-handover.md
+?? core-idempotency-slots-handover.md
+?? supabase/migrations/062_consolidated_baseline.sql
+?? supabase/migrations/063_report_crypto_search_path.sql
+?? supabase/migrations/064_explicit_report_context.sql
+?? supabase/migrations/065_remove_dhash_hardblock.sql
+?? supabase/migrations/066_push_and_carryover_hardening.sql
+?? supabase/migrations/067_admin_direct_notification_popup.sql
+?? supabase/migrations/068_owner_tester_reports_count.sql
+?? supabase/migrations/069_admin_audit_hardening.sql
+?? supabase/migrations/070_admin_management.sql
+?? supabase/migrations/071_business_policies.sql
+?? supabase/migrations/072_admin_notification_campaigns.sql
+?? supabase/migrations/073_admin_action_audit.sql
+?? supabase/migrations/074_app_mission_window_and_multi_attachments.sql
+?? supabase/migrations/075_owner_auto_pause_config.sql
+?? supabase/migrations/076_mission_for_finalized_campaigns.sql
+?? supabase/migrations/077_mission_reward_modes_and_management.sql
+?? supabase/migrations/078_admin_pause_reason_popup.sql
+?? supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql
+?? supabase/migrations/080_report_context_carryover_and_gap_recovery.sql
+?? supabase/migrations/081_admin_flow_audit_fixes.sql
+?? supabase/migrations/082_carryover_flow_audit_fixes.sql
+?? supabase/migrations/083_fix_app_configs_encoding_and_version.sql
+?? supabase/migrations/084_campaign_posting_business_policies.sql
+?? supabase/migrations/085_egress_optimization_sync_v2.sql
+?? supabase/migrations_archive/
+?? supabase/operations/HUONG_DAN_BASELINE_062.md
+?? supabase/operations/carryover_080_recovery.md
+?? supabase/operations/check-report-crypto-schema.sql
+?? supabase/operations/check-report-v2-contract.sql
+?? supabase/operations/egress_sync_v2_rollout.sql
+?? supabase/operations/owner_auto_pause_preflight.sql
+?? supabase/operations/report-context-audit.sql
+?? supabase/tests/audit-owner-auto-pause-flow.mjs
+?? supabase/tests/owner-auto-pause-concurrency-fixture.mjs
+?? supabase/tests/probe-daily-mission-overlap.mjs
+?? supabase/tests/run-admin-action-audit-test.mjs
+?? supabase/tests/run-admin-audit-hardening-test.mjs
+?? supabase/tests/run-admin-daily-task-policy-test.mjs
+?? supabase/tests/run-admin-direct-notification-popup-test.mjs
+?? supabase/tests/run-admin-expansion-integration-test.mjs
+?? supabase/tests/run-admin-management-test.mjs
+?? supabase/tests/run-admin-notification-campaigns-test.mjs
+?? supabase/tests/run-admin-pause-reason-concurrency-test.mjs
+?? supabase/tests/run-admin-pause-reason-popup-test.mjs
+?? supabase/tests/run-admin-pause-resume-compatibility-test.mjs
+?? supabase/tests/run-admin-popup-concurrency-test.mjs
+?? supabase/tests/run-app-mission-window-test.mjs
+?? supabase/tests/run-business-policies-test.mjs
+?? supabase/tests/run-campaign-posting-policies-test.mjs
+?? supabase/tests/run-carryover-fix-acceptance-test.mjs
+?? supabase/tests/run-consolidated-baseline-test.mjs
+?? supabase/tests/run-egress-flags-v2-test.mjs
+?? supabase/tests/run-egress-sync-v2-test.mjs
+?? supabase/tests/run-explicit-report-context-test.mjs
+?? supabase/tests/run-mission-finalized-campaigns-test.mjs
+?? supabase/tests/run-mission-reward-modes-test.mjs
+?? supabase/tests/run-owner-auto-pause-concurrency-fixture-test.mjs
+?? supabase/tests/run-owner-auto-pause-concurrency-test.mjs
+?? supabase/tests/run-owner-auto-pause-hardening-test.mjs
+?? supabase/tests/run-owner-auto-pause-test.mjs
+?? supabase/tests/run-owner-tester-reports-count-test.mjs
+?? supabase/tests/run-push-and-carryover-baseline062-regression-test.mjs
+?? supabase/tests/run-push-campaign-role-hardening-test.mjs
+?? supabase/tests/run-remove-dhash-hardblock-test.mjs
+?? supabase/tests/run-report-extension-schema-test.mjs
+?? supabase/tests/run-report-idempotency-ledger-test.mjs
+?? supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs
+?? supabase/tests/run-verify-concurrency-runner-setup.mjs
+?? supabase/tools/

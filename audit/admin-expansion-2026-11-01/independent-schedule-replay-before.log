@@ -1,0 +1,24 @@
+{
+  "firstSuccess": true,
+  "error": "SCHEDULE_TIME_MUST_BE_IN_FUTURE: Scheduled delivery must be strictly in the future"
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Committed schedule must replay after its scheduled time has passed
++ actual - expected
+
++ undefined
+- true
+
+    at file:///F:/AI/12Tester/audit/admin-expansion-2026-11-01/independent-notification-schedule-replay-probe.mjs:23:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

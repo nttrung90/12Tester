@@ -1,0 +1,14 @@
+{
+    "logName":  "indep-manager",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T05:04:57.1898681Z",
+    "finishedUtc":  "2026-11-02T05:05:15.7689396Z",
+    "currentRunXmlCount":  1
+}

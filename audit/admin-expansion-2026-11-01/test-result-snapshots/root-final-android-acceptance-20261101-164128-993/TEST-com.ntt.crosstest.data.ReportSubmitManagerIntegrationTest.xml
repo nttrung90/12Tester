@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:41:16.344Z" hostname="PC-5700X3D" time="3.424">
+  <properties/>
+  <testcase name="startupReconciliationOnlyDeletesReceiptsAfterCommittedSuccess" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.038"/>
+  <testcase name="realWorkManagerFirstRunAndCompletionStayAtAttemptOne" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="1.062"/>
+  <testcase name="eachCampaignKeepsItsOwnFailureAndRetryTargetsThatCampaign" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="1.137"/>
+  <testcase name="restartReattachesToExistingWorkWithoutReplacingIt" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.578"/>
+  <testcase name="concurrentCampaignDoesNotAllowDuplicateOfEarlierPendingReport" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.033"/>
+  <testcase name="restartRestoresOrphanedRequestAndIgnoresOtherAccounts" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.575"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

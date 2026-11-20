@@ -1,0 +1,41 @@
+{
+  "agentMode": "auto",
+  "allowNonWorkspaceAccess": false,
+  "permissions": {
+    "allow": [
+      "read_file(F:/AI/12Tester)",
+      "write_file(F:/AI/12Tester)",
+      "command(regex:.*gradlew\\.bat (?:testDebugUnitTest|assembleDebug|compileDebugKotlin).*)",
+      "command(regex:node (?:--check )?(?:supabase[/\\\\]tests[/\\\\])?run-[A-Za-z0-9_-]+\\.mjs)",
+      "command(regex:npm run test:[A-Za-z0-9_-]+)",
+      "command(regex:git (?:status|diff).*)",
+      "command(regex:rg .*)",
+      "command(regex:Get-Content .*)",
+      "command(regex:Get-ChildItem .*)",
+      "command(regex:Select-String .*)",
+      "command(regex:Select-Object .*)",
+      "command(regex:Sort-Object .*)",
+      "command(regex:Test-Path .*)",
+      "command(regex:Measure-Object .*)",
+      "command(regex:.*gradlew(?:\\.bat)? .*)",
+      "command(regex:Tee-Object .*)",
+      "command(regex:Write-Output .*)",
+      "command(regex:Out-File .*)"
+    ],
+    "deny": [
+      "write_file(F:/AI/12Tester/.git)",
+      "write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before)",
+      "write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/before-hashes.json)",
+      "write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/SESSION_SETTINGS.json)",
+      "write_file(F:/AI/12Tester/audit/next-app-priority-2026-11-10/TASK_GEMINI.txt)",
+      "command(git reset)",
+      "command(git clean)",
+      "command(git checkout)",
+      "command(git push)",
+      "command(Remove-Item)",
+      "command(Stop-Process)",
+      "command(Invoke-WebRequest)",
+      "command(Invoke-RestMethod)"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:12:56.842Z" hostname="PC-5700X3D" time="0.092">
+  <properties/>
+  <testcase name="accountSwitch_slotIntentIsolation" classname="com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest" time="0.01"/>
+  <testcase name="pushApp_lostReply_preservesCampaignPushStoreRequestId" classname="com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest" time="0.032"/>
+  <testcase name="renewCurrentSlot_lostReply_retryReusesSameUUIDAndOriginalQuote" classname="com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest" time="0.032"/>
+  <testcase name="slot_quoteUnavailable_blocksPurchase" classname="com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

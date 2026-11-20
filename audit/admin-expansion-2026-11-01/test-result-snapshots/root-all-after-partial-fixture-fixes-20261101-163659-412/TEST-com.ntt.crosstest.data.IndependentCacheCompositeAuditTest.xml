@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.IndependentCacheCompositeAuditTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:36:40.989Z" hostname="PC-5700X3D" time="0.02">
+  <properties/>
+  <testcase name="feedbackOnlyFailureMustNotOverwriteGoodAverageRating" classname="com.ntt.crosstest.data.IndependentCacheCompositeAuditTest" time="0.01"/>
+  <testcase name="checkinOnlyFailureMustNotOverwriteTesterHistoryWithZero" classname="com.ntt.crosstest.data.IndependentCacheCompositeAuditTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

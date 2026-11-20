@@ -1,0 +1,27 @@
+{
+  "migrationSha256": "16E1DA4B567BEFA4B8C6BFA024F7AB2D3279AB0BA0B6B29601BF311F87989983",
+  "sourceStable": true,
+  "results": [
+    {
+      "probe": "root-daily-coexistence-probe",
+      "exit": 0,
+      "log": "audit\\app-mission-report-2026-11-02\\root-daily-coexistence-probe-root-verified.log"
+    },
+    {
+      "probe": "root-daily-state-matrix",
+      "exit": 0,
+      "log": "audit\\app-mission-report-2026-11-02\\root-daily-state-matrix-root-verified.log"
+    },
+    {
+      "probe": "root-migration-upgrade-probe",
+      "exit": 0,
+      "log": "audit\\app-mission-report-2026-11-02\\root-migration-upgrade-probe-root-verified.log"
+    },
+    {
+      "probe": "root-three-image-probe",
+      "exit": 0,
+      "log": "audit\\app-mission-report-2026-11-02\\root-three-image-probe-root-verified.log"
+    }
+  ],
+  "finishedUtc": "2026-11-02T04:13:50.0650553Z"
+}

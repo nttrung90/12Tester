@@ -1,0 +1,4 @@
+{"case":"client_cannot_forge_receipt","actor":{"current_user":"authenticated","session_user":"postgres","uid":"fa000000-0000-0000-0000-000000000001"},"error":"permission denied for table campaign_removal_receipts","pass":true}
+{"case":"client_cannot_rewrite_server_receipt","actor":{"current_user":"authenticated","session_user":"postgres","uid":"fa000000-0000-0000-0000-000000000001"},"error":"permission denied for table campaign_removal_receipts","pass":true}
+{"case":"unknown_id_has_no_replay_proof","actor":{"current_user":"authenticated","session_user":"postgres","uid":"fa000000-0000-0000-0000-000000000001"},"error":"CAMPAIGN_NOT_FOUND","pass":true}
+PASS 3/3 receipt authorization cases; not concurrency.

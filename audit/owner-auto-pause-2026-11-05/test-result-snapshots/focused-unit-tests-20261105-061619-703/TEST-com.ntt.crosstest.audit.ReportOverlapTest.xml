@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.ReportOverlapTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:15:58.266Z" hostname="PC-5700X3D" time="5.792">
+  <properties/>
+  <testcase name="remainingCompletionMustPreserveNewerDraftInSameViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="2.528"/>
+  <testcase name="round2NewDraftUsingSubmittedPhotoMustKeepItsPhotoAfterCompletion" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.597"/>
+  <testcase name="round3DuplicateSubmitDuringPreparingDoesNotOverwriteOwnership" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.572"/>
+  <testcase name="alreadyInFlightSubmissionReturnsConflictReason" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.057"/>
+  <testcase name="round3CancelAllMustPreventLateEnqueueFromAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="1.032"/>
+  <testcase name="formSubmissionBlockedKeepsFormAndDraft" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.045"/>
+  <testcase name="explicitMissionMustNotSilentlyBecomeOrdinaryApprovedComment" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.042"/>
+  <testcase name="ordinaryPendingReportMustKeepItsTypeAfterJoiningMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.058"/>
+  <testcase name="remainingForeignCompletionMustPreserveDraftInOtherViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.584"/>
+  <testcase name="newDailyReportMustNotBecomeJoinedMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.044"/>
+  <testcase name="remainingExplicitDifferentMissionMustNotSubmitOldMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.04"/>
+  <testcase name="missionContextMustMatchTheRequestedMissionIdentity" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.04"/>
+  <testcase name="remainingMissingScreenshotMustNotBeAcceptedBeforePersistence" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.018"/>
+  <testcase name="round2AdmissionMustNotPerformStorageIoOnCallingThread" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.025"/>
+  <testcase name="approvedMissionCommentMustNotDependOnLiveMissionFetch" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.052"/>
+  <testcase name="round3CallerCancellationDoesNotCancelManagerAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

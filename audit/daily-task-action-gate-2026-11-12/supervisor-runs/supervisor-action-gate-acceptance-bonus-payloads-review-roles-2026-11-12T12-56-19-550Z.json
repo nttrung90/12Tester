@@ -1,0 +1,3033 @@
+{
+  "at": "2026-11-12T12:56:19.550Z",
+  "kind": "current candidate",
+  "singleConnection": true,
+  "applied": [
+    {
+      "name": "062_consolidated_baseline.sql",
+      "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+    },
+    {
+      "name": "063_report_crypto_search_path.sql",
+      "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+    },
+    {
+      "name": "064_explicit_report_context.sql",
+      "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+    },
+    {
+      "name": "065_remove_dhash_hardblock.sql",
+      "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+    },
+    {
+      "name": "066_push_and_carryover_hardening.sql",
+      "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+    },
+    {
+      "name": "067_admin_direct_notification_popup.sql",
+      "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+    },
+    {
+      "name": "068_owner_tester_reports_count.sql",
+      "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+    },
+    {
+      "name": "069_admin_audit_hardening.sql",
+      "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+    },
+    {
+      "name": "070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "name": "071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "name": "072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "name": "073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "name": "074_app_mission_window_and_multi_attachments.sql",
+      "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+    },
+    {
+      "name": "075_owner_auto_pause_config.sql",
+      "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+    },
+    {
+      "name": "076_mission_for_finalized_campaigns.sql",
+      "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+    },
+    {
+      "name": "077_mission_reward_modes_and_management.sql",
+      "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+    },
+    {
+      "name": "078_admin_pause_reason_popup.sql",
+      "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+    },
+    {
+      "name": "079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+    },
+    {
+      "name": "080_report_context_carryover_and_gap_recovery.sql",
+      "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+    },
+    {
+      "name": "081_admin_flow_audit_fixes.sql",
+      "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+    },
+    {
+      "name": "082_carryover_flow_audit_fixes.sql",
+      "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+    },
+    {
+      "name": "083_fix_app_configs_encoding_and_version.sql",
+      "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+    },
+    {
+      "name": "084_campaign_posting_business_policies.sql",
+      "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+    },
+    {
+      "name": "085_egress_optimization_sync_v2.sql",
+      "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+    },
+    {
+      "name": "086_next_campaign_candidate_daily_target_priority.sql",
+      "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+    },
+    {
+      "name": "087_campaign_tester_bonus_rounds.sql",
+      "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+    },
+    {
+      "name": "088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "name": "089_fix_production_bonus_lifecycle.sql",
+      "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+    },
+    {
+      "name": "090_daily_task_action_gate.sql",
+      "sha256": "57e1f801f02560307351a6db1d16b572054e3d62101933a5f605b94010a3f370"
+    }
+  ],
+  "results": [
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_delete",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_completed",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "PERMISSION_DENIED: Trạng thái hoàn thành chỉ được thực hiện qua tiếp tục app quá 30 ngày",
+      "pass": true
+    },
+    {
+      "case": "direct_closed",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "PERMISSION_DENIED: Trạng thái đóng chỉ được thực hiện qua quy trình gỡ bỏ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 0,
+        "paused": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "reason": "Gỡ bỏ bởi Chủ sở hữu",
+            "status": "removed",
+            "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+            "success": true,
+            "app_name": "Supervisor gate fixture",
+            "owner_id": "ec000000-0000-0000-0000-000000000001",
+            "campaign_id": "a89b9d83-96dc-4d03-9b06-7ca0eaaefbf5"
+          }
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "9003c7e2-c654-4c28-94b0-fb578d0d807c",
+          "status": "production"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "f076f3c3-6054-4a78-b01e-d7948b22e40e",
+          "status": "paused"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "open",
+            "success": true,
+            "campaign_id": "427f9a6e-2733-47da-be60-56fdd5ae6d2d"
+          }
+        }
+      ],
+      "after": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 0,
+        "paused": true,
+        "expired": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "expired": true,
+        "locked": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "ACCOUNT_LOCKED: Tài khoản của bạn đã bị khóa",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 3,
+        "bonus": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "bonus": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "reason": "Gỡ bỏ bởi Chủ sở hữu",
+            "status": "removed",
+            "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+            "success": true,
+            "app_name": "Supervisor gate fixture",
+            "owner_id": "ec000000-0000-0000-0000-000000000001",
+            "campaign_id": "84dc7d9f-e54e-4021-9564-81b9a052d427"
+          }
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 3,
+        "bonus": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "bonus": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "ccb58006-7cab-4a56-b70e-bfe9dc5c9cbf",
+          "status": "production"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 3,
+        "bonus": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "bonus": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "e9756c3a-49f1-4a39-96ac-dfa9a48181a9",
+          "status": "paused"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 0,
+        "paused": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "forge_pending_delete",
+      "options": {
+        "completed": 0,
+        "paused": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "PERMISSION_DENIED: Không thể tự đặt trạng thái chờ gỡ bỏ",
+      "pass": true
+    },
+    {
+      "case": "forge_pending_then_delete",
+      "options": {
+        "completed": 0,
+        "paused": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "PERMISSION_DENIED: Không thể tự đặt trạng thái chờ gỡ bỏ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "streak": 7
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "open",
+            "success": true,
+            "campaign_id": "5222495d-49d0-47be-a064-6586256dc7f6"
+          }
+        }
+      ],
+      "after": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_remaining_tests",
+          "value": -1
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nợ cộng dồn không hợp lệ",
+      "pass": true
+    },
+    {
+      "case": "production_rpc",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "production_rpc",
+      "options": {
+        "completed": 6,
+        "bonus": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "production",
+            "success": true,
+            "campaign_id": "cf3aa9b6-ad4c-438b-9fac-15e6f760264d"
+          }
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "system_completed",
+      "options": {
+        "completed": 3,
+        "systemRole": "service_role",
+        "fixtureMet": false
+      },
+      "expected": "allowed",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "8d10c422-148c-4601-948a-f5dd368c6532",
+          "status": "completed"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "system_completed",
+      "options": {
+        "completed": 3,
+        "systemRole": "service_role",
+        "noUid": true,
+        "fixtureMet": false
+      },
+      "expected": "allowed",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "3923f6d4-57ca-4dfc-8bee-f562ed8996f5",
+          "status": "completed"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "system_completed",
+      "options": {
+        "completed": 6,
+        "systemRole": "service_role",
+        "locked": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "3c3570c1-8671-41d7-9b52-2398d7085eeb",
+          "status": "completed"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 3,
+        "spoof": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "production_rpc",
+      "options": {
+        "completed": 3,
+        "spoof": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 3,
+        "noUid": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [],
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "history_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "history_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_remaining_tests"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_remaining_tests",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "met"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "met",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "status_date"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": "2000-01-01"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "history_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "history_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_remaining_tests"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_remaining_tests",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "met"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "met",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "status_date"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": "2000-01-01"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "history_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "history_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_remaining_tests"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_remaining_tests",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "met"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "met",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "omit",
+          "key": "status_date"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "paused": false,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": "2000-01-01"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "omit",
+          "key": "history_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "history_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_ready"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_ready",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày chưa sẵn sàng hoặc đang đồng bộ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "omit",
+          "key": "carryover_remaining_tests"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "carryover_remaining_tests",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Dữ liệu nhiệm vụ ngày thiếu thông tin nợ cộng dồn",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "omit",
+          "key": "met"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "met",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_UNMET: OWNER_INACTIVE: Chưa hoàn thành nhiệm vụ ngày hôm nay",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "omit",
+          "key": "status_date"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": null
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "malformed": {
+          "kind": "value",
+          "key": "status_date",
+          "value": "2000-01-01"
+        }
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": "DAILY_TASK_PENDING: Ngày trạng thái nhiệm vụ không khớp với ngày hiện tại của máy chủ",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "logName":  "opencode-test-session-identity-perm",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T00:25:37.3405892Z",
+    "finishedUtc":  "2026-11-05T00:26:26.2729653Z",
+    "currentRunXmlCount":  71
+}

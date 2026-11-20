@@ -112,6 +112,9 @@ class AppUpdateRewardTest {
             currentRelease = oldRelease,
             versionName = "2.0.0",
             releaseNotes = "Fix bugs and enhance UI",
+            policyRevision = "valid-quote-token-fixture",
+            isLoading = false,
+            isQuoteLoading = false,
         )
 
         // VersionCode bằng bản cũ (25) -> Không được phép
@@ -125,6 +128,13 @@ class AppUpdateRewardTest {
         // VersionCode lớn hơn bản cũ (26) -> Được phép
         val stateGreater = validBase.copy(versionCode = "26")
         assertTrue(stateGreater.canPublish)
+
+        // Missing or blank quote token must not be allowed to publish
+        val stateBlankToken = validBase.copy(versionCode = "26", policyRevision = "   ")
+        assertFalse("Blank policyRevision must not be allowed to publish", stateBlankToken.canPublish)
+
+        val stateNullToken = validBase.copy(versionCode = "26", policyRevision = null)
+        assertFalse("Null policyRevision must not be allowed to publish", stateNullToken.canPublish)
     }
 
     @Test
@@ -135,6 +145,9 @@ class AppUpdateRewardTest {
             versionName = "",
             versionCode = "10",
             releaseNotes = "Notes",
+            policyRevision = "valid-quote-token-fixture",
+            isLoading = false,
+            isQuoteLoading = false,
         )
         assertFalse("versionName rỗng không được publish", state.canPublish)
 

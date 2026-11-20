@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.work.ReportUploadWorkerTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-02T12:00:54.803Z" hostname="PC-5700X3D" time="0.454">
+  <properties/>
+  <testcase name="changedFileFailsBeforeAnyNetworkOperation" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.036"/>
+  <testcase name="multiAttachmentRetryResumesFromFailedAttachmentWithoutReuploading" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.056"/>
+  <testcase name="multiAttachmentSequentialUploadWithCheckpoints" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.065"/>
+  <testcase name="restartAfterReceiptDoesNotSubmitAgainAndWorksOffline" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.042"/>
+  <testcase name="cryptoConfigurationFailureKeepsImageAndRequestForManualRetry" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.037"/>
+  <testcase name="legacyUnknownRequestIsReconciledBeforeUploading" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.025"/>
+  <testcase name="finalAttemptStopsAndKeepsPendingForManualRetry" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.025"/>
+  <testcase name="checksumRetriesWithoutChangingBytesHashOrId" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.037"/>
+  <testcase name="accountChangeAfterUploadCannotSubmitForAnotherUser" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.027"/>
+  <testcase name="legacyCommittedReceiptDoesNotSubmitOrUploadAgain" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.034"/>
+  <testcase name="lostRpcResponseRetriesSameRequestAndSkipsSavedUpload" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.044"/>
+  <testcase name="cancellationDuringSubmissionIsNeverSwallowed" classname="com.ntt.crosstest.work.ReportUploadWorkerTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

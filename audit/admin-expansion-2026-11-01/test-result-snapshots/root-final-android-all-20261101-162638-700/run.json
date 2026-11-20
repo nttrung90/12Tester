@@ -1,0 +1,13 @@
+{
+  "logName": "root-final-android-all",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T16:25:55.1941556Z",
+  "finishedUtc": "2026-11-01T16:26:38.8273193Z",
+  "currentRunXmlCount": 67
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:39:20.938Z" hostname="PC-5700X3D" time="3.578">
+  <properties/>
+  <testcase name="automaticStartupLookupRunsBeforeEarlyPausedOrMissingCampaignPath" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="1.968"/>
+  <testcase name="savedPendingReconcileNotFoundDoesNotChargeAndExplicitRetryPurchasesUsingOriginalId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.108"/>
+  <testcase name="pushCampaignTimeoutPreservesPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.694"/>
+  <testcase name="dialogButtonConditionDistinguishesPendingFromNewPurchase" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.014"/>
+  <testcase name="pushCampaignServerRejectionClearsPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.037"/>
+  <testcase name="oldPurchaseResponseDoesNotOverwriteNewAccountSnapshot" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.029"/>
+  <testcase name="accountSwitchDuringReconcileCannotSendPurchaseUnderNewSession" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.03"/>
+  <testcase name="failedLookupNotFoundDoesNotCharge" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.03"/>
+  <testcase name="pushActiveRejectsMissingOrExpiredExpiry" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.011"/>
+  <testcase name="pushErrorSanitizerRedactsSensitiveTokensAndUrls" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.012"/>
+  <testcase name="testCarryoverStringFormattingArguments" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.01"/>
+  <testcase name="automaticSuccessfulLookupUpdatesObservablePendingFalseAndPausedStaysReadOnly" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.019"/>
+  <testcase name="pendingPushResolvesWhenCampaignIsPausedOrDeleted" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.037"/>
+  <testcase name="staleResponseIgnoredOnAccountSwitchSameUidChangedGeneration" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.027"/>
+  <testcase name="pendingReceiptResolvesWhenBalanceBelow100" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.028"/>
+  <testcase name="vmStartupAutomaticallyReconcilesPendingPushReceiptWithoutCharging" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

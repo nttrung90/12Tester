@@ -31,7 +31,7 @@ async function runRegressionTests() {
 
   try {
     await db.exec(bootstrap);
-    const fullSql = read('supabase/full_schema_singapore.sql');
+    const fullSql = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');
     const marker044 = '-- ===== 044_mission_flow_hardening.sql =====\n';
     const schema043 = fullSql.split(marker044)[0];
     await db.exec(schema043);
@@ -75,7 +75,7 @@ async function runRegressionTests() {
     const query = async sql => (await db.query(sql)).rows;
 
     // Chạy migration 044 trên schema 043 có dữ liệu trùng thật (R04)
-    await db.exec(read('supabase/migrations/044_mission_flow_hardening.sql'));
+    await db.exec(read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql'));
     console.log('PASS: Áp dụng thành công migration 044_mission_flow_hardening.sql trên nền 043 với dữ liệu trùng');
 
     // Xác minh hòa giải R04:
@@ -92,7 +92,7 @@ async function runRegressionTests() {
     console.log('PASS: R04 - Hòa giải dữ liệu trùng có audit, bảo toàn số dư và giữ mission có tester');
 
     // Chạy lại migration 044 để kiểm tra tính Idempotency
-    await db.exec(read('supabase/migrations/044_mission_flow_hardening.sql'));
+    await db.exec(read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql'));
     console.log('PASS: Áp dụng lại migration 044 an toàn (idempotency)');
 
     await db.exec(`select set_config('request.jwt.claim.sub', '${owner}', false);`);

@@ -1,10 +1,12 @@
 package com.ntt.crosstest.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,17 +27,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PauseCircleOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -70,6 +82,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -86,39 +99,136 @@ import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AppConfig
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
+import com.ntt.crosstest.ui.components.AdminDailyTaskPolicySheet
 import com.ntt.crosstest.ui.viewmodels.AdminFilter
 import com.ntt.crosstest.ui.viewmodels.AdminUsersViewModel
+
+private val LocalMemberDetailOpener = androidx.compose.runtime.staticCompositionLocalOf<(String) -> Unit> { {} }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminUsersScreen(
     onBack: () -> Unit,
+    onNavigateToMemberDetail: (userId: String) -> Unit = {},
+    onNavigateToCampaigns: () -> Unit = {},
+    onNavigateToTesterReportsQueue: () -> Unit = {},
+    onNavigateToReports: () -> Unit = {},
+    onNavigateToAudit: () -> Unit = {},
+    onNavigateToSystemMonitor: () -> Unit = {},
+    onNavigateToCarryover: () -> Unit = {},
+    onNavigateToNotificationCampaigns: () -> Unit = {},
+    onNavigateToBusinessPolicies: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as TestCheoApp
     val viewModel: AdminUsersViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                AdminUsersViewModel(app.campaignRepository, app.authRepository, app.appConfigRepository, Localizer(app))
+                AdminUsersViewModel(
+                    app.campaignRepository,
+                    app.authRepository,
+                    app.appConfigRepository,
+                    Localizer(app),
+                    app.adminManagementRepository,
+                )
             }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var userToToggleLock by rememberSaveable { mutableStateOf<Profile?>(null) }
-    var userToAdjustCredits by rememberSaveable { mutableStateOf<Profile?>(null) }
-    var userToSendNotification by rememberSaveable { mutableStateOf<Profile?>(null) }
+    var targetUserLockId by rememberSaveable { mutableStateOf<String?>(null) }
+    var targetUserCreditId by rememberSaveable { mutableStateOf<String?>(null) }
+    var targetUserNotifId by rememberSaveable { mutableStateOf<String?>(null) }
     var showBroadcastDialog by rememberSaveable { mutableStateOf(false) }
     var showUpdateConfigDialog by rememberSaveable { mutableStateOf(false) }
     var showHomeStatsCycleDialog by rememberSaveable { mutableStateOf(false) }
+    var showOwnerAutoPauseDialog by rememberSaveable { mutableStateOf(false) }
+    var showDailyTaskPolicySheet by rememberSaveable { mutableStateOf(false) }
+    var isMembersExpanded by rememberSaveable { mutableStateOf(true) }
+    val memberListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+
+    val userToToggleLock = remember(targetUserLockId, uiState.allUsers) {
+        targetUserLockId?.let { id -> uiState.allUsers.find { it.id == id } }
+    }
+    val userToAdjustCredits = remember(targetUserCreditId, uiState.allUsers) {
+        targetUserCreditId?.let { id -> uiState.allUsers.find { it.id == id } }
+    }
+    val userToSendNotification = remember(targetUserNotifId, uiState.allUsers) {
+        targetUserNotifId?.let { id -> uiState.allUsers.find { it.id == id } }
+    }
+
+    LaunchedEffect(uiState.isLoading, uiState.allUsers) {
+        if (!uiState.isLoading && uiState.allUsers.isNotEmpty()) {
+            if (targetUserLockId != null && userToToggleLock == null) targetUserLockId = null
+            if (targetUserCreditId != null && userToAdjustCredits == null) targetUserCreditId = null
+            if (targetUserNotifId != null && userToSendNotification == null) targetUserNotifId = null
+        }
+    }
+
+    var savedSessionUid by rememberSaveable { mutableStateOf(uiState.currentAdminId) }
+    var savedSessionGen by rememberSaveable { mutableStateOf(uiState.sessionGeneration) }
+
+    var lastConsumedHomeStatsSignal by rememberSaveable { mutableIntStateOf(uiState.homeStatsSaveSignal) }
+    var lastConsumedOwnerAutoPauseSignal by rememberSaveable { mutableIntStateOf(uiState.ownerAutoPauseSaveSignal) }
+    var lastConsumedConfigSignal by rememberSaveable { mutableIntStateOf(uiState.configSaveSignal) }
+
+    LaunchedEffect(uiState.currentAdminId, uiState.sessionGeneration) {
+        if (uiState.currentAdminId == null) {
+            targetUserLockId = null
+            targetUserCreditId = null
+            targetUserNotifId = null
+            showBroadcastDialog = false
+            showUpdateConfigDialog = false
+            showHomeStatsCycleDialog = false
+            showOwnerAutoPauseDialog = false
+            showDailyTaskPolicySheet = false
+            savedSessionUid = null
+            savedSessionGen = 0L
+        } else if (savedSessionUid != uiState.currentAdminId || savedSessionGen != uiState.sessionGeneration) {
+            targetUserLockId = null
+            targetUserCreditId = null
+            targetUserNotifId = null
+            showBroadcastDialog = false
+            showUpdateConfigDialog = false
+            showHomeStatsCycleDialog = false
+            showOwnerAutoPauseDialog = false
+            showDailyTaskPolicySheet = false
+            savedSessionUid = uiState.currentAdminId
+            savedSessionGen = uiState.sessionGeneration
+            lastConsumedHomeStatsSignal = uiState.homeStatsSaveSignal
+            lastConsumedOwnerAutoPauseSignal = uiState.ownerAutoPauseSaveSignal
+            lastConsumedConfigSignal = uiState.configSaveSignal
+        }
+        if (uiState.currentAdminId != null) viewModel.loadOwnerAutoPauseConfig()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadDailyTaskConfig()
+    }
+
+    LaunchedEffect(showDailyTaskPolicySheet) {
+        if (showDailyTaskPolicySheet) viewModel.loadDailyTaskConfig()
+    }
 
     LaunchedEffect(showHomeStatsCycleDialog) {
         if (showHomeStatsCycleDialog) viewModel.loadHomeStatsConfig()
     }
 
     LaunchedEffect(uiState.homeStatsSaveSignal) {
-        if (uiState.homeStatsSaveSignal > 0) showHomeStatsCycleDialog = false
+        if (uiState.homeStatsSaveSignal > lastConsumedHomeStatsSignal) {
+            lastConsumedHomeStatsSignal = uiState.homeStatsSaveSignal
+            showHomeStatsCycleDialog = false
+        }
+    }
+
+    LaunchedEffect(uiState.ownerAutoPauseSaveSignal) {
+        if (uiState.ownerAutoPauseSaveSignal > lastConsumedOwnerAutoPauseSignal) {
+            lastConsumedOwnerAutoPauseSignal = uiState.ownerAutoPauseSaveSignal
+            showOwnerAutoPauseDialog = false
+        }
     }
 
     LaunchedEffect(showUpdateConfigDialog) {
@@ -127,7 +237,10 @@ fun AdminUsersScreen(
 
     // Close the config dialog once the save succeeded (signal from ViewModel).
     LaunchedEffect(uiState.configSaveSignal) {
-        if (uiState.configSaveSignal > 0) showUpdateConfigDialog = false
+        if (uiState.configSaveSignal > lastConsumedConfigSignal) {
+            lastConsumedConfigSignal = uiState.configSaveSignal
+            showUpdateConfigDialog = false
+        }
     }
 
     LaunchedEffect(uiState.error) {
@@ -148,7 +261,7 @@ fun AdminUsersScreen(
     userToToggleLock?.let { target ->
         val willLock = !target.isLocked
         AlertDialog(
-            onDismissRequest = { if (!uiState.isActionLoading) userToToggleLock = null },
+            onDismissRequest = { if (!uiState.isActionLoading) targetUserLockId = null },
             title = {
                 Text(
                     stringResource(
@@ -169,8 +282,13 @@ fun AdminUsersScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.setUserLock(target.id, willLock)
-                        userToToggleLock = null
+                        viewModel.setUserLock(
+                            target.id,
+                            willLock,
+                            confirmingAdminId = uiState.currentAdminId,
+                            confirmingSessionGen = uiState.sessionGeneration,
+                        )
+                        targetUserLockId = null
                     },
                     colors = if (willLock) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     else ButtonDefaults.buttonColors(),
@@ -189,7 +307,7 @@ fun AdminUsersScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { userToToggleLock = null },
+                    onClick = { targetUserLockId = null },
                     enabled = !uiState.isActionLoading,
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -200,12 +318,12 @@ fun AdminUsersScreen(
 
     // Dialog: Grant / Deduct Credits
     userToAdjustCredits?.let { target ->
-        var isGrant by rememberSaveable { mutableStateOf(true) }
-        var amountText by rememberSaveable { mutableStateOf("50") }
-        var reasonText by rememberSaveable { mutableStateOf("") }
+        var isGrant by rememberSaveable(target.id, uiState.currentAdminId, uiState.sessionGeneration) { mutableStateOf(true) }
+        var amountText by rememberSaveable(target.id, uiState.currentAdminId, uiState.sessionGeneration) { mutableStateOf("50") }
+        var reasonText by rememberSaveable(target.id, uiState.currentAdminId, uiState.sessionGeneration) { mutableStateOf("") }
 
         AlertDialog(
-            onDismissRequest = { if (!uiState.isActionLoading) userToAdjustCredits = null },
+            onDismissRequest = { if (!uiState.isActionLoading) targetUserCreditId = null },
             title = {
                 Column {
                     Text(stringResource(R.string.admin_adjust_credits_dialog_title))
@@ -272,8 +390,14 @@ fun AdminUsersScreen(
                         val amountVal = amountText.toIntOrNull() ?: 0
                         if (amountVal > 0) {
                             val finalAmount = if (isGrant) amountVal else -amountVal
-                            viewModel.adjustCredits(target.id, finalAmount, reasonText)
-                            userToAdjustCredits = null
+                            viewModel.adjustCredits(
+                                target.id,
+                                finalAmount,
+                                reasonText,
+                                confirmingAdminId = uiState.currentAdminId,
+                                confirmingSessionGen = uiState.sessionGeneration,
+                            )
+                            targetUserCreditId = null
                         }
                     },
                     enabled = !uiState.isActionLoading && (amountText.toIntOrNull() ?: 0) > 0,
@@ -291,7 +415,7 @@ fun AdminUsersScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { userToAdjustCredits = null },
+                    onClick = { targetUserCreditId = null },
                     enabled = !uiState.isActionLoading,
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -304,12 +428,65 @@ fun AdminUsersScreen(
     if (showBroadcastDialog) {
         AdminSendNotificationDialog(
             targetUser = null,
+            currentAdminId = uiState.currentAdminId,
+            sessionGeneration = uiState.sessionGeneration,
             isLoading = uiState.isActionLoading,
             onDismiss = { showBroadcastDialog = false },
             onSend = { title, message, type ->
-                viewModel.sendNotification(null, title, message, type)
+                viewModel.sendNotification(
+                    null,
+                    title,
+                    message,
+                    type,
+                    confirmingAdminId = uiState.currentAdminId,
+                    confirmingSessionGen = uiState.sessionGeneration,
+                )
                 showBroadcastDialog = false
             }
+        )
+    }
+
+    // Sheet: Daily task policy configuration (migration 058)
+    if (showDailyTaskPolicySheet) {
+        AdminDailyTaskPolicySheet(
+            config = uiState.dailyTaskConfig,
+            isLoading = uiState.isDailyTaskLoading,
+            isSaving = uiState.isDailyTaskSaving,
+            isCancelling = uiState.isDailyTaskCancelling,
+            draftRatio = uiState.dailyTaskDraftRatio,
+            draftEffectiveFrom = uiState.dailyTaskDraftEffectiveFrom,
+            draftNote = uiState.dailyTaskDraftNote,
+            futurePolicies = uiState.dailyTaskFuturePolicies,
+            isFutureLoading = uiState.isDailyTaskFutureLoading,
+            futureHasMore = uiState.dailyTaskFutureHasMore,
+            history = uiState.dailyTaskHistory,
+            isHistoryLoading = uiState.isDailyTaskHistoryLoading,
+            historyHasMore = uiState.dailyTaskHistoryHasMore,
+            errorMessage = uiState.dailyTaskError,
+            actionMessage = uiState.dailyTaskActionMessage,
+            saveSignal = uiState.dailyTaskSaveSignal,
+            onDismiss = { showDailyTaskPolicySheet = false },
+            onDraftChange = { ratio, effectiveFrom, note ->
+                viewModel.setDailyTaskDraft(ratio, effectiveFrom, note)
+            },
+            onSaveSchedule = { ratio, effectiveFrom, note ->
+                viewModel.saveDailyTaskSchedule(ratio, effectiveFrom, note)
+            },
+            onCancelSchedule = { effectiveFrom, note ->
+                viewModel.cancelDailyTaskSchedule(effectiveFrom, note)
+            },
+            onLoadMoreFuture = {
+                viewModel.loadMoreDailyTaskPolicies()
+            },
+            onLoadHistory = { reset ->
+                viewModel.loadDailyTaskHistory(reset)
+            },
+            onRetryLoad = {
+                viewModel.loadDailyTaskConfig()
+            },
+            onClearMessages = {
+                viewModel.clearDailyTaskMessages()
+            },
         )
     }
 
@@ -326,6 +503,24 @@ fun AdminUsersScreen(
         )
     }
 
+    // Dialog: Owner auto-pause threshold configuration (migration 075)
+    if (showOwnerAutoPauseDialog) {
+        AdminOwnerAutoPauseDialog(
+            config = uiState.ownerAutoPauseConfig,
+            isLoading = uiState.isOwnerAutoPauseLoading,
+            isSaving = uiState.isOwnerAutoPauseSaving,
+            errorMessage = uiState.ownerAutoPauseError,
+            onDismiss = {
+                viewModel.clearOwnerAutoPauseError()
+                showOwnerAutoPauseDialog = false
+            },
+            onSave = { missedDays ->
+                viewModel.saveOwnerAutoPauseConfig(missedDays)
+            },
+            onRetry = { viewModel.loadOwnerAutoPauseConfig() },
+        )
+    }
+
     // Dialog: App update configuration (version gate for all clients)
     if (showUpdateConfigDialog) {
         AdminUpdateConfigDialog(
@@ -333,8 +528,8 @@ fun AdminUsersScreen(
             isLoading = uiState.isConfigLoading,
             isSaving = uiState.isActionLoading,
             onDismiss = { showUpdateConfigDialog = false },
-            onSave = { min, latest, name, force, title, message, storeUrl ->
-                viewModel.saveAppConfig(min, latest, name, force, title, message, storeUrl)
+            onSave = { min, latest, name, force, title, message, storeUrl, titleVi, titleEn, messageVi, messageEn ->
+                viewModel.saveAppConfig(min, latest, name, force, title, message, storeUrl, titleVi, titleEn, messageVi, messageEn)
             },
         )
     }
@@ -343,11 +538,20 @@ fun AdminUsersScreen(
     userToSendNotification?.let { target ->
         AdminSendNotificationDialog(
             targetUser = target,
+            currentAdminId = uiState.currentAdminId,
+            sessionGeneration = uiState.sessionGeneration,
             isLoading = uiState.isActionLoading,
-            onDismiss = { userToSendNotification = null },
+            onDismiss = { targetUserNotifId = null },
             onSend = { title, message, type ->
-                viewModel.sendNotification(target.id, title, message, type)
-                userToSendNotification = null
+                viewModel.sendNotification(
+                    target.id,
+                    title,
+                    message,
+                    type,
+                    confirmingAdminId = uiState.currentAdminId,
+                    confirmingSessionGen = uiState.sessionGeneration,
+                )
+                targetUserNotifId = null
             }
         )
     }
@@ -362,122 +566,401 @@ fun AdminUsersScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showHomeStatsCycleDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = stringResource(R.string.admin_home_stats_cycle_title),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    IconButton(onClick = { showUpdateConfigDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.SystemUpdate,
-                            contentDescription = stringResource(R.string.admin_update_config_title),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    IconButton(onClick = { showBroadcastDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Campaign,
-                            contentDescription = stringResource(R.string.admin_send_broadcast_cd),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
                     IconButton(onClick = viewModel::refresh, enabled = !uiState.isLoading) {
-                        Icon(Icons.Filled.Refresh, contentDescription = null)
+                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.admin_refresh_cd))
                     }
                 }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+        androidx.compose.runtime.CompositionLocalProvider(
+            LocalMemberDetailOpener provides onNavigateToMemberDetail
         ) {
-            // Search and Filters
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedTextField(
-                    value = uiState.query,
-                    onValueChange = viewModel::setQuery,
-                    placeholder = { Text(stringResource(R.string.admin_search_users_hint)) },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    FilterChip(
-                        selected = uiState.filter == AdminFilter.ALL,
-                        onClick = { viewModel.setFilter(AdminFilter.ALL) },
-                        label = { Text("${stringResource(R.string.admin_filter_all)} (${uiState.allUsers.size})") },
-                    )
-                    FilterChip(
-                        selected = uiState.filter == AdminFilter.ACTIVE,
-                        onClick = { viewModel.setFilter(AdminFilter.ACTIVE) },
-                        label = { Text(stringResource(R.string.admin_filter_active)) },
-                    )
-                    FilterChip(
-                        selected = uiState.filter == AdminFilter.LOCKED,
-                        onClick = { viewModel.setFilter(AdminFilter.LOCKED) },
-                        label = { Text(stringResource(R.string.admin_filter_locked)) },
-                    )
-                    FilterChip(
-                        selected = uiState.filter == AdminFilter.ADMIN,
-                        onClick = { viewModel.setFilter(AdminFilter.ADMIN) },
-                        label = { Text(stringResource(R.string.admin_filter_admin)) },
-                    )
-                }
-            }
-
             PullToRefreshBox(
                 isRefreshing = uiState.isLoading,
                 onRefresh = viewModel::refresh,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
             ) {
-                if (uiState.filteredUsers.isEmpty() && !uiState.isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center,
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item(key = "member_management") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outlineVariant,
+                        ),
                     ) {
-                        Text(
-                            text = stringResource(R.string.admin_empty_users),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        items(uiState.filteredUsers, key = { it.id }) { user ->
-                            AdminUserCard(
-                                user = user,
-                                isCurrentAdmin = user.id == uiState.currentAdminId,
-                                onAdjustCredits = { userToAdjustCredits = user },
-                                onToggleLock = { userToToggleLock = user },
-                                onSendNotification = { userToSendNotification = user },
-                            )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+                                .clickable { isMembersExpanded = !isMembersExpanded }
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Groups,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp),
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.admin_member_management_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.admin_loaded_members_count, uiState.filteredUsers.size),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(
+                                onClick = { isMembersExpanded = !isMembersExpanded },
+                                modifier = Modifier.size(36.dp),
+                            ) {
+                                Icon(
+                                    imageVector = if (isMembersExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                    contentDescription = stringResource(if (isMembersExpanded) R.string.admin_collapse else R.string.admin_expand),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+
+                        if (isMembersExpanded) {
+                            // Search and Filters
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                OutlinedTextField(
+                                    value = uiState.query,
+                                    onValueChange = viewModel::setQuery,
+                                    placeholder = { Text(stringResource(R.string.admin_search_users_hint)) },
+                                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                )
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    FilterChip(
+                                        selected = uiState.filter == AdminFilter.ALL,
+                                        onClick = { viewModel.setFilter(AdminFilter.ALL) },
+                                        label = { Text(stringResource(R.string.admin_filter_all)) },
+                                    )
+                                    FilterChip(
+                                        selected = uiState.filter == AdminFilter.ACTIVE,
+                                        onClick = { viewModel.setFilter(AdminFilter.ACTIVE) },
+                                        label = { Text(stringResource(R.string.admin_filter_active)) },
+                                    )
+                                    FilterChip(
+                                        selected = uiState.filter == AdminFilter.LOCKED,
+                                        onClick = { viewModel.setFilter(AdminFilter.LOCKED) },
+                                        label = { Text(stringResource(R.string.admin_filter_locked)) },
+                                    )
+                                    FilterChip(
+                                        selected = uiState.filter == AdminFilter.ADMIN,
+                                        onClick = { viewModel.setFilter(AdminFilter.ADMIN) },
+                                        label = { Text(stringResource(R.string.admin_filter_admin)) },
+                                    )
+                                    FilterChip(
+                                        selected = uiState.filter == AdminFilter.MODERATOR,
+                                        onClick = { viewModel.setFilter(AdminFilter.MODERATOR) },
+                                        label = { Text(stringResource(R.string.admin_filter_moderator)) },
+                                    )
+                                }
+                            }
+
+                            if (uiState.filteredUsers.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 120.dp)
+                                        .padding(24.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (uiState.isLoading) {
+                                        CircularProgressIndicator()
+                                    } else {
+                                        Text(
+                                            text = stringResource(R.string.admin_empty_users),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Bound the nested list so all dashboard cards stay reachable.
+                                LazyColumn(
+                                    state = memberListState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 360.dp),
+                                    contentPadding = PaddingValues(14.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                items(uiState.filteredUsers, key = { it.id }) { user ->
+                                    AdminUserCard(
+                                        user = user,
+                                        isCurrentAdmin = user.id == uiState.currentAdminId,
+                                        onAdjustCredits = { targetUserCreditId = user.id },
+                                        onToggleLock = { targetUserLockId = user.id },
+                                        onSendNotification = { targetUserNotifId = user.id },
+                                    )
+                                }
+
+                                    if (uiState.hasMoreMembers) {
+                                        item(key = "load_more_members") {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 4.dp),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                if (uiState.isLoadingMore) {
+                                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                                } else {
+                                                    TextButton(onClick = viewModel::loadMoreMembers) {
+                                                        Text(stringResource(R.string.admin_load_more))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+
+                item(key = "daily_tasks") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val activeRatio = uiState.dailyTaskConfig?.activePolicy?.testsPerActiveApp
+                        AdminFeatureCard(
+                            title = stringResource(R.string.admin_daily_task_title),
+                            subtitle = if (activeRatio != null) {
+                                stringResource(R.string.admin_daily_task_active_format, activeRatio)
+                            } else {
+                                stringResource(R.string.admin_daily_task_subtitle)
+                            },
+                            icon = Icons.Filled.Settings,
+                            onClick = { showDailyTaskPolicySheet = true },
+                        )
+                        val autoPauseDays = uiState.ownerAutoPauseConfig?.missedDays
+                        OutlinedButton(
+                            onClick = {
+                                showOwnerAutoPauseDialog = true
+                                viewModel.loadOwnerAutoPauseConfig()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            enabled = !uiState.isOwnerAutoPauseSaving,
+                        ) {
+                            Icon(Icons.Filled.PauseCircleOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                if (autoPauseDays != null) {
+                                    stringResource(
+                                        R.string.admin_owner_auto_pause_button_full_format,
+                                        autoPauseDays
+                                    )
+                                } else {
+                                    stringResource(R.string.admin_owner_auto_pause_title)
+                                }
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onNavigateToCarryover,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            Icon(Icons.Filled.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.admin_carryover_title))
+                        }
+                    }
+                }
+
+                item(key = "home_stats_cycle") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_home_stats_cycle_title),
+                        subtitle = stringResource(R.string.admin_home_stats_cycle_desc),
+                        icon = Icons.Filled.BarChart,
+                        onClick = { showHomeStatsCycleDialog = true },
+                    )
+                }
+
+                item(key = "app_update_config") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_update_config_title),
+                        subtitle = stringResource(R.string.admin_update_config_subtitle),
+                        icon = Icons.Filled.SystemUpdate,
+                        onClick = { showUpdateConfigDialog = true },
+                    )
+                }
+
+                item(key = "broadcast_notification") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_send_broadcast_cd),
+                        subtitle = stringResource(R.string.admin_broadcast_subtitle),
+                        icon = Icons.Filled.Campaign,
+                        onClick = onNavigateToNotificationCampaigns,
+                    )
+                }
+
+                // Management Tools (Cards added after original 5 cards)
+                item(key = "business_policies") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_business_policy),
+                        subtitle = stringResource(R.string.admin_tool_business_policy_desc),
+                        icon = Icons.Filled.Settings,
+                        onClick = onNavigateToBusinessPolicies,
+                    )
+                }
+
+                item(key = "global_campaigns") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_campaigns),
+                        subtitle = stringResource(R.string.admin_tool_campaigns_desc),
+                        icon = Icons.Filled.Campaign,
+                        onClick = onNavigateToCampaigns,
+                    )
+                }
+
+                item(key = "tester_reports_queue") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_reports_queue),
+                        subtitle = stringResource(R.string.admin_tool_reports_queue_desc),
+                        icon = Icons.Filled.CheckCircle,
+                        onClick = onNavigateToTesterReportsQueue,
+                    )
+                }
+
+                item(key = "support_contact_reports") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_support),
+                        subtitle = stringResource(R.string.admin_tool_support_desc),
+                        icon = Icons.Filled.Info,
+                        onClick = onNavigateToReports,
+                    )
+                }
+
+                item(key = "audit_log") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_audit),
+                        subtitle = stringResource(R.string.admin_tool_audit_desc),
+                        icon = Icons.Filled.Search,
+                        onClick = onNavigateToAudit,
+                    )
+                }
+
+                item(key = "system_monitor") {
+                    AdminFeatureCard(
+                        title = stringResource(R.string.admin_tool_monitor),
+                        subtitle = stringResource(R.string.admin_tool_monitor_desc),
+                        icon = Icons.Filled.BarChart,
+                        onClick = onNavigateToSystemMonitor,
+                    )
+                }
             }
+        }
+    }
+}
+}
+
+@Composable
+private fun AdminFeatureCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }
@@ -490,8 +973,11 @@ private fun AdminUserCard(
     onToggleLock: () -> Unit,
     onSendNotification: () -> Unit,
 ) {
+    val onOpenDetail = LocalMemberDetailOpener.current
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onOpenDetail(user.id) },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (user.isLocked) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
@@ -502,7 +988,7 @@ private fun AdminUserCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Header Row: Avatar, Name, Email
             Row(
@@ -573,26 +1059,37 @@ private fun AdminUserCard(
             }
 
             // Status badges row
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 // Role badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
                         .background(
-                            if (user.isAdmin) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant
+                            when {
+                                user.isAdmin -> MaterialTheme.colorScheme.primaryContainer
+                                user.isModerator -> MaterialTheme.colorScheme.tertiaryContainer
+                                else -> MaterialTheme.colorScheme.surfaceVariant
+                            }
                         )
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = if (user.isAdmin) stringResource(R.string.admin_badge) else stringResource(R.string.member_badge),
+                        text = when {
+                            user.isAdmin -> stringResource(R.string.admin_badge)
+                            user.isModerator -> stringResource(R.string.admin_role_moderator)
+                            else -> stringResource(R.string.member_badge)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (user.isAdmin) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = when {
+                            user.isAdmin -> MaterialTheme.colorScheme.onPrimaryContainer
+                            user.isModerator -> MaterialTheme.colorScheme.onTertiaryContainer
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 }
 
@@ -619,20 +1116,22 @@ private fun AdminUserCard(
                         text = stringResource(R.string.admin_joined_format, date),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
 
-            // Actions row
-            Row(
+            // Actions
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 OutlinedButton(
                     onClick = onAdjustCredits,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.align(Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(R.string.admin_adjust_credits_btn),
@@ -642,7 +1141,9 @@ private fun AdminUserCard(
 
                 IconButton(
                     onClick = onSendNotification,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.CenterVertically),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Campaign,
@@ -659,7 +1160,8 @@ private fun AdminUserCard(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                             contentColor = MaterialTheme.colorScheme.onErrorContainer,
                         ),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.align(Alignment.CenterVertically),
                     ) {
                         Icon(
                             imageVector = if (user.isLocked) Icons.Filled.LockOpen else Icons.Filled.Lock,
@@ -681,13 +1183,15 @@ private fun AdminUserCard(
 @Composable
 private fun AdminSendNotificationDialog(
     targetUser: Profile?,
+    currentAdminId: String?,
+    sessionGeneration: Long,
     isLoading: Boolean,
     onDismiss: () -> Unit,
     onSend: (title: String, message: String, type: String) -> Unit,
 ) {
-    var title by rememberSaveable { mutableStateOf("") }
-    var message by rememberSaveable { mutableStateOf("") }
-    var selectedType by rememberSaveable { mutableStateOf("admin") }
+    var title by rememberSaveable(targetUser?.id, currentAdminId, sessionGeneration) { mutableStateOf("") }
+    var message by rememberSaveable(targetUser?.id, currentAdminId, sessionGeneration) { mutableStateOf("") }
+    var selectedType by rememberSaveable(targetUser?.id, currentAdminId, sessionGeneration) { mutableStateOf("admin") }
 
     val types = listOf(
         "admin" to stringResource(R.string.admin_type_notification),
@@ -792,7 +1296,7 @@ private fun AdminUpdateConfigDialog(
     isLoading: Boolean,
     isSaving: Boolean,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Boolean, String?, String?, String?) -> Unit,
+    onSave: (Int, Int, String, Boolean, String?, String?, String?, String?, String?, String?, String?) -> Unit,
 ) {
     var initialized by rememberSaveable { mutableStateOf(false) }
     var minVersionCode by rememberSaveable { mutableStateOf("") }
@@ -801,6 +1305,10 @@ private fun AdminUpdateConfigDialog(
     var forceUpdate by rememberSaveable { mutableStateOf(false) }
     var title by rememberSaveable { mutableStateOf("") }
     var message by rememberSaveable { mutableStateOf("") }
+    var titleVi by rememberSaveable { mutableStateOf("") }
+    var titleEn by rememberSaveable { mutableStateOf("") }
+    var messageVi by rememberSaveable { mutableStateOf("") }
+    var messageEn by rememberSaveable { mutableStateOf("") }
     var storeUrl by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(config) {
@@ -811,6 +1319,10 @@ private fun AdminUpdateConfigDialog(
             forceUpdate = config.forceUpdate
             title = config.title.orEmpty()
             message = config.message.orEmpty()
+            titleVi = config.titleVi ?: config.title.orEmpty()
+            titleEn = config.titleEn.orEmpty()
+            messageVi = config.messageVi ?: config.message.orEmpty()
+            messageEn = config.messageEn.orEmpty()
             storeUrl = config.storeUrl.orEmpty()
             initialized = true
         }
@@ -893,17 +1405,31 @@ private fun AdminUpdateConfigDialog(
                         )
                     }
                     OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text(stringResource(R.string.admin_config_title_label)) },
+                        value = titleVi,
+                        onValueChange = { titleVi = it },
+                        label = { Text(stringResource(R.string.admin_update_title_vi_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
-                        value = message,
-                        onValueChange = { message = it },
-                        label = { Text(stringResource(R.string.admin_config_message_label)) },
-                        minLines = 3,
+                        value = titleEn,
+                        onValueChange = { titleEn = it },
+                        label = { Text(stringResource(R.string.admin_update_title_en_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = messageVi,
+                        onValueChange = { messageVi = it },
+                        label = { Text(stringResource(R.string.admin_update_msg_vi_label)) },
+                        minLines = 2,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = messageEn,
+                        onValueChange = { messageEn = it },
+                        label = { Text(stringResource(R.string.admin_update_msg_en_label)) },
+                        minLines = 2,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
@@ -919,14 +1445,22 @@ private fun AdminUpdateConfigDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    val vTitleVi = titleVi.trim().ifBlank { null }
+                    val vTitleEn = titleEn.trim().ifBlank { null }
+                    val vMsgVi = messageVi.trim().ifBlank { null }
+                    val vMsgEn = messageEn.trim().ifBlank { null }
                     onSave(
                         minVal ?: return@Button,
                         latestVal ?: return@Button,
                         latestVersionName.trim(),
                         forceUpdate,
-                        title.trim().ifBlank { null },
-                        message.trim().ifBlank { null },
+                        vTitleVi ?: vTitleEn,
+                        vMsgVi ?: vMsgEn,
                         storeUrl.trim().ifBlank { null },
+                        vTitleVi,
+                        vTitleEn,
+                        vMsgVi,
+                        vMsgEn,
                     )
                 },
                 enabled = !isSaving && !isLoading && isValid,
@@ -1094,6 +1628,157 @@ private fun AdminHomeStatsCycleDialog(
                     Spacer(Modifier.width(8.dp))
                 }
                 Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isSaving,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun AdminOwnerAutoPauseDialog(
+    config: com.ntt.crosstest.data.OwnerAutoPauseConfig?,
+    isLoading: Boolean,
+    isSaving: Boolean,
+    errorMessage: String?,
+    onDismiss: () -> Unit,
+    onSave: (Int) -> Unit,
+    onRetry: () -> Unit,
+) {
+    var selectedDays by rememberSaveable(config?.revision) { mutableIntStateOf(config?.missedDays ?: 7) }
+
+    val currentDays = config?.missedDays ?: 7
+    val hasChange = config != null && selectedDays != currentDays
+    val isLowering = config != null && selectedDays < currentDays
+
+    AlertDialog(
+        onDismissRequest = { if (!isSaving) onDismiss() },
+        title = {
+            Text(
+                text = stringResource(R.string.admin_owner_auto_pause_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            if (isLoading && config == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.admin_owner_auto_pause_dialog_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    config?.let { cfg ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.admin_owner_auto_pause_current_format, cfg.missedDays),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(10.dp),
+                            )
+                        }
+                    }
+
+                    // 1 to 7 selectable chips
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        (1..7).forEach { day ->
+                            val isSelected = selectedDays == day
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedDays = day },
+                                label = { Text(stringResource(R.string.admin_owner_auto_pause_days_unit, day)) },
+                                enabled = config != null && !isLoading && !isSaving,
+                            )
+                        }
+                    }
+
+                    if (isLowering) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.admin_owner_auto_pause_lower_warning,
+                                        currentDays,
+                                        selectedDays
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                        }
+                    }
+
+                    errorMessage?.let { err ->
+                        Text(
+                            text = err,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    if (config == null && errorMessage != null) {
+                        TextButton(onClick = onRetry) {
+                            Text(stringResource(R.string.admin_daily_task_retry))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(selectedDays) },
+                enabled = !isSaving && !isLoading && hasChange,
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(R.string.admin_config_save))
             }
         },
         dismissButton = {

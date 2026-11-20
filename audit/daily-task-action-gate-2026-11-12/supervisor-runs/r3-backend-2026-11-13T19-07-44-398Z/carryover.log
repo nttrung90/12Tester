@@ -1,0 +1,17 @@
+=== LOADING ALL ACTIVE MIGRATIONS IN ORDER (062 TO 080) ===
+ACTIVE MIGRATIONS LOADED: 062_consolidated_baseline.sql, 063_report_crypto_search_path.sql, 064_explicit_report_context.sql, 065_remove_dhash_hardblock.sql, 066_push_and_carryover_hardening.sql, 067_admin_direct_notification_popup.sql, 068_owner_tester_reports_count.sql, 069_admin_audit_hardening.sql, 070_admin_management.sql, 071_business_policies.sql, 072_admin_notification_campaigns.sql, 073_admin_action_audit.sql, 074_app_mission_window_and_multi_attachments.sql, 075_owner_auto_pause_config.sql, 076_mission_for_finalized_campaigns.sql, 077_mission_reward_modes_and_management.sql, 078_admin_pause_reason_popup.sql, 079_owner_auto_pause_debt_and_timestamp_guard.sql, 080_report_context_carryover_and_gap_recovery.sql, 081_admin_flow_audit_fixes.sql, 082_carryover_flow_audit_fixes.sql, 083_fix_app_configs_encoding_and_version.sql, 084_campaign_posting_business_policies.sql, 085_egress_optimization_sync_v2.sql, 086_next_campaign_candidate_daily_target_priority.sql, 087_campaign_tester_bonus_rounds.sql, 088_immediate_daily_quota_on_campaign_changes.sql, 089_fix_production_bonus_lifecycle.sql, 090_daily_task_action_gate.sql
+PASS: C01: Real mission submission RPC does NOT count towards regular D or reduce regular debt {"beforeD":0,"afterD":0,"afterDebt":14}
+PASS: C01: Mission report CANNOT bypass campaign resume when debt remains {"blockedError":"OWNER_CARRYOVER_INCOMPLETE:1"}
+PASS: C01: Regular app_test report DOES qualify and reduce debt, while rejected does not {"pending":1,"approved":1,"rejected":0}
+PASS: C03: 40-day covered gap recovers in bounded batches with persistent progress and idempotence {"runs":3,"sealed":39,"finalCarryoverReady":true}
+PASS: C03: 3-day recovery, exact billing, and repeat-run credit/debt idempotence {"carryIn":3,"creditsAfterSecond":9726,"beforeAnchor":0,"intendedDebit":274}
+PASS: C03 / R08: Global cross-user recovery preserves other users trusted checkpoints and balances {"ownerPreAnchor":0,"ownerPostDebits":784}
+PASS: C03: 31-day recovery across bounded batches {"sealed31":31}
+PASS: Unresolved missing-source history preserves pending status and diagnostics {"historyReady":false,"carryoverReady":false}
+PASS: BUG-1: Mission report does NOT mark campaign as tested in get_home_feed, get_campaigns_stats, get_next_untested_campaign, get_my_dashboard {"feedHasTested":false,"statsHasTested":false,"nextUntestedId":"ca506b38-73f8-4d29-b06d-a60911a43e65","dashboardTodayCheckins":0}
+PASS: BUG-2: Rejecting app_test report restores daily_missed_streak and resubmitting (TH2) restores checkin & met {"streakAfterSub1":0,"streakAfterReject":2,"streakAfterResub":0,"checkinCount":1}
+PASS: BUG-3: 00:00-00:05 AM race condition re-evaluates today completion after sealing yesterday {"carryIn":2,"required":8,"completed":8,"profileStreak":0}
+PASS: BUG-5: Preserves known carry_in_tests in required_tests when predecessor is sealed but history_ready is false {"baseRequired":6,"carryIn":3,"required":9,"remaining":9}
+PASS: NEW-BUG-1: Direct INSERT and DELETE on public.checkins automatically updates daily_missed_streak and unfinalized user_daily_tasks row {"streakAfterCheckins":0,"streakAfterDelete":2,"unfinalizedAfterDelete":{"completed_tests":2,"met":false}}
+PASS: NEW-BUG-2: Member mode resets daily_missed_streak = 0 upon login even when carryover_ready is false {"mode":"member","carryoverReady":false,"met":true,"profileStreak":0}
+=== ALL C01, C03, AND 082 ACCEPTANCE TESTS PASSED ===

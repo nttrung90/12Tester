@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.EgressFinalClientReviewTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:35.878Z" hostname="PC-5700X3D" time="0.189">
+  <properties/>
+  <testcase name="statsRepair_concurrentStateChangeDuringRepair_throwsAndDoesNotPublish" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.029"/>
+  <testcase name="afterLocalReportInvalidation_freshnessInvalidated_newServerRequest_reusesTokens_changedStatsUpdate" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.038"/>
+  <testcase name="candidateStaleGenerationOrScopeChange_rejectsResult" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.013"/>
+  <testcase name="concurrentEquivalentRefreshes_shareOneHttpRequest_singleFlightJoin_cacheHitAddsZeroHttpAttempts" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.012"/>
+  <testcase name="legacyServerPayloadMissingStats_triggersBatchStatsFill_populatesCorrectly" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.011"/>
+  <testcase name="fifteenCandidatesReturnedUnchanged_v2Only_noHomeRequest" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.01"/>
+  <testcase name="statsRepair_hasTestedTodayTrue_excludesCandidate_preservesRemainingCandidates" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.01"/>
+  <testcase name="genuinePgrst202OnCandidateEndpoint_legacyHomeFallback_negativeTtlCaches_expiryRetries" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.016"/>
+  <testcase name="candidateForbiddenServerErrorMalformed_doesNotSilentlyFallbackOrMarkMissing" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.013"/>
+  <testcase name="explicitPrefetchResumeMutationMetadata_notPullRefresh_decodedBytesAccurate" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.012"/>
+  <testcase name="nullOrBlankId_withMissingFields_throwsErrorBeforeStatsRequest" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.01"/>
+  <testcase name="statsRepair_missingCandidateOrStaleStatsDate_throwsErrorNotAssumedZero" classname="com.ntt.crosstest.data.EgressFinalClientReviewTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

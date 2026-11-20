@@ -1,0 +1,28 @@
+[
+  {
+    "name": "different delimiter-containing payload must reject replay",
+    "firstTitle": "A|B",
+    "secondTitle": "A|B",
+    "replayed": true,
+    "payloadMismatchRejected": false
+  },
+  {
+    "name": "empty scheduled role audience must not grow when worker starts",
+    "initialCount": 0,
+    "afterCount": 1,
+    "worker": {
+      "details": [
+        {
+          "completed": true,
+          "campaign_id": "080d99f8-159b-4ace-b31f-5b81bd84ea91",
+          "sent_in_batch": 1,
+          "pending_remaining": 0
+        }
+      ],
+      "success": true,
+      "notifications_sent": 1,
+      "campaigns_processed": 1
+    },
+    "scheduledCount": 0
+  }
+]

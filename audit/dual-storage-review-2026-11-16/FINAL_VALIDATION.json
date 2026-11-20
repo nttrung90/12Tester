@@ -1,0 +1,52 @@
+{
+  "at": "2026-11-16T09:15:50.043Z",
+  "scope": "Local source and isolated PGlite/fake Storage only",
+  "results": [
+    {
+      "name": "backend",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "media-probes",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "sql-hardening",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "sql-upgrade",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "business-comparison",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "sql-quota",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "tester-bonus",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "mission-rewards",
+      "status": "PASS",
+      "exitCode": 0
+    }
+  ],
+  "postgresConcurrency": "NOT RUN: TEST_DATABASE_URL absent/excluded",
+  "hashes": {
+    "supabase/migrations/091_dual_storage_report_screenshots.sql": "3a1dc6f2a5998fb697fe2c841af46532f5df885a777c3617bc37d71215b69486",
+    "supabase/migrations/092_dual_storage_hardening.sql": "4b8a71520e975d4e4380a15eb85e1360da20fb37b963e4c67cf13c5b54a28c2f",
+    "audit/dual-storage-review-2026-11-16/review-probes.mjs": "f49436f1dbb86a039ade466163fee22e9c926183dce82c78cfb1d54d7f91095d"
+  }
+}

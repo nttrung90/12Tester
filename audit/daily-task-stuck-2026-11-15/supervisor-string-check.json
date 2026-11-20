@@ -1,0 +1,104 @@
+[
+  {
+    "file": "app/src/main/res/values/strings.xml",
+    "addedReplacementCharacters": 0,
+    "addedStrings": [
+      [
+        "daily_task_syncing_badge",
+        "Synchronizing"
+      ],
+      [
+        "daily_task_syncing_note",
+        "Synchronizing daily task after recent changes…"
+      ],
+      [
+        "daily_task_history_verifying_badge",
+        "Verifying History"
+      ],
+      [
+        "daily_task_history_verifying_note",
+        "Daily task is verifying yesterday\\'s history. Your completed tests are recorded."
+      ],
+      [
+        "daily_task_error_badge",
+        "Load Failed"
+      ],
+      [
+        "daily_task_error_note",
+        "Could not refresh daily task status. Check your network connection and try again."
+      ],
+      [
+        "daily_task_retry_btn",
+        "Retry"
+      ]
+    ]
+  },
+  {
+    "file": "app/src/main/res/values-vi/strings.xml",
+    "addedReplacementCharacters": 0,
+    "addedStrings": [
+      [
+        "daily_task_syncing_badge",
+        "Đang đồng bộ"
+      ],
+      [
+        "daily_task_syncing_note",
+        "Đang đồng bộ chỉ tiêu ngày sau thao tác…"
+      ],
+      [
+        "daily_task_history_verifying_badge",
+        "Đang xác minh lịch sử"
+      ],
+      [
+        "daily_task_history_verifying_note",
+        "Chỉ tiêu ngày đang xác minh dữ liệu từ hôm qua. Tiến độ của bạn đã được ghi nhận."
+      ],
+      [
+        "daily_task_error_badge",
+        "Lỗi tải chỉ tiêu"
+      ],
+      [
+        "daily_task_error_note",
+        "Không thể tải trạng thái nhiệm vụ ngày. Vui lòng kiểm tra mạng và thử lại."
+      ],
+      [
+        "daily_task_retry_btn",
+        "Thử lại"
+      ]
+    ]
+  },
+  {
+    "file": "app/src/main/res/values-en/strings.xml",
+    "addedReplacementCharacters": 0,
+    "addedStrings": [
+      [
+        "daily_task_syncing_badge",
+        "Synchronizing"
+      ],
+      [
+        "daily_task_syncing_note",
+        "Synchronizing daily task after recent changes…"
+      ],
+      [
+        "daily_task_history_verifying_badge",
+        "Verifying History"
+      ],
+      [
+        "daily_task_history_verifying_note",
+        "Daily task is verifying yesterday\\'s history. Your completed tests are recorded."
+      ],
+      [
+        "daily_task_error_badge",
+        "Load Failed"
+      ],
+      [
+        "daily_task_error_note",
+        "Could not refresh daily task status. Check your network connection and try again."
+      ],
+      [
+        "daily_task_retry_btn",
+        "Retry"
+      ]
+    ]
+  }
+]

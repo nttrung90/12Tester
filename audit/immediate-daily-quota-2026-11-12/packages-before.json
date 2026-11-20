@@ -1,0 +1,20 @@
+[
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+    "sha256": "D30280EDC24688CCDF5C298B97709B3151923557C32E2482C18C8930992F73EE",
+    "length": 32608569,
+    "lastWriteUtc": "2026-11-11T16:26:38.5344448Z"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\release\\app-release.apk",
+    "sha256": "541640EB5BA94AEC2A7575CBCAABA0E7E6C13D89BB3422E14447298D0C19C552",
+    "length": 6571177,
+    "lastWriteUtc": "2026-11-05T10:23:31.3543792Z"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\bundle\\release\\app-release.aab",
+    "sha256": "05EC0BA9DEA2C28FB6B1A1D5D6883395A40107E4C1983DD0804BDF9708150B47",
+    "length": 12877860,
+    "lastWriteUtc": "2026-11-03T23:38:23.2174532Z"
+  }
+]

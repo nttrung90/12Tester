@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,existsSync,readdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+const audit=fileURLToPath(new URL('./',import.meta.url));const root=resolve(audit,'../..');
+const baseline=resolve(root,readFileSync(new URL('./CURRENT_BASELINE.txt',import.meta.url),'utf8').trim());
+assert.ok(baseline.startsWith(audit.replace(/[\\/]$/,'')));
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const sources=JSON.parse(readFileSync(resolve(baseline,'source-manifest.json'),'utf8'));
+const changed=sources.filter(r=>!existsSync(resolve(root,r.path))||hash(resolve(root,r.path))!==r.sha256);
+const packages=JSON.parse(readFileSync(resolve(baseline,'packages.json'),'utf8'));
+const changedPackages=packages.filter(r=>!existsSync(resolve(root,r.path))||hash(resolve(root,r.path))!==r.sha256);
+const newMigrations=readdirSync(resolve(root,'supabase/migrations')).filter(n=>/^\d{3}_/.test(n)&&Number(n.slice(0,3))>89);
+const result={at:new Date().toISOString(),sourceFiles:sources.length,changedSource:changed.map(r=>r.path),packageFiles:packages.length,changedPackages:changedPackages.map(r=>r.path),newMigrations};
+writeFileSync(new URL('./current-baseline-verification.json',import.meta.url),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+assert.equal(changed.length,0);assert.equal(changedPackages.length,0);assert.equal(newMigrations.length,0);

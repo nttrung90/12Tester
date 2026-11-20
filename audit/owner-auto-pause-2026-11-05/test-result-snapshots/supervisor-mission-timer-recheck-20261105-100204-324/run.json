@@ -1,0 +1,13 @@
+{
+  "logName": "supervisor-mission-timer-recheck",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.data.MissionReportRecheckProbeTest",
+    "--rerun"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-05T10:01:48.6482749Z",
+  "finishedUtc": "2026-11-05T10:02:04.3368410Z",
+  "currentRunXmlCount": 1
+}

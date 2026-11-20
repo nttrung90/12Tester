@@ -1,0 +1,20 @@
+Loaded 062_consolidated_baseline.sql through 080_report_context_carryover_and_gap_recovery.sql; actual SQL functions, no function stubs.
+PASS: threshold 1: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 2: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 3: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 4: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 5: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 6: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 7: real finalization N-1 / N, both apps, repeated sync
+PASS: admin applies 7 -> 3 to existing streak; next sync, persisted setting, audit and notification
+PASS: raising 3 -> 7 preserves already-paused apps and historical threshold 3
+PASS: raising 3 -> 7 before sync spares an open app with streak 3
+Independent debt gate verified: {"met":true,"remaining":2}
+PASS: independent: debt blocks all owner resume reasons at threshold 3
+PASS: 24-hour boundary and grace period
+PASS: today already met is spared
+PASS: independent: client cannot alter timestamps to bypass owner debt
+Independent contiguous streak verified: {"intermediate_day_met":true,"streak":1,"expected_streak":1,"missing_day_rows":1,"paused":0}
+PASS: missing intermediate finalized day observation (carryover disabled)
+RISK pending requires reconciliation: {"carryover_ready":false,"history_ready":true,"paused":0}
+PASS: new unsealed history with carryover enabled observation

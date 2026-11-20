@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -54,6 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.TopupPackage
+import com.ntt.crosstest.ui.theme.statusColors
+import androidx.compose.ui.platform.LocalContext
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.util.TopupConfig
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -80,13 +84,13 @@ fun CreditTopupBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        contentWindowInsets = { WindowInsets.safeDrawing },
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState()),
         ) {
             // Header Row
@@ -251,12 +255,13 @@ fun CreditTopupBottomSheet(
                         .height(50.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2E7D32),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                 ) {
                     if (isProcessing) {
                         CircularProgressIndicator(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
                         )
@@ -280,7 +285,7 @@ fun CreditTopupBottomSheet(
                             ),
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                         )
                     }
                 }
@@ -354,31 +359,38 @@ private fun TopupPackageCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            val context = LocalContext.current
+            val localizer = remember(context) { Localizer(context) }
             // Left: Title, credits, bonus badge
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = pkg.title,
+                        text = TopupConfig.getLocalizedTitle(pkg.id, localizer),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
-                    pkg.badgeText?.let { badge ->
+                    val badge = TopupConfig.getLocalizedBadge(pkg.id, localizer) ?: pkg.badgeText
+                    badge?.let { badge ->
                         Spacer(Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(if (pkg.isPopular) Color(0xFFFFB300) else Color(0xFF2E7D32))
+                                .background(
+                                    if (pkg.isPopular) MaterialTheme.statusColors.warningContainer
+                                    else MaterialTheme.statusColors.successContainer
+                                )
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                         ) {
                             Text(
                                 text = badge,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White,
+                                color = if (pkg.isPopular) MaterialTheme.statusColors.onWarningContainer
+                                else MaterialTheme.statusColors.onSuccessContainer,
                             )
                         }
                     }

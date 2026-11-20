@@ -1,0 +1,14 @@
+{
+  "logName": "root-round5-expiry-initial",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest.expiredMissionRejectsLocallyBeforeCreatingAnUploadAndKeepsTheDraft"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T10:37:03.5868611Z",
+  "finishedUtc": "2026-11-02T10:37:17.9697503Z",
+  "currentRunXmlCount": 0
+}

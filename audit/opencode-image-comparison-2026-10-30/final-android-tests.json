@@ -1,0 +1,56 @@
+[
+  {
+    "name": "com.ntt.crosstest.audit.ImageHashCollisionAuditTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.data.ReportRpcCompatibilityTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.data.ReportRpcFallbackAuditTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.util.ComparisonStateCoordinatorTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.util.DetailedImageComparatorTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.util.ReportComparisonSelectorTest",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.work.ReportBackgroundSubmissionTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "name": "com.ntt.crosstest.work.ReportUploadWorkerTest",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0
+  }
+]

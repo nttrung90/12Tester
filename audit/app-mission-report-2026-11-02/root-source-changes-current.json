@@ -1,0 +1,126 @@
+[
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AdminManagementModels.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\PendingReportStore.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManager.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SupabaseMediaAccessGrantProvider.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\navigation\\NavGraph.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\QuestsScreen.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignDetailViewModel.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PreparedScreenshot.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PrivateScreenshotDiskCache.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotManager.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotRequestFactory.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\TimeFormat.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorker.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\strings.xml",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\strings.xml",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\strings.xml",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportRecheckProbeTest.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManagerIntegrationTest.kt",
+    "status": "modified"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorkerTest.kt",
+    "status": "modified"
+  },
+  {
+    "path": "backend\\media-gateway\\adapters\\supabase-authority-adapter.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "backend\\media-gateway\\media-gateway-handler.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "backend\\media-gateway\\media-gateway-server.test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "KE_HOACH_CUA_SO_BAO_CAO_NHIEM_VU_APP_2026-11-02.md",
+    "status": "modified"
+  },
+  {
+    "path": "supabase\\tests\\package.json",
+    "status": "modified"
+  },
+  {
+    "path": "supabase\\tests\\run-admin-audit-hardening-test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "supabase\\tests\\run-admin-expansion-integration-test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "supabase\\tests\\run-admin-management-test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "supabase\\tests\\run-owner-tester-reports-count-test.mjs",
+    "status": "modified"
+  }
+]

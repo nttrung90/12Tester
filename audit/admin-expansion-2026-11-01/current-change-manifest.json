@@ -1,0 +1,446 @@
+{
+  "changed": [
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+      "before": "eba72142bcf61c00a3d121795e244cf08916946403b6cb6475e809f65a114e9f",
+      "after": "feaa5fa956d32fe796f13ce70b21ce9f0aa339f7bf8357d3a9efdb51ff3d39c5"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+      "before": "06827855ab1c940a2bfcb797208d5ddfc6bfc9127ccfd41f9e13866db430a907",
+      "after": "b9d6edb24ced32ecca92e6a02381b447cab23a5b5a93d042ddb29ca9fd673fde"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/TestCheoApp.kt",
+      "before": "4ead333704546eb41b75078345900ec18cf60ac42d60b898ccabd895b219ae2d",
+      "after": "63597515a37f194a531b19de759823e0bbe85f81a567b5385c451792e26adb97"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/navigation/NavGraph.kt",
+      "before": "f8aad169f0db91cd450190f1e15501835d42ba975fd209bc4c6311d7793de8db",
+      "after": "123ea39e2fbfee0160ab6cbde62ff953477f243fe2a178138a8f2cd9bb68bb02"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminUsersScreen.kt",
+      "before": "6927543a9c8e621b714f637e7b4ba90df9c642f62447a31555cb6e3424093535",
+      "after": "61504f0180df86fc9de85e14eb5638c114ff7e95d0e6f6acb7b2f2f953984097"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AppUpdateReleaseScreen.kt",
+      "before": "4feac0867b3061926add58ef33d387218dfbaf0ae46d4ed6a6c17132a2dcf449",
+      "after": "5554799964ae05a30757eb5e487a51d7a80406f4cce26a3bb7f1504a52f0533d"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/CreateCampaignScreen.kt",
+      "before": "2b1256ed22a23d53a714abd4d15fb77ff17fd43a0e4e79086238dcc78cf2dcd9",
+      "after": "5b2529d64a098343d5de042427ca176f94e178bf3e37e3ba3a31266f824c03f1"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt",
+      "before": "35e1a112ebfd0c6d3cb0c524006eeeccdde1c6646b8fe61e4eb62c05888d4396",
+      "after": "0c0fcd94625b6bdee2d36affc81450b3ff291a966a8eaeb1672bf34c56e0f9c8"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/ProfileScreen.kt",
+      "before": "2823aa4620e54486189a93f8edba809261909132382e4f0ed8141cbaf04412f0",
+      "after": "81954ecb263813308cc09d98b140a974e17fe8929039ba22f16f16dd50364bd6"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminUsersViewModel.kt",
+      "before": "7f8ffa3478baff4cda3d9d8b73378fe5824ed9626bfe52133c7d7c448a8b8933",
+      "after": "5ad50db2a9cd1fb5aa01b49481b0409140e57ae64a35ac2266cce3cf850bc220"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModel.kt",
+      "before": "f6959b5d6fbef025302684be1154f926de5801beb2fc90871a770fb2327cbc4f",
+      "after": "0e1aabc755d8bf921b25e91f4727e375ed6b8d8046dc8da245c9bd55d83aea4d"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CreateCampaignViewModel.kt",
+      "before": "3189f3bd854693e3217fcc88ede0f04558b458416e483587fdf3b483b05207c0",
+      "after": "f9668a496a125046a91fe19d5be3c6a7afdb046921ad9aced75b5b3f5b2dfa9a"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt",
+      "before": "bfd09939a8ed5523f2b1448d523efdcf21b4dec5bf2b994e8c51ef888bbc1cae",
+      "after": "3a2ee2ebc53b5829fdd4fb9974f01f381e121ca674a794c1f2eb47a81edd4206"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/ProfileViewModel.kt",
+      "before": "51dcde21f34c78c83da570063ac500559eaeba937cd32fe96ab4388be86b05fc",
+      "after": "8df674a5bdf3b5eedc88545ab5860e6102af5aa20876d38a277bd36e2c3b989c"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/audit/ReportOverlapTest.kt",
+      "before": "6bf32705c46660fb047b741279aa4ede17a6b86a7d68c61dcc7655d5b32e9e9d",
+      "after": "c782f0419f3fb708e587a24a50e55f4c844204051bf76bc30f09b1a5aea05994"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/audit/ReportV2WirePayloadProbeTest.kt",
+      "before": "eb9713bcbfcbbf636da189a2daf663f968b347c73986d9c030d38967b0d479e2",
+      "after": "72e1ef7b6c91f82664381113b9ac2fe3bc7104195e029f83373cbd558ea1a4cf"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/AdminDailyTaskHardeningRegressionTest.kt",
+      "before": "917abb73cfd72498edbbf4140ac253c5920ebf0a9644bd6ee8de32b0011b0bcd",
+      "after": "ce880dba853add6eca97d49692ba641dd840cd196e058dc9fba6c575249522bb"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/AdminRelatedRepositoryRaceTest.kt",
+      "before": "e9cf85c9d66188d2f1fcb337b75cfdd1e15176f2e955234d545bd42b41708882",
+      "after": "f2cee010341e847b4225d32ec60aa7226e19bfd69bf4c8878b636d45949af6d6"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/AppUpdateRegressionTest.kt",
+      "before": "0984a62fcaa60b97adc96adc9e340d13b5eef40ec2be338c4d38b2ab3d538911",
+      "after": "8aa9a9c832bf60309e05bf7ce0fb303f67714cd53de31d5a39477ba930086b0b"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/AppUpdateRewardTest.kt",
+      "before": "cb6e95c188d39b7315852aef028ece72164f41c19639aa250a7da4dfe0d2f224",
+      "after": "aa12e6aed750b5eaf5ae27b329e7523d1248514d52fa1e4b6138027c15c0c1eb"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/CacheRegressionTest.kt",
+      "before": "1a4313203409a96b7fcd5ae7a364dd5ed15beb2f9281863c6881ef88136ca22f",
+      "after": "f77ed9ef27eec04cbe3fbfd23824005e0f5a62501c2462f7840baed42c3972a7"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheBudgetAuditTest.kt",
+      "before": "2bb438298d03661c98808df67dd476c47436e1f433a24685b01b3906082f4ee6",
+      "after": "ada5e82a9f95c66e54a01a9f3a3d8c730cbbc0f37db3d6e995a8e066daa4e712"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheClockAuditTest.kt",
+      "before": "7b4bd9f2e83905bdc09ab22b3af793bbb0b45c6f08ab8b1076c7a49864776cf4",
+      "after": "4609b4846025af8b8cd73adae314e5c839886414ad4276d1e716d23d062e5ea8"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheCompositeAuditTest.kt",
+      "before": "0434cfc26b6d6fd9dfc9b89a5e8d959d5d7236ab2a88773dc10d4f06a9683c5c",
+      "after": "701535a4c9164f648e5d4b6774271ffd51b089c2063a0b6476909db62c0a5586"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheFinalAuditTest.kt",
+      "before": "100ad7a82ce0bb298e47181173abbf3b9bc37f5552c2caccb447b072905ed6b4",
+      "after": "c0c9519473a02db543322162e73d3c24bfd579f0b337b6522a484747379e2e83"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheMutationAuditTest.kt",
+      "before": "36a2aa26a4e927d69387ddd907c88c6ee7d84e0eb8e6098901c4c4dc1f81e633",
+      "after": "bfe61ab25c60a2d7f70aba775427f268542ecbc40d86f69012dacaf70abae557"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCachePublicationAuditTest.kt",
+      "before": "2688934cb8f040b691505951e037077096775344298f44e591ae52fb0037599e",
+      "after": "d78ada712e1c0b320cf7ca1109000105e6c4b6b37304bd5210dff73ecc05dd9e"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt",
+      "before": "f4d44ed3e121626b7adb09c310b92a4e32ba55caa192b0f929455c9da971a82d",
+      "after": "50431c95721e7b7592afe6555c152047008b5dc465c08914659dffc96cba6fd0"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotIntegrityAuditTest.kt",
+      "before": "61d5490cdc60545683f0191c2fe5f92145648deac418fd30581975646ef16e55",
+      "after": "c65ed609707e113f7590500c99329a19dd3c2b07d483a7c0e526997acf745950"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/MissionRegressionTest.kt",
+      "before": "5c9553d277ed1dbc27a383cc30375612866c115de7f39700f1fa25663de4c309",
+      "after": "8fe572c0c5688194f358b5bfcd048c9afd8edd1d5fb1162a5ee04f1f146fac89"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt",
+      "before": "a90ee046f01a38ca60cece0ebb39f5e797fae720eed3b24e7f4f8dfa17048878",
+      "after": "cf99d12d787fc63ebdecc9e02320c9fccc43f60d207e3a3fafb58081234be252"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/OwnerReportCountBehavioralTest.kt",
+      "before": "115aeb742fd4fad51b368115aa7ebe46f8682e93711a6a24b35263a3d22e442d",
+      "after": "eb49f23dfb4b8b409676fed49fc999bf7d908885ca10c0dfdbb681fece9abe60"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/PushAndCarryoverHardeningTest.kt",
+      "before": "71238dac459c836f1c4daaf7625b86fcf4b755583fac035144e227be388056e1",
+      "after": "522ac4cdb794536f66cfa1cda1af146f29043af62d65ea11e1bcc76c633f2cb0"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/ReportRpcCompatibilityTest.kt",
+      "before": "28f432f0420428ac323bd8968c7f773485727a9fd056cd17e5a7b962020352e9",
+      "after": "367f203bb2fe29c03547ca3c1e967f1163e189ba196a09e745a1c46c2179f5ad"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt",
+      "before": "869bcd7e9c0d9ea0f9f9085e6de7a4aaabb91f65d0a703209ff0fb6231fa4faa",
+      "after": "6ed844c6121ee2465b31d1eb9d126ae11485fa04af5559e8bb50605b2e6a1974"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignActionRaceTest.kt",
+      "before": "276786344b6c2d4605229552302a0c73ea83f0c7c664d050cf51df40c2f82945",
+      "after": "ebc1777d8ad95810e4e916b993bbe136d9c78f5eb94108dd8cb87b6133f83fe1"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminFlowSessionRaceTest.kt",
+      "before": "7fd07ac8031c5bd9cb3e47220399be616571ae7167a83a65bfbdfdb825956d14",
+      "after": "b0aea55fb659857fc8e9b73067d76376e47737dfa80ede7befa7a8690a1007f1"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupReviewRegressionTest.kt",
+      "before": "aba0b995882955be3a6bc422e0b88da8743676b31a4a12de49fa3cad75ebdd9d",
+      "after": "5d0b313b629755ac7c3b8a89e6626bb502ef3b06c3fc63e717a1e83d4a401151"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupRound3RegressionTest.kt",
+      "before": "3489afdef7229d500b4cef1e368ae78ec79377d240c94b1977e36f9bda727fb2",
+      "after": "2ef529ee667985f0b28ef9e09351090fc0a679d6846c0fbb5b72a5b8e05a28a8"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModelTest.kt",
+      "before": "a6868034efeda122e1a688f9081ca9dfe12c6f4a71466c654bb3afa5f9295e52",
+      "after": "693b146765d72cb86486ccf1a67697f5628244b169ae13db56ac65b9991b016d"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/PendingCarryoverRetryRegressionTest.kt",
+      "before": "1b81afad6b32934bdd44e466cf604d58c39b115ae331fafd70f3249ea17681a0",
+      "after": "999239295b5b8c75226af166857e1bf79c323574e2a363430ed97dc64daf4dcf"
+    },
+    {
+      "path": "supabase/tests/package.json",
+      "before": "bbada2e3edc082657130798c796d3a765b2e429817ca9bc1b91b9514bd9a16f4",
+      "after": "c8346ac6bad6c030f2a1e2aea5595a9c287750812433fa21ecfb61b2aaa8f44e"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "before": "d6b78a1d77a57472c972e17793e662392ccb49aac6dc0183a781954c346c017c",
+      "after": "eb62f9be78a5efc759170462b6d3771cabbed6403fea837bf5ea762167b28c04"
+    }
+  ],
+  "added": [
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/AdminManagementModels.kt",
+      "sha256": "8ba5e271c4049a844ddba5cd743bb0e77dac957bd5cac1ab0bed9927b0fc3161"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/AdminManagementRepository.kt",
+      "sha256": "2565d9022379945984113625955233e15eaa7f78c9ac5ee6e265361ea03f4004"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/AdminNotificationCampaignModels.kt",
+      "sha256": "42032db749269bbc1e24e66397e6abfc3f05958878edb030b71729bb74f457b0"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/AdminNotificationCampaignRepository.kt",
+      "sha256": "0423a6321179d0d114959a2feda5f80fce8fe8bbce70a39b851e97b8401d5c2d"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/BusinessPolicyModels.kt",
+      "sha256": "37aad5053d4f35b230173e9cc311a5d7068004f9863c90c8f61b69893f457e56"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/BusinessPolicyRepository.kt",
+      "sha256": "a4f0967b311fd1e1a7f08910bb258145000df6efe98a88b8826442ef29ba2e56"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/FinancialIntentStore.kt",
+      "sha256": "fcb00e89e499cc8ea4a2e5cb0eace861da44650700087b2f8d772b26a65ecbf9"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminAuditScreen.kt",
+      "sha256": "1c267514d1837d3c1f45b037ee2381c3d402c17821a417eacf30f2d35cb691f2"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminBusinessPolicyScreen.kt",
+      "sha256": "6a7e495f23d7cf6d10e761c5120314b25a4bf0ac02cbc9ef602a7951be79005b"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminCampaignsScreen.kt",
+      "sha256": "6c6c27ee15b86b6e01d905e03236bd9b0f35d6f82e63b4442643afa401fc50d4"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminNotificationCampaignScreen.kt",
+      "sha256": "f314906e5c2e4ca31f2baa06b9043f49f8e7cb8598827ba69e1b01077ec3c542"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminSystemMonitorScreen.kt",
+      "sha256": "bbbaa39454c4553100c706f20af2e5570f4b292af6c6471f7363ae93357c6f49"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminTesterReportsQueueScreen.kt",
+      "sha256": "38d50fc9f543fa8b48e6c7609e445ce4346ab05a787418eecbde60a01f62c09f"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/CarryoverPolicyScreen.kt",
+      "sha256": "a74849b254b5a7f897ea8e03d2fde8ab987dcbdbf086328629a0d3ae7cf0573d"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/MemberDetailScreen.kt",
+      "sha256": "15111ce7d7ebcb7bd457b8d255abbdac4d52c4e3b33c03cdae5cb19ce17bdc3d"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminAuditViewModel.kt",
+      "sha256": "f1cf6e3abdc539f477378df8b05b5ccfd53d021f35e914ad0d8f1ef67f16d357"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModel.kt",
+      "sha256": "b1928ac1b90d8290fff5190d3473dae4cd157a00806d9a98989afaa54598fe01"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignsViewModel.kt",
+      "sha256": "7a1ac155e46b6e4a11aa0ddc03374fbdac3c53046f9dcba3b27aeec5571a5ab6"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModel.kt",
+      "sha256": "c262dcb3cb5591a7f91cd2f751f05b43f5a87e9456f3aed56b4a398d42540437"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminSystemMonitorViewModel.kt",
+      "sha256": "992d11b6db7fcb134566fc9ac12cd941db13821a8ca82eef07be1739d6bdfc1f"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminTesterReportsQueueViewModel.kt",
+      "sha256": "18fc378c7dba96bc8591b0c1d80111f53d5c8a0fb2cbac62db90d55339588b15"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CarryoverPolicyViewModel.kt",
+      "sha256": "3fbd90bc000e08e965ee35fdffdeff47723b6be544819147bc02192cbfb42ce9"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/MemberDetailViewModel.kt",
+      "sha256": "e30e54f883ea00e7f6bf7bb2d59dee0f648f24bd749233da66f03397bd048d2c"
+    },
+    {
+      "path": "app/src/main/res/values/admin_business_policy.xml",
+      "sha256": "bc45f05d972f70f426fbbb0c216ef992355578f992c755652ab805301af3d85a"
+    },
+    {
+      "path": "app/src/main/res/values/admin_management.xml",
+      "sha256": "5a8afb698f11451a3f6b02621f154b7c5545e6070e2b51ef90d75abc57f31d40"
+    },
+    {
+      "path": "app/src/main/res/values/admin_notifications.xml",
+      "sha256": "26685f7b2d7cdc7695737e8874dbf0892ad3ea10aabe7966f6138f2ddda77ae2"
+    },
+    {
+      "path": "app/src/main/res/values-en/admin_business_policy.xml",
+      "sha256": "bc45f05d972f70f426fbbb0c216ef992355578f992c755652ab805301af3d85a"
+    },
+    {
+      "path": "app/src/main/res/values-en/admin_management.xml",
+      "sha256": "5a8afb698f11451a3f6b02621f154b7c5545e6070e2b51ef90d75abc57f31d40"
+    },
+    {
+      "path": "app/src/main/res/values-en/admin_notifications.xml",
+      "sha256": "26685f7b2d7cdc7695737e8874dbf0892ad3ea10aabe7966f6138f2ddda77ae2"
+    },
+    {
+      "path": "app/src/main/res/values-vi/admin_business_policy.xml",
+      "sha256": "ed0d5bc4cdd1e3ef1f112297f0568551bba79dc814fdc4d40335f5d0e58b5f3b"
+    },
+    {
+      "path": "app/src/main/res/values-vi/admin_management.xml",
+      "sha256": "8e233388198f6df5c40b12df7c23e48f0b8775b2c950dfa0e01957f6039dda4e"
+    },
+    {
+      "path": "app/src/main/res/values-vi/admin_notifications.xml",
+      "sha256": "cb67337fc15b485bea5d3e9fc753ecf57888a4f7ec43e1092b277ea479347a16"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/AdminNotificationCampaignRepositoryTest.kt",
+      "sha256": "644943498dcb95842eb5ce9f430dea0fb3b91970fa3c78ab6caf42423bb445b4"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt",
+      "sha256": "9bfb69fb7c62a5bc853744b5c8b92126f2a858567d0b8b8a8804e1bb77ad3bef"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/FinancialConsumerV2BehavioralTest.kt",
+      "sha256": "bf7b9801f28ecfba39b0eda8773b0f2165ae615793c8c4852360b7e98b2954d6"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/data/FinancialIntentStoreTest.kt",
+      "sha256": "d128e71faadaff166c66f10d79c658c1d0b5cb20f67ea27244437a3c37fd3488"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModelTest.kt",
+      "sha256": "0c6e69c41b8c93f8b0c33c2072e966ec99665388b2442c7421a72f3fd8dc9fb5"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminManagementCoreTest.kt",
+      "sha256": "4eeb93ac12f966567878c4130b09ce504aed831cb5c3c67074338ed01e7b08e9"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt",
+      "sha256": "0aeadcbec73372019c2384d671c219cb17ced4a4d5aafa95d05423e42dbfd191"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModelBehavioralTest.kt",
+      "sha256": "24722d0f85b17dd339c14e2576c01271512a04501778189f9ef8b6b4a3d0de0b"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/SlotAndPushDurabilityBehavioralTest.kt",
+      "sha256": "3691813f7cbc9597cf77cf309b9dd2380c520c4114de7db89ff56bc8c133a0fe"
+    },
+    {
+      "path": "supabase/migrations/070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "path": "supabase/migrations/071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "path": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "path": "supabase/migrations/073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "path": "supabase/tests/run-admin-action-audit-test.mjs",
+      "sha256": "5fa19537f399b7158f56d9eb7a63cdfe13c9832fbb57fc2b5b3a12c3a9cc4579"
+    },
+    {
+      "path": "supabase/tests/run-admin-expansion-integration-test.mjs",
+      "sha256": "78d92fac7948504cea66780f376f78df8c71bad3fe142cad80e61b06db8dda2c"
+    },
+    {
+      "path": "supabase/tests/run-admin-management-test.mjs",
+      "sha256": "a0d5239a4dce93f64e696ff53b92a6cd2abb62abc564e4cd5ed32148fcae5e6e"
+    },
+    {
+      "path": "supabase/tests/run-admin-notification-campaigns-test.mjs",
+      "sha256": "d952eafc3eaf402cf29ba63877fae773bebe4b685a3280ba4a8e03d4c31affc7"
+    },
+    {
+      "path": "supabase/tests/run-business-policies-test.mjs",
+      "sha256": "d550f1225bac2d7d956573b8e27d645fa74470ef33bc813e97bc1d8c7037e5cf"
+    },
+    {
+      "path": "supabase/tools/append-dashboard-to-070.mjs",
+      "sha256": "49ff6033e4a665be2fc5e718daaf94c93aecff072a5bae4d10214ff998c44bde"
+    },
+    {
+      "path": "backend/notification-worker/package-lock.json",
+      "sha256": "f126320b059461e3ba04bb14cbcbca6eae371582fbe8e2641bd800be860fa47e"
+    },
+    {
+      "path": "backend/notification-worker/package.json",
+      "sha256": "338f18b07f4892ff6931baccb74c04de6646079a58e2a35cf2ba3a1b478192f0"
+    },
+    {
+      "path": "backend/notification-worker/README.md",
+      "sha256": "c03e559ca361d03e14f907cb53355e1443489da444fe295ddd835ff428029906"
+    },
+    {
+      "path": "backend/notification-worker/worker-runner.mjs",
+      "sha256": "02aa12a225d6063d2542a712a6d27e1a4d187e2b8989c30ff6e30ccdb0eb2979"
+    },
+    {
+      "path": "backend/notification-worker/worker-runner.test.mjs",
+      "sha256": "81b10556d9f005f741d35464ab99e1e9fa5a8e13f7d73f7436e43af02e80112e"
+    }
+  ],
+  "deleted": []
+}

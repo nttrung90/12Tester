@@ -1,0 +1,12 @@
+allprojects {
+    afterEvaluate { p ->
+        if (p.path == ':app') {
+            p.android.sourceSets.test.kotlin.srcDir(new File(rootProject.projectDir, 'audit/admin-panel-layout-recheck-2026-11-01/tests'))
+            p.tasks.withType(Test).configureEach {
+                outputs.upToDateWhen { false }
+                reports.junitXml.outputLocation = p.file(new File(p.rootProject.projectDir, 'audit/admin-panel-layout-recheck-2026-11-01/android-results'))
+                reports.html.outputLocation = p.file(new File(p.rootProject.projectDir, 'audit/admin-panel-layout-recheck-2026-11-01/android-html'))
+            }
+        }
+    }
+}

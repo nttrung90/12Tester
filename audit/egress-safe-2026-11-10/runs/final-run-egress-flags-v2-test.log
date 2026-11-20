@@ -1,0 +1,20 @@
+=== LOADING ALL MIGRATIONS IN ORDER ===
+Loaded 24 migrations successfully.
+
+--- TEST 1: Default Flag Values ---
+PASS: All four flags default false for android_client
+--- TEST 2: Reapply Migration Idempotency & Value Preservation ---
+PASS: True flag value preserved after migration 085 reapplication
+--- TEST 3: Flag Independence ---
+PASS: Individual flags toggle independently without cross-interference
+--- TEST 4: Disable All Rollback ---
+PASS: Rollback resets all 4 flags to false
+--- TEST 5: Legacy RPC & Function Metadata Stability ---
+PASS: Legacy functions and grants unchanged; _sync_block protected
+--- TEST 6: Anon Read & RLS Policies on app_configs ---
+PASS: Anon read succeeds and respects security policies
+
+======================================================
+ALL BACKEND FLAGS V2 TESTS PASSED SUCCESSFULLY!
+======================================================
+

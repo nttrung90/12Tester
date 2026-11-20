@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-30",
+  "target": "Supabase project configured in local.properties; no credentials recorded",
+  "method": "Anonymous POST to /rest/v1/rpc/submit_tester_report_v2; campaign is zero UUID; no authenticated user, so no business writes",
+  "observations": [
+    { "keys": ["p_campaign_id"], "httpStatus": 404, "postgrestCode": "PGRST202" },
+    { "keys": ["p_campaign_id", "p_submission_context"], "httpStatus": 401, "postgrestCode": "42501" }
+  ],
+  "interpretation": "Route resolution succeeds when required context key is supplied, then anonymous execution is denied. Missing context reproduces the signature lookup failure. This does not prove authenticated submission or the phone's configured project."
+}

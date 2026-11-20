@@ -1,0 +1,14 @@
+{
+  "logName": "root-android-budget-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest.admissionBlocksBeforeExceedingPendingBudgetWithoutEvictingAcceptedWork"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T05:24:54.6632636Z",
+  "finishedUtc": "2026-11-02T05:25:18.2491972Z",
+  "currentRunXmlCount": 1
+}

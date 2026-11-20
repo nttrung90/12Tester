@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-13T19:08:02.016Z",
+  "originalSha256": "1387865479bb4415a4e6880df99b67e146cbbf5dda6044917dce596dc571d195",
+  "migration090Sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e",
+  "changes": [
+    "relative import/file URLs only",
+    "apply actual 090 twice after installing 089 and before after-fix assertions"
+  ],
+  "pass": true
+}

@@ -1,0 +1,11 @@
+[PASS] D01: Ordinary pending report cannot be converted to mission report
+[PASS] D02: Old request replay must not overwrite later update
+[PASS] D03: Same request ID with different payload must fail with mismatch
+[PASS] D04: Replay with identical payload returns receipt without duplicate credit
+[PASS] D05: get_campaign_mission supports querying specific mission by p_mission_id
+[PASS] L01: Upgrade must preserve legacy request A before update B and later replay A
+[PASS] L02: Legacy receipt fallback must not accept a changed image as identical payload
+[PASS] B01: Exact legacy replay with implicit mission must remain valid after backfill
+[PASS] B02: Exact legacy approved-comment replay without image fields must remain valid
+
+--- All Database Idempotency & Context Tests Passed Successfully! ---

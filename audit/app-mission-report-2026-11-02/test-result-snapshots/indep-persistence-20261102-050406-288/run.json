@@ -1,0 +1,14 @@
+{
+    "logName":  "indep-persistence",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T05:03:10.4777149Z",
+    "finishedUtc":  "2026-11-02T05:04:06.3000121Z",
+    "currentRunXmlCount":  1
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-03T12:49:10.875Z" hostname="PC-5700X3D" time="0.061">
+  <properties/>
+  <testcase name="a_late_mark_all_read_from_user_a_must_not_mark_user_b_home_list_as_read" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest" time="0.015"/>
+  <testcase name="a_late_claim_must_not_show_a_notification_already_read_from_the_list" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest" time="0.015"/>
+  <testcase name="a_dashboard_started_before_ack_must_not_return_unread_after_ack_succeeds" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest" time="0.013"/>
+  <testcase name="offline_popup_read_must_update_the_existing_home_list_before_server_sync" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

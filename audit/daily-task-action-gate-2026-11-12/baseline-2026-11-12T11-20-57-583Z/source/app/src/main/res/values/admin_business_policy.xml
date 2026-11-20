@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Business Policy Editor & Management -->
+    <string name="admin_policy_title">Business Policies</string>
+    <string name="admin_policy_active_tab">Active Policy</string>
+    <string name="admin_policy_future_tab">Scheduled</string>
+    <string name="admin_policy_editor_tab">Editor</string>
+    <string name="admin_policy_history_tab">History</string>
+
+    <string name="admin_policy_baseline_badge">Baseline Default</string>
+    <string name="admin_policy_effective_date">Effective Date (VN Time)</string>
+    <string name="admin_policy_select_date">Select Date (YYYY-MM-DD)</string>
+    <string name="admin_policy_revision_format">Revision: %1$s</string>
+    <string name="admin_policy_updated_at_format">Updated: %1$s</string>
+    <string name="admin_policy_today_format">Today (%1$s): %2$s</string>
+    <string name="admin_policy_summary_welcome_format">%1$s: %2$d Credits</string>
+    <string name="admin_policy_summary_push_format">%1$s: %2$d Credits</string>
+    <string name="admin_policy_summary_slot_format">Slot 2=%1$d, Slot 3=%2$d, Slot 4+=%3$d (%4$d days)</string>
+    <string name="admin_policy_summary_report_format">Provisional=%1$d, TesterBonus=%2$d, OwnerBonus=%3$d</string>
+    <string name="admin_policy_summary_app_update_format">%1$d Credits/claim * %2$d claims = %3$d Credits</string>
+
+    <!-- Welcome Credits -->
+    <string name="admin_policy_section_welcome">Welcome Credits</string>
+    <string name="admin_policy_welcome_credits">New Account Welcome Credits</string>
+    <string name="admin_policy_welcome_credits_helper">Credits granted when a user registers (0 - 10,000, default 100)</string>
+
+    <!-- Penalty Tiers -->
+    <string name="admin_policy_section_penalty">Daily Penalty Tiers</string>
+    <string name="admin_policy_penalty_tier1">Tier 1 (1 missed day, %)</string>
+    <string name="admin_policy_penalty_tier2">Tier 2 (2 missed days, %)</string>
+    <string name="admin_policy_penalty_tier3">Tier 3 (3 missed days, %)</string>
+    <string name="admin_policy_penalty_tier4">Tier 4 (4+ missed days, %)</string>
+    <string name="admin_policy_penalty_helper">Percentages must be ordered: 0 &lt;= Tier 1 &lt;= Tier 2 &lt;= Tier 3 &lt;= Tier 4 &lt;= 100</string>
+
+    <!-- Push Fee -->
+    <string name="admin_policy_section_push">Campaign Push</string>
+    <string name="admin_policy_push_fee">Push Fee (Credits)</string>
+    <string name="admin_policy_push_fee_helper">Cost to push an app to top of testing list (1 - 10,000, default 100)</string>
+
+    <!-- Slot Fees -->
+    <string name="admin_policy_section_slots">Slot Fees &amp; Duration</string>
+    <string name="admin_policy_slot_fee_2">Slot 2 Fee (Credits)</string>
+    <string name="admin_policy_slot_fee_3">Slot 3 Fee (Credits)</string>
+    <string name="admin_policy_slot_fee_4_plus">Slot 4-6 Fee (Credits)</string>
+    <string name="admin_policy_slot_renewal_days">Renewal Duration (Days)</string>
+    <string name="admin_policy_slot_renewal_days_format">%1$d days</string>
+    <string name="admin_policy_slot_cost_format">%1$d Credit</string>
+    <string name="admin_policy_quote_unavailable">Pricing quote is currently unavailable. Please check your connection and tap retry before making a purchase.</string>
+    <string name="admin_policy_future_load_more">Load More Scheduled Policies</string>
+    <string name="admin_policy_slot_helper">Fees (1 - 10,000) and renewal period (1 - 365 days)</string>
+
+    <!-- Tester Report Rewards -->
+    <string name="admin_policy_section_reports">Tester Report Rewards</string>
+    <string name="admin_policy_report_provisional">Provisional Reward on Submit</string>
+    <string name="admin_policy_report_tester_bonus">Tester Manual Review Bonus</string>
+    <string name="admin_policy_report_owner_bonus">Owner Manual Review Bonus</string>
+    <string name="admin_policy_report_helper">Rewards awarded during report lifecycle (0 - 1,000)</string>
+
+    <!-- App Update Rewards -->
+    <string name="admin_policy_section_app_update">App Update Release</string>
+    <string name="admin_policy_app_update_reward_per_claim">Reward per Claim (Credits)</string>
+    <string name="admin_policy_app_update_max_claims">Max Claims per Release</string>
+    <string name="admin_policy_app_update_reserved_budget">Derived Escrow Budget: %1$d Credits</string>
+    <string name="admin_policy_app_update_helper">Per claim (1 - 1,000) * max claims (1 - 1,000) = total escrow budget</string>
+
+    <!-- Notes & Actions -->
+    <string name="admin_policy_operator_note">Operator Note (Mandatory)</string>
+    <string name="admin_policy_operator_note_hint">Enter administrative reason for this policy update...</string>
+    <string name="admin_policy_schedule_btn">Schedule Policy</string>
+    <string name="admin_policy_cancel_btn">Cancel Policy</string>
+    <string name="admin_policy_edit_draft_btn">Edit in Draft</string>
+    <string name="admin_policy_load_active_into_editor">Copy Active into Draft</string>
+
+    <!-- Confirmations & Dialogs -->
+    <string name="admin_policy_cancel_title">Cancel Scheduled Policy</string>
+    <string name="admin_policy_cancel_confirm">Are you sure you want to cancel the scheduled policy for %1$s? This action will be logged in audit.</string>
+    <string name="admin_policy_cancel_reason_hint">Reason for canceling...</string>
+    <string name="admin_policy_confirm_btn">Confirm</string>
+    <string name="admin_policy_dismiss_btn">Dismiss</string>
+
+    <!-- Status & Alerts -->
+    <string name="admin_policy_schedule_success">Policy scheduled successfully for %1$s!</string>
+    <string name="admin_policy_cancel_success">Scheduled policy canceled successfully!</string>
+    <string name="admin_policy_conflict_reload">Policy revision conflict detected. Latest revision loaded while preserving your draft edits.</string>
+    <string name="admin_policy_no_future">No future scheduled policies found.</string>
+    <string name="admin_policy_no_history">No policy history changes recorded yet.</string>
+    <string name="admin_policy_history_item_format">%1$s - %2$s by %3$s</string>
+    <string name="admin_policy_history_note_format">Note: %1$s</string>
+    <string name="admin_policy_validation_error">Validation error: Please verify bounds and ensure penalty tiers are ordered (Tier 1 &lt;= 2 &lt;= 3 &lt;= 4).</string>
+    <string name="admin_policy_date_required">Effective date must be in the future (VN Time).</string>
+    <string name="admin_policy_note_required">Operator note is mandatory (1 - 1,000 characters).</string>
+
+    <!-- Friendly Server Error Messages -->
+    <string name="error_business_policy_conflict">Business policy revision conflict. Another administrator has updated the policy. Please review and confirm.</string>
+    <string name="error_business_policy_price_mismatch">Transaction price or budget has changed compared to the displayed quote. Please confirm the new amount.</string>
+    <string name="error_business_policy_future_date_required">Policy effective date must be in the future (Asia/Ho_Chi_Minh 00:00).</string>
+    <string name="error_business_policy_note_required">An administrative reason note is required for policy changes.</string>
+    <string name="error_business_policy_not_found">The specified business policy was not found.</string>
+    <string name="error_business_policy_history_read_only">Business policy history is immutable and cannot be modified.</string>
+    <string name="error_client_update_required">System business policy has changed. Please update the application to proceed.</string>
+    <string name="error_request_id_conflict">Duplicate request detected with different parameters.</string>
+
+    <!-- Pending Recovery UI -->
+    <string name="admin_policy_pending_schedule_banner">Pending schedule request for %1$s is unresolved. Tap Retry to reconcile with server.</string>
+    <string name="admin_policy_pending_cancel_banner">Pending cancellation for %1$s is unresolved. Tap Retry to reconcile with server.</string>
+    <string name="admin_policy_retry_pending_btn">Retry</string>
+
+    <!-- Campaign Posting Controls (Min Retained Balance, Slot 1 Post Fee, Target Upgrade Fees) -->
+    <string name="admin_policy_section_posting">App Publishing &amp; Test Targets</string>
+    <string name="admin_policy_min_credits_to_post">Minimum Retained Balance (Credits)</string>
+    <string name="admin_policy_min_credits_to_post_helper">Minimum balance required AFTER deducting upfront publishing fees (0 - 10,000, default 10)</string>
+    <string name="admin_policy_slot_fee_1">Slot 1 Posting Fee (Credits / campaign)</string>
+    <string name="admin_policy_slot_fee_1_helper">Charged once per new campaign posted into Slot 1. Slot 1 remains permanent and never expires (0 - 10,000, default 0).</string>
+    <string name="admin_policy_target_15_fee">15 Tests/day Upgrade Fee (Credits)</string>
+    <string name="admin_policy_target_20_fee">20 Tests/day Upgrade Fee (Credits)</string>
+    <string name="admin_policy_target_fees_helper">12 Tests/day is free (0 C). Upgrade fees must satisfy: 0 &lt;= 15 Tests/day &lt;= 20 Tests/day &lt;= 10,000</string>
+    <string name="admin_policy_summary_posting_format">Min Retained=%1$d C, Slot 1 Post=%2$d C, Target 15/20=+%3$d/+%4$d C</string>
+    <string name="admin_policy_summary_slot_with_s1_format">Slot 1=%1$d/post, Slot 2=%2$d, Slot 3=%3$d, Slot 4+=%4$d (%5$d days)</string>
+    <string name="admin_policy_target_order_error">Validation error: 15 Tests/day fee cannot exceed 20 Tests/day fee (0 - 10,000).</string>
+    <string name="error_business_policy_invalid_target_fees">Invalid test target fees: 0 &lt;= 15 Tests/day &lt;= 20 Tests/day &lt;= 10,000.</string>
+    <string name="error_business_policy_invalid_min_credits">Invalid minimum retained balance (must be between 0 and 10,000 Credits).</string>
+    <string name="error_business_policy_invalid_slot_fees">Invalid slot fees or renewal duration.</string>
+
+    <!-- Dynamic Publishing Consumer UI -->
+    <string name="create_slot_1_post_fee_badge">+%1$d C/post</string>
+    <string name="create_target_plus_credit_format">+%1$d Credit</string>
+    <string name="create_target_free_cost">Free (0 C)</string>
+    <string name="create_posting_cost_summary_format">Upfront fee: %1$d Credit • Min retained balance: %2$d Credit (Your balance: %3$d Credit)</string>
+    <string name="create_posting_insufficient_summary_format">Need at least %1$d Credit (%2$d Credit upfront fee + %3$d Credit retained balance). Current balance: %4$d Credit.</string>
+    <string name="create_posting_min_balance_only_warning_format">You need at least %1$d Credit in your account to publish an app (currently %2$d Credit). Join testing to earn more Credit.</string>
+    <string name="create_slot_info_dynamic_msg">Each Slot holds 1 running app:\n\n• Slot 1: Default permanent slot (%1$s)\n• Slot 2: %2$d Credit / %5$d days\n• Slot 3: %3$d Credit / %5$d days\n• Slots 4 - 6: %4$d Credit / %5$d days\n\nMinimum retained balance after publishing: %6$d Credit.</string>
+    <string name="create_slot_1_free_post">0 Credit / campaign</string>
+    <string name="create_slot_1_paid_post_format">%1$d Credit / new campaign</string>
+    <string name="create_confirm_fee_breakdown_title">Publishing Fee Summary</string>
+    <string name="create_confirm_slot_1_fee_label">Slot 1 posting fee:</string>
+    <string name="create_confirm_target_fee_label_format">Target upgrade (%1$d/day):</string>
+    <string name="create_confirm_total_deduct_label">Deducted on publish:</string>
+    <string name="create_confirm_balance_after_label_format">Balance after publish (min %1$d C):</string>
+    <string name="create_unlock_slot_btn_dynamic_format">Unlock Slot %1$d (%2$d Credit / %3$d days)</string>
+</resources>

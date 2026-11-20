@@ -1,0 +1,26 @@
+[
+  {
+    "path": "supabase/migrations/090_daily_task_action_gate.sql",
+    "sha256": "f07d81b928be8e2fb6cdc43698582d8ba1027a45c94cce7b39ebfa25e683dfb6"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt",
+    "sha256": "6093768a0f8b436ca860b788ba549237e21735210b170ce314e1abe0ae190ace"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/DailyTaskActionGate.kt",
+    "sha256": "600fb3745de1aeeb366ace623bbc8574213490878195d3d4321040c83000528d"
+  },
+  {
+    "path": "app/src/main/res/values/strings.xml",
+    "sha256": "4ae87dbc6536dd0713c6a13fab85b3179abbffefb6e7f7da23f218b253cd66e3"
+  },
+  {
+    "path": "app/src/main/res/values-en/strings.xml",
+    "sha256": "c84dea241c104b4bb89ed7601541382256fcd6046b85cc55fa1a3ef0ef89c6da"
+  },
+  {
+    "path": "app/src/main/res/values-vi/strings.xml",
+    "sha256": "504794c10c91937b35b0b0c8c063183272d89ab9efe47822f5a02ac0c53866e7"
+  }
+]

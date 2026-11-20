@@ -27,6 +27,30 @@ object PreparedScreenshotCache {
     private const val DIRECTORY = "prepared_report_images"
     private const val MAX_AGE_MS = 48L * 60L * 60L * 1000L
 
+    private val activeLeases = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    fun acquireLease(path: String?) {
+        if (path.isNullOrBlank()) return
+        activeLeases.compute(path) { _, count -> (count ?: 0) + 1 }
+    }
+
+    fun releaseLease(path: String?) {
+        if (path.isNullOrBlank()) return
+        activeLeases.compute(path) { _, count ->
+            val next = (count ?: 1) - 1
+            if (next <= 0) null else next
+        }
+    }
+
+    fun isLeased(path: String?): Boolean {
+        if (path.isNullOrBlank()) return false
+        return (activeLeases[path] ?: 0) > 0
+    }
+
+    fun clearLeases() {
+        activeLeases.clear()
+    }
+
     fun newUploadId(): String = UUID.randomUUID().toString()
 
     fun directory(context: Context): File =
@@ -38,17 +62,19 @@ object PreparedScreenshotCache {
     fun newThumbnailFile(context: Context, uploadId: String, extension: String = "jpg"): File =
         File(directory(context), "thumb_$uploadId.$extension")
 
-    /** Dọn ảnh đã chọn nhưng không nộp sau 48h. */
+    /** Dọn ảnh đã chọn nhưng không nộp sau 48h (chỉ dọn file không còn form/draft nào giữ lease hoặc tham chiếu). */
     fun cleanup(context: Context) {
         val cutoff = System.currentTimeMillis() - MAX_AGE_MS
+        val draftReferenced = com.ntt.crosstest.data.MissionReportDraftStore.allReferencedFilePaths(context)
         directory(context).listFiles()?.forEach { file ->
-            if (file.isFile && file.lastModified() < cutoff) {
+            if (file.isFile && file.lastModified() < cutoff && !isLeased(file.absolutePath) && file.absolutePath !in draftReferenced) {
                 file.delete()
             }
         }
     }
 
     fun clear(context: Context) {
+        clearLeases()
         directory(context).deleteRecursively()
         directory(context).mkdirs()
     }

@@ -1,0 +1,2 @@
+PASS: Migration 087 applied to isolated native PostgreSQL test database.
+[{"table_name":"campaign_tester_bonus_awards"},{"table_name":"campaign_tester_bonus_events"},{"table_name":"campaign_tester_bonus_rounds"}]

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.MissionReportAndExpirationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-01T23:54:47.406Z" hostname="PC-5700X3D" time="0.156">
+  <properties/>
+  <testcase name="testCampaignRepository_isMissionActiveAndUnexpired" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.026"/>
+  <testcase name="testHomeViewModel_pruneExpiredMissions" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.053"/>
+  <testcase name="testReportSubmitManager_preservesMissionIdentityInPersist" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.02"/>
+  <testcase name="testCampaignRepository_getOpenMissions_filtersExpiredAndUpdatesClock" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.031"/>
+  <testcase name="testSubmitTesterReportResult_isMissionReport_resolution" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.013"/>
+  <testcase name="testTesterReport_isMissionReport_resolution" classname="com.ntt.crosstest.data.MissionReportAndExpirationTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,26 @@
+{
+  "beforeHash": "CE49362D75D5DDFAFF45D2B7F49E575EAD4B0E908F1371EEE354FAAA3D4C4E5C",
+  "afterHash": "CE49362D75D5DDFAFF45D2B7F49E575EAD4B0E908F1371EEE354FAAA3D4C4E5C",
+  "results": [
+    {
+      "probe": "root-daily-coexistence-probe.mjs",
+      "exit": 0,
+      "output": "PASS independent daily coexistence: app_test -> mission\nPASS independent daily coexistence: mission -> app_test"
+    },
+    {
+      "probe": "root-daily-state-matrix.mjs",
+      "exit": 0,
+      "output": "PASS independent daily state matrix: app_test -> mission with first pending\nPASS independent daily state matrix: app_test -> mission with first approved\nPASS independent daily state matrix: app_test -> mission with first rejected\nPASS independent daily state matrix: mission -> app_test with first pending\nPASS independent daily state matrix: mission -> app_test with first approved\nPASS independent daily state matrix: mission -> app_test with first rejected\nPASS independent later-day mission report after actual owner approval"
+    },
+    {
+      "probe": "root-migration-upgrade-probe.mjs",
+      "exit": 0,
+      "output": "PASS independent migration upgrade: preserves 1 historical reporting days\nPASS independent migration upgrade: preserves 2 historical reporting days\nPASS independent private-helper and attachment write ACL"
+    },
+    {
+      "probe": "root-three-image-probe.mjs",
+      "exit": 0,
+      "output": "PASS independent three-image contract: create three ordered attachments and immutable exact replay\nPASS independent three-image contract: four images rejected server-side\nPASS independent three-image contract: client cannot move report_date to regain the daily slot\nPASS independent three-image contract: v3 rejects missing client request identity\nPASS independent three-image contract: v3 rejects null context instead of inferring intent from mission ID\nPASS independent three-image contract: explicit v2 also rejects null context\nPASS independent three-image contract: foreign secondary image URL rejected\nPASS independent three-image contract: secondary hash format validated\nPASS independent three-image contract: secondary thumbnail bound to its own full image\nPASS independent three-image contract: empty array cannot silently mean keep attachments\nPASS independent three-image contract: changed order under same request ID rejected\nPASS independent three-image contract: v2 cover update either rejected or retains coherent entire set\nPASS independent three-image contract: distinct valid URL fields cannot collide in a delimiter-based fingerprint"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "logName":  "full-unit-tests-fresh",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T05:43:42.0736817Z",
+    "finishedUtc":  "2026-11-05T05:44:20.3386526Z",
+    "currentRunXmlCount":  73
+}

@@ -1,0 +1,39 @@
+node:internal/child_process:1143
+    result.error = new ErrnoException(result.error, 'spawnSync ' + options.file);
+                   ^
+
+<ref *1> Error: spawnSync F:\AI\12Tester\audit\tester-bonus-2026-11-11\pg-runtime\node_modules\@embedded-postgres\windows-x64\native\bin\pg_ctl.exe ETIMEDOUT
+    at Object.spawnSync (node:internal/child_process:1143:20)
+    at spawnSync (node:child_process:911:24)
+    at execFileSync (node:child_process:954:15)
+    at command (file:///F:/AI/12Tester/audit/immediate-daily-quota-2026-11-12/local-postgres.mjs:15:36)
+    at file:///F:/AI/12Tester/audit/immediate-daily-quota-2026-11-12/local-postgres.mjs:36:20
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'spawnSync F:\\AI\\12Tester\\audit\\tester-bonus-2026-11-11\\pg-runtime\\node_modules\\@embedded-postgres\\windows-x64\\native\\bin\\pg_ctl.exe',
+  path: 'F:\\AI\\12Tester\\audit\\tester-bonus-2026-11-11\\pg-runtime\\node_modules\\@embedded-postgres\\windows-x64\\native\\bin\\pg_ctl.exe',
+  spawnargs: [
+    '-D',
+    'F:\\AI\\12Tester\\audit\\immediate-daily-quota-2026-11-12\\pg-data',
+    '-l',
+    'F:\\AI\\12Tester\\audit\\immediate-daily-quota-2026-11-12\\postgres-server.log',
+    '-w',
+    '-t',
+    '25',
+    'start'
+  ],
+  error: [Circular *1],
+  status: 0,
+  signal: null,
+  output: [
+    null,
+    'waiting for server to start.... done\r\nserver started\r\n',
+    ''
+  ],
+  pid: 10840,
+  stdout: 'waiting for server to start.... done\r\nserver started\r\n',
+  stderr: ''
+}
+
+Node.js v24.15.0

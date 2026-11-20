@@ -1,0 +1,12 @@
+{
+    "logName":  "unit-test-integration",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:30:31.6630084Z",
+    "finishedUtc":  "2026-11-02T04:30:58.3396754Z",
+    "currentRunXmlCount":  1
+}

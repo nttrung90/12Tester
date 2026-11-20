@@ -1,0 +1,2 @@
+{"closedBeforeGateRelease":false,"waitingOnSubmission":true,"report":{"tester_bonus_round_id":"36c8033f-8e00-4abc-b9dd-83f4fc211519"},"ledger":{"status":"closing","remaining_credits":10,"refunded_credits":0}}
+PASS snapshot submission versus close preserves accepted pending obligation

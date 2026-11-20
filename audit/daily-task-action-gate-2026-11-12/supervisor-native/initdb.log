@@ -1,0 +1,23 @@
+The files belonging to this database system will be owned by user "nguye".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+creating directory F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-native/pg-data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... windows
+selecting default "max_connections" ... 25
+selecting default "shared_buffers" ... 400kB
+selecting default time zone ... Asia/Bangkok
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    ^"F^:^\AI^\12Tester^\audit^\tester^-bonus^-2026^-11^-11^\pg^-runtime^\node^_modules^\^@embedded^-postgres^\windows^-x64^\native^\bin^\pg^_ctl^" -D ^"F^:^\AI^\12Tester^\audit^\daily^-task^-action^-gate^-2026^-11^-12^\supervisor^-native^\pg^-data^" -l logfile start
+

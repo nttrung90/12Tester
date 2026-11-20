@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.TesterBonusRepositoryTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:51.952Z" hostname="PC-5700X3D" time="0.101">
+  <properties/>
+  <testcase name="legacy schema projection fallback on tester_bonus column missing 42703 error" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.009"/>
+  <testcase name="getCampaignTesterBonus returns dual projection for owner and tester" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.007"/>
+  <testcase name="error 42703 for unrelated column does NOT trigger bonus fallback and propagates" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.008"/>
+  <testcase name="valid closed partial refund replay passes strict validation" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.007"/>
+  <testcase name="budget, wallet, and counter inconsistencies reject evidence and safeOwnerBalanceInt never clamps" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.005"/>
+  <testcase name="newer wallet mutation during create RPC prevents stale cached balance overwrite" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.017"/>
+  <testcase name="reconcileCampaignTesterBonus found false decoding" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.01"/>
+  <testcase name="coherent wrong reconcile payload retains intent and does not write wallet" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.012"/>
+  <testcase name="reconcileCampaignTesterBonus found true decoding" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.007"/>
+  <testcase name="createCampaignTesterBonus wire decoding and payload submission" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.006"/>
+  <testcase name="cumulative earned Long arithmetic boundary handles values exceeding Int MAX_VALUE without wrap" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.005"/>
+  <testcase name="missing RPC 404 or PGRST202 is converted to server_update_required" classname="com.ntt.crosstest.data.TesterBonusRepositoryTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

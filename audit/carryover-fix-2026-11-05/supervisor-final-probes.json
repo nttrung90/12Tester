@@ -1,0 +1,36 @@
+{
+  "verifiedUtc": "2026-11-05T12:31:05.5320678Z",
+  "migrationSha256": "F3BBF9ED3E841462BDD67D247AA2480FE507E67443D162340D3AD7EA93B51106",
+  "checks": [
+    {
+      "name": "carryover",
+      "path": "audit/carryover-fix-2026-11-05/independent-acceptance.mjs",
+      "exitCode": 0,
+      "log": "F:\\AI\\12Tester\\audit\\carryover-fix-2026-11-05\\supervisor-final-carryover.log"
+    },
+    {
+      "name": "upgrade",
+      "path": "audit/carryover-fix-2026-11-05/legacy-classification-probes.mjs",
+      "exitCode": 0,
+      "log": "F:\\AI\\12Tester\\audit\\carryover-fix-2026-11-05\\supervisor-final-upgrade.log"
+    },
+    {
+      "name": "safety",
+      "path": "audit/carryover-fix-2026-11-05/safety-probes.mjs",
+      "exitCode": 0,
+      "log": "F:\\AI\\12Tester\\audit\\carryover-fix-2026-11-05\\supervisor-final-safety.log"
+    },
+    {
+      "name": "prior-owner",
+      "path": "audit/owner-auto-pause-2026-11-05/independent-acceptance.mjs",
+      "exitCode": 0,
+      "log": "F:\\AI\\12Tester\\audit\\carryover-fix-2026-11-05\\supervisor-final-prior-owner.log"
+    },
+    {
+      "name": "prior-edges",
+      "path": "audit/owner-auto-pause-2026-11-05/supervisor-edge-probes.mjs",
+      "exitCode": 0,
+      "log": "F:\\AI\\12Tester\\audit\\carryover-fix-2026-11-05\\supervisor-final-prior-edges.log"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.ReportOverlapTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:12:44.381Z" hostname="PC-5700X3D" time="3.814">
+  <properties/>
+  <testcase name="remainingCompletionMustPreserveNewerDraftInSameViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.598"/>
+  <testcase name="round2NewDraftUsingSubmittedPhotoMustKeepItsPhotoAfterCompletion" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.593"/>
+  <testcase name="round3DuplicateSubmitDuringPreparingDoesNotOverwriteOwnership" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.567"/>
+  <testcase name="alreadyInFlightSubmissionReturnsConflictReason" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.053"/>
+  <testcase name="round3CancelAllMustPreventLateEnqueueFromAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="1.031"/>
+  <testcase name="formSubmissionBlockedKeepsFormAndDraft" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.043"/>
+  <testcase name="explicitMissionMustNotSilentlyBecomeOrdinaryApprovedComment" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.039"/>
+  <testcase name="ordinaryPendingReportMustKeepItsTypeAfterJoiningMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.049"/>
+  <testcase name="remainingForeignCompletionMustPreserveDraftInOtherViewModel" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.585"/>
+  <testcase name="newDailyReportMustNotBecomeJoinedMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.039"/>
+  <testcase name="remainingExplicitDifferentMissionMustNotSubmitOldMission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.038"/>
+  <testcase name="missionContextMustMatchTheRequestedMissionIdentity" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.037"/>
+  <testcase name="remainingMissingScreenshotMustNotBeAcceptedBeforePersistence" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.016"/>
+  <testcase name="round2AdmissionMustNotPerformStorageIoOnCallingThread" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.024"/>
+  <testcase name="approvedMissionCommentMustNotDependOnLiveMissionFetch" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.049"/>
+  <testcase name="round3CallerCancellationDoesNotCancelManagerAdmission" classname="com.ntt.crosstest.audit.ReportOverlapTest" time="0.047"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

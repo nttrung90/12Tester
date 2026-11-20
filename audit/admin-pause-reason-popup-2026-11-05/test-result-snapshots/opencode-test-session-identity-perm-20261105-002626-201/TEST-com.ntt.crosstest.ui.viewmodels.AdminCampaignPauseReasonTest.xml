@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T00:26:17.942Z" hostname="PC-5700X3D" time="0.147">
+  <properties/>
+  <testcase name="sessionGenerationChange_discardsStaleResponse_andDoesNotInvokeOnSuccess" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.02"/>
+  <testcase name="concurrentDuplicatePause_rejectedByActionGate" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.024"/>
+  <testcase name="pauseWithPolicyViolation_routesToNewRpc_withPolicyViolationPayload" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.026"/>
+  <testcase name="pauseWithCustomReason_routesToLegacyRpc_withCustomReasonText" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.025"/>
+  <testcase name="pauseWithMissingGoogleGroup_routesToNewRpc_withCorrectPayloadAndInvokesOnSuccess" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.026"/>
+  <testcase name="pauseFailure_retainsDraft_doesNotInvokeOnSuccess_andSetsError" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

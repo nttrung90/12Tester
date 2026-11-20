@@ -4,6 +4,8 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -183,6 +185,8 @@ fun AuthScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .consumeWindowInsets(padding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -208,7 +212,7 @@ fun AuthScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
             // 1. Google sign in
             Button(

@@ -1,0 +1,23 @@
+=== LOADING ACTIVE MIGRATIONS DYNAMICALLY (062 ONWARD) ===
+Found 7 active migrations: [
+  '062_consolidated_baseline.sql',
+  '063_report_crypto_search_path.sql',
+  '064_explicit_report_context.sql',
+  '065_remove_dhash_hardblock.sql',
+  '066_push_and_carryover_hardening.sql',
+  '067_admin_direct_notification_popup.sql',
+  '068_owner_tester_reports_count.sql'
+]
+PASS: Successfully reproduced before-fix state (pending_reports_count and tester_reports_count missing)
+Applying 068_owner_tester_reports_count.sql...
+=== RUNNING GET_CAMPAIGN_DETAIL REPORT COUNT TESTS ===
+PASS: Fresh campaign with no reports returns 0 for all report counts
+PASS: Owner sees total and pending reports across all testers
+PASS: Admin and Moderator see campaign totals matching owner
+PASS: Regular tester only sees their own report totals and reports list
+PASS: Reports on Camp B do not leak into Camp A counts
+PASS: When all reports are approved or rejected, pending_reports_count is 0
+PASS: Pending reports older than 8 hours are auto-accepted and not counted as pending
+PASS: Feedbacks update reports_count and avg_rating without affecting tester_reports_count
+PASS: Authoritative count counts >200 reports accurately while reports array caps at 200
+ALL OWNER TESTER REPORT COUNT DATABASE TESTS PASSED

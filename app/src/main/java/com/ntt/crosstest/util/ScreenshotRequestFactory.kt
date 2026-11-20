@@ -18,20 +18,68 @@ object ScreenshotRequestFactory {
         report: TesterReport? = null,
         descriptor: ScreenshotDescriptor? = null,
         variant: ScreenshotVariant = ScreenshotVariant.FULL,
+        attachmentId: String? = null,
+        provider: String? = null,
+        viewExpiresAt: String? = null,
     ): ScreenshotDescriptor? {
         if (url.isNullOrBlank()) return null
         if (descriptor != null) return descriptor
         if (report != null) {
+            val matchingAtt = if (attachmentId != null) {
+                report.attachments.firstOrNull { it.id == attachmentId }
+            } else {
+                report.attachments.firstOrNull { it.screenshotUrl == url || it.thumbnailUrl == url }
+            }
+            val realAttachmentId = (matchingAtt?.id ?: attachmentId)?.takeIf { it != report.id }
+            val fallback = if (variant == ScreenshotVariant.THUMBNAIL) {
+                matchingAtt?.screenshotUrl ?: (if (realAttachmentId == null) report.screenshotUrl else null)
+            } else null
+
+            val effCreatedAt: String?
+            val effMediaExpired: Boolean
+            val effProvider: String?
+            val effViewExpiresAt: String?
+
+            if (matchingAtt != null) {
+                // Attachment riêng: DÙNG METADATA RIÊNG (a.createdAt), KHÔNG ĐỂ CHA HẾT HẠN CHẶN CON CÒN HẠN
+                effCreatedAt = matchingAtt.createdAt ?: report.createdAt
+                effMediaExpired = matchingAtt.mediaExpired ?: matchingAtt.isExpired
+                // Tránh fallback parent.storageProvider cho mixed provider; infer theo URL hoặc provider riêng
+                val explicitProvider = matchingAtt.storageProvider ?: matchingAtt.provider ?: provider
+                effProvider = if (!explicitProvider.isNullOrBlank()) {
+                    explicitProvider
+                } else {
+                    if (com.ntt.crosstest.data.MediaExpiryPolicy.isSupabaseStorage(url)) "supabase" else "gcs"
+                }
+                // Deadline riêng của attachment: không kế thừa report.viewExpiresAt của cha
+                effViewExpiresAt = matchingAtt.viewExpiresAt ?: viewExpiresAt
+            } else {
+                // Ảnh chính của report
+                effCreatedAt = report.createdAt
+                effMediaExpired = report.mediaExpired ?: report.isScreenshotExpired
+                effProvider = report.storageProvider ?: provider
+                effViewExpiresAt = report.viewExpiresAt ?: viewExpiresAt
+            }
+
             return ScreenshotDescriptor(
                 url = url,
-                createdAt = report.createdAt,
-                mediaExpired = report.mediaExpired ?: report.isScreenshotExpired,
+                createdAt = effCreatedAt,
+                mediaExpired = effMediaExpired,
                 variant = variant,
-                fallbackUrl = if (variant == ScreenshotVariant.THUMBNAIL) report.screenshotUrl else null,
+                fallbackUrl = fallback,
                 reportId = report.id,
+                attachmentId = realAttachmentId,
+                provider = effProvider,
+                viewExpiresAt = effViewExpiresAt,
             )
         }
-        return ScreenshotDescriptor(url = url, variant = variant)
+        return ScreenshotDescriptor(
+            url = url,
+            variant = variant,
+            attachmentId = attachmentId,
+            provider = provider,
+            viewExpiresAt = viewExpiresAt,
+        )
     }
 
     /**
@@ -44,18 +92,20 @@ object ScreenshotRequestFactory {
         descriptor: ScreenshotDescriptor? = null,
         variant: ScreenshotVariant = ScreenshotVariant.FULL,
         crossfade: Boolean = true,
+        attachmentId: String? = null,
     ): Any? {
         if (model == null) return null
         if (model is ImageRequest) return model
         if (model !is String) return model
 
-        val targetUrl = if (variant == ScreenshotVariant.THUMBNAIL && report != null && !report.thumbnailUrl.isNullOrBlank()) {
+        val matchesSecondary = report?.attachments?.any { it.screenshotUrl == model || it.thumbnailUrl == model } == true
+        val targetUrl = if (variant == ScreenshotVariant.THUMBNAIL && report != null && !report.thumbnailUrl.isNullOrBlank() && attachmentId == null && !matchesSecondary) {
             report.thumbnailUrl
         } else {
             model
         }
 
-        val desc = createDescriptor(targetUrl, report, descriptor, variant)
+        val desc = createDescriptor(targetUrl, report, descriptor, variant, attachmentId)
         val builder = ImageRequest.Builder(context)
             .data(targetUrl)
 

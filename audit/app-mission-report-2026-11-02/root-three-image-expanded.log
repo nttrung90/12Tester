@@ -1,0 +1,15 @@
+PASS independent three-image contract: create three ordered attachments and immutable exact replay
+PASS independent three-image contract: four images rejected server-side
+PASS independent three-image contract: client cannot move report_date to regain the daily slot
+FAIL independent three-image contract: v3 rejects missing client request identity ERR_ASSERTION Missing expected rejection.
+FAIL independent three-image contract: foreign secondary image URL rejected ERR_ASSERTION Missing expected rejection.
+FAIL independent three-image contract: secondary hash format validated ERR_ASSERTION Missing expected rejection.
+FAIL independent three-image contract: secondary thumbnail bound to its own full image ERR_ASSERTION Missing expected rejection.
+FAIL independent three-image contract: empty array cannot silently mean keep attachments ERR_ASSERTION Missing expected rejection.
+PASS independent three-image contract: changed order under same request ID rejected
+FAIL independent three-image contract: v2 cover update either rejected or retains coherent entire set ERR_ASSERTION primary report and first attachment must match
++ actual - expected
+
++ 'https://firebasestorage.googleapis.com/v0/b/cross-testers.firebasestorage.app/o/reports%2Faaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa%2F22222222-2222-2222-2222-222222222222%2Fdddddddd-dddd-dddd-dddd-000000000001.jpg?alt=media&token=fixture'
+- 'https://firebasestorage.googleapis.com/v0/b/cross-testers.firebasestorage.app/o/reports%2Faaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa%2F22222222-2222-2222-2222-222222222222%2Fdddddddd-dddd-dddd-dddd-000000000106.jpg?alt=media&token=fixture'
+

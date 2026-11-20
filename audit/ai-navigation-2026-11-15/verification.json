@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-15",
+  "scope": "AI navigation guidance and local lookup tools only",
+  "migrationAndArchiveFiles": 96,
+  "migrationAndArchiveBytesUnchanged": true,
+  "productionAccess": false,
+  "androidBuild": false,
+  "sqlIndex": {
+    "migrations": 29,
+    "functions": 249
+  },
+  "sampleRuns": [
+    {
+      "command": "node tools/ai-search.mjs --scope android DailyTaskCard --files",
+      "elapsedMs": 157,
+      "result": {
+        "scope": "android",
+        "candidateFiles": 170,
+        "filesRead": 170,
+        "results": 2,
+        "truncated": false
+      }
+    },
+    {
+      "command": "node tools/ai-sql-index.mjs find get_daily_task_status",
+      "elapsedMs": 81,
+      "result": {
+        "scope": "Final public non-extension function definitions after replaying current local migrations. Not deployment history, ACL/trigger/DML inventory, or a production snapshot.",
+        "totalMatches": 1,
+        "truncated": false,
+        "functions": [
+          {
+            "signature": "public.get_daily_task_status(uuid, date)",
+            "identityArguments": "p_user_id uuid, p_date date",
+            "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+            "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+            "lineHints": [
+              290
+            ],
+            "definitionSha256": "d6dbfb03610e6a4d53cabbc469c1749276b5bb5d352ff5cd1afadc7431068468"
+          }
+        ]
+      }
+    },
+    {
+      "command": "node tools/ai-sql-index.mjs check",
+      "elapsedMs": 82,
+      "result": {
+        "fresh": true,
+        "migrations": 29,
+        "functions": 249
+      }
+    }
+  ],
+  "note": "Single local measurements, not a guaranteed speedup or production validation."
+}

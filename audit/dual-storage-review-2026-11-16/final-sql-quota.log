@@ -1,0 +1,29 @@
+=== CHẠY KIỂM THỬ ĐƠN VỊ SQL & LOGIC HẠN MỨC DUAL STORAGE (PGLITE) ===
+PASS: Áp dụng thành công toàn bộ 31 migrations trên PGlite.
+
+--- Test 1: Usage at 94% -> Supabase Preferred ---
+PASS: Usage at 94% successfully dispatched to Supabase with reservation.
+
+--- Test 2: Pinning across retries with identical upload_id ---
+PASS: Pinning preserved provider and paths without double-incrementing reservation.
+
+--- Test 3: Overflow to Google Cloud when >= 95% ---
+PASS: Exceeding 95% threshold triggered google_overflow dispatch.
+
+--- Test 4: Hysteresis in [90%, 95%) range ---
+PASS: Usage at 92% stayed in google_overflow as required by hysteresis.
+
+--- Test 5: Recovery below 90% (< 900 MB) ---
+PASS: Usage at 85% recovered to supabase_preferred.
+
+--- Test 6: Fail-safe fallback to GCS on stale or invalid metrics ---
+PASS: Stale metrics engaged fail-safe and routed safely to GCS.
+
+--- Test 7: Report submission finalizes reservation and bounds expiry ---
+PASS: Report submission finalized Supabase ledger and set view_expires_at.
+
+--- Test 8: request_report_media_access enforces 216h cutoff for Supabase ---
+PASS: Expired Supabase media access was correctly rejected with MEDIA_EXPIRED.
+
+>>> TẤT CẢ 8 KỊCH BẢN LOGIC DUAL STORAGE TRÊN PGLITE ĐÃ PASS! <<<
+[NOT RUN] PostgreSQL multi-connection: TEST_DATABASE_URL is missing.

@@ -1,0 +1,14 @@
+{
+  "logName": "root-android-daily-eligibility-initial",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest.participantWhoseFirstDayWasApprovedRemainsJoinedDuringTheMissionWindow"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T04:54:31.2908792Z",
+  "finishedUtc": "2026-11-02T04:54:56.5332168Z",
+  "currentRunXmlCount": 1
+}

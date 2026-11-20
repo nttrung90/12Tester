@@ -1,0 +1,11 @@
+{
+    "logName":  "full-android-tests",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--rerun-tasks"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-02T04:31:10.9095659Z",
+    "finishedUtc":  "2026-11-02T04:33:48.5802501Z",
+    "currentRunXmlCount":  65
+}

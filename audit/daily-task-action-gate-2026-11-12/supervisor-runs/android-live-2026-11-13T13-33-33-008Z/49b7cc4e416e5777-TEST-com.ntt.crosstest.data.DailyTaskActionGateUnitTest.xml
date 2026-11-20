@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:48:54.254Z" hostname="PC-5700X3D" time="0.059">
+  <properties/>
+  <testcase name="testNegativeCarryoverRemainingTestsBlocksGateAsInvalidData" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.049"/>
+  <testcase name="testStaleDateBlocksGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.001"/>
+  <testcase name="testOmittedCarryoverReadyDecodesToNullAndBlocksGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testNullHistoryReadyDecodesToNullAndBlocksGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testAccountLockedBlocksAllActionsRegardlessOfTaskCompletion" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.001"/>
+  <testcase name="testMetFalseBlocksGateAsUnmet" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.002"/>
+  <testcase name="testValidCompletePayloadDecodesAndPassesGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testOmittedMetDecodesToNullAndBlocksGateAsPending" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testAdminBypassAllowsAllActionsEvenWhenUnmetOrLocked" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testPositiveCarryoverRemainingTestsBlocksGateWithDebt" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testOmittedHistoryReadyDecodesToNullAndBlocksGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.001"/>
+  <testcase name="testManualPauseGatedOnlyWhenAppWasActive" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.0"/>
+  <testcase name="testOmittedCarryoverRemainingTestsDecodesToNullAndBlocksGate" classname="com.ntt.crosstest.data.DailyTaskActionGateUnitTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

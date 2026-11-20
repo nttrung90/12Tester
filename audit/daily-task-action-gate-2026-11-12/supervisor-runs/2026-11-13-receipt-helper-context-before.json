@@ -1,0 +1,159 @@
+{
+  "at": "2026-11-13T12:21:16.517Z",
+  "singleConnection": true,
+  "applied": [
+    {
+      "name": "062_consolidated_baseline.sql",
+      "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+    },
+    {
+      "name": "063_report_crypto_search_path.sql",
+      "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+    },
+    {
+      "name": "064_explicit_report_context.sql",
+      "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+    },
+    {
+      "name": "065_remove_dhash_hardblock.sql",
+      "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+    },
+    {
+      "name": "066_push_and_carryover_hardening.sql",
+      "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+    },
+    {
+      "name": "067_admin_direct_notification_popup.sql",
+      "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+    },
+    {
+      "name": "068_owner_tester_reports_count.sql",
+      "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+    },
+    {
+      "name": "069_admin_audit_hardening.sql",
+      "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+    },
+    {
+      "name": "070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "name": "071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "name": "072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "name": "073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "name": "074_app_mission_window_and_multi_attachments.sql",
+      "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+    },
+    {
+      "name": "075_owner_auto_pause_config.sql",
+      "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+    },
+    {
+      "name": "076_mission_for_finalized_campaigns.sql",
+      "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+    },
+    {
+      "name": "077_mission_reward_modes_and_management.sql",
+      "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+    },
+    {
+      "name": "078_admin_pause_reason_popup.sql",
+      "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+    },
+    {
+      "name": "079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+    },
+    {
+      "name": "080_report_context_carryover_and_gap_recovery.sql",
+      "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+    },
+    {
+      "name": "081_admin_flow_audit_fixes.sql",
+      "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+    },
+    {
+      "name": "082_carryover_flow_audit_fixes.sql",
+      "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+    },
+    {
+      "name": "083_fix_app_configs_encoding_and_version.sql",
+      "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+    },
+    {
+      "name": "084_campaign_posting_business_policies.sql",
+      "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+    },
+    {
+      "name": "085_egress_optimization_sync_v2.sql",
+      "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+    },
+    {
+      "name": "086_next_campaign_candidate_daily_target_priority.sql",
+      "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+    },
+    {
+      "name": "087_campaign_tester_bonus_rounds.sql",
+      "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+    },
+    {
+      "name": "088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "name": "089_fix_production_bonus_lifecycle.sql",
+      "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+    },
+    {
+      "name": "090_daily_task_action_gate.sql",
+      "sha256": "8399386a8e90e72a70193a32f569ea75071651cbbf5f3779e7ac027620cda587"
+    }
+  ],
+  "results": [
+    {
+      "case": "actual_authenticated_session_cannot_author_receipt",
+      "actor": {
+        "current_user": "authenticated",
+        "session_user": "supervisor_receipt_authenticator",
+        "uid": "fa000000-0000-0000-0000-000000000002",
+        "can_temp": true
+      },
+      "error": "PERMISSION_DENIED: Cannot record removal receipt outside trigger or service context",
+      "receipts": [],
+      "pass": true
+    },
+    {
+      "case": "untrusted_temp_trigger_cannot_author_receipt",
+      "actor": {
+        "current_user": "authenticated",
+        "session_user": "supervisor_receipt_authenticator",
+        "uid": "fa000000-0000-0000-0000-000000000002",
+        "can_temp": true
+      },
+      "reply": [
+        {
+          "n": 1
+        }
+      ],
+      "receipts": [
+        {
+          "campaign_id": "fb000000-0000-0000-0000-000000000002",
+          "owner_id": "fa000000-0000-0000-0000-000000000002",
+          "reason": "Untrusted client proof"
+        }
+      ],
+      "pass": false,
+      "failure": "untrusted actor authored a server removal receipt\n\n1 !== 0\n"
+    }
+  ]
+}

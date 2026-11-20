@@ -1,0 +1,274 @@
+I1110 20:19:47.961581       1 resolver.go:85] Model ID gemini-3.8-flash-high not in local config, defaulting to CCPA
+I1110 20:19:47.962108       1 resolver.go:111] Model resolved via default
+I1110 20:19:47.962108      24 server.go:2335] Starting language server process with pid 13232
+I1110 20:19:47.963155      24 server.go:2394] Language server version: 1.5.4
+I1110 20:19:47.963155      24 server.go:1086] Language server will attempt to listen on host localhost
+I1110 20:19:47.973122      24 server.go:1101] Language server listening on random port at 57557 for HTTPS (gRPC)
+I1110 20:19:47.973645      24 server.go:1109] Language server listening on random port at 57558 for HTTP
+I1110 20:19:47.976680      66 model_configs.go:195] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1110 20:19:47.976680      42 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1110 20:19:47.976680      42 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+E1110 20:19:47.976680      66 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1110 20:19:48.011761      72 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1110 20:19:48.012270      72 store_client.go:764] summary store: reconciliation complete, synced 3 records
+W1110 20:19:48.020705     112 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1110 20:19:48.020705     112 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1110 20:19:48.021764      24 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1110 20:19:48.021764      24 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1110 20:19:48.027199     179 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1110 20:19:48.028241     179 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.028241     179 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1110 20:19:48.029287     179 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.029287     179 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1110 20:19:48.030855     179 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.030855     179 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1110 20:19:48.030855     179 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1110 20:19:48.030855     179 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1110 20:19:48.030855     179 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1110 20:19:48.058959      24 server.go:3632] initialized server successfully in 96.9609ms
+I1110 20:19:48.058959     196 server.go:4329] Auth succeeded, refreshing features and managers
+W1110 20:19:48.058959      43 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1110 20:19:48.058959      43 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1110 20:19:48.058959      44 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1110 20:19:48.058959      44 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1110 20:19:48.058959      43 rpcs_plugin_auth.go:105] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+E1110 20:19:48.058959     196 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1110 20:19:48.058959     196 server.go:4348] State refresh took 0ms
+I1110 20:19:48.058959     196 server.go:4363] [RemoteControl] Subscription callback triggered.
+I1110 20:19:48.058959       1 auto_updater.go:281] Last check was less than 15 minutes ago, skipping update (fast path)
+I1110 20:19:48.058959       1 common.go:191] Launching CLI mode
+E1110 20:19:48.058959       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1110 20:19:48.060463       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1110 20:19:48.060463       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1110 20:19:48.060463       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1110 20:19:48.060463     196 server.go:4366] [RemoteControl] RemoteControlEnabled value: false
+I1110 20:19:48.060463     196 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 20:19:48.060463     196 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 20:19:48.060463     213 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1110 20:19:48.060463     196 profiler.go:231] Continuous pprof profiling is disabled.
+I1110 20:19:48.061470     210 reconcile_summaries.go:94] [Summaries] reconcile checked 3 conversations, restored 0, cached 3, skipped 0, dropped 0, cancelled false in 0ms (resident: 0 -> 0)
+I1110 20:19:48.062471     213 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.062471     213 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1110 20:19:48.063469     213 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.063469     213 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1110 20:19:48.063974     213 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 20:19:48.063974     213 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1110 20:19:48.063974     213 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1110 20:19:48.063974     213 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1110 20:19:48.063974     213 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1110 20:19:48.074122       1 server.go:3366] GetConversationDetail: found conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 (active=false)
+I1110 20:19:48.074650       1 projectresolve.go:97] project: resuming conversation belonging to project ID: default-cli-project
+I1110 20:19:48.074650       1 projectresolve.go:111] project: synced active project to "CLI Project" (id=default-cli-project) from resumed conversation
+I1110 20:19:48.075197       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1110 20:19:48.075197       1 analytics.go:249] CLI startup completed (took 123.8744ms, phases [main_entered=0ms ls_start=11ms ls_ready=108ms launch_cli=109ms backend_created=116ms project_resolved=123ms])
+I1110 20:19:48.075197       1 printmode.go:208] Print mode: starting (promptLength=2502, model="gemini-3.8-flash-high", conversationID="83e21089-deb1-4b20-b2e3-66fc799d7111")
+I1110 20:19:48.075197       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+I1110 20:19:48.077315       1 cli_setting_manager.go:159] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1110 20:19:48.101116       1 cli_setting_manager.go:96] CLI settings initialized: permissions=&{Allow:[read_file(F:/AI/12Tester) write_file(F:/AI/12Tester) command(Get-ChildItem -Path . -Depth 1) command(Get-ChildItem -Path . -Recurse -Filter *Egress*.kt) command(Select-Object FullName) command(.\gradlew.bat assembleDebug --offline) command(.\gradlew.bat testDebugUnitTest --offline) command(.\gradlew.bat testDebugUnitTest assembleDebug --offline) command(.\gradlew.bat assembleDebug testDebugUnitTest --offline) command(.\gradlew.bat compileDebugKotlin --offline) command(node audit/egress-safe-2026-11-10/apply-core-repair.mjs) command(node audit/egress-safe-2026-11-10/apply-safe-diagnostics.mjs) command(regex:node (?:--check )?supabase[/\\]tests[/\\]run-[A-Za-z0-9_-]+\.mjs) command(regex:node (?:--check )?run-[A-Za-z0-9_-]+\.mjs)] Deny:[write_file(F:/AI/12Tester/.git) write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/before) write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/SESSION_SETTINGS.json) write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/TASK_GEMINI.txt) write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/apply-core-repair.mjs) write_file(F:/AI/12Tester/audit/egress-safe-2026-11-10/apply-safe-diagnostics.mjs) command(git reset) command(git clean) command(git checkout) command(git push) command(Remove-Item) command(Stop-Process) command(Invoke-WebRequest) command(Invoke-RestMethod)] Ask:[]}, toolPermission=request-review
+I1110 20:19:48.101116       1 manager.go:1751] SetCycleMode called: accept-edits
+I1110 20:19:48.111613       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1110 20:19:48.111613       1 manager.go:727] CLI store manager initialized successfully
+I1110 20:19:48.112135       1 printmode.go:889] Print mode: applying agent mode accept-edits
+I1110 20:19:48.112135       1 manager.go:1751] SetCycleMode called: accept-edits
+I1110 20:19:48.112135       1 printmode.go:409] Print mode: not authenticated, trying silent auth
+I1110 20:19:48.112663     128 keyring.go:64] keyringAuth: loaded token, expiry=2026-11-10 20:50:12.2367594 +0700 +07 expired=false
+I1110 20:19:48.112663       1 auth.go:157] ChainedAuth: authenticated via keyring (effective: keyring)
+I1110 20:19:48.112663       1 server_oauth.go:221] applyAuthResult: email=nguyenthieutrung@gmail.com, authMethod=consumer, quotaProject=
+I1110 20:19:48.112663       1 server_oauth.go:226] OAuth: authenticated successfully as nguyenthieutrung@gmail.com
+I1110 20:19:48.112663       1 server_oauth.go:235] b.codeAssistClient.AuthProvider (0x1fa6d7eb1680) is same as b.cliAuth (0x1fa6d7eb1680)
+W1110 20:19:48.112663     263 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+W1110 20:19:48.112663     254 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+I1110 20:19:48.694164     259 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x898af73cdb7bf0
+I1110 20:19:48.997915     259 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x4f2b9e90ed02b199
+I1110 20:19:49.009097       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1110 20:19:49.009097       1 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 20:19:49.009097       1 printmode.go:411] Print mode: silent auth succeeded
+I1110 20:19:49.009097     233 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1110 20:19:49.009097     234 experiment_manager.go:66] Starting experiment refresh after login
+I1110 20:19:49.216544     234 http_helpers.go:104] UseAICodeMendel routing switch changed: false -> true
+I1110 20:19:49.216544     234 remote_agent.go:204] Remote agent fastpush pin gate changed: false -> true
+I1110 20:19:49.216544     234 server.go:4975] [RemoteControl] Mendel flags changed (remote-control-setting-enabled=true, remote-control-proxy-server-url="jetski-webchannel.googleapis.com:443"), re-evaluating the connection
+I1110 20:19:49.218640     311 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 20:19:49.218640     311 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 20:19:49.218640     234 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 20:19:49.218640     234 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 20:19:49.218640     234 experiment_manager.go:70] Experiments refreshed after login
+I1110 20:19:49.218640     315 manager.go:1658] Reloading system slash commands
+I1110 20:19:49.440201     281 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xa715b863b5263c1a
+I1110 20:19:49.886017     281 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x8e30db2c2fdc6348
+I1110 20:19:49.968234     281 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 20:19:49.968234     233 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1110 20:19:49.968234     234 experiment_manager.go:66] Starting experiment refresh after login
+I1110 20:19:49.968743     408 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 20:19:50.009990       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1110 20:19:50.015795       1 server.go:3366] GetConversationDetail: found conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 (active=false)
+I1110 20:19:50.016328       1 session.go:163] Print mode: resuming conversation 83e21089-deb1-4b20-b2e3-66fc799d7111
+I1110 20:19:50.016328       1 conversation_manager.go:1044] Streaming conversation 83e21089-deb1-4b20-b2e3-66fc799d7111
+I1110 20:19:50.021187       1 server.go:3366] GetConversationDetail: found conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 (active=false)
+I1110 20:19:50.021723       1 server.go:1251] Starting conversation update stream for 83e21089-deb1-4b20-b2e3-66fc799d7111
+I1110 20:19:50.022791       1 session.go:201] Print mode: conversation=83e21089-deb1-4b20-b2e3-66fc799d7111, sending message
+I1110 20:19:50.022791       1 manager.go:1658] Reloading system slash commands
+I1110 20:19:50.037676     234 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 20:19:50.037676     234 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 20:19:50.037676     234 experiment_manager.go:70] Experiments refreshed after login
+I1110 20:19:50.038207     234 experiment_manager.go:66] Starting experiment refresh after login
+I1110 20:19:50.038207     442 manager.go:1658] Reloading system slash commands
+I1110 20:19:50.039269       1 manager.go:1667] Slash commands unchanged, skipping update
+I1110 20:19:50.039801     234 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 20:19:50.039801     234 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 20:19:50.039801     234 experiment_manager.go:70] Experiments refreshed after login
+I1110 20:19:50.039801     447 manager.go:1658] Reloading system slash commands
+I1110 20:19:50.059526       1 conversation_manager.go:846] Forwarding user message to conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 (items=1, media=0)
+I1110 20:19:50.059526       1 server.go:1817] Sending user message to conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 (items=1, media=0)
+I1110 20:19:50.060062     442 manager.go:1667] Slash commands unchanged, skipping update
+I1110 20:19:50.060062     447 manager.go:1667] Slash commands unchanged, skipping update
+I1110 20:19:50.070053     379 manager.go:651] Ignoring IDLE update at 270 steps; it predates the sent message (270 steps at send)
+I1110 20:19:50.070587       1 latency_breakdown.go:168] SEND_USER_CASCADE_MESSAGE_LATENCY latency breakdown: map[active_user_state_latency_ms:0 blocking:false cascade_id:83e21089-deb1-4b20-b2e3-66fc799d7111 cascade_send_latency_ms:10 hydrate_slash_commands_latency_ms:0 load_trajectory_latency_ms:0 media_count:0 media_summaries_latency_ms:0 message_origin:AGENT_MESSAGE_ORIGIN_UNSPECIFIED resolve_agent_config_latency_ms:0 save_media_latency_ms:0 saved_media_count:0 status:OK total_latency_ms:10 trajectory_id:d5c580b5-f418-4530-8d42-f9bfc2914ae7]
+I1110 20:19:50.070587     379 manager.go:651] Ignoring IDLE update at 270 steps; it predates the sent message (270 steps at send)
+I1110 20:19:50.110941     522 monitor_config_manager_external.go:53] externalMonitorConfigManager: initialized with embedded config (3 monitors)
+I1110 20:19:50.110941     522 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+I1110 20:19:50.110941     522 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+E1110 20:19:50.123392     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:19:50.124447     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:19:50.228136     233 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1110 20:19:50.384511     407 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x48e729bf3ef21115
+I1110 20:20:03.448856     850 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xd5c618954d52a3a2 ResponseID: 9hnzasCrNobzrfcPqrSd6QM
+E1110 20:20:04.204527     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:04.205586     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:07.559886     947 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2e68a7600c6fff2e ResponseID: BBrzarnoO6e_vr0P44XHwAk
+E1110 20:20:07.611807     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:07.613381     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:11.197083     994 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8846d00b80f5044d ResponseID: CBrzaobJDKLv2roP1t2woQ8
+E1110 20:20:11.295913     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:11.296972     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:16.847479    1039 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8a6ee1666317675b ResponseID: DBrzapu7A4_arfcPoKH04Qc
+E1110 20:20:16.935403     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:16.936456     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:19.948884    1113 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfe32fe3ccbdf6b1d ResponseID: ERrzatmYN9XI2roPrcb62AM
+E1110 20:20:19.998484     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:20.000057     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:23.142911    1146 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfe3567a99836571a ResponseID: FBrzapWdJMzLrfcPhP2uYA
+E1110 20:20:23.181163     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:23.182200     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:27.243839    1203 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x786cd3794b950a9d ResponseID: GBrzavTfFZ2j9tMPvqy_qQ0
+E1110 20:20:27.506095     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:27.507133     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:30.873335    1259 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x21238f5ba461dff8 ResponseID: HBrzasDAI9XI2roPrcb62AM
+E1110 20:20:30.928923     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:30.929978     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:34.226710    1305 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x91aee29a55127a8e ResponseID: Hxrzas2HMajL2roPv8jd8Qs
+E1110 20:20:34.340034     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:34.341600     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:45.064093    1361 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x7ade454f60f22956 ResponseID: IxrzapejB87Y9tMP9oXpmQk
+E1110 20:20:45.092877     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:45.093924     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:47.873726    1424 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb7b544458041fcad ResponseID: LRrzaqacK6es1e8PmILE-A8
+E1110 20:20:47.913543     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:47.914594     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:50.436076    1472 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3708109a31457444 ResponseID: MBrzarjSHZD01e8PypmfqQc
+E1110 20:20:50.470208     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:50.471254     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:20:55.596051    1516 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc33f41edd55cfe4d ResponseID: Mxrzav_OBbb_1e8PlYWroQ0
+E1110 20:20:55.688981     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:20:55.690027     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:02.320178    1547 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8daa4ddd8e8beab4 ResponseID: OBrzarq3KL_IrfcP857XoAc
+E1110 20:21:02.431631     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:02.433217     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:05.488876    1607 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xcf2400c364702604 ResponseID: Pxrzap_QB7vw2roP8sTcsAY
+E1110 20:21:05.742848     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:05.743891     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:09.257736    1638 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe285efd40c69dff7 ResponseID: QhrzavuqK73J2roPh87rqAY
+E1110 20:21:09.292105     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:09.293156     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:12.300333    1688 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x53cdfd2494ee5303 ResponseID: RhrzariGB8LnrfcPnqbgoA4
+E1110 20:21:12.349942     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:12.351535     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:17.926172    1721 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc085f38debfa083f ResponseID: SBrzavq4PIbzrfcPqrSd6QM
+E1110 20:21:32.007839     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:32.008909     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:38.409492    1814 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfba0e2aa1cb548ae ResponseID: XBrzavOlN6_t2roP_bKmwQY
+E1110 20:21:43.773866     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:43.774943     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:47.303519    1893 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8d7725ad74b3ea1b ResponseID: aBrzapucGJry2roPz6zWgAc
+E1110 20:21:47.357175     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:47.358233     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:21:50.888510    1945 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc2b860f78924a09 ResponseID: bBrzavDhDqes1e8PmILE-A8
+E1110 20:21:51.129229     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:21:51.130287     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:00.606029    2015 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x3fd4297b02575fed ResponseID: cBrzaqH6C6yU9tMP9PSmyAI
+E1110 20:22:12.586007     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:12.587592     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:15.481176    2080 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xbb8677152cf16a4a ResponseID: hRrzas-GEbjjrfcP9sHXkAM
+E1110 20:22:15.716106     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:15.717143     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:18.376491    2136 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x94cb0be0d04ae837 ResponseID: iBrzapilFMLerfcPjc-o2Q0
+E1110 20:22:18.421692     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:18.423252     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:23.990494    2185 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5f78d1dd0942e1c0 ResponseID: ixrzaqm9Bvep2roPlfiL8Qw
+E1110 20:22:24.106539     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:24.111734     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:27.109187    1078 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xfdc1d608c7997feb ResponseID: kBrzauHmMsjZ9tMP3rv-sAQ
+E1110 20:22:27.179887     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:27.181459     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:30.217828    2263 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x6530d4fcc24ccd76 ResponseID: kxrzaqqcMcfa2roP2PiZ2QU
+E1110 20:22:30.274761     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:30.275809     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:35.333262    2302 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x27c91ad2347b0870 ResponseID: lhrzatW4M87Y9tMP9oXpmQk
+E1110 20:22:35.379843     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:35.381940     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:39.458023    2375 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5a979fe232cebfcd ResponseID: nBrzauuWFLaBvr0P2Kem4AI
+E1110 20:22:39.508253     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:39.509831     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:45.365871    2400 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8327be5cfa36863f ResponseID: oBrzaor2Ctir1e8Psq-F-Qw
+E1110 20:22:47.333539     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:47.334644     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:51.914548    2451 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xebbf0ec3198757e0 ResponseID: qBrzaqrVGu_K1e8PheKC2QI
+E1110 20:22:52.012356     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:52.013938     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:22:56.370199    2514 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa2e60a3bc284a93f ResponseID: rBrzavWGKNjd9tMPrI2PkA0
+E1110 20:22:56.417045     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:22:56.418623     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:23:02.001401    2566 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xc8f6f62289e5f46e ResponseID: sRrzauW7GLvw2roP8sTcsAY
+E1110 20:23:02.240820     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:23:02.242436     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:23:09.144664    2614 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x5f9c328a9f05015b ResponseID: thrzaoeONZD01e8P86Oj4QE
+E1110 20:23:09.198365     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:23:09.199953     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:23:33.081146    2666 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x8b3f33fcd7cf5039 ResponseID: vRrzasSoNqjL2roPv8jd8Qs
+E1110 20:23:33.128962     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:23:33.130526     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:23:35.436340      29 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1110 20:23:53.695403    2735 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x864fb26464db5398 ResponseID: 1hrzasPYEZzurfcPr9-4oAg
+E1110 20:23:53.784655     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:23:53.786258     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:01.598626    2814 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xa75349eda12d47d7 ResponseID: 6hrzauriHb-x1e8P8pnHsAI
+E1110 20:24:01.704163     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:01.705726     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:05.221746    2876 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xb96190e9a44e6ee1 ResponseID: 8hrzauTnF93s1e8P2KioGA
+E1110 20:24:05.286948     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:05.288506     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:08.215319    2637 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x132a520b2528630d ResponseID: 9hrzauXfGa2k1e8PnZfm8A8
+E1110 20:24:08.279939     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:08.281530     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:10.442275      29 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+I1110 20:24:11.983544    2955 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0xe85348723909946c ResponseID: -BrzapTnOLuz9tMPwqqrwAI
+E1110 20:24:12.033539     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:12.035067     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:29.703533    2998 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2785b957510f05ad ResponseID: _BrzarzMMIbMrfcPooOW4Qs
+E1110 20:24:29.771230     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:29.772834     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:36.002617    3059 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x58abaf93d72cac1a ResponseID: Dhvzatq4LZry2roP963WgAc
+E1110 20:24:36.076091     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+E1110 20:24:36.077605     522 errorreport.go:273] serializer encountered non-tool step 269 of type CORTEX_STEP_TYPE_PLANNER_RESPONSE with unexpected status CORTEX_STEP_STATUS_CANCELED
+I1110 20:24:40.513658    3122 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x2b0837e62acf067d ResponseID: FRvzasLLBv2X9tMPoMixuQw
+I1110 20:24:40.641402     379 tool_confirmation_manager.go:221] Print mode: soft-denying tool confirmation "RunCommand" at step 357
+I1110 20:24:40.641402    2984 server.go:2729] Tool confirmation for conversation 83e21089-deb1-4b20-b2e3-66fc799d7111 step 357 (type=*gemini_coder_go_proto.Step_Generic approved=false)
+I1110 20:24:40.660682       1 manager.go:965] CLI store manager shutting down
+I1110 20:24:40.662192       1 conversation_manager.go:985] Stopping conversation stream
+I1110 20:24:40.662192     380 server.go:1314] Stream goroutine exited for 83e21089-deb1-4b20-b2e3-66fc799d7111, sending completion signal
+E1110 20:24:40.737546    2989 telemetry.go:141] error recording trajectory segment analytics: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:recordTrajectoryAnalytics": context canceled
+I1110 20:24:40.739050    3158 server.go:4046] Language server shutting down
+I1110 20:24:40.739050    3158 server.go:4068] Waiting for migrations to complete to prevent partial migration state...
+E1110 20:24:40.742746     133 file_watcher.go:194] skipping empty or temp file: 
+E1110 20:24:45.451009      29 client.go:98] Post "https://play.googleapis.com/log": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+E1110 20:24:45.739496      24 server.go:4039] Language server shutdown timed out

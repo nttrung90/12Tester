@@ -1,0 +1,16 @@
+{
+    "logName":  "fresh-targeted-verification",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T01:02:46.2184774Z",
+    "finishedUtc":  "2026-11-05T01:03:15.0524477Z",
+    "currentRunXmlCount":  3
+}

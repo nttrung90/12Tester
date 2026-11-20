@@ -1,0 +1,20 @@
+Continue SAME session/model google/antigravity-gemini-3.8-flash variant high. The first pass is NOT accepted. Read audit/carryover-fix-2026-11-05/supervisor-review-notes.md and the supervisor failure logs named there. Implement all valid findings and finish the original full plan.
+
+Run supervisor probes, do not change them:
+node audit/carryover-fix-2026-11-05/independent-acceptance.mjs
+node audit/carryover-fix-2026-11-05/legacy-classification-probes.mjs
+node audit/carryover-fix-2026-11-05/safety-probes.mjs
+
+Also run prior owner auto-pause independent regressions:
+node audit/owner-auto-pause-2026-11-05/independent-acceptance.mjs
+node audit/owner-auto-pause-2026-11-05/supervisor-edge-probes.mjs
+
+Primary verified first-draft failures: removed finalized historical getter snapshots; global financial finalization incorrectly granted to ordinary authenticated clients; private diagnostics allow UID-null clients and locked admins; legacy NULL-context reports inferred as regular; mission-like old checkins retain incorrect qualification; one unknown old source repeatedly blocks healthy users' recent finalization. The detailed fixtures and evidence are in supervisor notes/probes. Later edits may have resolved some; re-test rather than assuming.
+
+The independent mission/resume scenario now logs in the member explicitly before attempting resume, so activity passes but old debt must still reject it. The upgrade probes also verify ordinary event preservation after cascade campaign deletion and rerunning the new migration. Preserve the actual business rules and stable previous protections; do not weaken assertions, hide active migration failures behind historical caps, or delete unknown sources/zero debts as a shortcut.
+
+Complete the UI correction too, with localized debt visibility after daily completion, in member state, when waived, and pending history without false debt-free labels. Maintain appropriate authentication/session guards and member login semantics.
+
+Full npm test requires more than 120000 ms here: give the shell enough time or start an async logged run and monitor it to completion; a shell timeout is not a pass. On final sources run full SQL suite, fresh Android tests and assembleDebug. Capture JUnit counts and logs. No live deployment/commits/pushes or provider changes. Preserve before/ and historical audit evidence. Update progress.md and implementation-handover.md honestly.
+
+Known working local JDK: C:\Users\nguye\.gradle\jdks\eclipse_adoptium-25-amd64-windows.2. Set JAVA_HOME for the Gradle process. The previous task's audit/owner-auto-pause-2026-11-05/run-gradle-logged.ps1 and verify-android.ps1 show working offline/no-daemon invocations, a shared build mutex, and fresh JUnit snapshots. You can adapt this workflow to this task's log directory; no need to scan unrelated program directories or install dependencies.

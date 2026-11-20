@@ -20,7 +20,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 object FirebaseStorageHelper {
 
@@ -294,9 +296,9 @@ object FirebaseStorageHelper {
             .setContentType("image/webp")
             .setCacheControl(IMMUTABLE_CACHE_CONTROL)
             .build()
-        storageRef.putBytes(bytes, metadata).await()
-
-        storageRef.downloadUrl.await().toString()
+        val upload = storageRef.putBytes(bytes, metadata)
+        awaitIconUpload(onCancel = { upload.cancel() }) { upload.await() }
+        storageRef.awaitDownloadUrlWithRetry(maxAttempts = 2, initialDelayMs = 300L)
     }
 
     /**
@@ -462,5 +464,23 @@ object FirebaseStorageHelper {
             throw IllegalStateException("Bitmap compression failed")
         }
         return outputStream.toByteArray()
+    }
+}
+
+/** Stop the underlying SDK upload as well as the waiting coroutine. */
+internal suspend fun awaitIconUpload(
+    timeoutMs: Long = 30_000L,
+    onCancel: () -> Unit,
+    upload: suspend () -> Unit,
+) {
+    try {
+        val completed = withTimeoutOrNull(timeoutMs) { upload(); true } ?: false
+        if (!completed) {
+            onCancel()
+            throw IOException("icon_upload_timeout")
+        }
+    } catch (e: CancellationException) {
+        onCancel()
+        throw e
     }
 }

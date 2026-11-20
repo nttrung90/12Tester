@@ -1,0 +1,14 @@
+{
+  "logName": "root-review-current-policy",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T23:48:13.9335795Z",
+  "finishedUtc": "2026-11-01T23:48:35.9923902Z",
+  "currentRunXmlCount": 1
+}

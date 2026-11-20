@@ -1,0 +1,123 @@
+Bạn đang làm việc trong dự án Android Kotlin/Compose + Supabase tại F:\AI\12Tester.
+
+Hãy sửa hoàn chỉnh 4 lỗi sản phẩm còn lại và runner kiểm thử concurrency của tính năng popup thông báo riêng admin. Cần có code, test và báo cáo kiểm chứng; không chỉ viết lại kế hoạch.
+
+ĐỌC TRƯỚC KHI SỬA
+
+- Đọc AGENTS.md áp dụng nếu có, git status và source hiện tại. Workspace có nhiều thay đổi từ công việc khác; giữ nguyên chúng, không reset/checkout/revert hoặc ghi đè file bằng bản cũ.
+- Đọc toàn bộ:
+  F:\AI\12Tester\RECHECK_VONG_3_VA_KE_HOACH_SUA_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+- Đối chiếu yêu cầu gốc và bản sửa vừa làm:
+  F:\AI\12Tester\KE_HOACH_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+  F:\AI\12Tester\BAO_CAO_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_2_2026-10-30.md
+- Đọc test mới và bằng chứng:
+  app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupRound3RegressionTest.kt
+  audit/admin-popup-review-round3-2026-10-30/android-combined.log
+  audit/admin-popup-review-round3-2026-10-30/TEST-com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest.xml
+  audit/admin-popup-review-round3-2026-10-30/concurrency-runner-setup.log
+
+KẾT QUẢ HIỆN TẠI
+
+- 6 regression của vòng trước đã PASS, không cần làm lại các lỗi đã được sửa đúng.
+- Bộ Android đã có: 33 test PASS (13 popup ViewModel + 6 regression + 2 pending store + 12 localization).
+- Backend popup: 11 PGlite test PASS; assembleDebug PASS.
+- Thêm 4 regression mới thì tổng 37 Android test, 33 PASS và 4 FAIL bằng assertion hành vi.
+- Báo cáo vòng 2 đã cộng nhầm số test: trước khi thêm test vòng 3 chỉ có 33, không phải 35/37. Báo cáo lần này đọc XML thực tế.
+
+G1 — ĐÃ ĐỌC OFFLINE PHẢI CẬP NHẬT HOME/BADGE
+
+Hiện onMarkAsRead chỉ ghi pending store và đóng popup. localReadNotificationIds/event chỉ có sau khi RPC thành công. Nếu HTTP 503, Home vẫn unread dù người dùng đã xác nhận.
+
+Sửa:
+- Sau khi ghi pending bền vững thành công, cập nhật trạng thái đọc local và phát event đúng owner/generation ngay, không đợi network.
+- Không đánh dấu local nếu ghi đĩa thất bại; không hoàn tác read intent vì lỗi mạng.
+- Khi restart, lấy pending store áp lên UI/snapshot trước khi render dữ liệu cũ. Sau khi ack sync thành công và pending được xóa vẫn phải giữ read state đúng trước các fetch cũ.
+- Không dùng refresh dashboard toàn phần như điều kiện bắt buộc để cập nhật một badge/bản tin.
+
+Test: offline_popup_read_must_update_the_existing_home_list_before_server_sync.
+
+G2 — OVERLAY PHẢI ÁP CHO DASHBOARD/CACHE/SNAPSHOT
+
+Hiện overlay chỉ nằm trong getMyNotifications. getMyDashboard trả raw result; Home dùng dashboard.notifications, nên response bắt đầu trước ack và trả muộn vẫn có thể làm bản đã đọc trở lại unread. Mutation version mới chỉ chặn cache write, chưa bảo vệ dữ liệu trả caller.
+
+Sửa:
+- Dùng một quy tắc chiếu trạng thái read/delete local chung cho dashboard, query riêng, cache RAM, snapshot đĩa và publish vào Home.
+- Áp trạng thái mới nhất tại thời điểm trả/publish, không chỉ lúc bắt đầu request.
+- Giữ nguyên kiểm tra UID/generation/mutation hiện có, tránh sửa lan sang cache không liên quan.
+- Xem xét delete tombstone để response cũ không hồi sinh thông báo đã xóa.
+
+Test: a_dashboard_started_before_ack_must_not_return_unread_after_ack_succeeds.
+
+G3 — CHẶN EVENT/RESULT CŨ CỦA A TÁC ĐỘNG B
+
+Đã tái hiện: request markAllNotificationsAsRead của A bị giữ response; đổi sang B, clear cache, tải Home B; A response về thì event MarkedAllRead không scope đánh dấu toàn bộ Home B thành read. Đây là lỗi UI có bằng chứng, không được bỏ qua vì server có RLS.
+
+Sửa:
+- Chụp context owner UID + generation/operation identity trước request; gắn context vào event hoặc dùng nguồn state có scope tương đương.
+- Kiểm tra context trước khi gửi request, sau await và trước khi thay cache/local sets/emit. Home và popup consumer cũng phải bỏ event không thuộc phiên đang render.
+- markAll hiện lấy cachedNotifications sau await để thêm read IDs; không được lấy cache B cho request A. Chụp đúng tập ID/owner ở đầu hoặc quản lý read state theo owner.
+- Bao phủ read một bản, read-all, delete, ack, status check và các job sync đang chạy. Cần test A→B→A để không chỉ so UID cuối request.
+- Không chỉ dựa vào cancel job hoặc clear cache: các guard kết quả/event vẫn cần thiết.
+- Không gửi pending ack A bằng JWT B; không xóa pending A theo kết quả từ phiên B. Quản lý mọi worker sync, không chỉ giữ tham chiếu job mới nhất.
+
+Test: a_late_mark_all_read_from_user_a_must_not_mark_user_b_home_list_as_read.
+
+G4 — CLAIM TRẢ MUỘN KHÔNG ĐƯỢC MỞ BẢN TIN ĐÃ ĐỌC/XÓA
+
+Đã tái hiện: claim N đang bay; repo.markNotificationAsRead(N) thành công lúc popup còn Idle; event bị subscriber bỏ qua vì chưa Active; response claim cũ về vẫn chuyển Showing/Held vì chỉ kiểm tra pending ack store. N đã đọc có thể bật popup lại.
+
+Sửa:
+- Read/delete mutation phải được ghi nhớ đúng owner/generation dù popup đang Idle.
+- Khi nhận candidate claim, đối chiếu trạng thái mới nhất của chính candidate trước khi giữ/trình bày. Dùng read/delete tombstone/mutation state chung; có thể revalidate bằng status RPC nhẹ khi cần, không gọi lại dashboard nặng.
+- Recheck khi Held→Showing, vì N có thể bị đọc/xóa trong lúc chờ blocker.
+- Nếu bản tin đã read/deleted, dừng trình bày và giữ đúng semantics receipt: không hoàn lượt hoặc claim lại lượt khác trong cùng phiên để chữa stale response.
+- Bao phủ read từ danh sách, read-all, delete và ack, không chỉ pending ack offline.
+
+Test: a_late_claim_must_not_show_a_notification_already_read_from_the_list.
+
+T1 — SỬA RUNNER CONCURRENCY ĐỂ CHẠY ĐƯỢC
+
+File supabase/tests/run-admin-popup-concurrency-test.mjs đang:
+- SET ROLE authenticated với user admin rồi SELECT notification của target: RLS trả 0 dòng nên notifRow.id lỗi.
+- UPDATE notification_popup_states vẫn bằng authenticated: permission denied đúng thiết kế.
+- Chưa khai báo dependency pg; chưa tạo fixture cô lập; user/session ID cố định, không cleanup; fallback DATABASE_URL có thể trỏ nhầm môi trường.
+
+Probe local đã xác minh hai lỗi quyền:
+node audit/admin-popup-review-round3-2026-10-30/verify-concurrency-runner-setup.mjs
+
+Sửa runner:
+- Chỉ chấp nhận TEST_DATABASE_URL cho database test được cấu hình rõ ràng, không fallback DATABASE_URL; không tự dùng production.
+- Setup/fast-forward count/đối soát/cleanup bằng kết nối quản trị phù hợp của DB test. Thao tác claim và kiểm tra quyền vẫn chạy bằng đúng role authenticated/user cần kiểm chứng.
+- Không grant thêm quyền sản phẩm để chiều runner.
+- Dùng user/notification/session ID riêng cho mỗi lần chạy, seed đúng role/profile theo schema thật, target không có thông báo cũ đủ điều kiện; truy vấn chính xác ID của lần chạy này.
+- Cleanup trong finally kể cả lỗi; rollback setup khi thất bại. Khai báo dependency và script chạy tái lập từ checkout sạch. Không tự tạo một DB production clone hoặc sửa dữ liệu có sẵn của người dùng.
+- Test setup bằng fixture local sẵn có. Nếu chưa có PostgreSQL nhiều connection để chạy thì báo rõ chưa chạy concurrency thật, không biến skip thành PASS.
+
+GIỮ NGUYÊN CÁC YÊU CẦU ĐÃ ĐÚNG
+
+- Tận dụng luồng admin hiện có; gửi riêng mọi loại đều được hỗ trợ, broadcast không popup, không backfill lịch sử cũ.
+- Tối đa 5 lượt server mỗi bản tin/người nhận, chung giữa thiết bị; một popup mỗi phiên foreground. Lượt thứ 5 vẫn hiện đầy đủ; hết lượt không tự đọc hoặc xóa bản tin.
+- Xoay máy/recompose/đổi màn hình không đếm thêm; carried popup qua background/resume không claim lại; Để sau không mở lại trong cùng phiên.
+- Blocker giữ cùng lượt đã claim, không đè dialog ưu tiên; Đã đọc offline bền qua restart, sync độc lập với consumed session.
+- Giữ nguyên nội dung admin, VI/EN/default, sáng/tối và nội dung cuộn được.
+- Không mở quyền ghi popup state/receipt cho client; không dùng metadata admin giả làm bằng chứng.
+
+KIỂM THỬ VÀ BÀN GIAO
+
+1. Sửa source để 4 regression vòng 3 xanh; giữ 33 test hiện có xanh. Không xóa/disable/giảm assertion để chấp nhận lỗi. Nếu thay kiến trúc, giữ phép kiểm chứng hành vi tương đương.
+2. Thêm test tích hợp Home refresh/snapshot và popup in-flight cho read-all/delete, A→B→A, late status result, Held→Showing sau read/delete. Dùng barrier/deferred để điều khiển thứ tự, tránh sleep ngẫu nhiên.
+3. Chạy backend popup, build và test liên quan. Phân biệt compile failure, assertion failure, skipped test và lỗi môi trường.
+
+Lệnh tham khảo từ root:
+
+node supabase/tests/run-admin-direct-notification-popup-test.mjs
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+.\gradlew.bat testDebugUnitTest --tests 'com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest' --tests 'com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest' --tests 'com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest' --tests 'com.ntt.crosstest.data.NotificationPendingAckStoreTest' --tests 'com.ntt.crosstest.localization.LocalizationHardeningTest' assembleDebug
+
+4. Không cần migration chỉ để đủ hình thức nếu chỉ sửa Android/runner. Nếu có SQL sản phẩm thay đổi, tạo migration tiếp nối tương thích, không chỉ sửa lịch sử 067 đã có thể được áp dụng.
+5. Không tự migrate/deploy production, phát hành APK, commit hoặc push.
+6. Tạo báo cáo:
+   F:\AI\12Tester\BAO_CAO_SUA_POPUP_THONG_BAO_RIENG_ADMIN_VONG_3_2026-10-30.md
+7. Báo cáo nêu từng G1–G4/T1: nguyên nhân, file sửa, test chứng minh; lệnh và số test từ XML thực tế; giới hạn UI/thiết bị/concurrency/live chưa xác minh. Không tự gọi ViewModel/store tests là render Compose tests hoặc khẳng định concurrency production đã PASS khi chỉ chạy PGlite.
+
+BẮT ĐẦU: đọc toàn bộ tài liệu recheck vòng 3 và source, rồi triển khai đến khi có bản sửa, kiểm thử và báo cáo cụ thể.

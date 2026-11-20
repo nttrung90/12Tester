@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-13T19:08:05.204Z",
+  "originalSha256": "14138a54f81f306cc56aadee5bbc48945f9083ab10219303f8658e0e8d1174fd",
+  "migration090Sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e",
+  "changedCodes": 4,
+  "changes": [
+    "relative file/import URLs",
+    "four legacy generic error checks use exact canonical debt/unmet error; all other assertions preserved"
+  ],
+  "pass": true
+}

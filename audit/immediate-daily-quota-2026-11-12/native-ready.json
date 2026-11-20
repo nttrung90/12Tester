@@ -1,0 +1,7 @@
+{
+  "directory": "F:/AI/12Tester/audit/immediate-daily-quota-2026-11-12/pg-data",
+  "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "timezone": "UTC",
+  "connection": "postgresql://quota_test_admin@127.0.0.1:55446/immediate_quota_test",
+  "checkedAt": "2026-11-11T23:31:55.934Z"
+}

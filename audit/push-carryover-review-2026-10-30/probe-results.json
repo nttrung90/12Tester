@@ -1,0 +1,37 @@
+[
+  {
+    "name": "history_manual_pause_must_not_rewrite_past_owner_day",
+    "passed": true,
+    "before": {
+      "mode": "member",
+      "k": 0
+    },
+    "after": {
+      "mode": "member",
+      "k": 0,
+      "history_ready": false
+    }
+  },
+  {
+    "name": "disabled_policy_must_preserve_existing_debt",
+    "passed": true,
+    "row": {
+      "carry_in_tests": 8,
+      "carry_out_tests": 8,
+      "carryover_version": null,
+      "sealed": true
+    },
+    "expectedCarryOut": 8
+  },
+  {
+    "name": "new_retroactive_policy_must_be_rejected",
+    "passed": true,
+    "error": "CANNOT_MODIFY_HISTORICAL_POLICY: Chinh sach phai duoc len lich tu ngay tuong lai (sau ngay hien tai)"
+  },
+  {
+    "name": "pending_source_does_not_seal_or_penalize",
+    "passed": true,
+    "row": null,
+    "credits": 1000
+  }
+]

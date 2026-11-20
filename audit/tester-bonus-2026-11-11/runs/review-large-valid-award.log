@@ -1,0 +1,1 @@
+{"error":"integer out of range","code":"22003","where":"PL/pgSQL function _impl_approve_tester_report(uuid,integer) line 162 at RETURN\nPL/pgSQL function approve_tester_report(uuid,integer) line 16 at assignment"}

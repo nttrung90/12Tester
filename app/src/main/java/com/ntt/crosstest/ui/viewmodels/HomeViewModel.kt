@@ -26,8 +26,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 import com.ntt.crosstest.data.CachedSessionData
+import com.ntt.crosstest.data.DailyTaskChangeEvent
+import com.ntt.crosstest.data.EgressTriggerSource
 import com.ntt.crosstest.data.CampaignStats
 import com.ntt.crosstest.data.DailyTaskStatus
+import com.ntt.crosstest.data.NotificationEvent
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.UserNotification
 import com.ntt.crosstest.data.UserWarning
@@ -72,11 +75,15 @@ private fun vnToday(): String =
  * Chỉ dùng trạng thái của đúng ngày VN hiện tại. Member đang mở app nghĩa là
  * đã đăng nhập, kể cả khi RPC trả về chậm hơn thao tác ghi nhận.
  */
-private fun DailyTaskStatus?.forCurrentUi(): DailyTaskStatus? {
+internal fun DailyTaskStatus?.forCurrentUi(expectedDate: String = vnToday()): DailyTaskStatus? {
     val task = this ?: return null
-    if (task.statusDate != null && task.statusDate != vnToday()) return null
+    if (task.statusDate != null && task.statusDate != expectedDate) return null
     return if (task.isMember && !task.loggedInToday) {
-        task.copy(loggedInToday = true, met = true)
+        task.copy(
+            loggedInToday = true,
+            met = true,
+            rawMet = if (task.rawMet != null) true else null,
+        )
     } else {
         task
     }
@@ -103,6 +110,8 @@ data class HomeUiState(
     /** Bảng xếp hạng theo tổng lượt test (sub-tab "Top Test"). */
     val testLeaderboard: List<LeaderboardUser> = emptyList(),
     val isTestLeaderboardLoading: Boolean = false,
+    /** Hạng của người dùng hiện tại theo bảng Top Test (thẻ ghim trong sub-tab "Top Test"). */
+    val testMyRank: MyRank? = null,
     val query: String = "",
     val error: String? = null,
     val todayCheckinCount: Int = 0,
@@ -110,6 +119,9 @@ data class HomeUiState(
     val missedStreak: Int = 0,
     /** Nhiệm vụ ngày mới; null khi server chưa deploy migration 036. */
     val dailyTask: DailyTaskStatus? = null,
+    /** Đang chờ làm mới lại nhiệm vụ ngày sau khi thay đổi campaign (lỗi mạng tạm thời hoặc stale payload). */
+    val isDailyTaskPendingRefresh: Boolean = false,
+    val isDailyTaskError: Boolean = false,
     /** true khi lần tải lịch sử Credit gần nhất thất bại (mạng lỗi) — dialog báo tải lại. */
     val creditLogsLoadFailed: Boolean = false,
     val userProfile: Profile? = null,
@@ -144,6 +156,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val refreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
+    private val dailyTaskRequestSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val missionRefreshSequence = java.util.concurrent.atomic.AtomicLong(0L)
     private val missionMutationVersion = java.util.concurrent.atomic.AtomicLong(0L)
     private val staleFeedRetryCount = java.util.concurrent.atomic.AtomicInteger(0)
@@ -197,6 +210,7 @@ class HomeViewModel(
                     todayCheckinCount = cached.todayCheckinCount,
                     missedStreak = cached.missedStreak,
                     dailyTask = cached.dailyTask.forCurrentUi(),
+                    isDailyTaskPendingRefresh = cached.isDailyTaskPendingRefresh,
                     userProfile = cached.userProfile,
                     pendingReportsCount = cached.pendingReportsCount,
                     notifications = cached.notifications,
@@ -284,6 +298,8 @@ class HomeViewModel(
     init {
         val initUid = repository.currentUserId()
         val initGen = SessionCacheManager.currentGeneration()
+        val initDailyTaskVersion = SessionCacheManager.currentDailyTaskVersion()
+        val initBusinessDay = repository.businessDay().toString()
         if (_uiState.value.openCampaigns.isEmpty() && context != null) {
             viewModelScope.launch(Dispatchers.IO) {
                 val loaded = SessionCacheManager.loadSync(context)
@@ -294,8 +310,18 @@ class HomeViewModel(
                     val sortedDisplay = DailyHomeOrder.sortOpenCampaigns(loaded.displayItems, todayStr)
                     val sortedPaused = DailyHomeOrder.sortOtherCampaigns(loaded.pausedDisplayItems, todayStr)
                     val sortedCompleted = DailyHomeOrder.sortOtherCampaigns(loaded.completedDisplayItems, todayStr)
+                    val notifs = loaded.notifications.map {
+                        if (curUid != null && repository.isNotificationLocallyRead(curUid, it.id)) it.copy(isRead = true) else it
+                    }
                     _uiState.update { current ->
                         if (current.openCampaigns.isEmpty() && SessionCacheManager.currentGeneration() == initGen && repository.currentUserId() == initUid) {
+                            val preserveCurrentTask = SessionCacheManager.currentDailyTaskVersion() != initDailyTaskVersion ||
+                                repository.businessDay().toString() != initBusinessDay ||
+                                current.dailyTask != null
+                            val targetDailyTask = if (preserveCurrentTask) current.dailyTask else loaded.dailyTask?.forCurrentUi(todayStr)
+                            val targetMissedStreak = if (preserveCurrentTask) current.missedStreak else loaded.missedStreak
+                            val targetIsPendingRefresh = if (preserveCurrentTask) current.isDailyTaskPendingRefresh else loaded.isDailyTaskPendingRefresh
+
                             current.copy(
                                 isLoading = false,
                                 isBackgroundSyncing = true,
@@ -312,12 +338,13 @@ class HomeViewModel(
                                 ownerStatsMap = loaded.ownerStatsMap,
                                 userCredits = loaded.userCredits,
                                 todayCheckinCount = loaded.todayCheckinCount,
-                                missedStreak = loaded.missedStreak,
-                                dailyTask = loaded.dailyTask,
+                                missedStreak = targetMissedStreak,
+                                dailyTask = targetDailyTask,
+                                isDailyTaskPendingRefresh = targetIsPendingRefresh,
                                 userProfile = loaded.userProfile,
                                 pendingReportsCount = loaded.pendingReportsCount,
-                                notifications = loaded.notifications,
-                                unreadNotificationsCount = loaded.unreadNotificationsCount,
+                                notifications = notifs,
+                                unreadNotificationsCount = notifs.count { !it.isRead },
                                 questSummary = loaded.questSummary,
                             )
                         } else current
@@ -325,10 +352,60 @@ class HomeViewModel(
                 }
             }
         }
-        refresh(context = context, forceRefresh = false)
+        refresh(context = context, forceRefresh = false, triggerSource = EgressTriggerSource.COLD_START)
         observeSession()
         observeSubmittedReports()
+        observeNotificationEvents()
+        observeDailyTaskEvents()
+        observeInstalledPackages()
         scheduleMidnightRefresh()
+    }
+
+    private fun observeInstalledPackages() {
+        val appContext = context ?: return
+        viewModelScope.launch {
+            InstalledAppCache.versionFlow.collect {
+                recomputeInstalledFlags(appContext)
+            }
+        }
+    }
+
+    fun refreshInstalledStatus(context: android.content.Context? = null) {
+        val appContext = context ?: this.context ?: return
+        InstalledAppCache.invalidateFreshness()
+        viewModelScope.launch(Dispatchers.IO) {
+            InstalledAppCache.refreshPackages(appContext)
+            recomputeInstalledFlags(appContext)
+        }
+    }
+
+    private suspend fun recomputeInstalledFlags(appContext: android.content.Context) {
+        val stateSnapshot = _uiState.value
+        val allPackages = buildSet {
+            stateSnapshot.displayItems.forEach { add(it.campaign.packageName) }
+            stateSnapshot.pausedDisplayItems.forEach { add(it.campaign.packageName) }
+            stateSnapshot.completedDisplayItems.forEach { add(it.campaign.packageName) }
+            stateSnapshot.searchResults?.forEach { add(it.campaign.packageName) }
+        }.filter { it.isNotBlank() }
+        if (allPackages.isEmpty()) return
+
+        val installFlags = withContext(Dispatchers.IO) {
+            allPackages.associateWith { pkg -> InstalledAppCache.isInstalled(appContext, pkg) }
+        }
+
+        fun List<CampaignDisplayItem>.applyInstallFlags(): List<CampaignDisplayItem> = map { item ->
+            val installed = installFlags[item.campaign.packageName] ?: item.isInstalledLocally
+            if (item.isInstalledLocally == installed) item else item.copy(isInstalledLocally = installed)
+        }
+
+        _uiState.update { current ->
+            current.copy(
+                displayItems = current.displayItems.applyInstallFlags(),
+                pausedDisplayItems = current.pausedDisplayItems.applyInstallFlags(),
+                completedDisplayItems = current.completedDisplayItems.applyInstallFlags(),
+                searchResults = current.searchResults?.applyInstallFlags(),
+            )
+        }
     }
 
     /**
@@ -345,8 +422,101 @@ class HomeViewModel(
                     event.campaignId.isNotBlank() &&
                     repository.isAuthenticated()
                 ) {
-                    markCampaignTestedToday(event.campaignId)
-                    refresh(forceRefresh = true)
+                    if (!event.isMissionReport) {
+                        markCampaignTestedToday(event.campaignId)
+                        triggerDailyTaskReloadAfterReport()
+                    }
+                    refresh(forceRefresh = true, triggerSource = EgressTriggerSource.MUTATION)
+                }
+            }
+        }
+    }
+
+    fun triggerDailyTaskReloadAfterReport() {
+        if (repository.currentUserId() == null) return
+        repository.invalidateDailyTaskDashboardCache()
+        repository.bumpMutationVersion("daily_task")
+        retryDailyTask()
+    }
+
+    private fun observeNotificationEvents() {
+        viewModelScope.launch {
+            repository.notificationEvents.collect { event ->
+                val currentUid = repository.currentUserId()
+                val currentGen = SessionCacheManager.currentGeneration()
+                if (event.ownerId != currentUid || event.generation != currentGen) {
+                    return@collect
+                }
+                _uiState.update { state ->
+                    when (event) {
+                        is NotificationEvent.MarkedRead -> {
+                            val updated = state.notifications.map {
+                                if (it.id == event.id) it.copy(isRead = true) else it
+                            }
+                            state.copy(
+                                notifications = updated,
+                                unreadNotificationsCount = updated.count { !it.isRead },
+                            )
+                        }
+                        is NotificationEvent.MarkedAllRead -> {
+                            val updated = state.notifications.map { it.copy(isRead = true) }
+                            state.copy(
+                                notifications = updated,
+                                unreadNotificationsCount = 0,
+                            )
+                        }
+                        is NotificationEvent.Deleted -> {
+                            val updated = state.notifications.filterNot { it.id == event.id }
+                            state.copy(
+                                notifications = updated,
+                                unreadNotificationsCount = updated.count { !it.isRead },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeDailyTaskEvents() {
+        viewModelScope.launch {
+            repository.dailyTaskEvents.collect { event ->
+                val currentUid = repository.currentUserId()
+                val currentGen = SessionCacheManager.currentGeneration()
+                val currentDay = repository.businessDay().toString()
+                val currentMutVer = repository.getMutationVersion("daily_task")
+                when (event) {
+                    is DailyTaskChangeEvent.Updated -> {
+                        if (event.ownerId == currentUid &&
+                            event.generation == currentGen &&
+                            event.businessDate == currentDay &&
+                            event.mutationVersion == currentMutVer
+                        ) {
+                            val owner = DailyTaskRequestOwner(event.ownerId, event.generation, event.businessDate, event.mutationVersion)
+                            if (publishDailyTaskSnapshot(owner, dailyTaskRequestSequence.incrementAndGet(), event.status)) {
+                                stopDailyTaskRetry()
+                            }
+                        }
+                    }
+                    is DailyTaskChangeEvent.StalePending -> {
+                        if (event.ownerId == currentUid &&
+                            event.generation == currentGen &&
+                            event.businessDate == currentDay &&
+                            event.mutationVersion == currentMutVer
+                        ) {
+                            repository.invalidateDailyTaskDashboardCache()
+                            _uiState.update { it.copy(isDailyTaskPendingRefresh = true, isDailyTaskError = false) }
+                            if (event.triggerSource != "stale_pending_retry") {
+                                scheduleDailyTaskRetry(
+                                    targetUid = event.ownerId,
+                                    targetGen = event.generation,
+                                    targetDay = event.businessDate,
+                                    targetMutation = event.mutationVersion
+                                )
+                            }
+                            checkAndSchedulePendingCarryoverRetry(_uiState.value.dailyTask)
+                        }
+                    }
                 }
             }
         }
@@ -383,6 +553,7 @@ class HomeViewModel(
                         val uid = repository.currentUserId()
                         if (uid != null && uid != lastSyncedUid) {
                             stopPendingCarryoverRetry()
+                            stopDailyTaskRetry()
                             refreshWhenSessionReady = false
                             refresh(forceRefresh = false)
                         } else if (uid != null && refreshWhenSessionReady) {
@@ -394,6 +565,7 @@ class HomeViewModel(
                     }
                     is SessionStatus.NotAuthenticated -> {
                         stopPendingCarryoverRetry()
+                        stopDailyTaskRetry()
                         refreshWhenSessionReady = false
                         val ctx = context
                         val hadSnapshot = ctx != null && SessionCacheManager.hasCachedSession(ctx)
@@ -455,16 +627,25 @@ class HomeViewModel(
         viewModelScope.launch { repository.syncCampaignLifecycle() }
     }
 
-    private companion object {
+    internal companion object {
         const val LIFECYCLE_SYNC_THROTTLE_MS = 60 * 60 * 1000L
+        val PENDING_CARRYOVER_BACKOFF_MS = longArrayOf(
+            5_000L, 10_000L, 20_000L, 30_000L, 30_000L, 30_000L,
+            60_000L, 60_000L, 60_000L, 60_000L, 60_000L, 60_000L, 60_000L
+        )
     }
 
-    fun refresh(context: android.content.Context? = null, forceRefresh: Boolean = false) {
+    fun refresh(
+        context: android.content.Context? = null,
+        forceRefresh: Boolean = false,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
+    ) {
         val appContext = context ?: this.context
         val seq = refreshSequence.incrementAndGet()
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
         val initialDay = repository.businessDay()
+        val initialDailyTaskVersion = SessionCacheManager.currentDailyTaskVersion()
         viewModelScope.launch {
             val isOnline = appContext?.let { NetworkMonitor.isOnline(it) } ?: true
             _uiState.update { it.copy(isOffline = !isOnline) }
@@ -477,6 +658,8 @@ class HomeViewModel(
             if (isAccountSwitch) {
                 renderedUserId = initialUid
                 lastSyncedUid = null
+                stopDailyTaskRetry()
+                stopPendingCarryoverRetry()
                 _uiState.update {
                     val clearedOpen = it.displayItems.map { d -> d.copy(hasTestedToday = false) }
                     val clearedPaused = it.pausedDisplayItems.map { d -> d.copy(hasTestedToday = false) }
@@ -497,6 +680,8 @@ class HomeViewModel(
                         todayCheckinCount = 0,
                         questSummary = null,
                         dailyTask = null,
+                        isDailyTaskPendingRefresh = false,
+                        isDailyTaskError = false,
                         creditLogs = emptyList(),
                         openCampaigns = sortedOpen.map { d -> d.campaign },
                         displayItems = sortedOpen,
@@ -516,6 +701,8 @@ class HomeViewModel(
             val stateOrderDate = _uiState.value.homeOrderDate
             val isCalendarDayChanged = stateOrderDate != null && stateOrderDate != currentDayStr
             if (isCalendarDayChanged) {
+                stopDailyTaskRetry()
+                stopPendingCarryoverRetry()
                 _uiState.update { state ->
                     val sanitizedOpen = state.displayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
                     val sanitizedPaused = state.pausedDisplayItems.map { it.copy(hasTestedToday = false, todayTestedCount = 0, homeTestedCount = null, statsDate = null) }
@@ -537,6 +724,8 @@ class HomeViewModel(
                         searchResults = sanitizedSearch,
                         todayCheckinCount = 0,
                         dailyTask = null,
+                        isDailyTaskPendingRefresh = false,
+                        isDailyTaskError = false,
                         questSummary = state.questSummary?.copy(dailyCount = 0),
                         ownerStatsMap = state.ownerStatsMap.mapValues { (_, s) -> s.copy(testedTodayCount = 0) },
                         joinedStatsMap = sanitizedJoined,
@@ -565,7 +754,7 @@ class HomeViewModel(
                 _uiState.value.pausedDisplayItems.isNotEmpty() ||
                 _uiState.value.completedDisplayItems.isNotEmpty()
 
-            if (!isOnline && hasContent) {
+            if (!isOnline && hasContent && !forceRefresh) {
                 _uiState.update { it.copy(isLoading = false, isBackgroundSyncing = false) }
                 return@launch
             }
@@ -592,10 +781,11 @@ class HomeViewModel(
                 if (isAuthed) ensureDailyLoginRecorded(appContext)
 
                 // Fast path: 2 RPC gộp chạy SONG SONG (get_home_feed + get_my_dashboard) thay cho ~25 round-trip.
+                val dashForceRefresh = forceRefresh || _uiState.value.isDailyTaskPendingRefresh
                 val (feed, dashboard) = if (isAuthed) {
                     coroutineScope {
-                        val feedDeferred = async { repository.getHomeFeed(forceRefresh = forceRefresh) }
-                        val dashDeferred = async { repository.getMyDashboard(forceRefresh = forceRefresh) }
+                        val feedDeferred = async { repository.getHomeFeed(forceRefresh = forceRefresh, triggerSource = triggerSource) }
+                        val dashDeferred = async { repository.getMyDashboard(forceRefresh = dashForceRefresh, triggerSource = triggerSource) }
                         Pair(feedDeferred.await(), dashDeferred.await())
                     }
                 } else {
@@ -658,6 +848,7 @@ class HomeViewModel(
                     (open + paused + completed).distinctBy { it.packageName }
                         .associate { it.packageName to InstalledAppCache.isInstalled(appContext, it.packageName) }
                 } else emptyMap()
+                val installCacheVersion = InstalledAppCache.version.get()
 
                 fun toDisplayItem(c: Campaign): CampaignDisplayItem {
                     val stats = statsMap[c.id] ?: CampaignStats()
@@ -686,7 +877,7 @@ class HomeViewModel(
                         leaderboard = dashboard.leaderboard,
                         todayCheckins = dashboard.todayCheckinCount,
                         myProfile = dashboard.profile,
-                        dailyTask = dashboard.dailyTask.forCurrentUi(),
+                        dailyTask = verifiedDailyTask(dashboard.dailyTask, initialDay.toString()),
                         pendingReports = dashboard.pendingReportsCount,
                         unreadWarnings = dashboard.unreadWarnings,
                         weeklyWarnings = dashboard.weeklyWarningsCount,
@@ -722,7 +913,7 @@ class HomeViewModel(
                             },
                             todayCheckins = todayDeferred.await(),
                             myProfile = profileDeferred.await(),
-                            dailyTask = dailyDeferred.await().forCurrentUi(),
+                            dailyTask = verifiedDailyTask(dailyDeferred.await(), initialDay.toString()),
                             pendingReports = pendingDeferred.await(),
                             unreadWarnings = warningsDeferred.await(),
                             weeklyWarnings = weeklyDeferred.await(),
@@ -805,15 +996,23 @@ class HomeViewModel(
                 val finalDisplayList = DailyHomeOrder.sortOpenCampaigns(sanitizedDisplayList, currentBusinessDay)
                 val finalPausedList = DailyHomeOrder.sortOtherCampaigns(sanitizedPausedList, currentBusinessDay)
                 val finalCompletedList = DailyHomeOrder.sortOtherCampaigns(sanitizedCompletedList, currentBusinessDay)
+                val isDailyTaskStale = SessionCacheManager.currentDailyTaskVersion() != initialDailyTaskVersion
                 val finalTodayCheckins = if (isDayRollover) 0 else personal.todayCheckins
-                val finalDailyTask = if (isDayRollover) null else personal.dailyTask
+                val finalDailyTask = if (isDayRollover) null else if (isDailyTaskStale) _uiState.value.dailyTask else (personal.dailyTask ?: _uiState.value.dailyTask)
+                val finalMissedStreak = if (isDailyTaskStale) (_uiState.value.dailyTask?.missedStreak ?: _uiState.value.missedStreak) else (finalDailyTask?.missedStreak ?: myProfile?.effectiveMissedStreak ?: 0)
+                val finalIsPending = if (isDayRollover) false else if (isDailyTaskStale || personal.dailyTask == null) _uiState.value.isDailyTaskPendingRefresh else false
+                val finalIsError = if (isDailyTaskStale) _uiState.value.isDailyTaskError else isAuthed && personal.dailyTask == null
                 val finalQuestSummary = if (isDayRollover) personal.quests?.copy(dailyCount = 0) else personal.quests
                 val finalOwnerStats = if (isDayRollover) ownerStats.mapValues { (_, s) -> s.copy(testedTodayCount = 0) } else ownerStats
 
+                if (!isDayRollover && !isDailyTaskStale && personal.dailyTask != null) {
+                    stopDailyTaskRetry()
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isBackgroundSyncing = false,
+                        isOffline = false,
                         isAuthenticated = isAuthed,
                         openCampaigns = finalDisplayList.map { d -> d.campaign },
                         displayItems = finalDisplayList,
@@ -827,9 +1026,10 @@ class HomeViewModel(
                         myRank = personal.myRank ?: it.myRank,
                         todayCheckinCount = finalTodayCheckins,
                         userCredits = myProfile?.credits ?: it.userCredits,
-                        missedStreak = finalDailyTask?.missedStreak
-                            ?: myProfile?.effectiveMissedStreak ?: 0,
+                        missedStreak = finalMissedStreak,
                         dailyTask = finalDailyTask,
+                        isDailyTaskPendingRefresh = finalIsPending,
+                        isDailyTaskError = finalIsError,
                         userProfile = myProfile,
                         pendingReportsCount = personal.pendingReports,
                         ownerStatsMap = finalOwnerStats,
@@ -846,9 +1046,22 @@ class HomeViewModel(
                         error = null,
                     )
                 }
-                checkAndSchedulePendingCarryoverRetry(finalDailyTask)
+                if (isDayRollover) {
+                    stopDailyTaskRetry()
+                    stopPendingCarryoverRetry()
+                } else {
+                    if (isAuthed && finalIsPending && dailyTaskRetryJob?.isActive != true) {
+                        currentDailyTaskOwner()?.let { owner ->
+                            scheduleDailyTaskRetry(owner.uid, owner.generation, owner.day, owner.mutation, immediate = false)
+                        }
+                    }
+                    checkAndSchedulePendingCarryoverRetry(finalDailyTask)
+                }
                 renderedUserId = initialUid
                 lastSyncedUid = initialUid
+                if (appContext != null && InstalledAppCache.version.get() != installCacheVersion) {
+                    recomputeInstalledFlags(appContext)
+                }
 
                 // Persist fresh session snapshot to disk
                 if (appContext != null) {
@@ -865,9 +1078,10 @@ class HomeViewModel(
                         ownerStatsMap = finalOwnerStats,
                         userCredits = myProfile?.credits ?: _uiState.value.userCredits,
                         todayCheckinCount = finalTodayCheckins,
-                        missedStreak = finalDailyTask?.missedStreak
-                            ?: myProfile?.effectiveMissedStreak ?: 0,
+                        missedStreak = finalMissedStreak,
                         dailyTask = finalDailyTask,
+                        isDailyTaskPendingRefresh = finalIsPending,
+                        dailyTaskMutationVersion = if (isDailyTaskStale) SessionCacheManager.currentDailyTaskVersion() else initialDailyTaskVersion,
                         pendingReportsCount = personal.pendingReports,
                         notifications = notifs,
                         unreadNotificationsCount = unreadNotifsCount,
@@ -947,6 +1161,8 @@ class HomeViewModel(
                             todayCheckinCount = 0,
                             questSummary = null,
                             dailyTask = null,
+                            isDailyTaskPendingRefresh = false,
+                            isDailyTaskError = false,
                             creditLogs = emptyList(),
                             openCampaigns = sortedDisplay.map { d -> d.campaign },
                             displayItems = sortedDisplay,
@@ -977,6 +1193,8 @@ class HomeViewModel(
                             homeOrderDate = currentBusinessDay,
                             todayCheckinCount = if (isDayRollover) 0 else it.todayCheckinCount,
                             dailyTask = if (isDayRollover) null else it.dailyTask,
+                            isDailyTaskPendingRefresh = if (isDayRollover) false else it.isDailyTaskPendingRefresh,
+                            isDailyTaskError = if (isDayRollover) false else it.isDailyTaskError,
                             questSummary = if (isDayRollover) it.questSummary?.copy(dailyCount = 0) else it.questSummary,
                             ownerStatsMap = if (isDayRollover) it.ownerStatsMap.mapValues { (_, s) -> s.copy(testedTodayCount = 0) } else it.ownerStatsMap,
                             joinedStatsMap = if (isDayRollover) it.joinedStatsMap.mapValues { (_, s) -> s.copy(homeTestedCount = null, statsDate = null, hasTestedToday = false, todayTestedCount = 0) } else it.joinedStatsMap,
@@ -985,6 +1203,17 @@ class HomeViewModel(
                             error = if (it.displayItems.isEmpty() && it.pausedDisplayItems.isEmpty() && it.completedDisplayItems.isEmpty()) friendlyError(e, localizer) else null
                         )
                     }
+                }
+                if (isAccountSwitch || isDayRollover) {
+                    stopDailyTaskRetry()
+                    stopPendingCarryoverRetry()
+                } else if (repository.isAuthenticated()) {
+                    if (_uiState.value.isDailyTaskPendingRefresh && dailyTaskRetryJob?.isActive != true) {
+                        currentDailyTaskOwner()?.let { owner ->
+                            scheduleDailyTaskRetry(owner.uid, owner.generation, owner.day, owner.mutation, immediate = false)
+                        }
+                    }
+                    checkAndSchedulePendingCarryoverRetry(_uiState.value.dailyTask)
                 }
                 if (_uiState.value.query.isNotBlank()) {
                     runSearch(_uiState.value.query)
@@ -1034,8 +1263,23 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isTestLeaderboardLoading = true) }
             try {
-                val topUsers = repository.getLeaderboard(sort = "test", forceRefresh = forceRefresh)
-                _uiState.update { it.copy(isTestLeaderboardLoading = false, testLeaderboard = topUsers) }
+                coroutineScope {
+                    val topDeferred = async { repository.getLeaderboard(sort = "test", forceRefresh = forceRefresh) }
+                    val myRankDeferred = async { repository.getMyRank(sort = "test", forceRefresh = forceRefresh) }
+                    val topUsers = topDeferred.await()
+                    val myRank = try {
+                        myRankDeferred.await()
+                    } catch (_: Exception) {
+                        null
+                    }
+                    _uiState.update {
+                        it.copy(
+                            isTestLeaderboardLoading = false,
+                            testLeaderboard = topUsers,
+                            testMyRank = myRank,
+                        )
+                    }
+                }
             } catch (_: Exception) {
                 _uiState.update { it.copy(isTestLeaderboardLoading = false) }
             }
@@ -1166,7 +1410,7 @@ class HomeViewModel(
                 val isGranted = res.status.equals("success", ignoreCase = true) ||
                     res.status.equals("already_processed", ignoreCase = true)
                 if (!isGranted) {
-                    onResult(false, res.message.ifBlank { localizer.get(R.string.home_daily_reward_failed) })
+                    onResult(false, localizer.get(R.string.home_daily_reward_failed))
                     return@launch
                 }
                 val amount = res.creditsAwarded.takeIf { it > 0 } ?: pkg.totalCredits
@@ -1185,7 +1429,7 @@ class HomeViewModel(
                     )
                 }
                 refresh()
-                val msg = if (res.message.isNotBlank()) res.message else localizer.get(R.string.home_topup_success_format, pkg.totalCredits)
+                val msg = localizer.get(R.string.home_topup_success_format, amount)
                 onResult(true, msg)
             } catch (e: Exception) {
                 onResult(false, friendlyError(e, localizer))
@@ -1229,10 +1473,10 @@ class HomeViewModel(
                             },
                         )
                     }
-                    onResult(true, res.message.ifBlank { localizer.get(R.string.home_daily_reward_success_format, res.reward) })
+                    onResult(true, localizer.get(R.string.home_daily_reward_success_format, res.reward))
                 } else {
                     _uiState.update { it.copy(claimingMilestone = null) }
-                    onResult(false, res.message.ifBlank { localizer.get(R.string.home_daily_reward_failed) })
+                    onResult(false, localizer.get(R.string.home_daily_reward_failed))
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(claimingMilestone = null) }
@@ -1251,6 +1495,10 @@ class HomeViewModel(
      * Có sequence token, generation và UID guard để không bị response cũ ghi đè.
      */
     fun refreshMissions(forceRefresh: Boolean = false) {
+        if (!repository.isAuthenticated()) {
+            _uiState.update { it.copy(missions = emptyList(), isMissionsLoading = false, missionsError = null) }
+            return
+        }
         val seq = missionRefreshSequence.incrementAndGet()
         val initialMutation = missionMutationVersion.get()
         val initialUid = repository.currentUserId()
@@ -1292,6 +1540,11 @@ class HomeViewModel(
      */
     fun joinMission(missionId: String, onResult: (Boolean, String) -> Unit) {
         if (_uiState.value.joiningMissionId != null) return
+        val existingMission = _uiState.value.missions.firstOrNull { it.id == missionId }
+        if (existingMission?.isBlockedPreviousParticipant == true) {
+            onResult(false, localizer.get(R.string.mission_err_previous_participant_blocked))
+            return
+        }
         val initialUid = repository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
         val initialDay = repository.businessDay()
@@ -1346,10 +1599,24 @@ class HomeViewModel(
                         )
                     }
                     refreshMissions(forceRefresh = true)
+                } else if (errStr.contains("MISSION_PREVIOUS_PARTICIPANT_BLOCKED")) {
+                    missionMutationVersion.incrementAndGet()
+                    missionRefreshSequence.incrementAndGet()
+                    _uiState.update { state ->
+                        state.copy(
+                            isMissionsLoading = false,
+                            missions = state.missions.map { m ->
+                                if (m.id == missionId) m.copy(isBlockedPreviousParticipant = true) else m
+                            }
+                        )
+                    }
+                    refreshMissions(forceRefresh = true)
                 } else if (errStr.contains("MISSION_FULL") || errStr.contains("MISSION_EXPIRED") || errStr.contains("MISSION_NOT_OPEN")) {
                     refreshMissions(forceRefresh = true)
                 }
                 val msg = when {
+                    errStr.contains("MISSION_PREVIOUS_PARTICIPANT_BLOCKED") ->
+                        localizer.get(R.string.mission_err_previous_participant_blocked)
                     errStr.contains("MISSION_FULL") ->
                         localizer.get(R.string.mission_status_full)
                     errStr.contains("MISSION_EXPIRED") ->
@@ -1409,55 +1676,200 @@ class HomeViewModel(
         missionDeadlineJob = null
     }
 
-    private var pendingCarryoverJob: kotlinx.coroutines.Job? = null
+    private data class DailyTaskRequestOwner(
+        val uid: String,
+        val generation: Long,
+        val day: String,
+        val mutation: Long,
+    )
 
-    fun stopPendingCarryoverRetry() {
-        pendingCarryoverJob?.cancel()
-        pendingCarryoverJob = null
+    private fun currentDailyTaskOwner(): DailyTaskRequestOwner? {
+        val uid = repository.currentUserId() ?: return null
+        return DailyTaskRequestOwner(uid, SessionCacheManager.currentGeneration(),
+            repository.businessDay().toString(), repository.getMutationVersion("daily_task"))
     }
 
-    private fun checkAndSchedulePendingCarryoverRetry(dailyTask: DailyTaskStatus?) {
-        if (dailyTask == null || dailyTask.carryoverReady != false) {
+    private fun isCurrentDailyTaskOwner(owner: DailyTaskRequestOwner): Boolean =
+        repository.currentUserId() == owner.uid &&
+            SessionCacheManager.currentGeneration() == owner.generation &&
+            repository.businessDay().toString() == owner.day &&
+            repository.getMutationVersion("daily_task") == owner.mutation
+
+    private fun verifiedDailyTask(status: DailyTaskStatus?, day: String): DailyTaskStatus? {
+        if (status == null || status.statusDate != day || status.rawMet == null ||
+            status.rawHistoryReady == null || status.rawCarryoverReady == null ||
+            status.rawCarryoverRemainingTests == null || status.rawCarryoverRemainingTests < 0 ||
+            status.mode !in setOf("owner", "member", "exempt")) return null
+        return status.forCurrentUi(day)
+    }
+
+    /** Publish one verified result to the card and cache, fencing older dashboard reads. */
+    private fun publishDailyTaskSnapshot(
+        owner: DailyTaskRequestOwner,
+        request: Long,
+        raw: DailyTaskStatus,
+    ): Boolean {
+        if (!isCurrentDailyTaskOwner(owner) || request != dailyTaskRequestSequence.get()) return false
+        val fresh = verifiedDailyTask(raw, owner.day) ?: return false
+        val publishedVersion = SessionCacheManager.nextDailyTaskVersion()
+        repository.invalidateDailyTaskDashboardCache()
+        val publishedOwner = owner.copy(mutation = publishedVersion)
+        if (!isCurrentDailyTaskOwner(publishedOwner)) return false
+        SessionCacheManager.updateCachedData(owner.uid, owner.generation) { cached ->
+            if (cached.dateVn != owner.day || !isCurrentDailyTaskOwner(publishedOwner)) cached
+            else cached.copy(dailyTask = fresh, missedStreak = fresh.missedStreak,
+                isDailyTaskPendingRefresh = false)
+        }
+        _uiState.update { state ->
+            if (!isCurrentDailyTaskOwner(publishedOwner)) state
+            else state.copy(dailyTask = fresh, missedStreak = fresh.missedStreak,
+                isDailyTaskPendingRefresh = false, isDailyTaskError = false)
+        }
+        if (fresh.isCarryoverHistoryPending) checkAndSchedulePendingCarryoverRetry(fresh)
+        else stopPendingCarryoverRetry()
+        return true
+    }
+
+    private suspend fun loadDailyTask(owner: DailyTaskRequestOwner): DailyTaskStatus? {
+        if (!isCurrentDailyTaskOwner(owner)) return null
+        val request = dailyTaskRequestSequence.incrementAndGet()
+        val result = repository.fetchMyDailyTaskStatus()
+        val status = result.getOrNull() ?: return null
+        return if (publishDailyTaskSnapshot(owner, request, status)) status else null
+    }
+
+    private fun markDailyTaskLoadFailed(owner: DailyTaskRequestOwner) {
+        if (!isCurrentDailyTaskOwner(owner)) return
+        _uiState.update { state ->
+            if (!isCurrentDailyTaskOwner(owner)) state else state.copy(
+                isDailyTaskPendingRefresh = false, isDailyTaskError = true)
+        }
+        SessionCacheManager.updateCachedData(owner.uid, owner.generation) { cached ->
+            if (cached.dateVn == owner.day && isCurrentDailyTaskOwner(owner))
+                cached.copy(isDailyTaskPendingRefresh = false) else cached
+        }
+    }
+
+    private data class PendingCarryoverOwner(val uid: String, val generation: Long, val businessDay: LocalDate)
+    private var pendingCarryoverOwner: PendingCarryoverOwner? = null
+    internal var pendingCarryoverJob: Job? = null
+
+    fun stopPendingCarryoverRetry() {
+        val oldJob = pendingCarryoverJob
+        pendingCarryoverJob = null
+        pendingCarryoverOwner = null
+        oldJob?.cancel()
+    }
+
+    internal fun checkAndSchedulePendingCarryoverRetry(dailyTask: DailyTaskStatus?) {
+        if (dailyTask == null || !dailyTask.isCarryoverHistoryPending) {
             stopPendingCarryoverRetry()
             return
         }
-        if (pendingCarryoverJob?.isActive == true) return
-
-        val targetUid = repository.currentUserId() ?: return
-        val backoffDelaysMs = longArrayOf(5_000L, 10_000L, 20_000L, 30_000L, 30_000L)
-
+        val owner = currentDailyTaskOwner() ?: run { stopPendingCarryoverRetry(); return }
+        val historyOwner = PendingCarryoverOwner(owner.uid, owner.generation, LocalDate.parse(owner.day))
+        if (pendingCarryoverJob?.isActive == true && pendingCarryoverOwner == historyOwner) return
+        stopPendingCarryoverRetry()
+        pendingCarryoverOwner = historyOwner
         pendingCarryoverJob = viewModelScope.launch {
-            for (delayMs in backoffDelaysMs) {
-                kotlinx.coroutines.delay(delayMs)
-                if (repository.currentUserId() != targetUid) break
-                try {
-                    val freshStatus = repository.getMyDailyTaskStatus().forCurrentUi()
-                    if (repository.currentUserId() != targetUid) break
-                    if (freshStatus != null) {
-                        _uiState.update { state ->
-                            state.copy(
-                                dailyTask = freshStatus,
-                                missedStreak = freshStatus.missedStreak
-                            )
-                        }
-                        if (freshStatus.carryoverReady != false) {
-                            break
-                        }
+            var exhausted = false
+            try {
+                for (waitMs in PENDING_CARRYOVER_BACKOFF_MS) {
+                    delay(waitMs)
+                    val attemptOwner = currentDailyTaskOwner() ?: return@launch
+                    if (attemptOwner.uid != historyOwner.uid || attemptOwner.generation != historyOwner.generation ||
+                        attemptOwner.day != historyOwner.businessDay.toString()) return@launch
+                    val fresh = loadDailyTask(attemptOwner)
+                    if (fresh != null && !fresh.isCarryoverHistoryPending) return@launch
+                }
+                exhausted = true
+            } finally {
+                if (pendingCarryoverJob === coroutineContext[Job]) {
+                    pendingCarryoverJob = null
+                    pendingCarryoverOwner = null
+                    val latestOwner = currentDailyTaskOwner()
+                    if (exhausted && latestOwner != null && latestOwner.uid == historyOwner.uid &&
+                        latestOwner.generation == historyOwner.generation &&
+                        latestOwner.day == historyOwner.businessDay.toString() &&
+                        _uiState.value.dailyTask?.isCarryoverHistoryPending == true) {
+                        markDailyTaskLoadFailed(latestOwner)
                     }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    // Tiếp tục thử lần sau
                 }
             }
-            pendingCarryoverJob = null
         }
+    }
+
+    internal var dailyTaskRetryJob: Job? = null
+    private var dailyTaskRetryMutation: Long? = null
+
+    fun stopDailyTaskRetry() {
+        val oldJob = dailyTaskRetryJob
+        dailyTaskRetryJob = null
+        dailyTaskRetryMutation = null
+        oldJob?.cancel()
+    }
+
+    fun resumePendingDailyTaskWork() {
+        if (!repository.isAuthenticated()) return
+        val state = _uiState.value
+        if (state.isDailyTaskPendingRefresh && dailyTaskRetryJob?.isActive != true) {
+            val owner = currentDailyTaskOwner()
+            if (owner != null) {
+                scheduleDailyTaskRetry(owner.uid, owner.generation, owner.day, owner.mutation, immediate = false)
+            }
+        }
+        checkAndSchedulePendingCarryoverRetry(state.dailyTask)
+    }
+
+    private fun scheduleDailyTaskRetry(
+        targetUid: String,
+        targetGen: Long,
+        targetDay: String,
+        targetMutation: Long,
+        immediate: Boolean = false,
+    ) {
+        if (dailyTaskRetryJob?.isActive == true && dailyTaskRetryMutation == targetMutation) return
+        stopDailyTaskRetry()
+        val owner = DailyTaskRequestOwner(targetUid, targetGen, targetDay, targetMutation)
+        if (!isCurrentDailyTaskOwner(owner)) return
+        _uiState.update { it.copy(isDailyTaskPendingRefresh = true, isDailyTaskError = false) }
+        dailyTaskRetryMutation = targetMutation
+        dailyTaskRetryJob = viewModelScope.launch {
+            try {
+                val waits = if (immediate) listOf(0L, 500L, 1000L, 2000L, 4000L)
+                    else listOf(200L, 500L, 1000L, 2000L, 4000L)
+                for (waitMs in waits) {
+                    if (waitMs > 0) delay(waitMs)
+                    if (coroutineContext[Job]?.isActive != true || !isCurrentDailyTaskOwner(owner)) return@launch
+                    if (loadDailyTask(owner) != null) return@launch
+                }
+                if (coroutineContext[Job]?.isActive == true) {
+                    markDailyTaskLoadFailed(owner)
+                }
+            } finally {
+                if (dailyTaskRetryJob === coroutineContext[Job]) {
+                    dailyTaskRetryJob = null
+                    dailyTaskRetryMutation = null
+                }
+            }
+        }
+    }
+
+    fun retryDailyTask() {
+        if (repository.currentUserId() == null) return
+        stopDailyTaskRetry()
+        stopPendingCarryoverRetry()
+        repository.invalidateDailyTaskDashboardCache()
+        repository.bumpMutationVersion("daily_task")
+        val owner = currentDailyTaskOwner() ?: return
+        scheduleDailyTaskRetry(owner.uid, owner.generation, owner.day, owner.mutation, immediate = true)
     }
 
     override fun onCleared() {
         stopMidnightScheduler()
         stopMissionDeadlineScheduler()
         stopPendingCarryoverRetry()
+        stopDailyTaskRetry()
         super.onCleared()
     }
 }

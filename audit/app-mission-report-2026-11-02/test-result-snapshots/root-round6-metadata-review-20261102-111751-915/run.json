@@ -1,0 +1,14 @@
+{
+  "logName": "root-round6-metadata-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest.admissionCountsActualMetadataWithoutDeletingTheUnsentDraft"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T11:17:25.8036556Z",
+  "finishedUtc": "2026-11-02T11:17:51.9279199Z",
+  "currentRunXmlCount": 1
+}

@@ -1,0 +1,15 @@
+FAIL through 78: admin resume preserves JSON fields and owner_inactive flag: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- null
+
+FAIL through 78: admin resume audit preserves original reason: Expected values to be strictly equal:
++ actual - expected
+
++ null
+- 'Khôi phục chiến dịch bởi Admin'
+
+FAIL through 78: owner resume allows streak 4 with configured threshold 7: OWNER_INACTIVE
+FAIL through 78: owner resume blocks streak 1 with configured threshold 1: Missing expected rejection.
+Resume contract failures: 4

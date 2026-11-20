@@ -1,5 +1,11 @@
 import java.io.File
 import java.util.Properties
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     alias(libs.plugins.android.application)
@@ -27,12 +33,17 @@ android {
         applicationId = "com.ntt.crosstest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 21
-        versionName = "1.0.1"
+        versionCode = 56
+        versionName = "1.5.6"
 
         buildConfigField("String", "SUPABASE_URL", "\"${appSecret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${appSecret("SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${appSecret("GOOGLE_WEB_CLIENT_ID")}\"")
+
+        val telegramApiId = appSecret("TELEGRAM_API_ID").toIntOrNull() ?: 0
+        val telegramApiHash = appSecret("TELEGRAM_API_HASH")
+        buildConfigField("int", "TELEGRAM_API_ID", "$telegramApiId")
+        buildConfigField("String", "TELEGRAM_API_HASH", "\"$telegramApiHash\"")
     }
 
     signingConfigs {
@@ -82,6 +93,7 @@ android {
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
+            it.maxHeapSize = "2048m"
             it.jvmArgs(
                 "--add-opens=java.base/java.lang=ALL-UNNAMED",
                 "--add-opens=java.base/java.util=ALL-UNNAMED",
@@ -100,7 +112,44 @@ android {
     }
 }
 
+abstract class GenerateHelpAssetsTask : DefaultTask() {
+    @get:InputFile
+    abstract val guideSource: RegularFileProperty
+
+    @get:InputFile
+    abstract val faqSource: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val destDir = outputDir.get().asFile
+        destDir.mkdirs()
+        guideSource.get().asFile.copyTo(File(destDir, "HUONG_DAN_SU_DUNG_12_CROSS_TESTERS.md"), overwrite = true)
+        faqSource.get().asFile.copyTo(File(destDir, "CAU_HOI_THUONG_GAP_12_CROSS_TESTERS.md"), overwrite = true)
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val helpAssetsTask = tasks.register<GenerateHelpAssetsTask>(
+            "generate${variant.name.replaceFirstChar { it.uppercase() }}HelpAssets"
+        ) {
+            guideSource.set(rootProject.file("HUONG_DAN_SU_DUNG_12_CROSS_TESTERS.md"))
+            faqSource.set(rootProject.file("CAU_HOI_THUONG_GAP_12_CROSS_TESTERS.md"))
+            outputDir.set(layout.buildDirectory.dir("generated/assets/help/${variant.name}"))
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(
+            helpAssetsTask,
+            GenerateHelpAssetsTask::outputDir
+        )
+    }
+}
+
 dependencies {
+    implementation(project(":tdlib"))
+
     // Supabase (auth + database). Versions pinned by the BOM.
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.auth)

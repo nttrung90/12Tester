@@ -1,0 +1,34 @@
+=== LOADING ALL MIGRATIONS IN ORDER (INCLUDING 087) ===
+MIGRATIONS LOADED SUCCESSFULLY (30 migrations).
+=== BASE FIXTURES SEEDED ===
+--- TEST 1: Validation, Balance Bounds & Overflow Prevention ---
+PASS: Input validation & overflow protection verified.
+--- TEST 2: Authorization & Ownership Guards ---
+PASS: Ownership & authorization guards verified.
+--- TEST 3: Creation, Atomic Budget Reserve & Idempotency ---
+PASS: Successful creation, atomic budget reservation and idempotency verified.
+--- TEST 4: Reconcile RPC ---
+PASS: Reconcile RPC verified.
+--- TEST 5: Dual Read API (Owner vs Tester/Public) ---
+PASS: Dual read API verified.
+--- TEST 6: Report Snapshot Attachment Rules & Immutability ---
+PASS: Report snapshot attachment rules & immutability verified.
+--- TEST 7: Manual Settlement & Single Award per Tester ---
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+7 !== 17
+
+    at file:///F:/AI/12Tester/audit/dual-storage-review-2026-11-16/baseline-campaign-tester-bonus-generated.mjs:465:8 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 7,
+  expected: 17,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

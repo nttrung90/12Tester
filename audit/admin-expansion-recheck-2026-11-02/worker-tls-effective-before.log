@@ -1,0 +1,44 @@
+{
+  "connectedToDatabase": false,
+  "results": [
+    {
+      "mode": "plain URL",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": true
+    },
+    {
+      "mode": "?sslmode=disable",
+      "safelyRejected": false,
+      "tls": false,
+      "verified": false
+    },
+    {
+      "mode": "?sslmode=no-verify",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": false
+    },
+    {
+      "mode": "?sslmode=require",
+      "safelyRejected": false,
+      "tls": true,
+      "verified": true
+    }
+  ]
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Default TLS was weakened by ?sslmode=disable
+    at file:///F:/AI/12Tester/audit/admin-expansion-recheck-2026-11-02/worker-tls-effective-probe.mjs:28:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

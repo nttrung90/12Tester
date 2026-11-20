@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.MissionReportMultiAttachmentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:28:25.101Z" hostname="PC-5700X3D" time="2.059">
+  <properties/>
+  <testcase name="testSubmitStateKeyDistinguishesContextAndMission" classname="com.ntt.crosstest.data.MissionReportMultiAttachmentTest" time="1.373"/>
+  <testcase name="testPendingCampaignIdsFiltersByContext" classname="com.ntt.crosstest.data.MissionReportMultiAttachmentTest" time="0.099"/>
+  <testcase name="testMultiAttachmentStoreSerializationAndCheckpoints" classname="com.ntt.crosstest.data.MissionReportMultiAttachmentTest" time="0.063"/>
+  <testcase name="testTesterReportAllAttachmentsFallbackForSingleImage" classname="com.ntt.crosstest.data.MissionReportMultiAttachmentTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

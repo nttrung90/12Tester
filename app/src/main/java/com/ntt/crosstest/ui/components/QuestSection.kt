@@ -59,10 +59,10 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.data.QuestMilestone
 import com.ntt.crosstest.data.QuestSummary
 
-private val GoldStarColor = Color(0xFFF57F17)
-private val GoldBadgeBg = Color(0xFFFFF8E1)
-private val GreenDoneColor = Color(0xFF2E7D32)
-private val GreenDoneBg = Color(0xFFE8F5E9)
+private val GoldStarColor = Color(0xFF795000)
+private val GoldBadgeBg = Color(0xFFFFF0D4)
+private val GreenDoneColor = Color(0xFF1B7A43)
+private val GreenDoneBg = Color(0xFFD7EFDD)
 
 @Composable
 fun QuestSection(
@@ -137,7 +137,7 @@ fun QuestSection(
                                         .padding(horizontal = 8.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = "$totalClaimable nhận ngay!",
+                                        text = stringResource(R.string.quest_claimable_badge, totalClaimable),
                                         color = Color.White,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
@@ -147,7 +147,11 @@ fun QuestSection(
                         }
                         if (!isExpanded) {
                             Text(
-                                text = "Hôm nay: ${summary.dailyCount}/50 | Tuần này: ${summary.weeklyCount}/300 lượt",
+                                text = stringResource(
+                                    R.string.quest_collapsed_summary_format,
+                                    summary.dailyCount,
+                                    summary.weeklyCount,
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -259,7 +263,7 @@ fun QuestSection(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Tiến độ hôm nay",
+                                text = stringResource(R.string.quest_progress_today),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -334,7 +338,7 @@ fun QuestSection(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Tiến độ tuần này",
+                                text = stringResource(R.string.quest_progress_week),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -470,9 +474,9 @@ private fun QuestItemRow(
                     Spacer(Modifier.height(2.dp))
                     Text(
                         text = if (isClaimed) {
-                            "Đã hoàn thành ($currentCount/$milestone)"
+                            stringResource(R.string.quest_milestone_completed_format, currentCount, milestone)
                         } else {
-                            "Tiến độ: ${currentCount.coerceAtMost(milestone)}/$milestone lượt"
+                            stringResource(R.string.quest_milestone_progress_format, currentCount.coerceAtMost(milestone), milestone)
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = if (canClaim) GoldStarColor else MaterialTheme.colorScheme.onSurfaceVariant,

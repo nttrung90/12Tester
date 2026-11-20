@@ -8,8 +8,11 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AuthRepository
 import com.ntt.crosstest.data.CampaignRepository
+import com.ntt.crosstest.data.EgressTriggerSource
 import com.ntt.crosstest.data.CreditLog
+import com.ntt.crosstest.data.FinancialIntentStore
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.data.PendingSlotIntent
 import com.ntt.crosstest.data.Profile
 import com.ntt.crosstest.data.SessionCacheManager
 import com.ntt.crosstest.data.SettingsRepository
@@ -40,6 +43,7 @@ data class ProfileUiState(
     val reminderEnabled: Boolean = true,
     val appLanguage: String = SettingsRepository.LANGUAGE_SYSTEM,
     val appTheme: String = SettingsRepository.THEME_SYSTEM,
+    val testMode: String = SettingsRepository.TEST_MODE_NORMAL,
     val signedOut: Boolean = false,
     val error: String? = null,
     val creditLogs: List<CreditLog> = emptyList(),
@@ -131,6 +135,11 @@ class ProfileViewModel(
                 _uiState.update { it.copy(appTheme = theme) }
             }
         }
+        viewModelScope.launch {
+            app.settingsRepository.testMode.collect { mode ->
+                _uiState.update { it.copy(testMode = mode) }
+            }
+        }
     }
 
     /** Session khôi phục bất đồng bộ: refresh một lần khi phiên sẵn sàng. */
@@ -169,11 +178,22 @@ class ProfileViewModel(
         _uiState.update { it.copy(error = null) }
     }
 
-    fun refresh(forceRefresh: Boolean = false) {
+    private var refreshJob: kotlinx.coroutines.Job? = null
+
+    fun refresh(
+        forceRefresh: Boolean = false,
+        triggerSource: EgressTriggerSource = EgressTriggerSource.UNKNOWN,
+    ) {
+        if (!forceRefresh && refreshJob?.isActive == true) {
+            return
+        }
         val seq = refreshSequence.incrementAndGet()
         val initialUid = authRepository.currentUserId()
         val initialGen = SessionCacheManager.currentGeneration()
-        viewModelScope.launch {
+        if (forceRefresh) {
+            refreshJob?.cancel()
+        }
+        refreshJob = viewModelScope.launch {
             if (forceRefresh || _uiState.value.profile == null) {
                 _uiState.update { it.copy(isLoading = true, isBackgroundSyncing = true, error = null) }
             } else {
@@ -205,7 +225,7 @@ class ProfileViewModel(
                 }
                 lastSyncedUid = authRepository.currentUserId()
                 // Fast path: 1 RPC gộp (get_my_dashboard) phủ profile + logs + slots.
-                val dashboard = campaignRepository.getMyDashboard(forceRefresh = forceRefresh)
+                val dashboard = campaignRepository.getMyDashboard(forceRefresh = forceRefresh, triggerSource = triggerSource)
                 val profile = dashboard?.profile ?: campaignRepository.getMyProfile(forceRefresh = forceRefresh)
                 if (profile?.isLocked == true) {
                     if (seq != refreshSequence.get() || initialGen != SessionCacheManager.currentGeneration() || initialUid != authRepository.currentUserId()) {
@@ -257,36 +277,107 @@ class ProfileViewModel(
         }
     }
 
-    fun unlockOrRenewSlot(slotNumber: Int) {
-        if (_uiState.value.isUnlockingSlot) return
-        val slotCost = SlotInfo.costForSlot(slotNumber)
-        val credits = _uiState.value.profile?.credits ?: 0
-        if (credits < slotCost) {
+    private val isSlotActionInProgress = java.util.concurrent.atomic.AtomicBoolean(false)
+    private var lastSlotIntentKey: String? = null
+    private var lastSlotRequestId: String? = null
+
+    fun unlockOrRenewSlot(
+        slotNumber: Int,
+        expectedCost: Int? = null,
+        expectedRevision: String? = null,
+    ) {
+        if (!isSlotActionInProgress.compareAndSet(false, true)) return
+        val currentSlot = _uiState.value.slots.find { it.slotNumber == slotNumber }
+        val cost = expectedCost ?: currentSlot?.cost ?: SlotInfo.costForSlot(slotNumber)
+        val revision = expectedRevision ?: currentSlot?.policyRevision
+
+        if (revision == null) {
+            isSlotActionInProgress.set(false)
             _uiState.update {
-                it.copy(error = localizer.get(R.string.profile_slot_cost_format, slotCost, slotNumber, credits))
+                it.copy(error = localizer.get(R.string.admin_policy_quote_unavailable))
             }
             return
+        }
+
+        val credits = _uiState.value.profile?.credits ?: 0
+        if (credits < cost) {
+            isSlotActionInProgress.set(false)
+            _uiState.update {
+                it.copy(error = localizer.get(R.string.profile_slot_cost_format, cost, slotNumber, credits))
+            }
+            return
+        }
+
+        val uid = authRepository.currentUserId() ?: run {
+            isSlotActionInProgress.set(false)
+            return
+        }
+        val gen = SessionCacheManager.currentGeneration()
+
+        val pending = FinancialIntentStore.peekSlotIntent(localizer.context, uid, slotNumber)
+        val intentToUse = if (pending != null && pending.expectedCost == cost && pending.expectedRevision == revision) {
+            pending
+        } else {
+            val newIntent = PendingSlotIntent(
+                userId = uid,
+                slotNumber = slotNumber,
+                expectedCost = cost,
+                expectedRevision = revision,
+                renewalDays = currentSlot?.renewalDays ?: 30,
+                clientRequestId = java.util.UUID.randomUUID().toString(),
+            )
+            FinancialIntentStore.saveSlotIntent(localizer.context, newIntent)
+            newIntent
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isUnlockingSlot = true, error = null) }
             try {
-                campaignRepository.unlockOrRenewSlot(slotNumber)
-                _uiState.update {
-                    it.copy(
-                        unlockSuccessMsg = localizer.get(R.string.profile_slot_success_format, slotNumber),
+                val result = campaignRepository.unlockOrRenewSlotV2(
+                    slotNumber = intentToUse.slotNumber,
+                    clientRequestId = intentToUse.clientRequestId,
+                    expectedCost = intentToUse.expectedCost,
+                    expectedRevision = intentToUse.expectedRevision,
+                )
+                if (authRepository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                FinancialIntentStore.clearSlotIntent(localizer.context, uid, slotNumber)
+
+                _uiState.update { state ->
+                    val updatedProfile = state.profile?.copy(credits = result.balance)
+                    state.copy(
+                        profile = updatedProfile,
+                        unlockSuccessMsg = localizer.get(R.string.profile_slot_success_format, slotNumber, result.renewalDays),
                     )
                 }
                 refresh()
             } catch (e: Exception) {
-                val msg = when {
-                    e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.profile_insufficient_credits)
-                    e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
-                    else -> friendlyError(e, localizer)
+                if (e is CancellationException) throw e
+                if (authRepository.currentUserId() != uid || SessionCacheManager.currentGeneration() != gen) return@launch
+
+                val isConflict = e.message?.contains("BUSINESS_POLICY_CONFLICT", ignoreCase = true) == true ||
+                        e.message?.contains("BUSINESS_POLICY_PRICE_MISMATCH", ignoreCase = true) == true
+
+                if (isConflict) {
+                    FinancialIntentStore.clearSlotIntent(localizer.context, uid, slotNumber)
+                    campaignRepository.invalidateBusinessQuote()
+                    refresh(forceRefresh = true)
+                    _uiState.update {
+                        it.copy(error = friendlyBusinessPolicyError(e, localizer))
+                    }
+                } else {
+                    val msg = when {
+                        e.message?.contains("INSUFFICIENT_CREDITS") == true -> localizer.get(R.string.profile_insufficient_credits)
+                        e.message?.contains("PREVIOUS_SLOT_NOT_ACTIVE") == true -> localizer.get(R.string.profile_prev_slot_required_format, slotNumber - 1)
+                        else -> friendlyBusinessPolicyError(e, localizer)
+                    }
+                    _uiState.update { it.copy(error = msg) }
                 }
-                _uiState.update { it.copy(error = msg) }
             } finally {
-                _uiState.update { it.copy(isUnlockingSlot = false) }
+                if (authRepository.currentUserId() == uid && SessionCacheManager.currentGeneration() == gen) {
+                    isSlotActionInProgress.set(false)
+                    _uiState.update { it.copy(isUnlockingSlot = false) }
+                }
             }
         }
     }
@@ -344,6 +435,12 @@ class ProfileViewModel(
     fun setAppTheme(theme: String) {
         viewModelScope.launch {
             app.settingsRepository.setAppTheme(theme)
+        }
+    }
+
+    fun setTestMode(mode: String) {
+        viewModelScope.launch {
+            app.settingsRepository.setTestMode(mode)
         }
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:59.839Z" hostname="PC-5700X3D" time="0.131">
+  <properties/>
+  <testcase name="owner_resume_succeeds_when_quota_met_and_debt_zero" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.02"/>
+  <testcase name="precheck_blocks_resume_when_carryover_debt_exists" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.015"/>
+  <testcase name="admin_resume_bypasses_owner_carryover_precheck" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.015"/>
+  <testcase name="server_refusal_with_daily_task_pending_displays_pending_error" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.015"/>
+  <testcase name="precheck_blocks_resume_when_carryover_pending" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.015"/>
+  <testcase name="uiState_flags_reflect_carryover_debt_and_pending" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.005"/>
+  <testcase name="precheck_blocks_resume_when_mode_is_member_but_history_is_pending" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.014"/>
+  <testcase name="server_refusal_with_owner_carryover_incomplete_displays_count_and_reloads_daily_task" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.016"/>
+  <testcase name="precheck_blocks_resume_when_manual_pause_and_daily_task_unmet" classname="com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

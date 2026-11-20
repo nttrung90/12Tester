@@ -1,0 +1,25 @@
+Bạn đang làm việc trong F:\AI\12Tester. Hãy trực tiếp triển khai sửa lỗi so sánh ảnh báo cáo test giữa các ngày, không chỉ phân tích hoặc trả kế hoạch.
+
+ĐỌC TRƯỚC:
+1. AGENTS.md áp dụng nếu có, git status và diff hiện tại. Workspace có nhiều thay đổi của công việc khác: tuyệt đối không reset/clean/ghi đè chúng.
+2. BAO_CAO_KIEM_TRA_SO_SANH_ANH_2026-10-30.md.
+3. KE_HOACH_SUA_SO_SANH_ANH_BAO_CAO_CHO_GEMINI_2026-10-30.md — đây là kế hoạch và tiêu chí nghiệm thu cần thực hiện đầy đủ.
+4. app/src/test/java/com/ntt/crosstest/audit/ImageHashCollisionAuditTest.kt — 3 test đã tái hiện va chạm dHash, không phải thuật toán đã sửa.
+
+VẤN ĐỀ ĐÃ XÁC NHẬN:
+ImageHashHelper thu nhỏ về 9x8, lưu 64 bit so sáng/tối. Hash bằng nhau được đổi thành 100% và DUPLICATE; có thể chặn nộp lại ảnh đã thay đổi. Owner còn suy diễn 100 - similarity thành phần trăm tính năng mới. Migration 064 kiểm tra trùng image_hash trên toàn bảng ở cả nhánh tạo/cập nhật, gây SAME_SCREENSHOT_REJECTED nhầm giữa các user/campaign.
+
+YÊU CẦU TRIỂN KHAI:
+- Giữ image_hash dHash 16 hex để tương thích; dHash chỉ cảnh báo bố cục, không kết luận exact hoặc hard-block. Hash sai/thiếu là UNKNOWN.
+- Không sửa giả bằng ép 100 xuống 99, chỉ đổi ngưỡng, hoặc bỏ cảnh báo rồi vẫn để backend chặn sai.
+- Thẻ danh sách dùng hash có sẵn; không tải full ảnh hàng loạt. Khi mở so sánh, dùng ScreenshotManager/cache và tính màu + khác biệt theo vùng trên dispatcher nền, giới hạn bộ nhớ, cancellation và expiry đúng. Chỉ khẳng định trùng file/pixel nếu có đúng bằng chứng, không từ ảnh resize/thumbnail. Nếu chưa đủ bằng chứng thì dùng nhãn gần giống/cần kiểm tra, không 100%.
+- Tách helper chọn report trước: cùng tester/campaign/context, cùng missionId khi là mission, ngày trước theo Asia/Ho_Chi_Minh; độc lập thứ tự input. Nộp lại report bị từ chối so với chính ảnh bị từ chối, gắn nhãn riêng. Xử lý timestamp lỗi, dữ liệu cũ và lịch sử tải một phần.
+- Sửa đồng bộ OwnerAppDetailScreen, CampaignDetailScreen, ImageViewerComponents và strings mặc định/vi/en; bỏ nhãn phần trăm tính năng mới, chống stale state/loading kẹt.
+- Thêm migration số kế tiếp còn trống, không sửa baseline/migration cũ/archive. Bỏ các hard-block dựa duy nhất dHash trên đường RPC thực tế; giữ mọi validation media/auth/status/context/quota/reward/idempotency/cancellation và yêu cầu thay ảnh bị từ chối hiện có.
+- Không coi screenshotSha256 do client gửi là digest server đã xác minh. Không mở rộng sang cơ chế chống sao chép toàn hệ thống hoặc migration SHA khi chưa có xác minh object phía server. Nêu rõ giới hạn: upload lại cùng ảnh thành URL mới có thể chỉ cảnh báo trong bản sửa này.
+- Cập nhật test va chạm giữ bằng chứng hash collision nhưng kỳ vọng không block/không exact; thêm tests chọn ngày/context, màu/vùng, UNKNOWN/expiry/race, backend cùng hash khác user, retry/idempotency và compatibility. Backend tests phải apply migration mới thật.
+
+THỰC HIỆN VÀ BÀN GIAO:
+Làm trọn các bước trong kế hoạch, tự xử lý quyết định triển khai nhỏ. Chạy test và build phù hợp, không thay logic ngoài phạm vi. Không tự deploy production, không thay dữ liệu thực, không commit/push nếu chưa được yêu cầu.
+Tạo BAO_CAO_SUA_SO_SANH_ANH_BAO_CAO_2026-10-30.md với file sửa, migration, lệnh và kết quả kiểm thử, phần chưa kiểm tra, giới hạn và thứ tự deploy/rollback. Nêu rõ backend mới + app cũ vẫn có thể hiện nhãn cũ, app mới + backend cũ vẫn có thể bị chặn sai.
+Kết thúc bằng tóm tắt tiếng Việt: đã sửa gì, test nào chạy, còn giới hạn gì, việc nào cần làm khi phát hành. Không khẳng định đã deploy hoặc đã kiểm chứng ảnh production nếu chưa thực hiện.

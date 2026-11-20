@@ -1,0 +1,14 @@
+{
+    "logName":  "indep-day-rollover",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowDayRolloverIndependentTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-03T13:12:11.5914746Z",
+    "finishedUtc":  "2026-11-03T13:12:30.7896458Z",
+    "currentRunXmlCount":  0
+}

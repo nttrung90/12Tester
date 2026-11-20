@@ -1,0 +1,653 @@
+
+> test
+> npm run test:baseline-regressions && npm run test:admin-expansion
+
+
+> test:baseline-regressions
+> node run-consolidated-baseline-test.mjs && node run-daily-task-ratio.mjs && node run-backend-cleanup-hardening.mjs && node run-mission-flow-hardening.mjs && node run-thumbnail-migration.mjs && node run-media-gateway-test.mjs && node run-home-stats-cycle-test.mjs && node run-mission-report-and-expiration-test.mjs && node run-app-update-reward-test.mjs && node run-campaign-push-test.mjs && node run-daily-task-carryover.mjs && node run-push-and-carryover-hardening-test.mjs && node run-report-idempotency-ledger-test.mjs && node run-admin-daily-task-policy-test.mjs && node run-report-idempotency-provenance-and-rating-test.mjs && node run-push-campaign-role-hardening-test.mjs && node run-report-extension-schema-test.mjs && node run-explicit-report-context-test.mjs && node run-remove-dhash-hardblock-test.mjs && node run-push-and-carryover-baseline062-regression-test.mjs && node run-owner-tester-reports-count-test.mjs && node run-admin-audit-hardening-test.mjs && node run-admin-management-test.mjs
+
+PASS: Fresh baseline has the same final schema, function bodies, ACLs, RLS, indexes and triggers as all 65 migrations
+PASS: Existing 061 without 046, restricted default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 with 046, restricted default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 without 046, legacy default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 with 046, legacy default grants: preserve all business data, ACLs, sequence values and settings
+PASS: An older/partial schema fails atomically before business changes
+PASS: Conflicting constraint definition causes a full rollback including the missing 046 column
+PASS: Archived history remains the exact reviewed 65 files
+8/8 baseline checks passed
+PASS: existing full schema through its current pre-042 content loads
+PASS: migration 042 upgrades the existing schema
+PASS: default 3:1 status, penalties, balances and logs match pre-042
+PASS: read-only preflight recognizes baseline and installed definitions
+PASS: 2016 SQL assertions (matrix, dates, audit, penalties, RPCs, roles)
+PASS: rerunning 042 preserves baseline, future schedules and audit
+PASS: missing baseline fails closed
+PASS: fresh full-schema install matches upgraded definitions and ACLs
+PASS: customized live function is refused without partial migration
+PASS: 8 runner checks plus SQL assertions
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ HARDENING 043 ---
+PASS: Nạp thành công full_schema_singapore.sql (bao gồm 041, 042, 043, 044)
+Cleanup run status: {
+  status: 'dry_run',
+  error: null,
+  details: {
+    dry_run: true,
+    batch_size: 10,
+    campaign_ids: [ 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' ],
+    retention_days: 90,
+    expired_missions_synced: 0,
+    stale_pending_reports_count: 0
+  }
+}
+PASS: Review Point 1 - Dry run an toàn, chỉ scan/log, không đổi dữ liệu nghiệp vụ
+PASS: Purge thật tự động đồng bộ mission hết hạn và xóa sạch campaign
+PASS: Review Point 2 - sync_expired_missions() hoạt động chính xác độc lập UI
+PASS: Review Point 3 - Cơ chế chống starvation & backoff bảo đảm campaign tốt không bị chặn
+PASS: Review Point 6 - pause/resume cập nhật status expired không rollback, giữ contract auth
+=== TẤT CẢ 5 NHÓM KIỂM THỬ HARDENING 043 ĐỀU PASS 100% ===
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ REGRESSION 044 (M01-M09 & R01-R07) ---
+PASS: Nạp thành công schema baseline 043 (trước 044)
+PASS: Áp dụng thành công migration 044_mission_flow_hardening.sql trên nền 043 với dữ liệu trùng
+PASS: R04 - Hòa giải dữ liệu trùng có audit, bảo toàn số dư và giữ mission có tester
+PASS: Áp dụng lại migration 044 an toàn (idempotency)
+--- Kiểm tra M02 ---
+PASS: M02 - Pause mission chiếm giữ slot, chặn tạo trùng mission trên cùng campaign
+--- Kiểm tra M06 ---
+PASS: M06 - Tự động đồng bộ mission hết hạn dưới khóa khi tạo mới
+--- Kiểm tra M03 ---
+PASS: M03 - Báo cáo trước join không được tính thưởng; báo cáo sau join được thưởng đúng 1 lần
+--- Kiểm tra M05 & R05 ---
+PASS: M05 - Settlement failure được lưu vào outbox và retry bền vững, idempotent
+--- Kiểm tra R05: Anti-starvation với 50 job tạm dừng ---
+PASS: R05 - Cơ chế backoff ngăn 50 job tạm dừng làm nghẽn batch retry
+--- Kiểm tra R03: Quyền RPC auto_accept_expired_reports ---
+PASS: R03 - Role authenticated gọi được auto_accept_expired_reports
+--- Kiểm tra R06: Reset suppress notification flag ---
+PASS: R06 - Cờ suppress_report_notify được reset về 0 sau khi chạy
+--- Kiểm tra M07 ---
+PASS: M07 - Sắp xếp trước khi Limit 100 bảo toàn nhiệm vụ mới nhất
+--- Kiểm tra get_my_active_mission_campaign_ids ---
+PASS: get_my_active_mission_campaign_ids trả đúng danh sách campaign có mission
+--- Kiểm tra bảo toàn 043 review point 6 ---
+PASS: Bảo toàn sửa đổi 043 cho pause/resume expired
+=== TẤT CẢ CÁC REGRESSION TESTS BACKEND 044 ĐỀU PASS 100% ===
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ MIGRATION 045 (E02 THUMBNAIL) ---
+PASS: Nạp schema baseline
+PASS: Áp dụng thành công migration 045_thumbnail_support.sql
+PASS: Cột thumbnail_url đã tồn tại trong public.tester_reports
+PASS: Legacy 6-argument call tương thích ngược 100%
+PASS: 7-argument call lưu và trả thumbnail_url chính xác
+PASS: Idempotency trả lại đúng thumbnail_url đã lưu
+PASS: Chặn thumbnail từ bucket ngoài allowlist
+PASS: Chặn query-string spoofing trên URL thumbnail
+PASS: Chặn không cho ghép cặp thumbnail sai lệch ID với ảnh full
+PASS: Chặn thumbnail có user_id không khớp với session
+=== TẤT CẢ KIỂM THỬ MIGRATION 045 ĐỀU PASS 100% ===
+--- KHỞI TẠO PGLITE ĐỂ KIỂM THỬ MIGRATION 046 (E04 MEDIA GATEWAY) ---
+PASS: Áp dụng thành công migration 045 và 046
+PASS: Thiếu cấu hình secret fail-closed với MEDIA_GATEWAY_SECRET_NOT_CONFIGURED
+PASS: Thiếu cấu hình base URL fail-closed với MEDIA_GATEWAY_BASE_URL_NOT_CONFIGURED
+PASS: Unauthenticated bị từ chối với NOT_AUTHENTICATED
+PASS: Author được cấp quyền truy cập media với role=author và HMAC hợp lệ
+PASS: Grant token bị từ chối khi consumer khác người được cấp (identity binding)
+PASS: Grant token ràng buộc chặt chẽ với variant (full vs thumb)
+PASS: Token hết hạn bị từ chối
+PASS: Campaign Owner được cấp quyền truy cập media với role=owner
+PASS: Admin hệ thống được cấp quyền truy cập media với role=admin
+PASS: Stranger bị từ chối truy cập với lỗi FORBIDDEN
+PASS: Báo cáo quá hạn 31 ngày bị từ chối với lỗi MEDIA_EXPIRED
+=== TẤT CẢ KIỂM THỬ MIGRATION 046 MEDIA GATEWAY ĐỀU PASS 100% ===
+=== BẮT ĐẦU KIỂM THỬ MIGRATION 047: CHU KỲ THỐNG KÊ TRANG CHỦ (1 / 2 / 3 NGÀY) ===
+PASS 1: Áp dụng thành công baseline schema và migration 045, 046, 047
+PASS 2: Mặc định chu kỳ 1 ngày, không có lịch chờ
+PASS 3: Phân quyền chặn anon và non-admin gọi RPC cấu hình
+PASS 4: Validate chu kỳ hợp lệ (chỉ chấp nhận 1, 2, 3)
+PASS 5: Chu kỳ 1 ngày cho home_tested_count đúng bằng today_tested_count
+PASS 6: Admin lên lịch đổi chu kỳ 3 ngày, ghi nhận audit đầy đủ
+PASS 7: Chống ghi đè đồng thời hoạt động chính xác khi sai revision
+PASS 8: Chọn lại chu kỳ đang chạy hủy lịch chờ thành công
+PASS 9: Helper _get_home_stats_period tính đúng mốc chu kỳ 3 ngày và tự reset đầu chu kỳ
+PASS 10: Chu kỳ 3 ngày cộng dồn 4 -> 7 -> 9, sang chu kỳ mới reset về 0 rồi lên 5
+PASS 11: Không cộng trùng lượt khi cùng tester nộp nhiều lần trong một ngày
+PASS 12: Reject xóa check-in làm giảm home_tested_count ngay lập tức
+PASS 13: Tử số vượt mục tiêu (14/12) không bị giới hạn hay cắt cụt
+PASS 14: Đổi cấu hình giữa chu kỳ: ngày hôm nay giữ nguyên, ngày mai bắt đầu chu kỳ mới từ 0
+=== TẤT CẢ 14 KIỂM THỬ BACKEND SQL MIGRATION 047 ĐỀU PASS 100% ===
+=== BẮT ĐẦU KIỂM THỬ BACKEND MIGRATION 048 & 049 (BÁO CÁO NHIỆM VỤ & HARDENING) ===
+PASS 1: Nạp thành công full schema và migration 045 -> 049 (xác minh idempotent)
+PASS 2: get_open_missions lọc bỏ mission hết hạn và trả server_now
+PASS 3: Nộp báo cáo nhiệm vụ thành công với context mission và snapshot đầy đủ
+PASS 4: Quyền bảng và trigger bảo vệ metadata nhiệm vụ khỏi việc chèn/sửa trực tiếp
+PASS 5: Idempotency replay trả lại đúng receipt và metadata đã commit
+PASS 6: Tự động phân loại mission khi người dùng mở từ Khám phá
+PASS 7: Báo cáo thường không có mission gắn context app_test chính xác
+PASS 8: Chặn nộp nhiệm vụ khi mission đã hết hạn
+PASS 9: Chặn nộp nhiệm vụ khi tester chưa join
+PASS 10: _settle_mission_reward từ chối trả thưởng cho báo cáo thường
+PASS 11: _settle_mission_reward trả thưởng nguyên tử và idempotent
+PASS 12: get_campaign_reports_for_owner trả đủ metadata nhiệm vụ cho chủ app
+PASS 13: Chặn hồi tố chuyển đổi báo cáo đã approved thành báo cáo nhiệm vụ
+PASS 14: Nộp lại sau khi bị reject giữ nguyên identity nhiệm vụ và chuyển về pending
+PASS 15 (R01): get_campaign_detail trả đủ metadata nhiệm vụ đồng bộ với receipt và owner view
+PASS 16 (R03 Case A): Cho phép sửa comment báo cáo approved khi participant completed, không phát sinh thưởng
+PASS 17 (R04): Sửa minh chứng báo cáo pending nhiệm vụ sau khi hết hạn không truyền mission_id bị chặn với MISSION_EXPIRED, dữ liệu cũ giữ nguyên
+PASS 18 (R03 Case B): Sửa comment báo cáo test thường đã approved khi đã join mission giữ nguyên context app_test, không bị tự động gán mission
+=== TẤT CẢ 18 KIỂM THỬ BACKEND MIGRATION 048 & 049 ĐỀU PASS 100% ===
+=== BẮT ĐẦU KIỂM THỬ BACKEND MIGRATION 050: THƯỞNG CẬP NHẬT PHIÊN BẢN APP ===
+PASS 1: Nạp thành công full schema và migration 045 -> 051 (xác minh idempotent)
+PASS 2: Chặn công bố khi ví chủ < 120 Credit (INSUFFICIENT_CREDITS)
+PASS 3: Chặn non-owner gọi publish_app_update (NOT_ACTUAL_OWNER)
+PASS 4: Công bố v1.0.0 thành công, trừ 120 Credit ví chủ, khởi tạo quỹ 120
+PASS 5: Idempotency publish: Replay cùng operation_id không trừ tiền lần hai
+PASS 6: Chặn công bố versionCode không lớn hơn watermark (VERSION_CODE_NOT_GREATER)
+PASS 7: Chủ app bị chặn nhận thưởng của chính app mình (OWNER_CANNOT_CLAIM)
+PASS 8: Tester cài bản cũ (< targetVersionCode) bị từ chối (VERSION_NOT_SATISFIED)
+PASS 9: Tester 1 nhận +6 Credit thành công; quỹ giữ giảm còn 114, ví chủ KHÔNG trừ lại
+PASS 10: Tester 1 gọi lại claim: Idempotent trả receipt cũ, không nhân đôi thưởng
+PASS 11: Tester tham gia sau thời điểm công bố bị từ chối (MEMBER_JOINED_AFTER_RELEASE)
+PASS 12: Đủ 20 người nhận thưởng: paid_count = 20, remaining = 0, status = exhausted
+PASS 13: Người thứ 21 claim bị từ chối (RELEASE_EXHAUSTED)
+PASS 14: get_campaign_detail ẩn khối cập nhật cho tester khi đủ 20 suất, chủ vẫn thấy
+PASS 15: Thay đợt nguyên tử: Hoàn 78 Credit đợt cũ và giữ 120 đợt mới trong cùng transaction
+PASS 16: Claim vào release đã superseded bị từ chối (RELEASE_REPLACED)
+PASS 17: Chủ kết thúc sớm đợt, hoàn trả toàn bộ 120 Credit chưa dùng (close_app_update_release)
+PASS 18: Trigger hoàn tiền an toàn khi campaign completed hoặc deleted
+PASS 19: get_campaign_update_history trả đầy đủ lịch sử các đợt cập nhật cho chủ app
+PASS 20: Bất biến kế toán: reserved_total (120) = remaining + (paid_count * 6) + refunded khớp 100% trên mọi release
+PASS 21 (R01): Thu hồi quyền gọi helper quyết toán khỏi client/authenticated
+PASS 22 (R02): Tạm dừng rồi hoàn tất (paused -> completed) tự động hoàn Credit
+PASS 23 (R04): Publish cùng operation_id khác payload bị chặn với OPERATION_PAYLOAD_CONFLICT
+PASS 24 (R05): Concurrency CAS: Form cũ mong đợi không có đợt bị từ chối nếu có đợt phát hành
+PASS 25 (R10): Chủ app bị khóa bị chặn công bố đợt mới với USER_LOCKED
+PASS 26 (R03): Xóa tài khoản chủ app thành công, giải phóng FK và giữ lịch sử tài chính
+PASS 27 (R07): Read contract trả is_eligible = false cho tester tham gia sau ngày phát hành
+PASS 28 (R09): Đóng đợt mới nhất không phục hồi đợt exhausted cũ trên màn hình chủ
+=== TẤT CẢ 28 KIỂM THỬ BACKEND MIGRATION 050 & 051 ĐỀU PASS 100% ===
+=== BẮT ĐẦU KIỂM THỬ BACKEND MIGRATION 052: TÍNH NĂNG ĐẨY APP (CAMPAIGN PUSH PRIORITY) ===
+PASS 1: Nạp thành công full schema và migration 045 -> 052 (xác minh idempotent)
+PASS 2: Số dư 99 Credit bị từ chối INSUFFICIENT_CREDITS, không trừ tiền, không ghi receipt
+PASS 3: Đúng 100 Credit thực hiện thành công, số dư còn 0, log -100, metadata campaign được cập nhật
+PASS 4: Idempotency replay trả lại đúng receipt, replayed=true, không trừ tiền lần 2
+PASS 5: Dùng lại request_id cho campaign khác bị chặn với REQUEST_ID_CONFLICT
+PASS 6: User có 150 Credit mua thành công, số dư còn 50, push_order tăng
+PASS 7: Người không phải chủ app gọi push_campaign bị từ chối với NOT_OWNER
+PASS 8: App đang tạm dừng bị từ chối đẩy với CAMPAIGN_NOT_OPEN
+PASS 9: App quá 30 ngày bị từ chối đẩy với CAMPAIGN_WINDOW_EXPIRED
+PASS 10: App Slot 2 hết hạn bị từ chối đẩy với SLOT_EXPIRED
+PASS 11: Tài khoản bị khóa (is_locked) bị từ chối đẩy với ACCOUNT_LOCKED
+PASS 12: Direct UPDATE và INSERT metadata đẩy app bị trigger chặn an toàn
+PASS 13: Cập nhật thông tin thông thường (không đổi push_*) hoạt động bình thường
+PASS 14: Thao tác INSERT trực tiếp vào campaign_push_receipts bị RLS/REVOKE từ chối
+PASS 15: Thứ tự lượt đẩy tuân thủ nghiêm ngặt A(1) < A(2) < B(3) < A(4)
+PASS 16: _campaign_json xuất đầy đủ push_business_date, push_expires_at, push_order
+PASS 17: Xóa campaign bảo toàn receipt tài chính với campaign_id = null
+PASS 18: Ràng buộc chk_campaign_push_metadata_consistency bảo vệ tính toàn vẹn 3 cột metadata
+PASS 19: Giao dịch thất bại rollback toàn bộ (tiền giữ nguyên, không lưu log, không lưu receipt)
+=== TẤT CẢ 19 KIỂM THỬ BACKEND SQL MIGRATION 052 ĐỀU PASS 100% ===
+=== BẮT ĐẦU KIỂM THỬ BACKEND MIGRATION 053: CỘNG DỒN APP TEST CÒN THIẾU ===
+PASS 1: Nạp thành công full schema và migrations 045 -> 053 (xác minh idempotent)
+PASS 2: Ngày đầu hiệu lực C=0; làm 4/6 -> carry_out = 2, phạt Credit và streak tăng
+PASS 3: Ngày 2 nhận 6+2=8, làm 5 -> carry_out = 3, streak tăng lên 2
+PASS 4: Ngày 3 nhận 6+3=9, làm đủ 9/9 -> carry_out = 0, streak reset về 0, không phạt
+PASS 5: Vượt chỉ tiêu không tạo số âm và không chuyển tín dụng sang ngày sau
+PASS 6: Ma trận nguồn app thiếu: Q=max(C, T), carry_out=max(0, Q-D), T=0 không phạt và giữ nguyên phần thiếu
+PASS 7: Member chỉ cần đăng nhập là hoàn thành; phần thiếu cũ được tạm giữ và giảm khi test tự nguyện
+PASS 8: 00:00 - 00:05 chưa chốt -> carryover_ready = false, test vẫn đếm, sau khi chốt chuyển ready
+PASS 9: Idempotency: retry finalizer không nhân đôi phạt hay nhân đôi phần thiếu
+PASS 10: Tương thích Đẩy app: Mua đẩy trừ 100 Credit, không đổi chỉ tiêu test, không reset streak
+=== TẤT CẢ 10 KIỂM THỬ BACKEND MIGRATION 053 CỘNG DỒN ĐỀU PASS 100% ===
+=== KHỞI TẠO PGLITE VÀ NẠP FULL SCHEMA SINGAPORE (GỒM 052, 053, 054) ===
+PASS: R01: C01 - Finalizer hoãn chốt và không phạt khi carryover chưa ready
+PASS: R03: C02 - pause_inactive_owner_campaigns không auto-pause app khi owner pending
+PASS: R03: C03 - resume_campaign bị từ chối khi owner pending
+PASS: R04: C04 - Tắt rồi bật lại chính sách bảo lưu phần thiếu cũ (không bị reset về 0)
+PASS: R02: C05 - Campaign completed ở hiện tại không làm mất nghĩa vụ owner của ngày quá khứ
+PASS: R04: C06 - Chặn sửa đổi hồi tố chính sách quá khứ đã áp dụng
+PASS: R07: P01 - Xóa tài khoản chủ app thành công mà không bị receipt chặn
+PASS: R08: P02 - Xóa campaign vẫn replay được receipt cũ với campaign id gốc
+PASS: R09: P03 - Role authenticated không thể vượt qua trigger bảo vệ metadata
+PASS: R10: C07 - Checkpoint ngày đăng ký có sẵn row login được chốt đúng is_exempt=true, met=true
+=== TẤT CẢ 10/10 REGRESSION TESTS SQL HARDENING (R01-R10) ĐỀU PASS 100% ===
+[PASS] D01: Ordinary pending report cannot be converted to mission report
+[PASS] D02: Old request replay must not overwrite later update
+[PASS] D03: Same request ID with different payload must fail with mismatch
+[PASS] D04: Replay with identical payload returns receipt without duplicate credit
+[PASS] D05: get_campaign_mission supports querying specific mission by p_mission_id
+[PASS] L01: Upgrade must preserve legacy request A before update B and later replay A
+[PASS] L02: Legacy receipt fallback must not accept a changed image as identical payload
+[PASS] B01: Exact legacy replay with implicit mission must remain valid after backfill
+[PASS] B02: Exact legacy approved-comment replay without image fields must remain valid
+
+--- All Database Idempotency & Context Tests Passed Successfully! ---
+=== KHỞI TẠO PGLITE VÀ NẠP SCHEMA CHO TEST ADMIN DAILY TASK POLICY ===
+PASS: Khởi tạo database và seed dữ liệu thành công.
+PASS 1: Admin đọc cấu hình ban đầu thành công.
+PASS 2: Các tài khoản không đủ quyền đều bị chặn gọi RPC.
+PASS 3: Quyền ghi bảng trực tiếp và gọi hàm nội bộ bị từ chối đúng thiết kế.
+PASS 4: Validation các tham số đầu vào hoạt động chính xác.
+PASS 5: Admin 1 lên lịch tỷ lệ 6 cho ngày mai thành công.
+PASS 6: Chống xung đột revision hoạt động chính xác.
+PASS 7: Cập nhật lại lịch cùng ngày thành công.
+PASS 8: Thêm lịch ngày khác không xóa hoặc ảnh hưởng lịch đã có.
+PASS 9: Hủy đúng ngày đã chọn, giữ nguyên lịch các ngày khác.
+PASS 10: Audit log ghi nhận chính xác actor_id từ auth.uid() và profile tương ứng.
+=== TOÀN BỘ CÁC BƯỚC TEST BACKEND CHO MIGRATION 058 ĐÃ THÀNH CÔNG ===
+=== BẮT ĐẦU KIỂM THỬ IDEMPOTENCY PROVENANCE & CANONICAL LEGACY RATING (C02 & C03) ===
+[PASS] P01: Applying 059 & 061 preserves exact_v1 provenance and strictly validates exact receipts
+[PASS] P02: Legacy approved-comment replay preserves locked rating 1 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 2 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 3 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 4 under default and explicit rating calls
+[PASS] P03: Migration 061 successfully recovers overwritten exact_v1 receipts using evidence
+=== TẤT CẢ KIỂM THỬ IDEMPOTENCY PROVENANCE & CANONICAL LEGACY RATING ĐỀU PASS 100% ===
+=== KHỞI TẠO PGLITE VÀ NẠP FULL SCHEMA SINGAPORE HIỆN TẠI ===
+=== GIAI ĐOẠN 1: TÁI HIỆN LỖI TRÊN BASELINE HIỆN TẠI (MIGRATION 054) ===
+  -> Đã tái hiện thành công lỗi: PUSH_METADATA_READ_ONLY: Client khong duoc phep thay doi metadata day app truc tiep
+PASS: Tái hiện: Authenticated role gọi RPC push_campaign bị PUSH_METADATA_READ_ONLY
+=== GIAI ĐOẠN 2: ÁP DỤNG BẢN SỬA (MIGRATION 056) ===
+  -> Đã nạp thành công migration 056_push_campaign_role_hardening.sql
+=== GIAI ĐOẠN 3: KIỂM CHỨNG TOÀN DIỆN BẢN SỬA ===
+PASS: Test 1: Authenticated role + đúng 100 Credit mua hợp lệ thành công (credits 100 -> 0)
+PASS: Test 2: Authenticated role + 483 Credit gọi RPC thành công (credits 483 -> 383, không còn lỗi)
+PASS: Test 3: Authenticated ghi trực tiếp metadata qua UPDATE bị chặn PUSH_METADATA_READ_ONLY
+PASS: Test 4: Authenticated tự đặt cờ GUC app.allow_push_metadata_write=true rồi UPDATE vẫn bị chặn
+PASS: Test 5: Authenticated khởi tạo metadata qua INSERT bị chặn PUSH_METADATA_READ_ONLY
+PASS: Test 6: Thiếu tiền (99 Credit) bị từ chối INSUFFICIENT_CREDITS, không trừ tiền, không receipt/log
+PASS: Test 7: Rollback toàn diện (nguyên tử): lỗi xảy ra thì tiền và log đều rollback
+PASS: Test 8: Replay cùng request_id trả replayed=true, không trừ lần 2, push_order giữ nguyên
+PASS: Test 9: Thứ tự ưu tiên đẩy app: A đẩy trước, B đẩy sau -> B > A; A đẩy lại -> A > B
+PASS: Test 10: Non-owner, Guest, Locked user bị từ chối đúng nguyên nhân
+PASS: Test 11: Business date tính theo ngày Việt Nam và hết hạn lúc 00:00 ngày hôm sau
+=== TẤT CẢ 11 TEST CASES KIỂM CHỨNG BẢN SỬA ĐỀU PASS 100% ===
+REPRODUCED: baseline submit fails with 42883 digest when pgcrypto is in extensions
+PASS: pgcrypto in extensions, admin: submission, replay, credits, mismatch, ACL and migration rerun
+REPRODUCED: baseline submit fails with 42883 digest when pgcrypto is in extensions
+PASS: pgcrypto in extensions, member: submission, replay, credits, mismatch, ACL and migration rerun
+PASS: pgcrypto in public, admin: submission, replay, credits, mismatch, ACL and migration rerun
+PASS: pgcrypto in public, member: submission, replay, credits, mismatch, ACL and migration rerun
+PASS public/member/app_test: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS public/member/mission: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS public/admin/app_test: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS public/admin/mission: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS extensions/member/app_test: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS extensions/member/mission: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS extensions/admin/app_test: context, credits, replay, conflict, ACL, reconcile and tombstone
+PASS extensions/admin/mission: context, credits, replay, conflict, ACL, reconcile and tombstone
+--- Testing Migration 065: Remove dHash Hard-Block ---
+PASS: User 1 submitted report with dHash 3a9c72f10b5d84e2
+PASS: User 2 successfully submitted report with identical dHash without SAME_SCREENSHOT_REJECTED
+PASS: User 1 submitted report on different campaign with same dHash
+PASS: Resubmitting rejected report with exact same photo URL was correctly rejected with REPORT_RESUBMIT_NEW_PHOTO_REQUIRED
+PASS: Resubmitting rejected report with new photo URL and same dHash succeeded
+PASS: Replay idempotency returns identical result
+PASS: Migration 065 is safe to re-run
+ALL BACKEND MIGRATION 065 TESTS PASSED SUCCESSFULLY!
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 066) ===
+PASS: Unproven legacy day safely defers with history_ready = false (R02)
+PASS: Fully covered day operates for ABSENT users without app-open requirement (R02/Absent)
+PASS: Disabled policy preserves debt=8 on a proven covered day (R04)
+PASS: D events preserve deleted campaign tests and handle same-day/late rejects (R02/D)
+PASS: Role journal protects historical boundary from retroactive exemption (R02/Role)
+PASS: Policy past-row moving and retroactive scheduling rejected (R04)
+=== ALL BASELINE 062+ REGRESSION TESTS PASSED ===
+=== LOADING ACTIVE MIGRATIONS DYNAMICALLY (062 ONWARD) ===
+Found 12 active migrations: [
+  '062_consolidated_baseline.sql',
+  '063_report_crypto_search_path.sql',
+  '064_explicit_report_context.sql',
+  '065_remove_dhash_hardblock.sql',
+  '066_push_and_carryover_hardening.sql',
+  '067_admin_direct_notification_popup.sql',
+  '068_owner_tester_reports_count.sql',
+  '069_admin_audit_hardening.sql',
+  '070_admin_management.sql',
+  '071_business_policies.sql',
+  '072_admin_notification_campaigns.sql',
+  '073_admin_action_audit.sql'
+]
+PASS: Successfully reproduced before-fix state (pending_reports_count and tester_reports_count missing)
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING GET_CAMPAIGN_DETAIL REPORT COUNT TESTS ===
+PASS: Fresh campaign with no reports returns 0 for all report counts
+PASS: Owner sees total and pending reports across all testers
+PASS: Admin and Moderator see campaign totals matching owner
+PASS: Regular tester only sees their own report totals and reports list
+PASS: Reports on Camp B do not leak into Camp A counts
+PASS: When all reports are approved or rejected, pending_reports_count is 0
+PASS: Pending reports older than 8 hours are auto-accepted and not counted as pending
+PASS: Feedbacks update reports_count and avg_rating without affecting tester_reports_count
+PASS: Authoritative count counts >200 reports accurately while reports array caps at 200
+ALL OWNER TESTER REPORT COUNT DATABASE TESTS PASSED
+=== LOADING ACTIVE MIGRATIONS (UP TO 999) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING BEHAVIORAL VERIFICATION ===
+PASS: Effective credit delta: -50 on balance 5 clamps to 0 with delta -5 in result and ledger
+PASS: Credit adjustment input validation: null target, null amount, 0 amount, overflow
+PASS: Absent lock target raises error
+PASS: Unlocked admin and moderator can approve reports without owner reward
+PASS: Unlocked admin and moderator can reject reports
+PASS: member denied: adjust credits
+PASS: member denied: lock user
+PASS: member denied: contact list
+PASS: member denied: contact reply
+PASS: member denied: contact status
+PASS: member denied: notification
+PASS: member denied: app configuration
+PASS: member denied: home stats read
+PASS: member denied: home stats write
+PASS: member denied: daily task configuration
+PASS: member denied: daily task list
+PASS: member denied: daily task history
+PASS: member denied: daily task schedule
+PASS: member denied: daily task cancellation
+PASS: member denied: campaign pause
+PASS: member denied: campaign resume
+PASS: member denied: campaign delete
+PASS: moderator denied: adjust credits
+PASS: moderator denied: lock user
+PASS: moderator denied: contact list
+PASS: moderator denied: contact reply
+PASS: moderator denied: contact status
+PASS: moderator denied: notification
+PASS: moderator denied: app configuration
+PASS: moderator denied: home stats read
+PASS: moderator denied: home stats write
+PASS: moderator denied: daily task configuration
+PASS: moderator denied: daily task list
+PASS: moderator denied: daily task history
+PASS: moderator denied: daily task schedule
+PASS: moderator denied: daily task cancellation
+PASS: moderator denied: campaign pause
+PASS: moderator denied: campaign resume
+PASS: moderator denied: campaign delete
+PASS: missing-profile denied: adjust credits
+PASS: missing-profile denied: lock user
+PASS: missing-profile denied: contact list
+PASS: missing-profile denied: contact reply
+PASS: missing-profile denied: contact status
+PASS: missing-profile denied: notification
+PASS: missing-profile denied: app configuration
+PASS: missing-profile denied: home stats read
+PASS: missing-profile denied: home stats write
+PASS: missing-profile denied: daily task configuration
+PASS: missing-profile denied: daily task list
+PASS: missing-profile denied: daily task history
+PASS: missing-profile denied: daily task schedule
+PASS: missing-profile denied: daily task cancellation
+PASS: missing-profile denied: campaign pause
+PASS: missing-profile denied: campaign resume
+PASS: missing-profile denied: campaign delete
+PASS: anonymous denied: adjust credits
+PASS: anonymous denied: lock user
+PASS: anonymous denied: contact list
+PASS: anonymous denied: contact reply
+PASS: anonymous denied: contact status
+PASS: anonymous denied: notification
+PASS: anonymous denied: app configuration
+PASS: anonymous denied: home stats read
+PASS: anonymous denied: home stats write
+PASS: anonymous denied: daily task configuration
+PASS: anonymous denied: daily task list
+PASS: anonymous denied: daily task history
+PASS: anonymous denied: daily task schedule
+PASS: anonymous denied: daily task cancellation
+PASS: anonymous denied: campaign pause
+PASS: anonymous denied: campaign resume
+PASS: anonymous denied: campaign delete
+PASS: locked admin denied: adjust credits
+PASS: locked admin denied: lock user
+PASS: locked admin denied: contact list
+PASS: locked admin denied: contact reply
+PASS: locked admin denied: contact status
+PASS: locked admin denied: notification
+PASS: locked admin denied: app configuration
+PASS: locked admin denied: home stats read
+PASS: locked admin denied: home stats write
+PASS: locked admin denied: daily task configuration
+PASS: locked admin denied: daily task list
+PASS: locked admin denied: daily task history
+PASS: locked admin denied: daily task schedule
+PASS: locked admin denied: daily task cancellation
+PASS: locked admin denied: campaign pause
+PASS: locked admin denied: campaign resume
+PASS: locked admin denied: campaign delete
+PASS: locked admin cannot approve reports
+PASS: locked admin cannot reject reports
+PASS: locked moderator cannot approve reports
+PASS: locked moderator cannot reject reports
+PASS: Locked admin cannot update app_configs directly
+PASS: Locked admin cannot delete campaigns directly
+PASS: anon has no TRUNCATE capability on public tables
+PASS: anon has no TRIGGER capability on public tables
+PASS: authenticated has no TRUNCATE capability on public tables
+PASS: authenticated has no TRIGGER capability on public tables
+PASS: Unlocked admin can send direct notification to locked recipient and popup state is registered
+PASS: get_campaign_detail preserves exact DTO keys and excludes locked callers from can_manage
+PASS: reject_tester_report: bounded clawback, ledger metadata, checkin note preservation, warning rules
+PASS: Locked admin cannot bypass moderation through UPDATE on their own campaign
+=== ALL ADMIN AUDIT HARDENING TESTS PASSED ===
+=== LOADING ACTIVE MIGRATIONS (UP TO 999) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING ADMIN MANAGEMENT BEHAVIORAL TESTS (STAGE A) ===
+PASS: Deny non-admin / anon / locked: get action events
+PASS: Deny non-admin / anon / locked: get capabilities
+PASS: Deny non-admin / anon / locked: search members
+PASS: Deny non-admin / anon / locked: get member overview
+PASS: Deny non-admin / anon / locked: get member credit history
+PASS: Deny non-admin / anon / locked: get member daily tasks
+PASS: Deny non-admin / anon / locked: get carryover policies
+PASS: Deny non-admin / anon / locked: list future carryover policies
+PASS: Deny non-admin / anon / locked: schedule carryover policy
+PASS: Deny non-admin / anon / locked: cancel carryover policy
+PASS: Deny non-admin / anon / locked: search campaigns
+PASS: Deny non-admin / anon / locked: get tester reports queue
+PASS: Deny non-admin / anon / locked: compensate credits
+PASS: Deny non-admin / anon / locked: set user role
+PASS: Deny non-admin / anon / locked: get member warnings
+PASS: Deny non-admin / anon / locked: revoke warning
+PASS: Deny non-admin / anon / locked: get monitor summary
+PASS: Deny non-admin / anon / locked: get job runs queue
+PASS: Deny non-admin / anon / locked: retry mission settlement
+PASS: Capabilities RPC distinguishes bootstrap capability and UI explanation
+PASS: Role Management: Admin without admin_management cannot grant or revoke admin
+PASS: Role Management: Admin cannot change own role
+PASS: Role Management: Preserves last unlocked admin under concurrency
+PASS: Role Management: Records audit event and supports request ID replay
+PASS: Search members across >500 profiles with stable cursor pagination
+PASS: Member overview, credit history, and daily tasks explanation
+PASS: Carryover policy: active/future/history, revision conflict and cancellation
+PASS: admin_list_future_carryover_policies: 125 future policies pagination, cursor stability on cancel, bounds and security
+PASS: Campaign search and tester reports queue with display joins and media_expired flag
+PASS: Credit compensation: safe retry replay, mismatch rejection, bounded delta
+PASS: Warning revocation append-only, consistency across get_unread_warnings and get_campaign_detail
+PASS: System monitor summary and mission settlement retry wrapper
+=== ALL ADMIN MANAGEMENT BEHAVIORAL TESTS PASSED (STAGE A) ===
+
+> test:admin-expansion
+> npm run test:business-policies && npm run test:notification-campaigns && npm run test:admin-action-audit && npm run test:admin-expansion-integration && npm run test:admin-direct-popup
+
+
+> test:business-policies
+> node run-business-policies-test.mjs
+
+=== KHỞI TẠO PGLITE VÀ NẠP MIGRATIONS 062 - 070 ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+=== NẠP STAGED MIGRATION 071 BUSINESS POLICIES FOUNDATION & CONSUMERS ===
+=== BẮT ĐẦU KIỂM THỬ BUSINESS POLICIES FOUNDATION ===
+PASS: 1. Baseline configuration defaults & shape
+PASS: 2. Admin permission guards reject non-admin & locked admin
+PASS: 3. Public authenticated get_effective_business_policy and get_business_quote
+PASS: 4. Range, date and CAS validation
+PASS: 5. Schedule future policy and verify CAS & audit
+PASS: 6. Schedule second future date, cancel it, and verify history pagination
+PASS: 7. Anti-tamper triggers prevent history mutation and active policy delete
+PASS: 8. Admin RequestID replay, mismatch detection, finite bounds & cursor list
+PASS: 9. Consumer: handle_new_user with policy credits, ledger consistency & 0 credits
+PASS: 10. Consumer: push_campaign legacy & v2 with fee changes, replays and bounds
+PASS: 11. Consumer: unlock_or_renew_slot legacy & v2 with fee/days changes, replays, prerequisites
+PASS: 12. 070 integration & record_admin_action_event audit integration
+PASS: 13. Quote activation token rotation & stale quote rejection with date seam
+PASS: 14. Daily Inactivity Penalty: 0% tier, snapshot terms, and history immutability
+PASS: 15. Financial metadata guard: direct client inserts/updates rejected
+PASS: 16. Report Lifecycle: submission snapshots, owner vs staff approval, auto-accept
+PASS: 17. Zero provisional reward, clawback bounds, and 070 warning revocation
+PASS: 18. admin_get_tester_reports_queue 070 override with snapshot fields
+PASS: 19. Helper ACLs: Private helpers denied to authenticated & anon roles
+PASS: 20. App Update Lifecycle: publish v2, claim snapshots, close/refund, legacy gate & replays
+PASS: 21. Real get_business_quote(all) confirmation, immediate & post-activation replay, token mismatch
+=== TẤT CẢ CÁC BƯỚC KIỂM THỬ FOUNDATION VÀ CONSUMERS ĐÃ VƯỢT QUA THÀNH CÔNG ===
+
+> test:notification-campaigns
+> node run-admin-notification-campaigns-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 069) EXCLUDING 070/071 ===
+Applying migration 062_consolidated_baseline.sql...
+Applying migration 063_report_crypto_search_path.sql...
+Applying migration 064_explicit_report_context.sql...
+Applying migration 065_remove_dhash_hardblock.sql...
+Applying migration 066_push_and_carryover_hardening.sql...
+Applying migration 067_admin_direct_notification_popup.sql...
+Applying migration 068_owner_tester_reports_count.sql...
+Applying migration 069_admin_audit_hardening.sql...
+=== APPLYING STAGED 072 NOTIFICATION CAMPAIGNS MIGRATION ===
+=== SEEDING BASE TEST PROFILES ===
+=== RUNNING NOTIFICATION CAMPAIGNS BEHAVIORAL TESTS ===
+PASS: Core tables and indexes created successfully
+PASS: All admin RPCs enforce unlocked admin and deny member/moderator/locked/anon
+PASS: Content boundaries, target_role, and selected_user_ids validation
+PASS: Preview handles empty selection and role count accurately
+PASS: Draft CAS conflict prevents stale updates
+PASS: Future schedule/edit/cancel lifecycle and rejection of past/in-flight cancellation
+PASS: Send-now scheduling and worker exactly-once fanout with idempotent restart
+PASS: Mutation request ID replay succeeds idempotently and payload mismatch fails
+Seeding 550 test members for scale batch testing...
+PASS: Fanout worker processes 550+ recipients in batches and cursor paginates cleanly
+PASS: Read count joined from notifications.is_read and no popup states registered
+PASS: Deleted notification rows do not decrease sent_count
+PASS: Internal helpers and direct table modifications are denied to client roles
+PASS: Compatibility with existing direct notification popup registration and original broadcast
+PASS: Admin scheduler health exposes status and background queue counts
+PASS: Empty scheduled role audience freezes at 0 and does not grow when member changes role
+PASS: Filter status whitelist and cursor malformed/infinity protection
+PASS: Campaign detail bounds events list and supports events_limit
+Applying 070_admin_management.sql for integrated common audit verification...
+PASS: Integrated common audit records to admin_action_events exactly once when 070 installed
+PASS: Committed schedule replays successfully with same UUID after scheduled time passes
+=== ALL ADMIN NOTIFICATION CAMPAIGNS TESTS PASSED ===
+
+> test:admin-action-audit
+> node run-admin-action-audit-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 TO 070) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+=== APPLYING STAGED 073 (FOCUS 1 AUDIT & ROLES) ===
+=== RUNNING ADMIN ACTION AUDIT & ROLE COUPLING TESTS (STAGED 073 FOCUS 1) ===
+PASS: Legacy admin_adjust_credits records common audit event and clamps overdraft
+PASS: admin_compensate_credits emits exactly one common intent event and supports replay
+PASS: Private helper _admin_adjust_credits_internal has execution revoked from client roles
+PASS: admin_set_user_lock records audit, blocks self-lock and protects last unlocked admin
+PASS: Role demotion clears admin_capabilities preventing dormant privilege reactivation
+PASS: Legacy admin_send_notification records audit and registers 067 popup state
+PASS: Audited app_config, home_stats_cycle, daily_task_policy mutations
+PASS: Campaign pause, resume, delete mutations emit audit events
+PASS: Contact reports reply and update status emit audit events
+PASS: Owner moderation retains normal review events; Staff moderation records in common audit
+PASS: Read-only GET RPCs do not emit fake action audit events
+PASS: All _impl_ internal functions have execution revoked from authenticated and anon
+PASS: Re-application of 073 is completely idempotent
+=== ALL ADMIN ACTION AUDIT & ROLE COUPLING TESTS PASSED (STAGED 073 COMPLETE) ===
+
+> test:admin-expansion-integration
+> node run-admin-expansion-integration-test.mjs
+
+APPLIED: 062_consolidated_baseline.sql
+APPLIED: 063_report_crypto_search_path.sql
+APPLIED: 064_explicit_report_context.sql
+APPLIED: 065_remove_dhash_hardblock.sql
+APPLIED: 066_push_and_carryover_hardening.sql
+APPLIED: 067_admin_direct_notification_popup.sql
+APPLIED: 068_owner_tester_reports_count.sql
+APPLIED: 069_admin_audit_hardening.sql
+APPLIED: 070_admin_management.sql
+APPLIED: 071_business_policies.sql
+APPLIED: 072_admin_notification_campaigns.sql
+APPLIED: 073_admin_action_audit.sql
+PASS: Admin-owner review preserves071 snapshot bonuses and owner-mode audit semantics
+PASS: Non-owner staff review retains snapshot and emits one common audit event
+PASS: Staff rejection retains071 exact provisional clawback and common audit
+PASS: Final queue combines070 media expiry and071 reward snapshots
+PASS: Final-chain private helpers and public policy metadata remain restricted
+ALL ADMIN EXPANSION INTEGRATION TESTS PASSED
+
+> test:admin-direct-popup
+> node run-admin-direct-notification-popup-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 067) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING ADMIN DIRECT NOTIFICATION POPUP TESTS ===
+PASS: Admin direct send registers notification and popup state with count 0
+PASS: Broadcast does NOT register popup state
+PASS: Member and anon are forbidden from sending notifications and executing popup RPCs
+PASS: Client directly inserting fake notification cannot get popup
+PASS: Trigger prevents client from modifying protected fields and unmarking read
+PASS: User B cannot claim or acknowledge User A notification
+PASS: Claim quotas 1-5, retry idempotency, and session 6 blocked
+PASS: Acknowledge stops popup and subsequent claim/session retry returns stopped
+PASS: Deleting notification sets receipt notification_id null and stops replay without picking another
+PASS: Finds eligible notification beyond top 50 items and preserves created_at order
+PASS: Locked account cannot claim popup
+=== ALL ADMIN DIRECT NOTIFICATION POPUP TESTS PASSED ===

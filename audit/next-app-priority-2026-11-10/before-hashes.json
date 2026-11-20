@@ -1,0 +1,1254 @@
+[
+  {
+    "path": "supabase/tests\\run-verify-concurrency-runner-setup.mjs",
+    "hash": "0A2AD513A04AAE7C056D7D4C0DA44DE9944772B82656532729696412F66DC93E"
+  },
+  {
+    "path": "supabase/tests\\run-thumbnail-migration.mjs",
+    "hash": "8FD05CBAD084AC90800B1DA5F304FA57FCBD3A05476378D6514A70F19AF45A53"
+  },
+  {
+    "path": "supabase/tests\\run-report-idempotency-provenance-and-rating-test.mjs",
+    "hash": "11490111493132D75BDEBC8900DF2F28D75386192A73A23BE1A19818A0AA1831"
+  },
+  {
+    "path": "supabase/tests\\run-report-idempotency-ledger-test.mjs",
+    "hash": "05ACF51837D998E9FECE461BFED655A604419BC9D3B413CCE0411DAD976C8D25"
+  },
+  {
+    "path": "supabase/tests\\run-report-extension-schema-test.mjs",
+    "hash": "ED2CC7D03987AE750F2A96CE0BFC55907A71C2557C62F6C70EA8F5ABB79B7B30"
+  },
+  {
+    "path": "supabase/tests\\run-remove-dhash-hardblock-test.mjs",
+    "hash": "26045E25C42122C472FDD3F03444E45816222569B7E79F23CCECEA4709A4C750"
+  },
+  {
+    "path": "supabase/tests\\run-push-campaign-role-hardening-test.mjs",
+    "hash": "DC7302EF234A7E36EA0CD17E6173938F1FEF2D17C518A14649970C2021C26730"
+  },
+  {
+    "path": "supabase/tests\\run-push-and-carryover-hardening-test.mjs",
+    "hash": "D440A6188E83E08FFCEFEA397270AC281FA698ECC265FBD38DCC35B2FB6A82C0"
+  },
+  {
+    "path": "supabase/tests\\run-push-and-carryover-baseline062-regression-test.mjs",
+    "hash": "4EF544B675DE2483AD45789FD17B3336B539E5268AC4DC7FF448651BDDD0E743"
+  },
+  {
+    "path": "supabase/tests\\run-owner-tester-reports-count-test.mjs",
+    "hash": "89E9F6904C99912500E65F1D87E547CD23D64550E12D8E6D8533A98C156D3B19"
+  },
+  {
+    "path": "supabase/tests\\run-owner-auto-pause-test.mjs",
+    "hash": "8A36B6222108A306CF845982373DBD1F367C7362511F080E55A0954AA72B3CD5"
+  },
+  {
+    "path": "supabase/tests\\run-owner-auto-pause-hardening-test.mjs",
+    "hash": "14138A54F81F306CC56AADEE5BBC48945F9083AB10219303F8658E0E8D1174FD"
+  },
+  {
+    "path": "supabase/tests\\run-owner-auto-pause-concurrency-test.mjs",
+    "hash": "2F8598A8608F61B99C18DCC4E2115448338914CED66B0EB1E7C9693B61AE7178"
+  },
+  {
+    "path": "supabase/tests\\run-owner-auto-pause-concurrency-fixture-test.mjs",
+    "hash": "04CEE655CEC2895A0DCF32DC5CD9D9D86671723DEB54AFABC3C023ADC8988744"
+  },
+  {
+    "path": "supabase/tests\\run-mission-reward-modes-test.mjs",
+    "hash": "1B8B9139332C1C3F8A50CBA3C0E19012D72DEB5A6D45D1FD225F01E75E925136"
+  },
+  {
+    "path": "supabase/tests\\run-mission-report-and-expiration-test.mjs",
+    "hash": "5C3098587D8BABA7B69F41ECE3B561C0FE01B5CE3BA127D613D47B72068047F3"
+  },
+  {
+    "path": "supabase/tests\\run-mission-flow-hardening.mjs",
+    "hash": "A6492B5CCB95E71B7520D8950B2B0ED5B7A8C5F3C34113C5CE7CD7664686342A"
+  },
+  {
+    "path": "supabase/tests\\run-mission-finalized-campaigns-test.mjs",
+    "hash": "FAFA33606DB2A658EDF2F1E7665B649F8DAEE6D6AADAB9D44E3632205CC4A412"
+  },
+  {
+    "path": "supabase/tests\\run-media-gateway-test.mjs",
+    "hash": "2592A97A2EAD928F44DBD9F142571FD228463C540E1328D920348A4445FFD8E1"
+  },
+  {
+    "path": "supabase/tests\\run-home-stats-cycle-test.mjs",
+    "hash": "9FB7AFDED79C27212383515C29D16A0291676CEE9514EC638BA50B621F45ECD6"
+  },
+  {
+    "path": "supabase/tests\\run-explicit-report-context-test.mjs",
+    "hash": "79B79739232B2EF4FF922E55A3586B05F1EBC4A9C2FCF637E666B4DE5B930EB3"
+  },
+  {
+    "path": "supabase/tests\\run-egress-sync-v2-test.mjs",
+    "hash": "C5E1D7C7C80530EAFC7DDE814116AF9FA0563AC2C90B0B5B587443527CD42C91"
+  },
+  {
+    "path": "supabase/tests\\run-egress-flags-v2-test.mjs",
+    "hash": "7ABE179482D8CC8F2C7E81213CEF2E51AE8F658D96BE64BFA6ABF76DAD7872F7"
+  },
+  {
+    "path": "supabase/tests\\run-daily-task-ratio.mjs",
+    "hash": "624562FAF48BB1B37559FA4B7FFDD837822939BB2CA87F90DFA5D9312735AF19"
+  },
+  {
+    "path": "supabase/tests\\run-daily-task-carryover.mjs",
+    "hash": "660DA62CE1F876E3D18B18D86856361B8DE224E9E422643FE7F4A88EA38DABC0"
+  },
+  {
+    "path": "supabase/tests\\run-consolidated-baseline-test.mjs",
+    "hash": "A8B473DFAFB8B12E82602F69E08F62B739856F36A9C7BE150C85CE22902B9D73"
+  },
+  {
+    "path": "supabase/tests\\run-carryover-fix-acceptance-test.mjs",
+    "hash": "204E64B1763D64B09A7AE2BC6776F6610D842911622450187C9E631E74EC18F3"
+  },
+  {
+    "path": "supabase/tests\\run-campaign-push-test.mjs",
+    "hash": "358417BAFD105401CFAAC83E2DF9E6AE6F4E94741ACC9C9EAE7DC461AA85AED8"
+  },
+  {
+    "path": "supabase/tests\\run-campaign-posting-policies-test.mjs",
+    "hash": "E88B844E7B8EFAAD2BEB8CF981A16BFDFB168A5A48EF4B06CC343190FA429130"
+  },
+  {
+    "path": "supabase/tests\\run-business-policies-test.mjs",
+    "hash": "D550F1225BAC2D7D956573B8E27D645FA74470EF33BC813E97BC1D8C7037E5CF"
+  },
+  {
+    "path": "supabase/tests\\run-backend-cleanup-hardening.mjs",
+    "hash": "63BA26DE0746EC38280D489E34A899186DC7A28C408907CF6944F1BFB1E2FB4C"
+  },
+  {
+    "path": "supabase/tests\\run-app-update-reward-test.mjs",
+    "hash": "4D89AA0C999C8F9037991C32826937F8AEDFF8870FD39E445DC3F43BD952D834"
+  },
+  {
+    "path": "supabase/tests\\run-app-mission-window-test.mjs",
+    "hash": "6C94FB4FFAF439DAFA72BD8A895043262B446996E9EA3A6F207E1CB98E200E3D"
+  },
+  {
+    "path": "supabase/tests\\run-admin-popup-concurrency-test.mjs",
+    "hash": "5879C5EFF0FBF9312C22ECAC6B992D648DB8392147FC6BC1898BFAEBC13EE27A"
+  },
+  {
+    "path": "supabase/tests\\run-admin-pause-resume-compatibility-test.mjs",
+    "hash": "8055D8723CCAA37780320ADBCB8309CADD3CCC1990069E83009F0A154A364F67"
+  },
+  {
+    "path": "supabase/tests\\run-admin-pause-reason-popup-test.mjs",
+    "hash": "460CA86D10B2979235E7E780CC8AC84DE431BA9252DA8DFDD8EFF31F872579B4"
+  },
+  {
+    "path": "supabase/tests\\run-admin-pause-reason-concurrency-test.mjs",
+    "hash": "CB3A9EDE24ECED8E880EED07EE373FFDF36517F06C497E06A3F49B5F29613BDA"
+  },
+  {
+    "path": "supabase/tests\\run-admin-notification-campaigns-test.mjs",
+    "hash": "D952EAFC3EAF402CF29BA63877FAE773BEBE4B685A3280BA4A8E03D4C31AFFC7"
+  },
+  {
+    "path": "supabase/tests\\run-admin-management-test.mjs",
+    "hash": "25D195328EFABBE55285E395B3BE2A8E937DFF0BD9FC638E57730DEB7AC0C01E"
+  },
+  {
+    "path": "supabase/tests\\run-admin-expansion-integration-test.mjs",
+    "hash": "0E195B7C6592E09372A46956CC9F4160752EE84BC2C2466A0297194EECFF74D2"
+  },
+  {
+    "path": "supabase/tests\\run-admin-direct-notification-popup-test.mjs",
+    "hash": "82478B1C4DCE4539CC3289EADC63991E59F37190F4A15FFA5D283A20FBF29BA6"
+  },
+  {
+    "path": "supabase/tests\\run-admin-daily-task-policy-test.mjs",
+    "hash": "12A74F97080D48E4D99458DA53AC312853FF6876774E5F8D546AB9CAB08D6983"
+  },
+  {
+    "path": "supabase/tests\\run-admin-audit-hardening-test.mjs",
+    "hash": "7ABFEE3FDF887BEC93168B91703B746B997083100549B759EAF5D95A7B7BB1C6"
+  },
+  {
+    "path": "supabase/tests\\run-admin-action-audit-test.mjs",
+    "hash": "5FA19537F399B7158F56D9EB7A63CDFE13C9832FBB57FC2B5B3A12C3A9CC4579"
+  },
+  {
+    "path": "supabase/tests\\probe-daily-mission-overlap.mjs",
+    "hash": "696D8C17F9134070905586E773B445CED348DFCF9E7FDB37F3469D35AE2FDE04"
+  },
+  {
+    "path": "supabase/tests\\package.json",
+    "hash": "4E3C036D4B8C2D281782C328746540B8646BD80AD6BBBAF14B31877CF0BC7A4B"
+  },
+  {
+    "path": "supabase/tests\\owner-auto-pause-concurrency-fixture.mjs",
+    "hash": "48F41253DD58BA455D86C07180D672D1768E513242A8360EC8082F02DF56A97F"
+  },
+  {
+    "path": "supabase/tests\\daily_task_ratio_fixture.sql",
+    "hash": "001CC31A62BBD8EC2A102D6C872E25F46365EB05D375E1FCE11012C08AFAAE01"
+  },
+  {
+    "path": "supabase/tests\\daily_task_ratio.sql",
+    "hash": "78D128EF053C9164173E6C21CDE7DE9C8936CC797A3B0B0B39538C82D961D774"
+  },
+  {
+    "path": "supabase/tests\\audit-owner-auto-pause-flow.mjs",
+    "hash": "E99544E9188FE78387FA122568AFA54EEB5B5363835774E02311C013BE7D7592"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\work\\ReportUploadWorkerTest.kt",
+    "hash": "8A9BB8ED6D7CBB6D9BC0B06D37AB123453E4B658C12D07959B8806BE10435054"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\work\\ReportSubmissionLatencyTest.kt",
+    "hash": "798D2DC8EA66E776174A23C417119ADA8EC3928D1EFCEF88451DBF985C4F7B04"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\work\\ReportBackgroundSubmissionTest.kt",
+    "hash": "B155AD10F20360249CC425FAC117EFB2D2427D2BABB050D64D91ECDA10C55871"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\work\\EgressThumbnailPipelineAuditTest.kt",
+    "hash": "FBC4AC6528D48096435B9BB0712EE287A73FBF377AB7B5ED8CC0F6610CDC349A"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\ReportUrlRetryTest.kt",
+    "hash": "3D69353DE4F4E4E5773754CE3D71517297456B8C7EE1A816024478DF868445EA"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\ReportComparisonSelectorTest.kt",
+    "hash": "302E588B5AFBD0B959344A5179FD90BD823C0BB8E73662185A625FD9793CA09D"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\FirebaseEgressOptimizationTest.kt",
+    "hash": "664C1E9B52350EFCC4E2A5DA93243D164B9F3151E9F3659B275A942ACA7D1B20"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\EgressRound2OptInTest.kt",
+    "hash": "9139526CDE99056590EF2CAEBA392ED01F084F429873834E1755C779945DE359"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\EgressGatewayClientAuditTest.kt",
+    "hash": "D4612CAF3832584FBEB11270947D21ABE45F483D4F5A09E9A0D32481DA1F2CC2"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\EgressFinalPolicyAuditTest.kt",
+    "hash": "49B1937B6D94A664C04F06412E673C94BD45FFC558329B3950C6A50F75CAD18B"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\EgressAuditProbeTest.kt",
+    "hash": "CD5A723C87E36EDE33890B5321780C2974EEFDFCF5B0E5872576B47687A00B6E"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\DetailedImageComparatorTest.kt",
+    "hash": "1CF18EC440D376DBA51D7F5B34979E14987C69D7A492EA2AD1B304939BA444AE"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\util\\ComparisonStateCoordinatorTest.kt",
+    "hash": "F6060E520C4723F47C3E71601ED3465BE068BCB9E2176AD84D5E474A7D8BA75E"
+  },
+  {
+    "path": "app/src/main/res\\xml\\data_extraction_rules.xml",
+    "hash": "7578D504490AE7C0F127CE6B85128A0FF41CB8FC8D990838BAF1920CDA8CA10E"
+  },
+  {
+    "path": "app/src/main/res\\values-vi\\strings.xml",
+    "hash": "90FF946D3E8508775F4F85CBF568A13C54A31C4DF6A641FD51CBA9B1D3269300"
+  },
+  {
+    "path": "app/src/main/res\\values-vi\\help_faq.xml",
+    "hash": "C49F84E3439704FDE818A4D739141CCA4A7E2190D99CFF81FFED22F8E5E12D2F"
+  },
+  {
+    "path": "app/src/main/res\\values-vi\\admin_notifications.xml",
+    "hash": "53852D72668D4D92262F83294DAA36395212CD4D872DE75B87B1541D5E830A0A"
+  },
+  {
+    "path": "app/src/main/res\\values-vi\\admin_management.xml",
+    "hash": "98D532AB8B95210B2EA80B6D4CD2A33CD2AC703EAD43006E19A07F91535BA072"
+  },
+  {
+    "path": "app/src/main/res\\values-vi\\admin_business_policy.xml",
+    "hash": "40AF639349E5C0464E7CDA6A79AC0E66F514F3C6B165525C38858FE25B60A0E7"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\SlotAndPushDurabilityBehavioralTest.kt",
+    "hash": "858261EA7F669D474320393B5CB936A21217ECCC2EF56FC76189ADE77C8C1A5F"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\PendingCarryoverRetryRegressionTest.kt",
+    "hash": "999239295B5B8C75226AF166857E1BF79C323574E2A363430ED97DC64DAF4DCF"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerDailyTaskOrderingReviewTest.kt",
+    "hash": "7DE155F9D672DD55C4B1A08DA8898FF4BE8E22CD64045B497E4F74E76BFE3B2E"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerDailyRefreshRaceReviewTest.kt",
+    "hash": "17CDFE5D03F79C1E1E49745D26E4CC830A0232B1EDC008915D06DCD818EC28E8"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAutoPauseResumeHardeningTest.kt",
+    "hash": "476FDB2EFE25E78194795D7C0948C3CD18D55F9788F12646F3284B9DC63A09B8"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupViewModelTest.kt",
+    "hash": "693B146765D72CB86486CCF1A67697F5628244B169AE13DB56AC65B9991B016D"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupRound3RegressionTest.kt",
+    "hash": "2EF529EE667985F0B28EF9E09351090FC0A679D6846C0FBB5B72A5B8E05A28A8"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupReviewRegressionTest.kt",
+    "hash": "5D0B313B629755AC7C3B8A89E6626BB502EF3B06C3FC63E717A1E83D4A401151"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrderTest.kt",
+    "hash": "13BEF0B3C3BF255D4D7D0BFA585E2F09CC9C1A05A68E2065B67B1CF441F471A7"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignPostingPolicyViewModelTest.kt",
+    "hash": "963FEAAD983F25A4CA95F6C0B5D8FADE925FFE4690B73E9AA0F115B77BB7515C"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AppUpdateReleaseViewModelBehavioralTest.kt",
+    "hash": "24722D0F85B17DD339C14E2576C01271512A04501778189F9EF8B6B4A3D0DE0B"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseSessionIdentityReviewTest.kt",
+    "hash": "0BE104DCB5084886E1EC7AE2C2A5056E4B9DD3725CD9C17DAADD28F53064141B"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseDialogControllerTest.kt",
+    "hash": "32DEC8ECE1C80C4A5B66AA336E96583C508302BC244E429FB943BF432247B257"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminOwnerAutoPauseViewModelTest.kt",
+    "hash": "FBA8782AE99AF7CD3EE806A917B0ABD4E79406F37132DAA3842C4AF686EB1FF7"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminNotificationCampaignViewModelTest.kt",
+    "hash": "9732353486EF1C5467779C63D060C5FC0B45E6C59F313B79511D2002D69F9F0E"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminManagementCoreTest.kt",
+    "hash": "B08D85D807ECEC33DD8D05E47E643F988F5BF774B4B58E6E21E0B1A1B242BE12"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminFlowSessionRaceTest.kt",
+    "hash": "B0AEA55FB659857FC8E9B73067D76376E47737DFA80EDE7BEFA7A8690A1007F1"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignPauseReasonTest.kt",
+    "hash": "BC95AA720CA2915751E0200DC0D4E2841B7ADF41AE57B558D0D120F9A08CBECD"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignActionRaceTest.kt",
+    "hash": "EBC1777D8AD95810E4E916B993BBE136D9C78F5EB94108DD8CB87B6133F83FE1"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminBusinessPolicyViewModelTest.kt",
+    "hash": "04BA03B3E9C7909BE03FE4F605C4231E29C42699DAE1DEF41B4244191CDD69AC"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\audit\\ReportV2WirePayloadProbeTest.kt",
+    "hash": "72E1EF7B6C91F82664381113B9AC2FE3BC7104195E029F83373CBD558EA1A4CF"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\audit\\ReportOverlapTest.kt",
+    "hash": "11BF53573EC0B3319A75CDC02950E8714E35795E969219785BBBBFCBB86B0275"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\audit\\ImageHashCollisionAuditTest.kt",
+    "hash": "A674E852640650645EF0BB5B7401E4D91AE8A835578F803A165FA1898550CD15"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\audit\\BusinessPolicyRecheckIndependentTest.kt",
+    "hash": "080FFDB3A05E1153280653C7B6B785E09302A982E7D5790AEA6B4660291967D7"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\localization\\LocalizationHardeningTest.kt",
+    "hash": "7AF6269B9C22EF57DCD4C55131E640466EEAA5D8F41D4D6D89CB5035C337FAAF"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\localization\\ComposeLocaleRegressionTest.kt",
+    "hash": "3301ECFF4DE124140940BE17A169531499989AEBD5566587C9BE50BE52D015C1"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportWorkStateTest.kt",
+    "hash": "1828CACC2AAFCED7439201112775F677580C2E50699559F3CD0CAAE73A452F1E"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicyTest.kt",
+    "hash": "AFCC14BCC4FC4F78422FD2023AECC08E57BC8068955C29CFA27EF2D08877EDEA"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportSubmitManagerIntegrationTest.kt",
+    "hash": "66EC6D6517C38275BF5EF2940F7A1E771AA676AA9B33CD1949E915BB38208898"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailureTest.kt",
+    "hash": "F0217F1CB6E22807653A8CB6371C06AAEFBCB101355FCCF438AF94AEF005CAD0"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportRpcFallbackAuditTest.kt",
+    "hash": "6ED844C6121EE2465B31D1EB9D126AE11485FA04AF5559E8BB50605B2E6A1974"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\ReportRpcCompatibilityTest.kt",
+    "hash": "367F203BB2FE29C03547CA3C1E967F1163E189BA196A09E745A1C46C2179F5AD"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\PushAndCarryoverHardeningTest.kt",
+    "hash": "522AC4CDB794536F66CFA1CDA1AF146F29043AF62D65EA11E1BCC76C633F2CB0"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\PendingReportStoreTest.kt",
+    "hash": "C4EFB59C67E16719C2C6BEBCA0E908C42A42DD06C4C4EAC5D1A1F73573F2A054"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\OwnerReportCountBehavioralTest.kt",
+    "hash": "EB49F23DFB4B8B409676FED49FC999BF7D908885CA10C0DFDBB681FECE9ABE60"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\NotificationPendingAckStoreTest.kt",
+    "hash": "5EB14F032FC7FB2392A00FCE1FA0757FD05F3476A7FD6F292D6DCCE22B2ABB9B"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\MissionRewardModesUnitTest.kt",
+    "hash": "15E37C580C4D312BCCA414F5989E84250AB46ACF25F46C3096FF53B4E9A65A31"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\MissionReportRecheckProbeTest.kt",
+    "hash": "CEA079B9F09FE202E5A0F0B86BEB0250B9869C3CF416B2A8EB04EDF5ADF5F4C0"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\MissionReportMultiAttachmentTest.kt",
+    "hash": "3019117DDE673555EFBCCB8CEDF53E012F8E13B3FAF0B55B8B8AB1A84C37025F"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\MissionReportAndExpirationTest.kt",
+    "hash": "9236C9384EF6C37AE1904241BB86D266E06E943637039D92BF13D7295A8639FA"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\MissionRegressionTest.kt",
+    "hash": "B2E0319670A681B0BB48F2BD7ACD94A5AE5E40D404D3955064800FAE6EB0E309"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotIntegrityAuditTest.kt",
+    "hash": "C65ED609707E113F7590500C99329A19DD3C2B07D483A7C0E526997ACF745950"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotClearAuditTest.kt",
+    "hash": "50431C95721E7B7592AFE6555C152047008B5DC465C08914659DFFC96CBA6FD0"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCachePublicationAuditTest.kt",
+    "hash": "D78ADA712E1C0B320CF7CA1109000105E6C4B6B37304BD5210DFF73ECC05DD9E"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheMutationAuditTest.kt",
+    "hash": "BFE61AB25C60A2D7F70ABA775427F268542ECBC40D86F69012DACAF70ABAE557"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheFinalAuditTest.kt",
+    "hash": "C0C9519473A02DB543322162E73D3C24BFD579F0B337B6522A484747379E2E83"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheCompositeAuditTest.kt",
+    "hash": "701535A4C9164F648E5D4B6774271FFD51B089C2063A0B6476909DB62C0A5586"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheClockAuditTest.kt",
+    "hash": "4609B4846025AF8B8CD73ADAE314E5C839886414AD4276D1E716D23D062E5EA8"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\IndependentCacheBudgetAuditTest.kt",
+    "hash": "ADA5E82A9F95C66E54A01A9F3A3D8C730CBBC0F37DB3D6E995A8E066DAA4E712"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\HomeStatsCycleTest.kt",
+    "hash": "380445E7F4AC74F46B0591D2551742F39FFB59847A79E60C9F9A9C1307D4F636"
+  },
+  {
+    "path": "app/src/main/res\\values-v35\\themes.xml",
+    "hash": "E48858E43EF9574214FC11946403F38951C2C5040ADFB063DC6298D66FDA255C"
+  },
+  {
+    "path": "app/src/main/res\\values\\themes.xml",
+    "hash": "5B3C0FE0FD623901131EFAE99C161EF932585B83F6BB335E311BBEB524FF26E8"
+  },
+  {
+    "path": "app/src/main/res\\values\\strings.xml",
+    "hash": "7119977F7402BFE0A2BF2439947FB668E5165296B67A67163B852422E2E011B9"
+  },
+  {
+    "path": "app/src/main/res\\values\\help_faq.xml",
+    "hash": "31D28BE2C615970B80DEC5A69AF1F4D87E2A9BC792F8ECF8C19407E75E3596A8"
+  },
+  {
+    "path": "app/src/main/res\\values\\colors.xml",
+    "hash": "B0A2A942BC0788590295C1B5E865DBD3E031467056DEC1CB4AE3A53FE083E580"
+  },
+  {
+    "path": "app/src/main/res\\values\\admin_notifications.xml",
+    "hash": "4BEF4748C342609FB1584BD77DF9101ACB5940A040ABD63CDA59B29D722DAA1E"
+  },
+  {
+    "path": "app/src/main/res\\values\\admin_management.xml",
+    "hash": "20EAA4B95EE682C7EAD288CF612FEB470C6D098ADC9E952F30E9C1F7752A58A3"
+  },
+  {
+    "path": "app/src/main/res\\values\\admin_business_policy.xml",
+    "hash": "0DD502EA3515AE87AD4A3237181F670B7F41B3E2A9BD9D58F6D84E614869DF85"
+  },
+  {
+    "path": "supabase/migrations\\085_egress_optimization_sync_v2.sql",
+    "hash": "D6B0500C75DB6551A0B9421BD5BE5B5D93D6AC44E9696BCB10169ECA8FB323E6"
+  },
+  {
+    "path": "supabase/migrations\\084_campaign_posting_business_policies.sql",
+    "hash": "C9805915527FAED53AAECF74577C6466378FDF12FD0F033D19CE6FE9544D155E"
+  },
+  {
+    "path": "supabase/migrations\\083_fix_app_configs_encoding_and_version.sql",
+    "hash": "41315B7826610E3E64738A8E05E26B2A9503E1D3B094B8E367868BA6B4B1B55A"
+  },
+  {
+    "path": "supabase/migrations\\082_carryover_flow_audit_fixes.sql",
+    "hash": "D188C8EE8482B452DBE8FEBB0603A4E9FC3F52DF0B19B3748D88DE002C598BD3"
+  },
+  {
+    "path": "supabase/migrations\\081_admin_flow_audit_fixes.sql",
+    "hash": "376BDCA0628EFE047080DA0317F22E97ED8C37D72D61C57AF4904DBEFE08B1DA"
+  },
+  {
+    "path": "supabase/migrations\\080_report_context_carryover_and_gap_recovery.sql",
+    "hash": "F3BBF9ED3E841462BDD67D247AA2480FE507E67443D162340D3AD7EA93B51106"
+  },
+  {
+    "path": "supabase/migrations\\079_owner_auto_pause_debt_and_timestamp_guard.sql",
+    "hash": "688827B28EB6B18903E9C49CB6FDC872B8C6479404F7CEF326D9B2AC8BFBEEF8"
+  },
+  {
+    "path": "supabase/migrations\\078_admin_pause_reason_popup.sql",
+    "hash": "B10D9D55366E11799F4DCE0881EBED3F6207AB0668BEB872396C7B939E71C912"
+  },
+  {
+    "path": "supabase/migrations\\077_mission_reward_modes_and_management.sql",
+    "hash": "44A9D69467C3B190B860E367AD8F041B739EEDAB34A1B8E7D3A0BF1B328FE7F0"
+  },
+  {
+    "path": "supabase/migrations\\076_mission_for_finalized_campaigns.sql",
+    "hash": "DC8922F13B25ECCECC3B9D5FE6C14FF640FD2769A97A43F1A9AB75678B4EAEC2"
+  },
+  {
+    "path": "supabase/migrations\\075_owner_auto_pause_config.sql",
+    "hash": "B7D6C2CBE17B19DF1A02BBDC44C4784140F9169A931CF93876AE43C47EE274F8"
+  },
+  {
+    "path": "supabase/migrations\\074_app_mission_window_and_multi_attachments.sql",
+    "hash": "ED7E17603DA72F6A2C7CAE9DE5B26B6E3A69C99CB6ABE6ED7E157126EE00B97A"
+  },
+  {
+    "path": "supabase/migrations\\073_admin_action_audit.sql",
+    "hash": "5FAD33D13A36772ED52EC93919F82502816A57016E71559560F47B0C1321D592"
+  },
+  {
+    "path": "supabase/migrations\\072_admin_notification_campaigns.sql",
+    "hash": "9BA67555147BE73D6944F3ED927CC166FA7BD107933AAA1044B23A38ACDCF622"
+  },
+  {
+    "path": "supabase/migrations\\071_business_policies.sql",
+    "hash": "54BEE66AC2094032D355579E0B1B615EFC5311648BCE8BD4C0710321F3FCA515"
+  },
+  {
+    "path": "supabase/migrations\\070_admin_management.sql",
+    "hash": "30F1C530906832AEFB946F090DAB79C7A923A63070726C33758BB2756BF63190"
+  },
+  {
+    "path": "supabase/migrations\\069_admin_audit_hardening.sql",
+    "hash": "1ED9E26C18B4454368267E826728FF00C44B2F726B2B387703D5C7AF20293E7B"
+  },
+  {
+    "path": "supabase/migrations\\068_owner_tester_reports_count.sql",
+    "hash": "B0C61249B41A8E2FBA4A1C07D1A6BC103B3CD8C59340D10E91B53610D7DA3C22"
+  },
+  {
+    "path": "supabase/migrations\\067_admin_direct_notification_popup.sql",
+    "hash": "42F377B82FB865BDF663A32975A0B864FCC012A43024037072845C471C1F94DF"
+  },
+  {
+    "path": "supabase/migrations\\066_push_and_carryover_hardening.sql",
+    "hash": "EBF02559A79A23AEB99C9953087F2A895C3B3E4A10F7B72BFDDCC40ECC5499A6"
+  },
+  {
+    "path": "supabase/migrations\\065_remove_dhash_hardblock.sql",
+    "hash": "53CE688F80CF96532C3C3895046EDADCC30CD3C4499AFEFC81B92ED38BDB76A9"
+  },
+  {
+    "path": "supabase/migrations\\064_explicit_report_context.sql",
+    "hash": "047DBA110F2AAEC70B0CA8D8C4A31D432EBE7B57D60BEB84522CDC1FCB670341"
+  },
+  {
+    "path": "supabase/migrations\\063_report_crypto_search_path.sql",
+    "hash": "A14FDD0D9805B1FC48F83CB6B0C87A73EB076612FC21DD21CF58A4610D4D0A41"
+  },
+  {
+    "path": "supabase/migrations\\062_consolidated_baseline.sql",
+    "hash": "C4814564D27FA43406C7D79A8982C3167C7BC8F20F8BC65A7160B505E4FC45F2"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\BusinessPolicyRepositoryTest.kt",
+    "hash": "9BFB69FB7C62A5BC853744B5C8B92126F2A858567D0B8B8A8804E1BB77AD3BEF"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AppUpdateRewardTest.kt",
+    "hash": "AA12E6AED750B5EAF5AE27B329E7523D1248514D52FA1E4B6138027C15C0C1EB"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AppUpdateRegressionTest.kt",
+    "hash": "8AA9A9C832BF60309E05BF7CE0FB303F67714CD53DE31D5A39477BA930086B0B"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AdminRelatedRepositoryRaceTest.kt",
+    "hash": "F2CEE010341E847B4225D32EC60AA7226E19BFD69BF4C8878B636D45949AF6D6"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AdminOwnerAutoPauseTest.kt",
+    "hash": "4E3B097F0B62E196FEB2A21B96AA491E3EC9D505919FFAE357A2E6ABFC15D81F"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignRepositoryTest.kt",
+    "hash": "644943498DCB95842EB5CE9F430DEA0FB3B91970FA3C78AB6CAF42423BB445B4"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AdminDailyTaskPolicyTest.kt",
+    "hash": "EF094086FCA1965F1BF438ED6ED7B905A4CF0698A9DF89CB5095A48ACD18ADB1"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\AdminDailyTaskHardeningRegressionTest.kt",
+    "hash": "CE880DBA853ADD6ECA97D49692BA641DD840CD196E058DC9FBA6C575249522BB"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\EgressFinalClientReviewTest.kt",
+    "hash": "04DB066F0FB6BE589021A11DC1970377B620C05FC1491C88155569811AECA408"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\DailyTaskCarryoverUnitTest.kt",
+    "hash": "62A15530E3B87AA1BD2E42F0D7B910BA781228A1823304B79E18F5F66BB31E43"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\CampaignPushUnitTest.kt",
+    "hash": "20C64D0E6C9ED2F749FCE2BA1FF8E357A5449CAAF2170E2C9B48194829EFFBDC"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\CacheRegressionTest.kt",
+    "hash": "F77ED9EF27EEC04CBE3FBFD23824005E0F5A62501C2462F7840BAED42C3972A7"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\EgressReviewContractTest.kt",
+    "hash": "8E1AF3CF47322C7948D20F2AD03D1E4FBB51861FBA16F9618F499BB3E688F2DD"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\EgressProtocolReviewTest.kt",
+    "hash": "DA35AB0522EF2D27F4A1CAC792568A91AA3A8715C363E1C17F77D5D539C20015"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\FinancialConsumerV2BehavioralTest.kt",
+    "hash": "BF7B9801F28ECFBA39B0EDA8773B0F2165AE615793C8C4852360B7E98B2954D6"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\FinancialIntentStoreTest.kt",
+    "hash": "D128E71FAADAFF166C66F10D79C658C1D0B5CB20F67EA27244437A3C37FD3488"
+  },
+  {
+    "path": "app/src/main/res\\values-night\\colors.xml",
+    "hash": "7484C9DE12B5D3A2B1CAFA86245225725C1C4721502E381B9628B9D8C0C163D6"
+  },
+  {
+    "path": "app/src/test/java\\com\\ntt\\crosstest\\data\\help\\HelpDocumentParserTest.kt",
+    "hash": "E4D6E6891C775B16154CF06B8EFB0668FC750EBE8A8C464078C02600E52FCDAC"
+  },
+  {
+    "path": "app/src/main/res\\values-en\\strings.xml",
+    "hash": "C5D901909F963E6C6D3D8E5C7EA0BB90D1F89054615B6503A715A3236EE71E3E"
+  },
+  {
+    "path": "app/src/main/res\\values-en\\help_faq.xml",
+    "hash": "31D28BE2C615970B80DEC5A69AF1F4D87E2A9BC792F8ECF8C19407E75E3596A8"
+  },
+  {
+    "path": "app/src/main/res\\values-en\\admin_notifications.xml",
+    "hash": "4BEF4748C342609FB1584BD77DF9101ACB5940A040ABD63CDA59B29D722DAA1E"
+  },
+  {
+    "path": "app/src/main/res\\values-en\\admin_management.xml",
+    "hash": "20EAA4B95EE682C7EAD288CF612FEB470C6D098ADC9E952F30E9C1F7752A58A3"
+  },
+  {
+    "path": "app/src/main/res\\values-en\\admin_business_policy.xml",
+    "hash": "0DD502EA3515AE87AD4A3237181F670B7F41B3E2A9BD9D58F6D84E614869DF85"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\MainActivity.kt",
+    "hash": "DDC463348940677EA02706237CDD95F27DE7126D07FA15D51FC5902370A2DC37"
+  },
+  {
+    "path": "app/src/main/res\\mipmap-anydpi-v26\\ic_launcher_round.xml",
+    "hash": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4"
+  },
+  {
+    "path": "app/src/main/res\\mipmap-anydpi-v26\\ic_launcher.xml",
+    "hash": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4"
+  },
+  {
+    "path": "app/src/main/res\\drawable\\ic_zalo.xml",
+    "hash": "083DF2A81938177634603CDB873216C8DCC839267B9B1D2FEDDD2887B14EB819"
+  },
+  {
+    "path": "app/src/main/res\\drawable\\ic_notification.xml",
+    "hash": "3E29BFA39F2CC3D4F73DE6820078BE54D7C97A5F00F3F07C51408BEB2FFED8F8"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\TestCheoApp.kt",
+    "hash": "63597515A37F194A531B19DE759823E0BBE85F81A567B5385C451792E26ADB97"
+  },
+  {
+    "path": "app/src/main/res\\values-v29\\themes.xml",
+    "hash": "210ED53FB66176D56EEEAB39893DF404A3542C468A4ACC29D2A19F891884DE37"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\SupabaseMediaAccessGrantProvider.kt",
+    "hash": "39F50F34FA33F16F17D980299AD212D97A52AEE4D17AEB7B3558B001228FBC1E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\work\\ReminderWorker.kt",
+    "hash": "415A7815C11D08102A15A932463A19A914829F71B3423A96E2B73209C5FD1EE6"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\work\\UpdateCheckWorker.kt",
+    "hash": "306FD9010F2CE52934CA4762CF3E2508C09B3C5D6CE869BD6E49CE9BFED4F746"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\SupabaseHolder.kt",
+    "hash": "FF3E11339C76B49E24CB324881DC46BD919EEDED161B71EE5DB35B4793597614"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\work\\NotificationHelper.kt",
+    "hash": "BBAFF3BFBB7A90D0214F1A313A6CDEE74D199D3F0935151F0FCB1139E06F713E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\LocalizedAppContent.kt",
+    "hash": "BA0B26A7853F812767BF6F0DB6D329FBEBF64CBD30D5370801DDEFE8FF1357D5"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\SettingsRepository.kt",
+    "hash": "EFB34FF6982D94407F6F66FA12CCA51532D3BECB27B267976B3E583E1427A3A2"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "hash": "D16BC427333516AFD221A77F8514ED0681035E70E5218EEC3143D63C6331E80C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\ReportWorkState.kt",
+    "hash": "86B8F7BCB1C5FA5BB03B7ED7C1BFB8D800DD0C111E0C3DBA5C89A20E2D268195"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicy.kt",
+    "hash": "F011D19DB8BD73AA105B6C2ECDE24CCE94A557838569A9455E0D0F68E21FA256"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\ReportSubmitManager.kt",
+    "hash": "BEFD0BD51795ECD8B37511D6E3CFE07421DCF34F18F0D66EC98F915EF3239794"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailure.kt",
+    "hash": "FACCCFF4FE3597E5735B7C560C1B3DC7AF7DB58FE072D03E3186EA85DE67BDF0"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\PendingReportStore.kt",
+    "hash": "C67DBA2BEF67B8E22A682992CBE57363D8F60B5C560F787F86FE05AA10531CB3"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\NotificationPendingAckStore.kt",
+    "hash": "C72D1965AFC356573550D9F0841DA7ACD08F002CA543C2DDDDE1479D6AD02C62"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "hash": "B9C49B524FB183B280D630B1A8DBC0DD4A295A173AF82E819138D58525AEB42D"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\MissionReportDraftStore.kt",
+    "hash": "5FF249CB50507AD36FBC3FD3519F8CC8E29D1464E70C1127BE6226FECD11D920"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\work\\ReportUploadWorker.kt",
+    "hash": "4F27F02D823A19E792B8B1396B65465ADFADB365BE842625562E0C0AC662638A"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\AppCheckObservationConfig.kt",
+    "hash": "3993C7C7F3E211F0A5FEC80D5400A83A71BA808BC1E019D4997ADF18CB62F1E0"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\WarningRenderer.kt",
+    "hash": "3C0398D60EDB9583A19CFD00601ABC208130F63DC549FE83B9B8FADD508E7FCC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\UiText.kt",
+    "hash": "D96496A835D759D4337FEFA1B5E08548611D2AC5108A5C155ED00620FA1539DA"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\UiStateMessageResolver.kt",
+    "hash": "25DB48A1A88270479C014B17681228028950D63EF4EA93CD53A142E6E1FF67B1"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\TopupConfig.kt",
+    "hash": "09A0E80939739664ED3A2C9DB70E68D7971AE3AC34106FA4B6B6A19C3B106544"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\TimeFormat.kt",
+    "hash": "64EC44142279A19DC665CEF05F656C0AE921BEB7062D80B1EE60C8D67544500A"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ScreenshotRequestFactory.kt",
+    "hash": "4A09CEB161DE5AE8B3B7C2BDE08FDBB0CC805B78C03FAC7D49663D8166DDCC66"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ScreenshotManager.kt",
+    "hash": "CAAF7EF30A6CED10AEB2DB524F6D0D526E9B07A010E075E820BC4F705EF7AB0C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ScreenshotCoilInterceptor.kt",
+    "hash": "7970E0DB4B47AA842768FACBC07FE0291B5B5EE70072A242EBA1493FAAD2E619"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ReportUrlRetry.kt",
+    "hash": "3865051B10F2439BDC7B3CDF7C61847B3FC93F5DEA0B23729B5FC3A211CE9A42"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ReportComparisonSelector.kt",
+    "hash": "110D7C9EC929C5396BFF0A1123893823E81BF7D8E4714413F861161B2BA98104"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\RejectionReasonRenderer.kt",
+    "hash": "D38C53A5BCC262531176B46699F9D9CDDB9B87B9A39D2CFC56AF7E0768AEBC96"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\PrivateScreenshotDiskCache.kt",
+    "hash": "3FF1AA6081CD63793FFD3F8BCA0754DA6B85932D1B26CC0250E14BA702EFD7BB"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\PreparedScreenshot.kt",
+    "hash": "0249A91806819D10988FB8874C9FDAABB6D4DF3ED1BAF1A8573FA6658F3541DD"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\PlayStoreUpdateChecker.kt",
+    "hash": "208E2ED1285DD7F32F15514D6977B0477E442FCC87EFB575C70194368A310F73"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\PlayStoreHelper.kt",
+    "hash": "F07CB6BC364692DFDE4F25B7FA6890C41C0D5638295CF46D3D64FE904FC602FA"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\NotificationRenderer.kt",
+    "hash": "2BDA1A36CC665A3E35325D62FE8134BE2DD9CAB5B39C94D49F76893FEB91FD2C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\NotificationPopupBlockerCoordinator.kt",
+    "hash": "6F2526C99C5C7980C7FD4EB7636D96840974720746A744545120790E8EB45310"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\NetworkMonitor.kt",
+    "hash": "DEF350479E5B4C103D29E8BD0EA2DEB495371DF856BBBFB9F62CC4B56F0FE913"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\InstalledAppVersionReader.kt",
+    "hash": "82F22C169053E665D332ED364BBECB5E609AE23A122DD61887EB858B60600105"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\InstalledAppCache.kt",
+    "hash": "06C46F0C8CB751263B7371734068314068FAF29547FC5D42F2A8598E3A3364E2"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ImageTelemetryCollector.kt",
+    "hash": "CF4C6F46830729CE2162DF663BB74D22965ACA495D429977141470AA0CDCEE3E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ImageInstrumentation.kt",
+    "hash": "CD5C873782C75ACDD53C124C9777061144F5CDAFC1E2B3DAC76180035BAC5815"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ImageHashHelper.kt",
+    "hash": "2448F1BF1432EA23CA4B49A12D389AC572359F990EC46CD73C632B3D2C7F7856"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\IconRoutingHelper.kt",
+    "hash": "BB8F4B3C7A435ECE7C2590F14EFC4AC220FA7710394187120C5023CCCDBEE73C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\FirebaseStorageHelper.kt",
+    "hash": "A17D352BFCCADE235611FEBA6798B51C9235A71B7228B2FB14A1AE53F9B0EA96"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\DetailedImageComparator.kt",
+    "hash": "94EE53EEFBCA66D7759C40999470434840D76AE3E057585BBA5FEAE3F2A673A8"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\CreditLogRenderer.kt",
+    "hash": "C236D7EA4F0FB24D3D9A47E40D31168B99DE82EB0B2AB4FC3866AAFA4281564A"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\ComparisonStateCoordinator.kt",
+    "hash": "DF0071F1C38869034A536FD2CF30D11B24D587AA5F8686FCA68A7C178219BC94"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\CoinSoundPlayer.kt",
+    "hash": "5065F585DC8E28E6685BE12B305C7ADA71640CDA5F00493FC00594DB50748B69"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\util\\AppForegroundTracker.kt",
+    "hash": "5C62D308686D3A9510EA7B0C3D833066554F811BEE7D22B94B35C663DBCBAF09"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\help\\HelpModels.kt",
+    "hash": "64547B148FA7BA5ACA7A54AB3AE53F4831961306E48CA6127F2BBD5E2F8CBCCC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\help\\HelpDocumentParser.kt",
+    "hash": "DCAC6C798C10F7187EBC1CAC79871FD33C6CA090BE549E39EF33C83BE23A3EB9"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\help\\HelpContentRepository.kt",
+    "hash": "CF488787E347DD4A90C369AFC998B6DBD0622C47CC2089CA67C8D5FC746FC46E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\FinancialIntentStore.kt",
+    "hash": "EB74B3C90B15E4F2E641A49CE543C48E5D0F660CEBF42A41079030D22408AAE9"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\EgressSyncProtocol.kt",
+    "hash": "6D88D45E3C1C0A3141658BB66ED448863EF09A9281F69A59AAB787BFC49C6D97"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\EgressOptimization.kt",
+    "hash": "87696DA4D355774A2E496079C8BFF3CA7D1A88300A2975103878A3FBD00475AD"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "hash": "A5EB70A507182AA2D7DB5CBCDFF2BDCCA15D77A50C613A190824E95AD644267F"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\CampaignPushStore.kt",
+    "hash": "263B150C3D14D44E22BACF3D7DB4783E7403732E300B9797F8F2BA9074D01AB8"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\BusinessPolicyRepository.kt",
+    "hash": "DC98B2AD9F9F23D97B54D1920E1B583F6AABE5F56C25352F473DE38A6D126D0B"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\BusinessPolicyModels.kt",
+    "hash": "6D04ED09D7B642EFC469FF32ADD78B9215FA667F7C3C20FA0E0F8D28CF0B0332"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AuthRepository.kt",
+    "hash": "A7F51DFBB3E2356580C3F481B4C5F9AC143F2855BD803F0E4520B9244C4987E5"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AppConfigRepository.kt",
+    "hash": "7BC30CAE58A5ABEA5B4B536FFF8B010A85B125B5370FA4145D8E80E2E6117724"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignRepository.kt",
+    "hash": "0423A6321179D0D114959A2FEDA5F80FCE8FE8BBCE70A39B851E97B8401D5C2D"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignModels.kt",
+    "hash": "42032DB749269BBC1E24E66397E6ABFC3F05958878EDB030B71729BB74F457B0"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AdminManagementRepository.kt",
+    "hash": "2565D9022379945984113625955233E15EAA7F78C9AC5EE6E265361EA03F4004"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\data\\AdminManagementModels.kt",
+    "hash": "3733FA8B216AF9811DEAEB10A4F1A5BD648307D58A33AA108D1F7AAD8AE21CCD"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\ProfileViewModel.kt",
+    "hash": "0A8D7C299A8D97FC860F383466E9B35DE540B11AD0F0FF2E2B102FCE5218B960"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "hash": "2A03642087F47076B6C832957F71CDC5881757EFE7C06A7AC2A2BE701A27B2F7"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupViewModel.kt",
+    "hash": "FF1C924C3475C048F4042AD5E70540A9835176E4D0B27B23C0530F534D60786B"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\MissionReportViewModel.kt",
+    "hash": "D0FB3CD24604AB3799E470D454D2AC80F76D69BD41B5F90B1AAA36D6CA9CE514"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\MissionCreateViewModel.kt",
+    "hash": "E17B0AD6E4AD20596FA270C384570FDF48BC05913C4C1AED84513F1B38E4493C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\MemberDetailViewModel.kt",
+    "hash": "E30E54F883EA00E7F6BF7BB2D59DEE0F648F24BD749233DA66F03397BD048D2C"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "hash": "3AE15329CA1F46F3E2F84AC39CC5C94264CC98C29BD0514EE089382A40C13DF8"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrder.kt",
+    "hash": "31DC90962B11F45F693363D31A54A65DF88C3ACE541750399EF6CAD20C44506A"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\CreateCampaignViewModel.kt",
+    "hash": "4C8110566D1B3E6B451750A9C5A2D89386E32176F72C616B24D20F1FDEAD6E94"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\CarryoverPolicyViewModel.kt",
+    "hash": "B86599BCE8DEFBF650A7B3827DC9EF7DC8738F6D61113790FCC06C236C9D5125"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignDetailViewModel.kt",
+    "hash": "1DB3130873EF559B2A436FE63D04DF2229A5653416B9D29D23ED9DC5BB95229E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AuthViewModel.kt",
+    "hash": "429A8FC7B4923DDA11F064FA4272EED26C432E9827D24CC6D9934E5022C063E6"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AppUpdateReleaseViewModel.kt",
+    "hash": "0E1AABC755D8BF921B25E91F4727E375ED6B8D8046DC8DA245C9BD55D83AEA4D"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminUsersViewModel.kt",
+    "hash": "174A68C8B19777EDACB991883B860A5C990270ECE648D126E420932698CED4BC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminTesterReportsQueueViewModel.kt",
+    "hash": "18FC378C7DBA96BC8591B0C1D80111F53D5C8A0FB2CBAC62DB90D55339588B15"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminSystemMonitorViewModel.kt",
+    "hash": "D2DE1B302130D2F251BBFD43C05FDB0D7B3EC789D792AA1987CC7EAB795B2B19"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminReportsViewModel.kt",
+    "hash": "9739A063AD2A62E3C8EB4537DE5FC6F113451E8A1337C59DD0CB133C47689911"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseDialogController.kt",
+    "hash": "28177D648ABF88D88853F0375E3496A0D665FE9591887CC8EAD8282E6B09E514"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminNotificationCampaignViewModel.kt",
+    "hash": "B90FB3EA9933A6CBE8F43A5002200573849C46225B99CA9ED0DAFDB25F3ACAB2"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignsViewModel.kt",
+    "hash": "7A1AC155E46B6E4A11AA0DDC03374FBDAC3C53046F9DCBA3B27AEEC5571A5AB6"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminBusinessPolicyViewModel.kt",
+    "hash": "A6115D41895A1120DC0B843C34B9CEE2D58906B5B7E9D2F5C1F64F780394E272"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminAuditViewModel.kt",
+    "hash": "F1CF6E3ABDC539F477378DF8B05B5CCFD53D021F35E914AD0D8F1EF67F16D357"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminCampaignsScreen.kt",
+    "hash": "6C6C27EE15B86B6E01D905E03236BD9B0F35D6F82E63B4442643AFA401FC50D4"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminBusinessPolicyScreen.kt",
+    "hash": "CCBA8C88C0CB0B7DAD9730D69F1257D45BC1C47E2506E8DB9681B225E2CF2986"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminAuditScreen.kt",
+    "hash": "D096E76BE10C0D5BB50B1A1D120C5541DF467B49D3070091745B759796FAE8FF"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AccountLockedScreen.kt",
+    "hash": "DBEDFE8DE469133A2E9AD73E372514B99968D148C88FC419E769227746D63AAC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminSystemMonitorScreen.kt",
+    "hash": "4D667E7F791F9E06FFCDE7A05ACE77BB030F67958FFE255415DFCF8EB9FC0DA7"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminReportsScreen.kt",
+    "hash": "5D0BA1766189B3EFAF3788D2B19051C0308DE6034611EA5F1DB9F10DA94EC1B5"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminNotificationCampaignScreen.kt",
+    "hash": "4FC96891E9CCDB880FCCC1D64CA914AA8ED30939F185912FD57E7B2FE5BE3C29"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminTesterReportsQueueScreen.kt",
+    "hash": "9D9BA1177A5F37F79A68D1ED182DE0D1E435B07A6AF1FD7F17DDDE709231A894"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AdminUsersScreen.kt",
+    "hash": "934EBC4B9127F7A1D5E154E2F79D96EB6741A4D28815A9A1E147EE98A3307A7B"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\navigation\\NavGraph.kt",
+    "hash": "8CCAC83C4DE981BBF17A059A7B6B1A013D5BF34AACD840B38F155E95554AF36B"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AuthScreen.kt",
+    "hash": "497CCE58D65BF0E080050389DD911008D2025B8516480FD452580E20B376F0E4"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\AppUpdateReleaseScreen.kt",
+    "hash": "5554799964AE05A30757EB5E487A51D7A80406F4CCE26A3BB7F1504A52F0533D"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\CampaignDetailScreen.kt",
+    "hash": "82CC63A550D800D84D8CA5CD9A562E5ABFAD6AA3D4A51EF2A89E4C685EC0A961"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\CarryoverPolicyScreen.kt",
+    "hash": "E20FD5CA321B9ED6D427C3B2B95AB6AFBA4BFEA3BC20EA6BBBEDD43A4C8E7868"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\theme\\Color.kt",
+    "hash": "C4C93CD0FF09AC877F5A2E07D0598B459B299C618E01685E9F1164315A9BF75F"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\CreateCampaignScreen.kt",
+    "hash": "3F0E04A494A96560D25759364176CDDCF30BE8635E00B1182F4177F13071AC1B"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\theme\\StatusColors.kt",
+    "hash": "094C3C8F2B20C57FC384E56CFBD31A75821787CE2EC67F77B865EE49C6EE5A2E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\theme\\Type.kt",
+    "hash": "76919AC5646D6447B30AA58A79A50E728CC2D9889E1DC8F0FCC8E4F16873BD70"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\theme\\Theme.kt",
+    "hash": "5602F0FB3D5E44C6DFEA02CE1F708D76A1ADB2C510FA49F439F29A86BE7E11DE"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\AdminDailyTaskPolicySheet.kt",
+    "hash": "04F6BC47BC71ADEDB69DB51D2B6D291A6DCC189A93886AC2A9BA713222C0CCEF"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\GoogleSignIn.kt",
+    "hash": "DBBCE93D6C615C87D4B0F0419C89E3DDACDA3EA82B8222ABD024F0AF50B49207"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\HelpScreen.kt",
+    "hash": "F09A95C16AD95EBE87A4BBB06E1C6190C9B8827BE133733CD2E753E044329F49"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\UpdateScreens.kt",
+    "hash": "3F70F4D83A35F72902BFB4CBE92B091352A7A722598F9AE9B00A5F432952F2E9"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\QuestsScreen.kt",
+    "hash": "7E2D4A2571FB8840567CBA4801C1CFD59467B9C1C5F97135EFDBDFCE6AE62AB4"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\ProfileScreen.kt",
+    "hash": "089ED7D674CE0B9B053E725219698E2E75B0CE2F87ECE5D34494CE1331DAACEF"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\PostAppGuideScreen.kt",
+    "hash": "D6AB1DDDB9FFB766C81D9F7E077EB5E74992B51BDFE3F0AB26C5A61CB2BDEBDC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "hash": "FF8F3E7127B6CD100EFE4B021911328E4DFB1E3F35F609D7011E0DFC5FF45A10"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\MissionReportScreen.kt",
+    "hash": "322DC332C933C47EFE78B7F99F2138CDF7FE71C5BD5E0AEDE53E4873D76D3696"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\MissionCreateScreen.kt",
+    "hash": "1AF5EA5311F703CEBF9BC55DF774D3E24E41D46505318B7EC13C2BE97F8B634E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\MissingConfigScreen.kt",
+    "hash": "2B79B6B14A5E67A39E83B9B99E2A2318D36132C7FA33800F0216F428305A8DD4"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\MemberDetailScreen.kt",
+    "hash": "15111CE7D7EBCB7BD457B8D255ABBDAC4D52C4E3B33C03CDAE5CB19CE17BDC3D"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "hash": "B07086776DBC2DD1B1FED99CBE8158A62C9666EA04C0F726CC0CD9CE02F76B45"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\QuestSection.kt",
+    "hash": "FDECEF4CFD953ADFF2A56F917DD1A5C56351CC3B841A2EE9E389EBCBC2A8E3E6"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\QuestHeroBanner.kt",
+    "hash": "742209C14E6C92EAA87643691DA4022E76308ACAEB8552335B98009B8C9374B4"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\ProgressSection.kt",
+    "hash": "718A7D43EFA81911681A2FCAA0DFC67790FED6789B161CBE8161542012CFE5CC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\NotificationBottomSheet.kt",
+    "hash": "7D0BE61B2F271B7F272FC918F303E43A191541F48F6D66232DF34598150EF24E"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\MyAppCard.kt",
+    "hash": "641F8A2EDE337A377163C467E745A223603C758CD2B24D89C4269FA8E6E225AC"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\ImageViewerComponents.kt",
+    "hash": "40B6109BDC3C87CEA545F15FE94E83FCCF7601BE641D7C8F3A9496E737CAE4D1"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "hash": "E5C6B4FB57B1EB7AE76142572710CB842997B2BC1160BD588C21803E73F744B5"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBottomSheet.kt",
+    "hash": "C078C793C991C2C62E2DA9AF0050D4791855FC9B1B32853A2F5F0E00742D1D77"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBadge.kt",
+    "hash": "9742615E0FAA285BF10309B1DBB5032C36D244BC48A6A95817B6FD08DB1154BD"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\CreditRewardOverlay.kt",
+    "hash": "198BA26629CECFB906FBB04E563D26DBD9CBE93741679FC6ED0F6007943DDC80"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\CampaignCard.kt",
+    "hash": "2BBC0B4618BAE9D5C76E173EC43B96C99D90A523E22685D5D8BE8A605922D228"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\AppIcon.kt",
+    "hash": "8B6C78B60FA47C8CB1F06DEB0CBFB3DCF2B355D104554C9AE50813CAFBA5F123"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\AdminNotificationPopupHost.kt",
+    "hash": "C0C130DF4298E5EFD6D4566FBB54E2A8D26BD68C76686D7A3D60B9B91254BDAA"
+  },
+  {
+    "path": "app/src/main/java\\com\\ntt\\crosstest\\ui\\components\\AnimatedCreditBalance.kt",
+    "hash": "D48CDCCB4719861AC7282A0FED0B8C7C9F395C076B8837A36D1A095C7AFB65BB"
+  }
+]

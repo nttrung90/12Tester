@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.util.EgressAuditProbeTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:37:20.980Z" hostname="PC-5700X3D" time="0.582">
+  <properties/>
+  <testcase name="probe01_preparedThumbnailMustSurviveDurablePendingPersistence" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.093"/>
+  <testcase name="probe03_diskCacheMustRequireTrustedExpiry" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.008"/>
+  <testcase name="probe04_diskCacheMustRespectServerMaxAge" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.02"/>
+  <testcase name="probe07_runtimeLoaderMustCountOneMemoryHitOnce" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.172"/>
+  <testcase name="probe05_serverClockBehindMustNotImmediatelyInvalidateValidCache" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.022"/>
+  <testcase name="probe06_clearDuringBodyReadMustNotReviveDiskFiles" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.03"/>
+  <testcase name="probe08_diskDecodeMustPreserveDHashBasis" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.216"/>
+  <testcase name="probe02_thumbnail404FallbackMustWorkOnSecondDisplay" classname="com.ntt.crosstest.util.EgressAuditProbeTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

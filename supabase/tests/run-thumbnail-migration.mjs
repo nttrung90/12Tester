@@ -8,8 +8,8 @@ import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, 'utf8').replaceAll('\r\n', '\n');
 
-const fullSchema = read('supabase/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
-const migration045 = read('supabase/migrations/045_thumbnail_support.sql');
+const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];
+const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');
 
 const bootstrap = `
   create role anon nologin;

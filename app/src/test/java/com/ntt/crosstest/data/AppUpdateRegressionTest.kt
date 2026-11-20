@@ -56,6 +56,7 @@ class AppUpdateRegressionTest {
             install(Postgrest)
             httpEngine=MockEngine { req -> respond(handler(req.url.encodedPath),HttpStatusCode.OK,headersOf(HttpHeaders.ContentType,"application/json")) }
         }
+        client.auth.awaitInitialization()
         client.auth.importSession(Json { ignoreUnknownKeys=true }.decodeFromString<UserSession>(
             """{"access_token":"fixture-token","refresh_token":"fixture-refresh","expires_in":3600,"token_type":"bearer","user":{"id":"tester","aud":"authenticated"}}"""))
         return client to CampaignRepository(client, Localizer(context))

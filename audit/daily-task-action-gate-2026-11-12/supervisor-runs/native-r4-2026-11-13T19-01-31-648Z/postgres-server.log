@@ -1,0 +1,114 @@
+2026-11-14 02:01:31.724 +07 [2160] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-11-14 02:01:31.725 +07 [2160] LOG:  listening on IPv4 address "127.0.0.1", port 55444
+2026-11-14 02:01:31.755 +07 [24368] LOG:  database system was interrupted; last known up at 2026-11-14 01:38:41 +07
+2026-11-14 02:01:31.854 +07 [21684] FATAL:  the database system is starting up
+2026-11-14 02:01:32.025 +07 [24376] FATAL:  the database system is starting up
+2026-11-14 02:01:32.112 +07 [24368] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-14 02:01:32.114 +07 [24368] LOG:  redo starts at 0/1FA3C48
+2026-11-14 02:01:32.114 +07 [24368] WARNING:  could not open directory "base/16384": No such file or directory
+2026-11-14 02:01:32.114 +07 [24368] CONTEXT:  WAL redo at 0/1FA3D18 for Database/DROP: dir 1663/16384
+2026-11-14 02:01:32.115 +07 [24368] WARNING:  some useless files may be left behind in old database directory "base/16384"
+2026-11-14 02:01:32.115 +07 [24368] CONTEXT:  WAL redo at 0/1FA3D18 for Database/DROP: dir 1663/16384
+2026-11-14 02:01:32.209 +07 [11900] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:32.209 +07 [11900] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:32.367 +07 [24368] LOG:  invalid record length at 0/29CFA60: expected at least 24, got 0
+2026-11-14 02:01:32.367 +07 [24368] LOG:  redo done at 0/29CFA38 system usage: CPU: user: 0.01 s, system: 0.06 s, elapsed: 0.25 s
+2026-11-14 02:01:32.370 +07 [23208] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-14 02:01:32.381 +07 [22144] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:32.381 +07 [22144] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:32.562 +07 [16080] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:32.562 +07 [16080] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:32.740 +07 [21064] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:32.740 +07 [21064] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:32.908 +07 [2416] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:32.908 +07 [2416] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:32.983 +07 [23208] LOG:  checkpoint complete: wrote 1874 buffers (11.4%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.209 s, sync=0.397 s, total=0.614 s; sync files=715, longest=0.005 s, average=0.001 s; distance=10415 kB, estimate=10415 kB; lsn=0/29CFA60, redo lsn=0/29CFA60
+2026-11-14 02:01:33.081 +07 [2160] LOG:  database system is ready to accept connections
+2026-11-14 02:01:33.083 +07 [20516] FATAL:  the database system is not yet accepting connections
+2026-11-14 02:01:33.083 +07 [20516] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-14 02:01:33.539 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:33.973 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:33.974 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:33.975 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:33.976 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:33.987 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:33.988 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:33.991 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:33.992 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.029 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.030 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.036 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.037 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.039 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.040 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.052 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.054 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.077 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.121 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.154 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.155 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.163 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.181 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.185 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.213 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.216 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.217 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.221 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.234 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.238 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.249 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.251 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.252 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.269 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.270 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.272 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.273 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.273 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.276 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.317 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.318 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.331 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.332 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.333 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.334 +07 [22908] WARNING:  there is already a transaction in progress
+2026-11-14 02:01:34.342 +07 [22908] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.593 +07 [24320] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:01:34.594 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.595 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.707 +07 [24320] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:01:34.707 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.708 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.782 +07 [24320] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:01:34.783 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.783 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.804 +07 [24320] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:01:34.805 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.806 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.853 +07 [24320] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:01:34.854 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.855 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.856 +07 [22524] WARNING:  there is no transaction in progress
+2026-11-14 02:01:34.857 +07 [1808] WARNING:  there is no transaction in progress
+2026-11-14 02:01:35.042 +07 [19788] ERROR:  INSUFFICIENT_CREDITS: Không đủ Credit để tạo đợt thưởng (cần 100s, hiện có 50s)
+2026-11-14 02:01:35.042 +07 [19788] CONTEXT:  PL/pgSQL function create_campaign_tester_bonus(uuid,integer,integer,uuid) line 131 at RAISE
+2026-11-14 02:01:35.042 +07 [19788] STATEMENT:  select public.create_campaign_tester_bonus(
+	            p_campaign_id => $1,
+	            p_reward_credits => 10,
+	            p_max_recipients => 10,
+	            p_client_request_id => $2
+	          ) as r
+2026-11-14 02:01:35.242 +07 [20720] ERROR:  REPORT_ALREADY_REVIEWED
+2026-11-14 02:01:35.242 +07 [20720] CONTEXT:  PL/pgSQL function _impl_approve_tester_report(uuid,integer) line 47 at RAISE
+	PL/pgSQL function approve_tester_report(uuid,integer) line 16 at assignment
+2026-11-14 02:01:35.242 +07 [20720] STATEMENT:  select public.approve_tester_report($1, 0)
+2026-11-14 02:01:35.371 +07 [20720] ERROR:  REPORT_ALREADY_REVIEWED
+2026-11-14 02:01:35.371 +07 [20720] CONTEXT:  PL/pgSQL function _impl_approve_tester_report(uuid,integer) line 47 at RAISE
+	PL/pgSQL function approve_tester_report(uuid,integer) line 16 at assignment
+2026-11-14 02:01:35.371 +07 [20720] STATEMENT:  select public.approve_tester_report($1, 0) as r
+2026-11-14 02:01:35.632 +07 [2160] LOG:  received fast shutdown request
+2026-11-14 02:01:35.633 +07 [2160] LOG:  aborting any active transactions
+2026-11-14 02:01:35.637 +07 [2160] LOG:  background worker "logical replication launcher" (PID 1412) exited with exit code 1
+2026-11-14 02:01:35.637 +07 [23208] LOG:  shutting down
+2026-11-14 02:01:35.638 +07 [23208] LOG:  checkpoint starting: shutdown immediate
+2026-11-14 02:01:36.145 +07 [23208] LOG:  checkpoint complete: wrote 1820 buffers (11.1%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.174 s, sync=0.326 s, total=0.508 s; sync files=714, longest=0.005 s, average=0.001 s; distance=10894 kB, estimate=10894 kB; lsn=0/34732F8, redo lsn=0/34732F8
+2026-11-14 02:01:36.637 +07 [2160] LOG:  database system is shut down

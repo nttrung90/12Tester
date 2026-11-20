@@ -1,0 +1,6 @@
+PASS independent media grant: primary issued grant verifies through both published legacy and attachment-capable paths
+PASS independent media grant: selected secondary grant binds image and cannot be replayed as primary, another image or another viewer
+PASS independent media grant: owner can receive and use an exact third-image grant
+PASS independent media grant: RPC JSON matches actual Android MediaAccessGrantResult fields
+PASS independent media grant: unrelated authenticated tester cannot request report media
+PASS independent media grant: expired report denies issuance and revokes already issued secondary grant

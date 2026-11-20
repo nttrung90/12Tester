@@ -1,0 +1,161 @@
+
+> test:admin-expansion
+> npm run test:business-policies && npm run test:notification-campaigns && npm run test:admin-action-audit && npm run test:admin-expansion-integration && npm run test:admin-direct-popup
+
+
+> test:business-policies
+> node run-business-policies-test.mjs
+
+=== KHỞI TẠO PGLITE VÀ NẠP MIGRATIONS 062 - 070 ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+=== NẠP STAGED MIGRATION 071 BUSINESS POLICIES FOUNDATION & CONSUMERS ===
+=== BẮT ĐẦU KIỂM THỬ BUSINESS POLICIES FOUNDATION ===
+PASS: 1. Baseline configuration defaults & shape
+PASS: 2. Admin permission guards reject non-admin & locked admin
+PASS: 3. Public authenticated get_effective_business_policy and get_business_quote
+PASS: 4. Range, date and CAS validation
+PASS: 5. Schedule future policy and verify CAS & audit
+PASS: 6. Schedule second future date, cancel it, and verify history pagination
+PASS: 7. Anti-tamper triggers prevent history mutation and active policy delete
+PASS: 8. Admin RequestID replay, mismatch detection, finite bounds & cursor list
+PASS: 9. Consumer: handle_new_user with policy credits, ledger consistency & 0 credits
+PASS: 10. Consumer: push_campaign legacy & v2 with fee changes, replays and bounds
+PASS: 11. Consumer: unlock_or_renew_slot legacy & v2 with fee/days changes, replays, prerequisites
+PASS: 12. 070 integration & record_admin_action_event audit integration
+PASS: 13. Quote activation token rotation & stale quote rejection with date seam
+PASS: 14. Daily Inactivity Penalty: 0% tier, snapshot terms, and history immutability
+PASS: 15. Financial metadata guard: direct client inserts/updates rejected
+PASS: 16. Report Lifecycle: submission snapshots, owner vs staff approval, auto-accept
+PASS: 17. Zero provisional reward, clawback bounds, and 070 warning revocation
+PASS: 18. admin_get_tester_reports_queue 070 override with snapshot fields
+PASS: 19. Helper ACLs: Private helpers denied to authenticated & anon roles
+PASS: 20. App Update Lifecycle: publish v2, claim snapshots, close/refund, legacy gate & replays
+=== TẤT CẢ CÁC BƯỚC KIỂM THỬ FOUNDATION VÀ CONSUMERS ĐÃ VƯỢT QUA THÀNH CÔNG ===
+
+> test:notification-campaigns
+> node run-admin-notification-campaigns-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 069) EXCLUDING 070/071 ===
+Applying migration 062_consolidated_baseline.sql...
+Applying migration 063_report_crypto_search_path.sql...
+Applying migration 064_explicit_report_context.sql...
+Applying migration 065_remove_dhash_hardblock.sql...
+Applying migration 066_push_and_carryover_hardening.sql...
+Applying migration 067_admin_direct_notification_popup.sql...
+Applying migration 068_owner_tester_reports_count.sql...
+Applying migration 069_admin_audit_hardening.sql...
+=== APPLYING STAGED 072 NOTIFICATION CAMPAIGNS MIGRATION ===
+=== SEEDING BASE TEST PROFILES ===
+=== RUNNING NOTIFICATION CAMPAIGNS BEHAVIORAL TESTS ===
+PASS: Core tables and indexes created successfully
+PASS: All admin RPCs enforce unlocked admin and deny member/moderator/locked/anon
+PASS: Content boundaries, target_role, and selected_user_ids validation
+PASS: Preview handles empty selection and role count accurately
+PASS: Draft CAS conflict prevents stale updates
+PASS: Future schedule/edit/cancel lifecycle and rejection of past/in-flight cancellation
+PASS: Send-now scheduling and worker exactly-once fanout with idempotent restart
+PASS: Mutation request ID replay succeeds idempotently and payload mismatch fails
+Seeding 550 test members for scale batch testing...
+PASS: Fanout worker processes 550+ recipients in batches and cursor paginates cleanly
+PASS: Read count joined from notifications.is_read and no popup states registered
+PASS: Deleted notification rows do not decrease sent_count
+PASS: Internal helpers and direct table modifications are denied to client roles
+PASS: Compatibility with existing direct notification popup registration and original broadcast
+PASS: Admin scheduler health exposes status and background queue counts
+PASS: Empty scheduled role audience freezes at 0 and does not grow when member changes role
+PASS: Filter status whitelist and cursor malformed/infinity protection
+PASS: Campaign detail bounds events list and supports events_limit
+Applying 070_admin_management.sql for integrated common audit verification...
+PASS: Integrated common audit records to admin_action_events exactly once when 070 installed
+PASS: Committed schedule replays successfully with same UUID after scheduled time passes
+=== ALL ADMIN NOTIFICATION CAMPAIGNS TESTS PASSED ===
+
+> test:admin-action-audit
+> node run-admin-action-audit-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 TO 070) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+=== APPLYING STAGED 073 (FOCUS 1 AUDIT & ROLES) ===
+=== RUNNING ADMIN ACTION AUDIT & ROLE COUPLING TESTS (STAGED 073 FOCUS 1) ===
+PASS: Legacy admin_adjust_credits records common audit event and clamps overdraft
+PASS: admin_compensate_credits emits exactly one common intent event and supports replay
+PASS: Private helper _admin_adjust_credits_internal has execution revoked from client roles
+PASS: admin_set_user_lock records audit, blocks self-lock and protects last unlocked admin
+PASS: Role demotion clears admin_capabilities preventing dormant privilege reactivation
+PASS: Legacy admin_send_notification records audit and registers 067 popup state
+PASS: Audited app_config, home_stats_cycle, daily_task_policy mutations
+PASS: Campaign pause, resume, delete mutations emit audit events
+PASS: Contact reports reply and update status emit audit events
+PASS: Owner moderation retains normal review events; Staff moderation records in common audit
+PASS: Read-only GET RPCs do not emit fake action audit events
+PASS: All _impl_ internal functions have execution revoked from authenticated and anon
+PASS: Re-application of 073 is completely idempotent
+=== ALL ADMIN ACTION AUDIT & ROLE COUPLING TESTS PASSED (STAGED 073 COMPLETE) ===
+
+> test:admin-expansion-integration
+> node run-admin-expansion-integration-test.mjs
+
+APPLIED: 062_consolidated_baseline.sql
+APPLIED: 063_report_crypto_search_path.sql
+APPLIED: 064_explicit_report_context.sql
+APPLIED: 065_remove_dhash_hardblock.sql
+APPLIED: 066_push_and_carryover_hardening.sql
+APPLIED: 067_admin_direct_notification_popup.sql
+APPLIED: 068_owner_tester_reports_count.sql
+APPLIED: 069_admin_audit_hardening.sql
+APPLIED: 070_admin_management.sql
+APPLIED: 071_business_policies.sql
+APPLIED: 072_admin_notification_campaigns.sql
+APPLIED: 073_admin_action_audit.sql
+PASS: Admin-owner review preserves071 snapshot bonuses and owner-mode audit semantics
+PASS: Non-owner staff review retains snapshot and emits one common audit event
+PASS: Staff rejection retains071 exact provisional clawback and common audit
+PASS: Final queue combines070 media expiry and071 reward snapshots
+PASS: Final-chain private helpers and public policy metadata remain restricted
+ALL ADMIN EXPANSION INTEGRATION TESTS PASSED
+
+> test:admin-direct-popup
+> node run-admin-direct-notification-popup-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 067) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING ADMIN DIRECT NOTIFICATION POPUP TESTS ===
+PASS: Admin direct send registers notification and popup state with count 0
+PASS: Broadcast does NOT register popup state
+PASS: Member and anon are forbidden from sending notifications and executing popup RPCs
+PASS: Client directly inserting fake notification cannot get popup
+PASS: Trigger prevents client from modifying protected fields and unmarking read
+PASS: User B cannot claim or acknowledge User A notification
+PASS: Claim quotas 1-5, retry idempotency, and session 6 blocked
+PASS: Acknowledge stops popup and subsequent claim/session retry returns stopped
+PASS: Deleting notification sets receipt notification_id null and stops replay without picking another
+PASS: Finds eligible notification beyond top 50 items and preserves created_at order
+PASS: Locked account cannot claim popup
+=== ALL ADMIN DIRECT NOTIFICATION POPUP TESTS PASSED ===

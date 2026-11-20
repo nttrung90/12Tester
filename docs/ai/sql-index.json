@@ -1,0 +1,2904 @@
+{
+  "formatVersion": 1,
+  "scope": "Final public non-extension function definitions after replaying current local migrations. Not deployment history, ACL/trigger/DML inventory, or a production snapshot.",
+  "sources": [
+    {
+      "path": "supabase/migrations/062_consolidated_baseline.sql",
+      "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+    },
+    {
+      "path": "supabase/migrations/063_report_crypto_search_path.sql",
+      "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+    },
+    {
+      "path": "supabase/migrations/064_explicit_report_context.sql",
+      "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+    },
+    {
+      "path": "supabase/migrations/065_remove_dhash_hardblock.sql",
+      "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+    },
+    {
+      "path": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+    },
+    {
+      "path": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+    },
+    {
+      "path": "supabase/migrations/068_owner_tester_reports_count.sql",
+      "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+    },
+    {
+      "path": "supabase/migrations/069_admin_audit_hardening.sql",
+      "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+    },
+    {
+      "path": "supabase/migrations/070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "path": "supabase/migrations/071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "path": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "path": "supabase/migrations/073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "path": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+    },
+    {
+      "path": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+    },
+    {
+      "path": "supabase/migrations/076_mission_for_finalized_campaigns.sql",
+      "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+    },
+    {
+      "path": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+    },
+    {
+      "path": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+    },
+    {
+      "path": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+    },
+    {
+      "path": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+    },
+    {
+      "path": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+    },
+    {
+      "path": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+    },
+    {
+      "path": "supabase/migrations/083_fix_app_configs_encoding_and_version.sql",
+      "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+    },
+    {
+      "path": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+    },
+    {
+      "path": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+    },
+    {
+      "path": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+      "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+    },
+    {
+      "path": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+    },
+    {
+      "path": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "path": "supabase/migrations/089_fix_production_bonus_lifecycle.sql",
+      "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+    },
+    {
+      "path": "supabase/migrations/090_daily_task_action_gate.sql",
+      "sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e"
+    },
+    {
+      "path": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "sha256": "3a1dc6f2a5998fb697fe2c841af46532f5df885a777c3617bc37d71215b69486"
+    },
+    {
+      "path": "supabase/migrations/092_dual_storage_hardening.sql",
+      "sha256": "4b8a71520e975d4e4380a15eb85e1360da20fb37b963e4c67cf13c5b54a28c2f"
+    },
+    {
+      "path": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "sha256": "ddbff20d4f7ba83bba451543c95fb3a63d8df35d4b5f91594d8bacdb99ea82a1"
+    },
+    {
+      "path": "supabase/migrations/094_fix_daily_task_completion_and_carryover.sql",
+      "sha256": "af5e0e54f6542baa4d0d0f202080193a9e580c2a4b1177bc9672d1fe464feeb7"
+    },
+    {
+      "path": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "sha256": "8e3fe19898114c6029b7b0c7b592dd82dde24b082e08775fea70ad57686c8dcd"
+    },
+    {
+      "path": "supabase/migrations/096_owner_activity_stats_in_campaign_detail.sql",
+      "sha256": "4ffe3dbf83cd20baa2157c5c8e7c6dd640abab2a39f6b3e3c946739bd1cb46e2"
+    },
+    {
+      "path": "supabase/migrations/097_auto_purge_expired_notifications.sql",
+      "sha256": "505051b8dbc138dd19edfcea80863c52f505186396a2b6f122fae9891f325e28"
+    },
+    {
+      "path": "supabase/migrations/098_auto_purge_operational_ledgers.sql",
+      "sha256": "8aca7294655fe357f1cf9fddeae9aa6749618fb00ea1898b0ed937e985fe6867"
+    },
+    {
+      "path": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "sha256": "da39947a09cd6f085781386658fa28dfebd17fb68ced33a45d67020a199a8fac"
+    },
+    {
+      "path": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "sha256": "3e7680659313b4ad35f814ea20d21064c1427603c3810f836fba6c7583f36f88"
+    },
+    {
+      "path": "supabase/migrations/101_telegram_group_mirror.sql",
+      "sha256": "915ee480806e5d583a8ff35f57d0e6eebcb9fa7599420dc05db3fa26a2f9670d"
+    }
+  ],
+  "supportSources": [
+    {
+      "path": "tools/ai-sql-index.mjs",
+      "sha256": "96b8905c1cdaa2da109aded75d12ea2dfd1d5bd37419e88abcd8934d1e1d0bd0"
+    },
+    {
+      "path": "supabase/tools/baseline-lib.mjs",
+      "sha256": "2d283c7535e0724bbf25736f243c84df882b843b67a14e29cef63d11ce2d3661"
+    },
+    {
+      "path": "supabase/tests/package-lock.json",
+      "sha256": "170bbfae6b5077e32dd87cfdf4d05566068ca6767b02428b1cc215239f0527da"
+    }
+  ],
+  "functions": [
+    {
+      "signature": "public._admin_adjust_credits_internal(uuid, uuid, integer, text)",
+      "identityArguments": "p_actor_id uuid, p_target_user_id uuid, p_amount integer, p_reason text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        61
+      ],
+      "definitionSha256": "2eb11076f66fe42ef89e9787559673f9bb6c9a77354c797ac0def931ad7297f1"
+    },
+    {
+      "signature": "public._apply_daily_inactivity_penalty(date)",
+      "identityArguments": "p_eval date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        709,
+        1099
+      ],
+      "definitionSha256": "ce4c18c93d150b0f3a0b9e9d72e3ddffacca0d64441dde937e98dec58a705675"
+    },
+    {
+      "signature": "public._apply_daily_inactivity_penalty(date, date)",
+      "identityArguments": "p_eval date, p_horizon_scope date",
+      "firstSeen": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "lastDefinitionChange": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "lineHints": [
+        620
+      ],
+      "definitionSha256": "b933a2a16b8461289069b27719824b0f96d21022a4ef456d05ce638e4017bbcc"
+    },
+    {
+      "signature": "public._assert_daily_task_admin()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1296
+      ],
+      "definitionSha256": "8ed117c49b42e146b56483de5da5b2a02fae87aa40838214ef0a3eae5a978760"
+    },
+    {
+      "signature": "public._assert_owner_daily_task_action_allowed(uuid, date)",
+      "identityArguments": "p_owner_id uuid, p_today date",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        176
+      ],
+      "definitionSha256": "f6f6e3178369aaa5be0ceaad48d35d8ebc276d738b86785d901280bafb32c847"
+    },
+    {
+      "signature": "public._campaign_json(campaigns)",
+      "identityArguments": "c campaigns",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        384
+      ],
+      "definitionSha256": "80151887789ac7aae363e2266c38f0bfbeef0104c896dc5d43760dde9cfaab81"
+    },
+    {
+      "signature": "public._can_caller_insert_campaign()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        840
+      ],
+      "definitionSha256": "f83a4affd6e4274aaafbb3d44410543b07c21c9456a58e43ed8e38125fe659b4"
+    },
+    {
+      "signature": "public._can_insert_report_object(text, text, jsonb)",
+      "identityArguments": "p_bucket text, p_name text, p_metadata jsonb",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        36
+      ],
+      "definitionSha256": "e35b5aa2e5a6cc2eee25c8659f8f92e8b482f1c022a7aded92d4f3227cd2b38c"
+    },
+    {
+      "signature": "public._can_read_report_object(text, text)",
+      "identityArguments": "p_bucket text, p_name text",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        86
+      ],
+      "definitionSha256": "3979d2d45b7ecc077a28c14d4468fb67f26aa704fc17c219150ef9f66faf668f"
+    },
+    {
+      "signature": "public._check_and_refund_mission_escrow(uuid)",
+      "identityArguments": "p_mission_id uuid",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        405
+      ],
+      "definitionSha256": "5b3cf37f579e2c1dee1a46d5d48dcc8c790691cfa0591084b00b60fff750cfc9"
+    },
+    {
+      "signature": "public._check_home_stats_policy_immutability()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lineHints": [
+        180
+      ],
+      "definitionSha256": "7ae9cbf454bcca035cb18ea79023d2824265c207a7315ee57a644ace696f967e"
+    },
+    {
+      "signature": "public._close_and_refund_tester_bonus_round(uuid, text)",
+      "identityArguments": "p_round_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        1039
+      ],
+      "definitionSha256": "e3e0f76b9602e21e32e4a91f1d3163c9f57cc4a9d7b6e8c9f839f8ccfd886358"
+    },
+    {
+      "signature": "public._finalize_report_media(jsonb, uuid, uuid)",
+      "identityArguments": "p_data jsonb, p_report uuid, p_attachment uuid",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        74
+      ],
+      "definitionSha256": "263b3b95bc1b4b835744200aa786ffa0b4ab9a433dbb278edff5beff11b5c48c"
+    },
+    {
+      "signature": "public._format_business_policy_json(business_policies)",
+      "identityArguments": "p business_policies",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        268
+      ],
+      "definitionSha256": "500dd13517dcd5607b4efdae9c2f0808d3df769130ce9a2f42543c994ee15f38"
+    },
+    {
+      "signature": "public._format_business_policy_public_json(business_policies)",
+      "identityArguments": "p business_policies",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        315
+      ],
+      "definitionSha256": "70b7663641ec814e568a742ee2b7fac709abb3ffb98e0b36f5b7a71d97bcffe9"
+    },
+    {
+      "signature": "public._format_daily_task_policy_json(daily_task_policies)",
+      "identityArguments": "p daily_task_policies",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1375
+      ],
+      "definitionSha256": "add3032b987bf189e2a0ad71ee1325d92452d1412c0eca869f3d2b1e74835829"
+    },
+    {
+      "signature": "public._get_business_policy_revision()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        230
+      ],
+      "definitionSha256": "7c8a9113f22ddda335b7d89fdf61ce166f22d208e7a9ec1d0de8923dbbef397b"
+    },
+    {
+      "signature": "public._get_business_quote_token(text, business_policies, jsonb)",
+      "identityArguments": "p_quote_type text, p_policy business_policies, p_params jsonb",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        638
+      ],
+      "definitionSha256": "2124cf015b094cbde6263433a66e722f4efd5d78df09bdfd43f89e0f82a52748"
+    },
+    {
+      "signature": "public._get_daily_task_policy_revision()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1391
+      ],
+      "definitionSha256": "f57d47c6a83f17dbca1d38af94280e66e49ce86b1ba89a1b0bb5d08690b7ed44"
+    },
+    {
+      "signature": "public._get_effective_business_policy_row(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        892
+      ],
+      "definitionSha256": "8fae69e17183430252af18e3d85bc6aa02804cee5b1e4a2fb1894048b37845b8"
+    },
+    {
+      "signature": "public._get_home_stats_period(date)",
+      "identityArguments": "p_today date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1411
+      ],
+      "definitionSha256": "ec6f577cd0410e0ce87ef26a541439a94aa85a7ff6958fc1185028d232eebf3e"
+    },
+    {
+      "signature": "public._get_home_stats_revision()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1443
+      ],
+      "definitionSha256": "921e5b1111866ff20c876c7e46123e85b423ba79299c48abf27b84f3e21a3faf"
+    },
+    {
+      "signature": "public._grant_report_tip(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_tester_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1458
+      ],
+      "definitionSha256": "61eb11766c913d29b5f4e944b768cdc0119573dc4e15998d62e29f753226a815"
+    },
+    {
+      "signature": "public._impl_admin_cancel_daily_task_policy(date, text, text)",
+      "identityArguments": "p_effective_from date, p_operator_note text, p_expected_revision text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "f78c3c967562d2ce6eb23132ad530135a364a1e2dfd36f087200aa48f4a701a1"
+    },
+    {
+      "signature": "public._impl_admin_delete_campaign(uuid, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        1682
+      ],
+      "definitionSha256": "bd9795a1d8fc564c26effe479e993010ad57482fa09e3b16c7c166a989621109"
+    },
+    {
+      "signature": "public._impl_admin_pause_campaign(uuid, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        362
+      ],
+      "definitionSha256": "cae705915d8a37854d496e202594b0eec10c6d5dec99a7bcda610eae49d3b8ef"
+    },
+    {
+      "signature": "public._impl_admin_pause_campaign_core(uuid, text, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason_code text, p_custom_reason text",
+      "firstSeen": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        193
+      ],
+      "definitionSha256": "4aad860e3fc6388d890b6d4441768b103c725fe25241286df92b60a7c9bb28b1"
+    },
+    {
+      "signature": "public._impl_admin_reply_contact_report(uuid, text)",
+      "identityArguments": "p_report_id uuid, p_message text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "cea781a7fb7e9274a185959d8c112d262ba1efbb2721f2acba600cb25d35daa4"
+    },
+    {
+      "signature": "public._impl_admin_resume_campaign(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        737
+      ],
+      "definitionSha256": "fc6789b942ab2e96680ab6fb8d26ce7e978ad5d0db3ee629b52e29c5968e4ff9"
+    },
+    {
+      "signature": "public._impl_admin_schedule_daily_task_policy(integer, date, text, text)",
+      "identityArguments": "p_tests_per_active_app integer, p_effective_from date, p_operator_note text, p_expected_revision text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "e6f7d2b808f5e90861f73bbf9dcf23b87f9a468f981cd8b9de1afa26e5ec9d68"
+    },
+    {
+      "signature": "public._impl_admin_set_home_stats_cycle(integer, text)",
+      "identityArguments": "p_cycle_days integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "8ac601835dcbb5b95cc768315c1dbbfb32dc1dc5da746db9bd325c427bfb6749"
+    },
+    {
+      "signature": "public._impl_admin_update_app_config(integer, integer, text, boolean, text, text, text, text, text, text, text)",
+      "identityArguments": "p_min_version_code integer, p_latest_version_code integer, p_latest_version_name text, p_force_update boolean, p_title text, p_message text, p_store_url text, p_title_vi text, p_title_en text, p_message_vi text, p_message_en text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "02939701b30a3747229f8133bd5a023cb4a9d590119b2f375541570cf336f2fd"
+    },
+    {
+      "signature": "public._impl_admin_update_report_status(uuid, boolean)",
+      "identityArguments": "p_report_id uuid, p_resolved boolean",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [],
+      "definitionSha256": "4ae354820f236c5846f9a9cf83fe38237d247c4c0f5980fdaece20b25b968f5f"
+    },
+    {
+      "signature": "public._impl_approve_tester_report(uuid, integer)",
+      "identityArguments": "p_report_id uuid, p_bonus integer",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        2850
+      ],
+      "definitionSha256": "60d07a71547b540526fbd47d2777f4475a3efd1dcb2b420e4b9c07d63806f774"
+    },
+    {
+      "signature": "public._impl_reject_tester_report(uuid, text, text)",
+      "identityArguments": "p_report_id uuid, p_reason text, p_reason_code text",
+      "firstSeen": "supabase/migrations/073_admin_action_audit.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        2549
+      ],
+      "definitionSha256": "c08b0871763abb15efc885b0f1585126be7d5f7548bbd6477c8cff5fb529b2d5"
+    },
+    {
+      "signature": "public._is_mission_expired_for_copy(text, timestamp with time zone, timestamp with time zone)",
+      "identityArguments": "p_status text, p_ends_at timestamp with time zone, p_now timestamp with time zone",
+      "firstSeen": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        82
+      ],
+      "definitionSha256": "09f1d00b146fdfc60e3f64558e5ac09e7995c7ecaf7490963c3b691c63723417"
+    },
+    {
+      "signature": "public._notif_campaign_to_jsonb(notification_campaigns)",
+      "identityArguments": "p_camp notification_campaigns",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        207
+      ],
+      "definitionSha256": "0e1bd20facc722dfeaef78b70ad9947ed8e512e71231a26b2e352442902d8445"
+    },
+    {
+      "signature": "public._notif_record_common_admin_audit(uuid, text, text, text, text, jsonb, jsonb, uuid)",
+      "identityArguments": "p_actor_id uuid, p_action text, p_target_type text, p_target_id text, p_reason text, p_old_state jsonb, p_new_state jsonb, p_request_id uuid",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        325
+      ],
+      "definitionSha256": "e3160d027827844188b7f728278445299fc90bb5a422514e4866ca9f30cb0e34"
+    },
+    {
+      "signature": "public._notif_resolve_delivered_content(text, text, text, text, text)",
+      "identityArguments": "p_title_vi text, p_title_en text, p_body_vi text, p_body_en text, p_locale text, OUT delivered_title text, OUT delivered_message text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        177
+      ],
+      "definitionSha256": "97724da1aaf3a9246ed251fdaa5c96d06a93b267976346ed122f486b85d12ace"
+    },
+    {
+      "signature": "public._notif_snapshot_recipients(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        257
+      ],
+      "definitionSha256": "7aa12c511a13ff69857e39e816433f0a4286bd9f47f41108293a48873f50f5b1"
+    },
+    {
+      "signature": "public._prepare_report_media(text, text, uuid, uuid, uuid)",
+      "identityArguments": "p_url text, p_thumb text, p_campaign uuid, p_user uuid, p_allowed_report uuid",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        173
+      ],
+      "definitionSha256": "4d020152307e5888a58e471abf7b0343e172b3843d027376d40690c297340547"
+    },
+    {
+      "signature": "public._process_closing_tester_bonus_rounds()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        1834
+      ],
+      "definitionSha256": "514da89813797a66aa1359ac721c2746f8cb9149b0f425163d50d5f0105caaa8"
+    },
+    {
+      "signature": "public._profile_json(profiles)",
+      "identityArguments": "p profiles",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1527
+      ],
+      "definitionSha256": "eb78f8eb46f21c9ad14f0dde049e06372944f5d1c6ff0d7abed1a87f12dda000"
+    },
+    {
+      "signature": "public._record_campaign_removal_receipt(uuid, uuid, text, text, text, text)",
+      "identityArguments": "p_campaign_id uuid, p_owner_id uuid, p_app_name text, p_removed_by text, p_status text, p_reason text",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        77
+      ],
+      "definitionSha256": "5ed3e6822b6a15e66c49a45c6d2ad471da79ee8d7802fc1509d64cf6b9849e80"
+    },
+    {
+      "signature": "public._report_media_deadline(uuid, uuid)",
+      "identityArguments": "p_report_id uuid, p_attachment_id uuid",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        1387
+      ],
+      "definitionSha256": "2ce8bc91bda5c8c1ec7b725cfb267b833f2d074a60b9e45ce86fc56a1e499d62"
+    },
+    {
+      "signature": "public._report_storage_ref(text)",
+      "identityArguments": "p_url text",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        28
+      ],
+      "definitionSha256": "8832bcb14cc6172140916e56e76d9b285bc131efc3c57ae7ce447761923c86c1"
+    },
+    {
+      "signature": "public._request_campaign_removal(uuid, text, boolean)",
+      "identityArguments": "p_campaign_id uuid, p_reason text, p_by_admin boolean",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        280
+      ],
+      "definitionSha256": "974f9940c44a0b2d4559689100332b3b5ecfe6039e3b91bd8fb0cfdcbbce15ca"
+    },
+    {
+      "signature": "public._settle_campaign_app_update(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1548
+      ],
+      "definitionSha256": "d46159ead4ff2ad12158c0983c35149db766d562fc14f95c88bb6563031e7841"
+    },
+    {
+      "signature": "public._settle_campaign_tester_bonus(uuid)",
+      "identityArguments": "p_report_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        832
+      ],
+      "definitionSha256": "71457b8aa13b25078e8318789c0d943524637c519ca43463c7fa89193814c541"
+    },
+    {
+      "signature": "public._settle_mission_reward(uuid)",
+      "identityArguments": "p_report_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        1085
+      ],
+      "definitionSha256": "407ca6ba37f636d49d8b75d85208f886ab5ea95e1a98c2f656584524ad914fe0"
+    },
+    {
+      "signature": "public._settle_mission_reward(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_user_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1625,
+        1932
+      ],
+      "definitionSha256": "0c07e35f42a4ece8f8bfcf6a106ef341cf5e9846ed9c68850408b6bfe4f76927"
+    },
+    {
+      "signature": "public._submit_tester_report_business_092(text, uuid, text, integer, uuid, text, text, text, uuid, jsonb, date)",
+      "identityArguments": "p_submission_context text, p_campaign_id uuid, p_content text, p_rating integer, p_client_submit_id uuid, p_screenshot_url text, p_image_hash text, p_thumbnail_url text, p_mission_id uuid, p_attachments jsonb, p_expected_date date",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        245
+      ],
+      "definitionSha256": "56978db49aa362e88738fd5a05564c2c91a466bac2b67c98765b3846af83a425"
+    },
+    {
+      "signature": "public._submit_tester_report_core(text, uuid, text, integer, uuid, text, text, text, uuid, jsonb, date)",
+      "identityArguments": "p_submission_context text, p_campaign_id uuid, p_content text, p_rating integer, p_client_submit_id uuid, p_screenshot_url text, p_image_hash text, p_thumbnail_url text, p_mission_id uuid, p_attachments jsonb, p_expected_date date",
+      "firstSeen": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        159
+      ],
+      "definitionSha256": "0b78381f24953d583c3e90a1c9111cab13f1516602621f404282d732009c1f2c"
+    },
+    {
+      "signature": "public._sync_block(text, jsonb, jsonb)",
+      "identityArguments": "p_key text, p_value jsonb, p_tokens jsonb",
+      "firstSeen": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lastDefinitionChange": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lineHints": [
+        44
+      ],
+      "definitionSha256": "6713ec3157c069bd5d57353559ec30970899a1403bc7d8c2a5e7dfbb7b130228"
+    },
+    {
+      "signature": "public.acknowledge_my_notification(uuid)",
+      "identityArguments": "p_notification_id uuid",
+      "firstSeen": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lineHints": [
+        349
+      ],
+      "definitionSha256": "843666fcff1bd67410c14f9b46cf7b7b9dcede5a9112ebc2a018975219d1de17"
+    },
+    {
+      "signature": "public.acknowledge_warning(uuid)",
+      "identityArguments": "p_warning_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        1961
+      ],
+      "definitionSha256": "589fc53bea978c993200cb9a03c52e0b9e086c135e20bb2906e1913d1ee270cc"
+    },
+    {
+      "signature": "public.admin_adjust_credits(uuid, integer, text)",
+      "identityArguments": "p_target_user_id uuid, p_amount integer, p_reason text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        142
+      ],
+      "definitionSha256": "00029ff12fda12bc7bd985499acaa654bbf3021553e1ca9ec17d91e23b126626"
+    },
+    {
+      "signature": "public.admin_cancel_business_policy(date, text, text, uuid)",
+      "identityArguments": "p_effective_from date, p_operator_note text, p_expected_revision text, p_request_id uuid",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "lineHints": [
+        1268
+      ],
+      "definitionSha256": "ef317354eb86bae24d8b8016e2971fb248d7a6e8c47ffb939b24e7047b861ac3"
+    },
+    {
+      "signature": "public.admin_cancel_daily_task_policy(date, text, text)",
+      "identityArguments": "p_effective_from date, p_operator_note text, p_expected_revision text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        701,
+        877
+      ],
+      "definitionSha256": "bdbeded4d4d485c8b03b465b2e8baea5bf9c82de66c17ae80445e4802faebb14"
+    },
+    {
+      "signature": "public.admin_cancel_future_carryover_policy(date, text, bigint, uuid)",
+      "identityArguments": "p_effective_from date, p_reason text, p_expected_revision bigint, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1078
+      ],
+      "definitionSha256": "f1c593a9d3935537e028f0c7dcbca748547db99187bbc3b4b0d39b51e1a0e20d"
+    },
+    {
+      "signature": "public.admin_cancel_notification_campaign(uuid, uuid, integer, text)",
+      "identityArguments": "p_request_id uuid, p_campaign_id uuid, p_expected_revision integer, p_reason text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1242
+      ],
+      "definitionSha256": "83027490a8acafef0a34a1cdc17e9bbfae36db9627dbcb8f4911490018546ad6"
+    },
+    {
+      "signature": "public.admin_compensate_credits(uuid, uuid, integer, text, uuid, uuid)",
+      "identityArguments": "p_request_id uuid, p_target_user_id uuid, p_amount integer, p_reason text, p_original_credit_log_id uuid, p_contact_report_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        187
+      ],
+      "definitionSha256": "6d31ab7f51e696b54bdbe3d6ac8e967a39553dd4f6c7e7326d7969ec9b203da1"
+    },
+    {
+      "signature": "public.admin_create_notification_campaign(uuid, text, text, text, text, text, text, text, uuid[], text)",
+      "identityArguments": "p_request_id uuid, p_title_vi text, p_title_en text, p_body_vi text, p_body_en text, p_default_locale text, p_audience_type text, p_target_role text, p_selected_user_ids uuid[], p_reason text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        366
+      ],
+      "definitionSha256": "4fa554ffd710d515d44309138931a7781a7bd5387deb6d6da063fd14ce6db033"
+    },
+    {
+      "signature": "public.admin_delete_campaign(uuid, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        719,
+        986
+      ],
+      "definitionSha256": "f386dc477c78e829f3299961cd2d9d97bd1432f72b2c040280f55c178d3bba4a"
+    },
+    {
+      "signature": "public.admin_delete_mission(uuid, text)",
+      "identityArguments": "p_mission_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        910
+      ],
+      "definitionSha256": "fbd56ba83c6f7e34b0f71b14900519ebf082cf778b0263d5fc9bc98e56067526"
+    },
+    {
+      "signature": "public.admin_get_action_events(timestamp with time zone, uuid, integer, text, text, uuid)",
+      "identityArguments": "p_cursor_created_at timestamp with time zone, p_cursor_id uuid, p_limit integer, p_action text, p_target_type text, p_actor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        235
+      ],
+      "definitionSha256": "cf0d284fc3bf0a32776ed3b2de3a614851ea2db02fec2a766470a65faefb3412"
+    },
+    {
+      "signature": "public.admin_get_business_policy_config(integer)",
+      "identityArguments": "p_future_limit integer",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        363
+      ],
+      "definitionSha256": "69e56f7f8b704e778349889771022ce138ec41eaf2dc1319e179045c81464d5c"
+    },
+    {
+      "signature": "public.admin_get_business_policy_history(integer, bigint)",
+      "identityArguments": "p_limit integer, p_cursor_id bigint",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        818
+      ],
+      "definitionSha256": "7169d9a842e477a3d74dfbef22430e45605a05766580dc9f1aef03d117d7acd0"
+    },
+    {
+      "signature": "public.admin_get_carryover_policies()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        727
+      ],
+      "definitionSha256": "2ed1188d3e249c9305922d959f55c13d824ff70c4617ca699cce5cc2dbad32a4"
+    },
+    {
+      "signature": "public.admin_get_carryover_policy_history(integer, bigint, boolean)",
+      "identityArguments": "p_limit integer, p_cursor_id bigint, p_include_cancelled boolean",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        816
+      ],
+      "definitionSha256": "453c3bf0c6ed969565d25cd4cc28c94cda9746d174aabf802e8193c41201d9bd"
+    },
+    {
+      "signature": "public.admin_get_contact_reports(text)",
+      "identityArguments": "p_status text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/069_admin_audit_hardening.sql",
+      "lineHints": [
+        161
+      ],
+      "definitionSha256": "9e8b985b22c5f993bdd54e3a340564327d0196967404779d23b75d6a9161fa6b"
+    },
+    {
+      "signature": "public.admin_get_daily_task_config()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        2192
+      ],
+      "definitionSha256": "f2f0b80afa5f312d03409bbf44c19e26a609e401368f3760a8b9ed851c17fca5"
+    },
+    {
+      "signature": "public.admin_get_daily_task_policy_history(integer, bigint)",
+      "identityArguments": "p_limit integer, p_cursor_id bigint",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        2264
+      ],
+      "definitionSha256": "dcaab251cd84f67abdefc5414414e3f2b63223b5d8df29375973cd56314451cc"
+    },
+    {
+      "signature": "public.admin_get_home_stats_config()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/069_admin_audit_hardening.sql",
+      "lineHints": [
+        502
+      ],
+      "definitionSha256": "6e2e011fcf519d6bad82847df6df915b986386694f8242cdef0b6ad015c09215"
+    },
+    {
+      "signature": "public.admin_get_job_runs_queue(text, text, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_job_type text, p_status text, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        2687
+      ],
+      "definitionSha256": "21565519bed5cb87b6f7edd95da0872366327e287b5aa569c659bb02ccb8de7e"
+    },
+    {
+      "signature": "public.admin_get_member_credit_history(uuid, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_user_id uuid, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        566
+      ],
+      "definitionSha256": "45ae68008894626d4e5078d3071c4406c40ec7045d8dff753b3447001f9dcabc"
+    },
+    {
+      "signature": "public.admin_get_member_daily_tasks(uuid, integer, date)",
+      "identityArguments": "p_user_id uuid, p_limit integer, p_cursor_date date",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        645
+      ],
+      "definitionSha256": "03de1a2d7d0f6d10aea1850857b72b664bacabfd9293008ca804345ff49f2ffb"
+    },
+    {
+      "signature": "public.admin_get_member_overview(uuid)",
+      "identityArguments": "p_user_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        414
+      ],
+      "definitionSha256": "75dc7e78d17d46c91a59ba9a6c338de0822a2c26f5855933e786183cffa74829"
+    },
+    {
+      "signature": "public.admin_get_member_slots(uuid)",
+      "identityArguments": "p_user_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        543
+      ],
+      "definitionSha256": "804e06a393df96678d3a8e0e403bb75c081342b4151f337063242393e6848c7f"
+    },
+    {
+      "signature": "public.admin_get_member_warnings(uuid, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_user_id uuid, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1733
+      ],
+      "definitionSha256": "9ca3407bc383d4b594d7b7b8530d679b7939f34717f20c010414ecd6702dc18d"
+    },
+    {
+      "signature": "public.admin_get_my_capabilities()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1550
+      ],
+      "definitionSha256": "2381e6b0da22205891ddc3b54cfbc48fc0f5ccd2151cdd08716ab71b396a98c5"
+    },
+    {
+      "signature": "public.admin_get_notification_campaign_detail(uuid, integer)",
+      "identityArguments": "p_campaign_id uuid, p_events_limit integer",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1792
+      ],
+      "definitionSha256": "21d57175ffb7efc3acef87b2c030c1a7847dbd5441f0a728e3091a75c3531670"
+    },
+    {
+      "signature": "public.admin_get_notification_scheduler_health()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1986
+      ],
+      "definitionSha256": "7643b6a3014aa750d4c8e915be7c3f31f3020debf9456e43519b515e660baab7"
+    },
+    {
+      "signature": "public.admin_get_owner_auto_pause_config()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lastDefinitionChange": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lineHints": [
+        35
+      ],
+      "definitionSha256": "17433c92cf1383c29d547d9c6c81b717ffbbd4455c36820ff93de1218dd6d768"
+    },
+    {
+      "signature": "public.admin_get_system_monitor_summary()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        2556
+      ],
+      "definitionSha256": "343f050517ba3cebfc6de2548032dd9787b575b4ee70bf0451746676ef7351e1"
+    },
+    {
+      "signature": "public.admin_get_tester_reports_queue(text, uuid, uuid, uuid, text, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_status text, p_campaign_id uuid, p_tester_id uuid, p_owner_id uuid, p_submission_context text, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lineHints": [
+        2234
+      ],
+      "definitionSha256": "8392322d7599ffda0d2021ff8288dc9569a486268c1085d58179c1896d0c3b94"
+    },
+    {
+      "signature": "public.admin_list_business_policies(integer, date)",
+      "identityArguments": "p_limit integer, p_cursor_date date",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        765
+      ],
+      "definitionSha256": "8cfbeb0e074bf35b6908195441d75751580c2081c122a6f0634d8cd664a436cb"
+    },
+    {
+      "signature": "public.admin_list_daily_task_policies(integer, date, bigint)",
+      "identityArguments": "p_limit integer, p_cursor_date date, p_cursor_id bigint",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        2383
+      ],
+      "definitionSha256": "c7ccc2cfbd2f7b4ecea47886456c84c081b8e7a968195f27af0603894d60fba9"
+    },
+    {
+      "signature": "public.admin_list_future_carryover_policies(integer, date)",
+      "identityArguments": "p_limit integer, p_cursor_date date",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        889
+      ],
+      "definitionSha256": "21dbfaf4a8132052e285691680cc0672ea32ba649dc0414d0d7ee3d0c473e72d"
+    },
+    {
+      "signature": "public.admin_list_notification_campaign_recipients(uuid, text, integer, text)",
+      "identityArguments": "p_campaign_id uuid, p_status text, p_limit integer, p_cursor text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1861
+      ],
+      "definitionSha256": "081787b5914549509e314994d425bda790e4572c889981d4c29fff38e35f1c06"
+    },
+    {
+      "signature": "public.admin_list_notification_campaigns(text, text, integer, text)",
+      "identityArguments": "p_status text, p_audience_type text, p_limit integer, p_cursor text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "lineHints": [
+        27
+      ],
+      "definitionSha256": "8a3a0618d9c1c50a9ee93bbf3935c693bff7d4aadfb8c88b94ae4ea1ddc35191"
+    },
+    {
+      "signature": "public.admin_pause_campaign(uuid, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        380
+      ],
+      "definitionSha256": "06c8a32ed47b06ebf7adc48d71549d4c49e83e7ce834dc5778785899591e6845"
+    },
+    {
+      "signature": "public.admin_pause_campaign_with_reason(uuid, text)",
+      "identityArguments": "p_campaign_id uuid, p_reason_code text",
+      "firstSeen": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        430
+      ],
+      "definitionSha256": "9fb3e716eedb911f93ae9844dac3a543ec3cf5b49f37c2999866c9b72f63b7f5"
+    },
+    {
+      "signature": "public.admin_preview_notification_campaign(uuid, text, text, uuid[], text, text, text, text, text)",
+      "identityArguments": "p_campaign_id uuid, p_audience_type text, p_target_role text, p_selected_user_ids uuid[], p_default_locale text, p_title_vi text, p_title_en text, p_body_vi text, p_body_en text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "lineHints": [
+        160
+      ],
+      "definitionSha256": "b1ebc44a1fb3b3c45fe12d5ea6fea7012f370ce46f91646c4a81bb7c7211a140"
+    },
+    {
+      "signature": "public.admin_process_due_notification_campaigns(integer, uuid)",
+      "identityArguments": "p_batch_size integer, p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1611
+      ],
+      "definitionSha256": "d788213a2f0c2f3488c1159353001bb59f1deeac2fa02390ec1f2c98aecb1597"
+    },
+    {
+      "signature": "public.admin_reply_contact_report(uuid, text)",
+      "identityArguments": "p_report_id uuid, p_message text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        725,
+        1023
+      ],
+      "definitionSha256": "f413a793240cce5aa58016a296e8f4dc7b049097f06400c352ae61ceb5fccf3d"
+    },
+    {
+      "signature": "public.admin_resume_campaign(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        861
+      ],
+      "definitionSha256": "2d87a99fc4befcb9f43540eb1672527ffbe68ceb55887bd2d92bf172caae8b84"
+    },
+    {
+      "signature": "public.admin_retry_mission_settlement_jobs(uuid, integer, uuid)",
+      "identityArguments": "p_job_id uuid, p_batch_limit integer, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        2787
+      ],
+      "definitionSha256": "92496aee84f09730ce0e9f36811b67b6a1a6b51b3bf6a480d42f3a2587b6df13"
+    },
+    {
+      "signature": "public.admin_revoke_warning(uuid, text, uuid)",
+      "identityArguments": "p_warning_id uuid, p_reason text, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1818
+      ],
+      "definitionSha256": "eb9bb0e4a7c5d995a2bf6c33c43de7809a20513a8fb3c6a6c3ea5c0d58c32242"
+    },
+    {
+      "signature": "public.admin_schedule_business_policy(date, text, text, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, integer, uuid, integer, integer, integer, integer)",
+      "identityArguments": "p_effective_from date, p_operator_note text, p_expected_revision text, p_welcome_credits integer, p_penalty_tier1_pct integer, p_penalty_tier2_pct integer, p_penalty_tier3_pct integer, p_penalty_tier4_pct integer, p_push_fee integer, p_slot_fee_2 integer, p_slot_fee_3 integer, p_slot_fee_4_plus integer, p_slot_renewal_days integer, p_report_provisional_reward integer, p_report_review_tester_bonus integer, p_report_review_owner_bonus integer, p_app_update_reward_per_claim integer, p_app_update_max_claims integer, p_request_id uuid, p_min_credits_to_post_app integer, p_slot_fee_1 integer, p_target_15_fee integer, p_target_20_fee integer",
+      "firstSeen": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        368
+      ],
+      "definitionSha256": "1546db7f6bbc7da1613846143e22cca8d9c9cf030384001bcf75bdb0875bf441"
+    },
+    {
+      "signature": "public.admin_schedule_carryover_policy(date, boolean, text, bigint, uuid)",
+      "identityArguments": "p_effective_from date, p_is_enabled boolean, p_operator_note text, p_expected_revision bigint, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        959
+      ],
+      "definitionSha256": "5196cdaea6a6e2d795a023eeee4303b9f288e8ed977a865bf580b6a10b2ae048"
+    },
+    {
+      "signature": "public.admin_schedule_daily_task_policy(integer, date, text, text)",
+      "identityArguments": "p_tests_per_active_app integer, p_effective_from date, p_operator_note text, p_expected_revision text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        695,
+        838
+      ],
+      "definitionSha256": "6ff5e57eadf380315ced4744be6d9a1dad5c85c41ba57053f8be964756122bea"
+    },
+    {
+      "signature": "public.admin_schedule_notification_campaign(uuid, uuid, integer, timestamp with time zone, text)",
+      "identityArguments": "p_request_id uuid, p_campaign_id uuid, p_expected_revision integer, p_scheduled_for timestamp with time zone, p_reason text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        929
+      ],
+      "definitionSha256": "64874a213841e92c4790ce8a0a789579c10561b2ff0b9dd65ee1b567a46f53ee"
+    },
+    {
+      "signature": "public.admin_search_campaigns(text, text, uuid, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_query text, p_status text, p_owner_id uuid, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1213
+      ],
+      "definitionSha256": "e27d1340cba46c146fdbebc326a436513bc6e79d1fee8ad3f05522c063096dc1"
+    },
+    {
+      "signature": "public.admin_search_members(text, text, boolean, integer, timestamp with time zone, uuid)",
+      "identityArguments": "p_query text, p_role text, p_is_locked boolean, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        319
+      ],
+      "definitionSha256": "b54741e035e2b190776048dabe5faf05f3ba358ac5795373ec2c661dfca2077a"
+    },
+    {
+      "signature": "public.admin_send_notification(uuid, text, text, text)",
+      "identityArguments": "p_target_user_id uuid, p_title text, p_message text, p_type text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        582
+      ],
+      "definitionSha256": "47a91e9f7a82c52b653d7ba2bbc5ccdbb468dc8063feb12d276a42244af1036f"
+    },
+    {
+      "signature": "public.admin_send_now_notification_campaign(uuid, uuid, integer, text)",
+      "identityArguments": "p_request_id uuid, p_campaign_id uuid, p_expected_revision integer, p_reason text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1092
+      ],
+      "definitionSha256": "38408ec27e5acd2ad17fd1f9e08fb908644e1c627051b33ae8486ecdd909dd5e"
+    },
+    {
+      "signature": "public.admin_set_home_stats_cycle(integer, text)",
+      "identityArguments": "p_cycle_days integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        689,
+        803
+      ],
+      "definitionSha256": "a4fda760187541d82a01d7dde3f15829dbb60357064154ef546bb51e4c6b2a1d"
+    },
+    {
+      "signature": "public.admin_set_owner_auto_pause_config(integer, text)",
+      "identityArguments": "p_missed_days integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lastDefinitionChange": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lineHints": [
+        66
+      ],
+      "definitionSha256": "e443c41d54c6b594296d3da0c649390250db11a5b47c2b5d026ac870e7f825e0"
+    },
+    {
+      "signature": "public.admin_set_user_lock(uuid, boolean, text)",
+      "identityArguments": "p_target_user_id uuid, p_locked boolean, p_reason text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        319
+      ],
+      "definitionSha256": "302a139410c110a49f10ee446d2b59cebdf2797b44b946e0ccd521d349b572a0"
+    },
+    {
+      "signature": "public.admin_set_user_role(uuid, text, text, uuid)",
+      "identityArguments": "p_target_user_id uuid, p_new_role text, p_reason text, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        424
+      ],
+      "definitionSha256": "40b0344160ca317c4c1e2b627ce4ec493d83e207109bc91f68fd0a9600cb6926"
+    },
+    {
+      "signature": "public.admin_update_app_config(integer, integer, text, boolean, text, text, text, text, text, text, text)",
+      "identityArguments": "p_min_version_code integer, p_latest_version_code integer, p_latest_version_name text, p_force_update boolean, p_title text, p_message text, p_store_url text, p_title_vi text, p_title_en text, p_message_vi text, p_message_en text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        683,
+        753
+      ],
+      "definitionSha256": "f3ad8d8ca2b5d20a4dece2ef9a86e082f199d670b25139587046df9c7742bb9f"
+    },
+    {
+      "signature": "public.admin_update_notification_campaign(uuid, uuid, integer, text, text, text, text, text, text, text, uuid[], text)",
+      "identityArguments": "p_request_id uuid, p_campaign_id uuid, p_expected_revision integer, p_title_vi text, p_title_en text, p_body_vi text, p_body_en text, p_default_locale text, p_audience_type text, p_target_role text, p_selected_user_ids uuid[], p_reason text",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        576
+      ],
+      "definitionSha256": "fee7ad740f48ee22561f5b17646483f80f02c629423aebc11b5947e2a9bbb309"
+    },
+    {
+      "signature": "public.admin_update_report_status(uuid, boolean)",
+      "identityArguments": "p_report_id uuid, p_resolved boolean",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        731,
+        1055
+      ],
+      "definitionSha256": "982eb1294a54ddba237b58f85435e3b8159818fbcb153004c9756d43e6a8ddcc"
+    },
+    {
+      "signature": "public.apply_daily_inactivity_penalty(integer)",
+      "identityArguments": "p_batch_limit integer",
+      "firstSeen": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "lastDefinitionChange": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "lineHints": [
+        1049
+      ],
+      "definitionSha256": "53b5e7cf4901cb21ca24e4a44a3ca94dc15f871a16bc602e58d0324f2058d48b"
+    },
+    {
+      "signature": "public.apply_report_credit(uuid, integer, text, text)",
+      "identityArguments": "p_report_id uuid, p_amount integer, p_action text, p_note text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3140
+      ],
+      "definitionSha256": "f6d173694cbf8227c57d6eaf8a91196ffb77a0ae2a24bb32e79aee4932f97f7e"
+    },
+    {
+      "signature": "public.approve_tester_report(uuid, integer)",
+      "identityArguments": "p_report_id uuid, p_bonus integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        737,
+        1091
+      ],
+      "definitionSha256": "946b403742ca3b21458085e55fe02f682ffbfbfa157c56dc3e9b74073945f53d"
+    },
+    {
+      "signature": "public.archive_campaign_before_delete()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3360
+      ],
+      "definitionSha256": "9fe34958728ef8d3502c5440ca686f5e1b8e4810d2ad4f64429b131f31d25676"
+    },
+    {
+      "signature": "public.assert_unlocked_admin(text)",
+      "identityArguments": "p_required_capability text",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        102
+      ],
+      "definitionSha256": "02179288e22e1b01c3687df0a0f6240b160185e34a01a0bc274fc8e01a13502b"
+    },
+    {
+      "signature": "public.audit_business_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "lineHints": [
+        1221
+      ],
+      "definitionSha256": "bf90a3f2d976e414d3ebc973dee748984781343194505446a8be700d703fbc42"
+    },
+    {
+      "signature": "public.audit_carryover_journal_reconciliation()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "lastDefinitionChange": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "lineHints": [
+        1258
+      ],
+      "definitionSha256": "3feaf0c8a4b50268f6fee0c69c1242c95ecf47ca24902527b9ffe173f7ef7483"
+    },
+    {
+      "signature": "public.audit_daily_task_ledger_gaps()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "lastDefinitionChange": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "lineHints": [
+        1068
+      ],
+      "definitionSha256": "c257f366f090fbd8595259fbedb39bf0db0bcd2d7a9bda8f25d60587b47eeac1"
+    },
+    {
+      "signature": "public.audit_daily_task_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3427
+      ],
+      "definitionSha256": "bf9df7e8f7d328a6ba340ca408795c4ce028dc3f49a2754f230aa858817c599e"
+    },
+    {
+      "signature": "public.auto_accept_expired_reports()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        3049
+      ],
+      "definitionSha256": "96917fa6f78207d9c02775377139b7ed929fca8293349954a919fd080b3d55db"
+    },
+    {
+      "signature": "public.auto_confirm_user()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3551
+      ],
+      "definitionSha256": "4497d861d0fe2bbbc7cb4b664384ad4acb225afc216ef7f98b131fafdc44f65c"
+    },
+    {
+      "signature": "public.backfill_profiles_zero_credits_since()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lastDefinitionChange": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lineHints": [
+        102
+      ],
+      "definitionSha256": "bdc1e461058ebeb56e31b326757542b879e6bdbe2734b685bc0f81d6acd0aa4a"
+    },
+    {
+      "signature": "public.bootstrap_admin_capability(uuid, text)",
+      "identityArguments": "p_admin_id uuid, p_capability text",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        185
+      ],
+      "definitionSha256": "dd553ab8f4d4fdbfa62d065b558e3dbaf76313d8b74db15b58a3ed6adf28b3cf"
+    },
+    {
+      "signature": "public.cancel_daily_task_policy(date, text)",
+      "identityArguments": "p_effective_from date, p_operator_note text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3565
+      ],
+      "definitionSha256": "2e57812704dde2c5181db9293b96b1369f448384d410c0b25ebc449b724253bd"
+    },
+    {
+      "signature": "public.check_campaign_slot_validity()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        75
+      ],
+      "definitionSha256": "9d63fb48b766e02225f989ef856b3ca8832ceb2804e4cea2a1cadeedc6a22340"
+    },
+    {
+      "signature": "public.claim_app_update_reward(uuid, bigint, text)",
+      "identityArguments": "p_release_id uuid, p_observed_version_code bigint, p_client_operation_id text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        4726
+      ],
+      "definitionSha256": "75b72289b3d90738567d2d322276d925afd3c5a6d0035b47880c5882f3d73fac"
+    },
+    {
+      "signature": "public.claim_my_notification_popup(uuid)",
+      "identityArguments": "p_foreground_session_id uuid",
+      "firstSeen": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lineHints": [
+        181
+      ],
+      "definitionSha256": "7a7a16cb86acacb7a0ab8a1ab2f62237a0280734c60a39d9a2f069cbd2aa62ba"
+    },
+    {
+      "signature": "public.claim_quest_reward(text, integer)",
+      "identityArguments": "p_quest_type text, p_milestone integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        3854
+      ],
+      "definitionSha256": "b23ee9caf60aa357ce2503feef7a1ab119fe4293d0558725a34fdccfc64202e7"
+    },
+    {
+      "signature": "public.close_app_update_release(uuid, text)",
+      "identityArguments": "p_release_id uuid, p_reason text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        4948
+      ],
+      "definitionSha256": "b27e9ddfe4800deabbbebc6cf8d2979ce1c8c29cf5490465626936b6bbbf73ad"
+    },
+    {
+      "signature": "public.close_campaign_tester_bonus(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        1360
+      ],
+      "definitionSha256": "95e14fb25b1632177f4eea8c116a45e002883686d90609ac061bdf16a217f984"
+    },
+    {
+      "signature": "public.complete_expired_campaigns()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        4094
+      ],
+      "definitionSha256": "9965e51de9b07497416a04dda362cf2269c467d9462df1cd9ec54bb002fba1fc"
+    },
+    {
+      "signature": "public.confirm_campaign_production(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        909
+      ],
+      "definitionSha256": "e5f96b60a78741a2507eecd99cd837037181c53a0e1728fe15afcd256982a7a2"
+    },
+    {
+      "signature": "public.create_campaign_tester_bonus(uuid, integer, integer, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_reward_credits integer, p_max_recipients integer, p_client_request_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        430
+      ],
+      "definitionSha256": "64eeb7c571da6797cdc784f1dc6dc45bbe4d84ba5651f2db5f8afa27ac68de22"
+    },
+    {
+      "signature": "public.create_campaign_v2(text, text, text, text, text, integer, text, text, text, integer, uuid, integer, integer, text)",
+      "identityArguments": "p_app_name text, p_package_name text, p_play_url text, p_testing_url text, p_description text, p_target_testers integer, p_icon_url text, p_test_username text, p_test_password text, p_slot_number integer, p_client_request_id uuid, p_expected_total_cost integer, p_expected_min_credits integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        1211
+      ],
+      "definitionSha256": "35468803c7f6ad19e518b606babb2a7fed0790d1493afd31d344d884fbbdba6b"
+    },
+    {
+      "signature": "public.create_mission(uuid, text, text, integer, integer, integer)",
+      "identityArguments": "p_campaign_id uuid, p_title text, p_description text, p_max_participants integer, p_duration_days integer, p_reward_credits integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        86
+      ],
+      "definitionSha256": "81342362147e7fda06cb39a42c394771ff9ff83877e1c462299c2ec1c026a1ac"
+    },
+    {
+      "signature": "public.create_mission_from_source(uuid, uuid, text, text, integer, integer, integer, text, boolean, text)",
+      "identityArguments": "p_source_mission_id uuid, p_campaign_id uuid, p_title text, p_description text, p_max_participants integer, p_duration_days integer, p_reward_credits integer, p_reward_mode text, p_block_previous_participants boolean, p_client_operation_id text",
+      "firstSeen": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        230
+      ],
+      "definitionSha256": "db85dae160a1c3152c48190730ce69e109043f528658bd8ea745c319afefea28"
+    },
+    {
+      "signature": "public.create_mission_v2(uuid, text, text, integer, integer, integer, text)",
+      "identityArguments": "p_campaign_id uuid, p_title text, p_description text, p_max_participants integer, p_duration_days integer, p_reward_credits integer, p_reward_mode text",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        226
+      ],
+      "definitionSha256": "1459382a5c705333fa3351d20d12851a1af833c2d27b58aee743caa156693115"
+    },
+    {
+      "signature": "public.delete_mission(uuid)",
+      "identityArguments": "p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        1013
+      ],
+      "definitionSha256": "0b7967a4dadb3b3960bd3d01045bd525339dd7cc2532190fcd964671cbc59a54"
+    },
+    {
+      "signature": "public.delete_owned_campaign(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        1705
+      ],
+      "definitionSha256": "8c15f82c861bb48b8d8da1ddfe2341dcffa2ebdf0c46794673a7b48489fbd1ed"
+    },
+    {
+      "signature": "public.dhash_hamming(text, text)",
+      "identityArguments": "p_a text, p_b text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        4303
+      ],
+      "definitionSha256": "e3953aa7ca4ba41fb3d1e929f072f8b2069dbf63fd74d55060a7d5bef2929528"
+    },
+    {
+      "signature": "public.diagnose_daily_task_stuck_users()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "lastDefinitionChange": "supabase/migrations/094_fix_daily_task_completion_and_carryover.sql",
+      "lineHints": [
+        1184
+      ],
+      "definitionSha256": "7f15fe0211c048247c452b54a1ccd71d123aab71494422d24f23b600c027939a"
+    },
+    {
+      "signature": "public.edit_mission(uuid, text, text, text, integer, integer, integer, text, integer, integer)",
+      "identityArguments": "p_mission_id uuid, p_title text, p_description text, p_reward_mode text, p_max_participants integer, p_duration_days integer, p_reward_credits integer, p_tester_announcement text, p_expected_version integer, p_expected_cost_diff integer",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        647
+      ],
+      "definitionSha256": "3e4d181bcea15ea3ace90dfa8ef4114c66537e6717b4d178ff6dae3fdad1d8d7"
+    },
+    {
+      "signature": "public.finalize_daily_tasks_for_date(date)",
+      "identityArguments": "p_target_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "lineHints": [
+        1166
+      ],
+      "definitionSha256": "1ee473b2df4e1fcfde2e8586fbf4e777fdafe1418f2eabc8430a818f3116a9e8"
+    },
+    {
+      "signature": "public.get_business_quote(text, jsonb)",
+      "identityArguments": "p_quote_type text, p_params jsonb",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        693
+      ],
+      "definitionSha256": "98baf56a5a9dcad63304d7959f7b1eccd3a21e4a5d9e410ef5ac1edea4527307"
+    },
+    {
+      "signature": "public.get_campaign_detail(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/096_owner_activity_stats_in_campaign_detail.sql",
+      "lineHints": [
+        5
+      ],
+      "definitionSha256": "6e555497db5b7a8aa1a252882a92a1902e3544f350ea3011e2468acd5c998e8f"
+    },
+    {
+      "signature": "public.get_campaign_detail_sync_v2(uuid, jsonb)",
+      "identityArguments": "p_campaign_id uuid, p_tokens jsonb",
+      "firstSeen": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lastDefinitionChange": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lineHints": [
+        171
+      ],
+      "definitionSha256": "e4a67d4324e2d74c2772fbc2152221ae9970944f3cd28cd6445fa28960df9e40"
+    },
+    {
+      "signature": "public.get_campaign_mission(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        763
+      ],
+      "definitionSha256": "e0a6c6c019178fd6cdc026e4edc9b9db6c292a693f634efaaed0978734590bce"
+    },
+    {
+      "signature": "public.get_campaign_reports_for_owner(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lineHints": [
+        2099
+      ],
+      "definitionSha256": "3f4d8f3954d4e47edba60d9b95e22d634f98446c3df621649f2f5da751e5183e"
+    },
+    {
+      "signature": "public.get_campaign_tester_bonus(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        724
+      ],
+      "definitionSha256": "a93915489770095299855088d61caf6db653d24d9e147310e091b03bd5efd3f4"
+    },
+    {
+      "signature": "public.get_campaign_update_history(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        4784
+      ],
+      "definitionSha256": "059bdf318f607aa8dc113d329cc4113b59d1c0c2917984ec38a8dfe86f6e0cfb"
+    },
+    {
+      "signature": "public.get_campaigns_stats(uuid[])",
+      "identityArguments": "p_campaign_ids uuid[]",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        1109
+      ],
+      "definitionSha256": "a8b147c2f7188138c37217531056929a1f43bcaab29365beb88274bfdf09f2fc"
+    },
+    {
+      "signature": "public.get_daily_task_carryover_policy(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        4893
+      ],
+      "definitionSha256": "249aa9c552cfe9e6120dc367ffd05b1fd7b0342b6df4e29295af7d678dbaf0fb"
+    },
+    {
+      "signature": "public.get_daily_task_immediate_quota_policy(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        108
+      ],
+      "definitionSha256": "0e7800baa2effc84c7d81f804f11c3e06ab6e0f3f07e5fd00bf6523dfcf05693"
+    },
+    {
+      "signature": "public.get_daily_task_policy(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        4915
+      ],
+      "definitionSha256": "2459e062f0d0af33352ee363fde56b252109acc997c8964a8c9eaf5d1fa5c9cf"
+    },
+    {
+      "signature": "public.get_daily_task_status(uuid, date)",
+      "identityArguments": "p_user_id uuid, p_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "lineHints": [
+        183
+      ],
+      "definitionSha256": "ec3a7d8c4fc4d159714f13eddb94d2b508f2b069084d8c4967af5f3e966ca90c"
+    },
+    {
+      "signature": "public.get_effective_business_policy(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        920
+      ],
+      "definitionSha256": "f2272c695c0b1f09f579f2023d9636f6cf2af3272d380770d4fa28fdc13f11b7"
+    },
+    {
+      "signature": "public.get_expired_report_media_for_cleanup(integer, integer)",
+      "identityArguments": "p_limit integer, p_lease_seconds integer",
+      "firstSeen": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        1669,
+        1724
+      ],
+      "definitionSha256": "aafe66dc092ec23e165251d505f3dfeec336f28c3d348f2bb4f832f688d80eb7"
+    },
+    {
+      "signature": "public.get_expired_report_media_for_cleanup(integer, integer, boolean)",
+      "identityArguments": "p_limit integer, p_lease_seconds integer, p_dry_run boolean",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        348
+      ],
+      "definitionSha256": "3ed99f9b221bf9d60541f2f8537efc6e9296c44d9c256fe896602981502f5145"
+    },
+    {
+      "signature": "public.get_home_feed()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        1020
+      ],
+      "definitionSha256": "0183b19a9b88724356c957bfbea4d467fedd9a6532d961690700ddca802dccd6"
+    },
+    {
+      "signature": "public.get_home_feed_sync_v2(jsonb)",
+      "identityArguments": "p_tokens jsonb",
+      "firstSeen": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lastDefinitionChange": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lineHints": [
+        94
+      ],
+      "definitionSha256": "394dc4382a65893cf8cbda32c85bbec605a832620d57dbcb9c43114385c0acbd"
+    },
+    {
+      "signature": "public.get_leaderboard_v2(integer, text)",
+      "identityArguments": "p_limit integer, p_sort text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5277
+      ],
+      "definitionSha256": "2301d8566fb466d14b15d3523ef54355e7c5c247e8db729c0ab5694dc6acaf45"
+    },
+    {
+      "signature": "public.get_media_gateway_secret()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5349
+      ],
+      "definitionSha256": "ac07972f979a8c11f3d83a4c758cf4d6499ba5c90e9eb8da580adfeac7b9f522"
+    },
+    {
+      "signature": "public.get_mission_copy_draft(uuid, uuid)",
+      "identityArguments": "p_source_mission_id uuid, p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        111
+      ],
+      "definitionSha256": "8bb0054dbacd9cd997d798a408cc05e49898ea1e7b61895d5de146d8961dc21c"
+    },
+    {
+      "signature": "public.get_my_active_mission_campaign_ids()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5366
+      ],
+      "definitionSha256": "dd3b1bb10e73c10bafcd01b3d64f6115f961d6cf3a5ea5383251e2490fbb5e91"
+    },
+    {
+      "signature": "public.get_my_daily_task_status()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5395
+      ],
+      "definitionSha256": "bcdbb45f2553d66b0982f1a5ce3be431dcd8f9c50e7640cbfb04737c1fdd78fc"
+    },
+    {
+      "signature": "public.get_my_dashboard(boolean)",
+      "identityArguments": "p_include_leaderboard boolean",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        1204
+      ],
+      "definitionSha256": "6623087c0da360b0bcdf493458227934a11e12797014aa38c9f6d9f5a0d6a1fc"
+    },
+    {
+      "signature": "public.get_my_dashboard_sync_v2(jsonb, boolean)",
+      "identityArguments": "p_tokens jsonb, p_include_leaderboard boolean",
+      "firstSeen": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lastDefinitionChange": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lineHints": [
+        131
+      ],
+      "definitionSha256": "9ae2d839134de66e79954ab9641aaf3c25ef5b4cf122fe48823ff8879a58bbfe"
+    },
+    {
+      "signature": "public.get_my_notification_status(uuid)",
+      "identityArguments": "p_notification_id uuid",
+      "firstSeen": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lineHints": [
+        406
+      ],
+      "definitionSha256": "f8eefd45b039cd64cb1749de15574f489132a83ad995f4ae314d5ac226c42bdb"
+    },
+    {
+      "signature": "public.get_my_rank_v1(text)",
+      "identityArguments": "p_sort text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5650
+      ],
+      "definitionSha256": "b8d6d8405be1d37499935abeee177b4accb2f26d226330188068c9eb8f3501b6"
+    },
+    {
+      "signature": "public.get_next_campaign_candidates_v2(uuid)",
+      "identityArguments": "p_current_campaign_id uuid",
+      "firstSeen": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "lastDefinitionChange": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+      "lineHints": [
+        19
+      ],
+      "definitionSha256": "ccf51be653890b4d9240006d258e3bb91106d646d76b881687df5783e89fa374"
+    },
+    {
+      "signature": "public.get_next_untested_campaign(uuid)",
+      "identityArguments": "p_current_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        1161
+      ],
+      "definitionSha256": "1d09cff72c1250e6d85ec31fff838d78b9010faedb91d4e06b2df6eb6231c1fd"
+    },
+    {
+      "signature": "public.get_open_missions()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        626
+      ],
+      "definitionSha256": "1a839c6859ff1027e3ebddea739cb46f493c8308a1c969df7f6e21d59b675be4"
+    },
+    {
+      "signature": "public.get_report_media_access(uuid)",
+      "identityArguments": "p_report_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5865
+      ],
+      "definitionSha256": "4e89ccab3c58ab48e17053914192e5b52aa6822e21d2c06dbe46f5cddf7116a8"
+    },
+    {
+      "signature": "public.get_telegram_mirror_feed(text, bigint, bigint, timestamp with time zone, integer)",
+      "identityArguments": "p_chat_key text, p_before_message_id bigint, p_after_message_id bigint, p_since_edited_at timestamp with time zone, p_limit integer",
+      "firstSeen": "supabase/migrations/101_telegram_group_mirror.sql",
+      "lastDefinitionChange": "supabase/migrations/101_telegram_group_mirror.sql",
+      "lineHints": [
+        91
+      ],
+      "definitionSha256": "cb07249aa2602c38508ed3ac3514a4f723fa65828811faf88a1a36d57c2948c4"
+    },
+    {
+      "signature": "public.get_unread_warnings()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lineHints": [
+        1955
+      ],
+      "definitionSha256": "c7ece79046b78ef6140b6c33dfda98e5c783fd940d30e5c977ef010b57828ab6"
+    },
+    {
+      "signature": "public.get_user_quest_summary()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        5997
+      ],
+      "definitionSha256": "0c36aabebe070f0f88d1a0d4a416bb168c6fc8758afd3d41b0d1b7d79cbfe7d4"
+    },
+    {
+      "signature": "public.guard_business_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        137
+      ],
+      "definitionSha256": "23e18a2108379f43cae2312ebc9d7eacdc559ef442cb4fde009226074b289f58"
+    },
+    {
+      "signature": "public.guard_daily_task_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6069
+      ],
+      "definitionSha256": "bc9eade8b7791bd5e46509464f8745b3827f80e899216bc30f2095878654824e"
+    },
+    {
+      "signature": "public.guard_immediate_daily_quota_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        246
+      ],
+      "definitionSha256": "3a651463f800cad51493689ce7d48e1279ba9cba30440d0a627af0c78eb8723e"
+    },
+    {
+      "signature": "public.guard_tester_report_financial_metadata()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        334
+      ],
+      "definitionSha256": "65f3a62f29dc72bbb950b20854c2b237dfd07459dcac8ffe10e13596a6f8d074"
+    },
+    {
+      "signature": "public.handle_campaign_target_cost()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lineHints": [
+        942
+      ],
+      "definitionSha256": "8cf79a144f64a15125bb6b5b907215a09353d98c9d533985e838b35bbe9b89b0"
+    },
+    {
+      "signature": "public.handle_checkin_reward()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6165
+      ],
+      "definitionSha256": "8395e5457884f81cdf61db33f0f565bc8f0d2fa285b77ae13aa2169982bd449f"
+    },
+    {
+      "signature": "public.handle_new_user()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        1151
+      ],
+      "definitionSha256": "8401bc56d15a12675b9b3350fe1698addb1b6b26e22428c6d29f33be6b5a9260"
+    },
+    {
+      "signature": "public.handle_tester_report_submitted()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6280
+      ],
+      "definitionSha256": "478b0f38b3973a473c9dec62ecf9b13a98d600483ed07610779f9bcc46e09489"
+    },
+    {
+      "signature": "public.is_immediate_daily_quota_active(date)",
+      "identityArguments": "p_date date",
+      "firstSeen": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        136
+      ],
+      "definitionSha256": "67de1b87df90e12c1e31cca280b2278981b3c03f3573323bc4f85c1bc1104516"
+    },
+    {
+      "signature": "public.is_valid_report_screenshot_url(text, uuid, uuid)",
+      "identityArguments": "p_url text, p_campaign_id uuid, p_user_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        61
+      ],
+      "definitionSha256": "618b7ad7125f2615ac2cb47ffc89c0766c2e416a5cce83ce52e5d55c7727b3df"
+    },
+    {
+      "signature": "public.is_valid_report_thumbnail_url(text, uuid, uuid, text)",
+      "identityArguments": "p_thumb_url text, p_campaign_id uuid, p_user_id uuid, p_screenshot_url text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        69
+      ],
+      "definitionSha256": "61faa74f1088ec8503059fd811e359e6f9e5d8e99ca5d71b5efec666c8118b03"
+    },
+    {
+      "signature": "public.join_mission(uuid)",
+      "identityArguments": "p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/100_mission_copy_and_block_previous_participants.sql",
+      "lineHints": [
+        519
+      ],
+      "definitionSha256": "e82850e242c82fd27650bf89c75aa63ab89c99c31965fd630b76b194406fd7c0"
+    },
+    {
+      "signature": "public.make_user_admin(text)",
+      "identityArguments": "p_email text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6526
+      ],
+      "definitionSha256": "8f025b457c3bd23504dae7931091d48482bb6d2bb098b782c690df85916929be"
+    },
+    {
+      "signature": "public.make_user_moderator(text)",
+      "identityArguments": "p_email text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6556
+      ],
+      "definitionSha256": "8b7909631a217825ea02a515982ae4a8a13b6176611d9e063d0cee9e057de606"
+    },
+    {
+      "signature": "public.pause_expired_slot_campaigns()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6585
+      ],
+      "definitionSha256": "5f770837893840fbcfe6b8e363046facc0fcd7539da1311e85281a9986b8134b"
+    },
+    {
+      "signature": "public.pause_inactive_owner_campaigns()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lineHints": [
+        147
+      ],
+      "definitionSha256": "e6ecbf096a05ef7f7898f58886f198a10e8f457efe1776cb9fc8dae7959f1ef2"
+    },
+    {
+      "signature": "public.pause_mission(uuid)",
+      "identityArguments": "p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6669
+      ],
+      "definitionSha256": "38f433343e147785d98ac9f6b92252367b75073d57a6b6757d79bc7a73a83592"
+    },
+    {
+      "signature": "public.preview_edit_mission(uuid, text, integer, integer, integer)",
+      "identityArguments": "p_mission_id uuid, p_reward_mode text, p_max_participants integer, p_duration_days integer, p_reward_credits integer",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        519
+      ],
+      "definitionSha256": "6f73007e83f9fb8f28c28301de5b050e2b1f3822a2e0d2655784cfe1cab379cd"
+    },
+    {
+      "signature": "public.process_topup_order(text, text, text, text, text)",
+      "identityArguments": "p_package_id text, p_purchase_token text, p_order_ref text, p_payment_method text, p_raw_receipt text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        6731
+      ],
+      "definitionSha256": "958b730a46132c40a1229cf99ed0c09acd99e5396f11e99cbf6007715a1ce19d"
+    },
+    {
+      "signature": "public.protect_popup_notification_update()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lastDefinitionChange": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "lineHints": [
+        61
+      ],
+      "definitionSha256": "483622d8ff5a0c0e338a76c698f6d63ec2e12eef4f64dd2e3bafdac48a5a956f"
+    },
+    {
+      "signature": "public.publish_app_update(uuid, text, bigint, text, text, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_version_name text, p_target_version_code bigint, p_release_notes text, p_client_operation_id text, p_expected_current_release_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        4643
+      ],
+      "definitionSha256": "cf4813bf99517398a098600488d1a5dbd1f7060e1c5259f106f5aaa6f34ca39c"
+    },
+    {
+      "signature": "public.publish_app_update_v2(uuid, text, bigint, text, text, integer, text, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_version_name text, p_target_version_code bigint, p_release_notes text, p_client_operation_id text, p_expected_budget integer, p_expected_revision text, p_expected_current_release_id uuid",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        4340
+      ],
+      "definitionSha256": "e03acca27f07d42b7739c9fc1dbc00a40dd15a6b2caf33abad5174b23ce5b948"
+    },
+    {
+      "signature": "public.purge_completed_campaigns(integer, boolean, integer)",
+      "identityArguments": "p_retention_days integer, p_dry_run boolean, p_batch_size integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        7122
+      ],
+      "definitionSha256": "5ccf669fd5355c22443745ebaf2ca7ab1d534c87274ee09b8e8dd68e9aef965f"
+    },
+    {
+      "signature": "public.purge_expired_notifications(integer, integer, boolean, integer)",
+      "identityArguments": "p_other_retention_days integer, p_admin_retention_days integer, p_dry_run boolean, p_batch_size integer",
+      "firstSeen": "supabase/migrations/097_auto_purge_expired_notifications.sql",
+      "lastDefinitionChange": "supabase/migrations/097_auto_purge_expired_notifications.sql",
+      "lineHints": [
+        37
+      ],
+      "definitionSha256": "c2640b9b11598e3cf9bfed393729726679901c4f9819733aa6e95e15cbee8529"
+    },
+    {
+      "signature": "public.purge_expired_operational_data(integer, integer, integer, integer, integer, integer, boolean, integer)",
+      "identityArguments": "p_receipt_retention_days integer, p_operation_retention_days integer, p_media_retention_days integer, p_cleanup_log_retention_days integer, p_quest_retention_days integer, p_contact_retention_days integer, p_dry_run boolean, p_batch_size integer",
+      "firstSeen": "supabase/migrations/098_auto_purge_operational_ledgers.sql",
+      "lastDefinitionChange": "supabase/migrations/098_auto_purge_operational_ledgers.sql",
+      "lineHints": [
+        53
+      ],
+      "definitionSha256": "524ff2038b02764db5cca17790646af2df3d4b31c656550027fd860612f80084"
+    },
+    {
+      "signature": "public.purge_old_telegram_mirror_messages(text, integer)",
+      "identityArguments": "p_chat_key text, p_keep_latest integer",
+      "firstSeen": "supabase/migrations/101_telegram_group_mirror.sql",
+      "lastDefinitionChange": "supabase/migrations/101_telegram_group_mirror.sql",
+      "lineHints": [
+        271
+      ],
+      "definitionSha256": "0edd1edf85f72611e8147c0503c69e0b4fcc74a69c9af06d423769d0f4b4e478"
+    },
+    {
+      "signature": "public.purge_zero_credit_accounts(integer, boolean, integer)",
+      "identityArguments": "p_zero_credit_days integer, p_dry_run boolean, p_batch_size integer",
+      "firstSeen": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lastDefinitionChange": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lineHints": [
+        214
+      ],
+      "definitionSha256": "0bdd57c6ce55322e647a07ce4482cfa7ed06cf0e6886cd09ac90f1c77131d03b"
+    },
+    {
+      "signature": "public.push_campaign(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_client_request_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        1437
+      ],
+      "definitionSha256": "a2469a0310887f46387caa3ac3a337ed1d9f9c731b2feb528618f09183d4bb44"
+    },
+    {
+      "signature": "public.push_campaign_v2(uuid, uuid, integer, text)",
+      "identityArguments": "p_campaign_id uuid, p_client_request_id uuid, p_expected_cost integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        1219
+      ],
+      "definitionSha256": "bda840eb9541ce151ec75ad74a655870b4db189a05071b064bc145ab7b51071f"
+    },
+    {
+      "signature": "public.reconcile_campaign_push_receipt(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_client_request_id uuid",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        1453
+      ],
+      "definitionSha256": "1ee03dbfb80d73085614c73d620f5bd1a30b2d72997bcd85982169f19458c3e4"
+    },
+    {
+      "signature": "public.reconcile_campaign_tester_bonus(uuid, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_client_request_id uuid",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        647
+      ],
+      "definitionSha256": "4b35da89679c5419d2744177d3204da7568f936246c173e44258539bc9bff5f0"
+    },
+    {
+      "signature": "public.reconcile_legacy_daily_task_checkpoint(uuid, date, text, integer, integer, integer, text)",
+      "identityArguments": "p_user_id uuid, p_task_date date, p_mode text, p_active_app_count integer, p_carry_in integer, p_carry_out integer, p_operator_note text",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        874
+      ],
+      "definitionSha256": "4b9ce55f97326c6419e2f32dcf914834818f6ec9726d7f17979cc2bdc901b847"
+    },
+    {
+      "signature": "public.reconcile_legacy_report(uuid)",
+      "identityArguments": "p_client_submit_id uuid",
+      "firstSeen": "supabase/migrations/064_explicit_report_context.sql",
+      "lastDefinitionChange": "supabase/migrations/064_explicit_report_context.sql",
+      "lineHints": [
+        759
+      ],
+      "definitionSha256": "15b4ea016e2ab8e08771b9881258d7046cded3678bd93832a89bf31b8154e1e7"
+    },
+    {
+      "signature": "public.reconcile_storage_organization_usage(bigint, bigint, jsonb, boolean)",
+      "identityArguments": "p_total_capacity_bytes bigint, p_used_storage_bytes bigint, p_measured_projects jsonb, p_is_valid boolean",
+      "firstSeen": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        255
+      ],
+      "definitionSha256": "a3416d8a4594b608c57e8f81f188ec11ddb997fcf54466afd4b64f58f0350af9"
+    },
+    {
+      "signature": "public.record_admin_action_event(uuid, text, text, text, text, jsonb, jsonb, uuid)",
+      "identityArguments": "p_actor_id uuid, p_action text, p_target_type text, p_target_id text, p_reason text, p_old_state jsonb, p_new_state jsonb, p_request_id uuid",
+      "firstSeen": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        21
+      ],
+      "definitionSha256": "bfe02b189b901d07d0320597f3515c6fe8b68abc295ef20ca4909cf2a263cccf"
+    },
+    {
+      "signature": "public.record_daily_login()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        7530
+      ],
+      "definitionSha256": "c97b34f051b8f4c090e41839b996cb7831d5956b4af810f16af4e778240349f2"
+    },
+    {
+      "signature": "public.record_daily_login_internal(uuid, date)",
+      "identityArguments": "p_user_id uuid, p_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        7550
+      ],
+      "definitionSha256": "be09a2cb9aa91da9c5a2cbf928404a43d2a80897fa333fb9d32cfc9b992205bb"
+    },
+    {
+      "signature": "public.record_report_media_deleted(text, bigint)",
+      "identityArguments": "p_upload_id text, p_bytes_freed bigint",
+      "firstSeen": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        1729,
+        1760
+      ],
+      "definitionSha256": "5fe45c6a5f3ed8d1381bc2b16b1d5dfe41979b62d4d3765dff620eb19d33a574"
+    },
+    {
+      "signature": "public.record_report_media_deleted(uuid, uuid, text[])",
+      "identityArguments": "p_media_id uuid, p_lease_token uuid, p_deleted_paths text[]",
+      "firstSeen": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        196
+      ],
+      "definitionSha256": "87aae3f37c36ed75315fba1ca23a4f337b9c174157d1d23f58928c2d771d318a"
+    },
+    {
+      "signature": "public.refresh_daily_completion(uuid, date)",
+      "identityArguments": "p_user_id uuid, p_date date",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/095_enable_immediate_quota_and_catchup_carryover.sql",
+      "lineHints": [
+        1283
+      ],
+      "definitionSha256": "aebd5d88a11a469e6af0f3392b1395940df8d7a5030182aa242552498708c15a"
+    },
+    {
+      "signature": "public.reject_business_policy_history_change()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        174
+      ],
+      "definitionSha256": "47abb00483639b6149e4af4e911ddaff69bbe7571e607c58ad9486747670eaa8"
+    },
+    {
+      "signature": "public.reject_daily_task_policy_history_change()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        7618
+      ],
+      "definitionSha256": "7c1f680d5b593ee9c028804ee1648e2c31c67dfd54f7d8d99c30322589552abc"
+    },
+    {
+      "signature": "public.reject_tester_report(uuid, text, text)",
+      "identityArguments": "p_report_id uuid, p_reason text, p_reason_code text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/073_admin_action_audit.sql",
+      "lineHints": [
+        743,
+        1144
+      ],
+      "definitionSha256": "b022e1500babc3c032063c6b8881be54ecedc8f071f9ad6508ac15ecd1796d32"
+    },
+    {
+      "signature": "public.request_report_media_access(uuid, uuid)",
+      "identityArguments": "p_report_id uuid, p_attachment_id uuid",
+      "firstSeen": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        1415
+      ],
+      "definitionSha256": "c59761b7455584752e5f9920e03b1df34bf84f312bae0caf61468d4c60c996a0"
+    },
+    {
+      "signature": "public.request_report_media_reservation(uuid, text, bigint, boolean, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_upload_id text, p_estimated_size bigint, p_has_thumbnail boolean, p_attachment_id uuid",
+      "firstSeen": "supabase/migrations/091_dual_storage_report_screenshots.sql",
+      "lastDefinitionChange": "supabase/migrations/093_dual_storage_runtime_recheck.sql",
+      "lineHints": [
+        111
+      ],
+      "definitionSha256": "5d3a3ee399ac45de2a77ad5123878fea4d0b2b2eb9f7509ec5b1a4e7437ec2fd"
+    },
+    {
+      "signature": "public.resume_campaign(uuid)",
+      "identityArguments": "p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        570
+      ],
+      "definitionSha256": "340537b9d8c97dcc5493a0991f635ed4bc7c1be69e65eddb08c8558fe179711b"
+    },
+    {
+      "signature": "public.resume_mission(uuid)",
+      "identityArguments": "p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/076_mission_for_finalized_campaigns.sql",
+      "lineHints": [
+        235
+      ],
+      "definitionSha256": "bc894f9cf7bbf9df58803ab04c75b9bff6e293408e1cf49d4b425076939877e4"
+    },
+    {
+      "signature": "public.retry_failed_mission_settlements(integer)",
+      "identityArguments": "p_limit integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        8056
+      ],
+      "definitionSha256": "a1f4b37f8cdb4260c715ff729c625374c2906f8ff651dd649658c1750081b0cb"
+    },
+    {
+      "signature": "public.schedule_daily_task_policy(integer, date, text)",
+      "identityArguments": "p_tests_per_active_app integer, p_effective_from date, p_operator_note text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        8087
+      ],
+      "definitionSha256": "9345d2a1e21672b746ad3c5b89609f545fceedde6ae83bd8627a11b9dd0ce80a"
+    },
+    {
+      "signature": "public.self_unlock_account()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        8125
+      ],
+      "definitionSha256": "51ec14af27928c8d6bba75e4764ff0b63e6e75cd1144aea9994ab5675b890d60"
+    },
+    {
+      "signature": "public.service_process_notification_campaigns(integer, integer, uuid)",
+      "identityArguments": "p_batch_size integer, p_max_campaigns integer, p_campaign_id uuid",
+      "firstSeen": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lastDefinitionChange": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "lineHints": [
+        1400
+      ],
+      "definitionSha256": "b4bf797e41446f71363410652ce093b2e79178691ae270e6c6c11b3b5aafcd9b"
+    },
+    {
+      "signature": "public.set_campaign_tip(uuid, integer)",
+      "identityArguments": "p_campaign_id uuid, p_tip_credits integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        8188
+      ],
+      "definitionSha256": "683906db170fba58edc77ea21791d0b583bce6595aabc28ac7f605da8b9470b6"
+    },
+    {
+      "signature": "public.set_daily_task_carryover_policy(date, boolean, text)",
+      "identityArguments": "p_effective_from date, p_is_enabled boolean, p_operator_note text",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        370
+      ],
+      "definitionSha256": "ba9eb8800dd7c72fc58d68f37e6acb9d177ca2c66dbf55efeaa284f2fe8edf28"
+    },
+    {
+      "signature": "public.set_daily_task_immediate_quota_policy(date, boolean, text)",
+      "identityArguments": "p_effective_from date, p_is_enabled boolean, p_operator_note text",
+      "firstSeen": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lastDefinitionChange": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "lineHints": [
+        154
+      ],
+      "definitionSha256": "a0db5d22191e78995e37bacc11c4d99b52ad5a2cfe7faf93fba461e366c357c8"
+    },
+    {
+      "signature": "public.submit_tester_report(uuid, text, text, integer, text, uuid, text, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_content text, p_screenshot_url text, p_rating integer, p_image_hash text, p_client_submit_id uuid, p_thumbnail_url text, p_mission_id uuid",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lineHints": [
+        1171
+      ],
+      "definitionSha256": "2cd6143be0f1ac0b2ca35633267080e59123bda044badb181943c98b579114b5"
+    },
+    {
+      "signature": "public.submit_tester_report_internal_v2(uuid, text, text, integer, text, uuid, text, uuid)",
+      "identityArguments": "p_campaign_id uuid, p_content text, p_screenshot_url text, p_rating integer, p_image_hash text, p_client_submit_id uuid, p_thumbnail_url text, p_mission_id uuid",
+      "firstSeen": "supabase/migrations/064_explicit_report_context.sql",
+      "lastDefinitionChange": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lineHints": [
+        1090
+      ],
+      "definitionSha256": "b1ec5c06593e32ba03faaf45e28e25af422ca8467f24f66dc4e45ada82b399fd"
+    },
+    {
+      "signature": "public.submit_tester_report_v2(text, uuid, text, text, integer, text, uuid, text, uuid)",
+      "identityArguments": "p_submission_context text, p_campaign_id uuid, p_content text, p_screenshot_url text, p_rating integer, p_image_hash text, p_client_submit_id uuid, p_thumbnail_url text, p_mission_id uuid",
+      "firstSeen": "supabase/migrations/064_explicit_report_context.sql",
+      "lastDefinitionChange": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lineHints": [
+        1126
+      ],
+      "definitionSha256": "184a16b691dfabeb67777d161c3b353d6fa1b94302c6a5b05882a646d8b9267f"
+    },
+    {
+      "signature": "public.submit_tester_report_v3(text, uuid, text, integer, uuid, jsonb, uuid, date)",
+      "identityArguments": "p_submission_context text, p_campaign_id uuid, p_content text, p_rating integer, p_client_submit_id uuid, p_attachments jsonb, p_mission_id uuid, p_expected_date date",
+      "firstSeen": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lastDefinitionChange": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lineHints": [
+        1208
+      ],
+      "definitionSha256": "68419ab652e06179aa46b47e81e3fde05492b525645b93a39d2993785657b499"
+    },
+    {
+      "signature": "public.sync_campaign_lifecycle()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lineHints": [
+        661
+      ],
+      "definitionSha256": "6e5a60a773c6a651754e9bee3bfd364d1aa1a4c767f66c0a652d186c2c767427"
+    },
+    {
+      "signature": "public.sync_expired_missions()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        3170
+      ],
+      "definitionSha256": "38c6f0eedd91a90e3aa26cb31d3407699df59923fa32343c15ccd601af61ec07"
+    },
+    {
+      "signature": "public.trg_campaign_status_journal()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        55
+      ],
+      "definitionSha256": "2371b149307519dc9c02921ac59d57d55604903e2175338812986abdf368a0d2"
+    },
+    {
+      "signature": "public.trg_campaign_status_lifecycle()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        31
+      ],
+      "definitionSha256": "bf5e4c1d8402c4e8d0e2513ab0f94405dbb703d8f83ea9f7653d9d8ce690ac19"
+    },
+    {
+      "signature": "public.trg_campaigns_bonus_round_lifecycle()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/089_fix_production_bonus_lifecycle.sql",
+      "lineHints": [
+        8
+      ],
+      "definitionSha256": "f13eba8b191e7025b0ba27bf58112213db0d03c910b7545e6a8d6af1ff8846a3"
+    },
+    {
+      "signature": "public.trg_campaigns_guard_admin_actions()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "lineHints": [
+        115
+      ],
+      "definitionSha256": "3ae47dfb74961dc56fe199937f58dcddb0116eaa32567a7f52023b3f946a55fd"
+    },
+    {
+      "signature": "public.trg_campaigns_guard_client_lifecycle()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "lastDefinitionChange": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "lineHints": [
+        19
+      ],
+      "definitionSha256": "89aa7e68f6f874812971c5ab05b50b8630c3db41e205e40bdd6f07343c151431"
+    },
+    {
+      "signature": "public.trg_campaigns_guard_financial_snapshots()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        249
+      ],
+      "definitionSha256": "1219b73e0f6ee4154f1c570dd0e1a2a3a562c1328d1c9383edb6f6dc90690e4e"
+    },
+    {
+      "signature": "public.trg_campaigns_guard_mission_escrow_before_delete()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lastDefinitionChange": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "lineHints": [
+        57
+      ],
+      "definitionSha256": "b47d9bd08ef8d3399dc16f34d70b115a354bba8883cbf8e6d55538936b51bf00"
+    },
+    {
+      "signature": "public.trg_campaigns_guard_tester_bonus_before_delete()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lineHints": [
+        1427
+      ],
+      "definitionSha256": "0f34b627eea79c39b42d9033dfe2012353b1a352bbb2de68d0f03f21fcf297bc"
+    },
+    {
+      "signature": "public.trg_fn_campaigns_app_update_settle()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9147
+      ],
+      "definitionSha256": "5f63819591db9a06195f7ffab6b6ff299d8d8e7c4ef97afe54b2f1500267de3a"
+    },
+    {
+      "signature": "public.trg_fn_campaigns_guard_action_gate_before_delete()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        1006
+      ],
+      "definitionSha256": "8d1e1a0249c97ea5d418185230ae91cff3e9aa0b9e91b7cc431fc6f4df0dc866"
+    },
+    {
+      "signature": "public.trg_fn_campaigns_guard_action_gate_before_update()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        1085
+      ],
+      "definitionSha256": "cb6e9634e50a9d83604e40ed9f2d59823d4ab1450542637b6235b8ecf6d928e0"
+    },
+    {
+      "signature": "public.trg_fn_campaigns_record_removal_receipt_after_delete()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        108
+      ],
+      "definitionSha256": "d1a24099abe80da0ec88e0a223200cb94625fe3e54073ac9e914ce0196bc8aba"
+    },
+    {
+      "signature": "public.trg_fn_campaigns_refresh_daily_completion_after()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lastDefinitionChange": "supabase/migrations/090_daily_task_action_gate.sql",
+      "lineHints": [
+        1169
+      ],
+      "definitionSha256": "31abfc2c0ec2e0a63306fa41e8a5455e48b1b98fa2a01eec75ff498a4e722132"
+    },
+    {
+      "signature": "public.trg_fn_profiles_track_zero_credits()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lastDefinitionChange": "supabase/migrations/099_auto_purge_zero_credit_accounts.sql",
+      "lineHints": [
+        56
+      ],
+      "definitionSha256": "62c8995f825e9bf7435aab150e5995d079c39b070357a5c5a6cbb4c39ba4f873"
+    },
+    {
+      "signature": "public.trg_fn_protect_campaign_push_metadata()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9168
+      ],
+      "definitionSha256": "cf684c35f799219c214e85c281a02ed1278c268dfb93107ce2409ea642684a4f"
+    },
+    {
+      "signature": "public.trg_journal_checkin_event()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        588
+      ],
+      "definitionSha256": "ea6d62e9a2248c5e25d90646a782711ce3705e9782d7df591e09c91c017e1138"
+    },
+    {
+      "signature": "public.trg_journal_report_event()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "lineHints": [
+        520
+      ],
+      "definitionSha256": "d26bcc59f834f0970aabbff1b74fda8cf43bc2ae35f81e7d9d90a030b02b35a1"
+    },
+    {
+      "signature": "public.trg_notify_campaign_member_joined()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9194
+      ],
+      "definitionSha256": "175c414d180bd2c56e5b966b97fdd5220863408fe125b4efa9e9e043d066072b"
+    },
+    {
+      "signature": "public.trg_notify_credit_change()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9224
+      ],
+      "definitionSha256": "f75749f64e46be8b6f07c567a209b79be6a7fddf739df9734c1b26884f3ba91e"
+    },
+    {
+      "signature": "public.trg_notify_profile_lock_status()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9263
+      ],
+      "definitionSha256": "97481b41df4d81114f77560995244b8a1f8af6534214b344ecb3cc5d1b29fc87"
+    },
+    {
+      "signature": "public.trg_notify_tester_report()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9295
+      ],
+      "definitionSha256": "37e2434a48bcd075f341684a628f36ec943bb48202e666cf87a3781122b51c29"
+    },
+    {
+      "signature": "public.trg_notify_user_warning()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9447
+      ],
+      "definitionSha256": "e52ac7e93d77449894ac3c1118cd3c4bcbcd6a612f28264c751dd4e960b80068"
+    },
+    {
+      "signature": "public.trg_protect_daily_task_carryover_policy()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        437
+      ],
+      "definitionSha256": "723892c3c55ceac361d85f424ab79b67c93da782f437a0aee202b9255bad0f18"
+    },
+    {
+      "signature": "public.trg_reports_require_open_campaign()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/076_mission_for_finalized_campaigns.sql",
+      "lineHints": [
+        1368
+      ],
+      "definitionSha256": "fcca2e3e5b966d01e777fa3ca279826e3874cd19897c57f7334a170962452f7f"
+    },
+    {
+      "signature": "public.trg_reset_tester_report_rejection()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9485
+      ],
+      "definitionSha256": "0f95845fd841da5d78b5244a1cde16517935a1ad84a1a45ac91d099d610b4283"
+    },
+    {
+      "signature": "public.trg_user_role_journal()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lastDefinitionChange": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "lineHints": [
+        144
+      ],
+      "definitionSha256": "63c25fc23c4042894960f5b01d184e88e9af835baf55640c3e3d37a894dc793b"
+    },
+    {
+      "signature": "public.trig_protect_tester_reports_mission_metadata()",
+      "identityArguments": "",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9500
+      ],
+      "definitionSha256": "e5be7ff7ed0f875ae66f5c088ec6a4a1a77010542f97ddc7b8ecbfb0c9d35f60"
+    },
+    {
+      "signature": "public.unlock_or_renew_slot(integer)",
+      "identityArguments": "p_slot_number integer",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        1699
+      ],
+      "definitionSha256": "e14258310bab00fdebecb3631ad3bbd8c4bc47cfdb464c34a2ca3184aac55ea4"
+    },
+    {
+      "signature": "public.unlock_or_renew_slot_v2(integer, uuid, integer, text)",
+      "identityArguments": "p_slot_number integer, p_client_request_id uuid, p_expected_cost integer, p_expected_revision text",
+      "firstSeen": "supabase/migrations/071_business_policies.sql",
+      "lastDefinitionChange": "supabase/migrations/071_business_policies.sql",
+      "lineHints": [
+        1491
+      ],
+      "definitionSha256": "808f0b5a464858dc4664c5597408ffe6ba4fcf6b4b504ebcb17f092b8114b536"
+    },
+    {
+      "signature": "public.verify_media_access_grant(uuid, text, text, bigint)",
+      "identityArguments": "p_report_id uuid, p_grant_token text, p_variant text, p_expires_at_epoch bigint",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/062_consolidated_baseline.sql",
+      "lineHints": [
+        9633
+      ],
+      "definitionSha256": "60a2512a25ac5e82146220bda742dfe716c92e6aac77ff8b9feb6dcdd66a1d05"
+    },
+    {
+      "signature": "public.verify_media_access_grant_internal(uuid, uuid, text, text, bigint)",
+      "identityArguments": "p_report_id uuid, p_user_id uuid, p_grant_token text, p_variant text, p_expires_at_epoch bigint",
+      "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
+      "lastDefinitionChange": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lineHints": [
+        1977,
+        2074
+      ],
+      "definitionSha256": "c1b630abf67ec1f5d77c634b06d40ac3d09a7e7c4b977700e8c8acadb52facc8"
+    },
+    {
+      "signature": "public.verify_media_access_grant_internal(uuid, uuid, text, text, bigint, uuid)",
+      "identityArguments": "p_report_id uuid, p_user_id uuid, p_grant_token text, p_variant text, p_expires_at_epoch bigint, p_attachment_id uuid",
+      "firstSeen": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "lastDefinitionChange": "supabase/migrations/092_dual_storage_hardening.sql",
+      "lineHints": [
+        1576
+      ],
+      "definitionSha256": "dc05df8ccc776fe87979facbfcb4299b71869ba21707c0cf0d92347c7290eaba"
+    }
+  ]
+}

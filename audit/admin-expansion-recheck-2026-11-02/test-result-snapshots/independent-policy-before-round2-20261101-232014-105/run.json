@@ -1,0 +1,14 @@
+{
+  "logName": "independent-policy-before-round2",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T23:19:52.8645471Z",
+  "finishedUtc": "2026-11-01T23:20:14.1174098Z",
+  "currentRunXmlCount": 1
+}

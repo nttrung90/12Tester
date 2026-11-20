@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.CampaignDetailTesterBonusTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:58.322Z" hostname="PC-5700X3D" time="0.082">
+  <properties/>
+  <testcase name="CampaignDetailViewModel loads bonus info and does not preserve previous user my_awarded across identity change" classname="com.ntt.crosstest.ui.viewmodels.CampaignDetailTesterBonusTest" time="0.08"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

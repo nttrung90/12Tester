@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-03T05:33:00.709Z" hostname="PC-5700X3D" time="0.164">
+  <properties/>
+  <testcase name="testSaveOwnerAutoPauseConfig_success" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.044"/>
+  <testcase name="testLoadOwnerAutoPauseConfig_success" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.03"/>
+  <testcase name="missingRpcLeavesConfigUnavailable" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.018"/>
+  <testcase name="testSaveOwnerAutoPauseConfig_concurrencyConflictReloads" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.036"/>
+  <testcase name="saveResponseFromOldSessionGenerationIsDiscarded" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.024"/>
+  <testcase name="testSaveOwnerAutoPauseConfig_missingRevisionError" classname="com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

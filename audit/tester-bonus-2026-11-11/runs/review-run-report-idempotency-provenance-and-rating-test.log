@@ -1,0 +1,8 @@
+=== BẮT ĐẦU KIỂM THỬ IDEMPOTENCY PROVENANCE & CANONICAL LEGACY RATING (C02 & C03) ===
+[PASS] P01: Applying 059 & 061 preserves exact_v1 provenance and strictly validates exact receipts
+[PASS] P02: Legacy approved-comment replay preserves locked rating 1 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 2 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 3 under default and explicit rating calls
+[PASS] P02: Legacy approved-comment replay preserves locked rating 4 under default and explicit rating calls
+[PASS] P03: Migration 061 successfully recovers overwritten exact_v1 receipts using evidence
+=== TẤT CẢ KIỂM THỬ IDEMPOTENCY PROVENANCE & CANONICAL LEGACY RATING ĐỀU PASS 100% ===

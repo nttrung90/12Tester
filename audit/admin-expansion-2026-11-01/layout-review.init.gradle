@@ -1,0 +1,8 @@
+allprojects {
+    afterEvaluate { p ->
+        if (p.path == ':app') {
+            p.android.sourceSets.test.kotlin.srcDir(new File(rootProject.projectDir, 'audit/admin-expansion-2026-11-01/independent-tests'))
+            p.tasks.withType(Test).configureEach { outputs.upToDateWhen { false } }
+        }
+    }
+}

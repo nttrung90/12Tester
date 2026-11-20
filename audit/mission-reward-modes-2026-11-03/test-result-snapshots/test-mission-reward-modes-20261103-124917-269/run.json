@@ -1,0 +1,10 @@
+{
+    "logName":  "test-mission-reward-modes",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-03T12:48:13.7268637Z",
+    "finishedUtc":  "2026-11-03T12:49:17.3319252Z",
+    "currentRunXmlCount":  69
+}

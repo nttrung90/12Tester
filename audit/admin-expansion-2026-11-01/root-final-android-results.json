@@ -1,0 +1,479 @@
+{
+  "snapshot": "F:\\AI\\12Tester\\audit\\admin-expansion-2026-11-01\\test-result-snapshots\\root-final-android-acceptance-20261101-164128-993",
+  "tests": 499.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "suiteCount": 67,
+  "suites": [
+    {
+      "suite": "com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.CarryoverStreamsIndependentTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.ImageHashCollisionAuditTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.MemberDetailPaginationIndependentTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.NotificationOwnershipIndependentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.ReportOverlapTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AdminDailyTaskPolicyTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AppUpdateRegressionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.AppUpdateRewardTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.BusinessPolicyRepositoryTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.CacheRegressionTest",
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.CampaignPushUnitTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.DailyTaskCarryoverUnitTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.FinancialIntentStoreTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.HomeStatsCycleTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheBudgetAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheClockAuditTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheCompositeAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheFinalAuditTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheMutationAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCachePublicationAuditTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.IndependentCacheSnapshotIntegrityAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.MissionRegressionTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.MissionReportAndExpirationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.MissionReportRecheckProbeTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.NotificationPendingAckStoreTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.OwnerReportCountBehavioralTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.PendingReportStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.PushAndCarryoverHardeningTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportRpcCompatibilityTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportRpcFallbackAuditTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportSubmissionFailureTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportSubmitPolicyTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.data.ReportWorkStateTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.localization.LocalizationHardeningTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.ComparisonStateCoordinatorTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.DetailedImageComparatorTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.EgressAuditProbeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.EgressFinalPolicyAuditTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.EgressGatewayClientAuditTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.EgressRound2OptInTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.FirebaseEgressOptimizationTest",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.ReportComparisonSelectorTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.util.ReportUrlRetryTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.work.EgressThumbnailPipelineAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.work.ReportBackgroundSubmissionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.work.ReportSubmissionLatencyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.ntt.crosstest.work.ReportUploadWorkerTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

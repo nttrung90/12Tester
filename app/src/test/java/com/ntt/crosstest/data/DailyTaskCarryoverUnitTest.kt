@@ -120,7 +120,7 @@ class DailyTaskCarryoverUnitTest {
     @Test
     fun testWaivedStateOnlyWhenReadyAndZeroTarget() {
         // Owner không có app open nào khác để test (A=0 -> effectiveRequiredTests = 0)
-        val waivedStatus = DailyTaskStatus(
+        val waivedStatus = createStatus(
             statusDate = "2026-10-30",
             mode = "owner",
             activeAppCount = 1,
@@ -139,7 +139,7 @@ class DailyTaskCarryoverUnitTest {
 
     @Test
     fun testMemberStatusProperties() {
-        val memberStatus = DailyTaskStatus(
+        val memberStatus = createStatus(
             statusDate = "2026-10-30",
             mode = "member",
             activeAppCount = 0,
@@ -153,48 +153,201 @@ class DailyTaskCarryoverUnitTest {
         )
         assertTrue(memberStatus.isMember)
         assertFalse(memberStatus.isOwner)
-        assertTrue(memberStatus.met)
+        assertTrue(memberStatus.isMet)
         assertTrue(memberStatus.hasCarryIn)
+        assertTrue(memberStatus.hasRemainingCarryover)
         assertEquals(4, memberStatus.carryInTests)
+        assertEquals(4, memberStatus.carryoverRemainingTests)
+        assertFalse(memberStatus.isPendingCarryover)
     }
 
-    private fun DailyTaskStatus(
+    @Test
+    fun testMemberPendingCarryoverIsNotDebtFree() {
+        val pendingMember = createStatus(
+            statusDate = "2026-11-05",
+            mode = "member",
+            activeAppCount = 0,
+            required_tests = 0,
+            effective_required_tests = 0,
+            carry_in_tests = 0,
+            carryover_remaining_tests = 0,
+            carryover_ready = false, // Yesterday unfinalized
+            history_ready = true,
+            met = true,
+            logged_in_today = true,
+        )
+        assertTrue(pendingMember.isMember)
+        assertTrue(pendingMember.isMet)
+        assertFalse(pendingMember.isPendingCarryover)
+        assertTrue(pendingMember.isCarryoverHistoryPending)
+        assertFalse("Pending member carryover must NOT be presented as confirmed remaining debt", pendingMember.hasRemainingCarryover)
+    }
+
+    @Test
+    fun testOwnerMetWithRemainingPreservedDebt() {
+        // C=8, A=5, D=5: met=true, remaining=3
+        val metWithDebt = createStatus(
+            statusDate = "2026-11-05",
+            mode = "owner",
+            activeAppCount = 2,
+            required_tests = 14,
+            available_apps = 5,
+            effective_required_tests = 5,
+            completed_tests = 5,
+            carry_in_tests = 8,
+            carryover_remaining_tests = 3,
+            carryover_ready = true,
+            history_ready = true,
+            met = true,
+        )
+        assertTrue(metWithDebt.isMet)
+        assertEquals(3, metWithDebt.carryoverRemainingTests)
+        assertTrue(metWithDebt.hasRemainingCarryover)
+    }
+
+    @Test
+    fun testDailyTaskCardSourceContractGuardsRemainingCarryover() {
+        val cardSource = java.io.File("src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt").readText()
+        val start = cardSource.indexOf("if (isAuthenticated && met && !exempt && !waived)")
+        val end = cardSource.indexOf("\n        return", start)
+        assertTrue("Compact card branch must exist", start >= 0 && end > start)
+        val compactBranch = cardSource.substring(start, end)
+        assertTrue("Compact card branch must check carryoverRemainingTests or hasRemainingCarryover",
+            compactBranch.contains("carryoverRemainingTests") || compactBranch.contains("hasRemainingCarryover"))
+        assertTrue("Compact card must render preserved debt notice",
+            compactBranch.contains("daily_task_preserved_debt_notice"))
+    }
+
+    @Test
+    fun testDailyTaskCardSourceGuardsDisabledCarryoverMath() {
+        val cardSource = java.io.File("src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt").readText()
+        assertTrue(
+            "DailyTaskCard must guard daily_owner_goal_with_carryover with requiredTests > baseRequiredTests",
+            cardSource.contains("isCarryoverIncludedInRequired") &&
+                cardSource.contains("(dailyTask?.requiredTests ?: 0) > (dailyTask?.baseRequiredTests ?: 0)")
+        )
+        assertTrue(
+            "DailyTaskCard expanded else branch must require hasCarryIn == true before showing preserved debt notice",
+            cardSource.contains("dailyTask?.hasCarryIn == true && dailyTask.hasRemainingCarryover && !dailyTask.isCarryoverHistoryPending")
+        )
+    }
+
+    @Test
+    fun testSessionCacheManagerSanitizeForDateClearsStaleDailyTask() {
+        val todayStr = com.ntt.crosstest.util.VnTime.today().toString()
+        val yesterdayStr = com.ntt.crosstest.util.VnTime.today().minusDays(1).toString()
+
+        // 1. Old session snapshot where dailyTask.statusDate is null -> must clear dailyTask to null
+        val snapshotOldWithNullStatusDate = CachedSessionData(
+            userId = "u1",
+            dateVn = yesterdayStr,
+            dailyTask = createStatus(statusDate = null, mode = "owner", required_tests = 3),
+        )
+        assertNull(
+            "sanitizeForDate must clear dailyTask when session date is old and statusDate is null",
+            snapshotOldWithNullStatusDate.sanitizeForDate().dailyTask
+        )
+
+        // 2. Snapshot where dateVn is null & timestamp is 0L (isOldDate == false), but dailyTask.statusDate is yesterday
+        val snapshotUnknownDateWithStaleDailyTask = CachedSessionData(
+            userId = "u1",
+            dateVn = null,
+            timestamp = 0L,
+            dailyTask = createStatus(statusDate = yesterdayStr, mode = "owner", required_tests = 3),
+        )
+        assertNull(
+            "sanitizeForDate must clear dailyTask when dailyTask.statusDate != todayStr even if isOldDate is false",
+            snapshotUnknownDateWithStaleDailyTask.sanitizeForDate().dailyTask
+        )
+
+        // 3. Snapshot from today with matching statusDate -> must preserve dailyTask
+        val snapshotToday = CachedSessionData(
+            userId = "u1",
+            dateVn = todayStr,
+            dailyTask = createStatus(statusDate = todayStr, mode = "owner", required_tests = 3),
+        )
+        assertEquals(
+            todayStr,
+            snapshotToday.sanitizeForDate().dailyTask?.statusDate
+        )
+    }
+
+    @Test
+    fun testCampaignRepositoryFallbackFiltersExcludeMissionReports() {
+        val repoSource = java.io.File("src/main/java/com/ntt/crosstest/data/CampaignRepository.kt").readText()
+        assertTrue(
+            "getTodayCheckinCount must exclude mission reports",
+            repoSource.contains("it.isCreatedToday() && (it.isPending || it.isApproved) && !it.isMissionReport")
+        )
+        val nonRejectedNonMissionCount =
+            Regex("""it\.isCreatedToday\(\)\s*&&\s*!it\.isRejected\s*&&\s*!it\.isMissionReport""")
+                .findAll(repoSource)
+                .count()
+        assertEquals(
+            "getCampaignOwnerStats and getCampaignsStatsMap fallbacks in CampaignRepository must exclude mission reports",
+            2,
+            nonRejectedNonMissionCount
+        )
+        val detailVmSource = java.io.File("src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt").readText()
+        assertTrue(
+            "CampaignDetailViewModel must exclude mission reports when computing todayTested",
+            detailVmSource.contains("it.isCreatedToday() && !it.isRejected && !it.isMissionReport")
+        )
+    }
+
+    private fun createStatus(
         statusDate: String? = null,
         mode: String = "member",
         activeAppCount: Int = 0,
         required_tests: Int = 0,
+        requiredTests: Int = required_tests,
         available_apps: Int = 0,
+        availableApps: Int = available_apps,
         effective_required_tests: Int = 0,
+        effectiveRequiredTests: Int = effective_required_tests,
         completed_tests: Int = 0,
+        completedTests: Int = completed_tests,
         logged_in_today: Boolean = false,
+        loggedInToday: Boolean = logged_in_today,
         is_penalty_exempt: Boolean = false,
+        isPenaltyExempt: Boolean = is_penalty_exempt,
         missed_streak: Int = 0,
+        missedStreak: Int = missed_streak,
         next_penalty_percent: Int = 1,
+        nextPenaltyPercent: Int = next_penalty_percent,
         met: Boolean = false,
         base_required_tests: Int = 0,
+        baseRequiredTests: Int = base_required_tests,
         carry_in_tests: Int = 0,
+        carryInTests: Int = carry_in_tests,
         carryover_remaining_tests: Int = 0,
+        carryoverRemainingTests: Int = carryover_remaining_tests,
         carryover_ready: Boolean = true,
+        carryoverReady: Boolean = carryover_ready,
+        history_ready: Boolean = true,
+        historyReady: Boolean = history_ready,
         carryover_effective_from: String? = null,
+        carryoverEffectiveFrom: String? = carryover_effective_from,
     ): DailyTaskStatus {
         return DailyTaskStatus(
             statusDate = statusDate,
             mode = mode,
             activeAppCount = activeAppCount,
-            requiredTests = required_tests,
-            availableApps = available_apps,
-            effectiveRequiredTests = effective_required_tests,
-            completedTests = completed_tests,
-            loggedInToday = logged_in_today,
-            isPenaltyExempt = is_penalty_exempt,
-            missedStreak = missed_streak,
-            nextPenaltyPercent = next_penalty_percent,
+            requiredTests = requiredTests,
+            availableApps = availableApps,
+            effectiveRequiredTests = effectiveRequiredTests,
+            completedTests = completedTests,
+            loggedInToday = loggedInToday,
+            isPenaltyExempt = isPenaltyExempt,
+            missedStreak = missedStreak,
+            nextPenaltyPercent = nextPenaltyPercent,
             met = met,
-            baseRequiredTests = base_required_tests,
-            carryInTests = carry_in_tests,
-            carryoverRemainingTests = carryover_remaining_tests,
-            carryoverReady = carryover_ready,
-            carryoverEffectiveFrom = carryover_effective_from,
+            baseRequiredTests = baseRequiredTests,
+            carryInTests = carryInTests,
+            carryoverRemainingTests = carryoverRemainingTests,
+            carryoverReady = carryoverReady,
+            historyReady = historyReady,
+            carryoverEffectiveFrom = carryoverEffectiveFrom,
         )
     }
 }

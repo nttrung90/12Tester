@@ -1,0 +1,35 @@
+{
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "android_api_level": 26,
+  "android_ndk_version": "28.2.13676358",
+  "android_stl": "c++_static",
+  "apt_snapshot": "20261115T000000Z",
+  "assemble_image": "python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b",
+  "base_image": "ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5",
+  "openssl": {
+    "sha256": "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a",
+    "size_delta_vs_1_1_1w": "not measured",
+    "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz",
+    "version": "openssl-3.5.9"
+  },
+  "release_tag": "tdlib-1.8.70-c8828d5",
+  "sha256": {
+    "java/org/drinkless/tdlib/Client.java": "ea37f5c3f2cb894ad14381a22e1c6ca22affbaa25346669ff117e0b489e6eabe",
+    "java/org/drinkless/tdlib/TdApi.java": "45cc95ded1b4d5533e32f2faeadd6df32bc3ab04a34193c1f3222d61cd83764e",
+    "jniLibs/arm64-v8a/libtdjni.so": "a5c49e1f2fba58398909207e84b0e891abdfe5dcc0d1848e97227a1a12423dbb",
+    "jniLibs/armeabi-v7a/libtdjni.so": "f6090a9efe25a9c8ac3a4c624f40f0fad3a671920a0840bd7e83443676221016",
+    "jniLibs/x86_64/libtdjni.so": "1184aea3055ece858ce16d4c828587103bffbbe292b0ed98b4eec1abb9fe5415"
+  },
+  "stripped_size_bytes": {
+    "arm64-v8a": 20332936,
+    "armeabi-v7a": 17251616,
+    "x86_64": 23749600
+  },
+  "tdlib_commit": "c8828d50f5eac2fc7089ce1089d7ce9095c61b5e",
+  "tdlib_interface": "Java",
+  "tdlib_version": "1.8.70"
+}

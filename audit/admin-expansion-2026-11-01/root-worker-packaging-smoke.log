@@ -1,0 +1,8 @@
+file:///F:/AI/12Tester/backend/notification-worker/[eval1]:1
+process.env.DATABASE_URL="postgres://fixture:dummy@127.0.0.1:1/fixture";delete process.env.DATABASE_SSL;const {getClientPool}=await import("./worker-runner.mjs");const p=await getClientPool();if(p.options.ssl?.rejectUnauthorized!==true)throw Error("TLS verification must default to true");console.log(JSON.stringify({pgLoaded:true,verifiedTlsDefault:true,connectedToDatabase:false}));await p.end();
+                                                                                                                                                                                                                                                  ^
+
+Error: TLS verification must default to true
+    at file:///F:/AI/12Tester/backend/notification-worker/[eval1]:1:243
+
+Node.js v24.15.0

@@ -1,0 +1,26 @@
+{
+    "logName":  "test-combined-business-all",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.BusinessPolicyRepositoryTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.AppUpdateRewardTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.PushAndCarryoverHardeningTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.CacheRegressionTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-01T16:15:20.9313519Z",
+    "finishedUtc":  "2026-11-01T16:15:37.9233341Z",
+    "currentRunXmlCount":  8
+}

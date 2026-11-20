@@ -36,6 +36,7 @@ class ReportRpcFallbackAuditTest {
     private suspend fun client(handler: (Map<String, String>) -> Pair<String, HttpStatusCode>): io.github.jan.supabase.SupabaseClient {
         val fixture = createSupabaseClient("https://fixture.invalid", "fixture-key") {
             install(Auth) {
+                enableLifecycleCallbacks = false
                 sessionManager = MemorySessionManager()
                 codeVerifierCache = MemoryCodeVerifierCache()
                 autoLoadFromStorage = false
@@ -49,6 +50,7 @@ class ReportRpcFallbackAuditTest {
                 respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             }
         }
+        fixture.auth.awaitInitialization()
         fixture.auth.importSession(Json { ignoreUnknownKeys = true }.decodeFromString<UserSession>(
             """{"access_token":"fixture-access","refresh_token":"fixture-refresh","expires_in":3600,"token_type":"bearer","user":{"id":"tester","aud":"authenticated"}}"""
         ))
@@ -77,6 +79,7 @@ class ReportRpcFallbackAuditTest {
             assertTrue(result.success)
             assertEquals("report-fixture", result.reportId)
             assertEquals(1, bodies.size)
+            assertEquals("app_test", bodies[0]["p_submission_context"])
             assertEquals("camp-123", bodies[0]["p_campaign_id"])
             assertEquals("tested thoroughly", bodies[0]["p_content"])
             assertEquals("https://fixture.invalid/full.jpg", bodies[0]["p_screenshot_url"])
@@ -121,6 +124,7 @@ class ReportRpcFallbackAuditTest {
         var calls = 0
         val backend = createSupabaseClient("https://fixture.invalid", "fixture-key") {
             install(Auth) {
+                enableLifecycleCallbacks = false
                 sessionManager = MemorySessionManager()
                 codeVerifierCache = MemoryCodeVerifierCache()
                 autoLoadFromStorage = false
@@ -132,6 +136,7 @@ class ReportRpcFallbackAuditTest {
                 throw CancellationException("Simulated external cancellation")
             }
         }
+        backend.auth.awaitInitialization()
         backend.auth.importSession(Json { ignoreUnknownKeys = true }.decodeFromString<UserSession>(
             """{"access_token":"fixture-access","refresh_token":"fixture-refresh","expires_in":3600,"token_type":"bearer","user":{"id":"tester","aud":"authenticated"}}"""
         ))
@@ -205,42 +210,14 @@ class ReportRpcFallbackAuditTest {
     }
 
     @Test
-    fun fallbackToFiveArgumentsWhenIdempotencyNotRequired() = runBlocking {
-        val bodies = mutableListOf<Map<String, String>>()
-        val backend = client { fields ->
-            bodies += fields
-            if ("p_thumbnail_url" in fields) {
-                """{"code":"PGRST202","message":"Could not find the function submit_tester_report with 7 args in schema cache"}""" to HttpStatusCode.NotFound
-            } else if ("p_client_submit_id" in fields) {
-                """{"code":"PGRST202","message":"Could not find the function submit_tester_report with 6 args in schema cache"}""" to HttpStatusCode.NotFound
-            } else {
-                success to HttpStatusCode.OK
-            }
-        }
+    fun contextCannotBeDroppedEvenWhenLegacyCallerAllowsFallback() = runBlocking {
+        var calls=0
+        val backend=client { calls++; """{"code":"PGRST202","message":"Could not find the function in schema cache"}""" to HttpStatusCode.NotFound }
         try {
-            val repo = CampaignRepository(backend, Localizer(RuntimeEnvironment.getApplication()))
-            val result = repo.submitFeedback(
-                campaignId = "camp-fallback",
-                rating = 5,
-                comment = "tested",
-                screenshotUrl = "https://fixture.invalid/full.jpg",
-                imageHash = "0123456789abcdef",
-                clientSubmitId = requestId,
-                requireIdempotency = false,
-                thumbnailUrl = "https://fixture.invalid/thumb.jpg",
-            )
-            assertTrue(result.success)
-            assertEquals("Should attempt 7-param, then 6-param, then fall back to 5-param", 3, bodies.size)
-            // Call 1: 7 args
-            assertTrue(bodies[0].containsKey("p_thumbnail_url"))
-            assertTrue(bodies[0].containsKey("p_client_submit_id"))
-            // Call 2: 6 args
-            assertFalse(bodies[1].containsKey("p_thumbnail_url"))
-            assertTrue(bodies[1].containsKey("p_client_submit_id"))
-            // Call 3: 5 args (legacy)
-            assertFalse(bodies[2].containsKey("p_thumbnail_url"))
-            assertFalse(bodies[2].containsKey("p_client_submit_id"))
-            assertEquals("camp-fallback", bodies[2]["p_campaign_id"])
+            val result=runCatching { CampaignRepository(backend,Localizer(RuntimeEnvironment.getApplication()))
+                .submitFeedback("campaign",5,"test",clientSubmitId=requestId,requireIdempotency=false) }
+            assertEquals("server_update_required",result.exceptionOrNull()?.message)
+            assertEquals(1,calls)
         } finally { backend.close() }
     }
 }

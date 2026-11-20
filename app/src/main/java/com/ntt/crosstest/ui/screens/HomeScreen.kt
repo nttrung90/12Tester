@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,9 +17,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,7 +33,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +47,7 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Surface
 import com.ntt.crosstest.util.NetworkMonitor
 import com.ntt.crosstest.ui.viewmodels.CampaignDisplayItem
+import com.ntt.crosstest.data.EgressTriggerSource
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
@@ -48,6 +56,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -65,6 +75,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -73,8 +84,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,12 +98,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -127,9 +143,64 @@ import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.DailyTaskCard
 import com.ntt.crosstest.ui.components.NotificationBottomSheet
 import com.ntt.crosstest.ui.screens.QuestsScreen
+import com.ntt.crosstest.util.CommunityLinks
 import com.ntt.crosstest.util.TopupConfig
+import com.ntt.crosstest.util.WarningRenderer
+import com.ntt.crosstest.util.openExternalLink
 import com.ntt.crosstest.ui.viewmodels.HomeViewModel
 import com.ntt.crosstest.ui.theme.statusColors
+
+internal const val ZALO_GROUP_URL = CommunityLinks.ZALO_GROUP_URL
+internal const val TELEGRAM_GROUP_URL = CommunityLinks.TELEGRAM_GROUP_URL
+internal const val WHATSAPP_GROUP_URL = CommunityLinks.WHATSAPP_GROUP_URL
+
+internal data class HomeSocialAction(
+    @get:DrawableRes val iconRes: Int,
+    @get:StringRes val labelRes: Int,
+    val containerColor: Color,
+    val url: String,
+    val iconSize: Dp = 22.dp,
+)
+
+internal val TELEGRAM_SOCIAL_ACTION = HomeSocialAction(
+    iconRes = R.drawable.ic_telegram,
+    labelRes = R.string.social_link_telegram,
+    containerColor = Color(0xFF26A5E4),
+    url = TELEGRAM_GROUP_URL,
+)
+
+internal val ENGLISH_SOCIAL_ACTIONS = listOf(
+    TELEGRAM_SOCIAL_ACTION,
+    HomeSocialAction(
+        iconRes = R.drawable.ic_whatsapp,
+        labelRes = R.string.social_link_whatsapp,
+        containerColor = Color(0xFF25D366),
+        url = WHATSAPP_GROUP_URL,
+    ),
+)
+
+internal val VIETNAMESE_SOCIAL_ACTIONS = listOf(
+    TELEGRAM_SOCIAL_ACTION,
+    HomeSocialAction(
+        iconRes = R.drawable.ic_zalo,
+        labelRes = R.string.social_link_zalo,
+        containerColor = Color(0xFF0068FF),
+        url = ZALO_GROUP_URL,
+        iconSize = 26.dp,
+    ),
+)
+
+internal fun socialActionsForLanguage(language: String?): List<HomeSocialAction> = when {
+    language.equals("vi", ignoreCase = true) -> VIETNAMESE_SOCIAL_ACTIONS
+    language.equals("en", ignoreCase = true) -> ENGLISH_SOCIAL_ACTIONS
+    else -> emptyList()
+}
+
+@Composable
+internal fun currentAppLanguageCode(): String? {
+    val locales = LocalConfiguration.current.locales
+    return if (!locales.isEmpty) locales[0]?.language else null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,6 +214,8 @@ fun HomeScreen(
     onAdminPanelClick: () -> Unit = {},
     onAdminReportsClick: () -> Unit = {},
     onAccountLocked: () -> Unit = {},
+    onHelpClick: () -> Unit = {},
+    onTelegramChatClick: () -> Unit = {},
     onSignedOut: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -161,11 +234,23 @@ fun HomeScreen(
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val telegramUnreadCount by app.telegramChatRepository.unreadCount.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        app.telegramChatRepository.startUnreadWatcherIfLoggedIn()
+    }
     val isOnline by remember(context) {
         NetworkMonitor.observeNetwork(context)
     }.collectAsStateWithLifecycle(initialValue = NetworkMonitor.isOnline(context))
+    var previouslyOnline by remember { mutableStateOf(isOnline) }
+    LaunchedEffect(isOnline) {
+        if (isOnline && !previouslyOnline) {
+            viewModel.refresh(context, forceRefresh = true, triggerSource = EgressTriggerSource.RESUME)
+        }
+        previouslyOnline = isOnline
+    }
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
+    var questsOpenCount by rememberSaveable { mutableIntStateOf(0) }
     var showLoginPromptDialog by rememberSaveable { mutableStateOf(false) }
     var showNotificationBottomSheet by rememberSaveable { mutableStateOf(false) }
     var showCreditHistoryDialog by rememberSaveable { mutableStateOf(false) }
@@ -175,12 +260,15 @@ fun HomeScreen(
 
     LifecycleResumeEffect(Unit) {
         viewModel.scheduleMidnightRefresh()
-        viewModel.refresh(context, forceRefresh = false)
+        viewModel.refreshInstalledStatus(context)
+        viewModel.resumePendingDailyTaskWork()
+        viewModel.refresh(context, forceRefresh = false, triggerSource = EgressTriggerSource.RESUME)
         viewModel.pruneExpiredMissions()
         onPauseOrDispose {
             viewModel.stopMidnightScheduler()
             viewModel.stopMissionDeadlineScheduler()
             viewModel.stopPendingCarryoverRetry()
+            viewModel.stopDailyTaskRetry()
         }
     }
 
@@ -196,8 +284,30 @@ fun HomeScreen(
         }
     }
 
+    val isLocked = uiState.userProfile?.isLocked == true
+    DisposableEffect(isLocked) {
+        com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setAccountLocked(isLocked)
+        onDispose {
+            com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setAccountLocked(false)
+        }
+    }
+
     // System warning popup if tester/owner has an active unread warning
     val activeWarning = uiState.unreadWarning
+    DisposableEffect(activeWarning != null) {
+        com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setSystemWarningShowing(activeWarning != null)
+        onDispose {
+            com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setSystemWarningShowing(false)
+        }
+    }
+
+    val isModalOpen = showNotificationBottomSheet || showTopupBottomSheet
+    DisposableEffect(isModalOpen) {
+        com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setModalDialogShowing(isModalOpen)
+        onDispose {
+            com.ntt.crosstest.util.NotificationPopupBlockerCoordinator.setModalDialogShowing(false)
+        }
+    }
     if (activeWarning != null) {
         AlertDialog(
             onDismissRequest = { /* Must acknowledge */ },
@@ -205,7 +315,7 @@ fun HomeScreen(
                 Icon(
                     imageVector = Icons.Filled.Warning,
                     contentDescription = null,
-                    tint = Color(0xFFF57F17),
+                    tint = MaterialTheme.statusColors.warning,
                     modifier = Modifier.size(36.dp)
                 )
             },
@@ -213,25 +323,25 @@ fun HomeScreen(
                 Text(
                     text = stringResource(R.string.warning_dialog_title),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = activeWarning.message,
+                        text = WarningRenderer.render(activeWarning, Localizer(context)),
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp,
                     )
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                         shape = RoundedCornerShape(8.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.warning_quota_format, uiState.weeklyWarningsCount),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFC62828),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(10.dp)
                         )
                     }
@@ -242,7 +352,10 @@ fun HomeScreen(
                     onClick = {
                         activeWarning.id?.let { viewModel.dismissWarning(it) }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    )
                 ) {
                     Text(stringResource(R.string.warning_confirm_btn))
                 }
@@ -502,6 +615,7 @@ fun HomeScreen(
                     NavigationBarItem(
                         selected = pagerState.currentPage == index,
                         onClick = {
+                            if (index == 1) questsOpenCount++
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(index)
                             }
@@ -531,58 +645,56 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (pagerState.currentPage == 2) {
-                // 2 FAB chồng nhau: "Đăng APP" + "Mở nhiệm vụ" (MyTab chừa sẵn 130dp)
-                Column(horizontalAlignment = Alignment.End) {
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            if (uiState.isAuthenticated) {
-                                onCreateClick()
-                            } else {
-                                showLoginPromptDialog = true
-                            }
-                        },
-                    ) {
-                        Text(
-                            text = stringResource(R.string.post_app_btn),
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    ExtendedFloatingActionButton(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        onClick = {
-                            if (uiState.isAuthenticated) {
-                                onCreateMissionClick()
-                            } else {
-                                showLoginPromptDialog = true
-                            }
-                        },
-                    ) {
-                        Icon(
-                            Icons.Filled.AddTask,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.mission_create_btn),
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                }
-            } else if (pagerState.currentPage == 0) {
-                FloatingActionButton(
+                ExtendedFloatingActionButton(
                     onClick = {
                         if (uiState.isAuthenticated) {
                             onCreateClick()
                         } else {
                             showLoginPromptDialog = true
                         }
-                    }
+                    },
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.create_campaign))
+                    Text(
+                        text = stringResource(R.string.post_app_btn),
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
+            } else if (pagerState.currentPage == 1) {
+                ExtendedFloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onClick = {
+                        if (uiState.isAuthenticated) {
+                            onCreateMissionClick()
+                        } else {
+                            showLoginPromptDialog = true
+                        }
+                    },
+                ) {
+                    Icon(
+                        Icons.Filled.AddTask,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.mission_create_btn),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            } else if (pagerState.currentPage == 0) {
+                HomeFloatingActions(
+                    onCreateClick = {
+                        if (uiState.isAuthenticated) {
+                            onCreateClick()
+                        } else {
+                            showLoginPromptDialog = true
+                        }
+                    },
+                    onSocialClick = { url -> openExternalLink(context, url) },
+                    onTelegramChatClick = onTelegramChatClick,
+                    telegramUnreadCount = telegramUnreadCount,
+                )
             }
         },
     ) { padding ->
@@ -653,7 +765,7 @@ fun HomeScreen(
                     searchResults = uiState.searchResults,
                     isLoading = uiState.isLoading,
                     error = uiState.error,
-                    onRefresh = { viewModel.refresh(context, forceRefresh = true) },
+                    onRefresh = { viewModel.refresh(context, forceRefresh = true, triggerSource = EgressTriggerSource.PULL_REFRESH) },
                     currentUserId = uiState.userProfile?.id,
                     onCampaignClick = { id -> onCampaignClick(id) },
                     onOwnerAppClick = { id -> onOwnerAppClick(id) },
@@ -664,45 +776,51 @@ fun HomeScreen(
                     userCredits = uiState.userCredits,
                     missedStreak = uiState.missedStreak,
                     dailyTask = uiState.dailyTask,
+                    isDailyTaskPendingRefresh = uiState.isDailyTaskPendingRefresh,
+                    isDailyTaskError = uiState.isDailyTaskError,
+                    onRetryDailyTask = { viewModel.retryDailyTask() },
                     onRequireLogin = { showLoginPromptDialog = true },
+                    onRefreshInstalledStatus = { viewModel.refreshInstalledStatus(context) },
                 )
-                1 -> QuestsScreen(
-                    questSummary = uiState.questSummary,
-                    userCredits = uiState.userCredits,
-                    claimingMilestone = uiState.claimingMilestone,
-                    missions = uiState.missions,
-                    isMissionsLoading = uiState.isMissionsLoading,
-                    missionsError = uiState.missionsError,
-                    joiningMissionId = uiState.joiningMissionId,
-                    onJoinMission = { missionId ->
-                        viewModel.joinMission(missionId) { success, msg ->
-                            if (success) {
-                                Toast.makeText(context, resources.getString(R.string.mission_join_success), Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                1 -> key(questsOpenCount) {
+                    QuestsScreen(
+                        questSummary = uiState.questSummary,
+                        userCredits = uiState.userCredits,
+                        claimingMilestone = uiState.claimingMilestone,
+                        missions = uiState.missions,
+                        isMissionsLoading = uiState.isMissionsLoading,
+                        missionsError = uiState.missionsError,
+                        joiningMissionId = uiState.joiningMissionId,
+                        onJoinMission = { missionId ->
+                            viewModel.joinMission(missionId) { success, msg ->
+                                if (success) {
+                                    Toast.makeText(context, resources.getString(R.string.mission_join_success), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        }
-                    },
-                    onMissionAppClick = { campaignId, missionId -> onMissionAppClick(campaignId, missionId) },
-                    onRetryMissions = { viewModel.refreshMissions(forceRefresh = true) },
-                    isAuthenticated = uiState.isAuthenticated,
-                    isLoading = uiState.isLoading,
-                    onRefresh = { viewModel.refresh(context, forceRefresh = true) },
-                    onClaimReward = { type, milestone ->
-                        viewModel.claimQuestReward(type, milestone) { success, msg ->
-                            // Success is announced by the reward overlay.
-                            if (!success) {
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        },
+                        onMissionAppClick = { campaignId, missionId -> onMissionAppClick(campaignId, missionId) },
+                        onRetryMissions = { viewModel.refreshMissions(forceRefresh = true) },
+                        isAuthenticated = uiState.isAuthenticated,
+                        isLoading = uiState.isLoading,
+                        onRefresh = { viewModel.refresh(context, forceRefresh = true, triggerSource = EgressTriggerSource.PULL_REFRESH) },
+                        onClaimReward = { type, milestone ->
+                            viewModel.claimQuestReward(type, milestone) { success, msg ->
+                                // Success is announced by the reward overlay.
+                                if (!success) {
+                                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        }
-                    },
-                    onRequireLogin = { showLoginPromptDialog = true },
-                    onNavigateToDiscover = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(0)
-                        }
-                    },
-                )
+                        },
+                        onRequireLogin = { showLoginPromptDialog = true },
+                        onNavigateToDiscover = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(0)
+                            }
+                        },
+                    )
+                }
                 2 -> MyTab(
                     isAuthenticated = uiState.isAuthenticated,
                     onGoToProfile = {
@@ -717,7 +835,7 @@ fun HomeScreen(
                     ownerNameById = uiState.ownerNameById,
                     pendingReportsCount = uiState.pendingReportsCount,
                     isLoading = uiState.isLoading,
-                    onRefresh = { viewModel.refresh(context, forceRefresh = true) },
+                    onRefresh = { viewModel.refresh(context, forceRefresh = true, triggerSource = EgressTriggerSource.PULL_REFRESH) },
                     onCampaignClick = onCampaignClick,
                     onOwnerAppClick = onOwnerAppClick,
                 )
@@ -727,6 +845,7 @@ fun HomeScreen(
                     isLoading = uiState.isLeaderboardLoading,
                     isTestLoading = uiState.isTestLeaderboardLoading,
                     myRank = uiState.myRank,
+                    testMyRank = uiState.testMyRank,
                     currentUserId = uiState.userProfile?.id,
                     myDisplayName = uiState.userProfile?.displayName,
                     onRefresh = { viewModel.refreshLeaderboard(forceRefresh = true) },
@@ -737,6 +856,7 @@ fun HomeScreen(
                     isActive = pagerState.currentPage == 4,
                     onAdminPanelClick = onAdminPanelClick,
                     onAdminReportsClick = onAdminReportsClick,
+                    onHelpClick = onHelpClick,
                     onSignedOut = onSignedOut,
                 )
             }
@@ -752,6 +872,69 @@ fun HomeScreen(
         onDismiss = viewModel::clearReward,
         modifier = Modifier.padding(top = 64.dp),
     )
+}
+
+@Composable
+internal fun HomeFloatingActions(
+    onCreateClick: () -> Unit,
+    onSocialClick: (String) -> Unit,
+    onTelegramChatClick: () -> Unit = { onSocialClick(TELEGRAM_GROUP_URL) },
+    telegramUnreadCount: Int = 0,
+) {
+    val socialActions = socialActionsForLanguage(currentAppLanguageCode())
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        FloatingActionButton(onClick = onCreateClick) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.create_campaign))
+        }
+        socialActions.forEach { action ->
+            val isTelegram = action.url == TELEGRAM_GROUP_URL
+            Box(contentAlignment = Alignment.Center) {
+                SmallFloatingActionButton(
+                    onClick = {
+                        if (isTelegram) {
+                            onTelegramChatClick()
+                        } else {
+                            onSocialClick(action.url)
+                        }
+                    },
+                    shape = CircleShape,
+                    containerColor = action.containerColor,
+                    contentColor = Color.White,
+                ) {
+                    Icon(
+                        painter = painterResource(action.iconRes),
+                        contentDescription = stringResource(action.labelRes),
+                        modifier = Modifier.size(action.iconSize),
+                    )
+                }
+                if (isTelegram && telegramUnreadCount > 0) {
+                    val badgeText = if (telegramUnreadCount > 99) "99+" else telegramUnreadCount.toString()
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 4.dp, y = (-4).dp)
+                            .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(Color(0xFFE53935))
+                            .border(1.5.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(9.dp))
+                            .padding(horizontal = 4.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = badgeText,
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -777,8 +960,19 @@ private fun DiscoverTab(
     userCredits: Int,
     missedStreak: Int,
     dailyTask: DailyTaskStatus?,
+    isDailyTaskPendingRefresh: Boolean = false,
+    isDailyTaskError: Boolean = false,
+    onRetryDailyTask: () -> Unit = {},
     onRequireLogin: () -> Unit,
+    onRefreshInstalledStatus: () -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val uninstallLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        onRefreshInstalledStatus()
+    }
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
     val coroutineScope = rememberCoroutineScope()
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -812,6 +1006,12 @@ private fun DiscoverTab(
     }
 
     val allListsEmpty = items.isEmpty() && pausedItems.isEmpty() && completedItems.isEmpty()
+    val extraFabCount = socialActionsForLanguage(currentAppLanguageCode()).size
+    val bottomSpacerHeight = when {
+        extraFabCount >= 2 -> 180.dp
+        extraFabCount == 1 -> 130.dp
+        else -> 72.dp
+    }
 
     PullToRefreshBox(
         isRefreshing = isLoading,
@@ -836,6 +1036,9 @@ private fun DiscoverTab(
                             isAuthenticated = isAuthenticated,
                             isPenaltyExempt = isPenaltyExempt,
                             dailyTask = dailyTask,
+                            isPendingRefresh = isDailyTaskPendingRefresh,
+                            isError = isDailyTaskError,
+                            onRetryClick = onRetryDailyTask,
                             onRequireLogin = onRequireLogin,
                             onTestAppClick = {
                                 coroutineScope.launch {
@@ -938,14 +1141,35 @@ private fun DiscoverTab(
                             }
                         }
                     ) { _, item ->
+                        val canUninstall = (selectedTab == 1 || selectedTab == 2) &&
+                            item.isInstalledLocally &&
+                            item.campaign.packageName.isNotBlank()
                         CampaignCard(
                             item = item,
                             onClick = { onCardClick(item) },
+                            showTesterBonusBadge = (selectedTab == 0),
+                            onUninstallClick = if (canUninstall) {
+                                {
+                                    try {
+                                        val intent = Intent(
+                                            Intent.ACTION_DELETE,
+                                            Uri.fromParts("package", item.campaign.packageName.trim(), null),
+                                        )
+                                        uninstallLauncher.launch(intent)
+                                    } catch (_: Exception) {
+                                        Toast.makeText(
+                                            context,
+                                            resources.getString(R.string.campaign_uninstall_error),
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }
+                                }
+                            } else null,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                     }
                 }
-                item { Spacer(Modifier.height(72.dp)) } // room for FAB
+                item { Spacer(Modifier.height(bottomSpacerHeight)) } // room for stacked FABs
             }
         }
     }
@@ -1213,8 +1437,8 @@ private fun MyTab(
     }
 }
 
-// Tạm ẩn sub-tab "Top Test" trong tab Xếp hạng. Đổi thành true để bật lại.
-private const val SHOW_LEADERBOARD_TEST_TAB = false
+// Công tắc sub-tab "Top Test" trong tab Xếp hạng (false = ẩn sub-tab).
+private const val SHOW_LEADERBOARD_TEST_TAB = true
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1225,6 +1449,7 @@ private fun LeaderboardTab(
     isLoading: Boolean,
     isTestLoading: Boolean,
     myRank: MyRank?,
+    testMyRank: MyRank?,
     currentUserId: String?,
     myDisplayName: String?,
     onRefresh: () -> Unit,
@@ -1283,10 +1508,11 @@ private fun LeaderboardTab(
 
             Spacer(Modifier.height(8.dp))
 
-            // Thẻ ghim hạng của người dùng hiện tại (chỉ tab Top Credit, đã đăng nhập).
-            if (!isTestTab && currentUserId != null && myRank != null && myRank.rank > 0) {
+            // Thẻ ghim hạng của người dùng hiện tại (đã đăng nhập, hạng xác định).
+            val activeMyRank = if (isTestTab) testMyRank else myRank
+            if (currentUserId != null && activeMyRank != null && activeMyRank.rank > 0) {
                 MyRankCard(
-                    myRank = myRank,
+                    myRank = activeMyRank,
                     displayName = myDisplayName,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )

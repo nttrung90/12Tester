@@ -1,0 +1,6 @@
+gradle.projectsEvaluated {
+    def app = gradle.rootProject.project(':app')
+    app.tasks.named('compileDebugUnitTestKotlin').configure {
+        source(new File(gradle.rootProject.projectDir, 'audit/localization-recheck-round2-2026-10-29/kotlin'))
+    }
+}

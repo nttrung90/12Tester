@@ -1,0 +1,25 @@
+FAIL 086->087 stored receipt replay single-open: CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH
+FAIL 086->087 stored receipt replay attachments-open: CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH
+FAIL 086->087 stored receipt replay single-completed: CAMPAIGN_NOT_OPEN
+FAIL 086->087 stored receipt replay attachments-completed: CAMPAIGN_NOT_OPEN
+{
+  "cases": 4,
+  "failures": [
+    {
+      "name": "086->087 stored receipt replay single-open",
+      "error": "CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH"
+    },
+    {
+      "name": "086->087 stored receipt replay attachments-open",
+      "error": "CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH"
+    },
+    {
+      "name": "086->087 stored receipt replay single-completed",
+      "error": "CAMPAIGN_NOT_OPEN"
+    },
+    {
+      "name": "086->087 stored receipt replay attachments-completed",
+      "error": "CAMPAIGN_NOT_OPEN"
+    }
+  ]
+}

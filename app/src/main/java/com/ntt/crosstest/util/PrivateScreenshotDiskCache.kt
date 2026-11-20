@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 interface MediaAccessGrantProvider {
     suspend fun getMediaAccessGrant(reportId: String): MediaAccessGrantResult?
+    suspend fun getMediaAccessGrant(reportId: String, attachmentId: String?): MediaAccessGrantResult? = getMediaAccessGrant(reportId)
     fun getCurrentAuthToken(): String?
 }
 
@@ -23,6 +24,7 @@ interface MediaAccessGrantProvider {
 data class MediaAccessGrantResult(
     val success: Boolean,
     @kotlinx.serialization.SerialName("report_id") val reportId: String? = null,
+    @kotlinx.serialization.SerialName("attachment_id") val attachmentId: String? = null,
     val role: String? = null,
     @kotlinx.serialization.SerialName("screenshot_url") val screenshotUrl: String? = null,
     @kotlinx.serialization.SerialName("thumbnail_url") val thumbnailUrl: String? = null,
@@ -174,6 +176,8 @@ object PrivateScreenshotDiskCache {
         mediaExpired: Boolean?,
         serverDateHeaderEpochMs: Long? = null,
         ageHeader: String? = null,
+        provider: String? = null,
+        viewExpiresAt: String? = null,
         isSessionValid: (() -> Boolean)? = null,
     ): Boolean {
         // 1. Kiểm tra cờ tính năng
@@ -229,10 +233,24 @@ object PrivateScreenshotDiskCache {
 
         // Chuyển mốc tạo report sang hệ quy chiếu thời gian local của client
         val createdInLocalMs = createdInstant.toEpochMilli() - clockSkewMs
-        val retentionCutoffInLocalMs = createdInLocalMs + (30L * 24 * 60 * 60 * 1000L)
+        val isSupabase = provider?.equals("supabase", ignoreCase = true) == true ||
+            url.contains("report-screenshots") ||
+            url.contains("supabase")
+
+        val retentionCutoffInLocalMs = if (!viewExpiresAt.isNullOrBlank()) {
+            try {
+                Instant.parse(viewExpiresAt).toEpochMilli() - clockSkewMs
+            } catch (_: Exception) {
+                val hours = if (isSupabase) 216L else (30L * 24L)
+                createdInLocalMs + (hours * 60 * 60 * 1000L)
+            }
+        } else {
+            val hours = if (isSupabase) 216L else (30L * 24L)
+            createdInLocalMs + (hours * 60 * 60 * 1000L)
+        }
 
         if (nowMs >= retentionCutoffInLocalMs) {
-            return false // Báo cáo đã quá hạn 30 ngày
+            return false // Báo cáo đã quá hạn (216 giờ cho Supabase hoặc 30 ngày cho Google)
         }
 
         val ttlCutoffInLocalMs = nowMs + ttlMs
@@ -292,6 +310,8 @@ object PrivateScreenshotDiskCache {
         url: String,
         currentReportCreatedAt: String? = null,
         currentMediaExpired: Boolean? = null,
+        currentProvider: String? = null,
+        currentViewExpiresAt: String? = null,
     ): Bitmap? {
         if (!ScreenshotCachePolicy.isPrivateDiskCacheEnabled) return null
         if (accountId.isBlank() || accountId == "default") return null
@@ -324,11 +344,25 @@ object PrivateScreenshotDiskCache {
                     return null
                 }
 
+                if (!currentViewExpiresAt.isNullOrBlank()) {
+                    try {
+                        val viewExpires = Instant.parse(currentViewExpiresAt)
+                        if (Instant.now().isAfter(viewExpires)) {
+                            targetFile.delete()
+                            return null
+                        }
+                    } catch (_: Exception) {}
+                }
+
                 // Kiểm tra lại với metadata mới nhất của report (nếu được truyền vào)
                 if (!currentReportCreatedAt.isNullOrBlank()) {
                     try {
                         val created = Instant.parse(currentReportCreatedAt)
-                        val cutoff = Instant.now().minus(java.time.Duration.ofDays(30))
+                        val isSupabase = currentProvider?.equals("supabase", ignoreCase = true) == true ||
+                            url.contains("report-screenshots") ||
+                            url.contains("supabase")
+                        val duration = if (isSupabase) java.time.Duration.ofHours(216) else java.time.Duration.ofDays(30)
+                        val cutoff = Instant.now().minus(duration)
                         if (created.isBefore(cutoff)) {
                             targetFile.delete()
                             return null

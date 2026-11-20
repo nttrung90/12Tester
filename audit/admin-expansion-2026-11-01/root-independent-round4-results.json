@@ -1,0 +1,50 @@
+[
+  {
+    "suite": "com.ntt.crosstest.audit.AdminExpansionMemberCardLayoutTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:00.762Z"
+  },
+  {
+    "suite": "com.ntt.crosstest.audit.ImageHashCollisionAuditTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:09.266Z"
+  },
+  {
+    "suite": "com.ntt.crosstest.audit.MemberDetailPaginationIndependentTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:09.336Z"
+  },
+  {
+    "suite": "com.ntt.crosstest.audit.NotificationOwnershipIndependentTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:10.583Z"
+  },
+  {
+    "suite": "com.ntt.crosstest.audit.ReportOverlapTest",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:10.711Z"
+  },
+  {
+    "suite": "com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-11-01T15:28:16.409Z"
+  }
+]

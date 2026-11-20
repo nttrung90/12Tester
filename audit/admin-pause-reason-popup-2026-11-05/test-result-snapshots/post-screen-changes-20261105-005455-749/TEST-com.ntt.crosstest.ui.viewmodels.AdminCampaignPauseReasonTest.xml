@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T00:54:49.928Z" hostname="PC-5700X3D" time="4.959">
+  <properties/>
+  <testcase name="sessionGenerationChange_discardsStaleResponse_andDoesNotInvokeOnSuccess" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="4.101"/>
+  <testcase name="concurrentDuplicatePause_rejectedByActionGate" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.084"/>
+  <testcase name="pauseWithPolicyViolation_routesToNewRpc_withPolicyViolationPayload" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.055"/>
+  <testcase name="pauseWithCustomReason_routesToLegacyRpc_withCustomReasonText" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.051"/>
+  <testcase name="pauseWithMissingGoogleGroup_routesToNewRpc_withCorrectPayloadAndInvokesOnSuccess" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.052"/>
+  <testcase name="pauseFailure_retainsDraft_doesNotInvokeOnSuccess_andSetsError" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest" time="0.052"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+{
+    "logName":  "test-modes-unit-pass",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionRewardModesUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-03T13:17:04.8003851Z",
+    "finishedUtc":  "2026-11-03T13:17:25.7598301Z",
+    "currentRunXmlCount":  1
+}

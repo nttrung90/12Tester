@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { readdirSync } from 'node:fs';
+import { createDb, read } from '../../supabase/tools/baseline-lib.mjs';
+const db = await createDb();
+try {
+  for (const f of readdirSync(new URL('../../supabase/migrations/', import.meta.url)).filter(f => /^0\d\d.*\.sql$/.test(f) && +f.slice(0,3) <= 70).sort()) await db.exec(read('supabase/migrations/' + f));
+  await db.exec(read('audit/admin-expansion-2026-11-01/audit-stage/073_admin_action_audit.sql'));
+  const owner='11111111-1111-1111-1111-111111111111', tester='22222222-2222-2222-2222-222222222222';
+  const camp='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', rep='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  await db.exec(`insert into auth.users(id,email) values ('${owner}','owner@fixture.invalid'),('${tester}','tester@fixture.invalid');
+  update public.profiles set role='admin' where id='${owner}';
+  insert into public.campaigns(id,owner_id,app_name,package_name,status) values ('${camp}','${owner}','Owner audit','invalid.audit.owner','open');
+  insert into public.campaign_members(campaign_id,user_id) values ('${camp}','${tester}');
+  insert into public.tester_reports(id,campaign_id,user_id,status,content,provisional_granted_credits,created_at) values ('${rep}','${camp}','${tester}','pending','test',2,now());
+  begin; select set_config('request.jwt.claim.sub','${owner}',true); set local role authenticated;`);
+  const res=(await db.query(`select public.approve_tester_report('${rep}',0) as r`)).rows[0].r;
+  await db.exec('commit');
+  const events=(await db.query(`select action,target_id from public.admin_action_events where target_id='${rep}'`)).rows;
+  console.log(JSON.stringify({ownerBonus:res.owner_credits_awarded,commonEvents:events},null,2));
+  assert.equal(res.owner_credits_awarded,2);
+  assert.equal(events.length,0,'Owner-mode review must retain owner semantics even if owner also has admin role');
+} finally { await db.close(); }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:38.098Z" hostname="PC-5700X3D" time="0.301">
+  <properties/>
+  <testcase name="server 500 error on owner delete does NOT fallback to table DELETE" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.023"/>
+  <testcase name="CampaignDetailViewModel admin delete pending does NOT fire onDeleted but DOES fire onPendingRemoval" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.036"/>
+  <testcase name="genuine PGRST202 404 missing RPC triggers legacy table DELETE fallback" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.021"/>
+  <testcase name="admin legacy body omitting status is compatible as removed" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.019"/>
+  <testcase name="owner RPC submits only p_campaign_id and decodes status pending_removal" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.021"/>
+  <testcase name="OwnerAppDetailViewModel pending does NOT fire onDeleted but DOES fire onPendingRemoval" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.044"/>
+  <testcase name="owner RPC missing status is unconfirmed and never falls back to table delete" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.022"/>
+  <testcase name="delayed owner delete response arriving after account switch does NOT trigger navigation" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.035"/>
+  <testcase name="success false or unknown status does NOT acknowledge as removed" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.039"/>
+  <testcase name="admin RPC actual deleted status is recognized as completed removal" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.021"/>
+  <testcase name="admin delete RPC decodes status pending_removal and preserves reason" classname="com.ntt.crosstest.data.OwnerRemovalLifecycleTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-05T00:15:41.961Z" hostname="PC-5700X3D" time="5.15">
+  <properties/>
+  <testcase name="adminToAdminSwitch_updatesDialogIdentityWithoutWaitingForRefresh" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="4.545"/>
+  <testcase name="logout_clearsDialogIdentityAndAdminAccessBeforeAnyRefresh" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.061"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

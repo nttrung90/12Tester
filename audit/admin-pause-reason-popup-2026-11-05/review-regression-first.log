@@ -1,0 +1,10 @@
+PASS independent 1: invalid/null code and non-admin/locked/anonymous calls cannot pause
+PASS independent 2: Google Group body uses authoritative app name and one shared popup notification
+PASS independent 3: owner cannot forge reason, reopen admin pause, or read another account popup
+PASS independent 4: retry does not duplicate before or after notification deletion
+PASS independent 5: changing reason creates policy body and only one more audit event
+PASS independent 6: legacy custom reason equal to label stays distinct and does not create popup
+PASS independent 7: reopen clears structured reason without deleting historical notifications
+PASS independent 8: campaign-type popup uses the existing queue, five-claim limit, replay and acknowledgment
+PASS independent 9: audit insert failure rolls back campaign, notification, and popup together
+INDEPENDENT REVIEW PASSED: 9 behavioral groups.

@@ -1,0 +1,8 @@
+PASS 086->087 stored receipt replay single-open
+PASS 086->087 stored receipt replay attachments-open
+PASS 086->087 stored receipt replay single-completed
+PASS 086->087 stored receipt replay attachments-completed
+{
+  "cases": 4,
+  "failures": []
+}

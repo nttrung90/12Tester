@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-02T05:41:25.613Z" hostname="PC-5700X3D" time="1.598">
+  <properties/>
+  <testcase name="editingReasonCannotChangeUnresolvedCancellationPayload" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="1.303"/>
+  <testcase name="explicitCancellationRetryAfterConflictMustUseFreshRevision" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.032"/>
+  <testcase name="processRecreationBeforeRpcReturnsMustRetainConfirmedRequest" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.025"/>
+  <testcase name="pendingCommittedScheduleCanBeReconciledAfterItsEffectiveDatePasses" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.018"/>
+  <testcase name="recreationAndDraftEditCannotReplaceUnresolvedConfirmedIntent" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.02"/>
+  <testcase name="anotherCancellationDialogCannotSendAnUndisplayedPendingTarget" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.017"/>
+  <testcase name="staleQueuedActionCannotStrandFreshOwnersActionSpinner" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.017"/>
+  <testcase name="dismissingAmbiguousCancellationCannotDiscardItsRequestId" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.018"/>
+  <testcase name="queuedScheduleCannotExecuteUsingAnotherAdminsSession" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.012"/>
+  <testcase name="queuedCancellationCannotExecuteUsingAnotherAdminsSession" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.014"/>
+  <testcase name="retryAfterRecreationMustReuseOriginalCommittedRequest" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.017"/>
+  <testcase name="numericDraftEditsWhileRpcIsPendingMustRetainTheirDateAndReason" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

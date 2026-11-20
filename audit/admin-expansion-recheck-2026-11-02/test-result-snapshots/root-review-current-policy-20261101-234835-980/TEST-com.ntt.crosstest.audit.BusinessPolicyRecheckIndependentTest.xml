@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" tests="12" skipped="0" failures="1" errors="0" timestamp="2026-11-01T23:48:32.364Z" hostname="PC-5700X3D" time="2.79">
+  <properties/>
+  <testcase name="editingReasonCannotChangeUnresolvedCancellationPayload" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="1.943"/>
+  <testcase name="explicitCancellationRetryAfterConflictMustUseFreshRevision" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.041"/>
+  <testcase name="processRecreationBeforeRpcReturnsMustRetainConfirmedRequest" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.037"/>
+  <testcase name="pendingCommittedScheduleCanBeReconciledAfterItsEffectiveDatePasses" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.021"/>
+  <testcase name="recreationAndDraftEditCannotReplaceUnresolvedConfirmedIntent" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.02"/>
+  <testcase name="anotherCancellationDialogCannotSendAnUndisplayedPendingTarget" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.023">
+    <failure message="org.junit.ComparisonFailure: Opening another target must not discard the original unresolved cancellation expected:&lt;[16acae1d-8009-458c-868e-5e5cfb425f2c]&gt; but was:&lt;[01fd9c3c-1dc5-4712-abee-f79b4f75e609]&gt;" type="org.junit.ComparisonFailure">org.junit.ComparisonFailure: Opening another target must not discard the original unresolved cancellation expected:&lt;[16acae1d-8009-458c-868e-5e5cfb425f2c]&gt; but was:&lt;[01fd9c3c-1dc5-4712-abee-f79b4f75e609]&gt;
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest$anotherCancellationDialogCannotSendAnUndisplayedPendingTarget$1$1.invokeSuspend(BusinessPolicyRecheckIndependentTest.kt:349)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest$anotherCancellationDialogCannotSendAnUndisplayedPendingTarget$1$1.invoke(BusinessPolicyRecheckIndependentTest.kt)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest$anotherCancellationDialogCannotSendAnUndisplayedPendingTarget$1$1.invoke(BusinessPolicyRecheckIndependentTest.kt)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest.fixture(BusinessPolicyRecheckIndependentTest.kt:123)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest.access$fixture(BusinessPolicyRecheckIndependentTest.kt:34)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest$fixture$1.invokeSuspend(BusinessPolicyRecheckIndependentTest.kt)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:54)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlockingImpl(Builders.kt:30)
+	at kotlinx.coroutines.BuildersKt.runBlockingImpl(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK(Builders.concurrent.kt:172)
+	at kotlinx.coroutines.BuildersKt.runBlockingK(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK$default(Builders.concurrent.kt:157)
+	at kotlinx.coroutines.BuildersKt.runBlockingK$default(Unknown Source)
+	at com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest.anotherCancellationDialogCannotSendAnUndisplayedPendingTarget(BusinessPolicyRecheckIndependentTest.kt:325)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:542)
+	at org.robolectric.internal.SandboxTestRunner.lambda$executeInSandbox$4(SandboxTestRunner.java:429)
+	at org.robolectric.internal.SandboxTestRunner.runInSandbox(SandboxTestRunner.java:455)
+	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:420)
+	at org.robolectric.internal.SandboxTestRunner$5.evaluate(SandboxTestRunner.java:405)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.robolectric.internal.SandboxTestRunner.access$000(SandboxTestRunner.java:64)
+	at org.robolectric.internal.SandboxTestRunner$4.evaluate(SandboxTestRunner.java:294)
+	at org.robolectric.internal.SandboxTestRunner$2.evaluate(SandboxTestRunner.java:260)
+	at org.robolectric.internal.SandboxTestRunner$3.lambda$evaluate$0(SandboxTestRunner.java:280)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThreadWithClassLoader$1(Sandbox.java:112)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+</failure>
+  </testcase>
+  <testcase name="staleQueuedActionCannotStrandFreshOwnersActionSpinner" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.019"/>
+  <testcase name="dismissingAmbiguousCancellationCannotDiscardItsRequestId" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.026"/>
+  <testcase name="queuedScheduleCannotExecuteUsingAnotherAdminsSession" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.014"/>
+  <testcase name="queuedCancellationCannotExecuteUsingAnotherAdminsSession" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.015"/>
+  <testcase name="retryAfterRecreationMustReuseOriginalCommittedRequest" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.026"/>
+  <testcase name="numericDraftEditsWhileRpcIsPendingMustRetainTheirDateAndReason" classname="com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

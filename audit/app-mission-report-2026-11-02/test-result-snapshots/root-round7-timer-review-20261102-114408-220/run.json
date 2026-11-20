@@ -1,0 +1,14 @@
+{
+  "logName": "root-round7-timer-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDayRolloverIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T11:43:45.4705893Z",
+  "finishedUtc": "2026-11-02T11:44:08.2322013Z",
+  "currentRunXmlCount": 1
+}

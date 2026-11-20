@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-12T10:06:49.465Z" hostname="PC-5700X3D" time="0.131">
+  <properties/>
+  <testcase name="deleteCampaign_bumpsDailyTaskMutationAndEmitsUpdatedQuota" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.013"/>
+  <testcase name="postCommitRefreshError_emitsStalePendingWithoutFailingFinancialAction" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.012"/>
+  <testcase name="createCampaignV2_bumpsDailyTaskMutationAndRefreshesQuota" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.009"/>
+  <testcase name="homeViewModel_updatesUiState_uponDailyTaskChangeEvent" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.078"/>
+  <testcase name="fourWayFencing_dropsStaleOrMismatchedEvents" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

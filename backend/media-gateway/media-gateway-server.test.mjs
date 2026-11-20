@@ -6,9 +6,12 @@ import { createMediaGatewayHandler } from './media-gateway-handler.mjs';
 
 const TEST_SECRET = 'crosstest_test_gateway_signing_secret_2026_at_least_32_chars';
 
-function signGrant(reportId, userId, role, variant, expiresEpoch) {
+function signGrant(reportId, userId, role, variant, expiresEpoch, attachmentId = null) {
+    const payload = attachmentId
+        ? `${reportId}:${attachmentId}:${userId}:${role}:${variant}:${expiresEpoch}`
+        : `${reportId}:${userId}:${role}:${variant}:${expiresEpoch}`;
     return createHmac('sha256', TEST_SECRET)
-        .update(`${reportId}:${userId}:${role}:${variant}:${expiresEpoch}`)
+        .update(payload)
         .digest('hex');
 }
 
@@ -30,6 +33,12 @@ function createMockAuthority() {
             isExpired: false,
             fullPath: 'reports/camp_1/u_author/full.jpg',
             thumbPath: 'reports/camp_1/u_author/thumb_full.jpg',
+            attachments: {
+                'att_2': {
+                    fullPath: 'reports/camp_1/u_author/att2_full.jpg',
+                    thumbPath: 'reports/camp_1/u_author/att2_thumb.jpg',
+                }
+            }
         },
         'rep_expired': {
             id: 'rep_expired',
@@ -46,7 +55,7 @@ function createMockAuthority() {
         async resolveUserFromToken(token) {
             return users[token] || null;
         },
-        async verifyGrant({ reportId, userId, variant, expiresAtEpoch, grantToken }) {
+        async verifyGrant({ reportId, userId, variant, expiresAtEpoch, grantToken, attachmentId }) {
             const report = reports[reportId];
             if (!report) return { isValid: false, message: 'Report not found' };
             if (report.isExpired) return { isValid: false, reason: 'MEDIA_EXPIRED' };
@@ -57,9 +66,18 @@ function createMockAuthority() {
             else if (users[`token-admin`]?.id === userId) role = 'admin';
             else return { isValid: false, message: 'Forbidden' };
 
-            const expectedSig = signGrant(reportId, userId, role, variant, expiresAtEpoch);
+            const expectedSig = signGrant(reportId, userId, role, variant, expiresAtEpoch, attachmentId);
             if (expectedSig !== grantToken) {
                 return { isValid: false, message: 'HMAC signature mismatch' };
+            }
+
+            if (attachmentId) {
+                const att = report.attachments?.[attachmentId];
+                if (!att) return { isValid: false, message: 'Attachment not found' };
+                return {
+                    isValid: true,
+                    storagePath: variant === 'thumb' ? att.thumbPath : att.fullPath,
+                };
             }
 
             return {
@@ -74,6 +92,8 @@ function createMockStorage() {
     const files = {
         'reports/camp_1/u_author/full.jpg': Buffer.from('FIXTURE_JPEG_FULL_SCREENSHOT_BYTES'),
         'reports/camp_1/u_author/thumb_full.jpg': Buffer.from('FIXTURE_JPEG_THUMBNAIL_BYTES'),
+        'reports/camp_1/u_author/att2_full.jpg': Buffer.from('FIXTURE_JPEG_ATTACHMENT_2_BYTES'),
+        'reports/camp_1/u_author/att2_thumb.jpg': Buffer.from('FIXTURE_JPEG_ATTACHMENT_2_THUMB_BYTES'),
     };
 
     return {
@@ -215,7 +235,18 @@ test('Media Access Gateway Integration Tests (E04 & R2-02)', async (t) => {
         assert.equal(res.status, 200);
     });
 
-    await t.test('11. Smoke test: server.mjs bootstrap fail-closed khi thiếu cấu hình môi trường', async () => {
+    await t.test('11. Thành công 200: Tải ảnh attachment phụ cụ thể qua attachment_id', async () => {
+        const attGrant = signGrant('rep_valid', 'u_author', 'author', 'full', futureEpoch, 'att_2');
+        const res = await fetch(`${baseUrl}?report_id=rep_valid&attachment_id=att_2&variant=full&expires_at=${futureEpoch}&grant_token=${attGrant}`, {
+            headers: { Authorization: 'Bearer token-author' },
+            redirect: 'manual',
+        });
+        assert.equal(res.status, 200);
+        const buf = Buffer.from(await res.arrayBuffer());
+        assert.equal(buf.toString(), 'FIXTURE_JPEG_ATTACHMENT_2_BYTES');
+    });
+
+    await t.test('12. Smoke test: server.mjs bootstrap fail-closed khi thiếu cấu hình môi trường', async () => {
         const { spawnSync } = await import('node:child_process');
         const { fileURLToPath } = await import('node:url');
         const serverPath = fileURLToPath(new URL('./server.mjs', import.meta.url));

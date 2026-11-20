@@ -1,0 +1,13 @@
+{
+  "logName": "root-all-after-partial-fixture-fixes",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T16:36:08.9522386Z",
+  "finishedUtc": "2026-11-01T16:36:59.5447570Z",
+  "currentRunXmlCount": 67
+}

@@ -1,5 +1,7 @@
 package com.ntt.crosstest.util
 
+import com.ntt.crosstest.R
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.TopupPackage
 
 /**
@@ -78,4 +80,24 @@ object TopupConfig {
             sortOrder = 5,
         ),
     )
+
+    fun getLocalizedTitle(packageId: String, localizer: Localizer): String {
+        return when (packageId) {
+            "credit_pack_starter_20" -> localizer.get(R.string.topup_pack_starter_title)
+            "credit_pack_basic_50" -> localizer.get(R.string.topup_pack_basic_title)
+            "credit_pack_popular_100" -> localizer.get(R.string.topup_pack_popular_title)
+            "credit_pack_pro_200" -> localizer.get(R.string.topup_pack_pro_title)
+            "credit_pack_master_400" -> localizer.get(R.string.topup_pack_master_title)
+            else -> packageId
+        }
+    }
+
+    fun getLocalizedBadge(packageId: String, localizer: Localizer): String? {
+        return when (packageId) {
+            "credit_pack_popular_100" -> localizer.get(R.string.topup_badge_popular)
+            "credit_pack_pro_200" -> localizer.get(R.string.topup_badge_saving)
+            "credit_pack_master_400" -> localizer.get(R.string.topup_badge_super_deal)
+            else -> null
+        }
+    }
 }

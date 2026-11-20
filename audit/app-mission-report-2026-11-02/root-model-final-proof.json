@@ -1,0 +1,24 @@
+[
+  {
+    "name": "primary",
+    "sessionId": "ses_e65c3bed6ffev0XseA6OqhRpVp",
+    "assistantMessages": 818,
+    "groups": [
+      {
+        "modelVariant": "google/antigravity-gemini-3.8-flash/medium",
+        "messages": 818
+      }
+    ]
+  },
+  {
+    "name": "sql",
+    "sessionId": "ses_e65993ca4ffencJ3tDmB7qckbi",
+    "assistantMessages": 166,
+    "groups": [
+      {
+        "modelVariant": "google/antigravity-gemini-3.8-flash/medium",
+        "messages": 166
+      }
+    ]
+  }
+]

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-02T12:00:48.338Z" hostname="PC-5700X3D" time="0.321">
+  <properties/>
+  <testcase name="a_blocker_appearing_during_claim_must_prevent_showing_the_returned_popup" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.066"/>
+  <testcase name="unsynced_pending_read_must_prevent_new_claim_from_consuming_an_invisible_view" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.034"/>
+  <testcase name="real_activity_start_must_publish_new_session_before_foreground_event" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.113"/>
+  <testcase name="successful_popup_ack_must_update_the_already_loaded_home_notification_list" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.047"/>
+  <testcase name="pending_read_must_retry_even_after_this_foreground_session_is_consumed" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.032"/>
+  <testcase name="closing_a_popup_carried_across_resume_must_consume_current_session_too" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,96 @@
+2026-11-14 02:11:58.693 +07 [2116] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-11-14 02:11:58.693 +07 [2116] LOG:  listening on IPv4 address "127.0.0.1", port 55444
+2026-11-14 02:11:58.724 +07 [14432] LOG:  database system was shut down at 2026-11-14 02:01:36 +07
+2026-11-14 02:11:58.743 +07 [2116] LOG:  database system is ready to accept connections
+2026-11-14 02:11:59.111 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.545 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.546 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.548 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.549 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.563 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.564 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.567 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.568 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.605 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.607 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.614 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.615 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.616 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.618 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.630 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.632 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.657 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.706 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.739 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.741 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.750 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.769 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.773 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.802 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.806 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.807 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.811 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.823 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.828 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.839 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.841 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.842 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.860 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.861 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.864 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.865 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.866 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.868 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.913 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.914 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.931 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.932 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.933 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:11:59.934 +07 [4480] WARNING:  there is already a transaction in progress
+2026-11-14 02:11:59.944 +07 [4480] WARNING:  there is no transaction in progress
+2026-11-14 02:12:00.246 +07 [22212] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:12:00.247 +07 [25392] WARNING:  there is no transaction in progress
+2026-11-14 02:12:00.248 +07 [6244] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.820 +07 [25392] ERROR:  canceling statement due to user request
+2026-11-14 02:12:03.820 +07 [25392] CONTEXT:  SQL statement "select * from public.app_update_releases
+	        where campaign_id = p_campaign_id and status = 'active'
+	        order by id
+	        for update"
+	PL/pgSQL function _settle_campaign_app_update(uuid) line 13 at FOR over SELECT rows
+	SQL statement "SELECT public._settle_campaign_app_update(OLD.id)"
+	PL/pgSQL function trg_fn_campaigns_app_update_settle() line 4 at PERFORM
+	SQL statement "delete from public.campaigns
+	    where id = p_campaign_id"
+	PL/pgSQL function _request_campaign_removal(uuid,text,boolean) line 249 at SQL statement
+	PL/pgSQL function delete_owned_campaign(uuid) line 13 at RETURN
+2026-11-14 02:12:03.820 +07 [25392] STATEMENT:  select public.delete_owned_campaign($1) r
+2026-11-14 02:12:03.884 +07 [25392] ERROR:  canceling statement due to user request
+2026-11-14 02:12:03.884 +07 [25392] CONTEXT:  SQL statement "SELECT pg_advisory_xact_lock(hashtextextended('campaign_slot_guard', hashtext(new.owner_id::text)))"
+	PL/pgSQL function check_campaign_slot_validity() line 25 at PERFORM
+	SQL statement "update public.campaigns
+	        set status = 'closed',
+	            paused_reason = case when p_by_admin then 'admin_deletion_pending' else 'owner_deletion_pending' end,
+	            admin_note = case when p_by_admin then v_effective_reason else admin_note end
+	        where id = p_campaign_id"
+	PL/pgSQL function _request_campaign_removal(uuid,text,boolean) line 157 at SQL statement
+	PL/pgSQL function delete_owned_campaign(uuid) line 13 at RETURN
+2026-11-14 02:12:03.884 +07 [25392] STATEMENT:  select public.delete_owned_campaign($1) r
+2026-11-14 02:12:03.885 +07 [6244] ERROR:  canceling statement due to user request
+2026-11-14 02:12:03.885 +07 [6244] CONTEXT:  PL/pgSQL function create_campaign_v2(text,text,text,text,text,integer,text,text,text,integer,uuid,integer,integer,text) line 193 at assignment
+2026-11-14 02:12:03.885 +07 [6244] STATEMENT:  select public.create_campaign_v2(p_app_name=>'Native concurrent create',p_package_name=>$1,
+	    p_slot_number=>3,p_target_testers=>12,p_client_request_id=>$2,p_expected_total_cost=>$3,p_expected_min_credits=>$4,p_expected_revision=>$5) r
+2026-11-14 02:12:03.886 +07 [22212] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:12:03.887 +07 [25392] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.888 +07 [6244] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.941 +07 [22212] WARNING:  you don't own a lock of type ExclusiveLock
+2026-11-14 02:12:03.941 +07 [25392] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.942 +07 [6244] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.943 +07 [25392] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.944 +07 [6244] WARNING:  there is no transaction in progress
+2026-11-14 02:12:03.986 +07 [2116] LOG:  received fast shutdown request
+2026-11-14 02:12:03.987 +07 [2116] LOG:  aborting any active transactions
+2026-11-14 02:12:03.991 +07 [2116] LOG:  background worker "logical replication launcher" (PID 21336) exited with exit code 1
+2026-11-14 02:12:03.991 +07 [22260] LOG:  shutting down
+2026-11-14 02:12:03.992 +07 [22260] LOG:  checkpoint starting: shutdown immediate
+2026-11-14 02:12:04.472 +07 [22260] LOG:  checkpoint complete: wrote 1719 buffers (10.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.131 s, sync=0.346 s, total=0.481 s; sync files=711, longest=0.005 s, average=0.001 s; distance=10580 kB, estimate=10580 kB; lsn=0/3EC86B8, redo lsn=0/3EC86B8
+2026-11-14 02:12:04.934 +07 [2116] LOG:  database system is shut down

@@ -1,0 +1,42 @@
+PASS: Existing owner create 12 -> 24 -> 36, remove -> 24 -> 12 {"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":12,"met":false,"carryover_ready":true,"history_ready":true}
+PASS: New registration-day owner gets 12 immediately without a nonexistent predecessor {"id":"b58ce446-463f-4d09-8ad2-253eb5603a98","status":{"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":12,"met":false,"carryover_ready":true,"history_ready":true}}
+PASS: Registration-day owner finalizes quota/debt/penalty and carries it into next day {"required_tests":12,"base_required_tests":12,"carry_out_tests":12,"is_exempt":false,"missed_streak":1,"penalty_credits":100}
+PASS: Registration-day pure member retains exemption and no debt {"required_tests":0,"carry_out_tests":0,"is_exempt":true,"missed_streak":0,"penalty_credits":0}
+PASS: Create replay counts one app and preserves immutable receipt {"replayed":true,"base":24}
+PASS: Create replay after removal does not resurrect a quota or campaign {"replayed":true,"base":12}
+PASS: Failed creation leaves quota, count and credit balance unchanged {"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":12,"met":false,"carryover_ready":true,"history_ready":true}
+PASS: Configured q12 is independent of target_testers20 {"base":24,"paid":20}
+PASS: Completed D survives add/remove and over-completion never becomes negative {"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":20,"carry_in_tests":0,"carryover_remaining_tests":0,"met":true,"carryover_ready":true,"history_ready":true}
+PASS: Deletion alone cannot erase previously sealed debt, including last app {"mode":"member","active_app_count":0,"base_required_tests":0,"required_tests":0,"effective_required_tests":0,"completed_tests":0,"carry_in_tests":7,"carryover_remaining_tests":7,"met":true,"carryover_ready":true,"history_ready":true}
+PASS: Quota change refreshes todays mutable ledger without finalization or credit penalty {"required_tests":24,"active_app_count":2,"completed_tests":12,"met":false,"finalized_at":null}
+PASS: Logical deferred removal reduces once and final physical cleanup preserves quota {"initial":"pending_removal","after":{"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":12,"met":false,"carryover_ready":true,"history_ready":true}}
+FAIL: Admin removal applies quota to actual owner without changing other users Expected values to be strictly deep-equal:
++ actual - expected
+
+  {
+    active_app_count: 0,
++   available_apps: 31,
+-   available_apps: 32,
+    base_required_tests: 0,
+    carry_in_tests: 0,
+    carryover_effective_from: null,
+    carryover_ready: true,
+    carryover_remaining_tests: 0,
+
+PASS: Inactive-owner paused apps stay counted while removed apps do not {"mode":"owner","active_app_count":2,"base_required_tests":24,"required_tests":24,"effective_required_tests":24,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":24,"met":false,"carryover_ready":true,"history_ready":true}
+PASS: Source scarcity preserves base24 separately from effective20 {"mode":"owner","active_app_count":2,"base_required_tests":24,"required_tests":24,"effective_required_tests":20,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":20,"met":false,"carryover_ready":true,"history_ready":true}
+PASS: Future activation preserves old current-day counting until effective day {"mode":"owner","active_app_count":1,"base_required_tests":12,"required_tests":12,"effective_required_tests":12,"completed_tests":0,"carry_in_tests":0,"carryover_remaining_tests":12,"met":false,"carryover_ready":true,"history_ready":true}
+FAIL: Exact one-date trusted finalizer entry point remains callable function public._apply_daily_inactivity_penalty(date) is not unique
+FAIL: Unidentified authenticated client cannot schedule a global quota policy Missing expected rejection.
+FAIL: Admin cannot insert a new retroactive/current policy: -4 Missing expected rejection.
+FAIL: Admin cannot insert a new retroactive/current policy: +0 Missing expected rejection.
+FAIL: Policy audit records actual administrator identity Expected values to be strictly equal:
++ actual - expected
+
++ 'quota_test_admin'
+- 'e2000000-0000-0000-0000-000000000001'
+
+FAIL: Locked administrator cannot read private quota-policy audit Expected values to be strictly equal:
+
+1 !== 0
+

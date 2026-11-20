@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-11-10T14:14:21.725Z",
+  "model": "gemini-3.8-flash-high",
+  "effort": "high",
+  "android": {
+    "suites": 80,
+    "tests": 611,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "commands": [
+    {
+      "command": ".\\gradlew.bat testDebugUnitTest --offline",
+      "output": "Command exited with code 0.\n\nCommand output:\nStarting a Gradle Daemon, 1 busy and 1 incompatible and 10 stopped Daemons could not be reused, use --status for details\r\nWarning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.\r\n> Task :app:preBuild UP-TO-DATE\r\n> Task :app:preDebugBuild UP-TO-DATE\r\n> Task :app:generateDebugBuildConfig UP-TO-DATE\r\n> Task :app:generateDebugResources UP-TO-DATE\r\n> Task :app:processDebugGoogleServices UP-TO-DATE\r\n> Task :app:packageDebugResources UP-TO-DATE\r\n> Task :app:processDebugNavigationResources UP-TO-DATE\r\n> Task :app:parseDebugLocalResources UP-TO-DATE\r\n> Task :app:generateDebugRFile UP-TO-DATE\r\n> Task :app:javaPreCompileDebug UP-TO-DATE\r\n> Task :app:checkDebugAarMetadata UP-TO-DATE\r\n> Task :app:mapDebugSourceSetPaths UP-TO-DATE\r\n> Task :app:compileDebugNavigationResources UP-TO-DATE\r\n> Task :app:mergeDebugResources UP-TO-DATE\r\n> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE\r\n> Task :app:extractDeepLinksDebug UP-TO-DATE\r\n> Task :app:processDebugMainManifest UP-TO-DATE\r\n> Task :app:processDebugManifest UP-TO-DATE\r\n> Task :app:processDebugManifestForPackage UP-TO-DATE\r\n> Task :app:processDebugResources UP-TO-DATE\r\n> Task :app:preDebugUnitTestBuild UP-TO-DATE\r\n> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE\r\n> Task :app:generateDebugAssets UP-TO-DATE\r\n> Task :app:generateDebugHelpAssets UP-TO-DATE\r\n> Task :app:mergeDebugAssets UP-TO-DATE\r\n> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE\r\n> Task :app:processDebugUnitTestManifest UP-TO-DATE\r\n> Task :app:generateDebugUnitTestConfig UP-TO-DATE\r\n> Task :app:compileDebugKotlin\r\n> Task :app:compileDebugJavaWithJavac UP-TO-DATE\r\n> Task :app:processDebugJavaRes UP-TO-DATE\r\n> Task :app:bundleDebugClassesToRuntimeJar\r\n> Task :app:bundleDebugClassesToCompileJar\r\n> Task :app:compileDebugUnitTestKotlin\r\n> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE\r\n> Task :app:processDebugUnitTestJavaRes UP-TO-DATE\r\nWARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\r\n> Task :app:testDebugUnitTest\r\n\r\nBUILD SUCCESSFUL in 55s\r\n32 actionable tasks: 5 executed, 27 up-to-date\r\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html\r\n"
+    },
+    {
+      "command": ".\\gradlew.bat assembleDebug --offline",
+      "output": "Command exited with code 0.\n\nCommand output:\nStarting a Gradle Daemon, 1 busy and 1 incompatible and 11 stopped Daemons could not be reused, use --status for details\r\nWarning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.\r\n> Task :app:preBuild UP-TO-DATE\r\n> Task :app:preDebugBuild UP-TO-DATE\r\n> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE\r\n> Task :app:generateDebugBuildConfig UP-TO-DATE\r\n> Task :app:generateDebugResources UP-TO-DATE\r\n> Task :app:processDebugGoogleServices UP-TO-DATE\r\n> Task :app:packageDebugResources UP-TO-DATE\r\n> Task :app:processDebugNavigationResources UP-TO-DATE\r\n> Task :app:parseDebugLocalResources UP-TO-DATE\r\n> Task :app:generateDebugRFile UP-TO-DATE\r\n> Task :app:compileDebugKotlin UP-TO-DATE\r\n> Task :app:javaPreCompileDebug UP-TO-DATE\r\n> Task :app:compileDebugJavaWithJavac UP-TO-DATE\r\n> Task :app:generateDebugAssets UP-TO-DATE\r\n> Task :app:generateDebugHelpAssets UP-TO-DATE\r\n> Task :app:mergeDebugAssets UP-TO-DATE\r\n> Task :app:compressDebugAssets UP-TO-DATE\r\n> Task :app:desugarDebugFileDependencies UP-TO-DATE\r\n> Task :app:checkDebugAarMetadata UP-TO-DATE\r\n> Task :app:mapDebugSourceSetPaths UP-TO-DATE\r\n> Task :app:compileDebugNavigationResources UP-TO-DATE\r\n> Task :app:mergeDebugResources UP-TO-DATE\r\n> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE\r\n> Task :app:extractDeepLinksDebug UP-TO-DATE\r\n> Task :app:processDebugMainManifest UP-TO-DATE\r\n> Task :app:processDebugManifest UP-TO-DATE\r\n> Task :app:processDebugManifestForPackage UP-TO-DATE\r\n> Task :app:processDebugResources UP-TO-DATE\r\n> Task :app:dexBuilderDebug\r\n> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE\r\n> Task :app:processDebugJavaRes UP-TO-DATE\r\n> Task :app:mergeDebugJavaResource UP-TO-DATE\r\n> Task :app:checkDebugDuplicateClasses UP-TO-DATE\r\n> Task :app:mergeExtDexDebug UP-TO-DATE\r\n> Task :app:mergeLibDexDebug UP-TO-DATE\r\n> Task :app:mergeDebugJniLibFolders UP-TO-DATE\r\n> Task :app:mergeDebugNativeLibs UP-TO-DATE\r\n> Task :app:stripDebugDebugSymbols UP-TO-DATE\r\n> Task :app:validateSigningDebug UP-TO-DATE\r\n> Task :app:writeDebugAppMetadata UP-TO-DATE\r\n> Task :app:writeDebugSigningConfigVersions UP-TO-DATE\r\n> Task :app:mergeProjectDexDebug\r\n> Task :app:packageDebug\r\n> Task :app:createDebugApkListingFileRedirect UP-TO-DATE\r\n> Task :app:assembleDebug\r\n\r\nBUILD SUCCESSFUL in 16s\r\n40 actionable tasks: 3 executed, 37 up-to-date\r\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html\r\n"
+    }
+  ],
+  "apk": {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+    "bytes": 34304187,
+    "modifiedAt": "2026-11-10T14:13:28.965Z",
+    "sha256": "ff0a5252ff49d587133f9e7d3b1e407b3715323014e69abf266c6bfe368e1698"
+  },
+  "checkpointFiles": 771,
+  "changedExisting": [
+    "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt",
+    "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/HomeScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/ProfileScreen.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/HomeViewModel.kt",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/ProfileViewModel.kt",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt"
+  ],
+  "oldSqlUnchanged": true,
+  "sourceSha256": {
+    "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt": "7bc30cae58a5abea5b4b536fff8b010a85b125b5370fa4145d8e80e2e6117724",
+    "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt": "a5eb70a507182aa2d7db5cbcdff2bdcca15d77a50c613a190824e95ad644267f",
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt": "b9c49b524fb183b280d630b1a8dbc0dd4a295a173af82e819138d58525aeb42d",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt": "82cc63a550d800d84d8ca5cd9a562e5abfad6aa3d4a51ef2a89e4c685ec0a961",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/HomeScreen.kt": "b07086776dbc2dd1b1fed99cbe8158a62c9666ea04c0f726cc0cd9ce02f76b45",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/ProfileScreen.kt": "089ed7d674ce0b9b053e725219698e2e75b0ce2f87ece5d34494ce1331daacef",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt": "1db3130873ef559b2a436fe63d04df2229a5653416b9d29d23ed9dc5bb95229e",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/HomeViewModel.kt": "3ae15329ca1f46f3e2f84ac39cc5c94264cc98c29bd0514ee089382a40c13df8",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/ProfileViewModel.kt": "0a8d7c299a8d97fc860f383466e9b35de540b11ad0f0ff2e2b102fce5218b960",
+    "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt": "9732353486ef1c5467779c63d060c5fc0b45e6c59f313b79511d2002d69f9f0e",
+    "app/src/main/java/com/ntt/crosstest/data/EgressOptimization.kt": "87696da4d355774a2e496079c8bff3ca7d1a88300a2975103878a3fbd00475ad",
+    "app/src/main/java/com/ntt/crosstest/data/EgressSyncProtocol.kt": "6d88d45e3c1c0a3141658bb66ed448863ef09a9281f69a59aab787bfc49c6d97",
+    "supabase/migrations/085_egress_optimization_sync_v2.sql": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6",
+    "supabase/operations/egress_sync_v2_rollout.sql": "56547f4e95a1afcd21ac9572d0d9c6128af1baf70a82bc9cfb9a8cfec80a394b",
+    "supabase/tests/run-egress-sync-v2-test.mjs": "c5e1d7c7c80530eafc7dde814116af9fa0563ac2c90b0b5b587443527cd42c91",
+    "supabase/tests/run-egress-flags-v2-test.mjs": "7abe179482d8cc8f2c7e81213cef2e51ae8f658d96be64bfa6abf76dad7872f7",
+    "app/src/test/java/com/ntt/crosstest/data/EgressReviewContractTest.kt": "8e1af3cf47322c7948d20f2ad03d1e4fbb51861fba16f9618f499bb3e688f2dd",
+    "app/src/test/java/com/ntt/crosstest/data/EgressProtocolReviewTest.kt": "da35ab0522ef2d27f4a1cac792568a91aa3a8715c363e1c17f77d5d539c20015",
+    "app/src/test/java/com/ntt/crosstest/data/EgressFinalClientReviewTest.kt": "04db066f0fb6be589021a11dc1970377b620c05fc1491c88155569811aeca408"
+  },
+  "liveMigrationApplied": false,
+  "liveFlagsEnabled": false,
+  "apkInstalledOrPublished": false,
+  "wireOrBillingEgressMeasured": false
+}

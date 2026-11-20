@@ -1,0 +1,20 @@
+=== RUNNING COMPREHENSIVE OWNER AUTO-PAUSE & CARRYOVER DEBT HARDENING TESTS (MIGRATION 079) ===
+Loaded 28 migrations (from 062_consolidated_baseline.sql to 089_fix_production_bonus_lifecycle.sql).
+
+--- Test 1: Configurable Thresholds 1 to 7 via Authenticated Admin RPC ---
+PASS: threshold 1: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 2: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 3: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 4: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 5: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 6: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 7: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: Test 2: resume blocked when met=true but remaining prior debt > 0
+PASS: Test 3: disabled carryover preserves prior debt and blocks resume
+PASS: Test 4: chronological finalization across met gap day
+PASS: Test 5: creation timestamp tamper protection
+PASS: Test 6: owner resume paths (owner_manual, slot_expired) & admin paths
+PASS: Test 7: read-only audit function (audit_daily_task_ledger_gaps)
+PASS: Test 8: account created on evaluation date is exempt with streak 0
+
+=== ALL OWNER AUTO-PAUSE HARDENING TESTS PASSED SUCCESSFULLY ===

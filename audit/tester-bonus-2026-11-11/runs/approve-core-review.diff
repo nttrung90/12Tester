@@ -1,0 +1,91 @@
+diff --git a/audit/tester-bonus-2026-11-11/baseline-functions/_impl_approve_tester_report_16841.sql b/audit/tester-bonus-2026-11-11/runs/current-_impl_approve_tester_report.sql
+index e2d5a4d..80ff9a3 100644
+--- a/audit/tester-bonus-2026-11-11/baseline-functions/_impl_approve_tester_report_16841.sql
++++ b/audit/tester-bonus-2026-11-11/runs/current-_impl_approve_tester_report.sql
+@@ -1,8 +1,11 @@
+-CREATE OR REPLACE FUNCTION public._impl_approve_tester_report(p_report_id uuid, p_bonus integer DEFAULT 0)
+- RETURNS jsonb
+- LANGUAGE plpgsql
+- SECURITY DEFINER
+- SET search_path TO 'public'
++CREATE OR REPLACE FUNCTION public._impl_approve_tester_report(
++    p_report_id uuid,
++    p_bonus integer DEFAULT 0
++)
++RETURNS jsonb
++LANGUAGE plpgsql
++SECURITY DEFINER
++SET search_path TO 'public', 'pg_catalog'
+ AS $function$
+ declare
+     v_caller_id uuid := auth.uid();
+@@ -18,6 +21,10 @@ declare
+     v_owner_balance int;
+     v_is_owner boolean := false;
+     v_today date := (now() at time zone 'Asia/Ho_Chi_Minh')::date;
++
++    -- Tester bonus variables
++    v_bonus_res jsonb;
++    v_tester_bonus int := 0;
+ begin
+     perform set_config('app.reviewing_report', 'true', true);
+ 
+@@ -34,6 +41,7 @@ begin
+         raise exception 'ACCOUNT_LOCKED: Tài khoản của bạn đã bị khóa';
+     end if;
+ 
++    -- Level 2: Lock report
+     select * into v_report
+     from public.tester_reports
+     where id = p_report_id
+@@ -47,9 +55,11 @@ begin
+         raise exception 'REPORT_ALREADY_REVIEWED';
+     end if;
+ 
++    -- Level 3: Lock campaign row
+     select * into v_camp
+     from public.campaigns
+-    where id = v_report.campaign_id;
++    where id = v_report.campaign_id
++    for update;
+ 
+     if v_camp.owner_id <> v_caller_id
+        and lower(coalesce(v_caller_role, '')) not in ('admin', 'moderator') then
+@@ -146,6 +156,15 @@ begin
+         end if;
+     end if;
+ 
++    -- Settle Campaign Tester Bonus Round (if eligible snapshot attached)
++    v_bonus_res := public._settle_campaign_tester_bonus(v_report.id);
++    if coalesce((v_bonus_res->>'settled')::boolean, false) then
++        v_tester_bonus := coalesce((v_bonus_res->>'reward_credits')::int, 0);
++        v_new_balance := coalesce((v_bonus_res->>'tester_balance')::int, v_new_balance);
++    else
++        v_tester_bonus := 0;
++    end if;
++
+     perform set_config('app.reviewing_report', 'false', true);
+ 
+     return jsonb_build_object(
+@@ -155,15 +174,17 @@ begin
+         'status', 'approved',
+         'credits_awarded', v_extra_reward,
+         'tip_awarded', v_tip,
++        'tester_bonus_awarded', v_tester_bonus,
+         'owner_credits_awarded', v_owner_bonus,
+-        'total_earned', v_total_bonus,
++        'total_earned', v_total_bonus + v_tester_bonus,
+         'tester_balance', v_new_balance,
+         'owner_balance', v_owner_balance,
+         'message', format(
+-            'Duyệt kết quả thành công (Thưởng thêm +%s Credit cho tester%s)',
+-            v_extra_reward,
++            'Duyệt kết quả thành công (Thưởng thêm +%s Credit cho tester%s%s)',
++            v_extra_reward + v_tester_bonus,
++            case when v_tester_bonus > 0 then format(' gồm +%s từ đợt thưởng', v_tester_bonus) else '' end,
+             case when v_owner_bonus > 0 then format(' và +%s Credit cho bạn', v_owner_bonus) else '' end
+         )
+     );
+ end;
+-$function$
++$function$;

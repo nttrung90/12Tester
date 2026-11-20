@@ -1,0 +1,30 @@
+[
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/SupervisorOwnerActionGateReviewTest.kt",
+    "sha256": "ced8081d2f6a18b390533294e10dc37a0fb27bb53f5112279e6b7b7a1958a738"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/SupervisorDailyTaskStatusCacheReviewTest.kt",
+    "sha256": "aec537034c025cbb903d21d168d67d6d62ab8bac97f89546b0a1dadbfd7cccce"
+  },
+  {
+    "path": "audit/daily-task-action-gate-2026-11-12/supervisor-action-gate-acceptance.mjs",
+    "sha256": "75ee1baba5e3f3fd9cfe4a04c86d9d54de842009a145f2cd077908aca15f50ea"
+  },
+  {
+    "path": "audit/daily-task-action-gate-2026-11-12/supervisor-receipt-authorization-test.mjs",
+    "sha256": "5914f56f11a004473afd15e469a28177b5af47b447a68a67d21803df7e2e66f9"
+  },
+  {
+    "path": "audit/daily-task-action-gate-2026-11-12/supervisor-receipt-helper-context-test.mjs",
+    "sha256": "d2b6502b36563ec0f3f906711060f7fa336e439970a2b394ea198cafc96a688a"
+  },
+  {
+    "path": "audit/daily-task-action-gate-2026-11-12/supervisor-receipt-attribution-test.mjs",
+    "sha256": "502a1e3f95948b3ca60167caeba9a5c29f07377b57b90461fa8a9eb9e4c8a9d6"
+  },
+  {
+    "path": "audit/daily-task-action-gate-2026-11-12/supervisor-admin-resume090-test.mjs",
+    "sha256": "df84a6918428f5030030808c66335830c01a48ccbd7aacf7f3594fdf9a1e0ce9"
+  }
+]

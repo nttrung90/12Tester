@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T05:23:34.333Z" hostname="PC-5700X3D" time="0.089">
+  <properties/>
+  <testcase name="inspectActualDailyAndMissionWirePayload" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.02"/>
+  <testcase name="mockRejectsMissingSubmissionContextAndAcceptsWhenPresent" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.014"/>
+  <testcase name="businessP0001PreservesCodeAndIsNotRetryable" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.015"/>
+  <testcase name="cancellationPropagatesWithoutFallbackOrRetry" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.013"/>
+  <testcase name="http503IsRetryableAndNotClassifiedAsMissingRpc" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.009"/>
+  <testcase name="wrappedPgrst202PreservesOriginalCodeAndMetadataInCauseChain" classname="com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

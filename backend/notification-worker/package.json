@@ -1,0 +1,16 @@
+{
+  "name": "@ntt/notification-worker",
+  "version": "1.0.0",
+  "description": "Background service daemon for notification campaigns batch fanout and scheduling",
+  "type": "module",
+  "main": "worker-runner.mjs",
+  "scripts": {
+    "start": "node worker-runner.mjs",
+    "once": "node worker-runner.mjs --once",
+    "test": "node --test worker-runner.test.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "private": true
+}

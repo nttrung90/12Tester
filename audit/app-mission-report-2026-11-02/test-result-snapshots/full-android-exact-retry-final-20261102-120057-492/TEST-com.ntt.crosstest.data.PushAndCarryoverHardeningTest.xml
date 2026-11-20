@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-02T12:00:41.535Z" hostname="PC-5700X3D" time="0.632">
+  <properties/>
+  <testcase name="automaticStartupLookupRunsBeforeEarlyPausedOrMissingCampaignPath" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.043"/>
+  <testcase name="savedPendingReconcileNotFoundDoesNotChargeAndExplicitRetryPurchasesUsingOriginalId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.058"/>
+  <testcase name="pushCampaignTimeoutPreservesPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.049"/>
+  <testcase name="dialogButtonConditionDistinguishesPendingFromNewPurchase" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.006"/>
+  <testcase name="pushCampaignServerRejectionClearsPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.052"/>
+  <testcase name="oldPurchaseResponseDoesNotOverwriteNewAccountSnapshot" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.047"/>
+  <testcase name="accountSwitchDuringReconcileCannotSendPurchaseUnderNewSession" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.061"/>
+  <testcase name="failedLookupNotFoundDoesNotCharge" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.05"/>
+  <testcase name="pushActiveRejectsMissingOrExpiredExpiry" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.007"/>
+  <testcase name="pushErrorSanitizerRedactsSensitiveTokensAndUrls" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.007"/>
+  <testcase name="testCarryoverStringFormattingArguments" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.005"/>
+  <testcase name="automaticSuccessfulLookupUpdatesObservablePendingFalseAndPausedStaysReadOnly" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.037"/>
+  <testcase name="pendingPushResolvesWhenCampaignIsPausedOrDeleted" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.053"/>
+  <testcase name="staleResponseIgnoredOnAccountSwitchSameUidChangedGeneration" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.061"/>
+  <testcase name="pendingReceiptResolvesWhenBalanceBelow100" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.057"/>
+  <testcase name="vmStartupAutomaticallyReconcilesPendingPushReceiptWithoutCharging" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.037"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

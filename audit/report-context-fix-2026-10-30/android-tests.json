@@ -1,0 +1,242 @@
+[
+  {
+    "Name": "com.ntt.crosstest.audit.ReportOverlapTest",
+    "Tests": 16,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest",
+    "Tests": 7,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.AdminDailyTaskPolicyTest",
+    "Tests": 7,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.AppUpdateRegressionTest",
+    "Tests": 7,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.AppUpdateRewardTest",
+    "Tests": 10,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.CacheRegressionTest",
+    "Tests": 36,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.CampaignPushUnitTest",
+    "Tests": 4,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.DailyTaskCarryoverUnitTest",
+    "Tests": 5,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.HomeStatsCycleTest",
+    "Tests": 6,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheBudgetAuditTest",
+    "Tests": 1,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheClockAuditTest",
+    "Tests": 5,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheCompositeAuditTest",
+    "Tests": 2,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheFinalAuditTest",
+    "Tests": 9,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheMutationAuditTest",
+    "Tests": 2,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCachePublicationAuditTest",
+    "Tests": 5,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest",
+    "Tests": 3,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.IndependentCacheSnapshotIntegrityAuditTest",
+    "Tests": 2,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.MissionRegressionTest",
+    "Tests": 3,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.MissionReportAndExpirationTest",
+    "Tests": 6,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.MissionReportRecheckProbeTest",
+    "Tests": 4,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.PendingReportStoreTest",
+    "Tests": 7,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.PushAndCarryoverHardeningTest",
+    "Tests": 8,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportRpcCompatibilityTest",
+    "Tests": 5,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportRpcFallbackAuditTest",
+    "Tests": 6,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportSubmissionFailureTest",
+    "Tests": 4,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest",
+    "Tests": 6,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportSubmitPolicyTest",
+    "Tests": 10,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.data.ReportWorkStateTest",
+    "Tests": 4,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.localization.LocalizationHardeningTest",
+    "Tests": 12,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest",
+    "Tests": 20,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.EgressAuditProbeTest",
+    "Tests": 8,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.EgressFinalPolicyAuditTest",
+    "Tests": 3,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.EgressGatewayClientAuditTest",
+    "Tests": 4,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.EgressRound2OptInTest",
+    "Tests": 8,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.FirebaseEgressOptimizationTest",
+    "Tests": 30,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.util.ReportUrlRetryTest",
+    "Tests": 12,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.work.EgressThumbnailPipelineAuditTest",
+    "Tests": 1,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.work.ReportBackgroundSubmissionTest",
+    "Tests": 6,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.work.ReportSubmissionLatencyTest",
+    "Tests": 3,
+    "Failures": 0,
+    "Errors": 0
+  },
+  {
+    "Name": "com.ntt.crosstest.work.ReportUploadWorkerTest",
+    "Tests": 10,
+    "Failures": 0,
+    "Errors": 0
+  }
+]

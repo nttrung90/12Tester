@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-05T00:24:40.289Z" hostname="PC-5700X3D" time="0.096">
+  <properties/>
+  <testcase name="schedulePolicy_validatesUnorderedPenaltyTiers" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.011"/>
+  <testcase name="init_loadsActiveConfigAndDefaults" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.006"/>
+  <testcase name="schedulePolicy_validatesPastOrTodayDate" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.008"/>
+  <testcase name="derivedUpdateBudget_calculatesDynamically" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.007"/>
+  <testcase name="schedulePolicy_synchronousActionGate_blocksDoubleInvoke" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.009"/>
+  <testcase name="selectTab_updatesActiveTab" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.006"/>
+  <testcase name="savedStateHandle_restoresPrimitiveDraftAcrossRecreation" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.006"/>
+  <testcase name="historyPagination_loadsItemsAndAppendsOnLoadMore" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.01"/>
+  <testcase name="schedulePolicy_editingInputs_rotatesDraftRequestId" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.007"/>
+  <testcase name="cancelPolicy_conflictRetainsDialogAndUuidForExplicitRetry" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.009"/>
+  <testcase name="cancelPolicy_flowExecutesAndClearsDialog" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.008"/>
+  <testcase name="schedulePolicy_conflictRetainsDraftWhileReloadingLatestRevision" classname="com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

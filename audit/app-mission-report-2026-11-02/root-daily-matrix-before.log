@@ -1,0 +1,10 @@
+FAIL independent daily state matrix: app_test -> mission with first pending P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily state matrix: app_test -> mission with first approved P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily state matrix: app_test -> mission with first rejected P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily state matrix: mission -> app_test with first pending P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily state matrix: mission -> app_test with first approved P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent daily state matrix: mission -> app_test with first rejected P0001 REPORT_CONTEXT_CONFLICT
+FAIL independent later-day mission report: ERR_ASSERTION new daily report identity requires a server reporting date
+
+false !== true
+

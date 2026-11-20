@@ -1,0 +1,35 @@
+=== RUNNING COMPREHENSIVE OWNER AUTO-PAUSE & CARRYOVER DEBT HARDENING TESTS (MIGRATION 079) ===
+Loaded 29 migrations (from 062_consolidated_baseline.sql to 090_daily_task_action_gate.sql).
+
+--- Test 1: Configurable Thresholds 1 to 7 via Authenticated Admin RPC ---
+PASS: threshold 1: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 2: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 3: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 4: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 5: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 6: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: threshold 7: N-1 spares, N pauses both apps, carryover gate, repeated sync
+PASS: Test 2: resume blocked when met=true but remaining prior debt > 0
+PASS: Test 3: disabled carryover preserves prior debt and blocks resume
+PASS: Test 4: chronological finalization across met gap day
+PASS: Test 5: creation timestamp tamper protection
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+false !== true
+
+    at file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-auto-pause090-generated.mjs?run=1794573162410:340:12
+    at async scenario (file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-auto-pause090-generated.mjs?run=1794573162410:116:7)
+    at async file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-auto-pause090-generated.mjs?run=1794573162410:306:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

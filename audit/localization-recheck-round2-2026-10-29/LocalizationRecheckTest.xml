@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.localization.LocalizationRecheckTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T12:12:51.243Z" hostname="PC-5700X3D" time="0.166">
+  <properties/>
+  <testcase name="customAdminNotificationMustBePreserved" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.018"/>
+  <testcase name="realWelcomeCreditLogMustBeLocalizedInEnglish" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.017"/>
+  <testcase name="realNewReportNotificationMustBeLocalizedInEnglish" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.017"/>
+  <testcase name="clawbackMustNotBeLabeledAsProvisionalReward" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.017"/>
+  <testcase name="newRejectPayloadMustPreserveClientContract" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.016"/>
+  <testcase name="customLegacyEnglishConfigMustNotLeakIntoVietnamese" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.011"/>
+  <testcase name="realCreditNotificationMustBeLocalizedInEnglish" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.02"/>
+  <testcase name="customRejectionContainingAdminMustBePreserved" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.017"/>
+  <testcase name="stateMessageMustChangeWithLocaleWithoutReissuingOperation" classname="com.ntt.crosstest.localization.LocalizationRecheckTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

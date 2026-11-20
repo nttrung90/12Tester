@@ -1,0 +1,314 @@
+I1110 18:54:35.551664       1 resolver.go:85] Model ID gemini-3.8-flash-high not in local config, defaulting to CCPA
+I1110 18:54:35.552193       1 resolver.go:111] Model resolved via default
+I1110 18:54:35.552193      39 server.go:2335] Starting language server process with pid 16340
+I1110 18:54:35.553225      39 server.go:2394] Language server version: 1.5.4
+I1110 18:54:35.553225      39 server.go:1086] Language server will attempt to listen on host localhost
+I1110 18:54:35.563076      39 server.go:1101] Language server listening on random port at 63408 for HTTPS (gRPC)
+I1110 18:54:35.563076      39 server.go:1109] Language server listening on random port at 63409 for HTTP
+I1110 18:54:35.566139      49 model_configs.go:195] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1110 18:54:35.567143      23 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1110 18:54:35.567143      23 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+E1110 18:54:35.567143      49 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1110 18:54:35.579006      87 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1110 18:54:35.579006      87 store_client.go:743] summary store: reconcile func returned 0 records, skipping
+W1110 18:54:35.589977      15 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1110 18:54:35.589977      15 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1110 18:54:35.595096      39 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1110 18:54:35.595096      39 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1110 18:54:35.870212     162 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1110 18:54:35.871790     162 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.871790     162 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1110 18:54:35.872841     162 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.872841     162 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1110 18:54:35.874408     162 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.874408     162 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1110 18:54:35.874408     162 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1110 18:54:35.874938     162 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1110 18:54:35.874938     162 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1110 18:54:35.907677      69 server.go:4329] Auth succeeded, refreshing features and managers
+I1110 18:54:35.907677      39 server.go:3632] initialized server successfully in 355.735ms
+W1110 18:54:35.907677      27 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1110 18:54:35.908685      28 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1110 18:54:35.908685      27 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+E1110 18:54:35.908685      28 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1110 18:54:35.908685      27 rpcs_plugin_auth.go:105] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+E1110 18:54:35.908685      69 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1110 18:54:35.908685      69 server.go:4348] State refresh took 0ms
+I1110 18:54:35.908685      69 server.go:4363] [RemoteControl] Subscription callback triggered.
+I1110 18:54:35.908685       1 auto_updater.go:281] Last check was less than 15 minutes ago, skipping update (fast path)
+I1110 18:54:35.908685       1 common.go:191] Launching CLI mode
+E1110 18:54:35.908685       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1110 18:54:35.908685       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1110 18:54:35.908685       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1110 18:54:35.908685       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1110 18:54:35.908685      69 server.go:4366] [RemoteControl] RemoteControlEnabled value: false
+I1110 18:54:35.908685      69 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 18:54:35.908685      69 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 18:54:35.910242     170 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1110 18:54:35.910242      69 profiler.go:231] Continuous pprof profiling is disabled.
+I1110 18:54:35.910242     167 reconcile_summaries.go:94] [Summaries] reconcile checked 0 conversations, restored 0, cached 0, skipped 0, dropped 0, cancelled false in 0ms (resident: 0 -> 0)
+I1110 18:54:35.911253     170 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.911253     170 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1110 18:54:35.911253       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1110 18:54:35.911253       1 analytics.go:249] CLI startup completed (took 362.1277ms, phases [main_entered=0ms ls_start=2ms ls_ready=359ms launch_cli=359ms backend_created=361ms project_resolved=362ms])
+I1110 18:54:35.911253       1 printmode.go:208] Print mode: starting (promptLength=5019, model="gemini-3.8-flash-high", conversationID="")
+I1110 18:54:35.911253       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+I1110 18:54:35.912253     170 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.912253     170 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1110 18:54:35.913252       1 cli_setting_manager.go:159] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1110 18:54:35.913761     170 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1110 18:54:35.913761     170 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1110 18:54:35.913761     170 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1110 18:54:35.913761     170 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1110 18:54:35.913761     170 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1110 18:54:35.934675       1 cli_setting_manager.go:96] CLI settings initialized: permissions=<nil>, toolPermission=request-review
+I1110 18:54:35.945200       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1110 18:54:35.945200       1 manager.go:727] CLI store manager initialized successfully
+W1110 18:54:35.945200       1 printmode.go:873] Print mode: --mode auto is unavailable (rollout flag off), continuing in the default mode
+I1110 18:54:35.945200       1 printmode.go:409] Print mode: not authenticated, trying silent auth
+I1110 18:54:35.946241     258 keyring.go:64] keyringAuth: loaded token, expiry=2026-11-10 19:53:07.0445388 +0700 +07 expired=false
+I1110 18:54:35.946241       1 auth.go:157] ChainedAuth: authenticated via keyring (effective: keyring)
+I1110 18:54:35.946241       1 server_oauth.go:221] applyAuthResult: email=nguyenthieutrung@gmail.com, authMethod=consumer, quotaProject=
+I1110 18:54:35.946241       1 server_oauth.go:226] OAuth: authenticated successfully as nguyenthieutrung@gmail.com
+I1110 18:54:35.946241       1 server_oauth.go:235] b.codeAssistClient.AuthProvider (0x1c32907d4a50) is same as b.cliAuth (0x1c32907d4a50)
+W1110 18:54:35.946241     265 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+W1110 18:54:35.946241     249 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+I1110 18:54:36.460621     264 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xf9213e62b26dfb58
+I1110 18:54:36.750155     245 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels Trace: 0x2c6765d31fcdd294
+I1110 18:54:36.765523       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1110 18:54:36.765523       1 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 18:54:36.765523       1 printmode.go:411] Print mode: silent auth succeeded
+I1110 18:54:36.765523     196 experiment_manager.go:66] Starting experiment refresh after login
+I1110 18:54:36.765523     195 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1110 18:54:36.873578     196 http_helpers.go:104] UseAICodeMendel routing switch changed: false -> true
+I1110 18:54:36.873578     196 remote_agent.go:204] Remote agent fastpush pin gate changed: false -> true
+I1110 18:54:36.874104     196 server.go:4975] [RemoteControl] Mendel flags changed (remote-control-setting-enabled=true, remote-control-proxy-server-url="jetski-webchannel.googleapis.com:443"), re-evaluating the connection
+I1110 18:54:36.875698     196 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 18:54:36.875698     196 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 18:54:36.875698     196 experiment_manager.go:70] Experiments refreshed after login
+I1110 18:54:36.876227     298 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 18:54:36.876227     298 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 18:54:36.876227     302 manager.go:1658] Reloading system slash commands
+I1110 18:54:37.409698     267 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x35290d53fc4dd3e
+I1110 18:54:38.064657     267 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0xd9b9cdb055bbe974
+I1110 18:54:38.143749     267 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 18:54:38.143749     195 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+I1110 18:54:38.143749     196 experiment_manager.go:66] Starting experiment refresh after login
+I1110 18:54:38.144254     371 model_config_manager.go:375] Propagating selected model override to backend: label="Gemini 3.8 Flash (High)"
+I1110 18:54:38.166081       1 model_resolver.go:107] Resolving model gemini-3.8-flash-high
+I1110 18:54:38.166081       1 conversation_manager.go:657] Starting new conversation (agent=false)
+I1110 18:54:38.166081       1 server.go:1190] Creating new cascade trajectory (agentScript=false)
+I1110 18:54:38.166081       1 server.go:1216] Conversation using project ID: default-cli-project
+I1110 18:54:38.180846       1 server.go:1233] Created conversation c908b120-0e99-4665-834b-96fd55464715 (backend=BACKEND_TYPE_UNSPECIFIED)
+I1110 18:54:38.181382       1 server.go:3366] GetConversationDetail: found conversation c908b120-0e99-4665-834b-96fd55464715 (active=true)
+I1110 18:54:38.181917       1 server.go:3366] GetConversationDetail: found conversation c908b120-0e99-4665-834b-96fd55464715 (active=true)
+I1110 18:54:38.181917       1 conversation_manager.go:711] project: switching to conversation belonging to project ID: default-cli-project
+I1110 18:54:38.181917       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1110 18:54:38.182455       1 cli_setting_manager.go:226] ApplyProjectPermissionGrants: no grants for project "CLI Project", cleared project permissions
+I1110 18:54:38.182455       1 conversation_manager.go:727] project: synced active project to "CLI Project" (id=default-cli-project) from conversation switch
+I1110 18:54:38.182455       1 conversation_manager.go:1044] Streaming conversation c908b120-0e99-4665-834b-96fd55464715
+I1110 18:54:38.182455     349 manager.go:1702] Reloading system slash commands and skills
+I1110 18:54:38.182455     349 manager.go:1658] Reloading system slash commands
+I1110 18:54:38.182455       1 server.go:3366] GetConversationDetail: found conversation c908b120-0e99-4665-834b-96fd55464715 (active=true)
+I1110 18:54:38.182988       1 server.go:1251] Starting conversation update stream for c908b120-0e99-4665-834b-96fd55464715
+I1110 18:54:38.182988       1 session.go:201] Print mode: conversation=c908b120-0e99-4665-834b-96fd55464715, sending message
+I1110 18:54:38.182988       1 manager.go:1658] Reloading system slash commands
+I1110 18:54:38.201129     349 manager.go:1667] Slash commands unchanged, skipping update
+I1110 18:54:38.201129       1 manager.go:1667] Slash commands unchanged, skipping update
+I1110 18:54:38.201650       1 conversation_manager.go:846] Forwarding user message to conversation c908b120-0e99-4665-834b-96fd55464715 (items=1, media=0)
+I1110 18:54:38.201650       1 server.go:1817] Sending user message to conversation c908b120-0e99-4665-834b-96fd55464715 (items=1, media=0)
+I1110 18:54:38.203218       1 latency_breakdown.go:168] SEND_USER_CASCADE_MESSAGE_LATENCY latency breakdown: map[active_user_state_latency_ms:0 blocking:false cascade_id:c908b120-0e99-4665-834b-96fd55464715 cascade_send_latency_ms:0 hydrate_slash_commands_latency_ms:0 load_trajectory_latency_ms:0 media_count:0 media_summaries_latency_ms:0 message_origin:AGENT_MESSAGE_ORIGIN_UNSPECIFIED resolve_agent_config_latency_ms:0 save_media_latency_ms:0 saved_media_count:0 status:OK total_latency_ms:0 trajectory_id:e990d4d9-cecc-4f57-ba14-134a57d7c41c]
+I1110 18:54:38.210075     196 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 18:54:38.210075     196 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 18:54:38.210075     196 experiment_manager.go:70] Experiments refreshed after login
+I1110 18:54:38.210075     581 manager.go:1658] Reloading system slash commands
+I1110 18:54:38.210075     196 experiment_manager.go:66] Starting experiment refresh after login
+I1110 18:54:38.211888     196 server.go:5451] [RemoteControl] Session toggle is off, staying disconnected
+I1110 18:54:38.211888     196 server.go:5159] [RemoteControl] Resolved proxyServerURL: ""
+I1110 18:54:38.211888     196 experiment_manager.go:70] Experiments refreshed after login
+I1110 18:54:38.211888     440 manager.go:1658] Reloading system slash commands
+I1110 18:54:38.227771     503 encoder_embed.go:85] Installing/updating embedded webm_encoder binary to C:\Users\nguye\.gemini\antigravity-cli\bin\webm_encoder.exe
+I1110 18:54:38.231027     581 manager.go:1667] Slash commands unchanged, skipping update
+I1110 18:54:38.231558     440 manager.go:1667] Slash commands unchanged, skipping update
+I1110 18:54:38.258742     503 monitor_config_manager_external.go:53] externalMonitorConfigManager: initialized with embedded config (3 monitors)
+I1110 18:54:38.258742     503 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+I1110 18:54:38.258742     503 monitoring.go:409] [Sonar] Resolved active tags: [jetski_mode_default policy_guardian sonar_skip_tags] (detected surface: "")
+I1110 18:54:38.432868     195 quota_manager.go:45] doRefreshQuota: starting reload (force=true)
+E1110 18:54:38.551849     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/assemble-debug-final-2.log: bytes are not valid utf8
+E1110 18:54:38.551849     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/assemble-debug-final.log: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:38.560257     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+I1110 18:54:38.700373     370 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist Trace: 0x2ddda5f08ca82ed8
+E1110 18:54:39.093298     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-2.log: bytes are not valid utf8
+E1110 18:54:39.102040     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-3.log: bytes are not valid utf8
+E1110 18:54:39.108887     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-4.log: bytes are not valid utf8
+E1110 18:54:39.116091     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-5.log: bytes are not valid utf8
+E1110 18:54:39.125338     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile-6.log: bytes are not valid utf8
+E1110 18:54:39.132370     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-compile.log: bytes are not valid utf8
+E1110 18:54:39.164320     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/business-android-tests.log: bytes are not valid utf8
+E1110 18:54:39.239878     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-2.log: bytes are not valid utf8
+E1110 18:54:39.247463     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-3.log: bytes are not valid utf8
+E1110 18:54:39.247970     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-4.log: bytes are not valid utf8
+E1110 18:54:39.255875     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile-5.log: bytes are not valid utf8
+E1110 18:54:39.264183     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/check-test-compile.log: bytes are not valid utf8
+E1110 18:54:39.307451     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/compile-check-all.log: bytes are not valid utf8
+E1110 18:54:39.314393     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/compile-core-status.log: bytes are not valid utf8
+E1110 18:54:39.322142     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-author-all.log: bytes are not valid utf8
+E1110 18:54:39.331492     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-author-tests.log: bytes are not valid utf8
+E1110 18:54:39.378218     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/core-session-independent.log: bytes are not valid utf8
+E1110 18:54:39.400098     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/full-core-suite-final.log: bytes are not valid utf8
+E1110 18:54:39.407462     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/full-core-suite-run.log: bytes are not valid utf8
+E1110 18:54:39.634505     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-all-android-tests.log: bytes are not valid utf8
+E1110 18:54:39.642139     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-all-integrated-tests.log: bytes are not valid utf8
+E1110 18:54:39.671276     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile-check.log: bytes are not valid utf8
+E1110 18:54:39.671779     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile-verify.log: bytes are not valid utf8
+E1110 18:54:39.679296     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-compile.log: bytes are not valid utf8
+E1110 18:54:39.686678     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-independent-test.log: bytes are not valid utf8
+E1110 18:54:39.693981     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-repo-test.log: bytes are not valid utf8
+E1110 18:54:39.741627     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/notification-vm-test.log: bytes are not valid utf8
+E1110 18:54:39.893747     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/run-core-management-tests.log: bytes are not valid utf8
+E1110 18:54:39.974407     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-bp-vm-fixed-2.log: bytes are not valid utf8
+E1110 18:54:39.982993     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-bp-vm-fixed.log: bytes are not valid utf8
+E1110 18:54:39.990551     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm-2.log: bytes are not valid utf8
+E1110 18:54:39.997659     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm-4.log: bytes are not valid utf8
+E1110 18:54:40.005547     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-admin-business-policy-vm.log: bytes are not valid utf8
+E1110 18:54:40.013130     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-reward.log: bytes are not valid utf8
+E1110 18:54:40.020900     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-2.log: bytes are not valid utf8
+E1110 18:54:40.028444     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-3.log: bytes are not valid utf8
+E1110 18:54:40.036055     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-4.log: bytes are not valid utf8
+E1110 18:54:40.043091     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-debug.log: bytes are not valid utf8
+E1110 18:54:40.049689     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-debug2.log: bytes are not valid utf8
+E1110 18:54:40.059613     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass-2.log: bytes are not valid utf8
+E1110 18:54:40.067397     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass-3.log: bytes are not valid utf8
+E1110 18:54:40.073434     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm-pass.log: bytes are not valid utf8
+E1110 18:54:40.081475     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-appupdate-vm.log: bytes are not valid utf8
+E1110 18:54:40.089477     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo-2.log: bytes are not valid utf8
+E1110 18:54:40.097486     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo-3.log: bytes are not valid utf8
+E1110 18:54:40.105403     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-business-policy-repo.log: bytes are not valid utf8
+E1110 18:54:40.112919     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-cache-regression.log: bytes are not valid utf8
+E1110 18:54:40.120448     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-campaign-race.log: bytes are not valid utf8
+E1110 18:54:40.128371     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-carryover-independent-2.log: bytes are not valid utf8
+E1110 18:54:40.135755     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-carryover-independent.log: bytes are not valid utf8
+E1110 18:54:40.142792     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-combined-business-all.log: bytes are not valid utf8
+E1110 18:54:40.150632     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-combined-business-final.log: bytes are not valid utf8
+E1110 18:54:40.160462     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-check.log: bytes are not valid utf8
+E1110 18:54:40.168366     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-member-fixed.log: bytes are not valid utf8
+E1110 18:54:40.175907     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-member.log: bytes are not valid utf8
+E1110 18:54:40.184945     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-run.log: bytes are not valid utf8
+E1110 18:54:40.192731     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile-unit-check.log: bytes are not valid utf8
+E1110 18:54:40.202834     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-compile.log: bytes are not valid utf8
+E1110 18:54:40.210382     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-financial-v2.log: bytes are not valid utf8
+E1110 18:54:40.218502     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-flow-race.log: bytes are not valid utf8
+E1110 18:54:40.225547     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-helper.log: bytes are not valid utf8
+E1110 18:54:40.233473     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-layout-probe.log: bytes are not valid utf8
+E1110 18:54:40.240967     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-member-pagination.log: bytes are not valid utf8
+E1110 18:54:40.241477     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-push-carryover.log: bytes are not valid utf8
+E1110 18:54:42.251153     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-run-core-all-fixed.log: bytes are not valid utf8
+E1110 18:54:42.261020     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-run-core-all.log: bytes are not valid utf8
+E1110 18:54:42.269359     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-2.log: bytes are not valid utf8
+E1110 18:54:42.277354     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-3.log: bytes are not valid utf8
+E1110 18:54:42.284310     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-4.log: bytes are not valid utf8
+E1110 18:54:42.285747     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-5.log: bytes are not valid utf8
+E1110 18:54:42.293055     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass-6.log: bytes are not valid utf8
+E1110 18:54:42.297264     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-2026-11-01/test-slot-push-vm-pass.log: bytes are not valid utf8
+E1110 18:54:42.318990     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/backend-admin-audit.log: bytes are not valid utf8
+E1110 18:54:43.960916     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-1.log: bytes are not valid utf8
+E1110 18:54:43.968434     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-2.log: bytes are not valid utf8
+E1110 18:54:43.975262     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-3.log: bytes are not valid utf8
+I1110 18:54:43.978158    1033 http_helpers.go:654] URL: https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse Trace: 0x4a45f947da919828 ResponseID: _wXzauKPEcSWvr0Py9TV8Aw
+E1110 18:54:43.982888     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-4.log: bytes are not valid utf8
+E1110 18:54:43.990229     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-5.log: bytes are not valid utf8
+E1110 18:54:43.997468     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-6.log: bytes are not valid utf8
+E1110 18:54:44.005027     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-7.log: bytes are not valid utf8
+E1110 18:54:44.012484     399 repo.go:368] failed to create patch for untracked file audit/admin-expansion-recheck-2026-11-02/opencode-verify-policy-8.log: bytes are not valid utf8
+E1110 18:54:45.938822     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:45.942384     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:45.946389     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:45.949898     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:45.950402     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:45.950929     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:45.955146     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:45.958693     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:45.962933     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:45.966447     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:45.970895     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:45.974439     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:45.978471     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:45.982082     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:45.985733     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:45.989371     399 repo.go:368] failed to create patch for untracked file audit/admin-flow-2026-11-01/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+E1110 18:54:46.946472     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/assemble-debug.log: bytes are not valid utf8
+E1110 18:54:47.706716     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:47.711661     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:47.714764     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-hdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:47.715805     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:47.716325     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:47.716843     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-mdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:47.721021     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:47.724646     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:47.728795     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:47.732973     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:47.736628     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:47.741321     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:47.744485     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: bytes are not valid utf8
+E1110 18:54:47.748633     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png: bytes are not valid utf8
+E1110 18:54:47.752299     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png: bytes are not valid utf8
+E1110 18:54:47.756450     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/before/app/src/main/res/raw/coin_drop.wav: bytes are not valid utf8
+I1110 18:54:47.984954     351 tool_confirmation_manager.go:221] Print mode: soft-denying tool confirmation "RunCommand" at step 2
+I1110 18:54:47.984954    1138 server.go:2729] Tool confirmation for conversation c908b120-0e99-4665-834b-96fd55464715 step 2 (type=*gemini_coder_go_proto.Step_Generic approved=false)
+I1110 18:54:47.999686       1 manager.go:965] CLI store manager shutting down
+I1110 18:54:48.000735       1 conversation_manager.go:985] Stopping conversation stream
+I1110 18:54:48.001259     352 server.go:1314] Stream goroutine exited for c908b120-0e99-4665-834b-96fd55464715, sending completion signal
+E1110 18:54:48.001259    1089 telemetry.go:141] error recording trajectory segment analytics: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:recordTrajectoryAnalytics": context canceled
+I1110 18:54:48.002328    1126 server.go:4046] Language server shutting down
+I1110 18:54:48.002328    1126 server.go:4068] Waiting for migrations to complete to prevent partial migration state...
+E1110 18:54:48.007636     121 file_watcher.go:194] skipping empty or temp file: 
+E1110 18:54:48.007636     121 file_watcher.go:194] skipping empty or temp file: 
+E1110 18:54:48.007636     121 file_watcher.go:194] skipping empty or temp file: 
+E1110 18:54:48.007636     121 file_watcher.go:194] skipping empty or temp file: 
+E1110 18:54:48.007636     121 file_watcher.go:194] skipping empty or temp file: 
+E1110 18:54:48.688310     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/controller-tests.log: bytes are not valid utf8
+E1110 18:54:48.721640     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/fresh-targeted-verification.log: bytes are not valid utf8
+E1110 18:54:48.729627     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/full-unit-tests.log: bytes are not valid utf8
+E1110 18:54:48.737163     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/initial-identity-check.log: bytes are not valid utf8
+E1110 18:54:48.756658     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-assemble-debug.log: bytes are not valid utf8
+E1110 18:54:48.763552     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-baseline-compile.log: bytes are not valid utf8
+E1110 18:54:48.772096     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-compile-android.log: bytes are not valid utf8
+E1110 18:54:48.780220     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-final-assemble-debug.log: bytes are not valid utf8
+E1110 18:54:48.800099     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-admin-pause-clean.log: bytes are not valid utf8
+E1110 18:54:48.807759     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-admin-pause-reason.log: bytes are not valid utf8
+E1110 18:54:48.815872     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-all.log: bytes are not valid utf8
+E1110 18:54:48.823527     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-fresh-run.log: bytes are not valid utf8
+E1110 18:54:48.830714     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-fresh.log: bytes are not valid utf8
+E1110 18:54:48.838005     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite-pass.log: bytes are not valid utf8
+E1110 18:54:48.845999     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-full-suite.log: bytes are not valid utf8
+E1110 18:54:48.854058     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-check.log: bytes are not valid utf8
+E1110 18:54:48.861311     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-perm.log: bytes are not valid utf8
+E1110 18:54:48.861844     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity-rerun.log: bytes are not valid utf8
+E1110 18:54:48.862890     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/opencode-test-session-identity.log: bytes are not valid utf8
+E1110 18:54:48.880261     399 repo.go:368] failed to create patch for untracked file audit/admin-pause-reason-popup-2026-11-05/post-screen-changes.log: bytes are not valid utf8
+E1110 18:54:51.732007     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/all-combined-android-tests.log: bytes are not valid utf8
+E1110 18:54:51.739910     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-atomic-ack-final.log: bytes are not valid utf8
+E1110 18:54:51.747291     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-exact-retry-final.log: bytes are not valid utf8
+E1110 18:54:51.755211     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-final.log: bytes are not valid utf8
+E1110 18:54:51.762715     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round5.log: bytes are not valid utf8
+E1110 18:54:51.770259     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round6-final.log: bytes are not valid utf8
+E1110 18:54:51.777643     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round7-final.log: bytes are not valid utf8
+E1110 18:54:51.785423     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug-round8-final.log: bytes are not valid utf8
+E1110 18:54:51.793100     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/assemble-debug.log: bytes are not valid utf8
+E1110 18:54:51.831335     399 repo.go:368] failed to create patch for untracked file audit/app-mission-report-2026-11-02/baseline-test.log: bytes are not valid utf8
+E1110 18:54:53.002515      39 server.go:4039] Language server shutdown timed out

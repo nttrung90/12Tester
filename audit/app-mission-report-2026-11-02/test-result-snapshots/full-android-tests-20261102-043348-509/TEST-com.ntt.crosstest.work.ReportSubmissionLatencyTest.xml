@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.work.ReportSubmissionLatencyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:33:45.989Z" hostname="PC-5700X3D" time="0.083">
+  <properties/>
+  <testcase name="completedFullUploadMustBeDurableBeforeWaitingForThumbnail" classname="com.ntt.crosstest.work.ReportSubmissionLatencyTest" time="0.028"/>
+  <testcase name="slowOptionalThumbnailMustNotBlockReportRpcBeyondTenSeconds" classname="com.ntt.crosstest.work.ReportSubmissionLatencyTest" time="0.031"/>
+  <testcase name="externalDeadlineDuringThumbnailMustNotContinueToJoinOrRpc" classname="com.ntt.crosstest.work.ReportSubmissionLatencyTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

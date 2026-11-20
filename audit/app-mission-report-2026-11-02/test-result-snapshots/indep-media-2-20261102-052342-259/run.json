@@ -1,0 +1,14 @@
+{
+    "logName":  "indep-media-2",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowMediaIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T05:23:21.4362049Z",
+    "finishedUtc":  "2026-11-02T05:23:42.2724168Z",
+    "currentRunXmlCount":  1
+}

@@ -1,0 +1,61 @@
+{
+  "changed": [
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminBusinessPolicyScreen.kt",
+      "sha256": "6a7e495f23d7cf6d10e761c5120314b25a4bf0ac02cbc9ef602a7951be79005b",
+      "after": "c6549236cc2b96489869a293f5f256e3ab3eaa1992e61290f45003156bee79aa"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModel.kt",
+      "sha256": "b1928ac1b90d8290fff5190d3473dae4cd157a00806d9a98989afaa54598fe01",
+      "after": "58ca4fd11c53ac8a3dc41530aa0ef50d8939efd439e6d1a5ea7c8aad92049a56"
+    },
+    {
+      "path": "app/src/main/res/values/admin_business_policy.xml",
+      "sha256": "bc45f05d972f70f426fbbb0c216ef992355578f992c755652ab805301af3d85a",
+      "after": "7a50cb2dbaa076297913edc38e4777595fc0853725c00e0c32f2abe48805ae04"
+    },
+    {
+      "path": "app/src/main/res/values-en/admin_business_policy.xml",
+      "sha256": "bc45f05d972f70f426fbbb0c216ef992355578f992c755652ab805301af3d85a",
+      "after": "7a50cb2dbaa076297913edc38e4777595fc0853725c00e0c32f2abe48805ae04"
+    },
+    {
+      "path": "app/src/main/res/values-vi/admin_business_policy.xml",
+      "sha256": "ed0d5bc4cdd1e3ef1f112297f0568551bba79dc814fdc4d40335f5d0e58b5f3b",
+      "after": "4b7b5d92022800823a53b6565d42ee8a4e946d38b0bb22de06695277e3be018e"
+    },
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminBusinessPolicyViewModelTest.kt",
+      "sha256": "0c6e69c41b8c93f8b0c33c2072e966ec99665388b2442c7421a72f3fd8dc9fb5",
+      "after": "be7c77b4a1508847baa8a2d92024c667a36e4c8fc57fd3b4361a657b6705673e"
+    },
+    {
+      "path": "supabase/tests/run-admin-audit-hardening-test.mjs",
+      "sha256": "f065f5c51837a8e4ddf0b05d654107215d99a6722211a1c0605c5037e0b27d63",
+      "after": "516e8be8317fac85ba909f663ca35cbe020a06b91058d4f7ccf49c8c2aad8d12"
+    },
+    {
+      "path": "backend/notification-worker/README.md",
+      "sha256": "c03e559ca361d03e14f907cb53355e1443489da444fe295ddd835ff428029906",
+      "after": "6b072c60689876a4dd28122f245f63e165386f765dbdcf4c90499239ac2222b2"
+    },
+    {
+      "path": "backend/notification-worker/worker-runner.mjs",
+      "sha256": "02aa12a225d6063d2542a712a6d27e1a4d187e2b8989c30ff6e30ccdb0eb2979",
+      "after": "535ac2bbf2b1fdb12d61c013f6e1b2bb6e5243877c09c7357480e00f9cea1cf9"
+    },
+    {
+      "path": "backend/notification-worker/worker-runner.test.mjs",
+      "sha256": "81b10556d9f005f741d35464ab99e1e9fa5a8e13f7d73f7436e43af02e80112e",
+      "after": "87f615825b11249ebc48b79b252d1735448bba81b025b687593fc46d53f5ffce"
+    }
+  ],
+  "added": [
+    {
+      "path": "app/src/test/java/com/ntt/crosstest/audit/BusinessPolicyRecheckIndependentTest.kt",
+      "sha256": "080ffdb3a05e1153280653c7b6b785e09302a982e7d5790aea6b4660291967d7"
+    }
+  ],
+  "deleted": []
+}

@@ -1,0 +1,98 @@
+{
+  "resource_issues": [],
+  "head": "34f0ddb811e5397774105c2dd905d052511e59ec",
+  "date": "2026-10-29",
+  "suites": [
+    {
+      "errors": 0,
+      "tests": 12,
+      "failed_cases": [],
+      "failures": 0,
+      "suite": "LocalizationHardeningTest"
+    },
+    {
+      "errors": 0,
+      "tests": 9,
+      "failed_cases": [],
+      "failures": 0,
+      "suite": "LocalizationRecheckTest"
+    },
+    {
+      "errors": 0,
+      "tests": 11,
+      "failed_cases": [
+        {
+          "name": "systemChoiceMustNotUsePreviouslyWrappedActivityConfiguration",
+          "message": "org.junit.ComparisonFailure: Device EN and a previously wrapped VI context must resolve EN expected:<[en]> but was:<[vi]>"
+        },
+        {
+          "name": "customReasonWithRecognizedPrefixMustRemainIntact",
+          "message": "org.junit.ComparisonFailure: expected:<[Ảnh không đúng ứng dụng ở bước thanh toán; riêng màn đăng nhập đã đạt yêu cầu, hãy giữ lại.]> but was:<[Unclear photo / not this app]>"
+        },
+        {
+          "name": "actualLegacyPredefinedReasonsMustTranslate",
+          "message": "org.junit.ComparisonFailure: expected:<[Photo duplicated from the previous day]> but was:<[Ảnh trùng lặp với ngày hôm trước]>"
+        },
+        {
+          "name": "unlistedFixedErrorMustChangeLocale",
+          "message": "org.junit.ComparisonFailure: expected:<[Không thể kết thúc đợt cập nhật].> but was:<[Unable to close update round].>"
+        },
+        {
+          "name": "legacyFallbackMustNotReportBilingualSaveSuccess",
+          "message": "java.lang.AssertionError: Cannot report full bilingual save after silently dropping EN"
+        },
+        {
+          "name": "parameterizedSuccessMustChangeLocale",
+          "message": "org.junit.ComparisonFailure: expected:<[Đã kết thúc đợt và hoàn 42 Credit chưa dùng]!> but was:<[Closed update round and refunded 42 unused Credits]!>"
+        },
+        {
+          "name": "ownerPersistedMessageMustChangeLocale",
+          "message": "org.junit.ComparisonFailure: expected:<[Lỗi mạng. Kiểm tra kết nối Internet rồi thử lại].> but was:<[Network error. Check your Internet connection and try again].>"
+        },
+        {
+          "name": "structuredAppNameMustDecodeJsonString",
+          "message": "java.lang.AssertionError: JSON escape sequences leaked into app name: App \"Demo \\\"A\\\" received 1 new test report from a tester. Please review it."
+        },
+        {
+          "name": "oldApprovedReportTitleMustTranslate",
+          "message": "java.lang.AssertionError: Values should be different. Actual: Báo cáo kiểm thử được phê duyệt! 🎉"
+        },
+        {
+          "name": "permissionErrorMustNotRetryUsingLegacyMutation",
+          "message": "java.lang.AssertionError: Permission failure was hidden by a second legacy update; calls=2"
+        },
+        {
+          "name": "oldApprovedReportMustNotTurnIntoNewReport",
+          "message": "java.lang.AssertionError: Approved legacy notification mislabeled: App \"DemoApp\" received 1 new test report from a tester. Please review it."
+        }
+      ],
+      "failures": 11,
+      "suite": "LocalizationRound2Test"
+    }
+  ],
+  "source_sha256": {
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt": "67A79073D8A4CBD0194B590BE5C7070B038D14071B8391DFB9E60E4B5116A275",
+    "supabase/full_schema_singapore.sql": "D11D02C92C77E331B389E1C67BFC161929863B705AAD37CD79A9A7297A6C358B",
+    "app/src/main/java/com/ntt/crosstest/MainActivity.kt": "F6D4D7656DE0216AB54008A0E6BA8F1FCC3C44229ACBEE152032CBFD2ACD7F62",
+    "supabase/migrations/055_localization_hardening.sql": "ECCCFBD39DEE4732071F29A65DB541A4C2E95C35A359689BFD9BB655AC8B6D7F",
+    "app/src/main/java/com/ntt/crosstest/util/UiStateMessageResolver.kt": "4E9E4AE2CA68509B70497B5CB133C8D5B9B296F658FC8B43ED74E6F177ABA37D",
+    "app/src/main/java/com/ntt/crosstest/util/RejectionReasonRenderer.kt": "A0B2C5F205C8AE25AF1A62FE2709993F1A191C9041AA2666DDFE6C4C2975AEF8",
+    "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt": "07F6D4866CF0FF8EDBAA32D623AB49665145C704A974E8C956209DACAE9238CE",
+    "app/src/main/java/com/ntt/crosstest/util/NotificationRenderer.kt": "F796C2A8C0FC29FC99950A28CD2126FB1E2BFC7940DAE6C5425E4811330F0D65"
+  },
+  "resources": {
+    "values": {
+      "duplicates": [],
+      "count": 1202
+    },
+    "values-en": {
+      "duplicates": [],
+      "count": 1202
+    },
+    "values-vi": {
+      "duplicates": [],
+      "count": 1202
+    }
+  },
+  "scope": "Working tree; Robolectric; Ktor MockEngine; PGlite in RAM. No production calls or device UI."
+}

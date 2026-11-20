@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:42:25.032Z" hostname="PC-5700X3D" time="0.159">
+  <properties/>
+  <testcase name="atomicPublishVsCloseGate_preventsConcurrentExecution" classname="com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest" time="0.06"/>
+  <testcase name="lostResponse_persistsIntentToDisk_recreationReusesOriginalOperationIdAndQuote" classname="com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest" time="0.063"/>
+  <testcase name="changedQuoteConflict_clearsDiskIntentAndPromptsReconfirm" classname="com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-02T10:57:49.521Z" hostname="PC-5700X3D" time="0.203">
+  <properties/>
+  <testcase name="ageCleanupDoesNotEraseQueuedThreeImageWork" classname="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" time="0.036"/>
+  <testcase name="uploadedCheckpointRestoresOnlyTheMatchingAttachment" classname="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" time="0.035"/>
+  <testcase name="preparedCleanupRetainsAFileStillLeasedByTheDraft" classname="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" time="0.019"/>
+  <testcase name="budgetDoesNotCountTheSamePrimaryPathTwiceOrEvictQueuedWork" classname="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" time="0.064"/>
+  <testcase name="completedReceiptRetainsAllImagesAndLeasedPreviewFiles" classname="com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

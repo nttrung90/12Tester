@@ -1,0 +1,29 @@
+--- baseline-functions/_submit_tester_report_core_18210.sql
++++ supabase/migrations/087_campaign_tester_bonus_rounds.sql (_submit_tester_report_core)
+@@ Search Path:
+- SET search_path TO 'public', 'extensions'
++ SET search_path TO 'public', 'extensions', 'pg_catalog'
+
+@@ Variable Declarations:
++ v_bonus_round_id uuid := null;
+
+@@ Idempotent Fallback Result:
++ 'tester_bonus_round_id', v_idempotent_report.tester_bonus_round_id
+
+@@ TH1 Approved Comment Update:
++ tester_bonus_round_id into v_bonus_round_id
++ 'tester_bonus_round_id', v_bonus_round_id
+
+@@ TH2 Resubmit / Update Pending:
++ v_bonus_round_id := v_existing_report.tester_bonus_round_id;
+
+@@ TH3 Brand New Report:
++ if v_submission_context = 'app_test' and v_camp.owner_id <> v_user_id then
++     select * into v_camp from public.campaigns where id = p_campaign_id for key share;
++     select id into v_bonus_round_id from public.campaign_tester_bonus_rounds where campaign_id = p_campaign_id and status = 'active' for key share;
++ end if;
++ App_test inserts: tester_bonus_round_id, tester_bonus_awarded (v_bonus_round_id, 0)
++ Mission insert: tester_bonus_round_id, tester_bonus_awarded (null, 0)
+
+@@ Result Object:
++ 'tester_bonus_round_id', v_bonus_round_id

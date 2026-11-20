@@ -1,0 +1,6 @@
+REPRODUCED: baseline submit fails with 42883 digest when pgcrypto is in extensions
+PASS: pgcrypto in extensions, admin: submission, replay, credits, mismatch, ACL and migration rerun
+REPRODUCED: baseline submit fails with 42883 digest when pgcrypto is in extensions
+PASS: pgcrypto in extensions, member: submission, replay, credits, mismatch, ACL and migration rerun
+PASS: pgcrypto in public, admin: submission, replay, credits, mismatch, ACL and migration rerun
+PASS: pgcrypto in public, member: submission, replay, credits, mismatch, ACL and migration rerun

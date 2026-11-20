@@ -1,0 +1,12 @@
+# Codex integration notes for staged business071
+
+Read before final integration/followup; these are concrete source constraints, not instructions to alter otheragents'files whileowned.
+
+- Current contract calls legacy publish function `publish_app_update_release`, but effective code has `publish_app_update` (062:6854) called by Android CampaignRepository. Ensure real legacyname guarded and actual new v2name documented/implemented consistently. Don't leave policy in a newlyinventedfunction while client continues oldfee120path.
+- Baseline has hard CHECKs such as app_update_claims.reward_credits=6 and related release limits. Inspect and migrate ALL relevant fixedconstraints intentionally so newreward/maxclaims work without corrupting bounds/balanceinvariants. Test nondefault actualpublish+claim, not just adminpolicy storage.
+- Policy permits penaltytiers=0; 066 penalty uses greatest(1,ceil(balance*pct*ratio)) for positivegap. With0%, this must yield0 rather than mandatory1. Keep min1 only when positivepct. Policy permits provisionalreportreward0 too: handlezero without invalidledger/grantedflag or laterextra clawback.
+- Rejection must remain bounded to actual grantedamount, legacy2 included. Snapshot manual tester/ownerbonus on report submission; oldpendingreports fallback2 perexistingbehavior. Newzero needs explicitpresence distinction from NULL. Missionreward commitment independent.
+- Core070 replaces reject_tester_report/get_campaign_detail to support warning revocations. Your staged071 built062-069 may replace reject again and erase revocation rules. After core stabilizes, integrate/rebase071 consumers onto070 effective definitions or add precise reviewed consolidation; test revokedwarning through Home dashboard/detail/rejectafterFULL chain062-072, notisolated071 only. Don't editcore070 directly now.
+- CLIlargepatch generation can stall; prefer write foundationSQL first, then append each consumer definition with sourcehash/extraction assertions, test aftereachgroup. Do not defer all tangiblepatches into one huge response.
+- Financial client changes must update SlotInfo/costchecks, pushconfirmdialog, AppUpdateReleaseViewModel/UI budget/rewardtexts and actualrepositoryRPCs. Merelychangingadminform does not meetuserrequest. Businessbackend should have stable APIcontract for Android continuation.
+- Return full JSON shape of legacyfunctions unchanged at default; existing tests cover exactDTOkeys. Preserve hardening069, media/receipts/race fixes and cancellation semantics.

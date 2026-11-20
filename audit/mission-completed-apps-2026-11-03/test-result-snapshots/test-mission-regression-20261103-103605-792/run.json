@@ -1,0 +1,12 @@
+{
+    "logName":  "test-mission-regression",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionRegressionTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-03T10:35:45.1844060Z",
+    "finishedUtc":  "2026-11-03T10:36:05.8027432Z",
+    "currentRunXmlCount":  1
+}

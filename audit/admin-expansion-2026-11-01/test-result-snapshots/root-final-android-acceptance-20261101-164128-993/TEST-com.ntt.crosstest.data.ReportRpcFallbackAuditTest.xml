@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:41:16.238Z" hostname="PC-5700X3D" time="0.059">
+  <properties/>
+  <testcase name="legacyDtoHasExactlyFiveParameters" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.018"/>
+  <testcase name="sevenArgumentsSuccessPath" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.009"/>
+  <testcase name="cancellationMustNotTriggerFallback" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.009"/>
+  <testcase name="http500MustNotTriggerFallback" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.007"/>
+  <testcase name="sixParamsDtoHasExactlySixParameters" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.006"/>
+  <testcase name="contextCannotBeDroppedEvenWhenLegacyCallerAllowsFallback" classname="com.ntt.crosstest.data.ReportRpcFallbackAuditTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

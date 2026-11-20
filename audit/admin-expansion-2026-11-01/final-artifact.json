@@ -1,0 +1,10 @@
+{
+  "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+  "bytes": 34979421,
+  "sha256": "FBFC17937BB2F2A64B278AE9F708006DE3E79E204BFFDD2565B0B3D086304C7D",
+  "versionName": "1.0.9",
+  "versionCode": 29,
+  "variant": "debug",
+  "testResult": "499/499 PASS; 0 failures, errors, skips; two consecutive full runs",
+  "sourceChangesAfterFinalRun": 0
+}

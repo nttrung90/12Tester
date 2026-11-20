@@ -1,0 +1,29 @@
+{
+  "name": "crosstest-database-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:report-schema": "node run-report-extension-schema-test.mjs",
+    "test:mission-window": "node run-app-mission-window-test.mjs",
+    "test": "npm run test:baseline-regressions && npm run test:admin-expansion && npm run test:mission-window",
+    "test:admin-management": "node run-admin-management-test.mjs",
+    "test:admin-audit": "node run-admin-audit-hardening-test.mjs",
+    "test:hardening": "node run-push-and-carryover-hardening-test.mjs",
+    "test:carryover": "node run-daily-task-carryover.mjs",
+    "test:baseline": "node run-consolidated-baseline-test.mjs",
+    "test:report-context": "node run-explicit-report-context-test.mjs",
+    "test:remove-dhash": "node run-remove-dhash-hardblock-test.mjs",
+    "test:admin-direct-popup": "node run-admin-direct-notification-popup-test.mjs",
+    "test:owner-tester-reports-count": "node run-owner-tester-reports-count-test.mjs",
+    "test:baseline-regressions": "node run-consolidated-baseline-test.mjs && node run-daily-task-ratio.mjs && node run-backend-cleanup-hardening.mjs && node run-mission-flow-hardening.mjs && node run-thumbnail-migration.mjs && node run-media-gateway-test.mjs && node run-home-stats-cycle-test.mjs && node run-mission-report-and-expiration-test.mjs && node run-app-update-reward-test.mjs && node run-campaign-push-test.mjs && node run-daily-task-carryover.mjs && node run-push-and-carryover-hardening-test.mjs && node run-report-idempotency-ledger-test.mjs && node run-admin-daily-task-policy-test.mjs && node run-report-idempotency-provenance-and-rating-test.mjs && node run-push-campaign-role-hardening-test.mjs && node run-report-extension-schema-test.mjs && node run-explicit-report-context-test.mjs && node run-remove-dhash-hardblock-test.mjs && node run-push-and-carryover-baseline062-regression-test.mjs && node run-owner-tester-reports-count-test.mjs && node run-admin-audit-hardening-test.mjs && node run-admin-management-test.mjs",
+    "test:business-policies": "node run-business-policies-test.mjs",
+    "test:notification-campaigns": "node run-admin-notification-campaigns-test.mjs",
+    "test:admin-action-audit": "node run-admin-action-audit-test.mjs",
+    "test:admin-expansion-integration": "node run-admin-expansion-integration-test.mjs",
+    "test:admin-expansion": "npm run test:business-policies && npm run test:notification-campaigns && npm run test:admin-action-audit && npm run test:admin-expansion-integration && npm run test:admin-direct-popup"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.12",
+    "pg": "^8.23.1"
+  }
+}

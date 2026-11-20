@@ -1,0 +1,1157 @@
+[
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorkerTest.kt",
+    "sha256": "8A9BB8ED6D7CBB6D9BC0B06D37AB123453E4B658C12D07959B8806BE10435054",
+    "lastWriteUtc": "2026-11-05T10:23:34.5820869Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\work\\ReportSubmissionLatencyTest.kt",
+    "sha256": "798D2DC8EA66E776174A23C417119ADA8EC3928D1EFCEF88451DBF985C4F7B04",
+    "lastWriteUtc": "2026-10-29T08:56:18.2101286Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\work\\ReportBackgroundSubmissionTest.kt",
+    "sha256": "B155AD10F20360249CC425FAC117EFB2D2427D2BABB050D64D91ECDA10C55871",
+    "lastWriteUtc": "2026-10-29T08:57:17.8056091Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\work\\EgressThumbnailPipelineAuditTest.kt",
+    "sha256": "FBC4AC6528D48096435B9BB0712EE287A73FBF377AB7B5ED8CC0F6610CDC349A",
+    "lastWriteUtc": "2026-10-29T08:56:18.3807275Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\strings.xml",
+    "sha256": "015C6CEC26642B8D815B6A75F9B28AA580579D4CCF2C07C3A8D2AD9307291CEF",
+    "lastWriteUtc": "2026-11-05T11:54:25.0118034Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\help_faq.xml",
+    "sha256": "C49F84E3439704FDE818A4D739141CCA4A7E2190D99CFF81FFED22F8E5E12D2F",
+    "lastWriteUtc": "2026-11-03T05:23:40.6641307Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\admin_notifications.xml",
+    "sha256": "CB67337FC15B485BEA5D3E9FC753ECF57888A4F7EC43E1092B277EA479347A16",
+    "lastWriteUtc": "2026-11-01T11:41:00.4620163Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\admin_management.xml",
+    "sha256": "8E233388198F6DF5C40B12DF7C23E48F0B8775B2C950DFA0E01957F6039DDA4E",
+    "lastWriteUtc": "2026-11-01T12:04:01.4103896Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\admin_business_policy.xml",
+    "sha256": "4B7B5D92022800823A53B6565D42EE8A4E946D38B0BB22DE06695277E3BE018E",
+    "lastWriteUtc": "2026-11-01T23:32:54.7355123Z"
+  },
+  {
+    "path": "app/src\\main\\AndroidManifest.xml",
+    "sha256": "023C05A342BBD0DEBDEE8148818DBD4B721380C7F15DD1CF286D24DFB65FB12D",
+    "lastWriteUtc": "2026-11-03T23:35:12.6271473Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\ReportUrlRetryTest.kt",
+    "sha256": "3D69353DE4F4E4E5773754CE3D71517297456B8C7EE1A816024478DF868445EA",
+    "lastWriteUtc": "2026-10-27T11:11:48.3482353Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\ReportComparisonSelectorTest.kt",
+    "sha256": "302E588B5AFBD0B959344A5179FD90BD823C0BB8E73662185A625FD9793CA09D",
+    "lastWriteUtc": "2026-10-30T08:25:26.3272482Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\FirebaseEgressOptimizationTest.kt",
+    "sha256": "664C1E9B52350EFCC4E2A5DA93243D164B9F3151E9F3659B275A942ACA7D1B20",
+    "lastWriteUtc": "2026-10-28T06:13:46.2227024Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\EgressRound2OptInTest.kt",
+    "sha256": "9139526CDE99056590EF2CAEBA392ED01F084F429873834E1755C779945DE359",
+    "lastWriteUtc": "2026-10-28T05:57:42.8774179Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\EgressGatewayClientAuditTest.kt",
+    "sha256": "6BDF4C6CFF2C0F57B525CDC3F28DCBC1D237C2A0EC895624525FD00143AE95CA",
+    "lastWriteUtc": "2026-10-28T05:46:37.2806498Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\EgressFinalPolicyAuditTest.kt",
+    "sha256": "49B1937B6D94A664C04F06412E673C94BD45FFC558329B3950C6A50F75CAD18B",
+    "lastWriteUtc": "2026-10-28T06:19:52.9567293Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\EgressAuditProbeTest.kt",
+    "sha256": "CD5A723C87E36EDE33890B5321780C2974EEFDFCF5B0E5872576B47687A00B6E",
+    "lastWriteUtc": "2026-10-28T02:16:14.6203861Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\DetailedImageComparatorTest.kt",
+    "sha256": "1CF18EC440D376DBA51D7F5B34979E14987C69D7A492EA2AD1B304939BA444AE",
+    "lastWriteUtc": "2026-10-30T08:24:49.4516977Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\util\\ComparisonStateCoordinatorTest.kt",
+    "sha256": "F6060E520C4723F47C3E71601ED3465BE068BCB9E2176AD84D5E474A7D8BA75E",
+    "lastWriteUtc": "2026-10-30T08:29:11.7530019Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-v35\\themes.xml",
+    "sha256": "E48858E43EF9574214FC11946403F38951C2C5040ADFB063DC6298D66FDA255C",
+    "lastWriteUtc": "2026-11-03T23:35:13.6791369Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\audit\\ReportV2WirePayloadProbeTest.kt",
+    "sha256": "72E1EF7B6C91F82664381113B9AC2FE3BC7104195E029F83373CBD558EA1A4CF",
+    "lastWriteUtc": "2026-11-01T16:38:56.8957765Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\audit\\ReportOverlapTest.kt",
+    "sha256": "C782F0419F3FB708E587A24A50E55F4C844204051BF76BC30F09B1A5AEA05994",
+    "lastWriteUtc": "2026-11-01T16:38:56.8947775Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\audit\\ImageHashCollisionAuditTest.kt",
+    "sha256": "A674E852640650645EF0BB5B7401E4D91AE8A835578F803A165FA1898550CD15",
+    "lastWriteUtc": "2026-10-30T08:09:22.4539841Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\audit\\BusinessPolicyRecheckIndependentTest.kt",
+    "sha256": "080FFDB3A05E1153280653C7B6B785E09302A982E7D5790AEA6B4660291967D7",
+    "lastWriteUtc": "2026-11-01T23:48:10.3787283Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\localization\\LocalizationHardeningTest.kt",
+    "sha256": "0CBBA81668A2364226492BAA7A04746F41FF090D33DA6AF11E4DBC569F5D6B71",
+    "lastWriteUtc": "2026-10-29T11:58:44.9048821Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportWorkStateTest.kt",
+    "sha256": "1828CACC2AAFCED7439201112775F677580C2E50699559F3CD0CAAE73A452F1E",
+    "lastWriteUtc": "2026-10-27T11:11:48.3482353Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicyTest.kt",
+    "sha256": "AFCC14BCC4FC4F78422FD2023AECC08E57BC8068955C29CFA27EF2D08877EDEA",
+    "lastWriteUtc": "2026-10-27T11:11:48.3482353Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManagerIntegrationTest.kt",
+    "sha256": "66EC6D6517C38275BF5EF2940F7A1E771AA676AA9B33CD1949E915BB38208898",
+    "lastWriteUtc": "2026-11-05T10:18:53.2670054Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailureTest.kt",
+    "sha256": "F0217F1CB6E22807653A8CB6371C06AAEFBCB101355FCCF438AF94AEF005CAD0",
+    "lastWriteUtc": "2026-10-30T03:26:12.6520591Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportRpcFallbackAuditTest.kt",
+    "sha256": "6ED844C6121EE2465B31D1EB9D126AE11485FA04AF5559E8BB50605B2E6A1974",
+    "lastWriteUtc": "2026-11-01T16:38:56.9067762Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\ReportRpcCompatibilityTest.kt",
+    "sha256": "367F203BB2FE29C03547CA3C1E967F1163E189BA196A09E745A1C46C2179F5AD",
+    "lastWriteUtc": "2026-11-01T16:38:56.9057802Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\PushAndCarryoverHardeningTest.kt",
+    "sha256": "522AC4CDB794536F66CFA1CDA1AF146F29043AF62D65EA11E1BCC76C633F2CB0",
+    "lastWriteUtc": "2026-11-01T16:38:56.9057802Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\PendingReportStoreTest.kt",
+    "sha256": "C4EFB59C67E16719C2C6BEBCA0E908C42A42DD06C4C4EAC5D1A1F73573F2A054",
+    "lastWriteUtc": "2026-10-29T02:13:45.3195420Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\OwnerReportCountBehavioralTest.kt",
+    "sha256": "EB49F23DFB4B8B409676FED49FC999BF7D908885CA10C0DFDBB681FECE9ABE60",
+    "lastWriteUtc": "2026-11-01T16:38:56.9047805Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\NotificationPendingAckStoreTest.kt",
+    "sha256": "5EB14F032FC7FB2392A00FCE1FA0757FD05F3476A7FD6F292D6DCCE22B2ABB9B",
+    "lastWriteUtc": "2026-10-30T12:46:46.7124058Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionRewardModesUnitTest.kt",
+    "sha256": "15E37C580C4D312BCCA414F5989E84250AB46ACF25F46C3096FF53B4E9A65A31",
+    "lastWriteUtc": "2026-11-03T13:16:56.4382711Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportRecheckProbeTest.kt",
+    "sha256": "CEA079B9F09FE202E5A0F0B86BEB0250B9869C3CF416B2A8EB04EDF5ADF5F4C0",
+    "lastWriteUtc": "2026-11-02T04:41:36.1963767Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportMultiAttachmentTest.kt",
+    "sha256": "3019117DDE673555EFBCCB8CEDF53E012F8E13B3FAF0B55B8B8AB1A84C37025F",
+    "lastWriteUtc": "2026-11-02T04:27:54.4080483Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportAndExpirationTest.kt",
+    "sha256": "027B578C08228585C3D16559D2A5A2F622D085FCE7FCD8C607066EB8E0DFBB88",
+    "lastWriteUtc": "2026-10-29T03:23:36.0049394Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\MissionRegressionTest.kt",
+    "sha256": "B2E0319670A681B0BB48F2BD7ACD94A5AE5E40D404D3955064800FAE6EB0E309",
+    "lastWriteUtc": "2026-11-03T10:37:18.5811127Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotIntegrityAuditTest.kt",
+    "sha256": "C65ED609707E113F7590500C99329A19DD3C2B07D483A7C0E526997ACF745950",
+    "lastWriteUtc": "2026-11-01T16:38:56.9027802Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotClearAuditTest.kt",
+    "sha256": "50431C95721E7B7592AFE6555C152047008B5DC465C08914659DFFC96CBA6FD0",
+    "lastWriteUtc": "2026-11-01T16:38:56.9027802Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCachePublicationAuditTest.kt",
+    "sha256": "D78ADA712E1C0B320CF7CA1109000105E6C4B6B37304BD5210DFF73ECC05DD9E",
+    "lastWriteUtc": "2026-11-01T16:38:56.9027802Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheMutationAuditTest.kt",
+    "sha256": "BFE61AB25C60A2D7F70ABA775427F268542ECBC40D86F69012DACAF70ABAE557",
+    "lastWriteUtc": "2026-11-01T16:38:56.9017783Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheFinalAuditTest.kt",
+    "sha256": "C0C9519473A02DB543322162E73D3C24BFD579F0B337B6522A484747379E2E83",
+    "lastWriteUtc": "2026-11-01T16:38:56.9017783Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheCompositeAuditTest.kt",
+    "sha256": "701535A4C9164F648E5D4B6774271FFD51B089C2063A0B6476909DB62C0A5586",
+    "lastWriteUtc": "2026-11-01T16:38:56.9007799Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheClockAuditTest.kt",
+    "sha256": "4609B4846025AF8B8CD73ADAE314E5C839886414AD4276D1E716D23D062E5EA8",
+    "lastWriteUtc": "2026-11-01T16:38:56.9007799Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheBudgetAuditTest.kt",
+    "sha256": "ADA5E82A9F95C66E54A01A9F3A3D8C730CBBC0F37DB3D6E995A8E066DAA4E712",
+    "lastWriteUtc": "2026-11-01T16:38:56.8997750Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\HomeStatsCycleTest.kt",
+    "sha256": "380445E7F4AC74F46B0591D2551742F39FFB59847A79E60C9F9A9C1307D4F636",
+    "lastWriteUtc": "2026-10-28T14:47:33.9282133Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\themes.xml",
+    "sha256": "5B3C0FE0FD623901131EFAE99C161EF932585B83F6BB335E311BBEB524FF26E8",
+    "lastWriteUtc": "2026-11-03T23:35:12.7750292Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\strings.xml",
+    "sha256": "68341EE737FAB34A77CABB20963B759444E33FB531BA8661934E73A329E2CF8C",
+    "lastWriteUtc": "2026-11-05T11:53:48.6890219Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\help_faq.xml",
+    "sha256": "31D28BE2C615970B80DEC5A69AF1F4D87E2A9BC792F8ECF8C19407E75E3596A8",
+    "lastWriteUtc": "2026-11-03T05:23:29.8670122Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\colors.xml",
+    "sha256": "B0A2A942BC0788590295C1B5E865DBD3E031467056DEC1CB4AE3A53FE083E580",
+    "lastWriteUtc": "2026-10-27T11:11:48.3458476Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\admin_notifications.xml",
+    "sha256": "26685F7B2D7CDC7695737E8874DBF0892AD3EA10AABE7966F6138F2DDDA77AE2",
+    "lastWriteUtc": "2026-11-01T11:40:51.7224146Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\admin_management.xml",
+    "sha256": "5A8AFB698F11451A3F6B02621F154B7C5545E6070E2B51EF90D75ABC57F31D40",
+    "lastWriteUtc": "2026-11-01T12:03:40.8531950Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\admin_business_policy.xml",
+    "sha256": "7A50CB2DBAA076297913EDC38E4777595FC0853725C00E0C32F2ABE48805AE04",
+    "lastWriteUtc": "2026-11-01T23:32:42.9627479Z"
+  },
+  {
+    "path": "app/src\\main\\res\\drawable\\ic_zalo.xml",
+    "sha256": "083DF2A81938177634603CDB873216C8DCC839267B9B1D2FEDDD2887B14EB819",
+    "lastWriteUtc": "2026-10-27T11:11:48.3402740Z"
+  },
+  {
+    "path": "app/src\\main\\res\\drawable\\ic_notification.xml",
+    "sha256": "3E29BFA39F2CC3D4F73DE6820078BE54D7C97A5F00F3F07C51408BEB2FFED8F8",
+    "lastWriteUtc": "2026-10-27T11:11:48.3402740Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseDialogControllerTest.kt",
+    "sha256": "32DEC8ECE1C80C4A5B66AA336E96583C508302BC244E429FB943BF432247B257",
+    "lastWriteUtc": "2026-11-05T00:55:27.6312902Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminOwnerAutoPauseViewModelTest.kt",
+    "sha256": "FBA8782AE99AF7CD3EE806A917B0ABD4E79406F37132DAA3842C4AF686EB1FF7",
+    "lastWriteUtc": "2026-11-03T05:11:13.1214040Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminNotificationCampaignViewModelTest.kt",
+    "sha256": "0AEADCBEC73372019C2384D671C219CB17CED4A4D5AAFA95D05423E42DBFD191",
+    "lastWriteUtc": "2026-11-01T15:50:41.4734971Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminManagementCoreTest.kt",
+    "sha256": "4EEB93AC12F966567878C4130B09CE504AED831CB5C3C67074338ED01E7B08E9",
+    "lastWriteUtc": "2026-11-01T16:38:56.9097769Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminFlowSessionRaceTest.kt",
+    "sha256": "B0AEA55FB659857FC8E9B73067D76376E47737DFA80EDE7BEFA7A8690A1007F1",
+    "lastWriteUtc": "2026-11-01T16:38:56.9097769Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignPauseReasonTest.kt",
+    "sha256": "BC95AA720CA2915751E0200DC0D4E2841B7ADF41AE57B558D0D120F9A08CBECD",
+    "lastWriteUtc": "2026-11-05T00:12:59.8644141Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignActionRaceTest.kt",
+    "sha256": "EBC1777D8AD95810E4E916B993BBE136D9C78F5EB94108DD8CB87B6133F83FE1",
+    "lastWriteUtc": "2026-11-01T16:40:39.5417137Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminBusinessPolicyViewModelTest.kt",
+    "sha256": "BE7C77B4A1508847BAA8A2D92024C667A36E4C8FC57FD3B4361A657B6705673E",
+    "lastWriteUtc": "2026-11-01T23:35:27.6229697Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupRound3RegressionTest.kt",
+    "sha256": "2EF529EE667985F0B28EF9E09351090FC0A679D6846C0FBB5B72A5B8E05A28A8",
+    "lastWriteUtc": "2026-11-01T16:38:56.9117770Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupReviewRegressionTest.kt",
+    "sha256": "5D0B313B629755AC7C3B8A89E6626BB502EF3B06C3FC63E717A1E83D4A401151",
+    "lastWriteUtc": "2026-11-01T16:38:56.9117770Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrderTest.kt",
+    "sha256": "13BEF0B3C3BF255D4D7D0BFA585E2F09CC9C1A05A68E2065B67B1CF441F471A7",
+    "lastWriteUtc": "2026-10-29T05:47:37.5839154Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AppUpdateReleaseViewModelBehavioralTest.kt",
+    "sha256": "24722D0F85B17DD339C14E2576C01271512A04501778189F9EF8B6B4A3D0DE0B",
+    "lastWriteUtc": "2026-11-01T16:38:56.9107774Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseSessionIdentityReviewTest.kt",
+    "sha256": "0BE104DCB5084886E1EC7AE2C2A5056E4B9DD3725CD9C17DAADD28F53064141B",
+    "lastWriteUtc": "2026-11-05T00:54:49.1364171Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerDailyRefreshRaceReviewTest.kt",
+    "sha256": "17CDFE5D03F79C1E1E49745D26E4CC830A0232B1EDC008915D06DCD818EC28E8",
+    "lastWriteUtc": "2026-11-05T06:08:27.8624404Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAutoPauseResumeHardeningTest.kt",
+    "sha256": "5FA55C9129682EED73C3A428593D98C901532BAE04E3AEDDEDB0BE2ABDC732E9",
+    "lastWriteUtc": "2026-11-05T06:21:05.4827741Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupViewModelTest.kt",
+    "sha256": "693B146765D72CB86486CCF1A67697F5628244B169AE13DB56AC65B9991B016D",
+    "lastWriteUtc": "2026-11-01T16:38:56.9127767Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerDailyTaskOrderingReviewTest.kt",
+    "sha256": "7DE155F9D672DD55C4B1A08DA8898FF4BE8E22CD64045B497E4F74E76BFE3B2E",
+    "lastWriteUtc": "2026-11-05T06:12:38.7164324Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\PendingCarryoverRetryRegressionTest.kt",
+    "sha256": "999239295B5B8C75226AF166857E1BF79C323574E2A363430ED97DC64DAF4DCF",
+    "lastWriteUtc": "2026-11-01T16:38:56.9127767Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AppUpdateRewardTest.kt",
+    "sha256": "AA12E6AED750B5EAF5AE27B329E7523D1248514D52FA1E4B6138027C15C0C1EB",
+    "lastWriteUtc": "2026-11-01T15:40:57.9633755Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AppUpdateRegressionTest.kt",
+    "sha256": "8AA9A9C832BF60309E05BF7CE0FB303F67714CD53DE31D5A39477BA930086B0B",
+    "lastWriteUtc": "2026-11-01T16:38:56.8967750Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AdminRelatedRepositoryRaceTest.kt",
+    "sha256": "F2CEE010341E847B4225D32EC60AA7226E19BFD69BF4C8878B636D45949AF6D6",
+    "lastWriteUtc": "2026-11-01T16:31:23.6057673Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AdminOwnerAutoPauseTest.kt",
+    "sha256": "4E3B097F0B62E196FEB2A21B96AA491E3EC9D505919FFAE357A2E6ABFC15D81F",
+    "lastWriteUtc": "2026-11-03T05:11:12.9559434Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignRepositoryTest.kt",
+    "sha256": "644943498DCB95842EB5CE9F430DEA0FB3B91970FA3C78AB6CAF42423BB445B4",
+    "lastWriteUtc": "2026-11-01T11:29:29.5103100Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AdminDailyTaskPolicyTest.kt",
+    "sha256": "EF094086FCA1965F1BF438ED6ED7B905A4CF0698A9DF89CB5095A48ACD18ADB1",
+    "lastWriteUtc": "2026-10-29T16:26:54.8096048Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\AdminDailyTaskHardeningRegressionTest.kt",
+    "sha256": "CE880DBA853ADD6ECA97D49692BA641DD840CD196E058DC9FBA6C575249522BB",
+    "lastWriteUtc": "2026-11-01T16:38:56.8957765Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\SlotAndPushDurabilityBehavioralTest.kt",
+    "sha256": "858261EA7F669D474320393B5CB936A21217ECCC2EF56FC76189ADE77C8C1A5F",
+    "lastWriteUtc": "2026-11-03T16:37:41.5099470Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\CampaignPushUnitTest.kt",
+    "sha256": "20C64D0E6C9ED2F749FCE2BA1FF8E357A5449CAAF2170E2C9B48194829EFFBDC",
+    "lastWriteUtc": "2026-10-29T05:49:11.4519662Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\CacheRegressionTest.kt",
+    "sha256": "F77ED9EF27EEC04CBE3FBFD23824005E0F5A62501C2462F7840BAED42C3972A7",
+    "lastWriteUtc": "2026-11-01T16:38:56.8977758Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\BusinessPolicyRepositoryTest.kt",
+    "sha256": "9BFB69FB7C62A5BC853744B5C8B92126F2A858567D0B8B8A8804E1BB77AD3BEF",
+    "lastWriteUtc": "2026-11-01T15:41:42.6231850Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\FinancialConsumerV2BehavioralTest.kt",
+    "sha256": "BF7B9801F28ECFBA39B0EDA8773B0F2165AE615793C8C4852360B7E98B2954D6",
+    "lastWriteUtc": "2026-11-01T15:42:12.5886860Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\DailyTaskCarryoverUnitTest.kt",
+    "sha256": "A615D336A35587A439ED78E09FE01D43D91CC0583DD70C7063F6438D32F5AECA",
+    "lastWriteUtc": "2026-11-05T11:55:40.8247876Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\FinancialIntentStoreTest.kt",
+    "sha256": "D128E71FAADAFF166C66F10D79C658C1D0B5CB20F67EA27244437A3C37FD3488",
+    "lastWriteUtc": "2026-11-01T16:25:39.9697539Z"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\help\\HelpDocumentParserTest.kt",
+    "sha256": "E4D6E6891C775B16154CF06B8EFB0668FC750EBE8A8C464078C02600E52FCDAC",
+    "lastWriteUtc": "2026-11-03T05:32:08.8806825Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\TestCheoApp.kt",
+    "sha256": "63597515A37F194A531B19DE759823E0BBE85F81A567B5385C451792E26ADB97",
+    "lastWriteUtc": "2026-11-01T10:45:57.5649637Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\MainActivity.kt",
+    "sha256": "4FE844E72115B1236615AE88FC9E99450ED3FCB6911D92B3A8E38BD2521B30C3",
+    "lastWriteUtc": "2026-11-05T10:21:34.7866972Z"
+  },
+  {
+    "path": "app/src\\main\\res\\mipmap-anydpi-v26\\ic_launcher_round.xml",
+    "sha256": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4",
+    "lastWriteUtc": "2026-10-27T11:11:48.3402740Z"
+  },
+  {
+    "path": "app/src\\main\\res\\mipmap-anydpi-v26\\ic_launcher.xml",
+    "sha256": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4",
+    "lastWriteUtc": "2026-10-27T11:11:48.3402740Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-v29\\themes.xml",
+    "sha256": "210ED53FB66176D56EEEAB39893DF404A3542C468A4ACC29D2A19F891884DE37",
+    "lastWriteUtc": "2026-11-03T23:35:13.2180291Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-night\\colors.xml",
+    "sha256": "7484C9DE12B5D3A2B1CAFA86245225725C1C4721502E381B9628B9D8C0C163D6",
+    "lastWriteUtc": "2026-10-27T11:11:48.3458476Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\strings.xml",
+    "sha256": "CED19600940661EDA326D8EAF17BADDE426139BB9E1566304CB5690CF56B3A25",
+    "lastWriteUtc": "2026-11-05T11:54:09.4385269Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\work\\UpdateCheckWorker.kt",
+    "sha256": "306FD9010F2CE52934CA4762CF3E2508C09B3C5D6CE869BD6E49CE9BFED4F746",
+    "lastWriteUtc": "2026-10-27T11:11:48.3402740Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\help_faq.xml",
+    "sha256": "31D28BE2C615970B80DEC5A69AF1F4D87E2A9BC792F8ECF8C19407E75E3596A8",
+    "lastWriteUtc": "2026-11-03T05:23:34.8215354Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\admin_notifications.xml",
+    "sha256": "26685F7B2D7CDC7695737E8874DBF0892AD3EA10AABE7966F6138F2DDDA77AE2",
+    "lastWriteUtc": "2026-11-01T11:41:10.3831172Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\admin_management.xml",
+    "sha256": "5A8AFB698F11451A3F6B02621F154B7C5545E6070E2B51EF90D75ABC57F31D40",
+    "lastWriteUtc": "2026-11-01T12:03:51.3165096Z"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\admin_business_policy.xml",
+    "sha256": "7A50CB2DBAA076297913EDC38E4777595FC0853725C00E0C32F2ABE48805AE04",
+    "lastWriteUtc": "2026-11-01T23:32:48.5454868Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorker.kt",
+    "sha256": "4F27F02D823A19E792B8B1396B65465ADFADB365BE842625562E0C0AC662638A",
+    "lastWriteUtc": "2026-11-05T10:18:16.4585491Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\work\\ReminderWorker.kt",
+    "sha256": "7B399543A93EDCE15E4A2192FE7166AF1CE67092160AC353C6C06834A1912043",
+    "lastWriteUtc": "2026-10-29T05:48:09.5041032Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\work\\NotificationHelper.kt",
+    "sha256": "BBAFF3BFBB7A90D0214F1A313A6CDEE74D199D3F0935151F0FCB1139E06F713E",
+    "lastWriteUtc": "2026-10-29T09:55:23.5676983Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AdminManagementModels.kt",
+    "sha256": "CB978E30C9AB9F3835FEADB235D7F6A06CBA462223C6FD794D6D5BB1E66F32DF",
+    "lastWriteUtc": "2026-11-02T04:19:19.7700493Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AdminManagementRepository.kt",
+    "sha256": "2565D9022379945984113625955233E15EAA7F78C9AC5EE6E265361EA03F4004",
+    "lastWriteUtc": "2026-11-01T15:27:21.1597617Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignModels.kt",
+    "sha256": "42032DB749269BBC1E24E66397E6ABFC3F05958878EDB030B71729BB74F457B0",
+    "lastWriteUtc": "2026-11-01T11:09:08.6732724Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AdminNotificationCampaignRepository.kt",
+    "sha256": "0423A6321179D0D114959A2FEDA5F80FCE8FE8BBCE70A39B851E97B8401D5C2D",
+    "lastWriteUtc": "2026-11-01T11:09:24.5737672Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AppConfigRepository.kt",
+    "sha256": "52DDB29D0B1459ABE3094BA232D9DECF56216D081002CEFB0AE449DF39E43B63",
+    "lastWriteUtc": "2026-11-01T06:29:38.2477180Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SupabaseMediaAccessGrantProvider.kt",
+    "sha256": "15A4B4F3418C6AC3A1B548DE174A6DE7283DE464A63B41ECEDEFFB6263CC4397",
+    "lastWriteUtc": "2026-11-02T05:00:53.7069024Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SupabaseHolder.kt",
+    "sha256": "FF3E11339C76B49E24CB324881DC46BD919EEDED161B71EE5DB35B4793597614",
+    "lastWriteUtc": "2026-10-27T11:11:48.3226960Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SettingsRepository.kt",
+    "sha256": "EFB34FF6982D94407F6F66FA12CCA51532D3BECB27B267976B3E583E1427A3A2",
+    "lastWriteUtc": "2026-11-03T16:37:41.3593458Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "sha256": "1937C4E113416FC3773B41ADCECD74E5360C5CF91748D240D86748C131E154FE",
+    "lastWriteUtc": "2026-10-29T07:20:39.8088580Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\ReportWorkState.kt",
+    "sha256": "86B8F7BCB1C5FA5BB03B7ED7C1BFB8D800DD0C111E0C3DBA5C89A20E2D268195",
+    "lastWriteUtc": "2026-10-27T11:11:48.3214636Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicy.kt",
+    "sha256": "F011D19DB8BD73AA105B6C2ECDE24CCE94A557838569A9455E0D0F68E21FA256",
+    "lastWriteUtc": "2026-10-30T03:47:35.3921982Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManager.kt",
+    "sha256": "BEFD0BD51795ECD8B37511D6E3CFE07421DCF34F18F0D66EC98F915EF3239794",
+    "lastWriteUtc": "2026-11-05T10:21:33.9091979Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailure.kt",
+    "sha256": "FACCCFF4FE3597E5735B7C560C1B3DC7AF7DB58FE072D03E3186EA85DE67BDF0",
+    "lastWriteUtc": "2026-10-30T06:09:31.9300102Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\PendingReportStore.kt",
+    "sha256": "C67DBA2BEF67B8E22A682992CBE57363D8F60B5C560F787F86FE05AA10531CB3",
+    "lastWriteUtc": "2026-11-05T10:17:46.8782563Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\NotificationPendingAckStore.kt",
+    "sha256": "C72D1965AFC356573550D9F0841DA7ACD08F002CA543C2DDDDE1479D6AD02C62",
+    "lastWriteUtc": "2026-10-30T12:40:46.1681466Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "sha256": "ED4A1277126091B4BB36759F5C355E147DBBAE1E817C3FD39401842C63DE35FB",
+    "lastWriteUtc": "2026-11-05T11:53:07.7159259Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\MissionReportDraftStore.kt",
+    "sha256": "5FF249CB50507AD36FBC3FD3519F8CC8E29D1464E70C1127BE6226FECD11D920",
+    "lastWriteUtc": "2026-11-02T11:53:37.2270207Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\WarningRenderer.kt",
+    "sha256": "3C0398D60EDB9583A19CFD00601ABC208130F63DC549FE83B9B8FADD508E7FCC",
+    "lastWriteUtc": "2026-10-29T11:50:11.4435159Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\UiText.kt",
+    "sha256": "D96496A835D759D4337FEFA1B5E08548611D2AC5108A5C155ED00620FA1539DA",
+    "lastWriteUtc": "2026-10-29T09:55:46.2027500Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\UiStateMessageResolver.kt",
+    "sha256": "25DB48A1A88270479C014B17681228028950D63EF4EA93CD53A142E6E1FF67B1",
+    "lastWriteUtc": "2026-10-30T03:47:35.5612038Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\TopupConfig.kt",
+    "sha256": "09A0E80939739664ED3A2C9DB70E68D7971AE3AC34106FA4B6B6A19C3B106544",
+    "lastWriteUtc": "2026-10-29T09:45:25.8891559Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\TimeFormat.kt",
+    "sha256": "64EC44142279A19DC665CEF05F656C0AE921BEB7062D80B1EE60C8D67544500A",
+    "lastWriteUtc": "2026-11-02T04:22:05.4207784Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotRequestFactory.kt",
+    "sha256": "4A09CEB161DE5AE8B3B7C2BDE08FDBB0CC805B78C03FAC7D49663D8166DDCC66",
+    "lastWriteUtc": "2026-11-02T10:34:13.1715329Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotManager.kt",
+    "sha256": "B16B5D16DDCF5EECE4B76D7246433D58F0815D751CFFE282DCEC527DD45ED369",
+    "lastWriteUtc": "2026-11-02T05:21:27.0499988Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotCoilInterceptor.kt",
+    "sha256": "7970E0DB4B47AA842768FACBC07FE0291B5B5EE70072A242EBA1493FAAD2E619",
+    "lastWriteUtc": "2026-10-28T04:55:28.6241637Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ReportUrlRetry.kt",
+    "sha256": "3865051B10F2439BDC7B3CDF7C61847B3FC93F5DEA0B23729B5FC3A211CE9A42",
+    "lastWriteUtc": "2026-10-27T11:11:48.3386895Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ReportComparisonSelector.kt",
+    "sha256": "110D7C9EC929C5396BFF0A1123893823E81BF7D8E4714413F861161B2BA98104",
+    "lastWriteUtc": "2026-10-30T08:20:24.4125971Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\RejectionReasonRenderer.kt",
+    "sha256": "D38C53A5BCC262531176B46699F9D9CDDB9B87B9A39D2CFC56AF7E0768AEBC96",
+    "lastWriteUtc": "2026-10-29T12:56:37.1400371Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PrivateScreenshotDiskCache.kt",
+    "sha256": "3FF1AA6081CD63793FFD3F8BCA0754DA6B85932D1B26CC0250E14BA702EFD7BB",
+    "lastWriteUtc": "2026-11-02T05:00:22.8051646Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PreparedScreenshot.kt",
+    "sha256": "0249A91806819D10988FB8874C9FDAABB6D4DF3ED1BAF1A8573FA6658F3541DD",
+    "lastWriteUtc": "2026-11-02T05:26:23.7714828Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PlayStoreUpdateChecker.kt",
+    "sha256": "208E2ED1285DD7F32F15514D6977B0477E442FCC87EFB575C70194368A310F73",
+    "lastWriteUtc": "2026-10-27T11:11:48.3381688Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\PlayStoreHelper.kt",
+    "sha256": "F07CB6BC364692DFDE4F25B7FA6890C41C0D5638295CF46D3D64FE904FC602FA",
+    "lastWriteUtc": "2026-10-27T11:11:48.3376492Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\NotificationRenderer.kt",
+    "sha256": "2BDA1A36CC665A3E35325D62FE8134BE2DD9CAB5B39C94D49F76893FEB91FD2C",
+    "lastWriteUtc": "2026-10-29T12:56:04.2010712Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\NotificationPopupBlockerCoordinator.kt",
+    "sha256": "6F2526C99C5C7980C7FD4EB7636D96840974720746A744545120790E8EB45310",
+    "lastWriteUtc": "2026-10-30T13:33:38.4929900Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\NetworkMonitor.kt",
+    "sha256": "DEF350479E5B4C103D29E8BD0EA2DEB495371DF856BBBFB9F62CC4B56F0FE913",
+    "lastWriteUtc": "2026-10-27T11:11:48.3376492Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\InstalledAppVersionReader.kt",
+    "sha256": "82F22C169053E665D332ED364BBECB5E609AE23A122DD61887EB858B60600105",
+    "lastWriteUtc": "2026-10-29T03:48:20.5823027Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\InstalledAppCache.kt",
+    "sha256": "D6B53E1B0368984D3881C1FA18F04D8C39E2ADFC36ADED126CCE75E600F82357",
+    "lastWriteUtc": "2026-10-28T09:22:54.4778611Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ImageTelemetryCollector.kt",
+    "sha256": "CF4C6F46830729CE2162DF663BB74D22965ACA495D429977141470AA0CDCEE3E",
+    "lastWriteUtc": "2026-10-28T05:11:58.1964231Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ImageInstrumentation.kt",
+    "sha256": "CD5C873782C75ACDD53C124C9777061144F5CDAFC1E2B3DAC76180035BAC5815",
+    "lastWriteUtc": "2026-10-28T04:52:22.9954955Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ImageHashHelper.kt",
+    "sha256": "2448F1BF1432EA23CA4B49A12D389AC572359F990EC46CD73C632B3D2C7F7856",
+    "lastWriteUtc": "2026-10-30T07:52:21.7216259Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\IconRoutingHelper.kt",
+    "sha256": "BB8F4B3C7A435ECE7C2590F14EFC4AC220FA7710394187120C5023CCCDBEE73C",
+    "lastWriteUtc": "2026-10-28T06:22:35.3141355Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\FirebaseStorageHelper.kt",
+    "sha256": "A17D352BFCCADE235611FEBA6798B51C9235A71B7228B2FB14A1AE53F9B0EA96",
+    "lastWriteUtc": "2026-10-29T01:06:20.0458861Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\DetailedImageComparator.kt",
+    "sha256": "94EE53EEFBCA66D7759C40999470434840D76AE3E057585BBA5FEAE3F2A673A8",
+    "lastWriteUtc": "2026-10-30T08:29:11.5778867Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\CreditLogRenderer.kt",
+    "sha256": "8235D6565E45C41278976C8AFC2097CC792926361D05F2E9A1A6DBBC50BA25B6",
+    "lastWriteUtc": "2026-10-29T11:58:13.1984076Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\ComparisonStateCoordinator.kt",
+    "sha256": "DF0071F1C38869034A536FD2CF30D11B24D587AA5F8686FCA68A7C178219BC94",
+    "lastWriteUtc": "2026-10-30T08:29:11.3932379Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\CoinSoundPlayer.kt",
+    "sha256": "5065F585DC8E28E6685BE12B305C7ADA71640CDA5F00493FC00594DB50748B69",
+    "lastWriteUtc": "2026-10-27T11:11:48.3366004Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\AppForegroundTracker.kt",
+    "sha256": "5C62D308686D3A9510EA7B0C3D833066554F811BEE7D22B94B35C663DBCBAF09",
+    "lastWriteUtc": "2026-10-30T13:31:47.1537795Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\util\\AppCheckObservationConfig.kt",
+    "sha256": "3993C7C7F3E211F0A5FEC80D5400A83A71BA808BC1E019D4997ADF18CB62F1E0",
+    "lastWriteUtc": "2026-10-28T10:02:56.6819764Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\BusinessPolicyRepository.kt",
+    "sha256": "A4F0967B311FD1E1A7F08910BB258145000DF6EFE98A88B8826442EF29BA2E56",
+    "lastWriteUtc": "2026-11-01T11:59:08.4883622Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\BusinessPolicyModels.kt",
+    "sha256": "37AAD5053D4F35B230173E9CC311A5D7068004F9863C90C8F61B69893F457E56",
+    "lastWriteUtc": "2026-11-01T11:58:29.1312900Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\AuthRepository.kt",
+    "sha256": "A7F51DFBB3E2356580C3F481B4C5F9AC143F2855BD803F0E4520B9244C4987E5",
+    "lastWriteUtc": "2026-10-28T05:52:50.3827314Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "sha256": "5223773A4B1ACDEEB8B476ECCE5B1CBAED0C566BDD8CC5E3BD5E83B8BF1145FF",
+    "lastWriteUtc": "2026-11-05T00:49:24.0239029Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignPushStore.kt",
+    "sha256": "263B150C3D14D44E22BACF3D7DB4783E7403732E300B9797F8F2BA9074D01AB8",
+    "lastWriteUtc": "2026-10-29T07:21:08.9367830Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\FinancialIntentStore.kt",
+    "sha256": "FCB00E89E499CC8EA4A2E5CB0EACE861DA44650700087B2F8D772B26A65ECBF9",
+    "lastWriteUtc": "2026-11-01T11:58:17.8814955Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\help\\HelpModels.kt",
+    "sha256": "64547B148FA7BA5ACA7A54AB3AE53F4831961306E48CA6127F2BBD5E2F8CBCCC",
+    "lastWriteUtc": "2026-11-03T05:25:20.5106648Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\help\\HelpDocumentParser.kt",
+    "sha256": "DCAC6C798C10F7187EBC1CAC79871FD33C6CA090BE549E39EF33C83BE23A3EB9",
+    "lastWriteUtc": "2026-11-03T05:32:08.7052839Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\help\\HelpContentRepository.kt",
+    "sha256": "CF488787E347DD4A90C369AFC998B6DBD0622C47CC2089CA67C8D5FC746FC46E",
+    "lastWriteUtc": "2026-11-03T05:25:48.1026958Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\navigation\\NavGraph.kt",
+    "sha256": "8CCAC83C4DE981BBF17A059A7B6B1A013D5BF34AACD840B38F155E95554AF36B",
+    "lastWriteUtc": "2026-11-03T16:37:41.0557630Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\ProfileViewModel.kt",
+    "sha256": "8DF674A5BDF3B5EEDC88545AB5860E6102AF5AA20876D38A277BD36E2C3B989C",
+    "lastWriteUtc": "2026-11-01T15:12:45.1629714Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "sha256": "B1A715C96B3C4152832E1D3FE04F70D26F64C8F5FD353EB8287E999F0E1B98BF",
+    "lastWriteUtc": "2026-11-05T09:57:00.1592553Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\NotificationPopupViewModel.kt",
+    "sha256": "FF1C924C3475C048F4042AD5E70540A9835176E4D0B27B23C0530F534D60786B",
+    "lastWriteUtc": "2026-11-01T06:31:18.1521831Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\MissionReportViewModel.kt",
+    "sha256": "D0FB3CD24604AB3799E470D454D2AC80F76D69BD41B5F90B1AAA36D6CA9CE514",
+    "lastWriteUtc": "2026-11-03T13:09:57.8489957Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\MissionCreateViewModel.kt",
+    "sha256": "E17B0AD6E4AD20596FA270C384570FDF48BC05913C4C1AED84513F1B38E4493C",
+    "lastWriteUtc": "2026-11-03T12:36:16.4453764Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\MemberDetailViewModel.kt",
+    "sha256": "E30E54F883EA00E7F6BF7BB2D59DEE0F648F24BD749233DA66F03397BD048D2C",
+    "lastWriteUtc": "2026-11-01T15:41:36.1278493Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "sha256": "7E8659F1743F5AED4DACD33B0ADA7D723D3088766D7CB077A875964624906FF5",
+    "lastWriteUtc": "2026-10-31T15:36:04.8862964Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrder.kt",
+    "sha256": "31DC90962B11F45F693363D31A54A65DF88C3ACE541750399EF6CAD20C44506A",
+    "lastWriteUtc": "2026-10-29T05:48:24.6199937Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CreateCampaignViewModel.kt",
+    "sha256": "06265CB3B5615C476698026218E6A00D24BA4AF9427346DB6C602CDA11FE53A7",
+    "lastWriteUtc": "2026-11-03T16:37:41.2012680Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CarryoverPolicyViewModel.kt",
+    "sha256": "3FBD90BC000E08E965EE35FDFFDEFF47723B6BE544819147BC02192CBFB42CE9",
+    "lastWriteUtc": "2026-11-01T16:07:35.9765193Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignDetailViewModel.kt",
+    "sha256": "1E34957D6617EA3F842F78DCB123BD2A0D8672B7A1C1F8E7EAF594FB665A9F7F",
+    "lastWriteUtc": "2026-11-05T00:59:09.9873546Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AuthViewModel.kt",
+    "sha256": "429A8FC7B4923DDA11F064FA4272EED26C432E9827D24CC6D9934E5022C063E6",
+    "lastWriteUtc": "2026-11-02T11:08:04.9560793Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AppUpdateReleaseViewModel.kt",
+    "sha256": "0E1AABC755D8BF921B25E91F4727E375ED6B8D8046DC8DA245C9BD55D83AEA4D",
+    "lastWriteUtc": "2026-11-01T16:06:43.1293325Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminUsersViewModel.kt",
+    "sha256": "24A2CADB9E7EC89D58F47ACC179206EA80EC0FE7414CFD43F454DC829AD77D75",
+    "lastWriteUtc": "2026-11-03T05:10:54.0807961Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminTesterReportsQueueViewModel.kt",
+    "sha256": "18FC378C7DBA96BC8591B0C1D80111F53D5C8A0FB2CBAC62DB90D55339588B15",
+    "lastWriteUtc": "2026-11-01T15:42:41.4403839Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminSystemMonitorViewModel.kt",
+    "sha256": "992D11B6DB7FCB134566FC9AC12CD941DB13821A8CA82EEF07BE1739D6BDFC1F",
+    "lastWriteUtc": "2026-11-01T15:43:28.3575526Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminReportsViewModel.kt",
+    "sha256": "9739A063AD2A62E3C8EB4537DE5FC6F113451E8A1337C59DD0CB133C47689911",
+    "lastWriteUtc": "2026-11-01T06:52:23.6856617Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminPauseDialogController.kt",
+    "sha256": "28177D648ABF88D88853F0375E3496A0D665FE9591887CC8EAD8282E6B09E514",
+    "lastWriteUtc": "2026-11-05T00:50:24.2051397Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminNotificationCampaignViewModel.kt",
+    "sha256": "C262DCB3CB5591A7F91CD2F751F05B43F5A87E9456F3AED56B4A398D42540437",
+    "lastWriteUtc": "2026-11-01T15:14:45.2866074Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminCampaignsViewModel.kt",
+    "sha256": "7A1AC155E46B6E4A11AA0DDC03374FBDAC3C53046F9DCBA3B27AEEC5571A5AB6",
+    "lastWriteUtc": "2026-11-01T15:42:21.9129769Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminBusinessPolicyViewModel.kt",
+    "sha256": "58CA4FD11C53AC8A3DC41530AA0EF50D8939EFD439E6D1A5EA7C8AAD92049A56",
+    "lastWriteUtc": "2026-11-01T23:52:54.1628070Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminAuditViewModel.kt",
+    "sha256": "F1CF6E3ABDC539F477378DF8B05B5CCFD53D021F35E914AD0D8F1EF67F16D357",
+    "lastWriteUtc": "2026-11-01T15:43:04.2573153Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\UpdateScreens.kt",
+    "sha256": "3F70F4D83A35F72902BFB4CBE92B091352A7A722598F9AE9B00A5F432952F2E9",
+    "lastWriteUtc": "2026-11-03T23:35:27.9807377Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\QuestsScreen.kt",
+    "sha256": "EE330DB2CB8A9EC80CB0A7C7F386AA5DBB9D6397F2BDE75CE4039105EC11325D",
+    "lastWriteUtc": "2026-11-03T16:40:43.0782234Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\ProfileScreen.kt",
+    "sha256": "E0B065FE712C55C1D345B323ED68260A86EDBA6363150F8BD6AB69DF87794AAE",
+    "lastWriteUtc": "2026-11-03T05:29:00.2758250Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\PostAppGuideScreen.kt",
+    "sha256": "D6AB1DDDB9FFB766C81D9F7E077EB5E74992B51BDFE3F0AB26C5A61CB2BDEBDC",
+    "lastWriteUtc": "2026-10-30T02:04:48.2387491Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "sha256": "96C27760373C3CBDE91015F4D9D20FFDFCB3431DB524839174E3E5B35045911C",
+    "lastWriteUtc": "2026-11-05T09:49:37.2307034Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MissionReportScreen.kt",
+    "sha256": "4F15DDBAF632D6E9813EF82D64C9F991EAED8206003A4A75BF8C7AD22D9EB577",
+    "lastWriteUtc": "2026-11-04T01:17:09.1303611Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MissionCreateScreen.kt",
+    "sha256": "1AF5EA5311F703CEBF9BC55DF774D3E24E41D46505318B7EC13C2BE97F8B634E",
+    "lastWriteUtc": "2026-11-03T12:45:48.9223542Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MissingConfigScreen.kt",
+    "sha256": "2B79B6B14A5E67A39E83B9B99E2A2318D36132C7FA33800F0216F428305A8DD4",
+    "lastWriteUtc": "2026-11-03T23:35:28.1295529Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MemberDetailScreen.kt",
+    "sha256": "15111CE7D7EBCB7BD457B8D255ABBDAC4D52C4E3B33C03CDAE5CB19CE17BDC3D",
+    "lastWriteUtc": "2026-11-01T15:13:13.2311610Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "sha256": "59201DC9B4E72C70DE20350486694C4CEFC85536A17CBE4598630C228F6CF6F7",
+    "lastWriteUtc": "2026-11-03T16:40:42.9236607Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HelpScreen.kt",
+    "sha256": "F09A95C16AD95EBE87A4BBB06E1C6190C9B8827BE133733CD2E753E044329F49",
+    "lastWriteUtc": "2026-11-03T05:32:09.0415121Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\GoogleSignIn.kt",
+    "sha256": "DBBCE93D6C615C87D4B0F0419C89E3DDACDA3EA82B8222ABD024F0AF50B49207",
+    "lastWriteUtc": "2026-10-29T11:52:39.9700137Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\CreateCampaignScreen.kt",
+    "sha256": "EE028CD672F5473EA4A7D727E949FD5448DB0C029EE89A8EC04951682CEA1207",
+    "lastWriteUtc": "2026-11-03T16:37:42.7570415Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\CarryoverPolicyScreen.kt",
+    "sha256": "A74849B254B5A7F897EA8E03D2FDE8AB987DCBDBF086328629A0D3AE7CF0573D",
+    "lastWriteUtc": "2026-11-01T15:29:22.1658730Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\CampaignDetailScreen.kt",
+    "sha256": "CB9AEDDA2DA67F814E78D41F67A40292C2240B0B11504987565C0BD451A54616",
+    "lastWriteUtc": "2026-11-05T00:54:10.9353413Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AuthScreen.kt",
+    "sha256": "497CCE58D65BF0E080050389DD911008D2025B8516480FD452580E20B376F0E4",
+    "lastWriteUtc": "2026-11-03T23:35:27.6764426Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AppUpdateReleaseScreen.kt",
+    "sha256": "5554799964AE05A30757EB5E487A51D7A80406F4CCE26A3BB7F1504A52F0533D",
+    "lastWriteUtc": "2026-11-01T12:06:17.7779300Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminUsersScreen.kt",
+    "sha256": "071D7DE860EEA5F9C3678BDE7EECB23933CB49084D6F2740DB6147764CCD853D",
+    "lastWriteUtc": "2026-11-03T05:10:54.2503301Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminTesterReportsQueueScreen.kt",
+    "sha256": "9D9BA1177A5F37F79A68D1ED182DE0D1E435B07A6AF1FD7F17DDDE709231A894",
+    "lastWriteUtc": "2026-11-02T10:49:56.1149218Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminSystemMonitorScreen.kt",
+    "sha256": "BBBAA39454C4553100C706F20AF2E5570F4B292AF6C6471F7363AE93357C6F49",
+    "lastWriteUtc": "2026-11-01T15:16:03.3481600Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminReportsScreen.kt",
+    "sha256": "5D0BA1766189B3EFAF3788D2B19051C0308DE6034611EA5F1DB9F10DA94EC1B5",
+    "lastWriteUtc": "2026-11-01T06:42:12.0607061Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminNotificationCampaignScreen.kt",
+    "sha256": "F314906E5C2E4CA31F2BAA06B9043F49F8E7CB8598827BA69E1B01077EC3C542",
+    "lastWriteUtc": "2026-11-01T12:08:15.0058009Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminCampaignsScreen.kt",
+    "sha256": "6C6C27EE15B86B6E01D905E03236BD9B0F35D6F82E63B4442643AFA401FC50D4",
+    "lastWriteUtc": "2026-11-01T11:40:37.2043139Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminBusinessPolicyScreen.kt",
+    "sha256": "C6549236CC2B96489869A293F5F256E3AB3EAA1992E61290F45003156BEE79AA",
+    "lastWriteUtc": "2026-11-01T23:52:54.3161119Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminAuditScreen.kt",
+    "sha256": "1C267514D1837D3C1F45B037EE2381C3D402C17821A417EACF30F2D35CB691F2",
+    "lastWriteUtc": "2026-11-01T11:38:45.5854150Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AccountLockedScreen.kt",
+    "sha256": "DBEDFE8DE469133A2E9AD73E372514B99968D148C88FC419E769227746D63AAC",
+    "lastWriteUtc": "2026-10-30T01:56:44.0832832Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\QuestSection.kt",
+    "sha256": "FDECEF4CFD953ADFF2A56F917DD1A5C56351CC3B841A2EE9E389EBCBC2A8E3E6",
+    "lastWriteUtc": "2026-10-30T01:49:50.2346813Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\QuestHeroBanner.kt",
+    "sha256": "742209C14E6C92EAA87643691DA4022E76308ACAEB8552335B98009B8C9374B4",
+    "lastWriteUtc": "2026-10-30T01:49:29.4976036Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\ProgressSection.kt",
+    "sha256": "718A7D43EFA81911681A2FCAA0DFC67790FED6789B161CBE8161542012CFE5CC",
+    "lastWriteUtc": "2026-10-27T11:11:48.3261016Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\NotificationBottomSheet.kt",
+    "sha256": "7D0BE61B2F271B7F272FC918F303E43A191541F48F6D66232DF34598150EF24E",
+    "lastWriteUtc": "2026-11-03T23:35:46.2990844Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\MyAppCard.kt",
+    "sha256": "641F8A2EDE337A377163C467E745A223603C758CD2B24D89C4269FA8E6E225AC",
+    "lastWriteUtc": "2026-10-28T15:55:34.8669124Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\ImageViewerComponents.kt",
+    "sha256": "40B6109BDC3C87CEA545F15FE94E83FCCF7601BE641D7C8F3A9496E737CAE4D1",
+    "lastWriteUtc": "2026-11-03T23:35:28.2792655Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "sha256": "F6AA15D46553B114B130423D053034DBD90402DB2E38B6A83247A0E6EEBB543B",
+    "lastWriteUtc": "2026-11-05T11:55:15.7281741Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBottomSheet.kt",
+    "sha256": "C078C793C991C2C62E2DA9AF0050D4791855FC9B1B32853A2F5F0E00742D1D77",
+    "lastWriteUtc": "2026-11-03T23:35:46.1480280Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBadge.kt",
+    "sha256": "9742615E0FAA285BF10309B1DBB5032C36D244BC48A6A95817B6FD08DB1154BD",
+    "lastWriteUtc": "2026-10-28T15:50:40.4912862Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditRewardOverlay.kt",
+    "sha256": "198BA26629CECFB906FBB04E563D26DBD9CBE93741679FC6ED0F6007943DDC80",
+    "lastWriteUtc": "2026-10-30T02:01:06.2420478Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CampaignCard.kt",
+    "sha256": "21F01990C2C248145298E76B97700A97DCDFB7D24398AFAAB2ACC43F5618C742",
+    "lastWriteUtc": "2026-10-28T15:53:41.6514296Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AppIcon.kt",
+    "sha256": "8B6C78B60FA47C8CB1F06DEB0CBFB3DCF2B355D104554C9AE50813CAFBA5F123",
+    "lastWriteUtc": "2026-10-28T09:30:58.3908034Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AnimatedCreditBalance.kt",
+    "sha256": "D48CDCCB4719861AC7282A0FED0B8C7C9F395C076B8837A36D1A095C7AFB65BB",
+    "lastWriteUtc": "2026-10-27T11:11:48.3226960Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AdminNotificationPopupHost.kt",
+    "sha256": "C0C130DF4298E5EFD6D4566FBB54E2A8D26BD68C76686D7A3D60B9B91254BDAA",
+    "lastWriteUtc": "2026-10-30T13:34:57.4116209Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AdminDailyTaskPolicySheet.kt",
+    "sha256": "04F6BC47BC71ADEDB69DB51D2B6D291A6DCC189A93886AC2A9BA713222C0CCEF",
+    "lastWriteUtc": "2026-11-03T23:35:45.9918271Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Type.kt",
+    "sha256": "76919AC5646D6447B30AA58A79A50E728CC2D9889E1DC8F0FCC8E4F16873BD70",
+    "lastWriteUtc": "2026-10-27T11:11:48.3334533Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Theme.kt",
+    "sha256": "5602F0FB3D5E44C6DFEA02CE1F708D76A1ADB2C510FA49F439F29A86BE7E11DE",
+    "lastWriteUtc": "2026-10-28T15:48:02.9609917Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\StatusColors.kt",
+    "sha256": "094C3C8F2B20C57FC384E56CFBD31A75821787CE2EC67F77B865EE49C6EE5A2E",
+    "lastWriteUtc": "2026-10-28T15:48:03.1241775Z"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Color.kt",
+    "sha256": "C4C93CD0FF09AC877F5A2E07D0598B459B299C618E01685E9F1164315A9BF75F",
+    "lastWriteUtc": "2026-10-30T01:48:04.3379893Z"
+  }
+]

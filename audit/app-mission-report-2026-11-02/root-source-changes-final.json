@@ -1,0 +1,242 @@
+[
+  {
+    "path": "app/build.gradle.kts",
+    "status": "modified",
+    "beforeSha256": "EB62F9BE78A5EFC759170462B6D3771CABBED6403FEA837BF5EA762167B28C04",
+    "afterSha256": "39089F652D438B56223A9B044FD2E8DFFA2B0D8F1CF5332B79F448F0F8A04BD3"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/AdminManagementModels.kt",
+    "status": "modified",
+    "beforeSha256": "8BA5E271C4049A844DDBA5CD743BB0E77DAC957BD5CAC1AB0BED9927B0FC3161",
+    "afterSha256": "CB978E30C9AB9F3835FEADB235D7F6A06CBA462223C6FD794D6D5BB1E66F32DF"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "status": "modified",
+    "beforeSha256": "FEAA5FA956D32FE796F13CE70B21CE9F0AA339F7BF8357D3A9EFDB51FF3D39C5",
+    "afterSha256": "784E47B7D318C7906BE8F22F8ACDCC6F5C5B9FA6D3A8446A4719088B1D013CD7"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/MissionReportDraftStore.kt",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "5FF249CB50507AD36FBC3FD3519F8CC8E29D1464E70C1127BE6226FECD11D920"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "status": "modified",
+    "beforeSha256": "B9D6EDB24CED32ECCA92E6A02381B447CAB23A5B5A93D042DDB29CA9FD673FDE",
+    "afterSha256": "90DAA88908E2EC42887DD85C8A2012EB86EE99D521FB55B6DE0B1A77A5C854C7"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/PendingReportStore.kt",
+    "status": "modified",
+    "beforeSha256": "D0396CC2927E771F91803ED6C9C2EA46817F0A8B2FE85BD91A12F8B6DC18AD22",
+    "afterSha256": "887A11E171F72F2680AB9577D32D0018B5ABEFAFB291181DF0F6EFD46BE0349D"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/ReportSubmitManager.kt",
+    "status": "modified",
+    "beforeSha256": "018307EC1B5CBB3CCF7E3C80FDC54E28D857CC4881B32988258714DFDA11FB52",
+    "afterSha256": "1346A5343E45A1F90B879E1BE24D8C3E742CCA7DEE6ED8D46A7C7F2B7A37A5E3"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/SupabaseMediaAccessGrantProvider.kt",
+    "status": "modified",
+    "beforeSha256": "B3DADB87DD11D83B5B435FA22B3C540C69C373B0CFC073CE2D308E98C22F72B8",
+    "afterSha256": "15A4B4F3418C6AC3A1B548DE174A6DE7283DE464A63B41ECEDEFFB6263CC4397"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/navigation/NavGraph.kt",
+    "status": "modified",
+    "beforeSha256": "123EA39E2FBFEE0160AB6CBDE62FF953477F243FE2A178138A8F2CD9BB68BB02",
+    "afterSha256": "6B73512C63D613C42ECAA48F28710EB6B14A55B6FAA7BE243C98C479415A9EFD"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminTesterReportsQueueScreen.kt",
+    "status": "modified",
+    "beforeSha256": "38D50FC9F543FA8B48E6C7609E445CE4346AB05A787418EECBDE60A01F62C09F",
+    "afterSha256": "9D9BA1177A5F37F79A68D1ED182DE0D1E435B07A6AF1FD7F17DDDE709231A894"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/MissionReportScreen.kt",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "2CD946560FDB15ABBD477E025039C007A181E99AFFC8556514CB0BD6B454D9E5"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt",
+    "status": "modified",
+    "beforeSha256": "0C0FCD94625B6BDEE2D36AFFC81450B3FF291A966A8EAEB1672BF34C56E0F9C8",
+    "afterSha256": "E49B31EC96C83B515F4F9396F53AB194F33F5EB31DE5FCFBE9F338AD2BFAA631"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/QuestsScreen.kt",
+    "status": "modified",
+    "beforeSha256": "C3C6424B6913E239E48D8B540DCD6FA83595EE8C434EA20E3E90FAB05BBC453E",
+    "afterSha256": "320E0CEAF8B3126F2ADC663DF95D0F2DE7BACC3023CF789D22C71256BF0A1A69"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AuthViewModel.kt",
+    "status": "modified",
+    "beforeSha256": "BC8A78FD6C5587F2543613866C5D355210507902F9B3C98500F6D12DA0E22DA3",
+    "afterSha256": "429A8FC7B4923DDA11F064FA4272EED26C432E9827D24CC6D9934E5022C063E6"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt",
+    "status": "modified",
+    "beforeSha256": "F9DE9B72893BEDCF23D108F77D2BF2D8FBEC2641B42D88FA4D5442A4FC721ED8",
+    "afterSha256": "BE4B219F8C72037E03AF3DF86830175DDCCED44A697CB075BAA67834A5CA1928"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/MissionReportViewModel.kt",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "8732E900805B61F57975B5C3B02A1C3B996E69FDAD4971DF8660A00D13BD2F78"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/PreparedScreenshot.kt",
+    "status": "modified",
+    "beforeSha256": "94B8185D2807E6711A5B9F1716EA55AD947304DB34CF529C849EF9E6E56A3766",
+    "afterSha256": "0249A91806819D10988FB8874C9FDAABB6D4DF3ED1BAF1A8573FA6658F3541DD"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/PrivateScreenshotDiskCache.kt",
+    "status": "modified",
+    "beforeSha256": "7A88C60424BA064B4E86F751560AE91161A7AC4827432BCA823AD396C2530301",
+    "afterSha256": "3FF1AA6081CD63793FFD3F8BCA0754DA6B85932D1B26CC0250E14BA702EFD7BB"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/ScreenshotManager.kt",
+    "status": "modified",
+    "beforeSha256": "2F2A6EE91C0DC2EFE1B4EBD9AC7FE5AC0CBF29CA091FEBEA38579BB544451AE6",
+    "afterSha256": "B16B5D16DDCF5EECE4B76D7246433D58F0815D751CFFE282DCEC527DD45ED369"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/ScreenshotRequestFactory.kt",
+    "status": "modified",
+    "beforeSha256": "79E9CAE80FDF394731B5E127912D4154019ECB33F4A6DC0AFBD3530B2C428664",
+    "afterSha256": "4A09CEB161DE5AE8B3B7C2BDE08FDBB0CC805B78C03FAC7D49663D8166DDCC66"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/TimeFormat.kt",
+    "status": "modified",
+    "beforeSha256": "72E9E4D9167BE009166757C6A4D6F831D7FCCF98F1E0C5204BAE1E204801E062",
+    "afterSha256": "64EC44142279A19DC665CEF05F656C0AE921BEB7062D80B1EE60C8D67544500A"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/work/ReportUploadWorker.kt",
+    "status": "modified",
+    "beforeSha256": "FAC8102B34C6862B2193DCD0586B4076990874DE4CBF90C8357C203FEEAA714E",
+    "afterSha256": "956749B2F54810DAFBF331A42665D5562E234844BAC2148277DCF320781A7388"
+  },
+  {
+    "path": "app/src/main/res/values-en/strings.xml",
+    "status": "modified",
+    "beforeSha256": "D0B9F37C4DFD8ACB886EA750B3B6FCE24D8193FCE32E66AEE64401AE2AB5C1B7",
+    "afterSha256": "7223944DC0EEA35430452E1EC3E53B060F66A08B71BFC7F0ADD9F406BA77DCBF"
+  },
+  {
+    "path": "app/src/main/res/values-vi/strings.xml",
+    "status": "modified",
+    "beforeSha256": "588EDF579E08F3F4839E15D8839D484B49E204921289D7DC3CCAE15D99A6E03D",
+    "afterSha256": "9DA670B85B18A49419BCA85D027DCB89DBB4FFF2B173C1B7D72111A575EC8687"
+  },
+  {
+    "path": "app/src/main/res/values/strings.xml",
+    "status": "modified",
+    "beforeSha256": "89430C62EEFA17EEB13C35AC9F403AFF4E915FC670D5FB223AAAA70A6CECE67D",
+    "afterSha256": "E58CFA43C58D7FC7B9817F53EB6A9D7B571FD5B82B0A5B98D881E5E1F452C2AF"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/MissionReportMultiAttachmentTest.kt",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "3019117DDE673555EFBCCB8CEDF53E012F8E13B3FAF0B55B8B8AB1A84C37025F"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt",
+    "status": "modified",
+    "beforeSha256": "CF99D12D787FC63EBDECC9E02320C9FCCC43F60D207E3A3FAFB58081234BE252",
+    "afterSha256": "CEA079B9F09FE202E5A0F0B86BEB0250B9869C3CF416B2A8EB04EDF5ADF5F4C0"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/ReportSubmitManagerIntegrationTest.kt",
+    "status": "modified",
+    "beforeSha256": "79EFCFFB436EB8B689DC969F41EE3985AEC6D862BC51EF7B5F39227AC547F9F7",
+    "afterSha256": "C5E554BBC1A95230C39A0776B21A2A67259F52587FE31DAD87962E0D7FC0313E"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/work/ReportUploadWorkerTest.kt",
+    "status": "modified",
+    "beforeSha256": "35441E1145DBD35EA318271676E1EF46E6308E3EE79E0D523F88F4ADFE2DCFC1",
+    "afterSha256": "1FC2ACD6D096C6C8D91434D48F80C79E0697B72204420E9CE8EA5DEDE874AD18"
+  },
+  {
+    "path": "backend/media-gateway/adapters/supabase-authority-adapter.mjs",
+    "status": "modified",
+    "beforeSha256": "96B702C27B5CA67F4595B0730390CA448F15F557E6E848A0AACEC6B91B2AD7B8",
+    "afterSha256": "379063704C817DAC83492A10522E59B23CA7F7234AE9ED13D1C47FF7D5403DA9"
+  },
+  {
+    "path": "backend/media-gateway/media-gateway-handler.mjs",
+    "status": "modified",
+    "beforeSha256": "8F3B57AFABAA41AB976758129A3E2F49447FCC7CEFAAB0D3D2AC9642810A403C",
+    "afterSha256": "E25E649899C88A179CFA907E8A46AB56F0BA2710C089567AF7FD6A14227E3FD6"
+  },
+  {
+    "path": "backend/media-gateway/media-gateway-server.test.mjs",
+    "status": "modified",
+    "beforeSha256": "C006C71990537A774DD3F5107A382BAFABEEB586B723DA09BF21CAA959BE25C7",
+    "afterSha256": "11A738983215549E7876C8CB1535F06D9AD9F8C0339AAF81B902A1EDA2395364"
+  },
+  {
+    "path": "KE_HOACH_CUA_SO_BAO_CAO_NHIEM_VU_APP_2026-11-02.md",
+    "status": "modified",
+    "beforeSha256": "DE4A729BC34B587B11BCEABCCAE33B226ABA1755AF9A674403E13529FF80F27F",
+    "afterSha256": "5807FA229C17419C3528316DD3C978DAE88DE564C296550BF40B535AA518FE5A"
+  },
+  {
+    "path": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "ED7E17603DA72F6A2C7CAE9DE5B26B6E3A69C99CB6ABE6ED7E157126EE00B97A"
+  },
+  {
+    "path": "supabase/tests/package.json",
+    "status": "modified",
+    "beforeSha256": "C8346AC6BAD6C030F2A1E2AEA5595A9C287750812433FA21ECFB61B2AAA8F44E",
+    "afterSha256": "F363BB1794D9F7B4F904CCAFDF95BED6A934C408C191ADD2B15FB95BD33D954B"
+  },
+  {
+    "path": "supabase/tests/run-admin-audit-hardening-test.mjs",
+    "status": "modified",
+    "beforeSha256": "516E8BE8317FAC85BA909F663CA35CBE020A06B91058D4F7CCF49C8C2AAD8D12",
+    "afterSha256": "7ABFEE3FDF887BEC93168B91703B746B997083100549B759EAF5D95A7B7BB1C6"
+  },
+  {
+    "path": "supabase/tests/run-admin-expansion-integration-test.mjs",
+    "status": "modified",
+    "beforeSha256": "78D92FAC7948504CEA66780F376F78DF8C71BAD3FE142CAD80E61B06DB8DDA2C",
+    "afterSha256": "0E195B7C6592E09372A46956CC9F4160752EE84BC2C2466A0297194EECFF74D2"
+  },
+  {
+    "path": "supabase/tests/run-admin-management-test.mjs",
+    "status": "modified",
+    "beforeSha256": "A0D5239A4DCE93F64E696FF53B92A6CD2ABB62ABC564E4CD5ED32148FCAE5E6E",
+    "afterSha256": "25D195328EFABBE55285E395B3BE2A8E937DFF0BD9FC638E57730DEB7AC0C01E"
+  },
+  {
+    "path": "supabase/tests/run-app-mission-window-test.mjs",
+    "status": "new",
+    "beforeSha256": null,
+    "afterSha256": "6C94FB4FFAF439DAFA72BD8A895043262B446996E9EA3A6F207E1CB98E200E3D"
+  },
+  {
+    "path": "supabase/tests/run-owner-tester-reports-count-test.mjs",
+    "status": "modified",
+    "beforeSha256": "87FEC1041B92197963E008E407892977254D81E4FE10EB8629DF65E879975684",
+    "afterSha256": "89E9F6904C99912500E65F1D87E547CD23D64550E12D8E6D8533A98C156D3B19"
+  }
+]

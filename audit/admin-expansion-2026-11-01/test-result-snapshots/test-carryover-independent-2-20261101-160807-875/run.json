@@ -1,0 +1,14 @@
+{
+    "logName":  "test-carryover-independent-2",
+    "arguments":  [
+                      "-I",
+                      "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.CarryoverStreamsIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T16:07:47.9206025Z",
+    "finishedUtc":  "2026-11-01T16:08:07.8891671Z",
+    "currentRunXmlCount":  1
+}

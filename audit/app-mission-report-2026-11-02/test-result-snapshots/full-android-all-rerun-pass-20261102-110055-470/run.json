@@ -1,0 +1,13 @@
+{
+    "logName":  "full-android-all-rerun-pass",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--rerun-tasks"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T10:58:56.1799872Z",
+    "finishedUtc":  "2026-11-02T11:00:55.5370829Z",
+    "currentRunXmlCount":  74
+}

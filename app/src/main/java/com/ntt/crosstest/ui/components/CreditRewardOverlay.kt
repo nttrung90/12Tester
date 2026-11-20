@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.util.CoinSoundPlayer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -178,21 +179,21 @@ fun CreditRewardOverlay(
 
 @Composable
 private fun RewardCard(reward: CreditReward) {
-    val dark = isSystemInDarkTheme()
     val isTopUp = reward.type == CreditRewardType.TOPUP
     val container = if (isTopUp) {
-        if (dark) Color(0xFF14361B) else Color(0xFFE8F5E9)
+        MaterialTheme.statusColors.successContainer
     } else {
         MaterialTheme.colorScheme.surface
     }
-    val accent = when {
-        isTopUp -> if (dark) Color(0xFFA5D6A7) else Color(0xFF2E7D32)
-        else -> Color(0xFFB8860B)
+    val accent = if (isTopUp) {
+        MaterialTheme.statusColors.success
+    } else {
+        MaterialTheme.statusColors.warning
     }
     val borderColor = if (isTopUp) {
-        if (dark) Color(0xFF4CAF50) else Color(0xFF66BB6A)
+        MaterialTheme.statusColors.success.copy(alpha = 0.5f)
     } else {
-        Color(0xFFFFB300).copy(alpha = 0.65f)
+        MaterialTheme.statusColors.warning.copy(alpha = 0.5f)
     }
     val title = rewardTitle(reward)
     val subtitle = rewardSubtitle(reward)
@@ -217,11 +218,7 @@ private fun RewardCard(reward: CreditReward) {
                     modifier = Modifier
                         .size(34.dp)
                         .background(
-                            color = if (isTopUp) {
-                                accent.copy(alpha = 0.16f)
-                            } else {
-                                Color(0xFFFFB300).copy(alpha = 0.18f)
-                            },
+                            color = accent.copy(alpha = 0.16f),
                             shape = CircleShape,
                         ),
                     contentAlignment = Alignment.Center,

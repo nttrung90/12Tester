@@ -36,10 +36,14 @@ object ImageHashHelper {
     }
 
     enum class SimilarityLevel {
-        DUPLICATE,        // >= 92% similarity (Hamming <= 5): Likely the exact same screenshot re-uploaded
-        HIGH_SIMILARITY,  // 85%..91% similarity (Hamming 6..9): Same static screen, minor changes (clock/battery)
-        MODERATE,         // 75%..84% similarity (Hamming 10..15): Same flow/screen with interaction (opened dialog/keyboard)
-        DIFFERENT         // < 75% similarity (Hamming >= 16): Distinctly different screens/features
+        UNKNOWN,          // Thiếu / sai định dạng dHash, không đủ dữ liệu so sánh
+        SIMILAR_LAYOUT,   // Bố cục gần giống (Hamming <= 9): cần đối chiếu ảnh trực tiếp
+        MODERATE,         // Bố cục tương đối khác (Hamming 10..15)
+        DIFFERENT,        // Khác bố cục rõ rệt (Hamming >= 16)
+        @Deprecated("Sử dụng SIMILAR_LAYOUT", ReplaceWith("SIMILAR_LAYOUT"))
+        DUPLICATE,
+        @Deprecated("Sử dụng SIMILAR_LAYOUT", ReplaceWith("SIMILAR_LAYOUT"))
+        HIGH_SIMILARITY
     }
 
     data class ComparisonResult(
@@ -48,9 +52,14 @@ object ImageHashHelper {
         val level: SimilarityLevel,
         val label: String,
         val isSuspectDuplicate: Boolean,
+        val isExactDuplicate: Boolean = false,
     ) {
-        /** Chỉ chặn nộp khi gần như trùng khít; HIGH_SIMILARITY chỉ cảnh báo. */
-        val isBlockingDuplicate: Boolean get() = level == SimilarityLevel.DUPLICATE
+        /**
+         * dHash CHỈ là perceptual layout hash (64-bit so sánh sáng/tối 9x8),
+         * KHÔNG BAO GIỜ là bằng chứng exact để hard-block.
+         * Thuộc tính này giữ lại để tương thích callsite, luôn false khi không có bằng chứng exact.
+         */
+        val isBlockingDuplicate: Boolean get() = isExactDuplicate
     }
 
     /**
@@ -87,6 +96,14 @@ object ImageHashHelper {
     }
 
     /**
+     * Kiểm tra tính hợp lệ của chuỗi dHash (phải đúng 16 ký tự hexadecimal).
+     */
+    fun isValidDHash(hash: String?): Boolean {
+        if (hash == null || hash.length != 16) return false
+        return hash.all { c -> (c in '0'..'9') || (c in 'a'..'f') || (c in 'A'..'F') }
+    }
+
+    /**
      * Downloads/fetches cached bitmap via Coil and computes dHash from image URL.
      */
     suspend fun computeDHashFromUrl(
@@ -95,8 +112,15 @@ object ImageHashHelper {
         report: TesterReport? = null,
     ): String? = withContext(Dispatchers.IO) {
         if (imageUrl.isBlank()) return@withContext null
-        if (report?.imageHash?.isNotBlank() == true) return@withContext report.imageHash
-        if (report?.isScreenshotExpired == true || ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+        val attachment = report?.attachments?.firstOrNull { it.screenshotUrl == imageUrl || it.thumbnailUrl == imageUrl }
+        val savedHash = when {
+            attachment != null -> attachment.imageHash
+            report != null && (imageUrl == report.screenshotUrl || imageUrl == report.thumbnailUrl) -> report.imageHash
+            else -> null
+        }
+        if (isValidDHash(savedHash)) return@withContext savedHash
+        val descriptor = ScreenshotRequestFactory.createDescriptor(imageUrl, report)
+        if (ScreenshotManager.isExpired(descriptor)) {
             return@withContext null
         }
 
@@ -114,14 +138,14 @@ object ImageHashHelper {
                 context = context,
                 url = imageUrl,
                 purpose = "hash",
-                report = report,
+                descriptor = descriptor,
             )
 
             // Guard trước khi tính hash
             if (genAtStart != ScreenshotManager.sessionGeneration.get()) {
                 return@withContext null
             }
-            if (ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+            if (ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired, report?.storageProvider, report?.viewExpiresAt)) {
                 return@withContext null
             }
             if (bitmap == null || bitmap.isRecycled) {
@@ -135,7 +159,7 @@ object ImageHashHelper {
                 if (genAtStart != ScreenshotManager.sessionGeneration.get()) {
                     return@withContext null
                 }
-                if (ScreenshotManager.isExpired(imageUrl, report?.createdAt, report?.mediaExpired)) {
+                if (ScreenshotManager.isExpired(descriptor)) {
                     return@withContext null
                 }
                 hashCache.put(cacheKey, hash)
@@ -150,44 +174,57 @@ object ImageHashHelper {
 
     /**
      * Calculates the Hamming distance between two 16-hex dHash strings.
-     * Returns 0..64 (number of differing bits).
+     * Returns 0..64 (number of differing bits) or -1 if any hash is invalid.
      */
     fun hammingDistance(hash1: String?, hash2: String?): Int {
-        if (hash1.isNullOrBlank() || hash2.isNullOrBlank()) return 64
-        val h1 = hash1.toULongOrNull(16)?.toLong() ?: return 64
-        val h2 = hash2.toULongOrNull(16)?.toLong() ?: return 64
+        if (!isValidDHash(hash1) || !isValidDHash(hash2)) return -1
+        val h1 = hash1?.toULongOrNull(16)?.toLong() ?: return -1
+        val h2 = hash2?.toULongOrNull(16)?.toLong() ?: return -1
         return java.lang.Long.bitCount(h1 xor h2)
     }
 
     /**
-     * Calculates percentage similarity between 0% and 100%.
+     * Calculates percentage similarity between 0% and 100%, or -1 if invalid.
      */
     fun similarityPercentage(hash1: String?, hash2: String?): Int {
         val dist = hammingDistance(hash1, hash2)
+        if (dist < 0) return -1
         val sim = ((64 - dist) * 100) / 64
         return sim.coerceIn(0, 100)
     }
 
     /**
      * Evaluates comparison result between two image hashes.
+     * Lưu ý: dHash CHỈ phản ánh tương đồng bố cục thô (9x8 grayscale), không đo tính năng mới
+     * và không bao giờ được suy diễn thành bằng chứng trùng lặp tuyệt đối.
      */
     fun compare(hash1: String?, hash2: String?, context: Context): ComparisonResult {
+        if (!isValidDHash(hash1) || !isValidDHash(hash2)) {
+            return ComparisonResult(
+                similarity = -1,
+                hammingDistance = -1,
+                level = SimilarityLevel.UNKNOWN,
+                label = context.getString(R.string.similarity_unknown),
+                isSuspectDuplicate = false,
+                isExactDuplicate = false,
+            )
+        }
+
         val dist = hammingDistance(hash1, hash2)
         val sim = ((64 - dist) * 100) / 64
         val clampedSim = sim.coerceIn(0, 100)
 
         val level = when {
-            dist <= 5 -> SimilarityLevel.DUPLICATE
-            dist <= 9 -> SimilarityLevel.HIGH_SIMILARITY
+            dist <= 9 -> SimilarityLevel.SIMILAR_LAYOUT
             dist <= 15 -> SimilarityLevel.MODERATE
             else -> SimilarityLevel.DIFFERENT
         }
 
         val label = when (level) {
-            SimilarityLevel.DUPLICATE -> context.getString(R.string.similarity_duplicate_format, clampedSim)
-            SimilarityLevel.HIGH_SIMILARITY -> context.getString(R.string.similarity_high_format, clampedSim)
-            SimilarityLevel.MODERATE -> context.getString(R.string.similarity_moderate_format, clampedSim)
-            SimilarityLevel.DIFFERENT -> context.getString(R.string.similarity_different_format, clampedSim)
+            SimilarityLevel.SIMILAR_LAYOUT -> context.getString(R.string.similarity_similar_layout)
+            SimilarityLevel.MODERATE -> context.getString(R.string.similarity_moderate)
+            SimilarityLevel.DIFFERENT -> context.getString(R.string.similarity_different)
+            else -> context.getString(R.string.similarity_unknown)
         }
 
         return ComparisonResult(
@@ -195,7 +232,8 @@ object ImageHashHelper {
             hammingDistance = dist,
             level = level,
             label = label,
-            isSuspectDuplicate = level == SimilarityLevel.DUPLICATE || level == SimilarityLevel.HIGH_SIMILARITY
+            isSuspectDuplicate = (level == SimilarityLevel.SIMILAR_LAYOUT),
+            isExactDuplicate = false,
         )
     }
 }

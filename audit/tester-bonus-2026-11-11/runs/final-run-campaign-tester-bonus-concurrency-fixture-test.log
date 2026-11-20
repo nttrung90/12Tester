@@ -1,0 +1,5 @@
+=== LOADING MIGRATIONS ===
+=== PREPARING CONCURRENCY FIXTURE ===
+=== CLEANING UP CONCURRENCY FIXTURE ===
+PASS: Concurrency fixture setup, sequential contracts, and full cleanup verified on PGlite.
+UNRUN: Multi-connection concurrency requires real PostgreSQL via run-campaign-tester-bonus-concurrency-test.mjs.

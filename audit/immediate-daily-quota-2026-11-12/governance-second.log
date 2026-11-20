@@ -1,0 +1,4 @@
+{"label":"ordinary member","success":false,"error":"FORBIDDEN: Admin access required","expected":false}
+{"label":"unidentified authenticated","success":false,"error":"UNAUTHORIZED: Authentication required","expected":false}
+{"label":"authorized admin","success":true,"expected":true}
+{"label":"trusted service role","success":true,"expected":true}

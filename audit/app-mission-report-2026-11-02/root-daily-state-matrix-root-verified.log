@@ -1,0 +1,7 @@
+PASS independent daily state matrix: app_test -> mission with first pending
+PASS independent daily state matrix: app_test -> mission with first approved
+PASS independent daily state matrix: app_test -> mission with first rejected
+PASS independent daily state matrix: mission -> app_test with first pending
+PASS independent daily state matrix: mission -> app_test with first approved
+PASS independent daily state matrix: mission -> app_test with first rejected
+PASS independent later-day mission report after actual owner approval

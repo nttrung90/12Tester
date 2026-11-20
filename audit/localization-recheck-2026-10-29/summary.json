@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-29",
+  "head": "34f0ddb811e5397774105c2dd905d052511e59ec",
+  "suites": [
+    {
+      "suite": "com.ntt.crosstest.localization.LocalizationHardeningTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "failure_messages": []
+    },
+    {
+      "suite": "com.ntt.crosstest.localization.LocalizationRecheckTest",
+      "tests": 9,
+      "failures": 9,
+      "errors": 0,
+      "failure_messages": [
+        {
+          "message": "org.junit.ComparisonFailure: expected:<[Cảnh báo bảo trì: không gửi lại báo cáo trong 15 phút]> but was:<[System warning]>",
+          "test": "customAdminNotificationMustBePreserved"
+        },
+        {
+          "message": "java.lang.AssertionError: Real current welcome log falls through to Vietnamese note. Actual: Thưởng 100 Credit khi mở tài khoản",
+          "test": "realWelcomeCreditLogMustBeLocalizedInEnglish"
+        },
+        {
+          "message": "java.lang.AssertionError: Current SQL trigger message must not pass through unchanged. Actual: Ứng dụng \"DemoApp\" vừa nhận được 1 báo cáo kiểm thử mới từ tester. Vui lòng kiểm tra và duyệt.",
+          "test": "realNewReportNotificationMustBeLocalizedInEnglish"
+        },
+        {
+          "message": "java.lang.AssertionError: Negative clawback incorrectly classified as provisional reward: Provisional test reward",
+          "test": "clawbackMustNotBeLabeledAsProvisionalReward"
+        },
+        {
+          "message": "java.lang.AssertionError: Migration response must decode the actual clawback expected:<10> but was:<0>",
+          "test": "newRejectPayloadMustPreserveClientContract"
+        },
+        {
+          "message": "java.lang.AssertionError: Unknown legacy language must use localized default instead expected null, but was:<Security update required>",
+          "test": "customLegacyEnglishConfigMustNotLeakIntoVietnamese"
+        },
+        {
+          "message": "java.lang.AssertionError: Current SQL trigger title must not pass through unchanged. Actual: Biến động số dư: +10 Credit 🪙",
+          "test": "realCreditNotificationMustBeLocalizedInEnglish"
+        },
+        {
+          "message": "org.junit.ComparisonFailure: Custom text must not be replaced based on a word match expected:<[Tôi đã hỏi admin, ảnh bị cắt mất nút xác nhận; hãy chụp toàn màn hình.]> but was:<[Removed by Admin]>",
+          "test": "customRejectionContainingAdminMustBePreserved"
+        },
+        {
+          "message": "org.junit.ComparisonFailure: Persisted error must resolve in the current locale expected:<[Lỗi mạng. Kiểm tra kết nối Internet rồi thử lại].> but was:<[Network error. Check your Internet connection and try again].>",
+          "test": "stateMessageMustChangeWithLocaleWithoutReissuingOperation"
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "app/src/main/java/com/ntt/crosstest/util/NotificationRenderer.kt": "C2FE05000DEEB0D3B0F39A5F24EE1CE6803B56DB15600485C36229DFD38D5ED2",
+    "supabase/migrations/055_localization_hardening.sql": "592994A418D347F31B12D726C1965922CEEF535871EDF307F47526944E029937",
+    "app/src/main/java/com/ntt/crosstest/data/Models.kt": "8A715DCD0B8FA1255F09EE7C7894FD86EFD5A4420BE29A2CC29D8A70C09CFD69",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt": "F32B2D8E69F9DC20CBAB9B24C2822F3BFE9F490123B92E913FFDD5190A6FCADC",
+    "app/src/main/java/com/ntt/crosstest/util/RejectionReasonRenderer.kt": "58FE522C5A53689384ED600DF9DF58E1AFCA6425EDD5C37177B7E7DB33AC0068",
+    "app/src/main/java/com/ntt/crosstest/data/AppConfigRepository.kt": "07F6D4866CF0FF8EDBAA32D623AB49665145C704A974E8C956209DACAE9238CE",
+    "app/src/main/java/com/ntt/crosstest/util/CreditLogRenderer.kt": "D4E72D065AC9C8C2BE72543007645CC9E82504CB75D76324BA125D673FE635D3",
+    "app/src/main/java/com/ntt/crosstest/MainActivity.kt": "15B7BB4F97FB70C86DEFB690FAA7C89697DC5A464446B89908DC56A5B704D68E"
+  },
+  "scope": "Working tree, local Robolectric and in-memory PGlite only",
+  "limitations": [
+    "No installed APK or Android UI verified",
+    "No production backend calls",
+    "System configuration recreation case needs device verification"
+  ]
+}

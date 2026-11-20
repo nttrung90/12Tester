@@ -1,0 +1,174 @@
+    private data class DailyTaskRequestOwner(
+        val uid: String,
+        val generation: Long,
+        val day: String,
+        val mutation: Long,
+    )
+
+    private fun currentDailyTaskOwner(): DailyTaskRequestOwner? {
+        val uid = repository.currentUserId() ?: return null
+        return DailyTaskRequestOwner(uid, SessionCacheManager.currentGeneration(),
+            repository.businessDay().toString(), repository.getMutationVersion("daily_task"))
+    }
+
+    private fun isCurrentDailyTaskOwner(owner: DailyTaskRequestOwner): Boolean =
+        repository.currentUserId() == owner.uid &&
+            SessionCacheManager.currentGeneration() == owner.generation &&
+            repository.businessDay().toString() == owner.day &&
+            repository.getMutationVersion("daily_task") == owner.mutation
+
+    private fun verifiedDailyTask(status: DailyTaskStatus?, day: String): DailyTaskStatus? {
+        if (status == null || status.statusDate != day || status.rawMet == null ||
+            status.rawHistoryReady == null || status.rawCarryoverReady == null ||
+            status.rawCarryoverRemainingTests == null || status.rawCarryoverRemainingTests < 0 ||
+            status.mode !in setOf("owner", "member", "exempt")) return null
+        return status.forCurrentUi(day)
+    }
+
+    /** Publish one verified result to the card and cache, fencing older dashboard reads. */
+    private fun publishDailyTaskSnapshot(
+        owner: DailyTaskRequestOwner,
+        request: Long,
+        raw: DailyTaskStatus,
+    ): Boolean {
+        if (!isCurrentDailyTaskOwner(owner) || request != dailyTaskRequestSequence.get()) return false
+        val fresh = verifiedDailyTask(raw, owner.day) ?: return false
+        val publishedVersion = SessionCacheManager.nextDailyTaskVersion()
+        repository.invalidateDailyTaskDashboardCache()
+        val publishedOwner = owner.copy(mutation = publishedVersion)
+        if (!isCurrentDailyTaskOwner(publishedOwner)) return false
+        SessionCacheManager.updateCachedData(owner.uid, owner.generation) { cached ->
+            if (cached.dateVn != owner.day || !isCurrentDailyTaskOwner(publishedOwner)) cached
+            else cached.copy(dailyTask = fresh, missedStreak = fresh.missedStreak,
+                isDailyTaskPendingRefresh = false)
+        }
+        _uiState.update { state ->
+            if (!isCurrentDailyTaskOwner(publishedOwner)) state
+            else state.copy(dailyTask = fresh, missedStreak = fresh.missedStreak,
+                isDailyTaskPendingRefresh = false, isDailyTaskError = false)
+        }
+        if (fresh.isCarryoverHistoryPending) checkAndSchedulePendingCarryoverRetry(fresh)
+        else stopPendingCarryoverRetry()
+        return true
+    }
+
+    private suspend fun loadDailyTask(owner: DailyTaskRequestOwner): DailyTaskStatus? {
+        if (!isCurrentDailyTaskOwner(owner)) return null
+        val request = dailyTaskRequestSequence.incrementAndGet()
+        val result = repository.fetchMyDailyTaskStatus()
+        val status = result.getOrNull() ?: return null
+        return if (publishDailyTaskSnapshot(owner, request, status)) status else null
+    }
+
+    private fun markDailyTaskLoadFailed(owner: DailyTaskRequestOwner) {
+        if (!isCurrentDailyTaskOwner(owner)) return
+        _uiState.update { state ->
+            if (!isCurrentDailyTaskOwner(owner)) state else state.copy(
+                isDailyTaskPendingRefresh = false, isDailyTaskError = true)
+        }
+        SessionCacheManager.updateCachedData(owner.uid, owner.generation) { cached ->
+            if (cached.dateVn == owner.day && isCurrentDailyTaskOwner(owner))
+                cached.copy(isDailyTaskPendingRefresh = false) else cached
+        }
+    }
+
+    private data class PendingCarryoverOwner(val uid: String, val generation: Long, val businessDay: LocalDate)
+    private var pendingCarryoverOwner: PendingCarryoverOwner? = null
+    internal var pendingCarryoverJob: Job? = null
+
+    fun stopPendingCarryoverRetry() {
+        val oldJob = pendingCarryoverJob
+        pendingCarryoverJob = null
+        pendingCarryoverOwner = null
+        oldJob?.cancel()
+    }
+
+    internal fun checkAndSchedulePendingCarryoverRetry(dailyTask: DailyTaskStatus?) {
+        if (dailyTask == null || !dailyTask.isCarryoverHistoryPending) {
+            stopPendingCarryoverRetry()
+            return
+        }
+        val owner = currentDailyTaskOwner() ?: run { stopPendingCarryoverRetry(); return }
+        val historyOwner = PendingCarryoverOwner(owner.uid, owner.generation, LocalDate.parse(owner.day))
+        if (pendingCarryoverJob?.isActive == true && pendingCarryoverOwner == historyOwner) return
+        stopPendingCarryoverRetry()
+        pendingCarryoverOwner = historyOwner
+        pendingCarryoverJob = viewModelScope.launch {
+            var exhausted = false
+            try {
+                for (waitMs in PENDING_CARRYOVER_BACKOFF_MS) {
+                    delay(waitMs)
+                    val attemptOwner = currentDailyTaskOwner() ?: return@launch
+                    if (attemptOwner.uid != historyOwner.uid || attemptOwner.generation != historyOwner.generation ||
+                        attemptOwner.day != historyOwner.businessDay.toString()) return@launch
+                    val fresh = loadDailyTask(attemptOwner)
+                    if (fresh != null && !fresh.isCarryoverHistoryPending) return@launch
+                }
+                exhausted = true
+            } finally {
+                if (pendingCarryoverJob === coroutineContext[Job]) {
+                    pendingCarryoverJob = null
+                    pendingCarryoverOwner = null
+                    val latestOwner = currentDailyTaskOwner()
+                    if (exhausted && latestOwner?.uid == historyOwner.uid &&
+                        latestOwner.generation == historyOwner.generation &&
+                        latestOwner.day == historyOwner.businessDay.toString() &&
+                        _uiState.value.dailyTask?.isCarryoverHistoryPending == true) {
+                        markDailyTaskLoadFailed(latestOwner)
+                    }
+                }
+            }
+        }
+    }
+
+    private var dailyTaskRetryJob: Job? = null
+    private var dailyTaskRetryMutation: Long? = null
+
+    fun stopDailyTaskRetry() {
+        val oldJob = dailyTaskRetryJob
+        dailyTaskRetryJob = null
+        dailyTaskRetryMutation = null
+        oldJob?.cancel()
+    }
+
+    private fun scheduleDailyTaskRetry(
+        targetUid: String,
+        targetGen: Long,
+        targetDay: String,
+        targetMutation: Long,
+        immediate: Boolean = false,
+    ) {
+        if (dailyTaskRetryJob?.isActive == true && dailyTaskRetryMutation == targetMutation) return
+        stopDailyTaskRetry()
+        val owner = DailyTaskRequestOwner(targetUid, targetGen, targetDay, targetMutation)
+        if (!isCurrentDailyTaskOwner(owner)) return
+        _uiState.update { it.copy(isDailyTaskPendingRefresh = true, isDailyTaskError = false) }
+        dailyTaskRetryMutation = targetMutation
+        dailyTaskRetryJob = viewModelScope.launch {
+            try {
+                val waits = if (immediate) listOf(0L, 500L, 1000L, 2000L, 4000L)
+                    else listOf(200L, 500L, 1000L, 2000L, 4000L)
+                for (waitMs in waits) {
+                    if (waitMs > 0) delay(waitMs)
+                    if (!isCurrentDailyTaskOwner(owner)) return@launch
+                    if (loadDailyTask(owner) != null) return@launch
+                }
+                markDailyTaskLoadFailed(owner)
+            } finally {
+                if (dailyTaskRetryJob === coroutineContext[Job]) {
+                    dailyTaskRetryJob = null
+                    dailyTaskRetryMutation = null
+                }
+            }
+        }
+    }
+
+    fun retryDailyTask() {
+        if (repository.currentUserId() == null) return
+        stopDailyTaskRetry()
+        stopPendingCarryoverRetry()
+        repository.bumpMutationVersion("daily_task")
+        val owner = currentDailyTaskOwner() ?: return
+        scheduleDailyTaskRetry(owner.uid, owner.generation, owner.day, owner.mutation, immediate = true)
+    }
+

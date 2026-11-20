@@ -1,0 +1,19 @@
+Unrelated tester financial rows under legacy default grants: 1
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Unrelated tester must not read private round financial ledger or request identity, even with pre-existing public schema default grants
+
+1 !== 0
+
+    at file:///F:/AI/12Tester/audit/tester-bonus-2026-11-11/review-bonus-privacy.mjs:19:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

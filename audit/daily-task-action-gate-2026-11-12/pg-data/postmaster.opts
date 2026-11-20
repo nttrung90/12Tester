@@ -1,0 +1,1 @@
+F:/AI/12Tester/audit/tester-bonus-2026-11-11/pg-runtime/node_modules/@embedded-postgres/windows-x64/native/bin/postgres.exe "-D" "F:\AI\12Tester\audit\daily-task-action-gate-2026-11-12\pg-data" "-h" "127.0.0.1" "-p" "55444"

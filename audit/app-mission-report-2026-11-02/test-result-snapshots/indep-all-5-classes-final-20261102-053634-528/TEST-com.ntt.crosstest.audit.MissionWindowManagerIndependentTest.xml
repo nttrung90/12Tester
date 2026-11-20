@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-02T05:36:31.177Z" hostname="PC-5700X3D" time="1.866">
+  <properties/>
+  <testcase name="admissionBlocksBeforeExceedingPendingBudgetWithoutEvictingAcceptedWork" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.321"/>
+  <testcase name="committedWorkPublishesTheWholeDurableReceiptBeforeDeletingPendingMetadata" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.61"/>
+  <testcase name="ordinaryDetailDoesNotAdoptAnotherMissionSendingState" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.819"/>
+  <testcase name="sameCampaignKindsAdmitIndependentlyAndLogoutPurgesBothScopes" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.113"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,754 @@
+[
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\AndroidManifest.xml",
+    "sha256": "4D9405676886B3BA60B3253933427E518646453583189624DE1D110B2001CC03"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\ic_launcher-playstore.png",
+    "sha256": "1EF9142C9645A12B05F2A5325A9B6896809DF3DEF9BA634A8212D25B6FC4663D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\MainActivity.kt",
+    "sha256": "C345AD4E8428138CF01C33664DF4228B27F7571669F82387BE4599F5CC996FFF"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\TestCheoApp.kt",
+    "sha256": "91D2862BEA4C4B8DE36CEE390D677FFEF2B33E8D3D25E3BB5EFB2EE55E0DDF29"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\AppConfigRepository.kt",
+    "sha256": "8909E9414358FE442DA107FCF33498EED46847703A346CEFC46DE975C6822DBB"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\AuthRepository.kt",
+    "sha256": "A7F51DFBB3E2356580C3F481B4C5F9AC143F2855BD803F0E4520B9244C4987E5"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignPushStore.kt",
+    "sha256": "263B150C3D14D44E22BACF3D7DB4783E7403732E300B9797F8F2BA9074D01AB8"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "sha256": "EA484A620497BE44DCE956B166E8459019AD0FD5E65E97F8EAF575B717101060"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "sha256": "C519822328B49CE56C2DB8AAFC41F84A1565E7E08B9F9A56005FDFE703BEDFCD"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\PendingReportStore.kt",
+    "sha256": "D0396CC2927E771F91803ED6C9C2EA46817F0A8B2FE85BD91A12F8B6DC18AD22"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailure.kt",
+    "sha256": "FACCCFF4FE3597E5735B7C560C1B3DC7AF7DB58FE072D03E3186EA85DE67BDF0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManager.kt",
+    "sha256": "018307EC1B5CBB3CCF7E3C80FDC54E28D857CC4881B32988258714DFDA11FB52"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicy.kt",
+    "sha256": "F011D19DB8BD73AA105B6C2ECDE24CCE94A557838569A9455E0D0F68E21FA256"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\ReportWorkState.kt",
+    "sha256": "86B8F7BCB1C5FA5BB03B7ED7C1BFB8D800DD0C111E0C3DBA5C89A20E2D268195"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "sha256": "1937C4E113416FC3773B41ADCECD74E5360C5CF91748D240D86748C131E154FE"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SettingsRepository.kt",
+    "sha256": "991829993DA938DAEFD6249C43D89D2A96CA515467845B2BCB248012C9C50F2F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SupabaseHolder.kt",
+    "sha256": "FF3E11339C76B49E24CB324881DC46BD919EEDED161B71EE5DB35B4793597614"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SupabaseMediaAccessGrantProvider.kt",
+    "sha256": "B3DADB87DD11D83B5B435FA22B3C540C69C373B0CFC073CE2D308E98C22F72B8"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AdminDailyTaskPolicySheet.kt",
+    "sha256": "51A624F7C0CFC464E25F00C171E8E29BB74EB6843A8AD5D953E6AFEF656778CF"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AnimatedCreditBalance.kt",
+    "sha256": "D48CDCCB4719861AC7282A0FED0B8C7C9F395C076B8837A36D1A095C7AFB65BB"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\AppIcon.kt",
+    "sha256": "8B6C78B60FA47C8CB1F06DEB0CBFB3DCF2B355D104554C9AE50813CAFBA5F123"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CampaignCard.kt",
+    "sha256": "21F01990C2C248145298E76B97700A97DCDFB7D24398AFAAB2ACC43F5618C742"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditRewardOverlay.kt",
+    "sha256": "198BA26629CECFB906FBB04E563D26DBD9CBE93741679FC6ED0F6007943DDC80"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBadge.kt",
+    "sha256": "9742615E0FAA285BF10309B1DBB5032C36D244BC48A6A95817B6FD08DB1154BD"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\CreditTopupBottomSheet.kt",
+    "sha256": "8F36EDEFC7FA890E4B02AC4EB94C1029E51D31667661FFD2A732FEFA59C230FC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "sha256": "59D6A3A3408A76FFDB12E808D24412CFA5C157E54019FD7FDA0C33C47682C1F9"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\ImageViewerComponents.kt",
+    "sha256": "C99C67362B2069AB566A67F6CFE21F3909C30051CBF95345EA7A58E41D8A454C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\MyAppCard.kt",
+    "sha256": "641F8A2EDE337A377163C467E745A223603C758CD2B24D89C4269FA8E6E225AC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\NotificationBottomSheet.kt",
+    "sha256": "80B72F051C1615B22E8294F5166D616F3AB307A27B6800FB3CC1615D0061D49A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\ProgressSection.kt",
+    "sha256": "718A7D43EFA81911681A2FCAA0DFC67790FED6789B161CBE8161542012CFE5CC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\QuestHeroBanner.kt",
+    "sha256": "742209C14E6C92EAA87643691DA4022E76308ACAEB8552335B98009B8C9374B4"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\QuestSection.kt",
+    "sha256": "FDECEF4CFD953ADFF2A56F917DD1A5C56351CC3B841A2EE9E389EBCBC2A8E3E6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\navigation\\NavGraph.kt",
+    "sha256": "F8AAD169F0DB91CD450190F1E15501835D42BA975FD209BC4C6311D7793DE8DB"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AccountLockedScreen.kt",
+    "sha256": "DBEDFE8DE469133A2E9AD73E372514B99968D148C88FC419E769227746D63AAC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminReportsScreen.kt",
+    "sha256": "7E45EDE064B51674B823362C5ABA13A0350B7637C90C5B4E887C4E7F33C32681"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AdminUsersScreen.kt",
+    "sha256": "7B7336A9E8A7D04C918261AFFCC470D2C4F967CEF5DC9C1CC8C91E1CAA2739A1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AppUpdateReleaseScreen.kt",
+    "sha256": "4FEAC0867B3061926ADD58EF33D387218DFBAF0AE46D4ED6A6C17132A2DCF449"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\AuthScreen.kt",
+    "sha256": "C97F105B7C8D0B8FB4BA6D48F53DC8AB48CCCD3ACE5E02E78FBC3A15C20B680F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\CampaignDetailScreen.kt",
+    "sha256": "0A00921686DC7E86A09D14D66D10AC95C6C28B0288BF46287EBB9ACE9CADD739"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\CreateCampaignScreen.kt",
+    "sha256": "2B1256ED22A23D53A714ABD4D15FB77FF17FD43A0E4E79086238DCC78CF2DCD9"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\GoogleSignIn.kt",
+    "sha256": "DBBCE93D6C615C87D4B0F0419C89E3DDACDA3EA82B8222ABD024F0AF50B49207"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "sha256": "0D62A9FA8DB96DA926120432D0600E2194FE1742C5C36105A58151145870E260"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MissingConfigScreen.kt",
+    "sha256": "CAAB96BDD3472DD6EBA3693CD6D945AC775B95B6FF78084FD91F1DE88935A27F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\MissionCreateScreen.kt",
+    "sha256": "49BA2AFC28F6D28E63F8BD2CADB192E76BA2D1C8241DFB1F5F7178057CB1C8D1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\OwnerAppDetailScreen.kt",
+    "sha256": "BC75AE142572888407F927966083490CB31BE9E944488FEDDEE6A07966CC11FB"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\PostAppGuideScreen.kt",
+    "sha256": "D6AB1DDDB9FFB766C81D9F7E077EB5E74992B51BDFE3F0AB26C5A61CB2BDEBDC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\ProfileScreen.kt",
+    "sha256": "2823AA4620E54486189A93F8EDBA809261909132382E4F0ED8141CBAF04412F0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\QuestsScreen.kt",
+    "sha256": "C3C6424B6913E239E48D8B540DCD6FA83595EE8C434EA20E3E90FAB05BBC453E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\UpdateScreens.kt",
+    "sha256": "1D0BAF55A3A7D093BA2AA23AB726B47207EE6B8085D7C2C88E6E3B60882C7A6A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Color.kt",
+    "sha256": "C4C93CD0FF09AC877F5A2E07D0598B459B299C618E01685E9F1164315A9BF75F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\StatusColors.kt",
+    "sha256": "094C3C8F2B20C57FC384E56CFBD31A75821787CE2EC67F77B865EE49C6EE5A2E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Theme.kt",
+    "sha256": "5602F0FB3D5E44C6DFEA02CE1F708D76A1ADB2C510FA49F439F29A86BE7E11DE"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\theme\\Type.kt",
+    "sha256": "76919AC5646D6447B30AA58A79A50E728CC2D9889E1DC8F0FCC8E4F16873BD70"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminReportsViewModel.kt",
+    "sha256": "6D449F6B3011115618A019778F760A15BB6E929E6C42644CBD991EB5233AB5AA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AdminUsersViewModel.kt",
+    "sha256": "944D1C5D4713BB7E2FE4E549AA301E76727C3E8B2D73016556ED3C2C9B01C2F6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AppUpdateReleaseViewModel.kt",
+    "sha256": "F6959B5D6FBEF025302684BE1154F926DE5801BEB2FC90871A770FB2327CBC4F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\AuthViewModel.kt",
+    "sha256": "BC8A78FD6C5587F2543613866C5D355210507902F9B3C98500F6D12DA0E22DA3"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CampaignDetailViewModel.kt",
+    "sha256": "E5560F0F865BA6FA432161AA4385B3EAC97CDCBC22F68827DB742FEA0A08491D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\CreateCampaignViewModel.kt",
+    "sha256": "3189F3BD854693E3217FCC88EDE0F04558B458416E483587FDF3B483B05207C0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrder.kt",
+    "sha256": "31DC90962B11F45F693363D31A54A65DF88C3ACE541750399EF6CAD20C44506A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "sha256": "EF804D69F3B7ACE53110A687E6BADFE3CDEA17CEEB5A3B87F87DB5144026F648"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\MissionCreateViewModel.kt",
+    "sha256": "68F637776B6AF65F0B0CE06F3CFCAB01F99BF644E153031559A7BD8D5BC17048"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\OwnerAppDetailViewModel.kt",
+    "sha256": "C81D9B7D88BDA4088AB0716FCF938CF8B3B74814EE2951CE7ED2A150C15EBA40"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\ProfileViewModel.kt",
+    "sha256": "51DCDE21F34C78C83DA570063AC500559EAEBA937CD32FE96AB4388BE86B05FC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\AppCheckObservationConfig.kt",
+    "sha256": "3993C7C7F3E211F0A5FEC80D5400A83A71BA808BC1E019D4997ADF18CB62F1E0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\CoinSoundPlayer.kt",
+    "sha256": "5065F585DC8E28E6685BE12B305C7ADA71640CDA5F00493FC00594DB50748B69"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\CreditLogRenderer.kt",
+    "sha256": "8235D6565E45C41278976C8AFC2097CC792926361D05F2E9A1A6DBBC50BA25B6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\FirebaseStorageHelper.kt",
+    "sha256": "A17D352BFCCADE235611FEBA6798B51C9235A71B7228B2FB14A1AE53F9B0EA96"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\IconRoutingHelper.kt",
+    "sha256": "BB8F4B3C7A435ECE7C2590F14EFC4AC220FA7710394187120C5023CCCDBEE73C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ImageHashHelper.kt",
+    "sha256": "7CDD1D73CF675BE16662B2AC1CED6E35C573900F5EBB78FED79F23BBB59FE9F8"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ImageInstrumentation.kt",
+    "sha256": "CD5C873782C75ACDD53C124C9777061144F5CDAFC1E2B3DAC76180035BAC5815"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ImageTelemetryCollector.kt",
+    "sha256": "CF4C6F46830729CE2162DF663BB74D22965ACA495D429977141470AA0CDCEE3E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\InstalledAppCache.kt",
+    "sha256": "D6B53E1B0368984D3881C1FA18F04D8C39E2ADFC36ADED126CCE75E600F82357"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\InstalledAppVersionReader.kt",
+    "sha256": "82F22C169053E665D332ED364BBECB5E609AE23A122DD61887EB858B60600105"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\NetworkMonitor.kt",
+    "sha256": "DEF350479E5B4C103D29E8BD0EA2DEB495371DF856BBBFB9F62CC4B56F0FE913"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\NotificationRenderer.kt",
+    "sha256": "2BDA1A36CC665A3E35325D62FE8134BE2DD9CAB5B39C94D49F76893FEB91FD2C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\PlayStoreHelper.kt",
+    "sha256": "F07CB6BC364692DFDE4F25B7FA6890C41C0D5638295CF46D3D64FE904FC602FA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\PlayStoreUpdateChecker.kt",
+    "sha256": "208E2ED1285DD7F32F15514D6977B0477E442FCC87EFB575C70194368A310F73"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\PreparedScreenshot.kt",
+    "sha256": "94B8185D2807E6711A5B9F1716EA55AD947304DB34CF529C849EF9E6E56A3766"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\PrivateScreenshotDiskCache.kt",
+    "sha256": "7A88C60424BA064B4E86F751560AE91161A7AC4827432BCA823AD396C2530301"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\RejectionReasonRenderer.kt",
+    "sha256": "D38C53A5BCC262531176B46699F9D9CDDB9B87B9A39D2CFC56AF7E0768AEBC96"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ReportUrlRetry.kt",
+    "sha256": "3865051B10F2439BDC7B3CDF7C61847B3FC93F5DEA0B23729B5FC3A211CE9A42"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotCoilInterceptor.kt",
+    "sha256": "7970E0DB4B47AA842768FACBC07FE0291B5B5EE70072A242EBA1493FAAD2E619"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotManager.kt",
+    "sha256": "2F2A6EE91C0DC2EFE1B4EBD9AC7FE5AC0CBF29CA091FEBEA38579BB544451AE6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\ScreenshotRequestFactory.kt",
+    "sha256": "79E9CAE80FDF394731B5E127912D4154019ECB33F4A6DC0AFBD3530B2C428664"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\TimeFormat.kt",
+    "sha256": "72E9E4D9167BE009166757C6A4D6F831D7FCCF98F1E0C5204BAE1E204801E062"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\TopupConfig.kt",
+    "sha256": "09A0E80939739664ED3A2C9DB70E68D7971AE3AC34106FA4B6B6A19C3B106544"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\UiStateMessageResolver.kt",
+    "sha256": "25DB48A1A88270479C014B17681228028950D63EF4EA93CD53A142E6E1FF67B1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\UiText.kt",
+    "sha256": "D96496A835D759D4337FEFA1B5E08548611D2AC5108A5C155ED00620FA1539DA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\util\\WarningRenderer.kt",
+    "sha256": "3C0398D60EDB9583A19CFD00601ABC208130F63DC549FE83B9B8FADD508E7FCC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\work\\NotificationHelper.kt",
+    "sha256": "BBAFF3BFBB7A90D0214F1A313A6CDEE74D199D3F0935151F0FCB1139E06F713E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\work\\ReminderWorker.kt",
+    "sha256": "7B399543A93EDCE15E4A2192FE7166AF1CE67092160AC353C6C06834A1912043"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorker.kt",
+    "sha256": "FAC8102B34C6862B2193DCD0586B4076990874DE4CBF90C8357C203FEEAA714E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\work\\UpdateCheckWorker.kt",
+    "sha256": "306FD9010F2CE52934CA4762CF3E2508C09B3C5D6CE869BD6E49CE9BFED4F746"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\drawable\\ic_notification.xml",
+    "sha256": "3E29BFA39F2CC3D4F73DE6820078BE54D7C97A5F00F3F07C51408BEB2FFED8F8"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\drawable\\ic_zalo.xml",
+    "sha256": "083DF2A81938177634603CDB873216C8DCC839267B9B1D2FEDDD2887B14EB819"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-anydpi-v26\\ic_launcher_round.xml",
+    "sha256": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-anydpi-v26\\ic_launcher.xml",
+    "sha256": "17DE17D5AB2BBC338E0D2F1C7E6A9D16A49F222EE6206D11BA4467CDAF19BBD4"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.png",
+    "sha256": "F638110643B78A008DCE53036C0EA7F5C2D23B257068A614E281510E90265F7C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_round.png",
+    "sha256": "B7E0C013050A27397356CFF17EB39F2B1047E69AD8D94D1F885C3E94319EA481"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png",
+    "sha256": "813330F3B6CF1072231AB87C5909568CE10C2D2F896A1652BB232164E589A134"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_foreground.png",
+    "sha256": "58CB9B9D2F3421C1FCFFAC4CD321EB4DE1B23624B0F9B26A7348403DB85131FE"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_round.png",
+    "sha256": "FB2FC684AB2253B80AE26F631B05108BE46690409941D7437FD139FBFA43079E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png",
+    "sha256": "EE263670694C7EC50D515E23A89E821F01A3FCB8979EC068AEC55C4EBA4C7CB9"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_foreground.png",
+    "sha256": "0005B3997262538C81B137AC607534BB15CB87EEA76DACFA7F0B961927F70DE2"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png",
+    "sha256": "7087BAE3D8062F29FF112F606C22CF2541BB91183F7B4A8AECA745131973236B"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png",
+    "sha256": "69EA16AB5C374FD9E8D04166711A4C4F9C549D95017695AF43446F8DB9EA9854"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_foreground.png",
+    "sha256": "05255CB35C1159AA3655390228BA86DAB301FE7C8C29BF7B314376AD437B3730"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_round.png",
+    "sha256": "B0658AD2622C56B22C727E45995949642CD1BD49BC637E6F15834ECC3A056F15"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png",
+    "sha256": "B81A01E4EF3DDE20FB125C71FFD9CE5C4E1F4E62BC565CD236809C66D3FA84B7"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_foreground.png",
+    "sha256": "570BFFD82F98BEF6857DBA8DE6AAAF3E7434BA2D293C2824941E11C5922EAAAB"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_round.png",
+    "sha256": "76D5FA705D4125FF98F10EFEE5A4CC0F9396E0C3854A048CEC6928B57884A5BF"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png",
+    "sha256": "97172CBD629365154BDF39C75CCE0798016A7F00C49B8DB05F73C53E6E0DE38A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\raw\\coin_drop.wav",
+    "sha256": "CD0817A5A405EA53521FE0753B84BE68E036B972D6767E31467CB5C6A4F57C33"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values\\colors.xml",
+    "sha256": "B0A2A942BC0788590295C1B5E865DBD3E031467056DEC1CB4AE3A53FE083E580"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values\\strings.xml",
+    "sha256": "4548D5614422430B5EF9B055A8FC0A6E545E00E1659733D8895D168C8B620681"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values\\themes.xml",
+    "sha256": "E68F5451E0B758F9B8941FC197FBDBF30FD8F1C2EEE58A647897C5553DDDAB33"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values-en\\strings.xml",
+    "sha256": "F29B581EBA3EB5CCD7CB4517693BE35CA07EC17E42F749014A382D975CDBB393"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values-night\\colors.xml",
+    "sha256": "7484C9DE12B5D3A2B1CAFA86245225725C1C4721502E381B9628B9D8C0C163D6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\main\\res\\values-vi\\strings.xml",
+    "sha256": "EA35FC403BD4B29475FD3E55E034A0919A8FB820BB2729817E9390912C9E3C62"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\audit\\ImageHashCollisionAuditTest.kt",
+    "sha256": "8C2235467FE2A9CFBB9474BE31C5FC9A0BD4C8EF54B5E51E17122DF233F05F8D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\audit\\ReportOverlapTest.kt",
+    "sha256": "6BF32705C46660FB047B741279AA4EDE17A6B86A7D68C61DCC7655D5B32E9E9D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\audit\\ReportV2WirePayloadProbeTest.kt",
+    "sha256": "EB9713BCBFCBBF636DA189A2DAF663F968B347C73986D9C030D38967B0D479E2"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\AdminDailyTaskHardeningRegressionTest.kt",
+    "sha256": "917ABB73CFD72498EDBBF4140AC253C5920EBF0A9644BD6EE8DE32B0011B0BCD"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\AdminDailyTaskPolicyTest.kt",
+    "sha256": "EF094086FCA1965F1BF438ED6ED7B905A4CF0698A9DF89CB5095A48ACD18ADB1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\AppUpdateRegressionTest.kt",
+    "sha256": "0984A62FCAA60B97ADC96ADC9E340D13B5EEF40EC2BE338C4D38B2AB3D538911"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\AppUpdateRewardTest.kt",
+    "sha256": "CB6E95C188D39B7315852AEF028ECE72164F41C19639AA250A7DA4DFE0D2F224"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\CacheRegressionTest.kt",
+    "sha256": "1A4313203409A96B7FCD5AE7A364DD5ED15BEB2F9281863C6881EF88136CA22F"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\CampaignPushUnitTest.kt",
+    "sha256": "20C64D0E6C9ED2F749FCE2BA1FF8E357A5449CAAF2170E2C9B48194829EFFBDC"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\DailyTaskCarryoverUnitTest.kt",
+    "sha256": "8E7BFBA460F55CA9C21850CBF3DEC2F4FE1933C259C9994B4C7CF39C2FF708A5"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\HomeStatsCycleTest.kt",
+    "sha256": "380445E7F4AC74F46B0591D2551742F39FFB59847A79E60C9F9A9C1307D4F636"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheBudgetAuditTest.kt",
+    "sha256": "2BB438298D03661C98808DF67DD476C47436E1F433A24685B01B3906082F4EE6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheClockAuditTest.kt",
+    "sha256": "7B4BD9F2E83905BDC09AB22B3AF793BBB0B45C6F08AB8B1076C7A49864776CF4"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheCompositeAuditTest.kt",
+    "sha256": "0434CFC26B6D6FD9DFC9B89A5E8D959D5D7236AB2A88773DC10D4F06A9683C5C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheFinalAuditTest.kt",
+    "sha256": "100AD7A82CE0BB298E47181173ABBF3B9BC37F5552C2CACCB447B072905ED6B4"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheMutationAuditTest.kt",
+    "sha256": "36A2AA26A4E927D69387DDD907C88C6EE7D84E0EB8E6098901C4C4DC1F81E633"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCachePublicationAuditTest.kt",
+    "sha256": "2688934CB8F040B691505951E037077096775344298F44E591AE52FB0037599E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotClearAuditTest.kt",
+    "sha256": "F4D44ED3E121626B7ADB09C310B92A4E32BA55CAA192B0F929455C9DA971A82D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\IndependentCacheSnapshotIntegrityAuditTest.kt",
+    "sha256": "61D5490CDC60545683F0191C2FE5F92145648DEAC418FD30581975646EF16E55"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\MissionRegressionTest.kt",
+    "sha256": "5C9553D277ED1DBC27A383CC30375612866C115DE7F39700F1FA25663DE4C309"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportAndExpirationTest.kt",
+    "sha256": "027B578C08228585C3D16559D2A5A2F622D085FCE7FCD8C607066EB8E0DFBB88"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\MissionReportRecheckProbeTest.kt",
+    "sha256": "A90EE046F01A38CA60CECE0EBB39F5E797FAE720EED3B24E7F4F8DFA17048878"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\PendingReportStoreTest.kt",
+    "sha256": "C4EFB59C67E16719C2C6BEBCA0E908C42A42DD06C4C4EAC5D1A1F73573F2A054"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\PushAndCarryoverHardeningTest.kt",
+    "sha256": "0B91D1340E9EE8E161929AD21F560FAD980D6580CB42C74C57C422A0F24E5B05"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportRpcCompatibilityTest.kt",
+    "sha256": "28F432F0420428AC323BD8968C7F773485727A9FD056CD17E5A7B962020352E9"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportRpcFallbackAuditTest.kt",
+    "sha256": "869BCD7E9C0D9EA0F9F9085E6DE7A4AAABB91F65D0A703209FF0FB6231FA4FAA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmissionFailureTest.kt",
+    "sha256": "F0217F1CB6E22807653A8CB6371C06AAEFBCB101355FCCF438AF94AEF005CAD0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmitManagerIntegrationTest.kt",
+    "sha256": "79EFCFFB436EB8B689DC969F41EE3985AEC6D862BC51EF7B5F39227AC547F9F7"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportSubmitPolicyTest.kt",
+    "sha256": "AFCC14BCC4FC4F78422FD2023AECC08E57BC8068955C29CFA27EF2D08877EDEA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\data\\ReportWorkStateTest.kt",
+    "sha256": "1828CACC2AAFCED7439201112775F677580C2E50699559F3CD0CAAE73A452F1E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\localization\\LocalizationHardeningTest.kt",
+    "sha256": "0CBBA81668A2364226492BAA7A04746F41FF090D33DA6AF11E4DBC569F5D6B71"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\DailyHomeOrderTest.kt",
+    "sha256": "13BEF0B3C3BF255D4D7D0BFA585E2F09CC9C1A05A68E2065B67B1CF441F471A7"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\EgressAuditProbeTest.kt",
+    "sha256": "CD5A723C87E36EDE33890B5321780C2974EEFDFCF5B0E5872576B47687A00B6E"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\EgressFinalPolicyAuditTest.kt",
+    "sha256": "49B1937B6D94A664C04F06412E673C94BD45FFC558329B3950C6A50F75CAD18B"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\EgressGatewayClientAuditTest.kt",
+    "sha256": "6BDF4C6CFF2C0F57B525CDC3F28DCBC1D237C2A0EC895624525FD00143AE95CA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\EgressRound2OptInTest.kt",
+    "sha256": "9139526CDE99056590EF2CAEBA392ED01F084F429873834E1755C779945DE359"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\FirebaseEgressOptimizationTest.kt",
+    "sha256": "664C1E9B52350EFCC4E2A5DA93243D164B9F3151E9F3659B275A942ACA7D1B20"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\util\\ReportUrlRetryTest.kt",
+    "sha256": "3D69353DE4F4E4E5773754CE3D71517297456B8C7EE1A816024478DF868445EA"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\work\\EgressThumbnailPipelineAuditTest.kt",
+    "sha256": "FBC4AC6528D48096435B9BB0712EE287A73FBF377AB7B5ED8CC0F6610CDC349A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\work\\ReportBackgroundSubmissionTest.kt",
+    "sha256": "B155AD10F20360249CC425FAC117EFB2D2427D2BABB050D64D91ECDA10C55871"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\work\\ReportSubmissionLatencyTest.kt",
+    "sha256": "798D2DC8EA66E776174A23C417119ADA8EC3928D1EFCEF88451DBF985C4F7B04"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\app\\src\\test\\java\\com\\ntt\\crosstest\\work\\ReportUploadWorkerTest.kt",
+    "sha256": "35441E1145DBD35EA318271676E1EF46E6308E3EE79E0D523F88F4ADFE2DCFC1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\migrations\\062_consolidated_baseline.sql",
+    "sha256": "C4814564D27FA43406C7D79A8982C3167C7BC8F20F8BC65A7160B505E4FC45F2"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\migrations\\063_report_crypto_search_path.sql",
+    "sha256": "A14FDD0D9805B1FC48F83CB6B0C87A73EB076612FC21DD21CF58A4610D4D0A41"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\migrations\\064_explicit_report_context.sql",
+    "sha256": "047DBA110F2AAEC70B0CA8D8C4A31D432EBE7B57D60BEB84522CDC1FCB670341"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\daily_task_ratio_fixture.sql",
+    "sha256": "001CC31A62BBD8EC2A102D6C872E25F46365EB05D375E1FCE11012C08AFAAE01"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\daily_task_ratio.sql",
+    "sha256": "78D128EF053C9164173E6C21CDE7DE9C8936CC797A3B0B0B39538C82D961D774"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\package-lock.json",
+    "sha256": "C3B1566BFB4CA60F60D6C0E21BEC7ED42A781085DD20B937EF36812B8160B4F1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\package.json",
+    "sha256": "9088B039FE421279858132FDBB248A5F252FCFC94D422EFDC3C742D86CAAA3C5"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\probe-daily-mission-overlap.mjs",
+    "sha256": "696D8C17F9134070905586E773B445CED348DFCF9E7FDB37F3469D35AE2FDE04"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-admin-daily-task-policy-test.mjs",
+    "sha256": "12A74F97080D48E4D99458DA53AC312853FF6876774E5F8D546AB9CAB08D6983"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-app-update-reward-test.mjs",
+    "sha256": "4D89AA0C999C8F9037991C32826937F8AEDFF8870FD39E445DC3F43BD952D834"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-backend-cleanup-hardening.mjs",
+    "sha256": "63BA26DE0746EC38280D489E34A899186DC7A28C408907CF6944F1BFB1E2FB4C"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-campaign-push-test.mjs",
+    "sha256": "358417BAFD105401CFAAC83E2DF9E6AE6F4E94741ACC9C9EAE7DC461AA85AED8"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-consolidated-baseline-test.mjs",
+    "sha256": "A8B473DFAFB8B12E82602F69E08F62B739856F36A9C7BE150C85CE22902B9D73"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-daily-task-carryover.mjs",
+    "sha256": "40F297647F1538214E9FA5B4DCBA3EB68049A040D1A13453BA4FD4E60F921D53"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-daily-task-ratio.mjs",
+    "sha256": "624562FAF48BB1B37559FA4B7FFDD837822939BB2CA87F90DFA5D9312735AF19"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-explicit-report-context-test.mjs",
+    "sha256": "EFB3E6D7486D2EA8DF625AAA917B0D5A7A3736E6C645B480FE52273A5E490B9D"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-home-stats-cycle-test.mjs",
+    "sha256": "9FB7AFDED79C27212383515C29D16A0291676CEE9514EC638BA50B621F45ECD6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-media-gateway-test.mjs",
+    "sha256": "2592A97A2EAD928F44DBD9F142571FD228463C540E1328D920348A4445FFD8E1"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-mission-flow-hardening.mjs",
+    "sha256": "A6492B5CCB95E71B7520D8950B2B0ED5B7A8C5F3C34113C5CE7CD7664686342A"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-mission-report-and-expiration-test.mjs",
+    "sha256": "5C3098587D8BABA7B69F41ECE3B561C0FE01B5CE3BA127D613D47B72068047F3"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-push-and-carryover-hardening-test.mjs",
+    "sha256": "D440A6188E83E08FFCEFEA397270AC281FA698ECC265FBD38DCC35B2FB6A82C0"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-push-campaign-role-hardening-test.mjs",
+    "sha256": "DC7302EF234A7E36EA0CD17E6173938F1FEF2D17C518A14649970C2021C26730"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-report-extension-schema-test.mjs",
+    "sha256": "ED2CC7D03987AE750F2A96CE0BFC55907A71C2557C62F6C70EA8F5ABB79B7B30"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-report-idempotency-ledger-test.mjs",
+    "sha256": "05ACF51837D998E9FECE461BFED655A604419BC9D3B413CCE0411DAD976C8D25"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-report-idempotency-provenance-and-rating-test.mjs",
+    "sha256": "11490111493132D75BDEBC8900DF2F28D75386192A73A23BE1A19818A0AA1831"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\supabase\\tests\\run-thumbnail-migration.mjs",
+    "sha256": "8FD05CBAD084AC90800B1DA5F304FA57FCBD3A05476378D6514A70F19AF45A53"
+  }
+]

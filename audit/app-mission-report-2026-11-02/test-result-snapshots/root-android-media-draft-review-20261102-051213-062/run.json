@@ -1,0 +1,16 @@
+{
+  "logName": "root-android-media-draft-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowMediaIndependentTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T05:11:46.4848478Z",
+  "finishedUtc": "2026-11-02T05:12:13.0891014Z",
+  "currentRunXmlCount": 2
+}

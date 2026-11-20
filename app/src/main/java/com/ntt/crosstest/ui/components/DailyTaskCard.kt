@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -37,8 +38,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,9 +53,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.ui.theme.statusColors
+import kotlinx.coroutines.delay
+
+internal fun dailyTaskCompletionForDisplay(
+    authenticated: Boolean,
+    exempt: Boolean,
+    status: DailyTaskStatus?,
+    pendingRefresh: Boolean,
+    loadError: Boolean,
+): Boolean {
+    if (!authenticated || pendingRefresh || loadError) return false
+    if (exempt) return true
+    if (status == null || status.statusDate.isNullOrBlank() || status.rawMet == null ||
+        status.rawHistoryReady == null || status.rawCarryoverReady == null ||
+        status.rawCarryoverRemainingTests == null || status.isPendingCarryover) return false
+    return status.isWaived || status.isMet
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,6 +85,9 @@ fun DailyTaskCard(
     isAuthenticated: Boolean,
     isPenaltyExempt: Boolean = false,
     dailyTask: DailyTaskStatus? = null,
+    isPendingRefresh: Boolean = false,
+    isError: Boolean = false,
+    onRetryClick: (() -> Unit)? = null,
     onRequireLogin: () -> Unit,
     onTestAppClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -78,7 +103,13 @@ fun DailyTaskCard(
     val ownerMode = dailyTask?.isOwner == true
     val memberMode = dailyTask?.isMember == true
     val pendingCarryover = dailyTask?.isPendingCarryover == true
-    val waived = ownerMode && !pendingCarryover && dailyTask?.isWaived == true
+    val isPending = pendingCarryover || isPendingRefresh
+    val unavailable = isAuthenticated && !exempt && (dailyTask == null ||
+        dailyTask.statusDate.isNullOrBlank() || dailyTask.rawMet == null ||
+        dailyTask.rawHistoryReady == null || dailyTask.rawCarryoverReady == null ||
+        dailyTask.rawCarryoverRemainingTests == null)
+    val hasLoadError = isError || (unavailable && !isPendingRefresh)
+    val waived = ownerMode && !isPending && dailyTask?.isWaived == true
     val target = when {
         exempt || waived -> 0
         ownerMode -> dailyTask?.effectiveRequiredTests ?: 1
@@ -88,13 +119,7 @@ fun DailyTaskCard(
         memberMode -> if (dailyTask?.loggedInToday == true) 1 else 0
         else -> dailyTask?.completedTests ?: todayCheckinCount
     }
-    val met = when {
-        !isAuthenticated -> false
-        exempt || waived -> true
-        pendingCarryover -> false
-        dailyTask != null -> dailyTask.met
-        else -> todayCheckinCount >= 1
-    }
+    val met = dailyTaskCompletionForDisplay(isAuthenticated, exempt, dailyTask, isPendingRefresh, hasLoadError)
     val streak = dailyTask?.missedStreak ?: missedStreak
     // Fallback khớp server (migration 036: 1%/2%/5%/10% theo streak 1/2/3/4+).
     val nextPct = dailyTask?.nextPenaltyPercent ?: when (streak) {
@@ -112,7 +137,8 @@ fun DailyTaskCard(
     val accentColor = when {
         !isAuthenticated -> MaterialTheme.colorScheme.primary
         exempt -> accentAmber
-        pendingCarryover -> accentAmber
+        hasLoadError -> accentRed
+        isPending -> accentAmber
         waived -> accentGreen
         streak > 0 -> accentRed
         else -> accentAmber
@@ -120,7 +146,8 @@ fun DailyTaskCard(
     val accentContainer = when {
         !isAuthenticated -> MaterialTheme.colorScheme.primaryContainer
         exempt -> statusColors.warningContainer
-        pendingCarryover -> statusColors.warningContainer
+        hasLoadError -> MaterialTheme.colorScheme.errorContainer
+        isPending -> statusColors.warningContainer
         waived -> statusColors.successContainer
         streak > 0 -> MaterialTheme.colorScheme.errorContainer
         else -> statusColors.warningContainer
@@ -162,7 +189,10 @@ fun DailyTaskCard(
     // Thẻ gọn khi đã đạt chỉ tiêu. Admin/Moderator và trường hợp miễn chỉ tiêu
     // vẫn hiển thị thẻ đầy đủ để thấy rõ trạng thái miễn.
     if (isAuthenticated && met && !exempt && !waived) {
-        val completedText = when {
+        val remainingDebt = dailyTask?.carryoverRemainingTests ?: 0
+        val isHistoryPending = dailyTask?.isCarryoverHistoryPending == true
+        val hasRemaining = (dailyTask?.hasRemainingCarryover == true || remainingDebt > 0) && !isHistoryPending
+        val completedTitle = when {
             ownerMode -> stringResource(
                 R.string.daily_task_completed_progress,
                 completed,
@@ -199,14 +229,33 @@ fun DailyTaskCard(
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = completedText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = accentGreen,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = completedTitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = accentGreen,
+                        )
+                        if (hasRemaining) {
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.daily_task_preserved_debt_notice, remainingDebt),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = accentAmber,
+                            )
+                        } else if (isHistoryPending) {
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.daily_task_carryover_updating_notice),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = accentAmber,
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
@@ -309,8 +358,18 @@ fun DailyTaskCard(
                         statusColors.warningContainer,
                         accentAmber
                     )
+                    hasLoadError -> Triple(
+                        stringResource(R.string.daily_task_error_badge),
+                        MaterialTheme.colorScheme.errorContainer,
+                        accentRed
+                    )
+                    isPendingRefresh -> Triple(
+                        stringResource(R.string.daily_task_syncing_badge),
+                        statusColors.warningContainer,
+                        accentAmber
+                    )
                     pendingCarryover -> Triple(
-                        stringResource(R.string.daily_task_carryover_badge),
+                        stringResource(R.string.daily_task_history_verifying_badge),
                         statusColors.warningContainer,
                         accentAmber
                     )
@@ -407,9 +466,30 @@ fun DailyTaskCard(
                 }
             } else {
                 val messages = mutableListOf<String>()
+                if (hasLoadError) {
+                    messages.add(stringResource(R.string.daily_task_error_note))
+                }
+                if (isPendingRefresh) {
+                    messages.add(stringResource(R.string.daily_task_campaign_refresh_pending_note))
+                }
+                if (pendingCarryover) {
+                    messages.add(stringResource(R.string.daily_task_carryover_pending_note))
+                }
                 when {
                     exempt -> messages.add(stringResource(R.string.daily_exempt_note))
-                    pendingCarryover -> messages.add(stringResource(R.string.daily_task_carryover_pending_note))
+                    isPendingRefresh || pendingCarryover || hasLoadError -> {
+                        if (ownerMode && streak > 0) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_owner_missed_alert,
+                                    completed,
+                                    target,
+                                    streak,
+                                    nextPct,
+                                )
+                            )
+                        }
+                    }
                     waived -> {
                         val remaining = dailyTask?.carryoverRemainingTests ?: 0
                         if (dailyTask?.hasCarryIn == true && remaining > 0) {
@@ -431,8 +511,10 @@ fun DailyTaskCard(
                             )
                         }
                         val hasCarryIn = dailyTask?.hasCarryIn == true
+                        val isCarryoverIncludedInRequired =
+                            hasCarryIn && (dailyTask?.requiredTests ?: 0) > (dailyTask?.baseRequiredTests ?: 0)
                         val isSourceLimited = (dailyTask?.availableApps ?: 0) < (dailyTask?.requiredTests ?: 0)
-                        if (hasCarryIn && isSourceLimited) {
+                        if (isCarryoverIncludedInRequired && isSourceLimited) {
                             messages.add(
                                 stringResource(
                                     R.string.daily_task_carryover_limited_note,
@@ -441,7 +523,7 @@ fun DailyTaskCard(
                                     dailyTask?.carryoverRemainingTests ?: 0,
                                 )
                             )
-                        } else if (hasCarryIn) {
+                        } else if (isCarryoverIncludedInRequired) {
                             messages.add(
                                 stringResource(
                                     R.string.daily_owner_goal_with_carryover,
@@ -450,17 +532,43 @@ fun DailyTaskCard(
                                     dailyTask?.carryInTests ?: 0,
                                 )
                             )
-                        } else if (streak == 0) {
-                            messages.add(
-                                stringResource(
-                                    R.string.daily_owner_goal_format,
-                                    dailyTask?.activeAppCount ?: 0,
-                                    target,
+                        } else {
+                            if (streak == 0) {
+                                messages.add(
+                                    stringResource(
+                                        R.string.daily_owner_goal_format,
+                                        dailyTask?.activeAppCount ?: 0,
+                                        target,
+                                    )
                                 )
-                            )
+                            }
+                            if (dailyTask?.hasCarryIn == true && dailyTask.hasRemainingCarryover && !dailyTask.isCarryoverHistoryPending) {
+                                messages.add(
+                                    stringResource(
+                                        R.string.daily_task_preserved_debt_notice,
+                                        dailyTask.carryoverRemainingTests ?: 0,
+                                    )
+                                )
+                            }
                         }
                     }
-                    memberMode -> messages.add(stringResource(R.string.daily_member_goal))
+                    memberMode -> {
+                        val remainingDebt = dailyTask?.carryoverRemainingTests ?: 0
+                        val isHistoryPending = dailyTask?.isCarryoverHistoryPending == true
+                        val hasRemaining = (dailyTask?.hasRemainingCarryover == true || remainingDebt > 0) && !isHistoryPending
+                        if (hasRemaining) {
+                            messages.add(
+                                stringResource(
+                                    R.string.daily_member_goal_with_carryover,
+                                    remainingDebt,
+                                )
+                            )
+                        } else if (isHistoryPending) {
+                            messages.add(stringResource(R.string.daily_task_carryover_pending_note))
+                        } else {
+                            messages.add(stringResource(R.string.daily_member_goal))
+                        }
+                    }
                     else -> {
                         if (streak > 0) {
                             messages.add(
@@ -471,7 +579,22 @@ fun DailyTaskCard(
                                 )
                             )
                         } else {
-                            messages.add(stringResource(R.string.daily_quest_warning))
+                            var showPostingReminder by remember { mutableStateOf(false) }
+                            val lifecycleOwner = LocalLifecycleOwner.current
+                            LaunchedEffect(lifecycleOwner) {
+                                lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                                    while (true) {
+                                        delay(5_000L)
+                                        showPostingReminder = !showPostingReminder
+                                    }
+                                }
+                            }
+                            messages.add(
+                                stringResource(
+                                    if (showPostingReminder) R.string.daily_quest_posting_reminder
+                                    else R.string.daily_quest_warning
+                                )
+                            )
                         }
                     }
                 }
@@ -494,6 +617,25 @@ fun DailyTaskCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
+                    if (hasLoadError && onRetryClick != null) {
+                        Button(
+                            onClick = onRetryClick,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        ) {
+                            Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = stringResource(R.string.daily_task_retry_btn),
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+
                     Button(
                         onClick = onTestAppClick,
                         shape = RoundedCornerShape(10.dp),

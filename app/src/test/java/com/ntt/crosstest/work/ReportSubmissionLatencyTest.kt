@@ -37,7 +37,6 @@ class ReportSubmissionLatencyTest {
         override val currentUserId = "tester"
         var fullUploads = 0
         var submissions = 0
-        var joins = 0
         var thumbStarted = false
         var thumbCancelled = false
         override suspend fun upload(prepared: PreparedScreenshot, campaignId: String, userId: String): String {
@@ -48,7 +47,6 @@ class ReportSubmissionLatencyTest {
             thumbStarted = true
             try { awaitCancellation() } finally { thumbCancelled = true }
         }
-        override suspend fun join(campaignId: String) { joins++ }
         override suspend fun submit(request: PendingReport, url: String?, hash: String?): SubmitTesterReportResult {
             submissions++
             assertEquals("https://fixture.invalid/full.jpg", url)
@@ -103,7 +101,6 @@ class ReportSubmissionLatencyTest {
         runCurrent()
         try { job.await(); fail("External deadline must propagate") } catch (_: TimeoutCancellationException) {}
         assertTrue(operations.thumbCancelled)
-        assertEquals("Do not start membership mutation after parent cancellation", 0, operations.joins)
         assertEquals(0, operations.submissions)
     }
 }

@@ -1,0 +1,12 @@
+{
+    "logName":  "egress-probe-check",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.util.EgressAuditProbeTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T10:58:22.6944392Z",
+    "finishedUtc":  "2026-11-02T10:58:42.4308488Z",
+    "currentRunXmlCount":  1
+}

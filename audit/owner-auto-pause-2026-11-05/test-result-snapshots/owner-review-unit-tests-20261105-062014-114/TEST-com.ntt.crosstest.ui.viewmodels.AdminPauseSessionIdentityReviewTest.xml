@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:20:06.873Z" hostname="PC-5700X3D" time="0.147">
+  <properties/>
+  <testcase name="permissionFailureOnExistingPresetRpc_preservesPermissionFeedback" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.042"/>
+  <testcase name="adminToAdminSwitch_updatesDialogIdentityWithoutWaitingForRefresh" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.021"/>
+  <testcase name="missingPresetRpc_explainsBackendUpdateAndNeverFallsBackOrReportsSuccess" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.037"/>
+  <testcase name="logout_clearsDialogIdentityAndAdminAccessBeforeAnyRefresh" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.023"/>
+  <testcase name="dialogReattachment_afterGenerationChangedBeforeOpening_preservesCurrentDraft" classname="com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

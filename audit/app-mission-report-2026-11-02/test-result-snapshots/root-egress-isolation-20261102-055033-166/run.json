@@ -1,0 +1,14 @@
+{
+  "logName": "root-egress-isolation",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.util.EgressAuditProbeTest"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-02T05:50:15.2193624Z",
+  "finishedUtc": "2026-11-02T05:50:33.1795397Z",
+  "currentRunXmlCount": 1
+}

@@ -1,0 +1,2 @@
+REPRODUCED: Existing owner second app receives quota immediately {"expected":24,"actual":12}
+REPRODUCED: Registration-day owner first app receives quota immediately {"expected":12,"actual":0}

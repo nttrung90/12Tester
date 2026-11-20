@@ -1,0 +1,691 @@
+{
+  "at": "2026-11-12T12:20:52.652Z",
+  "kind": "baseline through 089",
+  "singleConnection": true,
+  "results": [
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "reason": "Gỡ bỏ bởi Chủ sở hữu",
+            "status": "removed",
+            "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+            "success": true,
+            "app_name": "Supervisor gate fixture",
+            "owner_id": "ec000000-0000-0000-0000-000000000001",
+            "campaign_id": "39c48eff-0c37-4e0a-b578-080bcc436a6b"
+          }
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        completed_at: null,\n-       created_at: '2026-11-10T12:20:52.264+00:00',\n-       creation_policy_id: 1,\n-       description: '',\n-       icon_url: '',\n-       id: '39c48eff-0c37-4e0a-b578-080bcc436a6b',\n-       is_boosted: false,\n-       owner_id: 'ec000000-0000-0000-0000-000000000001',\n-       package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n-       paused_reason: null,\n-       play_url: '',\n-       push_business_date: null,\n-       push_expires_at: null,\n-       push_order: null,\n-       slot_1_fee_paid: 0,\n-       slot_number: 1,\n-       start_date: '2026-11-12',\n-       status: 'open',\n-       target_days: 14,\n-       target_fee_paid: 0,\n-       target_testers: 12,\n-       test_password: '',\n-       test_username: '',\n-       tester_bonus_credits: 0,\n-       tester_bonus_paid_count: 0,\n-       tester_bonus_remaining_slots: 0,\n-       tester_bonus_round_id: null,\n-       tester_bonus_status: null,\n-       testing_url: '',\n-       tip_credits: 0\n-     },\n-     {\n-       admin_note: null,\n-       admin_pause_reason_code: null,\n-       admin_resumed: false,\n-       app_name: 'Supervisor gate fixture',\n-       auto_accept_hours: 24,\n-       completed_at: null,\n        created_at: '2026-11-10T12:20:52.269+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: 'd385308d-2769-4fc6-aca2-5b3cb1a1ab2b',\n"
+    },
+    {
+      "case": "direct_delete",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "eaca7242-0b77-4c74-ba32-49a26da20e15"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n      },\n-     {\n-       admin_note: null,\n-       admin_pause_reason_code: null,\n-       admin_resumed: false,\n-       app_name: 'Supervisor gate fixture',\n-       auto_accept_hours: 24,\n-       completed_at: null,\n-       created_at: '2026-11-10T12:20:52.317+00:00',\n-       creation_policy_id: 1,\n-       description: '',\n-       icon_url: '',\n-       id: 'eaca7242-0b77-4c74-ba32-49a26da20e15',\n-       is_boosted: false,\n-       owner_id: 'ec000000-0000-0000-0000-000000000001',\n-       package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n-       paused_reason: null,\n-       play_url: '',\n-       push_business_date: null,\n-       push_expires_at: null,\n-       push_order: null,\n-       slot_1_fee_paid: 0,\n-       slot_number: 1,\n-       start_date: '2026-11-12',\n-       status: 'open',\n-       target_days: 14,\n-       target_fee_paid: 0,\n-       target_testers: 12,\n-       test_password: '',\n-       test_username: '',\n-       tester_bonus_credits: 0,\n-       tester_bonus_paid_count: 0,\n-       tester_bonus_remaining_slots: 0,\n-       tester_bonus_round_id: null,\n-       tester_bonus_status: null,\n-       testing_url: '',\n-       tip_credits: 0\n-     }\n    ],\n    rounds: [],\n    wallet: {\n      credits: 10000,\n      is_locked: false\n"
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "cbb78cd3-2871-4c2c-a866-54daeb926f46",
+          "status": "production"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        auto_accept_hours: 24,\n+       completed_at: '2026-11-12T12:20:52.339+00:00',\n-       completed_at: null,\n        created_at: '2026-11-10T12:20:52.345+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: 'cbb78cd3-2871-4c2c-a866-54daeb926f46',\n...\n        start_date: '2026-11-12',\n+       status: 'production',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "cde58815-236a-47c7-892b-c375f15b8207",
+          "status": "paused"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n+       paused_reason: 'owner_manual',\n-       paused_reason: null,\n        play_url: '',\n        push_business_date: null,\n        push_expires_at: null,\n        push_order: null,\n        slot_1_fee_paid: 0,\n        slot_number: 1,\n        start_date: '2026-11-12',\n+       status: 'paused',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "direct_completed",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "31a3f39e-4593-4ba6-8c64-a93f24329ddc",
+          "status": "completed"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        auto_accept_hours: 24,\n+       completed_at: '2026-11-12T12:20:52.389+00:00',\n-       completed_at: null,\n        created_at: '2026-11-10T12:20:52.393+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: '31a3f39e-4593-4ba6-8c64-a93f24329ddc',\n...\n        start_date: '2026-11-12',\n+       status: 'completed',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "direct_closed",
+      "options": {
+        "completed": 3
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "11d0a20d-1101-4852-933a-ddbee9a8c88f",
+          "status": "closed"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        start_date: '2026-11-12',\n+       status: 'closed',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 0,
+        "paused": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": "OWNER_INACTIVE",
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "reason": "Gỡ bỏ bởi Chủ sở hữu",
+            "status": "removed",
+            "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+            "success": true,
+            "app_name": "Supervisor gate fixture",
+            "owner_id": "ec000000-0000-0000-0000-000000000001",
+            "campaign_id": "411d9daa-c015-46ef-beb2-af670bf81055"
+          }
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "b7180a60-43d3-41a5-a866-b8165742b686",
+          "status": "production"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "18c8979f-4733-4a94-993d-83e129a4b769",
+          "status": "paused"
+        }
+      ],
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "pass": true
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true
+      },
+      "expected": "allowed",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "open",
+            "success": true,
+            "campaign_id": "0c19157b-3435-4ad7-a75b-6b6906afcc2e"
+          }
+        }
+      ],
+      "after": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 3
+      },
+      "pass": true
+    },
+    {
+      "case": "owner_delete",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "reason": "Gỡ bỏ bởi Chủ sở hữu",
+            "status": "removed",
+            "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+            "success": true,
+            "app_name": "Supervisor gate fixture",
+            "owner_id": "ec000000-0000-0000-0000-000000000001",
+            "campaign_id": "3ac3c056-bf0b-4ae3-9da0-e80ecf6e2377"
+          }
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        completed_at: null,\n-       created_at: '2026-11-10T12:20:52.55+00:00',\n-       creation_policy_id: 1,\n-       description: '',\n-       icon_url: '',\n-       id: '3ac3c056-bf0b-4ae3-9da0-e80ecf6e2377',\n-       is_boosted: false,\n-       owner_id: 'ec000000-0000-0000-0000-000000000001',\n-       package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n-       paused_reason: null,\n-       play_url: '',\n-       push_business_date: null,\n-       push_expires_at: null,\n-       push_order: null,\n-       slot_1_fee_paid: 0,\n-       slot_number: 1,\n-       start_date: '2026-11-12',\n-       status: 'open',\n-       target_days: 14,\n-       target_fee_paid: 0,\n-       target_testers: 12,\n-       test_password: '',\n-       test_username: '',\n-       tester_bonus_credits: 0,\n-       tester_bonus_paid_count: 0,\n-       tester_bonus_remaining_slots: 0,\n-       tester_bonus_round_id: null,\n-       tester_bonus_status: null,\n-       testing_url: '',\n-       tip_credits: 0\n-     },\n-     {\n-       admin_note: null,\n-       admin_pause_reason_code: null,\n-       admin_resumed: false,\n-       app_name: 'Supervisor gate fixture',\n-       auto_accept_hours: 24,\n-       completed_at: null,\n        created_at: '2026-11-10T12:20:52.551+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: 'f5d2db1a-d7ea-4b1b-a735-ff1d5e4fe269',\n"
+    },
+    {
+      "case": "direct_production",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "d7302c58-8359-4b80-b24e-a1a4986af6c3",
+          "status": "production"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        auto_accept_hours: 24,\n+       completed_at: '2026-11-12T12:20:52.567+00:00',\n-       completed_at: null,\n        created_at: '2026-11-10T12:20:52.572+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: 'd7302c58-8359-4b80-b24e-a1a4986af6c3',\n...\n        start_date: '2026-11-12',\n+       status: 'production',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "manual_pause",
+      "options": {
+        "completed": 6,
+        "debt": 2
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 2,
+        "required_tests": 8,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 8,
+        "carryover_remaining_tests": 2
+      },
+      "error": null,
+      "reply": [
+        {
+          "id": "b1a1b8fb-d951-4761-b0fb-669f24bde7e0",
+          "status": "paused"
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n+       paused_reason: 'owner_manual',\n-       paused_reason: null,\n        play_url: '',\n        push_business_date: null,\n        push_expires_at: null,\n        push_order: null,\n        slot_1_fee_paid: 0,\n        slot_number: 1,\n        start_date: '2026-11-12',\n+       status: 'paused',\n-       status: 'open',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 0,
+        "paused": true,
+        "expired": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 0,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 3
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "completed",
+            "success": true,
+            "campaign_id": "fc70e1c7-f671-417e-b7c9-fc593e4a1545"
+          }
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        auto_accept_hours: 24,\n+       completed_at: '2026-11-12T12:20:52.606+00:00',\n-       completed_at: null,\n        created_at: '2026-10-12T12:20:52.622+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: 'fc70e1c7-f671-417e-b7c9-fc593e4a1545',\n...\n        package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n+       paused_reason: null,\n-       paused_reason: 'owner_manual',\n        play_url: '',\n        push_business_date: null,\n        push_expires_at: null,\n        push_order: null,\n        slot_1_fee_paid: 0,\n        slot_number: 1,\n        start_date: '2026-11-12',\n+       status: 'completed',\n-       status: 'paused',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    },
+    {
+      "case": "resume",
+      "options": {
+        "completed": 3,
+        "paused": true,
+        "expired": true,
+        "locked": true
+      },
+      "expected": "blocked",
+      "before": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-12",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 3,
+        "carryover_ready": true,
+        "completed_tests": 3,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 3,
+        "carryover_remaining_tests": 0
+      },
+      "error": null,
+      "reply": [
+        {
+          "r": {
+            "status": "completed",
+            "success": true,
+            "campaign_id": "9954170c-bed3-4238-bb66-e5110fd9275f"
+          }
+        }
+      ],
+      "pass": false,
+      "failure": "blocked action changed campaign/credit/bonus state\n+ actual - expected\n... Skipped lines\n\n  {\n    bonus_events: [],\n    campaigns: [\n      {\n        admin_note: null,\n...\n        auto_accept_hours: 24,\n+       completed_at: '2026-11-12T12:20:52.626+00:00',\n-       completed_at: null,\n        created_at: '2026-10-12T12:20:52.642+00:00',\n        creation_policy_id: 1,\n        description: '',\n        icon_url: '',\n        id: '9954170c-bed3-4238-bb66-e5110fd9275f',\n...\n        package_name: 'supervisor.gate.ec000000000000000000000000000001.1',\n+       paused_reason: null,\n-       paused_reason: 'owner_manual',\n        play_url: '',\n        push_business_date: null,\n        push_expires_at: null,\n        push_order: null,\n        slot_1_fee_paid: 0,\n        slot_number: 1,\n        start_date: '2026-11-12',\n+       status: 'completed',\n-       status: 'paused',\n        target_days: 14,\n        target_fee_paid: 0,\n        target_testers: 12,\n        test_password: '',\n        test_username: '',\n"
+    }
+  ]
+}

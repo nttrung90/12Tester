@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.help.HelpDocumentParserTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T09:57:53.385Z" hostname="PC-5700X3D" time="0.011">
+  <properties/>
+  <testcase name="testUnsupportedHeadingDoesNotStallParsing" classname="com.ntt.crosstest.data.help.HelpDocumentParserTest" time="0.003"/>
+  <testcase name="testGuideDocumentParsingCompleteness" classname="com.ntt.crosstest.data.help.HelpDocumentParserTest" time="0.004"/>
+  <testcase name="testLocalizedHelpXmlParity" classname="com.ntt.crosstest.data.help.HelpDocumentParserTest" time="0.001"/>
+  <testcase name="testInlineFormattingParser" classname="com.ntt.crosstest.data.help.HelpDocumentParserTest" time="0.0"/>
+  <testcase name="testFaqDocumentParsingCompleteness" classname="com.ntt.crosstest.data.help.HelpDocumentParserTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

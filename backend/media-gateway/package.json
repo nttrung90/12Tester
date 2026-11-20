@@ -7,7 +7,7 @@
   "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test media-gateway-server.test.mjs"
+    "test": "node --test media-gateway-server.test.mjs dual-storage-adapter.test.mjs"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.0",

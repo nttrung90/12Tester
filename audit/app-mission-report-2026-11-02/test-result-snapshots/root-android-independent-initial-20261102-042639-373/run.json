@@ -1,0 +1,18 @@
+{
+  "logName": "root-android-independent-initial",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest",
+    "--tests",
+    "com.ntt.crosstest.work.MissionWindowWorkerIndependentTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T04:25:48.8733300Z",
+  "finishedUtc": "2026-11-02T04:26:39.3897443Z",
+  "currentRunXmlCount": 3
+}

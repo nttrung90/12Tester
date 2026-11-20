@@ -1,0 +1,54 @@
+[
+  {
+    "path": "supabase/tests/run-egress-sync-v2-test.mjs",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/res/values-vi/strings.xml",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/res/values/strings.xml",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/EgressFinalClientReviewTest.kt",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/res/values-en/strings.xml",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt",
+    "state": "modified"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt",
+    "state": "modified"
+  },
+  {
+    "path": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+    "state": "added"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/util/NextCampaignSelectorTest.kt",
+    "state": "added"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailNextAppPriorityTest.kt",
+    "state": "added"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/NextCampaignSelector.kt",
+    "state": "added"
+  }
+]

@@ -1,0 +1,20 @@
+{
+    "logName":  "indep-all-12",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.work.MissionWindowWorkerIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T05:07:06.2233524Z",
+    "finishedUtc":  "2026-11-02T05:07:26.4732364Z",
+    "currentRunXmlCount":  4
+}

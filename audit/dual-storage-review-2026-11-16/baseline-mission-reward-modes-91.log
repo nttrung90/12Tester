@@ -1,0 +1,68 @@
+=== RUNNING MISSION REWARD MODES & MANAGEMENT TESTS (MIGRATION 077) ===
+Loading 30 migrations from 062 to 077...
+
+--- Test 1: Insufficient Credits & Balance Guards ---
+PASS: Mission creation rejected when total cost exceeds balance
+
+--- Test 2: Once Mode Across Multiple Days ---
+PASS: Owner created once-mode mission; 150 fee + 100 escrow held upfront atomically
+PASS: Tester 1 joined once-mode mission
+PASS: Tester 1 submitted once-mode report on Day 1
+PASS: Exact idempotent replay on once-mode returns committed receipt
+TEST RUN FAILED: error: column "updated_at" of relation "tester_reports" does not exist
+    at pe.Oe (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:18162)
+    at pe.tt (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:15548)
+    at pe.parse (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:14222)
+    at D.Ne (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1763)
+    at file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1155
+    at wasm://wasm/0269dffe:wasm-function[10979]:0x5ad04f
+    at wasm://wasm/0269dffe:wasm-function[3598]:0x281dd2
+    at wasm://wasm/0269dffe:wasm-function[3640]:0x289ccf
+    at wasm://wasm/0269dffe:wasm-function[3650]:0x289f2b
+    at wasm://wasm/0269dffe:wasm-function[9956]:0x55697c {
+  length: 871,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: '549',
+  internalQuery: 'UPDATE public.tester_reports\n' +
+    "        SET content = coalesce(p_content, ''),\n" +
+    '            screenshot_url = v_effective_full,\n' +
+    '            thumbnail_url = v_final_thumb,\n' +
+    '            rating = v_rating,\n' +
+    "            status = 'pending',\n" +
+    '            image_hash = v_final_hash,\n' +
+    '            client_submit_id = coalesce(p_client_submit_id, client_submit_id),\n' +
+    '            rejection_reason = NULL,\n' +
+    '            reason_code = NULL,\n' +
+    '            storage_provider = v_provider,\n' +
+    '            view_expires_at = v_view_exp,\n' +
+    '            media_expired = false,\n' +
+    '            updated_at = now()\n' +
+    '        WHERE id = v_report_id',
+  where: 'PL/pgSQL function _submit_tester_report_core(text,uuid,text,integer,uuid,text,text,text,uuid,jsonb,date) line 489 at SQL statement',
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'analyze.c',
+  line: '2597',
+  routine: 'transformUpdateTargetList',
+  query: '\n' +
+    '      select public._submit_tester_report_core(\n' +
+    "        'mission', 'aaaaaaaa-1111-aaaa-1111-aaaaaaaaaaaa'::uuid, 'Báo cáo đã cập nhật nội dung sang ngày 2', 5,\n" +
+    "        '99999999-1111-9999-1111-999999999992'::uuid,\n" +
+    "        'https://firebasestorage.googleapis.com/v0/b/cross-testers.firebasestorage.app/o/reports%2Faaaaaaaa-1111-aaaa-1111-aaaaaaaaaaaa%2F33333333-cccc-3333-cccc-333333333333%2Ffull_1.jpg?alt=media&token=fixture',\n" +
+    "        '0123456789abcdef',\n" +
+    '        null,\n' +
+    "        'f0754c64-61a8-47ed-b86e-9763fb0ebf46'::uuid,\n" +
+    '        null,\n' +
+    '        null\n' +
+    '      ) as r;\n' +
+    '    ',
+  params: [],
+  queryOptions: undefined
+}

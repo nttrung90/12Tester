@@ -1,0 +1,1 @@
+PASS: create bonus RPC works with pgcrypto in extensions schema

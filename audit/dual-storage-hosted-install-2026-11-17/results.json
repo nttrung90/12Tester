@@ -1,0 +1,84 @@
+{
+  "at": "2026-11-16T17:20:39.696Z",
+  "scope": "PGlite restricted-CREATE simulation; not live Supabase or actual Storage API",
+  "bundleSha256": "b508881c4ce9477d94e0749a92452d4cc39e88e7b217dbda036dd70cb76a4c68",
+  "results": [
+    {
+      "name": "original 091 reproduces schema permission error with existing Storage tables",
+      "status": "PASS",
+      "evidence": {
+        "capabilities": {
+          "role": "hosted_migration_test",
+          "superuser": "off",
+          "can_create": false
+        },
+        "error": {
+          "code": "42501",
+          "message": "permission denied for schema storage"
+        }
+      }
+    },
+    {
+      "name": "missing bucket refuses before application mutations",
+      "status": "PASS",
+      "evidence": {
+        "code": "P0001",
+        "message": "Create private bucket report-screenshots through Storage Dashboard/API first (2 MB; image/jpeg, image/png, image/webp)"
+      }
+    },
+    {
+      "name": "public bucket refuses without silently changing its configuration",
+      "status": "PASS",
+      "evidence": {
+        "code": "P0001",
+        "message": "Bucket report-screenshots must be private, limit 2 MB (2000000..2097152 bytes), MIME image/jpeg,image/png,image/webp only. Configure it via Dashboard/API"
+      }
+    },
+    {
+      "name": "disabled managed RLS refuses instead of altering platform table",
+      "status": "PASS",
+      "evidence": {
+        "code": "P0001",
+        "message": "Managed storage.objects RLS is disabled; check the Storage service before installing"
+      }
+    },
+    {
+      "name": "existing policy name conflict is preserved and refused",
+      "status": "PASS",
+      "evidence": {
+        "code": "P0001",
+        "message": "Storage policy name conflict. Review existing policies before installing; this bundle will not overwrite an unrelated policy"
+      }
+    },
+    {
+      "name": "failure at end rolls back the entire 091-093 installation",
+      "status": "PASS"
+    },
+    {
+      "name": "hosted bundle installs full 091-093 without schema CREATE permission",
+      "status": "PASS"
+    },
+    {
+      "name": "installed database refuses replay of bootstrap bundle",
+      "status": "PASS",
+      "evidence": {
+        "code": "P0001",
+        "message": "Dual Storage already exists or was partially installed. Do not replay 091; inspect installed state and use a forward repair"
+      }
+    },
+    {
+      "name": "all final public function definitions match canonical 091-093 chain",
+      "status": "PASS",
+      "evidence": {
+        "functions": 262
+      }
+    },
+    {
+      "name": "094 applies after the hosted 091-093 bundle",
+      "status": "PASS",
+      "evidence": {
+        "migration": "094_fix_daily_task_completion_and_carryover.sql"
+      }
+    }
+  ]
+}

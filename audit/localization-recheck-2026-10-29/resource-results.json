@@ -1,0 +1,19 @@
+{
+  "counts": {
+    "values-en": {
+      "count": 1193,
+      "duplicates": []
+    },
+    "values-vi": {
+      "count": 1193,
+      "duplicates": []
+    },
+    "values": {
+      "count": 1193,
+      "duplicates": []
+    }
+  },
+  "default_vs_en_differences": [],
+  "missing_vi": [],
+  "placeholder_mismatches": []
+}

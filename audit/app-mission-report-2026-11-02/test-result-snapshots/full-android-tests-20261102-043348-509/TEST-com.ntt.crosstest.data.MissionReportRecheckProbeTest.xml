@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.MissionReportRecheckProbeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:33:34.045Z" hostname="PC-5700X3D" time="0.082">
+  <properties/>
+  <testcase name="failedMissionContextLoadMustNeverEnqueueOrdinaryReport" classname="com.ntt.crosstest.data.MissionReportRecheckProbeTest" time="0.023"/>
+  <testcase name="oldMissionContextResponseMustNotUndoNewDetailRefresh" classname="com.ntt.crosstest.data.MissionReportRecheckProbeTest" time="0.019"/>
+  <testcase name="homeDeadlineTimerMustPruneEachDeadlineWithoutRefresh" classname="com.ntt.crosstest.data.MissionReportRecheckProbeTest" time="0.02"/>
+  <testcase name="expiredInitialMissionMustNeverEnqueueOrdinaryReport" classname="com.ntt.crosstest.data.MissionReportRecheckProbeTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

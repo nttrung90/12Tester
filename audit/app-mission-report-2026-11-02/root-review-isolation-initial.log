@@ -1,0 +1,26 @@
+FAIL independent review isolation: approving only a mission cannot consume ordinary daily checkin/quota ERR_ASSERTION mission approval must not fabricate an ordinary checkin
+
+1 !== 0
+
+FAIL independent review isolation: ordinary provisional policy reward is unchanged after mission approval ERR_ASSERTION mission approval must not suppress ordinary policy provisional reward
+
+0 !== 10
+
+FAIL independent review isolation: rejecting mission preserves existing ordinary pending checkin and report ERR_ASSERTION mission rejection must not delete the separate ordinary checkin
++ actual - expected
+
++ []
+- [
+-   {
+-     campaign_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+-     checkin_date: '2026-11-02',
+-     note: 'Đã nộp kết quả test (tạm tính, chờ chủ app duyệt)',
+-     user_id: '22222222-2222-2222-2222-222222222222'
+-   }
+- ]
+
+FAIL independent review isolation: automatic acceptance of mission does not fabricate ordinary checkin ERR_ASSERTION auto-approved mission must keep ordinary slot untouched
+
+1 !== 0
+
+PASS independent review isolation: later-day mission can be approved without paying participant escrow twice

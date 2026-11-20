@@ -1,0 +1,21 @@
+{
+  "logName": "supervisor-focused-review",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyRefreshRaceReviewTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest",
+    "--tests",
+    "com.ntt.crosstest.data.AdminOwnerAutoPauseTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T06:16:42.2816069Z",
+  "finishedUtc": "2026-11-05T06:16:57.4873950Z",
+  "currentRunXmlCount": 5
+}

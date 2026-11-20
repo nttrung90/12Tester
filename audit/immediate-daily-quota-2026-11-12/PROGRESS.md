@@ -1,0 +1,82 @@
+# Implementation Progress: Immediate Daily Quota on Campaign Creation & Deletion
+Date: 2026-11-12
+Model: Gemini 3.8 Flash (High) / Effort: High
+Workspace: F:\AI\12Tester
+
+## Status Summary
+- [x] Initial requirement & plan analysis (`KE_HOACH_CAP_NHAT_NHIEM_VU_NGAY_NGAY_KHI_DANG_XOA_APP_2026-11-11.md` & `TASK_IMPLEMENTATION.txt`)
+- [x] Examined existing migrations 062..087 and identified integration points
+- [x] Verified local native PostgreSQL test cluster (`audit/immediate-daily-quota-2026-11-12/native-ready.json`)
+- [x] Implemented migration 088 (`supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql`):
+  - Audited activation policy table: `public.daily_task_immediate_quota_policies` & `public.daily_task_immediate_quota_policy_audit`
+  - Default inactive baseline (`-infinity`, false); authorized activation scheduled for a future Vietnamese business day, protected against unauthorized / retroactive client changes
+  - Direct trigger `trg_guard_immediate_daily_quota_policy` on policy table
+  - Updated `get_daily_task_status`:
+    - Counts new apps posted today immediately when active (`created_at < v_next_day_start`)
+    - Closed and pending_removal apps immediately excluded from `active_app_count` (K)
+    - New accounts posting on registration day receive daily quota immediately (`mode = 'owner'`, `carry_in = 0`, `history_ready = true`)
+    - Historical journal reconstruction matches activation semantics; immutable past frozen snapshots preserved
+    - Formula $B = tests\_per\_active\_app \times K$; preserves $D$, $C$, debt formulas and source caps
+  - Updated `_apply_daily_inactivity_penalty`:
+    - Owners posting on registration day finalized normally under verified creation boundary ($v\_prev\_streak = 0$, no past checkpoint required)
+    - Pure members and exempt accounts retain creation day exemption
+    - Historical evaluations prior to activation date retain historical exemption
+  - Updated `create_campaign_v2`:
+    - Atomically calls `refresh_daily_completion(v_uid, v_vn_today)` after campaign creation
+    - Idempotent replay of financial receipts remains immutable and safe
+  - Updated `_request_campaign_removal`:
+    - Atomically calls `refresh_daily_completion(v_owner_id, v_today)` on immediate removal AND pending_removal
+  - Updated `_process_closing_tester_bonus_rounds`:
+    - Refreshes daily completion on eventual physical deletion (without double subtraction)
+  - Dropped ambiguous legacy finalizer overloads before recreation (R1)
+  - Enforced `public._assert_daily_task_admin()` for client role callers (R2)
+  - Future-only scheduling enforced; retroactive client updates blocked (R3)
+  - RLS on audit table requires admin role AND `is_locked = false` (R4, R5)
+  - Enforced global lock order (`profiles` then `user_daily_tasks`) in `refresh_daily_completion` eliminating 40P01 deadlocks (R6)
+  - Removed task-only role name `quota_test_admin` from production trusted-role allowlist (R9 cleanup)
+- [x] Implemented Android client updates:
+  - `DailyTaskChangeEvent.kt`: Sealed interface with `Updated` and `StalePending` events incorporating 4-way fencing metadata
+  - `CampaignRepository.kt`:
+    - Unified `"daily_task"` mutation version with `SessionCacheManager`
+    - In `refreshDailyTaskAfterCampaignChange`: 4-way fencing (UID, session generation, VN business day, mutationVersion)
+    - Stale or missing payload date (`fresh.statusDate != expectedDay`) rejected with `IllegalStateException`
+    - Bounded retry trigger source (`"stale_pending_retry"`) preserves current mutation version
+    - Post-commit network/RPC failures emit `StalePending` and mark cache pending without aborting campaign action
+    - Guarded catch block with version fencing so delayed failed reads cannot overwrite newer successful quotas
+  - `SessionCacheManager.kt`:
+    - **Strict UID Check**: Exact mismatch check (`if (expectedUserId != null && current.userId != expectedUserId) return false`), strictly rejecting null guest caches when writing identified user data.
+    - **Atomic Publication During IO**: Introduced dedicated `publicationLock` for RAM cache operations. `save` acquires `diskLock`, writes staging, then inside `publicationLock` merges latest task fields, rewrites staging if needed, atomically moves staging to target, and publishes to RAM coherently (`diskLock` $\rightarrow$ `publicationLock` order). `loadSync` shares `publicationLock` for memory publication.
+    - Preserves in-memory daily task, missed streak, and pending refresh when in-memory version is newer or when an earlier pending snapshot tries to overwrite a resolved retry.
+    - `clear()` / `clearSync()` resets `dailyTaskVersion` synchronously to 0 under `publicationLock`.
+    - `loadSync()` rebases `dailyTaskVersion` to max of current and loaded snapshot.
+  - `HomeViewModel.kt`:
+    - **Async Initial Disk Load Fence**: Captures `initDailyTaskVersion` and `initBusinessDay` before launching IO load. Preserves current UI task state if task token or business day changed or if task is already non-null, preventing stale disk load from overwriting newer live task events.
+    - Subscribes to `dailyTaskEvents` via `observeDailyTaskEvents()` with 4-way fencing.
+    - Bounded retry mechanism `scheduleDailyTaskRetry()` with backoffs `[200ms, 500ms, 1000ms, 2000ms, 4000ms]`.
+    - In `refreshAll()`: captures initial daily task version; preserves UI quota if mutation occurred during slow dashboard fetch.
+    - Persists `isDailyTaskPendingRefresh` in disk snapshot.
+  - `DailyTaskCard.kt` & Resource Strings:
+    - Added generic localized refresh copy `daily_task_campaign_refresh_pending_note` in EN, default, and VI strings.
+    - Displays `daily_task_campaign_refresh_pending_note` when `isPendingRefresh` is true, preserving existing `daily_task_carryover_pending_note` for carryover-only pending state.
+  - `HomeScreen.kt`:
+    - Passes `uiState.isDailyTaskPendingRefresh` into `DailyTaskCard`.
+- [x] Verification Results:
+  - Database & Governance Probes:
+    - `node audit/immediate-daily-quota-2026-11-12/governance-probe.mjs`: EXIT 0 (all 4 cases passed)
+    - `node audit/immediate-daily-quota-2026-11-12/fresh-acceptance.mjs`: EXIT 0 (all 27 scenarios passed)
+    - `node audit/immediate-daily-quota-2026-11-12/independent-concurrency.mjs`: EXIT 0 (create vs owner/admin removal passed)
+    - `node audit/immediate-daily-quota-2026-11-12/independent-finalization-race.mjs`: EXIT 0 (yesterday finalization vs owner/admin removal passed)
+    - `node audit/immediate-daily-quota-2026-11-12/independent-acceptance.mjs`: EXIT 0 (all 26 tests passed)
+  - SQL Acceptance & Regression Suites:
+    - `npm --prefix supabase/tests run test:immediate-quota-acceptance`: EXIT 0 (all 7 scenarios passed)
+    - `npm --prefix supabase/tests run test:carryover-acceptance`: EXIT 0 (all 14 scenarios passed)
+  - Android Unit Tests:
+    - `SupervisorImmediateQuotaRaceTest`: 6 of 6 tests PASSED (0 failures, 0 errors, Exit code: 0)
+    - `ImmediateDailyQuotaUnitTest`: 5 of 5 tests PASSED (0 failures, 0 errors, Exit code: 0)
+    - Full Android `testDebugUnitTest`: 716+ tests PASSED (BUILD SUCCESSFUL, Exit code: 0)
+- [x] Hard Constraints Adhered To:
+  - App version `1.2.4` (build 44) strictly preserved.
+  - Initial no-APK verification completed. After explicit user permission for test packaging, one debug APK was built and signature/version verified; release artifacts remained unchanged.
+  - NO commit, push, or deployment.
+  - All existing dirty/untracked files preserved.
+  - No modification or weakening of supervisor-owned test fixtures or probe scripts.

@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "locales": [
+    "values",
+    "values-vi",
+    "values-en"
+  ],
+  "addedKeys": [
+    "campaign_admin_error_missing_rpc",
+    "campaign_admin_pause_opt_custom",
+    "campaign_admin_pause_opt_missing_google_group",
+    "campaign_admin_pause_opt_policy_violation",
+    "campaign_admin_pause_preview_missing_google_group",
+    "campaign_admin_pause_preview_policy_violation",
+    "campaign_admin_pause_preview_title",
+    "campaign_admin_pause_reason_missing_google_group",
+    "campaign_admin_pause_reason_policy_violation"
+  ],
+  "count": 9
+}

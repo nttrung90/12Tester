@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-05T00:26:13.376Z" hostname="PC-5700X3D" time="0.092">
+  <properties/>
+  <testcase name="legacyJsonWithoutCountKeysDerivesCountsFromReportsArray" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.006"/>
+  <testcase name="legacyJsonWithEmptyReportsDefaultsToZero" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.005"/>
+  <testcase name="viewModelFastPathLegacyFallbackDerivesFromReportsList" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.012"/>
+  <testcase name="newJsonWithExplicitZeroCountsStaysAuthoritativeZero" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.006"/>
+  <testcase name="viewModelAuthoritativeCountsBeyond200ArrayLimit" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.011"/>
+  <testcase name="newJsonAuthoritativeBeyond200ArrayLimit" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.005"/>
+  <testcase name="reportReviewTriggersRefreshAndOptimisticUpdate" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.018"/>
+  <testcase name="reportRejectTriggersRefreshAndPreservesZeroPendingAndTesterTotal" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.017"/>
+  <testcase name="viewModelFastPathUsesNewTesterReportsCountAndPendingReportsCount" classname="com.ntt.crosstest.data.OwnerReportCountBehavioralTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

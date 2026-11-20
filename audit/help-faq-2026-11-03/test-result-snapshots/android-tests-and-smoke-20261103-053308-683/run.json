@@ -1,0 +1,11 @@
+{
+  "logName": "android-tests-and-smoke",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-03T05:32:19.4512162Z",
+  "finishedUtc": "2026-11-03T05:33:08.8320041Z",
+  "currentRunXmlCount": 68
+}

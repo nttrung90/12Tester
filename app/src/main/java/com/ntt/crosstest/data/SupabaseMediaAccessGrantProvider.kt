@@ -13,12 +13,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 private data class GetReportMediaAccessRpcParams(
-    @SerialName("p_report_id") val reportId: String
+    @SerialName("p_report_id") val reportId: String,
+    @SerialName("p_attachment_id") val attachmentId: String? = null,
 )
 
 /**
  * Concrete implementation của MediaAccessGrantProvider gọi database RPC
- * `get_report_media_access(uuid)` của Supabase (E04).
+ * `request_report_media_access(uuid, uuid)` của Supabase (E04).
  *
  * Giải mã đúng snake_case định dạng JSON từ backend PostgreSQL / PostgREST.
  */
@@ -26,17 +27,27 @@ class SupabaseMediaAccessGrantProvider(
     private val supabase: SupabaseClient
 ) : MediaAccessGrantProvider {
 
-    override suspend fun getMediaAccessGrant(reportId: String): MediaAccessGrantResult? {
+    override suspend fun getMediaAccessGrant(reportId: String): MediaAccessGrantResult? =
+        getMediaAccessGrant(reportId, null)
+
+    override suspend fun getMediaAccessGrant(reportId: String, attachmentId: String?): MediaAccessGrantResult? {
         if (reportId.isBlank()) return null
         return try {
             supabase.postgrest.rpc(
-                function = "get_report_media_access",
-                parameters = GetReportMediaAccessRpcParams(reportId = reportId)
+                function = "request_report_media_access",
+                parameters = GetReportMediaAccessRpcParams(reportId = reportId, attachmentId = attachmentId)
             ).decodeAs<MediaAccessGrantResult>()
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
-            Log.w(TAG, "Lỗi khi gọi RPC get_report_media_access cho report $reportId: ${e.javaClass.simpleName}")
+            val msg = e.message.orEmpty()
+            if (msg.contains("FORBIDDEN", ignoreCase = true)) {
+                throw com.ntt.crosstest.util.ScreenshotPermissionDeniedException("FORBIDDEN:$reportId")
+            }
+            if (msg.contains("MEDIA_EXPIRED", ignoreCase = true)) {
+                throw com.ntt.crosstest.util.ScreenshotExpiredException("MEDIA_EXPIRED:$reportId")
+            }
+            Log.w(TAG, "Lỗi khi gọi RPC request_report_media_access cho report $reportId: ${e.javaClass.simpleName}")
             null
         }
     }

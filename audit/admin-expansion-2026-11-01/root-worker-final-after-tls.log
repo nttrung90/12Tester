@@ -1,0 +1,18 @@
+=== RUNNING WORKER-RUNNER TESTS ===
+[notification-worker] Iteration error: Connection refused by database
+[notification-worker 2026-11-01T15:49:44.756Z] Iteration completed: {"success":true,"processed":1}
+[notification-worker] Iteration error: Lock timeout in statement
+[notification-worker 2026-11-01T15:49:44.758Z] Iteration completed: {"success":true,"processed":2}
+[notification-worker] Previous iteration still in progress, skipping tick.
+[notification-worker 2026-11-01T15:49:44.758Z] Iteration completed: {"success":true,"processed":99}
+[notification-worker 2026-11-01T15:49:44.758Z] Iteration completed: {"success":true,"processed":100}
+=== ALL WORKER-RUNNER TESTS PASSED ===
+✔ backend\notification-worker\worker-runner.test.mjs (204.1356ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 211.9739

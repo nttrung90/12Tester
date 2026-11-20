@@ -1,0 +1,10 @@
+{
+    "logName":  "opencode-test-full-suite-fresh-run",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-05T00:27:08.8500423Z",
+    "finishedUtc":  "2026-11-05T00:27:47.5640628Z",
+    "currentRunXmlCount":  71
+}

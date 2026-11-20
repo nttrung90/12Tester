@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-12T10:06:56.455Z" hostname="PC-5700X3D" time="0.947">
+  <properties/>
+  <testcase name="postCommitQuotaReadFailureRetriesEvenWhenPreviousQuotaWasReady" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.025"/>
+  <testcase name="diskSaveQueuedBeforeMutationCannotRestoreOldQuotaInMemoryOrDisk" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.126"/>
+  <testcase name="yesterdayQuotaPayloadCannotBePublishedAsCurrentDay" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.009"/>
+  <testcase name="delayedDashboardCannotOverwriteQuotaAfterCampaignMutation" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.01"/>
+  <testcase name="persistentQuotaReadFailureHasBoundedRetries" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.742"/>
+  <testcase name="dashboardSnapshotAfterRepeatedEqualReadsCannotOverwriteLaterQuotaMutation" classname="com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

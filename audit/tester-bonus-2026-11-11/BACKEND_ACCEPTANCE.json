@@ -1,0 +1,18 @@
+{
+  "source": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+  "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6",
+  "nativeAppliedSnapshotSha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6",
+  "matches": true,
+  "behaviorGroups": 17,
+  "ownerRemovalGroups": 8,
+  "nativeConcurrencyScenarios": 7,
+  "ownerWorkerGatedProbe": true,
+  "repositoryDatabaseTests": true,
+  "logs": [
+    "runs/final-owner-removal.log",
+    "runs/final-native-owner-integrated.log",
+    "runs/final-native-owner-worker.log",
+    "runs/final-owner-integrated-database-regressions.log"
+  ],
+  "productionDeployed": false
+}

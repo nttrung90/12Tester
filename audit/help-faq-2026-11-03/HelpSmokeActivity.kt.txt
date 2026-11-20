@@ -1,0 +1,27 @@
+package com.ntt.crosstest
+
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.ntt.crosstest.ui.screens.HelpScreen
+import com.ntt.crosstest.ui.theme.TestCheoTheme
+import java.util.Locale
+
+class HelpSmokeActivity : ComponentActivity() {
+    override fun attachBaseContext(base: Context) {
+        val configuration = Configuration(base.resources.configuration)
+        configuration.setLocale(Locale.forLanguageTag("vi"))
+        super.attachBaseContext(base.createConfigurationContext(configuration))
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            TestCheoTheme {
+                HelpScreen(onBack = { finish() })
+            }
+        }
+    }
+}

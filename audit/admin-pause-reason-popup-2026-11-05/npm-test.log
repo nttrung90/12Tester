@@ -1,0 +1,214 @@
+﻿
+> test
+> npm run test:baseline-regressions && npm run test:admin-expansion && npm run test:mission-window && npm run test:owner-auto-pause
+
+
+> test:baseline-regressions
+> node run-consolidated-baseline-test.mjs && node run-daily-task-ratio.mjs && node run-backend-cleanup-hardening.mjs && node run-mission-flow-hardening.mjs && node run-thumbnail-migration.mjs && node run-media-gateway-test.mjs && node run-home-stats-cycle-test.mjs && node run-mission-report-and-expiration-test.mjs && node run-app-update-reward-test.mjs && node run-campaign-push-test.mjs && node run-daily-task-carryover.mjs && node run-push-and-carryover-hardening-test.mjs && node run-report-idempotency-ledger-test.mjs && node run-admin-daily-task-policy-test.mjs && node run-report-idempotency-provenance-and-rating-test.mjs && node run-push-campaign-role-hardening-test.mjs && node run-report-extension-schema-test.mjs && node run-explicit-report-context-test.mjs && node run-remove-dhash-hardblock-test.mjs && node run-push-and-carryover-baseline062-regression-test.mjs && node run-owner-tester-reports-count-test.mjs && node run-admin-audit-hardening-test.mjs && node run-admin-management-test.mjs
+
+PASS: Fresh baseline has the same final schema, function bodies, ACLs, RLS, indexes and triggers as all 65 migrations
+PASS: Existing 061 without 046, restricted default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 with 046, restricted default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 without 046, legacy default grants: preserve all business data, ACLs, sequence values and settings
+PASS: Existing 061 with 046, legacy default grants: preserve all business data, ACLs, sequence values and settings
+PASS: An older/partial schema fails atomically before business changes
+PASS: Conflicting constraint definition causes a full rollback including the missing 046 column
+PASS: Archived history remains the exact reviewed 65 files
+8/8 baseline checks passed
+PASS: existing full schema through its current pre-042 content loads
+PASS: migration 042 upgrades the existing schema
+PASS: default 3:1 status, penalties, balances and logs match pre-042
+PASS: read-only preflight recognizes baseline and installed definitions
+PASS: 2016 SQL assertions (matrix, dates, audit, penalties, RPCs, roles)
+PASS: rerunning 042 preserves baseline, future schedules and audit
+PASS: missing baseline fails closed
+PASS: fresh full-schema install matches upgraded definitions and ACLs
+PASS: customized live function is refused without partial migration
+PASS: 8 runner checks plus SQL assertions
+--- KHß╗₧I Tß║áO PGLITE ─Éß╗é KIß╗éM THß╗¼ HARDENING 043 ---
+PASS: Nß║íp th├ánh c├┤ng full_schema_singapore.sql (bao gß╗ôm 041, 042, 043, 044)
+Cleanup run status: {
+  status: 'dry_run',
+  error: null,
+  details: {
+    dry_run: true,
+    batch_size: 10,
+    campaign_ids: [ 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' ],
+    retention_days: 90,
+    expired_missions_synced: 0,
+    stale_pending_reports_count: 0
+  }
+}
+PASS: Review Point 1 - Dry run an to├án, chß╗ë scan/log, kh├┤ng ─æß╗òi dß╗» liß╗çu nghiß╗çp vß╗Ñ
+PASS: Purge thß║¡t tß╗▒ ─æß╗Öng ─æß╗ông bß╗Ö mission hß║┐t hß║ín v├á x├│a sß║ích campaign
+PASS: Review Point 2 - sync_expired_missions() hoß║ít ─æß╗Öng ch├¡nh x├íc ─æß╗Öc lß║¡p UI
+PASS: Review Point 3 - C╞í chß║┐ chß╗æng starvation & backoff bß║úo ─æß║úm campaign tß╗æt kh├┤ng bß╗ï chß║╖n
+PASS: Review Point 6 - pause/resume cß║¡p nhß║¡t status expired kh├┤ng rollback, giß╗» contract auth
+=== Tß║ñT Cß║ó 5 NH├ôM KIß╗éM THß╗¼ HARDENING 043 ─Éß╗ÇU PASS 100% ===
+--- KHß╗₧I Tß║áO PGLITE ─Éß╗é KIß╗éM THß╗¼ REGRESSION 044 (M01-M09 & R01-R07) ---
+PASS: Nß║íp th├ánh c├┤ng schema baseline 043 (tr╞░ß╗¢c 044)
+PASS: ├üp dß╗Ñng th├ánh c├┤ng migration 044_mission_flow_hardening.sql tr├¬n nß╗ün 043 vß╗¢i dß╗» liß╗çu tr├╣ng
+PASS: R04 - H├▓a giß║úi dß╗» liß╗çu tr├╣ng c├│ audit, bß║úo to├án sß╗æ d╞░ v├á giß╗» mission c├│ tester
+PASS: ├üp dß╗Ñng lß║íi migration 044 an to├án (idempotency)
+--- Kiß╗âm tra M02 ---
+PASS: M02 - Pause mission chiß║┐m giß╗» slot, chß║╖n tß║ío tr├╣ng mission tr├¬n c├╣ng campaign
+--- Kiß╗âm tra M06 ---
+PASS: M06 - Tß╗▒ ─æß╗Öng ─æß╗ông bß╗Ö mission hß║┐t hß║ín d╞░ß╗¢i kh├│a khi tß║ío mß╗¢i
+--- Kiß╗âm tra M03 ---
+PASS: M03 - B├ío c├ío tr╞░ß╗¢c join kh├┤ng ─æ╞░ß╗úc t├¡nh th╞░ß╗ƒng; b├ío c├ío sau join ─æ╞░ß╗úc th╞░ß╗ƒng ─æ├║ng 1 lß║ºn
+--- Kiß╗âm tra M05 & R05 ---
+PASS: M05 - Settlement failure ─æ╞░ß╗úc l╞░u v├áo outbox v├á retry bß╗ün vß╗»ng, idempotent
+--- Kiß╗âm tra R05: Anti-starvation vß╗¢i 50 job tß║ím dß╗½ng ---
+PASS: R05 - C╞í chß║┐ backoff ng─ân 50 job tß║ím dß╗½ng l├ám nghß║╜n batch retry
+--- Kiß╗âm tra R03: Quyß╗ün RPC auto_accept_expired_reports ---
+PASS: R03 - Role authenticated gß╗ìi ─æ╞░ß╗úc auto_accept_expired_reports
+--- Kiß╗âm tra R06: Reset suppress notification flag ---
+PASS: R06 - Cß╗¥ suppress_report_notify ─æ╞░ß╗úc reset vß╗ü 0 sau khi chß║íy
+--- Kiß╗âm tra M07 ---
+PASS: M07 - Sß║»p xß║┐p tr╞░ß╗¢c khi Limit 100 bß║úo to├án nhiß╗çm vß╗Ñ mß╗¢i nhß║Ñt
+--- Kiß╗âm tra get_my_active_mission_campaign_ids ---
+PASS: get_my_active_mission_campaign_ids trß║ú ─æ├║ng danh s├ích campaign c├│ mission
+--- Kiß╗âm tra bß║úo to├án 043 review point 6 ---
+PASS: Bß║úo to├án sß╗¡a ─æß╗òi 043 cho pause/resume expired
+=== Tß║ñT Cß║ó C├üC REGRESSION TESTS BACKEND 044 ─Éß╗ÇU PASS 100% ===
+--- KHß╗₧I Tß║áO PGLITE ─Éß╗é KIß╗éM THß╗¼ MIGRATION 045 (E02 THUMBNAIL) ---
+PASS: Nß║íp schema baseline
+PASS: ├üp dß╗Ñng th├ánh c├┤ng migration 045_thumbnail_support.sql
+PASS: Cß╗Öt thumbnail_url ─æ├ú tß╗ôn tß║íi trong public.tester_reports
+PASS: Legacy 6-argument call t╞░╞íng th├¡ch ng╞░ß╗úc 100%
+PASS: 7-argument call l╞░u v├á trß║ú thumbnail_url ch├¡nh x├íc
+PASS: Idempotency trß║ú lß║íi ─æ├║ng thumbnail_url ─æ├ú l╞░u
+PASS: Chß║╖n thumbnail tß╗½ bucket ngo├ái allowlist
+PASS: Chß║╖n query-string spoofing tr├¬n URL thumbnail
+PASS: Chß║╖n kh├┤ng cho gh├⌐p cß║╖p thumbnail sai lß╗çch ID vß╗¢i ß║únh full
+PASS: Chß║╖n thumbnail c├│ user_id kh├┤ng khß╗¢p vß╗¢i session
+=== Tß║ñT Cß║ó KIß╗éM THß╗¼ MIGRATION 045 ─Éß╗ÇU PASS 100% ===
+--- KHß╗₧I Tß║áO PGLITE ─Éß╗é KIß╗éM THß╗¼ MIGRATION 046 (E04 MEDIA GATEWAY) ---
+PASS: ├üp dß╗Ñng th├ánh c├┤ng migration 045 v├á 046
+PASS: Thiß║┐u cß║Ñu h├¼nh secret fail-closed vß╗¢i MEDIA_GATEWAY_SECRET_NOT_CONFIGURED
+PASS: Thiß║┐u cß║Ñu h├¼nh base URL fail-closed vß╗¢i MEDIA_GATEWAY_BASE_URL_NOT_CONFIGURED
+PASS: Unauthenticated bß╗ï tß╗½ chß╗æi vß╗¢i NOT_AUTHENTICATED
+PASS: Author ─æ╞░ß╗úc cß║Ñp quyß╗ün truy cß║¡p media vß╗¢i role=author v├á HMAC hß╗úp lß╗ç
+PASS: Grant token bß╗ï tß╗½ chß╗æi khi consumer kh├íc ng╞░ß╗¥i ─æ╞░ß╗úc cß║Ñp (identity binding)
+PASS: Grant token r├áng buß╗Öc chß║╖t chß║╜ vß╗¢i variant (full vs thumb)
+PASS: Token hß║┐t hß║ín bß╗ï tß╗½ chß╗æi
+PASS: Campaign Owner ─æ╞░ß╗úc cß║Ñp quyß╗ün truy cß║¡p media vß╗¢i role=owner
+PASS: Admin hß╗ç thß╗æng ─æ╞░ß╗úc cß║Ñp quyß╗ün truy cß║¡p media vß╗¢i role=admin
+PASS: Stranger bß╗ï tß╗½ chß╗æi truy cß║¡p vß╗¢i lß╗ùi FORBIDDEN
+PASS: B├ío c├ío qu├í hß║ín 31 ng├áy bß╗ï tß╗½ chß╗æi vß╗¢i lß╗ùi MEDIA_EXPIRED
+=== Tß║ñT Cß║ó KIß╗éM THß╗¼ MIGRATION 046 MEDIA GATEWAY ─Éß╗ÇU PASS 100% ===
+=== Bß║«T ─Éß║ªU KIß╗éM THß╗¼ MIGRATION 047: CHU Kß╗▓ THß╗ÉNG K├è TRANG CHß╗ª (1 / 2 / 3 NG├ÇY) ===
+PASS 1: ├üp dß╗Ñng th├ánh c├┤ng baseline schema v├á migration 045, 046, 047
+PASS 2: Mß║╖c ─æß╗ïnh chu kß╗│ 1 ng├áy, kh├┤ng c├│ lß╗ïch chß╗¥
+PASS 3: Ph├ón quyß╗ün chß║╖n anon v├á non-admin gß╗ìi RPC cß║Ñu h├¼nh
+PASS 4: Validate chu kß╗│ hß╗úp lß╗ç (chß╗ë chß║Ñp nhß║¡n 1, 2, 3)
+PASS 5: Chu kß╗│ 1 ng├áy cho home_tested_count ─æ├║ng bß║▒ng today_tested_count
+PASS 6: Admin l├¬n lß╗ïch ─æß╗òi chu kß╗│ 3 ng├áy, ghi nhß║¡n audit ─æß║ºy ─æß╗º
+PASS 7: Chß╗æng ghi ─æ├¿ ─æß╗ông thß╗¥i hoß║ít ─æß╗Öng ch├¡nh x├íc khi sai revision
+PASS 8: Chß╗ìn lß║íi chu kß╗│ ─æang chß║íy hß╗ºy lß╗ïch chß╗¥ th├ánh c├┤ng
+PASS 9: Helper _get_home_stats_period t├¡nh ─æ├║ng mß╗æc chu kß╗│ 3 ng├áy v├á tß╗▒ reset ─æß║ºu chu kß╗│
+PASS 10: Chu kß╗│ 3 ng├áy cß╗Öng dß╗ôn 4 -> 7 -> 9, sang chu kß╗│ mß╗¢i reset vß╗ü 0 rß╗ôi l├¬n 5
+PASS 11: Kh├┤ng cß╗Öng tr├╣ng l╞░ß╗út khi c├╣ng tester nß╗Öp nhiß╗üu lß║ºn trong mß╗Öt ng├áy
+PASS 12: Reject x├│a check-in l├ám giß║úm home_tested_count ngay lß║¡p tß╗⌐c
+PASS 13: Tß╗¡ sß╗æ v╞░ß╗út mß╗Ñc ti├¬u (14/12) kh├┤ng bß╗ï giß╗¢i hß║ín hay cß║»t cß╗Ñt
+PASS 14: ─Éß╗òi cß║Ñu h├¼nh giß╗»a chu kß╗│: ng├áy h├┤m nay giß╗» nguy├¬n, ng├áy mai bß║»t ─æß║ºu chu kß╗│ mß╗¢i tß╗½ 0
+=== Tß║ñT Cß║ó 14 KIß╗éM THß╗¼ BACKEND SQL MIGRATION 047 ─Éß╗ÇU PASS 100% ===
+=== Bß║«T ─Éß║ªU KIß╗éM THß╗¼ BACKEND MIGRATION 048 & 049 (B├üO C├üO NHIß╗åM Vß╗ñ & HARDENING) ===
+PASS 1: Nß║íp th├ánh c├┤ng full schema v├á migration 045 -> 049 (x├íc minh idempotent)
+PASS 2: get_open_missions lß╗ìc bß╗Å mission hß║┐t hß║ín v├á trß║ú server_now
+PASS 3: Nß╗Öp b├ío c├ío nhiß╗çm vß╗Ñ th├ánh c├┤ng vß╗¢i context mission v├á snapshot ─æß║ºy ─æß╗º
+PASS 4: Quyß╗ün bß║úng v├á trigger bß║úo vß╗ç metadata nhiß╗çm vß╗Ñ khß╗Åi viß╗çc ch├¿n/sß╗¡a trß╗▒c tiß║┐p
+PASS 5: Idempotency replay trß║ú lß║íi ─æ├║ng receipt v├á metadata ─æ├ú commit
+PASS 6: Tß╗▒ ─æß╗Öng ph├ón loß║íi mission khi ng╞░ß╗¥i d├╣ng mß╗ƒ tß╗½ Kh├ím ph├í
+PASS 7: B├ío c├ío th╞░ß╗¥ng kh├┤ng c├│ mission gß║»n context app_test ch├¡nh x├íc
+PASS 8: Chß║╖n nß╗Öp nhiß╗çm vß╗Ñ khi mission ─æ├ú hß║┐t hß║ín
+PASS 9: Chß║╖n nß╗Öp nhiß╗çm vß╗Ñ khi tester ch╞░a join
+PASS 10: _settle_mission_reward tß╗½ chß╗æi trß║ú th╞░ß╗ƒng cho b├ío c├ío th╞░ß╗¥ng
+PASS 11: _settle_mission_reward trß║ú th╞░ß╗ƒng nguy├¬n tß╗¡ v├á idempotent
+PASS 12: get_campaign_reports_for_owner trß║ú ─æß╗º metadata nhiß╗çm vß╗Ñ cho chß╗º app
+PASS 13: Chß║╖n hß╗ôi tß╗æ chuyß╗ân ─æß╗òi b├ío c├ío ─æ├ú approved th├ánh b├ío c├ío nhiß╗çm vß╗Ñ
+PASS 14: Nß╗Öp lß║íi sau khi bß╗ï reject giß╗» nguy├¬n identity nhiß╗çm vß╗Ñ v├á chuyß╗ân vß╗ü pending
+PASS 15 (R01): get_campaign_detail trß║ú ─æß╗º metadata nhiß╗çm vß╗Ñ ─æß╗ông bß╗Ö vß╗¢i receipt v├á owner view
+PASS 16 (R03 Case A): Cho ph├⌐p sß╗¡a comment b├ío c├ío approved khi participant completed, kh├┤ng ph├ít sinh th╞░ß╗ƒng
+PASS 17 (R04): Sß╗¡a minh chß╗⌐ng b├ío c├ío pending nhiß╗çm vß╗Ñ sau khi hß║┐t hß║ín kh├┤ng truyß╗ün mission_id bß╗ï chß║╖n vß╗¢i MISSION_EXPIRED, dß╗» liß╗çu c┼⌐ giß╗» nguy├¬n
+PASS 18 (R03 Case B): Sß╗¡a comment b├ío c├ío test th╞░ß╗¥ng ─æ├ú approved khi ─æ├ú join mission giß╗» nguy├¬n context app_test, kh├┤ng bß╗ï tß╗▒ ─æß╗Öng g├ín mission
+=== Tß║ñT Cß║ó 18 KIß╗éM THß╗¼ BACKEND MIGRATION 048 & 049 ─Éß╗ÇU PASS 100% ===
+=== Bß║«T ─Éß║ªU KIß╗éM THß╗¼ BACKEND MIGRATION 050: TH╞»ß╗₧NG Cß║¼P NHß║¼T PHI├èN Bß║óN APP ===
+PASS 1: Nß║íp th├ánh c├┤ng full schema v├á migration 045 -> 051 (x├íc minh idempotent)
+PASS 2: Chß║╖n c├┤ng bß╗æ khi v├¡ chß╗º < 120 Credit (INSUFFICIENT_CREDITS)
+PASS 3: Chß║╖n non-owner gß╗ìi publish_app_update (NOT_ACTUAL_OWNER)
+PASS 4: C├┤ng bß╗æ v1.0.0 th├ánh c├┤ng, trß╗½ 120 Credit v├¡ chß╗º, khß╗ƒi tß║ío quß╗╣ 120
+PASS 5: Idempotency publish: Replay c├╣ng operation_id kh├┤ng trß╗½ tiß╗ün lß║ºn hai
+PASS 6: Chß║╖n c├┤ng bß╗æ versionCode kh├┤ng lß╗¢n h╞ín watermark (VERSION_CODE_NOT_GREATER)
+PASS 7: Chß╗º app bß╗ï chß║╖n nhß║¡n th╞░ß╗ƒng cß╗ºa ch├¡nh app m├¼nh (OWNER_CANNOT_CLAIM)
+PASS 8: Tester c├ái bß║ún c┼⌐ (< targetVersionCode) bß╗ï tß╗½ chß╗æi (VERSION_NOT_SATISFIED)
+PASS 9: Tester 1 nhß║¡n +6 Credit th├ánh c├┤ng; quß╗╣ giß╗» giß║úm c├▓n 114, v├¡ chß╗º KH├öNG trß╗½ lß║íi
+PASS 10: Tester 1 gß╗ìi lß║íi claim: Idempotent trß║ú receipt c┼⌐, kh├┤ng nh├ón ─æ├┤i th╞░ß╗ƒng
+PASS 11: Tester tham gia sau thß╗¥i ─æiß╗âm c├┤ng bß╗æ bß╗ï tß╗½ chß╗æi (MEMBER_JOINED_AFTER_RELEASE)
+PASS 12: ─Éß╗º 20 ng╞░ß╗¥i nhß║¡n th╞░ß╗ƒng: paid_count = 20, remaining = 0, status = exhausted
+PASS 13: Ng╞░ß╗¥i thß╗⌐ 21 claim bß╗ï tß╗½ chß╗æi (RELEASE_EXHAUSTED)
+PASS 14: get_campaign_detail ß║⌐n khß╗æi cß║¡p nhß║¡t cho tester khi ─æß╗º 20 suß║Ñt, chß╗º vß║½n thß║Ñy
+PASS 15: Thay ─æß╗út nguy├¬n tß╗¡: Ho├án 78 Credit ─æß╗út c┼⌐ v├á giß╗» 120 ─æß╗út mß╗¢i trong c├╣ng transaction
+PASS 16: Claim v├áo release ─æ├ú superseded bß╗ï tß╗½ chß╗æi (RELEASE_REPLACED)
+PASS 17: Chß╗º kß║┐t th├║c sß╗¢m ─æß╗út, ho├án trß║ú to├án bß╗Ö 120 Credit ch╞░a d├╣ng (close_app_update_release)
+PASS 18: Trigger ho├án tiß╗ün an to├án khi campaign completed hoß║╖c deleted
+PASS 19: get_campaign_update_history trß║ú ─æß║ºy ─æß╗º lß╗ïch sß╗¡ c├íc ─æß╗út cß║¡p nhß║¡t cho chß╗º app
+PASS 20: Bß║Ñt biß║┐n kß║┐ to├ín: reserved_total (120) = remaining + (paid_count * 6) + refunded khß╗¢p 100% tr├¬n mß╗ìi release
+PASS 21 (R01): Thu hß╗ôi quyß╗ün gß╗ìi helper quyß║┐t to├ín khß╗Åi client/authenticated
+PASS 22 (R02): Tß║ím dß╗½ng rß╗ôi ho├án tß║Ñt (paused -> completed) tß╗▒ ─æß╗Öng ho├án Credit
+PASS 23 (R04): Publish c├╣ng operation_id kh├íc payload bß╗ï chß║╖n vß╗¢i OPERATION_PAYLOAD_CONFLICT
+PASS 24 (R05): Concurrency CAS: Form c┼⌐ mong ─æß╗úi kh├┤ng c├│ ─æß╗út bß╗ï tß╗½ chß╗æi nß║┐u c├│ ─æß╗út ph├ít h├ánh
+PASS 25 (R10): Chß╗º app bß╗ï kh├│a bß╗ï chß║╖n c├┤ng bß╗æ ─æß╗út mß╗¢i vß╗¢i USER_LOCKED
+PASS 26 (R03): X├│a t├ái khoß║ún chß╗º app th├ánh c├┤ng, giß║úi ph├│ng FK v├á giß╗» lß╗ïch sß╗¡ t├ái ch├¡nh
+PASS 27 (R07): Read contract trß║ú is_eligible = false cho tester tham gia sau ng├áy ph├ít h├ánh
+PASS 28 (R09): ─É├│ng ─æß╗út mß╗¢i nhß║Ñt kh├┤ng phß╗Ñc hß╗ôi ─æß╗út exhausted c┼⌐ tr├¬n m├án h├¼nh chß╗º
+=== Tß║ñT Cß║ó 28 KIß╗éM THß╗¼ BACKEND MIGRATION 050 & 051 ─Éß╗ÇU PASS 100% ===
+=== Bß║«T ─Éß║ªU KIß╗éM THß╗¼ BACKEND MIGRATION 052: T├ìNH N─éNG ─Éß║¿Y APP (CAMPAIGN PUSH PRIORITY) ===
+PASS 1: Nß║íp th├ánh c├┤ng full schema v├á migration 045 -> 052 (x├íc minh idempotent)
+PASS 2: Sß╗æ d╞░ 99 Credit bß╗ï tß╗½ chß╗æi INSUFFICIENT_CREDITS, kh├┤ng trß╗½ tiß╗ün, kh├┤ng ghi receipt
+PASS 3: ─É├║ng 100 Credit thß╗▒c hiß╗çn th├ánh c├┤ng, sß╗æ d╞░ c├▓n 0, log -100, metadata campaign ─æ╞░ß╗úc cß║¡p nhß║¡t
+PASS 4: Idempotency replay trß║ú lß║íi ─æ├║ng receipt, replayed=true, kh├┤ng trß╗½ tiß╗ün lß║ºn 2
+PASS 5: D├╣ng lß║íi request_id cho campaign kh├íc bß╗ï chß║╖n vß╗¢i REQUEST_ID_CONFLICT
+PASS 6: User c├│ 150 Credit mua th├ánh c├┤ng, sß╗æ d╞░ c├▓n 50, push_order t─âng
+PASS 7: Ng╞░ß╗¥i kh├┤ng phß║úi chß╗º app gß╗ìi push_campaign bß╗ï tß╗½ chß╗æi vß╗¢i NOT_OWNER
+PASS 8: App ─æang tß║ím dß╗½ng bß╗ï tß╗½ chß╗æi ─æß║⌐y vß╗¢i CAMPAIGN_NOT_OPEN
+PASS 9: App qu├í 30 ng├áy bß╗ï tß╗½ chß╗æi ─æß║⌐y vß╗¢i CAMPAIGN_WINDOW_EXPIRED
+PASS 10: App Slot 2 hß║┐t hß║ín bß╗ï tß╗½ chß╗æi ─æß║⌐y vß╗¢i SLOT_EXPIRED
+PASS 11: T├ái khoß║ún bß╗ï kh├│a (is_locked) bß╗ï tß╗½ chß╗æi ─æß║⌐y vß╗¢i ACCOUNT_LOCKED
+PASS 12: Direct UPDATE v├á INSERT metadata ─æß║⌐y app bß╗ï trigger chß║╖n an to├án
+PASS 13: Cß║¡p nhß║¡t th├┤ng tin th├┤ng th╞░ß╗¥ng (kh├┤ng ─æß╗òi push_*) hoß║ít ─æß╗Öng b├¼nh th╞░ß╗¥ng
+PASS 14: Thao t├íc INSERT trß╗▒c tiß║┐p v├áo campaign_push_receipts bß╗ï RLS/REVOKE tß╗½ chß╗æi
+PASS 15: Thß╗⌐ tß╗▒ l╞░ß╗út ─æß║⌐y tu├ón thß╗º nghi├¬m ngß║╖t A(1) < A(2) < B(3) < A(4)
+PASS 16: _campaign_json xuß║Ñt ─æß║ºy ─æß╗º push_business_date, push_expires_at, push_order
+PASS 17: X├│a campaign bß║úo to├án receipt t├ái ch├¡nh vß╗¢i campaign_id = null
+PASS 18: R├áng buß╗Öc chk_campaign_push_metadata_consistency bß║úo vß╗ç t├¡nh to├án vß║╣n 3 cß╗Öt metadata
+PASS 19: Giao dß╗ïch thß║Ñt bß║íi rollback to├án bß╗Ö (tiß╗ün giß╗» nguy├¬n, kh├┤ng l╞░u log, kh├┤ng l╞░u receipt)
+=== Tß║ñT Cß║ó 19 KIß╗éM THß╗¼ BACKEND SQL MIGRATION 052 ─Éß╗ÇU PASS 100% ===
+=== Bß║«T ─Éß║ªU KIß╗éM THß╗¼ BACKEND MIGRATION 053: Cß╗ÿNG Dß╗ÆN APP TEST C├ÆN THIß║╛U ===
+PASS 1: Nß║íp th├ánh c├┤ng full schema v├á migrations 045 -> 053 (x├íc minh idempotent)
+PASS 2: Ng├áy ─æß║ºu hiß╗çu lß╗▒c C=0; l├ám 4/6 -> carry_out = 2, phß║ít Credit v├á streak t─âng
+PASS 3: Ng├áy 2 nhß║¡n 6+2=8, l├ám 5 -> carry_out = 3, streak t─âng l├¬n 2
+PASS 4: Ng├áy 3 nhß║¡n 6+3=9, l├ám ─æß╗º 9/9 -> carry_out = 0, streak reset vß╗ü 0, kh├┤ng phß║ít
+PASS 5: V╞░ß╗út chß╗ë ti├¬u kh├┤ng tß║ío sß╗æ ├óm v├á kh├┤ng chuyß╗ân t├¡n dß╗Ñng sang ng├áy sau
+PASS 6: Ma trß║¡n nguß╗ôn app thiß║┐u: Q=max(C, T), carry_out=max(0, Q-D), T=0 kh├┤ng phß║ít v├á giß╗» nguy├¬n phß║ºn thiß║┐u
+PASS 7: Member chß╗ë cß║ºn ─æ─âng nhß║¡p l├á ho├án th├ánh; phß║ºn thiß║┐u c┼⌐ ─æ╞░ß╗úc tß║ím giß╗» v├á giß║úm khi test tß╗▒ nguyß╗çn
+PASS 8: 00:00 - 00:05 ch╞░a chß╗æt -> carryover_ready = false, test vß║½n ─æß║┐m, sau khi chß╗æt chuyß╗ân ready
+PASS 9: Idempotency: retry finalizer kh├┤ng nh├ón ─æ├┤i phß║ít hay nh├ón ─æ├┤i phß║ºn thiß║┐u
+node.exe : FAILED TEST RUNNER 053: AssertionError [ERR_ASSERTION]: Mua ─æß║⌐y kh├┤ng reset streak
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAILED TEST RUN...ng reset streak:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+false !== true
+
+    at runTests (file:///F:/AI/12Tester/supabase/tests/run-daily-task-carryover.mjs:577:14) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

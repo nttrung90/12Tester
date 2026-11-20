@@ -1,0 +1,14 @@
+{
+    "logName":  "test-mission-and-owner-suites",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.MissionRegressionTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.OwnerReportCountBehavioralTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-03T10:46:44.0945875Z",
+    "finishedUtc":  "2026-11-03T10:47:12.1481903Z",
+    "currentRunXmlCount":  2
+}

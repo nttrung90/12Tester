@@ -1,0 +1,3 @@
+{"case":"actual_authenticated_session_cannot_author_receipt","actor":{"current_user":"authenticated","session_user":"supervisor_receipt_authenticator","uid":"fa000000-0000-0000-0000-000000000002","can_temp":true},"error":"permission denied for function _record_campaign_removal_receipt","receipts":[],"pass":true}
+{"case":"untrusted_temp_trigger_cannot_author_receipt","actor":{"current_user":"authenticated","session_user":"supervisor_receipt_authenticator","uid":"fa000000-0000-0000-0000-000000000002","can_temp":true},"error":"permission denied for function _record_campaign_removal_receipt","receipts":[],"pass":true}
+PASS 2/2 real caller/helper-context authorization cases; not concurrency.

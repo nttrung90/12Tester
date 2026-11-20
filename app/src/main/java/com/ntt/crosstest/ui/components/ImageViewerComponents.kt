@@ -34,12 +34,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import android.graphics.Bitmap
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.TesterReport
+import com.ntt.crosstest.ui.theme.statusColors
+import com.ntt.crosstest.util.ComparisonStateCoordinator
+import com.ntt.crosstest.util.DetailedImageComparator
 import com.ntt.crosstest.util.ImageHashHelper
 import com.ntt.crosstest.util.ScreenshotManager
 import com.ntt.crosstest.util.ScreenshotExpiredException
@@ -47,6 +51,8 @@ import com.ntt.crosstest.util.ScreenshotUnavailableException
 import com.ntt.crosstest.util.ScreenshotPermissionDeniedException
 import com.ntt.crosstest.util.ScreenshotDescriptor
 import com.ntt.crosstest.util.ScreenshotRequestFactory
+import com.ntt.crosstest.util.formatIsoUtcToLocal
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
 /**
@@ -65,33 +71,43 @@ fun FullscreenImageViewer(
     if (imageUrl.isNullOrBlank()) return
     val context = LocalContext.current
 
-    // Cập nhật động: tự động chuyển sang trạng thái hết hạn nếu dialog mở qua mốc 30 ngày (E01d)
-    var isMediaExpired by remember(imageUrl, isExpired, report, descriptor) {
+    val effDescriptor = remember(imageUrl, report, descriptor) {
+        descriptor ?: ScreenshotRequestFactory.createDescriptor(imageUrl, report)
+    }
+
+    val isChild = effDescriptor?.attachmentId != null
+    val effCreatedAt = effDescriptor?.createdAt ?: report?.createdAt
+    val effMediaExpired = effDescriptor?.mediaExpired ?: (if (!isChild) report?.mediaExpired else null)
+    val effProvider = effDescriptor?.provider ?: (if (!isChild) report?.storageProvider else null)
+    val effViewExpiresAt = effDescriptor?.viewExpiresAt ?: (if (!isChild) report?.viewExpiresAt else null)
+
+    // Cập nhật động: tự động chuyển sang trạng thái hết hạn nếu dialog mở qua mốc hết hạn
+    var isMediaExpired by remember(imageUrl, isExpired, effDescriptor) {
         mutableStateOf(
             isExpired ||
-            (report?.isScreenshotExpired ?: false) ||
+            effDescriptor?.mediaExpired == true ||
             ScreenshotManager.isExpired(
-                imageUrl,
-                report?.createdAt ?: descriptor?.createdAt,
-                report?.mediaExpired ?: descriptor?.mediaExpired
+                url = imageUrl,
+                createdAt = effCreatedAt,
+                mediaExpired = effMediaExpired,
+                provider = effProvider,
+                viewExpiresAt = effViewExpiresAt,
             )
         )
     }
 
-    LaunchedEffect(imageUrl, isExpired, report, descriptor) {
-        if (isExpired || (report?.isScreenshotExpired == true)) {
+    LaunchedEffect(imageUrl, isExpired, effDescriptor) {
+        if (isExpired || effDescriptor?.mediaExpired == true) {
             isMediaExpired = true
             return@LaunchedEffect
         }
-        val effCreatedAt = report?.createdAt ?: descriptor?.createdAt
-        val effMediaExpired = report?.mediaExpired ?: descriptor?.mediaExpired
-        if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired)) {
+        if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt)) {
             isMediaExpired = true
             return@LaunchedEffect
         }
         while (!isMediaExpired) {
             delay(5000L)
-            if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired)) {
+            if (ScreenshotManager.isExpired(imageUrl, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt)) {
                 isMediaExpired = true
                 break
             }
@@ -111,7 +127,7 @@ fun FullscreenImageViewer(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xF00F172A))
-                .systemBarsPadding()
+                .safeDrawingPadding()
         ) {
             // Main Zoomable Area
             Box(
@@ -416,9 +432,9 @@ fun ImageComparisonDialog(
             isCalculatingHash = true
             comparisonResult = null
             // Không tải từ URL nếu ảnh đã hết hạn theo chính sách 30 ngày
-            val hash1 = currentReport.imageHash?.takeIf { it.isNotBlank() }
+            val hash1 = currentReport.imageHash?.takeIf { ImageHashHelper.isValidDHash(it) }
                 ?: if (!currentReport.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, url1, currentReport) else null
-            val hash2 = previousReport?.imageHash?.takeIf { it.isNotBlank() }
+            val hash2 = previousReport?.imageHash?.takeIf { ImageHashHelper.isValidDHash(it) }
                 ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, url2, previousReport) else null
             if (hash1 != null && hash2 != null) {
                 comparisonResult = ImageHashHelper.compare(hash1, hash2, context)
@@ -427,18 +443,77 @@ fun ImageComparisonDialog(
         }
     }
 
+    var detailedResult by remember { mutableStateOf<DetailedImageComparator.DetailedComparisonResult?>(null) }
+    var isCalculatingDetail by remember { mutableStateOf(false) }
+
+    LaunchedEffect(
+        currentReport.id,
+        previousReport?.id,
+        currentReport.screenshotUrl,
+        previousReport?.screenshotUrl,
+        currentReport.imageHash,
+        previousReport?.imageHash,
+        currentReport.isScreenshotExpired,
+        previousReport?.isScreenshotExpired,
+        currentReport.mediaExpired,
+        previousReport?.mediaExpired,
+        isCurrentDynamicallyExpired,
+        isPreviousDynamicallyExpired,
+    ) {
+        val u1 = currentReport.screenshotUrl
+        val u2 = previousReport?.screenshotUrl
+        if (u1.isNullOrBlank() || u2.isNullOrBlank() ||
+            isCurrentDynamicallyExpired || isPreviousDynamicallyExpired
+        ) {
+            detailedResult = null
+            isCalculatingDetail = false
+            return@LaunchedEffect
+        }
+
+        val execution = ComparisonStateCoordinator.startOperation(
+            currentReport, previousReport, u1, u2
+        )
+        isCalculatingDetail = true
+        detailedResult = null
+        try {
+            val res = ComparisonStateCoordinator.executeDetailedComparison(
+                context = context,
+                execution = execution,
+                report1 = currentReport,
+                report2 = previousReport,
+                image1 = u1,
+                image2 = u2,
+            )
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                detailedResult = res
+            }
+        } catch (ce: CancellationException) {
+            throw ce
+        } catch (_: Exception) {
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                detailedResult = null
+            }
+        } finally {
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                isCalculatingDetail = false
+            }
+        }
+    }
+
     ComparisonDialogScaffold(
         title = stringResource(R.string.img_compare_title),
         subtitle = stringResource(R.string.img_compare_tester_format, currentReport.resolvedTesterName),
         currentImage = currentRequest ?: currentReport.screenshotUrl,
         currentLabel = stringResource(R.string.img_today),
-        currentDate = currentReport.createdAt?.take(16)?.replace("T", " ").orEmpty(),
+        currentDate = currentReport.createdAt?.let { formatIsoUtcToLocal(it) }.orEmpty(),
         previousImage = previousRequest ?: previousReport?.screenshotUrl,
         previousLabel = stringResource(R.string.img_previous_day),
-        previousDate = previousReport?.createdAt?.take(16)?.replace("T", " ")
+        previousDate = previousReport?.createdAt?.let { formatIsoUtcToLocal(it) }
             ?: stringResource(R.string.img_none_yet),
         comparisonResult = comparisonResult,
+        detailedResult = detailedResult,
         isCalculatingHash = isCalculatingHash,
+        isCalculatingDetail = isCalculatingDetail,
         currentExpired = isCurrentDynamicallyExpired,
         previousExpired = isPreviousDynamicallyExpired,
         onDismiss = onDismiss,
@@ -498,6 +573,7 @@ fun TesterImageComparisonDialog(
     onDismiss: () -> Unit,
     currentDate: String? = null,
     previousDate: String? = null,
+    previousLabel: String? = null,
     comparisonResult: ImageHashHelper.ComparisonResult? = null,
     isCalculatingHash: Boolean = false,
     currentReport: TesterReport? = null,
@@ -505,41 +581,141 @@ fun TesterImageComparisonDialog(
 ) {
     val context = LocalContext.current
 
+    val currentUrl = currentImage as? String
+    val currentDescriptor = remember(currentUrl, currentReport) {
+        if (currentUrl != null) ScreenshotRequestFactory.createDescriptor(currentUrl, currentReport) else null
+    }
+    val previousDescriptor = remember(previousImage, previousReport) {
+        if (previousImage != null) ScreenshotRequestFactory.createDescriptor(previousImage, previousReport) else null
+    }
+
+    val curCreatedAt = currentDescriptor?.createdAt ?: currentReport?.createdAt
+    val curMediaExpired = currentDescriptor?.mediaExpired
+    val curProvider = currentDescriptor?.provider ?: currentReport?.storageProvider
+    val curViewExpiresAt = currentDescriptor?.viewExpiresAt
+
+    val prevCreatedAt = previousDescriptor?.createdAt ?: previousReport?.createdAt
+    val prevMediaExpired = previousDescriptor?.mediaExpired
+    val prevProvider = previousDescriptor?.provider ?: previousReport?.storageProvider
+    val prevViewExpiresAt = previousDescriptor?.viewExpiresAt
+
     // Cập nhật động khi dialog mở qua mốc hết hạn (E01d)
-    var isCurrentDynamicallyExpired by remember(currentReport?.id, currentReport?.isScreenshotExpired, currentImage) {
+    var isCurrentDynamicallyExpired by remember(currentReport?.id, currentDescriptor, currentImage) {
         mutableStateOf(
-            (currentReport?.isScreenshotExpired ?: false) ||
-            (currentImage is String && ScreenshotManager.isExpired(currentImage, currentReport?.createdAt, currentReport?.mediaExpired))
+            currentDescriptor?.mediaExpired == true ||
+            (currentUrl != null && ScreenshotManager.isExpired(
+                url = currentUrl,
+                createdAt = curCreatedAt,
+                mediaExpired = curMediaExpired,
+                provider = curProvider,
+                viewExpiresAt = curViewExpiresAt,
+            ))
         )
     }
-    var isPreviousDynamicallyExpired by remember(previousReport?.id, previousReport?.isScreenshotExpired, previousImage) {
+    var isPreviousDynamicallyExpired by remember(previousReport?.id, previousDescriptor, previousImage) {
         mutableStateOf(
-            (previousReport?.isScreenshotExpired ?: false) ||
-            (previousImage != null && ScreenshotManager.isExpired(previousImage, previousReport?.createdAt, previousReport?.mediaExpired))
+            previousDescriptor?.mediaExpired == true ||
+            (previousImage != null && ScreenshotManager.isExpired(
+                url = previousImage,
+                createdAt = prevCreatedAt,
+                mediaExpired = prevMediaExpired,
+                provider = prevProvider,
+                viewExpiresAt = prevViewExpiresAt,
+            ))
         )
     }
-    LaunchedEffect(currentReport?.id, previousReport?.id, currentImage, previousImage) {
+    LaunchedEffect(currentReport?.id, previousReport?.id, currentDescriptor, previousDescriptor, currentImage, previousImage) {
         while (!isCurrentDynamicallyExpired || (!isPreviousDynamicallyExpired && previousImage != null)) {
             delay(5000L)
-            if (!isCurrentDynamicallyExpired && currentImage is String && ScreenshotManager.isExpired(currentImage, currentReport?.createdAt, currentReport?.mediaExpired)) {
+            if (!isCurrentDynamicallyExpired && currentUrl != null && ScreenshotManager.isExpired(
+                url = currentUrl,
+                createdAt = curCreatedAt,
+                mediaExpired = curMediaExpired,
+                provider = curProvider,
+                viewExpiresAt = curViewExpiresAt,
+            )) {
                 isCurrentDynamicallyExpired = true
             }
-            if (!isPreviousDynamicallyExpired && previousImage != null && ScreenshotManager.isExpired(previousImage, previousReport?.createdAt, previousReport?.mediaExpired)) {
+            if (!isPreviousDynamicallyExpired && previousImage != null && ScreenshotManager.isExpired(
+                url = previousImage,
+                createdAt = prevCreatedAt,
+                mediaExpired = prevMediaExpired,
+                provider = prevProvider,
+                viewExpiresAt = prevViewExpiresAt,
+            )) {
                 isPreviousDynamicallyExpired = true
             }
         }
     }
 
     // Tạo request ở đầu dialog, giữ nguyên local Uri nếu là Uri
-    val currentModel = remember(context, currentImage, currentReport) {
+    val currentModel = remember(context, currentImage, currentReport, currentDescriptor) {
         if (currentImage is String) {
-            ScreenshotRequestFactory.createRequest(context, currentImage, currentReport) ?: currentImage
+            ScreenshotRequestFactory.createRequest(context, currentImage, currentReport, currentDescriptor) ?: currentImage
         } else {
             currentImage
         }
     }
-    val previousModel = remember(context, previousImage, previousReport) {
-        ScreenshotRequestFactory.createRequest(context, previousImage, previousReport) ?: previousImage
+    val previousModel = remember(context, previousImage, previousReport, previousDescriptor) {
+        ScreenshotRequestFactory.createRequest(context, previousImage, previousReport, previousDescriptor) ?: previousImage
+    }
+
+    var detailedResult by remember { mutableStateOf<DetailedImageComparator.DetailedComparisonResult?>(null) }
+    var isCalculatingDetail by remember { mutableStateOf(false) }
+
+    val u1 = if (currentImage is String) currentImage else null
+    val u2 = previousImage
+
+    LaunchedEffect(
+        currentReport?.id,
+        previousReport?.id,
+        currentImage,
+        previousImage,
+        currentReport?.imageHash,
+        previousReport?.imageHash,
+        currentReport?.isScreenshotExpired,
+        previousReport?.isScreenshotExpired,
+        currentReport?.mediaExpired,
+        previousReport?.mediaExpired,
+        isCurrentDynamicallyExpired,
+        isPreviousDynamicallyExpired,
+    ) {
+        if (currentImage == null || previousImage.isNullOrBlank() ||
+            isCurrentDynamicallyExpired || isPreviousDynamicallyExpired
+        ) {
+            detailedResult = null
+            isCalculatingDetail = false
+            return@LaunchedEffect
+        }
+
+        val execution = ComparisonStateCoordinator.startOperation(
+            currentReport, previousReport, u1, u2
+        )
+        isCalculatingDetail = true
+        detailedResult = null
+        try {
+            val res = ComparisonStateCoordinator.executeDetailedComparison(
+                context = context,
+                execution = execution,
+                report1 = currentReport,
+                report2 = previousReport,
+                image1 = currentImage,
+                image2 = previousImage,
+            )
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                detailedResult = res
+            }
+        } catch (ce: CancellationException) {
+            throw ce
+        } catch (_: Exception) {
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                detailedResult = null
+            }
+        } finally {
+            if (ComparisonStateCoordinator.isCurrent(execution)) {
+                isCalculatingDetail = false
+            }
+        }
     }
 
     ComparisonDialogScaffold(
@@ -549,10 +725,12 @@ fun TesterImageComparisonDialog(
         currentLabel = stringResource(R.string.img_new_photo),
         currentDate = currentDate.orEmpty(),
         previousImage = previousModel,
-        previousLabel = stringResource(R.string.img_previous_day),
+        previousLabel = previousLabel ?: stringResource(R.string.img_previous_day),
         previousDate = previousDate ?: stringResource(R.string.img_none_yet),
         comparisonResult = comparisonResult,
+        detailedResult = detailedResult,
         isCalculatingHash = isCalculatingHash,
+        isCalculatingDetail = isCalculatingDetail,
         currentExpired = isCurrentDynamicallyExpired,
         previousExpired = isPreviousDynamicallyExpired,
         onDismiss = onDismiss,
@@ -579,7 +757,9 @@ private fun ComparisonDialogScaffold(
     previousLabel: String,
     previousDate: String,
     comparisonResult: ImageHashHelper.ComparisonResult?,
+    detailedResult: DetailedImageComparator.DetailedComparisonResult? = null,
     isCalculatingHash: Boolean,
+    isCalculatingDetail: Boolean = false,
     currentExpired: Boolean = false,
     previousExpired: Boolean = false,
     onDismiss: () -> Unit,
@@ -633,7 +813,9 @@ private fun ComparisonDialogScaffold(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
+                            .windowInsetsPadding(
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+                            )
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -649,6 +831,8 @@ private fun ComparisonDialogScaffold(
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 // Similarity Assessment Banner
+                val isLoading = isCalculatingHash || isCalculatingDetail
+                val det = detailedResult
                 val res = comparisonResult
                 Card(
                     modifier = Modifier
@@ -657,11 +841,19 @@ private fun ComparisonDialogScaffold(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = when {
-                            isCalculatingHash -> MaterialTheme.colorScheme.surfaceVariant
-                            res?.level == ImageHashHelper.SimilarityLevel.DUPLICATE -> Color(0xFFFFEBEE)
-                            res?.level == ImageHashHelper.SimilarityLevel.HIGH_SIMILARITY -> Color(0xFFFFF3E0)
-                            res?.level == ImageHashHelper.SimilarityLevel.MODERATE -> Color(0xFFE8F5E9)
-                            res?.level == ImageHashHelper.SimilarityLevel.DIFFERENT -> Color(0xFFE3F2FD)
+                            isLoading -> MaterialTheme.colorScheme.surfaceVariant
+                            det != null -> when (det.verdict) {
+                                DetailedImageComparator.DetailedVerdict.SUSPECT_SIMILAR -> MaterialTheme.statusColors.warningContainer
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT,
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT_ASPECT -> MaterialTheme.statusColors.successContainer
+                                DetailedImageComparator.DetailedVerdict.UNAVAILABLE -> MaterialTheme.colorScheme.surfaceVariant
+                            }
+                            res != null -> when (res.level) {
+                                ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.warningContainer
+                                ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.successContainer
+                                ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.infoContainer
+                                else -> MaterialTheme.colorScheme.surfaceVariant
+                            }
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                     )
@@ -673,18 +865,64 @@ private fun ComparisonDialogScaffold(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        if (isCalculatingHash) {
+                        if (isLoading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Text(
-                                text = stringResource(R.string.img_analyzing),
+                                text = stringResource(R.string.img_detailed_analyzing),
                                 style = MaterialTheme.typography.bodySmall
                             )
+                        } else if (det != null) {
+                            val badgeColor = when (det.verdict) {
+                                DetailedImageComparator.DetailedVerdict.SUSPECT_SIMILAR -> MaterialTheme.statusColors.warning
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT,
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT_ASPECT -> MaterialTheme.statusColors.success
+                                DetailedImageComparator.DetailedVerdict.UNAVAILABLE -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                            val onContainerColor = when (det.verdict) {
+                                DetailedImageComparator.DetailedVerdict.SUSPECT_SIMILAR -> MaterialTheme.statusColors.onWarningContainer
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT,
+                                DetailedImageComparator.DetailedVerdict.DIFFERENT_ASPECT -> MaterialTheme.statusColors.onSuccessContainer
+                                DetailedImageComparator.DetailedVerdict.UNAVAILABLE -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(badgeColor.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (det.isSuspect) Icons.Filled.Warning else Icons.Filled.CheckCircle,
+                                    contentDescription = null,
+                                    tint = badgeColor,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(det.titleResId),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = onContainerColor
+                                )
+                                Text(
+                                    text = stringResource(det.descResId),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = onContainerColor.copy(alpha = 0.85f)
+                                )
+                            }
                         } else if (res != null) {
                             val badgeColor = when (res.level) {
-                                ImageHashHelper.SimilarityLevel.DUPLICATE -> Color(0xFFC62828)
-                                ImageHashHelper.SimilarityLevel.HIGH_SIMILARITY -> Color(0xFFE65100)
-                                ImageHashHelper.SimilarityLevel.MODERATE -> Color(0xFF2E7D32)
-                                ImageHashHelper.SimilarityLevel.DIFFERENT -> Color(0xFF1565C0)
+                                ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.warning
+                                ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.success
+                                ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.info
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                            val onContainerColor = when (res.level) {
+                                ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.onWarningContainer
+                                ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.onSuccessContainer
+                                ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.onInfoContainer
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
                             }
                             Box(
                                 modifier = Modifier
@@ -705,16 +943,16 @@ private fun ComparisonDialogScaffold(
                                     text = res.label,
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = badgeColor
+                                    color = onContainerColor
                                 )
                                 Text(
                                     text = if (res.isSuspectDuplicate) {
-                                        stringResource(R.string.img_suspect_warning_format, res.similarity)
+                                        stringResource(R.string.img_suspect_warning)
                                     } else {
-                                        stringResource(R.string.img_similarity_ok_format, res.similarity)
+                                        stringResource(R.string.img_difference_detected)
                                     },
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = onContainerColor.copy(alpha = 0.85f)
                                 )
                             }
                         } else if (previousImage == null || (previousImage is String && previousImage.isBlank())) {

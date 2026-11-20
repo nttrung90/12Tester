@@ -1,0 +1,38 @@
+# Supervisor R3 — 13/11/2026
+
+Trạng thái: đang điều khiển Antigravity để sửa tiếp, chưa nghiệm thu hoàn tất.
+
+Đã giao cùng conversation `e4afbc3e-90d5-416b-b6ed-7cbc512113dd` qua giao diện đang mở; quan sát model `Gemini 3.8 Flash High`. Lượt R3 được gửi thành công, có `Agent working` và đã đọc `SUPERVISOR_REVIEW_R3_2026-11-13.md`. Không đổi cấu hình quyền. Chi tiết scope và các lỗi trong tài liệu R3 này.
+
+## Bằng chứng độc lập mới
+
+- Backend90/90 PASS và receipt table ACL3/3 PASS chạy mới 13/11; logs `supervisor-resume-20261113-backend.log`, `supervisor-resume-20261113-receipts.log`.
+- Production regression089 sau khi nạp candidate090 hai lần: PASS toàn bộ 6 nhóm kiểm tra có sẵn, không bỏ assertion. Bao gồm trước/sau lỗi089, PATCH/replay, các kiểu pause, admin/ownership, bất biến thưởng và ví, Completed feed/sync v2. Driver `supervisor-production090-regression.mjs`, log `supervisor-production090.log`, source/hash/kết quả `supervisor-production090-results.json`. Đây là PGlite đơn kết nối.
+- Helper receipt context mới **1/2 PASS, 1 FAIL**: direct helper dưới session không đặc quyền bị chặn; TEMP trigger tự tạo dưới authenticated gọi helper ghi được receipt giả. SQL role test, chưa chứng minh HTTP exploit. File `supervisor-receipt-helper-context-test.mjs`, bản lỗi lưu cố định `supervisor-runs/2026-11-13-receipt-helper-context-before.json`.
+- Android XML gần nhất vẫn 4 lỗi/6 ca của supervisor ViewModel, chưa có kết quả mới sửa R3. Lỗi cụ thể trong R3.
+- Bảo toàn theo R2 snapshot: version1.2.5/build45, 7 package hiện có, permissions/launcher/migrations062–089 không đổi. Version và AAB do người dùng thay riêng được giữ nguyên.
+- Supervisor chạy độc lập thêm 4 regression script nạp toàn bộ active migrations bao gồm090: owner tester bonus removal, immediate daily quota (7 scenario), carryover fix acceptance, egress sync v2. Cả4 exit0. Log `supervisor-r3-owner-removal.log`, `supervisor-r3-immediate-quota.log`, `supervisor-r3-carryover.log`, `supervisor-r3-egress.log`. Các kết quả này thuộc candidate090839938... trước sửa R3; cần chạy lại nhóm liên quan sau khi090 thay đổi.
+- Regression auto-pause với expected error thích nghi chính xác theo canonical status: ngưỡng1–7 đều PASS, các Test2–5 PASS; Test6 FAIL thật ở admin_resumed. Driver/log `supervisor-auto-pause090-*`, không sửa original test.
+- Bộ Admin contract độc lập (actual session NOINHERIT+authenticated): baseline qua089 **5/5 PASS**, candidate090 **1/5 PASS,4FAIL**. Đã xác nhận Admin bị khóa vẫn resume thành công; mất admin_resumed/audit/notification/owner_id response; nhánh hết30 ngày không clear metadata. Nhánh mở bình thường clear metadata vẫn PASS nhờ trigger nền. Xem `supervisor-admin-resume090-test.mjs`, logs/JSON baseline/candidate. Bản trước sửa lưu cố định `supervisor-runs/2026-11-13-admin-resume-before.json`.
+
+Đã gửi ngay phản hồi bổ sung R3 qua UI (Send Now, cùng model/conversation); phiên trước dừng sau14phút đọc, chưa sửa nguồn. Phiên tiếp theo đã nhận phản hồi và đang đọc regression auto-pause. Không đổi model/quyền hay can thiệp dữ liệu thật.
+
+Khoảng20:06 VN: Antigravity bắt đầu sửa090, thu hồi EXECUTE helper ghi receipt của authenticated và thêm AFTER DELETE writer gắn campaigns. Supervisor chạy mới helper-context test, **2/2 PASS** (trước sửa1/2): direct và TEMP-trigger client đều permission denied, ledger không bị ghi. Log `supervisor-r3-receipt-helper-recheck.log`; JSON ghi đúng các migration đã nạp. Đây mới là kiểm tra từng phần; direct DELETE hợp lệ và90ca còn phải chạy lại sau khi bản sửa ổn định. Android chưa có bản sửa/test mới ở thời điểm này.
+
+Sau các patch backend tiếp: **Admin contract5/5 PASS**, backend acceptance**90/90 PASS**, toàn bộ owner auto-pause regression (gồm threshold1–7) PASS. Logs `supervisor-r3-admin-recheck.log`, `supervisor-r3-acceptance-recheck.log`, `supervisor-r3-auto-pause-recheck.log`; kết quả thuộc candidate tại thời điểm chạy, chưa phải chốt mọi sửa đổi cuối.
+
+Review mới: source thêm slot advisory trước campaign row trong resume tạo chiều ngược với direct UPDATE row->slot; cần native barrier và thiết kế lại/kiểm chứng, chưa native repro. Đã xếp hàng phản hồi UI, không Send Now để tránh cắt lượt sửa đang làm. Attribution receipt đã thực thi mới2/4 PASS,2FAIL: direct owner DELETE và service cleanup bị ghi admin; owner RPC removed_byowner vẫn PASS, admin thật PASS. Chi tiết trong R3 và `supervisor-receipt-attribution-test.mjs`, runner tổng hợp có11script. Chưa nghiệm thu hoàn tất.
+
+AndroidR3:6ca supervisor ban đầu đã PASS lại; Gate13/13, cache5/5, behavioral7/7 PASS. Supervisor thêm2ca hành vi (giữ6assertions gốc): old refresh về sau fresh deadline, và server OWNER_INACTIVE sau freshallowed. **Full suite20:38:37:749ca/95suites,3FAIL,0error,0skip**. Cả2ca mới FAIL thật; ca thứ3 legacy expected chuỗi cũ so với chuỗi mới cócount2. Snapshot đủ95JUnitXML `supervisor-runs/android-2026-11-13T13-41-08-360Z/`. VMsourcehash6093768a..., Gate600fb374... chưa được nghiệm thu. Đang theo dõi Antigravity sửa tiếp, phản hồi bổ sung vẫn xếp hàng cùng conversation/model.
+
+Đã cập nhật phản hồi bổ sung bằng kết quả749ca và dùng Send Now để chuyển vào lượt xử lý tiếp: yêu cầu sửa ngay2lỗi domain mới, cho phép thích nghi expected câu của legacy test nhưng giữ block/noRPC; không special-case code để quay về câu cũ. Giữ pending feedback về slot/row lock inversion, receipt attribution2/4, native concurrency,11backend scripts và báo cáo cuối. Source bản749fail được chụp `supervisor-runs/r3-749-failed-source/`;7tệp review tests giữ bản trong `r3-review-tests/` để xác minh assertions không bị giảm.
+
+Lượt tiếp đã bắt đầu sửa attribution.4ca ban đầu đã PASS, nhưng reviewer thêm2positive control cho actor thực (không đổi4case cũ): service_role cóUIDowner vẫn phảiworker; actualpostgres/noUID phảiadmin. Candidate dùng JWT GUC/sessionMEMBER và UID trước role nên **4/6 PASS,2FAIL** mới; xem `supervisor-r3-attribution-role-recheck.log` và R3 hướng dẫn activeSQLrole. Bản test6case do supervisor mở rộng, lưu riêng `r3-review-tests/supervisor-receipt-attribution-test-v2.mjs`, không phải agent giảm assertions.
+
+Sau patch tiếp6ca này PASS; supervisor thêm2context cần có của PostgREST/claim-spoof để kiểm đúng ghi chú active role: hiện **6/8 PASS,2FAIL** vì vẫn giữORJWTrole/MEMBER. Bản test8case chốt và giữ6case trước, snapshot-v3. Chi tiết/log/bản trước sửa trongR3. Antigravity đã chạy runner tổng hợp11script, nguồn migration ổn định trong cả lượt: **10/11script PASS**, chỉreceipt-attribution FAIL2case này. Kết quả và logs đầy đủ `supervisor-runs/r3-backend-2026-11-13T14-06-19-996Z/results.json`, latest pointer `supervisor-r3-backend-latest.json`. Bộ90gate, Admin, production089+090, auto-pause1–7, removal/bonus, quota088, carryover vàegress đều exit0. Không chứng minh native concurrency, không đóng nhiệm vụ.
+
+Khoảng21:14VN: attribution sửa sang activeSQLrole, bỏ request.jwt.role và MEMBER khỏi điều kiện; JSON thực thi mới **8/8PASS**. Supervisor đọc source xác nhận đã bỏ2nhánh giả role và kiểm tra8case đềupass. Cần runner11script trên candidate cuối sau các sửa lock/Android còn lại; chưa có fullAndroid749PASS hoặc nativeconcurrency mới, vẫn chưa hoàn tất.
+
+Candidate090 của các kiểm tra SQL trên: `8399386a8e90e72a70193a32f569ea75071651cbbf5f3779e7ac027620cda587` (chuẩn hóa CRLF khi script dùng baseline read; production JSON cũng ghi hash bytes file).
+
+Chưa có bằng chứng native PostgreSQL nhiều kết nối cho090; supervisor trước đó bị EACCES loopback, Gradle cache ngoài workspace bị AccessDenied. Antigravity tiếp tục trong quyền phiên sẵn có; không escalation/bypass, không cluster cũ. Chưa triển khai migration089/090 production, không build APK/AAB trong nhiệm vụ này.

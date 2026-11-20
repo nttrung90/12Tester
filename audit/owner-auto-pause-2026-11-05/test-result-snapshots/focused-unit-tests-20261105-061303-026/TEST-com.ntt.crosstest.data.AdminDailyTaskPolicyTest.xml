@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:12:48.614Z" hostname="PC-5700X3D" time="0.025">
+  <properties/>
+  <testcase name="testAdminDailyTaskHistoryDeserialization" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.019"/>
+  <testcase name="testRatioRangeValidation" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.0"/>
+  <testcase name="testAdminScheduleParamsSerialization" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.004"/>
+  <testcase name="testAdminCancelParamsSerialization" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.0"/>
+  <testcase name="testNoteLengthValidation" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.0"/>
+  <testcase name="testAdminDailyTaskConfigDeserialization_withBaselineAndFuture" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.001"/>
+  <testcase name="testTomorrowCalculationFromTodayServer" classname="com.ntt.crosstest.data.AdminDailyTaskPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

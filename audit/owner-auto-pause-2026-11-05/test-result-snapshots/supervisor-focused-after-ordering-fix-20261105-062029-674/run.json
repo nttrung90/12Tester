@@ -1,0 +1,21 @@
+{
+  "logName": "supervisor-focused-after-ordering-fix",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyRefreshRaceReviewTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest",
+    "--tests",
+    "com.ntt.crosstest.data.AdminOwnerAutoPauseTest",
+    "--rerun"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-05T06:20:14.2398181Z",
+  "finishedUtc": "2026-11-05T06:20:29.6928612Z",
+  "currentRunXmlCount": 5
+}

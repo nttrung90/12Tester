@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="help_faq_title">Hướng dẫn sử dụng &amp; Câu hỏi thường gặp</string>
+    <string name="help_faq_desc">Tìm hiểu cách dùng 12 Cross Testers và giải đáp thắc mắc</string>
+    <string name="help_tab_guide">Hướng dẫn sử dụng</string>
+    <string name="help_tab_faq">Câu hỏi thường gặp</string>
+    <string name="help_action_expand">Mở câu trả lời</string>
+    <string name="help_action_collapse">Thu gọn câu trả lời</string>
+    <string name="help_state_expanded">Đã mở</string>
+    <string name="help_state_collapsed">Đã thu gọn</string>
+</resources>

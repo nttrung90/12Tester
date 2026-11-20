@@ -1,0 +1,14 @@
+{
+  "logName": "root-carryover-error-review",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.CarryoverStreamsIndependentTest.futurePageFailureMustExposeErrorAndRecoverOnExplicitRefresh"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T16:03:53.3955418Z",
+  "finishedUtc": "2026-11-01T16:04:09.9011279Z",
+  "currentRunXmlCount": 1
+}

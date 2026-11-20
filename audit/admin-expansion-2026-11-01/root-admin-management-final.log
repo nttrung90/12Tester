@@ -1,0 +1,51 @@
+
+> test:admin-management
+> node run-admin-management-test.mjs
+
+=== LOADING ACTIVE MIGRATIONS (UP TO 999) ===
+Applying 062_consolidated_baseline.sql...
+Applying 063_report_crypto_search_path.sql...
+Applying 064_explicit_report_context.sql...
+Applying 065_remove_dhash_hardblock.sql...
+Applying 066_push_and_carryover_hardening.sql...
+Applying 067_admin_direct_notification_popup.sql...
+Applying 068_owner_tester_reports_count.sql...
+Applying 069_admin_audit_hardening.sql...
+Applying 070_admin_management.sql...
+Applying 071_business_policies.sql...
+Applying 072_admin_notification_campaigns.sql...
+Applying 073_admin_action_audit.sql...
+=== RUNNING ADMIN MANAGEMENT BEHAVIORAL TESTS (STAGE A) ===
+PASS: Deny non-admin / anon / locked: get action events
+PASS: Deny non-admin / anon / locked: get capabilities
+PASS: Deny non-admin / anon / locked: search members
+PASS: Deny non-admin / anon / locked: get member overview
+PASS: Deny non-admin / anon / locked: get member credit history
+PASS: Deny non-admin / anon / locked: get member daily tasks
+PASS: Deny non-admin / anon / locked: get carryover policies
+PASS: Deny non-admin / anon / locked: list future carryover policies
+PASS: Deny non-admin / anon / locked: schedule carryover policy
+PASS: Deny non-admin / anon / locked: cancel carryover policy
+PASS: Deny non-admin / anon / locked: search campaigns
+PASS: Deny non-admin / anon / locked: get tester reports queue
+PASS: Deny non-admin / anon / locked: compensate credits
+PASS: Deny non-admin / anon / locked: set user role
+PASS: Deny non-admin / anon / locked: get member warnings
+PASS: Deny non-admin / anon / locked: revoke warning
+PASS: Deny non-admin / anon / locked: get monitor summary
+PASS: Deny non-admin / anon / locked: get job runs queue
+PASS: Deny non-admin / anon / locked: retry mission settlement
+PASS: Capabilities RPC distinguishes bootstrap capability and UI explanation
+PASS: Role Management: Admin without admin_management cannot grant or revoke admin
+PASS: Role Management: Admin cannot change own role
+PASS: Role Management: Preserves last unlocked admin under concurrency
+PASS: Role Management: Records audit event and supports request ID replay
+PASS: Search members across >500 profiles with stable cursor pagination
+PASS: Member overview, credit history, and daily tasks explanation
+PASS: Carryover policy: active/future/history, revision conflict and cancellation
+PASS: admin_list_future_carryover_policies: 125 future policies pagination, cursor stability on cancel, bounds and security
+PASS: Campaign search and tester reports queue with display joins and media_expired flag
+PASS: Credit compensation: safe retry replay, mismatch rejection, bounded delta
+PASS: Warning revocation append-only, consistency across get_unread_warnings and get_campaign_detail
+PASS: System monitor summary and mission settlement retry wrapper
+=== ALL ADMIN MANAGEMENT BEHAVIORAL TESTS PASSED (STAGE A) ===

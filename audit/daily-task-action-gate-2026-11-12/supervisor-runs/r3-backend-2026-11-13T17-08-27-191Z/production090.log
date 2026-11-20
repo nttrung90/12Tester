@@ -1,0 +1,6 @@
+PASS: reproduced pre-fix production failure without a bonus round
+PASS: production succeeds, preserves no-bonus summary, moves to Completed, and replays safely
+PASS: owner can finalize manually/automatically/slot-expiry paused apps
+PASS: admin pause and ownership restrictions remain enforced
+PASS: bonus closes once, wallet is unchanged, and forged bonus summary is rejected
+PASS: system completion retains bonus lifecycle and Completed feed

@@ -17,6 +17,7 @@ object VnTime {
     private val ZONE: ZoneId = ZoneId.of("Asia/Ho_Chi_Minh")
 
     fun today(): LocalDate = LocalDate.now(ZONE)
+    fun todayString(): String = today().toString()
 }
 
 /**

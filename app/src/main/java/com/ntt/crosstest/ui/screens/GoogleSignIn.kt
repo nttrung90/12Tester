@@ -133,14 +133,14 @@ suspend fun requestGoogleSignIn(context: Context, webClientId: String): GoogleSi
             val msg = e.message ?: e.javaClass.simpleName
             Log.e(TAG, "GetCredentialException: $msg (flow 1: ${eFirst.message})", e)
             GoogleSignInOutcome.Error(
-                localizedContext.getString(R.string.google_signin_fetch_error_format, msg)
+                localizedContext.getString(R.string.google_signin_fetch_error)
             )
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error during Google sign-in", e)
             GoogleSignInOutcome.Error(
                 localizedContext.getString(
-                    R.string.google_signin_unexpected_error_format,
-                    e.message ?: e.javaClass.simpleName,
+                    R.string.google_signin_unexpected_error
+
                 )
             )
         }

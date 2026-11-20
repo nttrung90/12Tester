@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowDayRolloverIndependentTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-02T11:42:26.996Z" hostname="PC-5700X3D" time="0.935">
+  <properties/>
+  <testcase name="dayRolloverKeepsOldDraftAndIgnoresLateOldReceipt" classname="com.ntt.crosstest.audit.MissionWindowDayRolloverIndependentTest" time="0.933"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

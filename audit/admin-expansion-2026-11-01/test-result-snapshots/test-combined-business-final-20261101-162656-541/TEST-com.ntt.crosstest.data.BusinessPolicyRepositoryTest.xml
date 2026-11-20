@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-01T16:26:50.752Z" hostname="PC-5700X3D" time="2.628">
+  <properties/>
+  <testcase name="scheduleBusinessPolicy_sendsExactParametersIncludingRequestIdAndRevision" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="1.944"/>
+  <testcase name="pushCampaignV2_sendsExpectedCostAndRevisionAndHandlesReplayed" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.039"/>
+  <testcase name="unlockOrRenewSlotV2_sendsExactParameters" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.022"/>
+  <testcase name="getSlotQuote_sendsSlotNumberAndDecodesNonDefaultDuration" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.02"/>
+  <testcase name="cancelBusinessPolicy_sendsExactParameters" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.02"/>
+  <testcase name="getPushQuote_decodesCostAndOpaqueRevisionToken" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.017"/>
+  <testcase name="publishAppUpdateV2_sendsExpectedBudgetAndRevision" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.017"/>
+  <testcase name="getBusinessPolicyConfig_invokesCorrectRpcAndDecodesPayload" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.016"/>
+  <testcase name="getAppUpdateQuote_decodesDerivedBudgetAndTerms" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.014"/>
+  <testcase name="noFakedDefaultPolicyOnNetworkErrorForPurchases" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

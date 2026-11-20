@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "TestCheo"
-include(":app")
+include(":app", ":tdlib")

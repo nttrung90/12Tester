@@ -1,0 +1,13 @@
+{
+  "logName": "supervisor-task-ordering",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T06:13:03.1513313Z",
+  "finishedUtc": "2026-11-05T06:13:22.5793844Z",
+  "currentRunXmlCount": 1
+}

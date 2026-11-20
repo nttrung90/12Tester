@@ -1,0 +1,90 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/nguye/.gradle/wrapper/dists/gradle-9.3.1-bin/23ovyewtku6u96viwx3xl3oks/gradle-9.3.1/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugHelpAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:589:56 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:623:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1333:41 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1341:40 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/audit/ReportOverlapTest.kt:106:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/AppUpdateRegressionTest.kt:60:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:153:46 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:154:45 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:155:45 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:156:46 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:404:39 Unnecessary non-null assertion (!!) on a non-null receiver of type 'AppUpdateRelease'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:405:40 Unnecessary non-null assertion (!!) on a non-null receiver of type 'AppUpdateRelease'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCachePublicationAuditTest.kt:187:115 Unnecessary safe call on a non-null receiver of type 'CampaignOwnerStats'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:95:22 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:118:26 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:139:26 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRegressionTest.kt:287:37 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt:83:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:48:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:48:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:63:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:351:37 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcCompatibilityTest.kt:53:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt:54:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt:140:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt:637:89 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModelBehavioralTest.kt:309:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/util/FirebaseEgressOptimizationTest.kt:124:48 'enum entry WEBP: Bitmap.CompressFormat' is deprecated. Deprecated in Java.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/util/FirebaseEgressOptimizationTest.kt:452:58 This declaration needs opt-in. Its usage should be marked with '@coil.annotation.ExperimentalCoilApi' or '@OptIn(coil.annotation.ExperimentalCoilApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/work/EgressThumbnailPipelineAuditTest.kt:97:47 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///F:/AI/12Tester/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 52s
+32 actionable tasks: 5 executed, 27 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

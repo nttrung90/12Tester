@@ -149,4 +149,42 @@ class EgressGatewayClientAuditTest {
         assertEquals("tok", grant?.accessGrantToken)
         assertNull(provider.getCurrentAuthToken())
     }
+
+    @Test fun supabaseMediaAccessGrantProviderPropagatesForbiddenAndExpiredErrors() = runTest {
+        val forbiddenClient = createSupabaseClient("https://fixture.invalid", "dummy-key") {
+            install(Postgrest)
+            httpEngine = MockEngine {
+                respond(
+                    content = """{"code":"P0001","message":"FORBIDDEN"}""",
+                    status = HttpStatusCode.BadRequest,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+        }
+        val forbiddenProvider = com.ntt.crosstest.data.SupabaseMediaAccessGrantProvider(forbiddenClient)
+        try {
+            forbiddenProvider.getMediaAccessGrant("rep-forbidden")
+            fail("Expected ScreenshotPermissionDeniedException")
+        } catch (_: ScreenshotPermissionDeniedException) {
+            // expected
+        }
+
+        val expiredClient = createSupabaseClient("https://fixture.invalid", "dummy-key") {
+            install(Postgrest)
+            httpEngine = MockEngine {
+                respond(
+                    content = """{"code":"P0001","message":"MEDIA_EXPIRED"}""",
+                    status = HttpStatusCode.BadRequest,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+        }
+        val expiredProvider = com.ntt.crosstest.data.SupabaseMediaAccessGrantProvider(expiredClient)
+        try {
+            expiredProvider.getMediaAccessGrant("rep-expired")
+            fail("Expected ScreenshotExpiredException")
+        } catch (_: ScreenshotExpiredException) {
+            // expected
+        }
+    }
 }

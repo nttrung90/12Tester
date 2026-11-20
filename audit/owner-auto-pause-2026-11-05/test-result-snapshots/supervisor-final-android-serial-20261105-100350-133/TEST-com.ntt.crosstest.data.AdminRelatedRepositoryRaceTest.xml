@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-05T10:03:35.036Z" hostname="PC-5700X3D" time="0.152">
+  <properties/>
+  <testcase name="atomicRegistrationAndPublication_preventsStaleReadPublishAfterSave" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.028"/>
+  <testcase name="forceRefresh_errorBehavior_returnsNullOnForcedRefresh_andCachedOnNormal" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.016"/>
+  <testcase name="getAppConfig_rethrowsCancellationException" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.012"/>
+  <testcase name="legacyBilingualFallback_rethrowsWhenEnglishIsProvided" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.011"/>
+  <testcase name="readWhileSaveInFlight_doesNotSupersedeSavedConfig" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.016"/>
+  <testcase name="staleReadStartedBeforeMutation_doesNotOverwriteSavedConfigInRamOrDisk_andColdRestoreRestoresMutation" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.017"/>
+  <testcase name="publicGlobalCacheSemantics_respectsTtl" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.016"/>
+  <testcase name="legacyBilingualFallback_recoversOnCapabilityErrorWithoutEnglish" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.017"/>
+  <testcase name="staleWritesCompletedInReverseOrder_doNotOverwriteNewerMutationInCacheOrDisk" classname="com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -76,6 +76,7 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AppUpdateRelease
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -165,7 +166,7 @@ fun AppUpdateReleaseScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // Header: App Info
                 uiState.campaign?.let { camp ->
@@ -242,6 +243,8 @@ fun AppUpdateReleaseScreen(
                     onVersionCodeChange = viewModel::onVersionCodeChange,
                     onReleaseNotesChange = viewModel::onReleaseNotesChange,
                     onApplyClick = viewModel::publishUpdate,
+                    onRetryPendingClick = viewModel::retryPendingPublish,
+                    onDiscardPendingClick = viewModel::discardPendingPublish,
                 )
 
                 // Client Verification Notice
@@ -385,9 +388,9 @@ private fun CurrentReleaseCard(
                 Surface(
                     shape = RoundedCornerShape(6.dp),
                     color = when (release.status) {
-                        "active" -> Color(0xFF2E7D32).copy(alpha = 0.15f)
-                        "exhausted" -> Color(0xFF0288D1).copy(alpha = 0.15f)
-                        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                        "active" -> MaterialTheme.statusColors.successContainer
+                        "exhausted" -> MaterialTheme.statusColors.infoContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
                     },
                 ) {
                     Text(
@@ -400,8 +403,8 @@ private fun CurrentReleaseCard(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = when (release.status) {
-                            "active" -> Color(0xFF2E7D32)
-                            "exhausted" -> Color(0xFF0288D1)
+                            "active" -> MaterialTheme.statusColors.onSuccessContainer
+                            "exhausted" -> MaterialTheme.statusColors.onInfoContainer
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -410,7 +413,11 @@ private fun CurrentReleaseCard(
             }
 
             Text(
-                text = "Phiên bản: ${release.versionName} (mã: ${release.targetVersionCode})",
+                text = stringResource(
+                    R.string.app_update_version_code_format,
+                    release.versionName,
+                    release.targetVersionCode
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -424,25 +431,26 @@ private fun CurrentReleaseCard(
             }
 
             // Progress bar
+            val releaseMaxClaims = maxOf(1, release.maxClaims)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = stringResource(R.string.app_update_progress_format, release.paidCount),
+                        text = "${release.paidCount}/$releaseMaxClaims đã nhận thưởng",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                     )
                     Text(
-                        text = "${(release.paidCount * 100) / 20}%",
+                        text = "${(release.paidCount * 100) / releaseMaxClaims}%",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                     )
                 }
                 LinearProgressIndicator(
-                    progress = { (release.paidCount.toFloat() / 20f).coerceIn(0f, 1f) },
+                    progress = { (release.paidCount.toFloat() / releaseMaxClaims.toFloat()).coerceIn(0f, 1f) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
@@ -458,7 +466,7 @@ private fun CurrentReleaseCard(
                 Text(
                     text = stringResource(R.string.app_update_held_format, release.remainingCredits),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFFF57C00),
+                    color = MaterialTheme.statusColors.warning,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
@@ -503,6 +511,8 @@ private fun PublishReleaseFormCard(
     onVersionCodeChange: (String) -> Unit,
     onReleaseNotesChange: (String) -> Unit,
     onApplyClick: () -> Unit,
+    onRetryPendingClick: (() -> Unit)? = null,
+    onDiscardPendingClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -514,13 +524,42 @@ private fun PublishReleaseFormCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 text = stringResource(R.string.app_update_form_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
+
+            uiState.pendingPublishIntent?.let { pending ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "Yêu cầu đăng ký phiên bản ${pending.versionName} (mã ${pending.targetVersionCode}) đang chờ giải quyết sau sự cố mạng.",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            onDiscardPendingClick?.let {
+                                TextButton(onClick = it, enabled = !uiState.isPublishing) {
+                                    Text("Hủy bỏ")
+                                }
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            onRetryPendingClick?.let {
+                                Button(onClick = it, enabled = !uiState.isPublishing) {
+                                    Text("Thử lại gửi yêu cầu")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             // Version Name Field
             OutlinedTextField(
@@ -589,7 +628,7 @@ private fun PublishReleaseFormCard(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.app_update_budget_rule),
+                        text = "Giữ ${uiState.reservedBudget} Credit • ${uiState.rewardPerClaim} Credit/người • Tối đa ${uiState.maxClaims} người",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
@@ -603,12 +642,12 @@ private fun PublishReleaseFormCard(
                         BudgetRow(
                             label = stringResource(R.string.app_update_refund_from_old),
                             value = "+${uiState.refundFromCurrent} Credit",
-                            valueColor = Color(0xFF2E7D32),
+                            valueColor = MaterialTheme.statusColors.success,
                         )
                     }
                     BudgetRow(
                         label = stringResource(R.string.app_update_reserve_cost),
-                        value = "-120 Credit",
+                        value = "-${uiState.reservedBudget} Credit",
                         valueColor = MaterialTheme.colorScheme.error,
                     )
                     HorizontalDivider(
@@ -618,17 +657,24 @@ private fun PublishReleaseFormCard(
                     BudgetRow(
                         label = stringResource(R.string.app_update_projected_balance),
                         value = "${uiState.projectedRemaining} Credit",
-                        valueColor = if (uiState.projectedRemaining >= 0) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
+                        valueColor = if (uiState.projectedRemaining >= 0) MaterialTheme.statusColors.success else MaterialTheme.colorScheme.error,
                         isBold = true,
                     )
 
                     if (!uiState.hasEnoughCredits) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = stringResource(
-                                R.string.app_update_insufficient_credits_format,
-                                120 - uiState.effectiveBudget,
-                            ),
+                            text = "Số dư không đủ để giữ ${uiState.reservedBudget} Credit (cần thêm ${uiState.reservedBudget - uiState.effectiveBudget} Credit).",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+
+                    if (uiState.quoteError != null) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = uiState.quoteError ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.Medium,
@@ -739,14 +785,21 @@ private fun ReleaseHistoryCard(
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = when (rel.status) {
-                                "active" -> Color(0xFF2E7D32)
-                                "exhausted" -> Color(0xFF0288D1)
+                                "active" -> MaterialTheme.statusColors.success
+                                "exhausted" -> MaterialTheme.statusColors.info
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             },
                         )
                     }
+                    val refundText = if (rel.refundedCredits > 0) {
+                        stringResource(R.string.app_update_history_refund_suffix, rel.refundedCredits)
+                    } else ""
                     Text(
-                        text = "${rel.paidCount}/20 nhận • Đã chi: ${rel.paidCount * 6} Credit${if (rel.refundedCredits > 0) " • Hoàn: ${rel.refundedCredits} Credit" else ""}",
+                        text = stringResource(
+                            R.string.app_update_history_item_format,
+                            rel.paidCount,
+                            rel.paidCount * 6
+                        ) + refundText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

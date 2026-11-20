@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:39.027Z" hostname="PC-5700X3D" time="4.37">
+  <properties/>
+  <testcase name="startupReconciliationOnlyDeletesReceiptsAfterCommittedSuccess" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.024"/>
+  <testcase name="ordinaryAndMissionReportsOnSameCampaignCoexistWithoutBlockingEachOther" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.03"/>
+  <testcase name="realWorkManagerFirstRunAndCompletionStayAtAttemptOne" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="1.027"/>
+  <testcase name="repeatedAuthRestoreAndRestartKeepFailureSilentUntilExplicitRetry" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="1.09"/>
+  <testcase name="restoringLegacyFailedWorkWithoutFailureMarkerDoesNotEmitToast" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.031"/>
+  <testcase name="eachCampaignKeepsItsOwnFailureAndRetryTargetsThatCampaign" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="1.066"/>
+  <testcase name="restartReattachesToExistingWorkWithoutReplacingIt" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.525"/>
+  <testcase name="concurrentCampaignDoesNotAllowDuplicateOfEarlierPendingReport" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.03"/>
+  <testcase name="restartRestoresOrphanedRequestAndIgnoresOtherAccounts" classname="com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest" time="0.546"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

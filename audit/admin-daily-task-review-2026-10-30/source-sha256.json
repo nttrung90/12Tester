@@ -1,0 +1,34 @@
+[
+  {
+    "path": "supabase/migrations/058_admin_daily_task_policy.sql",
+    "sha256": "7E66584D13BBCCE585AB58FD3DAD0115CA089CA08E99F3929F930E3ED9B80B8C"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminUsersViewModel.kt",
+    "sha256": "C1D367B745F84E2DA86FE9BEB74E8A20E82CB2E5DD9441A11D8F2F06D508563B"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/components/AdminDailyTaskPolicySheet.kt",
+    "sha256": "EBF98D3DE2997016D8A3B06E3236E7936543701AC25AAC4072055709015E21A6"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/AdminUsersScreen.kt",
+    "sha256": "94CD8B325421F580592ECE219B950064404E9BAA31E135F0DABB5A2ACE63B969"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "sha256": "4B9DA5DA5C2D41399F96540F37F90A2A8CFC60DB031F6D833D015F60542A26EC"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "sha256": "3A141FCC39A3783D145E5C0313603AF03B2BD8AD1F69104B49E195A32A4F5A54"
+  },
+  {
+    "path": "supabase/tests/run-admin-daily-task-policy-test.mjs",
+    "sha256": "5C65CE11065CE29E03FB4257C83D8D4B9A298661DB182220D9DA25CAAC81F873"
+  },
+  {
+    "path": "supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md",
+    "sha256": "081EB5827EF5A12469EF4263AD3D48F8FD218706B2038693C66A212E24F73F2D"
+  }
+]

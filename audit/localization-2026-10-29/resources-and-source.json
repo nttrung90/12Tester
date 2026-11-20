@@ -1,0 +1,73 @@
+{
+  "audit_date": "2026-10-29",
+  "evidence_type": "static_source_and_resource_xml",
+  "head": "34f0ddb811e5397774105c2dd905d052511e59ec",
+  "resource_counts": {
+    "values-vi": {
+      "count": 1127,
+      "duplicate_keys": []
+    },
+    "values-en": {
+      "count": 1127,
+      "duplicate_keys": []
+    },
+    "values": {
+      "count": 1127,
+      "duplicate_keys": []
+    }
+  },
+  "missing_keys": {
+    "values-en": [],
+    "values-vi": []
+  },
+  "default_vs_explicit_en_differences": [],
+  "placeholder_signature_mismatches": [],
+  "identical_en_vi_keys": [
+    "admin_badge",
+    "admin_email_contact",
+    "app_name",
+    "credit_reward_amount_format",
+    "credit_reward_tester_amount_format",
+    "credit_reward_tip_amount_format",
+    "credit_unit",
+    "credit_unknown",
+    "daily_quest_progress",
+    "daily_task_progress_format",
+    "hint_play_store_link",
+    "img_compare_tester_format",
+    "label_email",
+    "language_english",
+    "language_vietnamese",
+    "leaderboard_rank_of_total",
+    "leaderboard_tab_credit",
+    "leaderboard_tab_test",
+    "my_app_status_production",
+    "oad_status_unknown",
+    "post_app_guide_group_email",
+    "post_app_guide_group_url",
+    "quest_progress_text",
+    "rank_format",
+    "slot_number_title",
+    "social_link_facebook",
+    "social_link_website",
+    "social_link_zalo"
+  ],
+  "source_sha256": {
+    "app/src/main/java/com/ntt/crosstest/ui/components/NotificationBottomSheet.kt": "4BE6E41DB4D5ECEBE9A2C2EF83D7CE4A3AB18FE0A734B8821B6BAD708DF37B50",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/AppUpdateReleaseScreen.kt": "D1BEC1DF7074DBDA0A2BA72121266B95715F3CB63C2CE9ED5750932DA988A581",
+    "app/src/main/res/values/strings.xml": "53B09AA12D2E28343512FFA1B057C1FA10E89EC20ECFC197CB8EE757B9D9A576",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AuthViewModel.kt": "1C51CF76D3FFE187BCA89CFD78BA8B4AF1A929A2A8BFAEDD10D32669742F0C49",
+    "app/src/main/res/values-vi/strings.xml": "00361FB80B85C2FEB3283ADA0BCF7FA4B093430143DF56B08EEBC34184410964",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/ProfileScreen.kt": "93FBA551492459BE88882DEE240A680BA10DF9E418EFEB8466D66F46E0FF7E25",
+    "app/src/main/res/values-en/strings.xml": "81690F0CCCEC86E400E32E214358D5CDFD594F1210F26449E2D042D7D40E774C",
+    "app/src/main/java/com/ntt/crosstest/MainActivity.kt": "8476B59947D596E6FB6351C5B873D5AF5E0DA2CBD3B2C9CDAC0643B4175D6680",
+    "app/src/main/java/com/ntt/crosstest/data/SettingsRepository.kt": "17FA2A50D536D1C0208F0EF24236CB732EF0D825932A206BFB5482A054644664",
+    "app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt": "1D58891A7AB5981E0D46ED85BDAD437F4669077BE1936720B217E6490D7B812F",
+    "app/src/main/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModel.kt": "45803F0CDE2AF720B785DAB71D32D4FE1FD2779817D3F02D094233FDD02194A3"
+  },
+  "limitations": [
+    "No emulator or installed APK exercised",
+    "No production Supabase/Firebase calls",
+    "Placeholder comparison is static and does not execute Android formatting"
+  ]
+}

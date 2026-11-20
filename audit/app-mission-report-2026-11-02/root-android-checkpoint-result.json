@@ -1,0 +1,14 @@
+{
+  "testSuites": 74,
+  "tests": 535.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "snapshot": "audit/app-mission-report-2026-11-02/test-result-snapshots/root-full-android-fixture-fixed-20261102-060324-743",
+  "apk": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+  "apkBytes": 35464633,
+  "apkSha256": "A88713C8A5ECAE81D677B4A057AE74A90F3E2443FDD8C2700541B0ABF744CEB7",
+  "versionName": "1.0.9",
+  "versionCode": 29,
+  "createdUtc": "2026-11-02T06:04:10.7244330Z"
+}

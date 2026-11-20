@@ -1,0 +1,7 @@
+=== RUNNING ADMIN PAUSE / RESUME COMPATIBILITY REGRESSION TEST ===
+=== LOADING MIGRATIONS 062 - 078 ===
+PASS: Owner resume respects configured missed_days threshold (7 allows streak 4, 1 rejects streak 1)
+PASS: Admin resume returns paused_reason=null and admin_resumed flag
+PASS: Admin resume audit event records original reason Khôi phục chiến dịch bởi Admin
+PASS: trg_campaign_status_lifecycle clears admin_pause_reason_code on reopen and guards client tamper
+=== ALL COMPATIBILITY REGRESSION TESTS PASSED SUCCESSFULLY ===

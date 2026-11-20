@@ -1,0 +1,46 @@
+[
+  {
+    "label": "yesterday finalization versus owner removal",
+    "blockers": [
+      14340
+    ],
+    "finalize": {
+      "ok": true
+    },
+    "remove": {
+      "ok": true,
+      "result": {
+        "reason": "Gỡ bỏ bởi Chủ sở hữu",
+        "status": "removed",
+        "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+        "success": true,
+        "app_name": "Old owner app",
+        "owner_id": "e1000000-0000-0000-0000-000000000001",
+        "campaign_id": "fd9f3725-cb97-47ed-adce-5370b9478650"
+      }
+    },
+    "pass": true
+  },
+  {
+    "label": "yesterday finalization versus admin removal",
+    "blockers": [
+      17536
+    ],
+    "finalize": {
+      "ok": true
+    },
+    "remove": {
+      "ok": true,
+      "result": {
+        "reason": "Gỡ bỏ bởi Admin",
+        "status": "deleted",
+        "message": "Chiến dịch đã được xóa hoàn toàn",
+        "success": true,
+        "app_name": "Old owner app",
+        "owner_id": "e1000000-0000-0000-0000-000000000001",
+        "campaign_id": "b2cb44c4-ad79-4ed2-a35c-a08891af38a5"
+      }
+    },
+    "pass": true
+  }
+]

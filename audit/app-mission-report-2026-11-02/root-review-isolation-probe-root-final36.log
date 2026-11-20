@@ -1,0 +1,5 @@
+PASS independent review isolation: approving only a mission cannot consume ordinary daily checkin/quota
+PASS independent review isolation: ordinary provisional policy reward is unchanged after mission approval
+PASS independent review isolation: rejecting mission preserves existing ordinary pending checkin and report
+PASS independent review isolation: automatic acceptance of mission does not fabricate ordinary checkin
+PASS independent review isolation: later-day mission can be approved without paying participant escrow twice

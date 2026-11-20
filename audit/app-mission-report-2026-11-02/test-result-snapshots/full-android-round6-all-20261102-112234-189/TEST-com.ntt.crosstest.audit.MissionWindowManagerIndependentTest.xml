@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-02T11:22:11.732Z" hostname="PC-5700X3D" time="3.354">
+  <properties/>
+  <testcase name="admissionBlocksBeforeExceedingPendingBudgetWithoutEvictingAcceptedWork" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.708"/>
+  <testcase name="committedWorkPublishesTheWholeDurableReceiptBeforeDeletingPendingMetadata" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.575"/>
+  <testcase name="ordinaryDetailDoesNotAdoptAnotherMissionSendingState" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.766"/>
+  <testcase name="ordinaryAdmissionFreezesItsDayBeforeWorkIsEnqueued" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.043"/>
+  <testcase name="concurrentAdmissionsShareOnePhysicalPendingBudget" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.341"/>
+  <testcase name="sameCampaignKindsAdmitIndependentlyAndLogoutPurgesBothScopes" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.073"/>
+  <testcase name="photoOnlyNewerDraftSurvivesEarlierReceiptWithoutAnOpenWindow" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.57"/>
+  <testcase name="admissionCountsActualMetadataWithoutDeletingTheUnsentDraft" classname="com.ntt.crosstest.audit.MissionWindowManagerIndependentTest" time="0.276"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

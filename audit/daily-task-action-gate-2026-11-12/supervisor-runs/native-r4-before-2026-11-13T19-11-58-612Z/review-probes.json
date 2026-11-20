@@ -1,0 +1,175 @@
+{
+  "at": "2026-11-13T19:12:00.029Z",
+  "dataDirectory": "f:/ai/12tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+  "database": "action_gate_native_test_r4_1794597118817",
+  "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "pids": {
+    "root": 22212,
+    "a": 25392,
+    "b": 6244
+  },
+  "cases": [
+    {
+      "name": "direct-pause-before-slot-versus-resume",
+      "pass": true,
+      "initial": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "atBarrier": {
+        "pid": 25392,
+        "wait_event_type": "Lock",
+        "wait_event": "advisory",
+        "blockers": [
+          22212
+        ]
+      },
+      "competingWait": {
+        "pid": 6244,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          25392
+        ]
+      },
+      "action": {
+        "ok": true,
+        "rows": [
+          {
+            "id": "dade2a63-baff-4213-a8ae-feee9f74d617"
+          }
+        ]
+      },
+      "resume": {
+        "ok": true,
+        "rows": [
+          {
+            "r": {
+              "status": "open",
+              "message": "Chiến dịch đã được kích hoạt lại",
+              "success": true,
+              "app_name": "Native reviewer app",
+              "campaign_id": "dade2a63-baff-4213-a8ae-feee9f74d617"
+            }
+          }
+        ]
+      },
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 12,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      }
+    },
+    {
+      "name": "delete-gate-before-physical-delete-versus-create-v2",
+      "pass": false,
+      "error": {
+        "code": null,
+        "message": "Expected backend 6244 to wait for 25392"
+      }
+    },
+    {
+      "name": "delete-refund-before-slot-versus-create-v2",
+      "pass": false,
+      "error": {
+        "code": "ERR_ASSERTION",
+        "message": "Create must wait on slot BEFORE owner profile\n+ actual - expected\n\n+ 'transactionid'\n- 'advisory'\n"
+      }
+    },
+    {
+      "name": "accepted-removal-worker-after-new-today-obligation",
+      "pass": false,
+      "error": {
+        "code": "ERR_ASSERTION",
+        "message": "Prerequisite accepted escrow-removal case must succeed"
+      }
+    },
+    {
+      "name": "real-finalizer-profile-lock-versus-owner-resume",
+      "pass": true,
+      "finalized": {
+        "ok": true,
+        "rows": [
+          {
+            "r": ""
+          }
+        ]
+      },
+      "competingWait": {
+        "pid": 6244,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          25392
+        ]
+      },
+      "resumed": {
+        "ok": true,
+        "rows": [
+          {
+            "r": {
+              "status": "open",
+              "message": "Chiến dịch đã được kích hoạt lại",
+              "success": true,
+              "app_name": "Native reviewer app",
+              "campaign_id": "d68637ae-09cc-4931-8ba6-69d17772f27b"
+            }
+          }
+        ]
+      },
+      "after": {
+        "met": true,
+        "mode": "owner",
+        "status_date": "2026-11-14",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 54,
+        "carry_in_tests": 0,
+        "required_tests": 6,
+        "carryover_ready": true,
+        "completed_tests": 6,
+        "logged_in_today": true,
+        "active_app_count": 2,
+        "is_penalty_exempt": false,
+        "base_required_tests": 6,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-10-30",
+        "effective_required_tests": 6,
+        "carryover_remaining_tests": 0
+      },
+      "walletBefore": 10000
+    }
+  ],
+  "pass": false
+}

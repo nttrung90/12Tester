@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:36.779Z" hostname="PC-5700X3D" time="0.052">
+  <properties/>
+  <testcase name="mainThreadClearMustNotWaitForPendingDiskIoLock" classname="com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest" time="0.013"/>
+  <testcase name="validSnapshotMustSurviveRuntimeEpochResetAndStillRespectNextClear" classname="com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest" time="0.021"/>
+  <testcase name="clearMustImmediatelyPreventReloadEvenWhenDiskCleanupIsQueued" classname="com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

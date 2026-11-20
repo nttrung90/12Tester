@@ -1,0 +1,16 @@
+{
+  "logName": "root-final-policy-targeted",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-recheck-2026-11-02/recheck.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-01T23:52:57.4132556Z",
+  "finishedUtc": "2026-11-01T23:53:24.4256464Z",
+  "currentRunXmlCount": 2
+}

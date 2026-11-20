@@ -1,0 +1,10 @@
+{
+    "logName":  "focused-unit-tests",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-05T06:15:35.6109481Z",
+    "finishedUtc":  "2026-11-05T06:16:19.7730526Z",
+    "currentRunXmlCount":  75
+}

@@ -1,0 +1,14 @@
+{
+    "logName":  "indep-draft-check",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-02T05:24:10.1840468Z",
+    "finishedUtc":  "2026-11-02T05:24:28.3524527Z",
+    "currentRunXmlCount":  1
+}

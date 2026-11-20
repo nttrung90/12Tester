@@ -1,0 +1,10 @@
+=== LOADING ALL MIGRATIONS IN ORDER (INCLUDING 088) ===
+ACTIVE MIGRATIONS LOADED: 062_consolidated_baseline.sql, 063_report_crypto_search_path.sql, 064_explicit_report_context.sql, 065_remove_dhash_hardblock.sql, 066_push_and_carryover_hardening.sql, 067_admin_direct_notification_popup.sql, 068_owner_tester_reports_count.sql, 069_admin_audit_hardening.sql, 070_admin_management.sql, 071_business_policies.sql, 072_admin_notification_campaigns.sql, 073_admin_action_audit.sql, 074_app_mission_window_and_multi_attachments.sql, 075_owner_auto_pause_config.sql, 076_mission_for_finalized_campaigns.sql, 077_mission_reward_modes_and_management.sql, 078_admin_pause_reason_popup.sql, 079_owner_auto_pause_debt_and_timestamp_guard.sql, 080_report_context_carryover_and_gap_recovery.sql, 081_admin_flow_audit_fixes.sql, 082_carryover_flow_audit_fixes.sql, 083_fix_app_configs_encoding_and_version.sql, 084_campaign_posting_business_policies.sql, 085_egress_optimization_sync_v2.sql, 086_next_campaign_candidate_daily_target_priority.sql, 087_campaign_tester_bonus_rounds.sql, 088_immediate_daily_quota_on_campaign_changes.sql, 089_fix_production_bonus_lifecycle.sql, 090_daily_task_action_gate.sql
+PASS: SCENARIO 1: Policy Governance - Default future date & audited activation {"activeNow":true,"auditRowId":1}
+PASS: SCENARIO 2: Immediate Quota Increase on CreateCampaignV2 (1 app -> 2 apps -> 3 apps) {"initial":12,"afterApp2":24,"afterApp3":36}
+PASS: SCENARIO 3: Replay Protection & Immutable Receipts Isolation {"firstId":"c97073d7-e183-418e-ac3e-39d6ff8b9a97","replayId":"c97073d7-e183-418e-ac3e-39d6ff8b9a97"}
+PASS: SCENARIO 4: Preservation of Completed Tests (D) & Yesterday Carry-In (C) {"d":5,"c":8,"b":24,"req":32}
+PASS: SCENARIO 5: Immediate Quota Reduction on Campaign Removal & Pending Removal (36 -> 24 -> 12 -> 0) {"s36":36,"s24":24,"s12":12,"s0":0}
+PASS: SCENARIO 6: Registration Day Owner Finalization & Member Exemption Boundary {"ownerFinalized":1,"memberFinalized":0}
+PASS: SCENARIO 7: Historical Cutover Preserves Old Schema Before Activation Date {"active_app_count":1,"base_required_tests":12}
+=== ALL IMMEDIATE DAILY QUOTA ACCEPTANCE SCENARIOS PASSED ===

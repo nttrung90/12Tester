@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.CacheRegressionTest" tests="36" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:39:12.111Z" hostname="PC-5700X3D" time="0.632">
+  <properties/>
+  <testcase name="probe09_deleteCampaign_invalidatesSingleItemAndListCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.016"/>
+  <testcase name="probe02_concurrentOrdinaryReads_coalesceToSingleCall" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.068"/>
+  <testcase name="feedbackOnlyFailureMustNotOverwriteGoodAverageRating" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.027"/>
+  <testcase name="probe03_emptyPausedCampaignsSuccess_cachedAndReused" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="ownerStatsFailureMustNotOverwriteGoodCount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.014"/>
+  <testcase name="businessDayClockAdvancementMustInvalidateTodayCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.014"/>
+  <testcase name="probe07_unlockSlot_mutatesBalance_getMyProfileFalse_returnsUpdatedBalance" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="memoryPeekMustSanitizePreviousDay" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="probe05_inFlightReadBeforeClear_completingAfterClear_doesNotRepopulateCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.062"/>
+  <testcase name="failedColdCountMustNotCacheZeroAsSuccess" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="adminProfilesMustNotCarryIntoAnotherAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="previousDaySnapshotMustClearOwnerTodayStats" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.007"/>
+  <testcase name="feedStartedBeforeClearMustNotRepopulateChildCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.012"/>
+  <testcase name="packageEventUpdatesVersionFlowAndInvalidatesCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.023"/>
+  <testcase name="probe11_concurrentForcedRefreshes_coalesceToSingleFlight" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.064"/>
+  <testcase name="probe10_networkFailure_doesNotOverwriteExistingCachedListWithEmpty" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.011"/>
+  <testcase name="probe04_profileA_thenProfileB_neverReturnsProfileAForUserB" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="homeFeed500MustNotLookLikeMissingRpc" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.009"/>
+  <testcase name="creditLogCoverageMustSliceRequestedLimit" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="probe01_readListTwiceWithinTtl_makesSingleNetworkCall" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.009"/>
+  <testcase name="guestStatsMustNotCarryIntoAuthenticatedUser" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.018"/>
+  <testcase name="probe06_inFlightSaveSnapshot_thenClear_doesNotReviveOldSessionOnDisk" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.008"/>
+  <testcase name="inFlightRequestAcrossMidnightStampsStartDay" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.013"/>
+  <testcase name="managerReportsMustBeScopedToRequestingAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="ordinaryAndForceSameVersionMustShareFreshInFlightRead" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="ownerDetailMustRecheckAccountAfterLoadingSlots" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.029"/>
+  <testcase name="probe12_creditLogs_differentLimits_doNotReturnTruncatedCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="differentStatsIdSetsMustNotShareFlightResult" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.01"/>
+  <testcase name="profileNetworkFailureMustSurfaceAsFailure" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.009"/>
+  <testcase name="probe08_joinCampaign_invalidatesTestersCache" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.015"/>
+  <testcase name="campaignUpdateMustInvalidateSlotInfoDependency" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.015"/>
+  <testcase name="notificationsFailureForBMustNotReturnAData" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.017"/>
+  <testcase name="oldNotificationsMustNotReviveAfterReadMutationAndNetworkFailure" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.012"/>
+  <testcase name="stats500MustNotManufactureSuccessfulZeroStats" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.009"/>
+  <testcase name="checkinOnlyFailureMustNotOverwriteTesterHistoryWithZero" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.012"/>
+  <testcase name="statsAreScopedToAccount" classname="com.ntt.crosstest.data.CacheRegressionTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

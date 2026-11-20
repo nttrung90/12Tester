@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-16T14:26:10.634Z",
+  "scope": "Isolated PGlite, pre-existing metadata rows only",
+  "results": [
+    {
+      "name": "092 to latest retains legacy finalized/expired/deleted pending writes",
+      "status": "PASS",
+      "migrations": [
+        "093_dual_storage_runtime_recheck.sql"
+      ],
+      "immediatelyAfterMigration": {
+        "u": "0",
+        "r": "300200",
+        "valid": false
+      },
+      "before": {
+        "u": "200",
+        "r": "300200"
+      },
+      "after": {
+        "u": "200",
+        "r": "300200",
+        "actual": "300400"
+      }
+    }
+  ]
+}

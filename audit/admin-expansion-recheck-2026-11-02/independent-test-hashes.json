@@ -1,0 +1,14 @@
+[
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/audit/BusinessPolicyRecheckIndependentTest.kt",
+    "sha256": "080FFDB3A05E1153280653C7B6B785E09302A982E7D5790AEA6B4660291967D7"
+  },
+  {
+    "path": "audit/admin-expansion-recheck-2026-11-02/worker-tls-effective-probe.mjs",
+    "sha256": "335E028BAEB37D537E6E5F08BD73D9D89EEF4EBFE386E37428BF3AF39D026879"
+  },
+  {
+    "path": "audit/admin-expansion-recheck-2026-11-02/independent-tests/com/ntt/crosstest/audit/BusinessPolicyRecheckIndependentTest.kt.snapshot",
+    "sha256": "080FFDB3A05E1153280653C7B6B785E09302A982E7D5790AEA6B4660291967D7"
+  }
+]

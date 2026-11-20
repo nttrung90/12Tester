@@ -144,7 +144,7 @@ fun PostAppGuideScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Introductory Card
             Card(

@@ -1,0 +1,26 @@
+[
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\CampaignRepository.kt",
+    "Hash": "4569F495239907D492CCAC60A2E25C50B9D65EE96C9324360E8743713C8B6548"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\viewmodels\\HomeViewModel.kt",
+    "Hash": "CEEF65B663DE928FF752C23FACE44A91AE54115694AC2462F1A971536EE50195"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "Hash": "9983A87815CB319B3EE0F3F8BA4D4284A8EA93B42BD4FF3B9D7E632A24A234C1"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\ui\\screens\\HomeScreen.kt",
+    "Hash": "82F44A86D620897F8A020CCA6E9D24BB83E31065B998FF486AC7008590343CDD"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\src\\main\\java\\com\\ntt\\crosstest\\data\\SessionCacheManager.kt",
+    "Hash": "1C12E8DECB801A011109525723E4D95BB8CCF23116DC53B239DECD10FB42ADF2"
+  },
+  {
+    "Path": "F:\\AI\\12Tester\\app\\build.gradle.kts",
+    "Hash": "3E1F3B52FE842C9CBAF15627C2230DC977727557A470CF889D19A39AC7B09E2A"
+  }
+]

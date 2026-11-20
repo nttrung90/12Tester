@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-10-30T18:55:32.8932097+07:00",
+  "model": "google/antigravity-gemini-3.8-flash",
+  "opencodeSessions": [
+    "ses_e74048e35ffeFw5XZbrnvZmq6v",
+    "ses_e7371e181ffeBKiftZz1HT8WFx"
+  ],
+  "backend": {
+    "command": "npm.cmd test --prefix supabase/tests",
+    "runnerCount": 20,
+    "exitCode": 0,
+    "log": "backend-final.log",
+    "completedAt": "2026-10-30T18:55:21.6256395+07:00"
+  },
+  "independentSql": {
+    "total": 14,
+    "passed": 14
+  },
+  "android": {
+    "command": "gradlew.bat -I audit/push-carryover-review-2026-10-30/review.init.gradle :app:testDebugUnitTest --rerun :app:assembleDebug --offline --console=plain",
+    "exitCode": 0,
+    "totals": {
+      "suites": 47,
+      "tests": 356.0,
+      "failures": 0.0,
+      "errors": 0.0,
+      "skipped": 0.0
+    },
+    "buildSuccessful": true,
+    "log": "android-final.log",
+    "xmlDirectory": "android-results"
+  },
+  "baseline062Through065Unchanged": true,
+  "productionDatabaseModified": false,
+  "productionDeploymentPerformed": false,
+  "limitations": [
+    "No real multi-connection PostgreSQL/Supabase concurrency test",
+    "No device/emulator UI walkthrough",
+    "Unproven legacy history requires trusted operator reconciliation"
+  ],
+  "reviewedSourcesUnchangedAfterFinalTests": true
+}

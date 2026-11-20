@@ -1,0 +1,34 @@
+[
+  {
+    "path": "supabase/tests\\package.json",
+    "state": "changed"
+  },
+  {
+    "path": "supabase/tests\\run-push-and-carryover-baseline062-regression-test.mjs",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\main\\res\\values-vi\\strings.xml",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\main\\res\\values\\strings.xml",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\main\\res\\values-en\\strings.xml",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\test\\java\\com\\ntt\\crosstest\\data\\DailyTaskCarryoverUnitTest.kt",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\data\\Models.kt",
+    "state": "changed"
+  },
+  {
+    "path": "app/src\\main\\java\\com\\ntt\\crosstest\\ui\\components\\DailyTaskCard.kt",
+    "state": "changed"
+  }
+]

@@ -1,0 +1,12 @@
+{
+    "logName":  "full-android-atomic-ack-final",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T11:53:55.0533227Z",
+    "finishedUtc":  "2026-11-02T11:54:51.6208438Z",
+    "currentRunXmlCount":  75
+}

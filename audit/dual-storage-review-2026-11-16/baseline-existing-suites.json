@@ -1,0 +1,26 @@
+[
+  {
+    "suite": "mission-reward-modes",
+    "through": 90,
+    "exitCode": 0,
+    "tail": "ASS: Moderator rejected with PERMISSION_DENIED\nPASS: Locked Admin rejected with PERMISSION_DENIED\nPASS: Empty deletion reason rejected\nPASS: Admin deleted mission successfully with audit event\nPASS: Repeated admin_delete_mission returned idempotent replay\nPASS: Admin action audit logged with actor, reason, and target details\nPASS: Notifications sent to owner and joined tester\nPASS: Escrow held safely while pending report remains to be reviewed\nPASS: Report submitted before deletion was successfully approved and rewarded\nPASS: Unused escrow of 585 credits refunded to owner atomically after final settlement\n\n--- Test 7: Approval After Expiration & sync_expired_missions Sweep ---\nPASS: sync_expired_missions executed (updated: 1)\nPASS: Report submitted in time was approved and rewarded AFTER mission expiration\nPASS: Expired mission unused escrow refunded to owner after last report settled\n\n--- Test 8: Discovery & Metadata Verification ---\nPASS: get_open_missions and get_campaign_mission return all required metadata\n\n=== ALL 15 MISSION REWARD MODES & MANAGEMENT TEST CASES PASSED 100% ===\n"
+  },
+  {
+    "suite": "mission-reward-modes",
+    "through": 91,
+    "exitCode": 1,
+    "tail": " '        WHERE id = v_report_id',\n  where: 'PL/pgSQL function _submit_tester_report_core(text,uuid,text,integer,uuid,text,text,text,uuid,jsonb,date) line 489 at SQL statement',\n  schema: undefined,\n  table: undefined,\n  column: undefined,\n  dataType: undefined,\n  constraint: undefined,\n  file: 'analyze.c',\n  line: '2597',\n  routine: 'transformUpdateTargetList',\n  query: '\\n' +\n    '      select public._submit_tester_report_core(\\n' +\n    \"        'mission', 'aaaaaaaa-1111-aaaa-1111-aaaaaaaaaaaa'::uuid, 'Báo cáo đã cập nhật nội dung sang ngày 2', 5,\\n\" +\n    \"        '99999999-1111-9999-1111-999999999992'::uuid,\\n\" +\n    \"        'https://firebasestorage.googleapis.com/v0/b/cross-testers.firebasestorage.app/o/reports%2Faaaaaaaa-1111-aaaa-1111-aaaaaaaaaaaa%2F33333333-cccc-3333-cccc-333333333333%2Ffull_1.jpg?alt=media&token=fixture',\\n\" +\n    \"        '0123456789abcdef',\\n\" +\n    '        null,\\n' +\n    \"        'f0754c64-61a8-47ed-b86e-9763fb0ebf46'::uuid,\\n\" +\n    '        null,\\n' +\n    '        null\\n' +\n    '      ) as r;\\n' +\n    '    ',\n  params: [],\n  queryOptions: undefined\n}\n"
+  },
+  {
+    "suite": "campaign-tester-bonus",
+    "through": 90,
+    "exitCode": 0,
+    "tail": "bligation preservation and single exact refund verified.\n--- TEST 11: Hard Delete Campaign Guard ---\nPASS: Hard delete campaign guard & audit retention verified.\n--- TEST 12: Feed Sync V2 Token Invalidation ---\nPASS: Feed sync v2 token invalidation verified.\n--- TEST 13: Report Read Projection APIs Include Bonus Fields ---\nPASS: Report read projection APIs verified with tester_bonus_awarded and tester_bonus_round_id.\n--- TEST 14: Valid Large Bonus Approval & Cumulative Response Arithmetic ---\nPASS: Valid large bonus response arithmetic verified without 22003 overflow.\n--- TEST 15: Overflow Worker Retry & Isolation ---\nPASS: Overflow worker retry and escrow isolation verified.\n--- TEST 16: Deferred Admin Deletion when Fully Consumed ---\nPASS: Deferred admin deletion when fully consumed verified.\n--- TEST 17: Post-Physical-Deletion Reconcile & Replay ---\nPASS: Post-physical-deletion durable reconcile & replay verified.\n\n======================================================\nALL CAMPAIGN TESTER BONUS BEHAVIORAL & RLS TESTS PASSED!\n======================================================\n\n"
+  },
+  {
+    "suite": "campaign-tester-bonus",
+    "through": 91,
+    "exitCode": 1,
+    "tail": "ance Bounds & Overflow Prevention ---\nPASS: Input validation & overflow protection verified.\n--- TEST 2: Authorization & Ownership Guards ---\nPASS: Ownership & authorization guards verified.\n--- TEST 3: Creation, Atomic Budget Reserve & Idempotency ---\nPASS: Successful creation, atomic budget reservation and idempotency verified.\n--- TEST 4: Reconcile RPC ---\nPASS: Reconcile RPC verified.\n--- TEST 5: Dual Read API (Owner vs Tester/Public) ---\nPASS: Dual read API verified.\n--- TEST 6: Report Snapshot Attachment Rules & Immutability ---\nPASS: Report snapshot attachment rules & immutability verified.\n--- TEST 7: Manual Settlement & Single Award per Tester ---\nnode:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\r\n\r\n7 !== 17\r\n\r\n    at file:///F:/AI/12Tester/audit/dual-storage-review-2026-11-16/baseline-campaign-tester-bonus-generated.mjs:465:8 {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 7,\r\n  expected: 17,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.15.0\r\n"
+  }
+]

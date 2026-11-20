@@ -1,0 +1,88 @@
+I1112 17:31:04.236781      50 server.go:2353] Starting language server process with pid 18736
+E1112 17:31:04.240793      50 server.go:2266] Failed to initialize crash reporter: failed to setup crash output: open C:\Users\nguye\.gemini\antigravity-cli\crashes\crash_18736_36dc1df8-b9a2-4fd6-a37c-1acb95477b8f.log: Access is denied.
+I1112 17:31:04.240793      50 workflow_python.go:21] run_workflow Python: interpreter "", embedded true
+I1112 17:31:04.243888      50 server.go:2412] Language server version: 1.5.6
+I1112 17:31:04.243888      50 server.go:1103] Language server will attempt to listen on host localhost
+I1112 17:31:04.276055      50 server.go:1118] Language server listening on random port at 65414 for HTTPS (gRPC)
+I1112 17:31:04.316260      50 server.go:1126] Language server listening on random port at 65415 for HTTP
+W1112 17:31:04.328348      55 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1112 17:31:04.328348      55 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+I1112 17:31:04.338306      71 model_configs.go:201] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1112 17:31:04.338306      28 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.338306      28 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.340313      71 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+W1112 17:31:04.340313      72 crashreporter.go:122] No active crash reporter, cannot upload previous crashes
+E1112 17:31:04.343319      50 summary_store.go:280] summary store open failed (corrupt_on_open), recreating: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+E1112 17:31:04.359558      50 summary_store.go:285] summary store recreate failed: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+I1112 17:31:04.364873      77 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+E1112 17:31:04.368982      77 summary_store.go:280] summary store open failed (corrupt_on_open), recreating: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+E1112 17:31:04.374864      77 summary_store.go:285] summary store recreate failed: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+E1112 17:31:04.374864      77 store_client.go:754] summary store: cannot reopen for reconciliation
+W1112 17:31:04.396661      96 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.396661      96 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1112 17:31:04.397739      50 auth_store.go:162] OS credential manager unavailable (Access is denied.); falling back to file-based secret storage
+I1112 17:31:04.397739      50 auth_store.go:199] Using file-based secret storage at C:\Users\nguye\AppData\Roaming\antigravity\plugin-secrets.json
+I1112 17:31:04.397739      50 auth_store.go:199] Using file-based secret storage at C:\Users\nguye\AppData\Roaming\antigravity\plugin-secrets.json
+W1112 17:31:04.399471      50 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1112 17:31:04.399471      50 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1112 17:31:04.414442     140 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1112 17:31:04.420165     140 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.420165     140 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1112 17:31:04.427265     140 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.427265     140 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1112 17:31:04.453111     140 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.453111     140 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1112 17:31:04.453111     140 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1112 17:31:04.453111     140 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1112 17:31:04.453111     140 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1112 17:31:04.499385      50 server.go:3698] initialized server successfully in 259.503ms
+I1112 17:31:04.499385     148 server.go:4405] Auth succeeded, refreshing features and managers
+W1112 17:31:04.499385       9 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1112 17:31:04.499385      10 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.499385      10 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.499385       9 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1112 17:31:04.499385       9 rpcs_plugin_auth.go:109] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+E1112 17:31:04.499385     148 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1112 17:31:04.499385     148 server.go:4424] State refresh took 0ms
+I1112 17:31:04.499385     148 server.go:4439] [RemoteControl] Subscription callback triggered.
+W1112 17:31:04.500892       1 auto_updater.go:274] Directory C:\Users\nguye\AppData\Local\agy\bin is not fully accessible (readable: true, writable: false), skipping update
+I1112 17:31:04.500892       1 common.go:191] Launching CLI mode
+E1112 17:31:04.500892       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1112 17:31:04.500892       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1112 17:31:04.500892       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1112 17:31:04.500892       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1112 17:31:04.502908     148 server.go:4442] [RemoteControl] RemoteControlEnabled value: false
+I1112 17:31:04.502908     148 server.go:5551] [RemoteControl] Session toggle is off, staying disconnected
+I1112 17:31:04.502908     148 server.go:5237] [RemoteControl] Resolved proxyServerURL: ""
+I1112 17:31:04.502908     148 profiler.go:231] Continuous pprof profiling is disabled.
+I1112 17:31:04.502908     181 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+E1112 17:31:04.504415       1 summary_store.go:280] summary store open failed (corrupt_on_open), recreating: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+I1112 17:31:04.504415      16 reconcile_summaries.go:94] [Summaries] reconcile checked 17 conversations, restored 0, cached 17, skipped 0, dropped 0, cancelled false in 1ms (resident: 0 -> 0)
+I1112 17:31:04.504415     181 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.504415     181 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+E1112 17:31:04.508728       1 summary_store.go:285] summary store recreate failed: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+I1112 17:31:04.510708       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1112 17:31:04.510708       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+E1112 17:31:04.511485     170 summary_store.go:280] summary store open failed (corrupt_on_open), recreating: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+E1112 17:31:04.518074     170 summary_store.go:285] summary store recreate failed: summary_store: open write db: unable to open database file: The system cannot find the file specified.
+W1112 17:31:04.518074     170 search_index.go:181] failed to open sqlite conversation search index: summary_store: store unavailable
+I1112 17:31:04.518074     181 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.518074     181 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1112 17:31:04.518702       1 cli_setting_manager.go:160] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1112 17:31:04.520963     181 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:31:04.520963     181 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1112 17:31:04.520963     181 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1112 17:31:04.520963     181 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1112 17:31:04.520963     181 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+W1112 17:31:04.563173       1 store.go:31] Terminal sandbox unavailable: sandboxing on Windows requires Windows 11 24H2 or later with the August 2026 or later update: CreateProcessSecurityEnvironment: There are no more endpoints available from the endpoint mapper.
+I1112 17:31:04.563173       1 cli_setting_manager.go:97] CLI settings initialized: permissions=<nil>, toolPermission=request-review
+I1112 17:31:04.661648       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1112 17:31:04.661648       1 manager.go:727] CLI store manager initialized successfully
+I1112 17:31:04.661648       1 common.go:346] CLI store manager created successfully
+I1112 17:31:04.661648     175 quota_manager.go:36] doRefreshQuota: skipped (not logged in)
+I1112 17:31:04.661648       1 cli_setting_manager.go:227] ApplyProjectPermissionGrants: no grants for project "CLI Project", cleared project permissions
+W1112 17:31:04.663155     259 composite_token_storage.go:511] Failed to load stored token from keyring, falling back to file: Access is denied.
+I1112 17:31:04.663155     158 server.go:4112] Language server shutting down
+I1112 17:31:04.663155     158 server.go:4134] Waiting for migrations to complete to prevent partial migration state...
+E1112 17:31:04.663682     117 file_watcher.go:194] skipping empty or temp file: 
+E1112 17:31:04.674462     158 server.go:4237] Failed to shutdown telemetry client: Post "https://play.googleapis.com/log": dial tcp: lookup play.googleapis.com: no such host

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Business Policy Editor & Management -->
+    <string name="admin_policy_title">Chính sách nghiệp vụ</string>
+    <string name="admin_policy_active_tab">Hiện hành</string>
+    <string name="admin_policy_future_tab">Đã lập lịch</string>
+    <string name="admin_policy_editor_tab">Biên tập</string>
+    <string name="admin_policy_history_tab">Lịch sử</string>
+
+    <string name="admin_policy_baseline_badge">Mặc định hệ thống</string>
+    <string name="admin_policy_effective_date">Ngày hiệu lực (Giờ VN)</string>
+    <string name="admin_policy_select_date">Chọn ngày (YYYY-MM-DD)</string>
+    <string name="admin_policy_revision_format">Bản sửa đổi: %1$s</string>
+    <string name="admin_policy_updated_at_format">Cập nhật: %1$s</string>
+    <string name="admin_policy_today_format">Hôm nay (%1$s): %2$s</string>
+    <string name="admin_policy_summary_welcome_format">%1$s: %2$d Credit</string>
+    <string name="admin_policy_summary_push_format">%1$s: %2$d Credit</string>
+    <string name="admin_policy_summary_slot_format">Slot 2=%1$d, Slot 3=%2$d, Slot 4+=%3$d (%4$d ngày)</string>
+    <string name="admin_policy_summary_report_format">Tạm tính=%1$d, Thưởng tester=%2$d, Thưởng chủ app=%3$d</string>
+    <string name="admin_policy_summary_app_update_format">%1$d Credit/claim * %2$d claim = %3$d Credit</string>
+
+    <!-- Welcome Credits -->
+    <string name="admin_policy_section_welcome">Credit đăng ký mới</string>
+    <string name="admin_policy_welcome_credits">Credit thưởng mở tài khoản</string>
+    <string name="admin_policy_welcome_credits_helper">Credit được cấp khi người dùng đăng ký mới (0 - 10.000, mặc định 100)</string>
+
+    <!-- Penalty Tiers -->
+    <string name="admin_policy_section_penalty">Tỷ lệ phạt bỏ lỡ nhiệm vụ ngày</string>
+    <string name="admin_policy_penalty_tier1">Bậc 1 (Bỏ lỡ 1 ngày, %)</string>
+    <string name="admin_policy_penalty_tier2">Bậc 2 (Bỏ lỡ 2 ngày, %)</string>
+    <string name="admin_policy_penalty_tier3">Bậc 3 (Bỏ lỡ 3 ngày, %)</string>
+    <string name="admin_policy_penalty_tier4">Bậc 4 (Bỏ lỡ từ 4 ngày, %)</string>
+    <string name="admin_policy_penalty_helper">Phần trăm phạt phải theo thứ tự tăng dần: 0 &lt;= Bậc 1 &lt;= Bậc 2 &lt;= Bậc 3 &lt;= Bậc 4 &lt;= 100</string>
+
+    <!-- Push Fee -->
+    <string name="admin_policy_section_push">Đẩy ứng dụng lên đầu</string>
+    <string name="admin_policy_push_fee">Phí đẩy app (Credit)</string>
+    <string name="admin_policy_push_fee_helper">Phí đẩy ứng dụng lên đầu danh sách kiểm thử (1 - 10.000, mặc định 100)</string>
+
+    <!-- Slot Fees -->
+    <string name="admin_policy_section_slots">Phí &amp; Thời hạn Slot</string>
+    <string name="admin_policy_slot_fee_2">Phí Slot 2 (Credit)</string>
+    <string name="admin_policy_slot_fee_3">Phí Slot 3 (Credit)</string>
+    <string name="admin_policy_slot_fee_4_plus">Phí Slot 4-6 (Credit)</string>
+    <string name="admin_policy_slot_renewal_days">Thời hạn gia hạn (ngày)</string>
+    <string name="admin_policy_slot_renewal_days_format">%1$d ngày</string>
+    <string name="admin_policy_slot_cost_format">%1$d Credit</string>
+    <string name="admin_policy_quote_unavailable">Báo giá chính sách hiện chưa sẵn sàng. Vui lòng kiểm tra kết nối mạng và bấm thử lại trước khi xác nhận giao dịch.</string>
+    <string name="admin_policy_future_load_more">Xem thêm chính sách đã lập lịch</string>
+    <string name="admin_policy_slot_helper">Phí mở/gia hạn (1 - 10.000) và số ngày hiệu lực mỗi lượt (1 - 365 ngày)</string>
+
+    <!-- Tester Report Rewards -->
+    <string name="admin_policy_section_reports">Thưởng báo cáo kiểm thử</string>
+    <string name="admin_policy_report_provisional">Thưởng tạm tính khi nộp báo cáo</string>
+    <string name="admin_policy_report_tester_bonus">Thưởng duyệt thủ công cho tester</string>
+    <string name="admin_policy_report_owner_bonus">Thưởng duyệt thủ công cho chủ app</string>
+    <string name="admin_policy_report_helper">Thưởng trong vòng đời báo cáo kiểm thử (0 - 1.000)</string>
+
+    <!-- App Update Rewards -->
+    <string name="admin_policy_section_app_update">Thưởng cập nhật ứng dụng</string>
+    <string name="admin_policy_app_update_reward_per_claim">Thưởng mỗi lượt claim (Credit)</string>
+    <string name="admin_policy_app_update_max_claims">Số lượt claim tối đa</string>
+    <string name="admin_policy_app_update_reserved_budget">Ngân sách giữ trước: %1$d Credit</string>
+    <string name="admin_policy_app_update_helper">Thưởng mỗi claim (1 - 1.000) * số claim (1 - 1.000) = ngân sách giữ trước</string>
+
+    <!-- Notes & Actions -->
+    <string name="admin_policy_operator_note">Ghi chú lý do (Bắt buộc)</string>
+    <string name="admin_policy_operator_note_hint">Nhập lý do quản trị cho lần điều chỉnh chính sách này...</string>
+    <string name="admin_policy_schedule_btn">Lập lịch chính sách</string>
+    <string name="admin_policy_cancel_btn">Hủy lịch chính sách</string>
+    <string name="admin_policy_edit_draft_btn">Đưa vào bản nháp</string>
+    <string name="admin_policy_load_active_into_editor">Sao chép hiện hành vào bản nháp</string>
+
+    <!-- Confirmations & Dialogs -->
+    <string name="admin_policy_cancel_title">Hủy chính sách đã lập lịch</string>
+    <string name="admin_policy_cancel_confirm">Bạn có chắc chắn muốn hủy chính sách đã lập lịch cho ngày %1$s không? Thao tác này sẽ được ghi vào nhật ký kiểm toán.</string>
+    <string name="admin_policy_cancel_reason_hint">Lý do hủy lịch...</string>
+    <string name="admin_policy_confirm_btn">Xác nhận</string>
+    <string name="admin_policy_dismiss_btn">Đóng</string>
+
+    <!-- Status & Alerts -->
+    <string name="admin_policy_schedule_success">Lập lịch chính sách thành công cho ngày %1$s!</string>
+    <string name="admin_policy_cancel_success">Hủy chính sách đã lập lịch thành công!</string>
+    <string name="admin_policy_conflict_reload">Xung đột bản sửa đổi chính sách. Đã tải lại phiên bản mới nhất và giữ nguyên nội dung nháp bạn đang sửa.</string>
+    <string name="admin_policy_no_future">Chưa có chính sách nào được lập lịch trong tương lai.</string>
+    <string name="admin_policy_no_history">Chưa có lịch sử thay đổi chính sách nào được ghi nhận.</string>
+    <string name="admin_policy_history_item_format">%1$s - %2$s bởi %3$s</string>
+    <string name="admin_policy_history_note_format">Ghi chú: %1$s</string>
+    <string name="admin_policy_validation_error">Lỗi xác thực: Vui lòng kiểm tra các giới hạn giá trị và đảm bảo các bậc phạt được sắp xếp tăng dần (Bậc 1 &lt;= 2 &lt;= 3 &lt;= 4).</string>
+    <string name="admin_policy_date_required">Ngày hiệu lực phải là một ngày trong tương lai (theo giờ Việt Nam).</string>
+    <string name="admin_policy_note_required">Ghi chú lý do là bắt buộc (1 - 1.000 ký tự).</string>
+
+    <!-- Friendly Server Error Messages -->
+    <string name="error_business_policy_conflict">Xung đột phiên bản chính sách nghiệp vụ. Quản trị viên khác vừa cập nhật chính sách. Vui lòng xem lại và xác nhận.</string>
+    <string name="error_business_policy_price_mismatch">Giá hoặc ngân sách đã thay đổi so với báo giá hiển thị. Vui lòng xác nhận mức giá mới.</string>
+    <string name="error_business_policy_future_date_required">Ngày hiệu lực chính sách phải ở tương lai (Asia/Ho_Chi_Minh 00:00).</string>
+    <string name="error_business_policy_note_required">Bắt buộc phải nhập ghi chú lý do khi thay đổi chính sách.</string>
+    <string name="error_business_policy_not_found">Không tìm thấy chính sách nghiệp vụ được yêu cầu.</string>
+    <string name="error_business_policy_history_read_only">Lịch sử thay đổi chính sách là dữ liệu bất biến không được chỉnh sửa.</string>
+    <string name="error_client_update_required">Chính sách nghiệp vụ hệ thống đã thay đổi. Vui lòng cập nhật ứng dụng để tiếp tục.</string>
+    <string name="error_request_id_conflict">Yêu cầu bị trùng lặp với nội dung khác đã gửi trước đó.</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-13T18:11:35.851Z" hostname="PC-5700X3D" time="0.024">
+  <properties/>
+  <testcase name="testWaivedStateOnlyWhenReadyAndZeroTarget" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testDailyTaskCardSourceContractGuardsRemainingCarryover" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.001"/>
+  <testcase name="testMemberPendingCarryoverIsNotDebtFree" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testCampaignRepositoryFallbackFiltersExcludeMissionReports" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.004"/>
+  <testcase name="testPendingCarryoverState" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testOwnerMetWithRemainingPreservedDebt" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.001"/>
+  <testcase name="testLegacyJsonCompatibility" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testCarryoverNewFieldsParsing" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testSessionCacheManagerSanitizeForDateClearsStaleDailyTask" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.016"/>
+  <testcase name="testMemberStatusProperties" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.0"/>
+  <testcase name="testDailyTaskCardSourceGuardsDisabledCarryoverMath" classname="com.ntt.crosstest.data.DailyTaskCarryoverUnitTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

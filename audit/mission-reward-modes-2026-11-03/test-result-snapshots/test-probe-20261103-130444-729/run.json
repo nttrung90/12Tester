@@ -1,0 +1,10 @@
+{
+    "logName":  "test-probe",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-03T13:03:39.8875545Z",
+    "finishedUtc":  "2026-11-03T13:04:44.7905415Z",
+    "currentRunXmlCount":  69
+}

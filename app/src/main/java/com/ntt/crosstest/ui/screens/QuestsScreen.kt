@@ -63,14 +63,7 @@ import com.ntt.crosstest.data.Mission
 import com.ntt.crosstest.data.QuestSummary
 import com.ntt.crosstest.ui.components.AppIcon
 import com.ntt.crosstest.ui.components.QuestHeroBanner
-import com.ntt.crosstest.ui.theme.QuestGoldBgDark
-import com.ntt.crosstest.ui.theme.QuestGoldBgLight
-import com.ntt.crosstest.ui.theme.QuestGoldTextDark
-import com.ntt.crosstest.ui.theme.QuestGoldTextLight
-import com.ntt.crosstest.ui.theme.QuestGreenBgDark
-import com.ntt.crosstest.ui.theme.QuestGreenBgLight
-import com.ntt.crosstest.ui.theme.QuestGreenTextDark
-import com.ntt.crosstest.ui.theme.QuestGreenTextLight
+import com.ntt.crosstest.ui.theme.statusColors
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,7 +87,7 @@ fun QuestsScreen(
     onNavigateToDiscover: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedTab by rememberSaveable { mutableIntStateOf(0) } // 0: Daily, 1: Weekly, 2: App missions
+    var selectedTab by rememberSaveable { mutableIntStateOf(2) } // 0: Daily, 1: Weekly, 2: App missions
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -116,8 +109,8 @@ fun QuestsScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 88.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 1. Overview Hero Banner
             item {
@@ -147,16 +140,32 @@ fun QuestsScreen(
                 )
             }
 
-            // 2. Segmented Tabs: [ Nhiệm vụ Ngày ] | [ Nhiệm vụ Tuần ]
+            // 2. Tab order: App missions, daily quests, weekly quests.
             item {
                 TabRow(
-                    selectedTabIndex = selectedTab,
+                    selectedTabIndex = when (selectedTab) {
+                        0 -> 1
+                        1 -> 2
+                        else -> 0
+                    },
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     contentColor = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                 ) {
+                    Tab(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        text = {
+                            Text(
+                                text = stringResource(R.string.quest_tab_missions),
+                                fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    )
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
@@ -172,12 +181,12 @@ fun QuestsScreen(
                                         modifier = Modifier
                                             .size(18.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFE65100)),
+                                            .background(MaterialTheme.statusColors.warningContainer),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
                                             text = "$dailyClaimable",
-                                            color = Color.White,
+                                            color = MaterialTheme.statusColors.onWarningContainer,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                         )
@@ -201,30 +210,18 @@ fun QuestsScreen(
                                         modifier = Modifier
                                             .size(18.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFE65100)),
+                                            .background(MaterialTheme.statusColors.warningContainer),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
                                             text = "$weeklyClaimable",
-                                            color = Color.White,
+                                            color = MaterialTheme.statusColors.onWarningContainer,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                         )
                                     }
                                 }
                             }
-                        }
-                    )
-                    Tab(
-                        selected = selectedTab == 2,
-                        onClick = { selectedTab = 2 },
-                        text = {
-                            Text(
-                                text = stringResource(R.string.quest_tab_missions),
-                                fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
                         }
                     )
                 }
@@ -607,11 +604,10 @@ private fun QuestItemCard(
     isClaiming: Boolean,
     onClaimClick: () -> Unit,
 ) {
-    val isDark = isSystemInDarkTheme()
-    val goldText = if (isDark) QuestGoldTextDark else QuestGoldTextLight
-    val goldBg = if (isDark) QuestGoldBgDark else QuestGoldBgLight
-    val greenText = if (isDark) QuestGreenTextDark else QuestGreenTextLight
-    val greenBg = if (isDark) QuestGreenBgDark else QuestGreenBgLight
+    val goldText = MaterialTheme.statusColors.onWarningContainer
+    val goldBg = MaterialTheme.statusColors.warningContainer
+    val greenText = MaterialTheme.statusColors.onSuccessContainer
+    val greenBg = MaterialTheme.statusColors.successContainer
 
     val containerBg = when {
         isClaimed -> greenBg
@@ -636,7 +632,7 @@ private fun QuestItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -712,15 +708,15 @@ private fun QuestItemCard(
                         onClick = onClaimClick,
                         enabled = !isClaiming,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32),
-                            contentColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                         shape = RoundedCornerShape(10.dp),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                     ) {
                         if (isClaiming) {
                             CircularProgressIndicator(
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(16.dp),
                                 strokeWidth = 2.dp,
                             )
@@ -800,11 +796,10 @@ private fun MissionCard(
                 .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // Tiêu đề + Credit thưởng
-            Row(
+            // Tiêu đề + Chế độ trả thưởng & Credit thưởng
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
                     text = mission.title,
@@ -812,22 +807,44 @@ private fun MissionCard(
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    contentAlignment = Alignment.Center,
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = stringResource(R.string.mission_reward_badge_format, mission.rewardCredits),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = if (mission.isDailyMode) stringResource(R.string.mission_mode_daily) else stringResource(R.string.mission_mode_once),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = if (mission.isDailyMode) {
+                                stringResource(R.string.mission_reward_badge_daily_format, mission.rewardCredits)
+                            } else {
+                                stringResource(R.string.mission_reward_badge_format, mission.rewardCredits)
+                            },
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
 
@@ -910,13 +927,6 @@ private fun MissionCard(
 
             // Hành động / trạng thái
             when {
-                mission.hasCompleted -> {
-                    StatusBadge(
-                        text = stringResource(R.string.mission_completed_badge),
-                        container = Color(0xFF2E7D32).copy(alpha = 0.12f),
-                        content = Color(0xFF2E7D32),
-                    )
-                }
                 mission.isMine -> {
                     StatusBadge(
                         text = stringResource(R.string.mission_mine_badge),
@@ -934,22 +944,43 @@ private fun MissionCard(
                 }
                 ended -> {
                     val label = when {
+                        mission.hasCompleted -> stringResource(R.string.mission_completed_badge)
                         mission.isStopped -> stringResource(R.string.mission_status_stopped)
                         else -> stringResource(R.string.mission_status_expired)
                     }
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error,
+                        color = if (mission.hasCompleted) MaterialTheme.statusColors.onSuccessContainer else MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
-                mission.hasJoined -> {
+                mission.hasJoined || mission.hasCompleted -> {
+                    if (mission.isDailyMode) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mission_progress_daily_format, mission.submittedDaysCount, mission.durationDays),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = if (mission.todaySubmitted) stringResource(R.string.mission_progress_daily_today_done) else stringResource(R.string.mission_progress_daily_today_pending),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (mission.todaySubmitted) MaterialTheme.statusColors.onSuccessContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                     Button(
                         onClick = onOpenApp,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2C4A73),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                         shape = RoundedCornerShape(10.dp),
                     ) {
@@ -957,6 +988,30 @@ private fun MissionCard(
                             text = stringResource(R.string.mission_joined_cta),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                mission.isBlockedPreviousParticipant -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Button(
+                            onClick = {},
+                            enabled = false,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mission_join_btn),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.mission_blocked_previous_participant_reason),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -974,13 +1029,14 @@ private fun MissionCard(
                         enabled = !isJoining,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                         shape = RoundedCornerShape(10.dp),
                     ) {
                         if (isJoining) {
                             CircularProgressIndicator(
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(16.dp),
                                 strokeWidth = 2.dp,
                             )

@@ -1,0 +1,54 @@
+[
+  {
+    "path": "supabase/tests/run-egress-sync-v2-test.mjs",
+    "sha256": "B5768A23A6235DAD47B17897612CDA5489BED93A00FDB83903EB02BC4EAF7CD1"
+  },
+  {
+    "path": "app/src/main/res/values-vi/strings.xml",
+    "sha256": "6FC24FED050E8726C02112A5781F6C46031AD6DE4BF218C7F45415534D58BD0D"
+  },
+  {
+    "path": "app/src/main/res/values/strings.xml",
+    "sha256": "8BA783E88DEFBE8042543F46888BEA5AFDA95F64EF06F1639D8479B489058CFE"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/EgressFinalClientReviewTest.kt",
+    "sha256": "EC88BAD8045671CB36A1F59058C544E89BA47DE132EEAD8FC781174B4260054E"
+  },
+  {
+    "path": "app/src/main/res/values-en/strings.xml",
+    "sha256": "C52F009C43AE2BBF5D21C4147E0C61C24766C11E79A1058F9FA848B5A83496EB"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+    "sha256": "8D0589D1259B9BE9C2B89BCF48B67A13285466D98F83BA8F584F0BE1D9EBC608"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+    "sha256": "B407FE8ED88A6B2BCD9DDCA4327CBAD0B680736C4137C5323794594DC10B968C"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt",
+    "sha256": "A3BFA4A3C16BDFE02DDA55D166E42477EFFF0025BE27E1A3BBBE0AFF534D93F7"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt",
+    "sha256": "E00FB8AEF9B64C8A543CF3CE5348789A2D5DF1BCE676E56FDE1CE78E29B09D98"
+  },
+  {
+    "path": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+    "sha256": "F8327114FF97BF3E61B9C314C57ADEA2ABA713600B26A04679446EC2C9C3E21D"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/util/NextCampaignSelectorTest.kt",
+    "sha256": "A71C330B7CF3B9D4E97E676FE71A13A6053CEB90445BCA6DFBA50ED75F6A49E1"
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailNextAppPriorityTest.kt",
+    "sha256": "841463A401E46189CDF2948E2DF62AB442B6F8CAD5D4108A39C1B661262997AD"
+  },
+  {
+    "path": "app/src/main/java/com/ntt/crosstest/util/NextCampaignSelector.kt",
+    "sha256": "744676EE8A134652032C111E606E19642762E62AF3C7E1F39A2ED0CE096370B2"
+  }
+]

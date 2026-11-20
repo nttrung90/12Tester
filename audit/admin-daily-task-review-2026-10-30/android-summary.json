@@ -1,0 +1,22 @@
+[
+  {
+    "test": "expandingHistoryMustNotDiscardSuccessfulSave",
+    "failure": "java.lang.AssertionError: A committed save must remain visible even if history loaded while saving expected:<rev-saved> but was:<null>"
+  },
+  {
+    "test": "expandingHistoryMustNotDiscardConfigRequest",
+    "failure": "java.lang.AssertionError: Opening history must not erase the independently loaded admin config"
+  },
+  {
+    "test": "successfulMutationMustInvalidatePreviouslyLoadedHistory",
+    "failure": "java.lang.AssertionError: History loaded before a mutation must be invalidated or refreshed instead of staying stale with no reload control"
+  },
+  {
+    "test": "conflictMustRemainVisibleAfterAutomaticReload",
+    "failure": "java.lang.AssertionError: The admin must still see the conflict and review the draft before resubmitting"
+  },
+  {
+    "test": "oldAccountResponseMustNotEraseNewAccountConfig",
+    "failure": "java.lang.AssertionError: A response for account A must not clear account B's fresh config expected:<rev-B> but was:<null>"
+  }
+]

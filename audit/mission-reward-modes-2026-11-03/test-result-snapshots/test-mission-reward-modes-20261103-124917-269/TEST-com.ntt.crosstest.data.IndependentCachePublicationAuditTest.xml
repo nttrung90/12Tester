@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-03T12:49:03.994Z" hostname="PC-5700X3D" time="0.072">
+  <properties/>
+  <testcase name="switchingAccountWithRefreshFailureMustRemoveAlreadyDisplayedPrivateState" classname="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" time="0.024"/>
+  <testcase name="optionalProfileMustNotDisableOwnerPurgeForNotificationsAndFeedFlags" classname="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" time="0.011"/>
+  <testcase name="homeMustNotPublishPreviousDayCountersFromInFlightRefresh" classname="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" time="0.01"/>
+  <testcase name="ownerDetailMustRecheckAccountAfterLoadingSlots" classname="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" time="0.013"/>
+  <testcase name="ownerDetailMustNotPublishYesterdayCountAfterSlotsAwaitCrossesMidnight" classname="com.ntt.crosstest.data.IndependentCachePublicationAuditTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

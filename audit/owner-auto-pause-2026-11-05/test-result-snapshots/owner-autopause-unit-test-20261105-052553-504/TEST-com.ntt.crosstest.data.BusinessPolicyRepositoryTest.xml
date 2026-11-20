@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-05T05:25:39.138Z" hostname="PC-5700X3D" time="0.1">
+  <properties/>
+  <testcase name="scheduleBusinessPolicy_sendsExactParametersIncludingRequestIdAndRevision" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.013"/>
+  <testcase name="pushCampaignV2_sendsExpectedCostAndRevisionAndHandlesReplayed" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.012"/>
+  <testcase name="unlockOrRenewSlotV2_sendsExactParameters" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.01"/>
+  <testcase name="getSlotQuote_sendsSlotNumberAndDecodesNonDefaultDuration" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.009"/>
+  <testcase name="cancelBusinessPolicy_sendsExactParameters" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.009"/>
+  <testcase name="getPushQuote_decodesCostAndOpaqueRevisionToken" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.008"/>
+  <testcase name="publishAppUpdateV2_sendsExpectedBudgetAndRevision" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.01"/>
+  <testcase name="getBusinessPolicyConfig_invokesCorrectRpcAndDecodesPayload" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.008"/>
+  <testcase name="getAppUpdateQuote_decodesDerivedBudgetAndTerms" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.008"/>
+  <testcase name="noFakedDefaultPolicyOnNetworkErrorForPurchases" classname="com.ntt.crosstest.data.BusinessPolicyRepositoryTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

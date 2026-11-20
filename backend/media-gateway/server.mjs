@@ -16,7 +16,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Storage } from '@google-cloud/storage';
 import { createMediaGatewayHandler } from './media-gateway-handler.mjs';
 import { SupabaseAuthorityAdapter } from './adapters/supabase-authority-adapter.mjs';
-import { FirebaseStorageAdapter } from './adapters/storage-adapter.mjs';
+import { createDualStorageAdapter } from './adapters/storage-adapter.mjs';
 
 const PORT = Number.parseInt(process.env.PORT || '8080', 10);
 const GATEWAY_SECRET = process.env.MEDIA_GATEWAY_SECRET;
@@ -46,9 +46,12 @@ const authorityAdapter = new SupabaseAuthorityAdapter({
 // Khởi tạo Google Cloud Storage authenticated client thông qua ADC (Application Default Credentials)
 const storageClient = new Storage();
 
-const storageAdapter = new FirebaseStorageAdapter({
+const storageAdapter = createDualStorageAdapter({
     bucketName: STORAGE_BUCKET,
+    allowedGoogleBuckets: [...new Set([STORAGE_BUCKET, ...(process.env.REPORT_GOOGLE_BUCKETS || '').split(',').map(s => s.trim()).filter(Boolean)])],
     storageClient,
+    supabaseClient: supabase,
+    supabaseUrl: SUPABASE_URL,
     logger: console,
 });
 

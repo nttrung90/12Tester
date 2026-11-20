@@ -1,0 +1,28 @@
+LOADED 062_consolidated_baseline.sql
+LOADED 063_report_crypto_search_path.sql
+LOADED 064_explicit_report_context.sql
+LOADED 065_remove_dhash_hardblock.sql
+LOADED 066_push_and_carryover_hardening.sql
+LOADED 067_admin_direct_notification_popup.sql
+LOADED 068_owner_tester_reports_count.sql
+LOADED 069_admin_audit_hardening.sql
+LOADED 070_admin_management.sql
+LOADED 071_business_policies.sql
+LOADED 072_admin_notification_campaigns.sql
+LOADED 073_admin_action_audit.sql
+LOADED 074_app_mission_window_and_multi_attachments.sql
+LOADED 075_owner_auto_pause_config.sql
+LOADED 076_mission_for_finalized_campaigns.sql
+LOADED 077_mission_reward_modes_and_management.sql
+LOADED 078_admin_pause_reason_popup.sql
+LOADED 079_owner_auto_pause_debt_and_timestamp_guard.sql
+LOADED 080_report_context_carryover_and_gap_recovery.sql
+LOADED 081_admin_flow_audit_fixes.sql
+LOADED 082_carryover_flow_audit_fixes.sql
+LOADED 083_fix_app_configs_encoding_and_version.sql
+LOADED 084_campaign_posting_business_policies.sql
+LOADED 085_egress_optimization_sync_v2.sql
+LOADED 086_next_campaign_candidate_daily_target_priority.sql
+LOADED 087_campaign_tester_bonus_rounds.sql
+Ready: PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit timezone=UTC
+TEST_DATABASE_URL=postgresql://quota_test_admin@127.0.0.1:55446/immediate_quota_test

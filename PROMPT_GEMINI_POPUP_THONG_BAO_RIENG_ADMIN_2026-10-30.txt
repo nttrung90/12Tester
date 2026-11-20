@@ -1,0 +1,83 @@
+Bạn đang làm việc trong dự án Android Kotlin/Jetpack Compose + Supabase tại:
+F:\AI\12Tester
+
+Hãy TRIỂN KHAI hoàn chỉnh tính năng popup thông báo riêng của admin, kiểm thử và viết báo cáo bàn giao. Không chỉ phân tích hoặc viết thêm kế hoạch rồi dừng.
+
+ĐỌC TRƯỚC KHI SỬA
+
+1. Đọc AGENTS.md áp dụng cho thư mục làm việc nếu có.
+2. Đọc toàn bộ tài liệu:
+   F:\AI\12Tester\KE_HOACH_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+3. Kiểm tra git status và source thực tế. Workspace có nhiều thay đổi chưa commit từ công việc khác. Giữ nguyên các thay đổi đó, không reset/checkout/revert hoặc ghi đè file bằng bản cũ. Chỉ sửa phần cần thiết cho tính năng này.
+4. Các tên bảng/RPC và số migration trong kế hoạch là đề xuất. Đối chiếu source mới nhất trước khi triển khai; giữ nguyên yêu cầu nghiệp vụ và nêu rõ mọi điều chỉnh thiết kế trong báo cáo.
+
+YÊU CẦU NGHIỆP VỤ
+
+- Tận dụng luồng Admin → gửi riêng cho thành viên → admin_send_notification → notifications → danh sách thông báo hiện tại.
+- Khi admin gửi riêng, chỉ người nhận thấy popup trong app. Áp dụng cho mọi loại thông báo có thể chọn trong màn gửi riêng, không chỉ type=admin.
+- Bấm “Đã đọc”: ghi nhận bền vững, đóng popup và không hiện lại. Đồng bộ notifications.is_read để danh sách và popup thống nhất.
+- Có nút “Để sau”; Back tương đương Để sau. Đóng theo cách này không tự đánh dấu đã đọc.
+- Mỗi bản tin tối đa 5 lượt được server cấp, tính theo người nhận, dùng chung giữa các thiết bị. Lượt thứ 5 vẫn hiển thị đầy đủ; sau khi đóng không có lần thứ 6. Hết lượt không xóa bản tin hoặc tự đánh dấu đã đọc.
+- Mỗi phiên foreground tối đa một popup, ưu tiên thông báo đủ điều kiện cũ nhất theo created_at,id. Đổi tab/màn hình, refresh, recompose, xoay máy hoặc đổi ngôn ngữ không tạo thêm phiên/lượt.
+- Nếu đang hiện popup rồi app vào nền, quay lại tiếp tục đúng popup/lượt đó; không claim thêm chỉ vì resume.
+- Chỉ bản tin gửi riêng mới qua luồng backend sau migration được đăng ký popup. Không backfill lịch sử cũ.
+- Broadcast, thông báo tự động, cảnh cáo xử phạt và thông báo Android hiện có giữ hành vi cũ.
+
+BACKEND
+
+- Thêm migration mới sau migration cao nhất hiện có; kế hoạch dự kiến 067_admin_direct_notification_popup.sql nhưng phải kiểm tra lại. Không chỉnh baseline 062 hoặc migration archive để triển khai tính năng.
+- Giữ chữ ký và contract tương thích của admin_send_notification. Nhánh gửi riêng tạo notification và popup state trong cùng transaction; broadcast không tạo state. Không tin cờ do client truyền vào để quyết định bản tin được popup.
+- Theo thiết kế trong kế hoạch, thêm popup state server quản lý và receipt UNIQUE(user_id,foreground_session_id) để retry không tăng đếm/chọn nhầm bản tin khác.
+- Receipt phải còn nhớ phiên đã dùng suất sau khi bản tin bị xóa; có thể dùng FK notification_id nullable ON DELETE SET NULL như kế hoạch.
+- RPC claim lấy chủ sở hữu từ auth.uid(), kiểm tra tài khoản và trạng thái đọc; khóa/transaction đúng để tổng số lượt không vượt 5 khi hai thiết bị gọi đồng thời. Retry cùng foreground_session_id trả lại lượt cũ, kể cả lượt đã làm count đạt 5; nếu đã đọc/xóa thì trả stopped. Không có ứng viên thì không tiêu lượt hoặc ghi receipt làm chặn thông báo đến sau trong phiên.
+- Tìm ứng viên trực tiếp bằng điều kiện popup ở server; không chỉ lọc 50 bản tin dashboard hoặc danh sách cache.
+- Không tách đọc count và tăng count thành hai request; không tự hoàn lượt khi timeout. Giải thích rõ giới hạn crash giữa server commit và render có thể tiêu một lượt.
+- RPC mới SECURITY DEFINER với search_path an toàn, bảng/hàm đầy đủ schema, revoke EXECUTE PUBLIC/anon, grant authenticated phù hợp và kiểm tra quyền bên trong. Client không được tự ghi popup state/receipt.
+- Source đã phát hiện notifications_insert_all và quyền UPDATE rộng. Không dùng data.sender/admin hoặc broadcast=false làm bằng chứng duy nhất. Bản popup phải có đăng ký backend đáng tin cậy; ngăn client sửa nội dung/người nhận/ID hoặc chuyển is_read=true về false để bật lại popup. Kiểm thử cả thao tác ghi trực tiếp, đồng thời giữ tương thích mark-read của app cũ. Tránh thay chính sách không liên quan nếu chưa rà tác động.
+- Tận dụng is_read và các thao tác đọc/xóa hiện có; nếu thêm acknowledge RPC thì trả kết quả rõ ràng, đúng chủ sở hữu và idempotent.
+
+ANDROID
+
+- Popup host và ViewModel ở cấp Activity/app để hoạt động trên các màn hình đã đăng nhập, không chỉ Home. Dùng lifecycle cấp app; không tạo foreground_session_id mới theo mỗi lần destination resume hoặc Activity recreation.
+- Chờ xác thực và UI sẵn sàng mới claim. Không claim lúc bị chặn bởi màn khóa, force update, cảnh cáo hệ thống hoặc dialog khác; không chồng popup với reward overlay. Đọc rõ unreadWarning đang ở Home và nối trạng thái chặn thực tế, không chỉ đặt host sau NavGraph.
+- Khi foreground/có mạng/chưa dùng suất popup, kiểm tra bằng RPC nhỏ tối đa mỗi 60 giây. Dừng job khi background/logout/đã dùng suất. Không polling dashboard nặng, không thêm FCM hoặc quyền vẽ đè app khác.
+- Gọi trùng/timeout phải reuse foreground_session_id. Chỉ publish response nếu UID, session generation và phiên/request hiện tại còn khớp.
+- Bấm Đã đọc: lưu pending acknowledgment bền vững theo user_id,notification_id trước khi đóng, chống double tap. Nếu lưu local lỗi thì giữ popup để thử lại. Sau đó đồng bộ server và chỉ xóa pending khi server xác nhận đã đọc/đã xóa.
+- Offline rồi restart vẫn không hiện lại bản đã xác nhận trên thiết bị đó. Ưu tiên đồng bộ pending trước khi claim để không tiêu thêm lượt của bản đang chờ ack. Cache cũ/fetch cũ/nhánh rollback Home không được khôi phục popup này.
+- Logout/chuyển A sang B phải hủy request và đóng popup; không publish dữ liệu A sang B hoặc gửi pending ack A bằng JWT B. Kiểm tra lại danh tính ngay tại ranh giới thực hiện request, không chỉ khi nhận kết quả.
+- Đọc một bản tin/đọc tất cả/xóa ở danh sách phải cập nhật cả popup host và cache. Đối soát nhẹ trạng thái bản tin đang mở để xử lý việc đọc từ thiết bị khác; không claim lượt mới để đối soát.
+- Nội dung dài cuộn được, nút không bị che khi font lớn. Có đủ chuỗi values/values-vi/values-en, sáng/tối. Nội dung admin tự nhập giữ nguyên, kể cả khi chọn loại warning/credit; không để renderer diễn giải thành bản tin hệ thống khác.
+
+KIỂM THỬ VÀ XÁC MINH
+
+Viết kiểm thử hành vi có ý nghĩa, không chỉ kiểm tra source chứa chuỗi hoặc sao chép logic triển khai vào test.
+
+Backend tối thiểu:
+- Admin gửi riêng/broadcast; member/moderator/anon không vượt quyền.
+- A không claim/ack bản của B; metadata giả không được popup; client không sửa state/receipt/nội dung được bảo vệ hoặc đánh dấu ngược về unread.
+- Lượt 1–5 hợp lệ, lượt 6 bị chặn; retry cùng ID phiên không tăng lượt; retry receipt lượt 5 vẫn trả đúng lượt cũ nếu còn chưa đọc.
+- Đã đọc/xóa/đọc tất cả dừng claim; receipt sau xóa không cho cùng phiên chọn bản tiếp theo.
+- Bản tin ngoài top 50 vẫn được tìm; nhiều bản tin đúng thứ tự và một suất mỗi phiên.
+- Tương thích app cũ và dashboard hiện có.
+- Kiểm tra tranh lượt cuối bằng PostgreSQL nhiều connection nếu có môi trường local/test phù hợp. Test tuần tự/PGlite không thay thế bằng chứng concurrency thật; nếu chưa chạy được thì báo rõ.
+
+Android tối thiểu:
+- Lifecycle/rotation/recomposition/đổi màn hình không đếm trùng.
+- Popup đang mở qua background/resume giữ cùng lượt; đóng rồi phiên sau mới được nhắc.
+- Retry, request trả muộn, logout/chuyển tài khoản không lộ nhầm nội dung.
+- Pending Đã đọc bền qua offline/restart và không bị cache cũ khôi phục.
+- Đọc/xóa ở danh sách đồng bộ host; dialog ưu tiên chặn claim.
+
+Đọc Gradle wrapper và scripts test hiện có để chọn lệnh compile/unit test/backend phù hợp. Chạy các test liên quan và kiểm tra build. Nếu có emulator/thiết bị thì xác minh UI thực tế. Phân biệt rõ test đã chạy, test pass/fail và phần chưa kiểm chứng; không báo pass cho lệnh chưa chạy. Không mở rộng sửa lỗi ngoài phạm vi chỉ để làm toàn bộ test suite xanh.
+
+PHẠM VI VÀ BÀN GIAO
+
+- Triển khai source, migration, tests và tài liệu vận hành trong workspace. Không tự chạy migration lên Supabase production, deploy service, phát hành APK, commit hoặc push nếu chưa được yêu cầu riêng.
+- Không đưa secret/service-role key vào APK, prompt, log hoặc báo cáo.
+- Hoàn tất các phần làm được; nếu môi trường thiếu SDK/PostgreSQL thì mô tả chính xác hạn chế và cung cấp lệnh kiểm tra tiếp theo, không dừng ở việc viết lại kế hoạch.
+- Tạo báo cáo:
+  F:\AI\12Tester\BAO_CAO_TRIEN_KHAI_POPUP_THONG_BAO_RIENG_ADMIN_2026-10-30.md
+- Báo cáo nêu: hành vi cuối cùng, file đã sửa/thêm, migration cần áp dụng, thứ tự backend trước Android, tương thích app cũ, tests/lệnh/kết quả thực tế, giới hạn còn lại và hướng tắt tính năng không xóa thông báo/reset lượt.
+- Khi kết thúc, tóm tắt ngắn gọn phần hoàn thành và phần chưa kiểm chứng. Không tự tuyên bố đã triển khai live.
+
+BẮT ĐẦU: đọc kế hoạch và source, sau đó triển khai đến mức có code, migration, tests và báo cáo kiểm chứng cụ thể.

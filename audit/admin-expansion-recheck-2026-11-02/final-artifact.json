@@ -1,0 +1,12 @@
+{
+  "apk": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+  "bytes": 33619197,
+  "sha256": "C3F2368108FAF884DC02A26A623BDC5EF1F17A851D60BB8527F02A1430E2297C",
+  "versionName": "1.0.9",
+  "versionCode": 29,
+  "tests": 511.0,
+  "suites": 68,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0
+}

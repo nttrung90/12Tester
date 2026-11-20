@@ -7,9 +7,10 @@
   "main": "cleanup-reports-storage.mjs",
   "scripts": {
     "start": "node cleanup-reports-storage.mjs",
-    "test": "node --test cleanup-reports-storage.test.mjs"
+    "test": "node --test cleanup-reports-storage.test.mjs cleanup-supabase-storage.test.mjs reconcile-org-storage.test.mjs dry-run-token-revocation.test.mjs"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.15.0"
+    "@google-cloud/storage": "^7.15.0",
+    "@supabase/supabase-js": "^2.49.1"
   }
 }

@@ -35,6 +35,7 @@ class ReportRpcCompatibilityTest {
     private suspend fun client(handler: (Map<String, String>) -> Pair<String, HttpStatusCode>): io.github.jan.supabase.SupabaseClient {
         val fixture = createSupabaseClient("https://fixture.invalid", "fixture-key") {
             install(Auth) {
+                enableLifecycleCallbacks = false
                 sessionManager = MemorySessionManager()
                 codeVerifierCache = MemoryCodeVerifierCache()
                 autoLoadFromStorage = false
@@ -48,6 +49,7 @@ class ReportRpcCompatibilityTest {
                 respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             }
         }
+        fixture.auth.awaitInitialization()
         fixture.auth.importSession(Json { ignoreUnknownKeys = true }.decodeFromString<UserSession>(
             """{"access_token":"fixture-access","refresh_token":"fixture-refresh","expires_in":3600,"token_type":"bearer","user":{"id":"tester","aud":"authenticated"}}"""
         ))
@@ -55,25 +57,19 @@ class ReportRpcCompatibilityTest {
     }
 
     @Test
-    fun missingThumbnailSignatureMustRetrySixArgumentsKeepingIdempotency() = runBlocking {
+    fun missingV2MustFailWithoutDroppingContext() = runBlocking {
         val bodies = mutableListOf<Map<String, String>>()
         val backend = client { fields ->
             bodies += fields
-            if ("p_thumbnail_url" in fields)
-                """{"code":"PGRST202","message":"Could not find the function public.submit_tester_report(p_campaign_id, p_client_submit_id, p_content, p_image_hash, p_rating, p_screenshot_url, p_thumbnail_url) in the schema cache"}""" to HttpStatusCode.NotFound
-            else success to HttpStatusCode.OK
+            """{"code":"PGRST202","message":"Could not find the function submit_tester_report_v2 in the schema cache"}""" to HttpStatusCode.NotFound
         }
         try {
-            val repo = CampaignRepository(backend, Localizer(RuntimeEnvironment.getApplication()))
-            val result = repo.submitFeedback("campaign", 5, "tested", "https://fixture.invalid/full.jpg",
-                "0123456789abcdef", requestId, requireIdempotency = true,
-                thumbnailUrl = "https://fixture.invalid/thumb.jpg")
-            assertTrue(result.success)
-            assertEquals(2, bodies.size)
-            assertTrue(bodies[0].containsKey("p_thumbnail_url"))
-            assertEquals(requestId, bodies[1]["p_client_submit_id"])
-            assertFalse(bodies[1].containsKey("p_thumbnail_url"))
-            assertEquals(bodies[0].filterKeys { it != "p_thumbnail_url" }, bodies[1])
+            val result = runCatching { CampaignRepository(backend, Localizer(RuntimeEnvironment.getApplication()))
+                .submitFeedback("campaign", 5, "tested", clientSubmitId=requestId, missionId="mission") }
+            assertEquals("server_update_required", result.exceptionOrNull()?.message)
+            assertEquals(1, bodies.size)
+            assertEquals("mission", bodies.single()["p_submission_context"])
+            assertEquals("mission", bodies.single()["p_mission_id"])
         } finally { backend.close() }
     }
 
@@ -91,7 +87,7 @@ class ReportRpcCompatibilityTest {
                     requireIdempotency = true, thumbnailUrl = "https://fixture.invalid/thumb.jpg")
                 fail("Must fail closed when no idempotent RPC exists")
             } catch (expected: IllegalStateException) {
-                assertEquals("report_idempotency_unavailable", expected.message)
+                assertEquals("server_update_required", expected.message)
             }
             assertTrue(bodies.all { it["p_client_submit_id"] == requestId })
         } finally { backend.close() }

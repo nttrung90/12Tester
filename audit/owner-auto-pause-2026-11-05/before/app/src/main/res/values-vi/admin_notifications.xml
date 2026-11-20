@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Titles & Navigation -->
+    <string name="admin_notif_title">Chiến dịch thông báo</string>
+    <string name="admin_notif_subtitle">Quản lý và hẹn giờ gửi thông báo toàn hệ thống</string>
+    <string name="admin_notif_tab_history">Lịch sử</string>
+    <string name="admin_notif_tab_composer">Soạn chiến dịch</string>
+    <string name="admin_notif_tab_monitor">Hẹn giờ &amp; Giám sát</string>
+
+    <!-- Filters & Search -->
+    <string name="admin_notif_filter_status">Trạng thái</string>
+    <string name="admin_notif_filter_audience">Đối tượng</string>
+    <string name="admin_notif_filter_all">Tất cả</string>
+    <string name="admin_notif_empty_history">Không có chiến dịch nào phù hợp với bộ lọc hiện tại</string>
+    <string name="admin_notif_load_more">Tải thêm</string>
+    <string name="admin_notif_loading">Đang tải...</string>
+    <string name="admin_notif_refresh">Làm mới</string>
+
+    <!-- Status Labels -->
+    <string name="admin_notif_status_draft">Bản nháp</string>
+    <string name="admin_notif_status_queued">Đã lên lịch</string>
+    <string name="admin_notif_status_sending">Đang gửi</string>
+    <string name="admin_notif_status_completed">Hoàn thành</string>
+    <string name="admin_notif_status_cancelled">Đã hủy</string>
+    <string name="admin_notif_status_failed">Thất bại</string>
+
+    <!-- Audience Labels -->
+    <string name="admin_notif_aud_all">Tất cả thành viên</string>
+    <string name="admin_notif_aud_role">Theo vai trò</string>
+    <string name="admin_notif_aud_selected">Người dùng được chọn</string>
+
+    <!-- Locales -->
+    <string name="admin_notif_locale_vi">Tiếng Việt (VI)</string>
+    <string name="admin_notif_locale_en">Tiếng Anh (EN)</string>
+    <string name="admin_notif_locale_bilingual">Song ngữ (VI + EN)</string>
+
+    <!-- Composer Form -->
+    <string name="admin_notif_composer_heading">Soạn chiến dịch mới</string>
+    <string name="admin_notif_edit_heading">Chỉnh sửa bản nháp chiến dịch</string>
+    <string name="admin_notif_field_title_vi">Tiêu đề (Tiếng Việt)</string>
+    <string name="admin_notif_field_title_en">Tiêu đề (Tiếng Anh)</string>
+    <string name="admin_notif_field_body_vi">Nội dung thông báo (Tiếng Việt)</string>
+    <string name="admin_notif_field_body_en">Nội dung thông báo (Tiếng Anh)</string>
+    <string name="admin_notif_field_default_locale">Ngôn ngữ hiển thị chính</string>
+    <string name="admin_notif_field_audience">Đối tượng nhận tin</string>
+    <string name="admin_notif_field_role">Vai trò mục tiêu</string>
+    <string name="admin_notif_field_reason">Ghi chú quản trị / Lý do</string>
+    <string name="admin_notif_selected_users_title">Người dùng đã chọn (%1$d)</string>
+    <string name="admin_notif_search_users_placeholder">Tìm người dùng theo tên hoặc email...</string>
+    <string name="admin_notif_no_users_found">Không tìm thấy người dùng phù hợp</string>
+    <string name="admin_notif_user_already_selected">Người dùng đã được chọn trước đó</string>
+    <string name="admin_notif_remove_user">Xóa</string>
+    <string name="admin_notif_search_users_load_more">Tải thêm người dùng</string>
+
+    <!-- Preview Section -->
+    <string name="admin_notif_preview_section">Xem trước hiển thị thực tế</string>
+    <string name="admin_notif_preview_recipients_count">Số lượng người nhận dự kiến: %1$d</string>
+    <string name="admin_notif_preview_vi_tab">Bản tiếng Việt</string>
+    <string name="admin_notif_preview_en_tab">Bản tiếng Anh</string>
+    <string name="admin_notif_preview_effective_tab">Nội dung gửi thực tế</string>
+
+    <!-- Actions -->
+    <string name="admin_notif_action_save_draft">Lưu bản nháp</string>
+    <string name="admin_notif_action_update_draft">Lưu thay đổi</string>
+    <string name="admin_notif_action_schedule">Lên lịch gửi</string>
+    <string name="admin_notif_action_send_now">Gửi ngay lập tức</string>
+    <string name="admin_notif_action_cancel">Hủy chiến dịch</string>
+    <string name="admin_notif_action_view_detail">Xem chi tiết</string>
+    <string name="admin_notif_action_reset_composer">Soạn chiến dịch mới</string>
+
+    <!-- Detail Dialog / Screen -->
+    <string name="admin_notif_detail_title">Chi tiết chiến dịch</string>
+    <string name="admin_notif_stat_total">Tổng người nhận: %1$d</string>
+    <string name="admin_notif_stat_sent">Đã phát: %1$d</string>
+    <string name="admin_notif_stat_read">Đang được đọc: %1$d</string>
+    <string name="admin_notif_stat_failed">Lỗi phát: %1$d</string>
+    <string name="admin_notif_stat_read_note">(tính trên các thông báo còn tồn tại trong hộp thư)</string>
+    <string name="admin_notif_recipients_list_title">Danh sách người nhận</string>
+    <string name="admin_notif_events_list_title">Nhật ký kiểm toán</string>
+    <string name="admin_notif_empty_recipients">Chưa có dữ liệu biên nhận gửi</string>
+    <string name="admin_notif_empty_events">Chưa có sự kiện kiểm toán</string>
+
+    <!-- Scheduler & Monitor -->
+    <string name="admin_notif_monitor_title">Trạng thái bộ lập lịch thông báo</string>
+    <string name="admin_notif_cron_status">Trạng thái pg_cron: %1$s</string>
+    <string name="admin_notif_cron_active">Đang hoạt động (chu kỳ 1 phút)</string>
+    <string name="admin_notif_cron_unavailable">Không khả dụng / Chưa cài đặt</string>
+    <string name="admin_notif_scheduler_ready">Hẹn giờ tự động đang sẵn sàng và hoạt động</string>
+    <string name="admin_notif_scheduler_unready">Hẹn giờ tự động CHƯA sẵn sàng. Các chiến dịch hẹn giờ cần pg_cron hoặc tiến trình worker nền để gửi.</string>
+    <string name="admin_notif_pending_due_count">Chiến dịch đến hạn đang chờ: %1$d</string>
+    <string name="admin_notif_inflight_count">Chiến dịch đang xử lý: %1$d</string>
+    <string name="admin_notif_last_worker_run">Lần chạy worker gần nhất: %1$s</string>
+    <string name="admin_notif_lifetime_processed">Tổng đã xử lý: %1$d chiến dịch</string>
+    <string name="admin_notif_lifetime_sent">Tổng đã phát: %1$d thông báo</string>
+    <string name="admin_notif_action_process_due">Xử lý ngay các đợt đến hạn</string>
+    <string name="admin_notif_confirm_process_due">Bạn có chắc chắn muốn kích hoạt xử lý ngay tất cả chiến dịch đã đến hạn?</string>
+    <string name="admin_notif_process_due_success">Worker đã xử lý %1$d chiến dịch (phát thành công %2$d thông báo)</string>
+
+    <!-- Confirmations & Dialogs -->
+    <string name="admin_notif_schedule_dialog_title">Lên lịch phát chiến dịch</string>
+    <string name="admin_notif_schedule_date">Ngày (YYYY-MM-DD)</string>
+    <string name="admin_notif_schedule_time">Giờ (HH:mm, 24h giờ VN)</string>
+    <string name="admin_notif_schedule_must_be_future">Thời gian lên lịch phải nằm trong tương lai</string>
+    <string name="admin_notif_send_now_confirm_title">Xác nhận gửi ngay</string>
+    <string name="admin_notif_send_now_confirm_body">Bạn có chắc chắn muốn đưa chiến dịch này vào hàng đợi gửi ngay cho %1$d người nhận?</string>
+    <string name="admin_notif_cancel_confirm_title">Xác nhận hủy chiến dịch</string>
+    <string name="admin_notif_cancel_confirm_body">Bạn có chắc chắn muốn hủy chiến dịch này? Chỉ chiến dịch hẹn giờ trong tương lai mới có thể hủy.</string>
+    <string name="admin_notif_cancel_reason_label">Lý do hủy (bắt buộc)</string>
+    <string name="admin_notif_btn_confirm">Xác nhận</string>
+    <string name="admin_notif_btn_dismiss">Bỏ qua</string>
+    <string name="admin_notif_btn_close">Đóng</string>
+
+    <!-- Labels & Placeholders -->
+    <string name="admin_notif_field_audience_label">Đối tượng: %1$s</string>
+    <string name="admin_notif_role_member">Thành viên</string>
+    <string name="admin_notif_role_moderator">Điều hành viên</string>
+    <string name="admin_notif_role_admin">Quản trị viên</string>
+    <string name="admin_notif_placeholder_title_empty">(Chưa có tiêu đề)</string>
+    <string name="admin_notif_placeholder_body_empty">(Chưa có nội dung)</string>
+    <string name="admin_notif_placeholder_user_unnamed">(Chưa đặt tên)</string>
+    <string name="admin_notif_label_english_version">Bản tiếng Anh: %1$s</string>
+    <string name="admin_notif_label_worker_never">Chưa chạy</string>
+    <string name="admin_notif_status_read_badge">(Đã đọc)</string>
+    <string name="admin_notif_error_date_invalid">Định dạng ngày giờ không hợp lệ. Vui lòng nhập theo định dạng YYYY-MM-DD và HH:mm.</string>
+    <string name="admin_notif_error_cancel_in_flight">Không thể hủy chiến dịch đang phát, đã hoàn thành hoặc đã đến hạn.</string>
+    <string name="admin_notif_error_not_authenticated">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</string>
+    <string name="admin_notif_btn_retry">Thử lại</string>
+    <string name="admin_notif_error_title_required">Tiêu đề tiếng Việt và tiếng Anh là bắt buộc (1–200 ký tự)</string>
+    <string name="admin_notif_error_body_required">Nội dung thông báo tiếng Việt và tiếng Anh là bắt buộc (1–2000 ký tự)</string>
+    <string name="admin_notif_error_selected_users_empty">Vui lòng chọn ít nhất một người dùng nhận tin</string>
+    <string name="admin_notif_error_revision_conflict">Chiến dịch đã được cập nhật bởi quản trị viên khác. Bản nháp hiện tại của bạn đã được giữ nguyên; vui lòng kiểm tra lại.</string>
+    <string name="admin_notif_error_request_conflict">Xung đột request: Mã request ID đã được sử dụng với hành động hoặc payload khác.</string>
+    <string name="admin_notif_error_generic">Đã xảy ra lỗi: %1$s</string>
+    <string name="admin_notif_success_draft_saved">Lưu bản nháp chiến dịch thành công</string>
+    <string name="admin_notif_success_scheduled">Lên lịch chiến dịch thành công</string>
+    <string name="admin_notif_success_sent">Đã đưa chiến dịch vào hàng đợi gửi ngay</string>
+    <string name="admin_notif_success_cancelled">Hủy chiến dịch thành công</string>
+    <string name="admin_notif_replayed_note">(Phản hồi từ request trùng trước đó)</string>
+</resources>

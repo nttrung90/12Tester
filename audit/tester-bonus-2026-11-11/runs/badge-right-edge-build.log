@@ -1,0 +1,92 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/nguye/.gradle/wrapper/dists/gradle-9.3.1-bin/23ovyewtku6u96viwx3xl3oks/gradle-9.3.1/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResources
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:generateDebugRFile
+> Task :app:mergeDebugResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugHelpAssets
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:processDebugUnitTestManifest
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+
+> Task :app:compileDebugKotlin
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2283:95 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2285:53 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2819:34 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2996:72 Unnecessary safe call on a non-null receiver of type 'ReportComparisonSelector.SelectionResult'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2999:107 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3006:97 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3058:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3119:66 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3130:62 Unnecessary safe call on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3130:110 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3132:72 Unnecessary safe call on a non-null receiver of type 'ReportComparisonSelector.SelectionResult'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3135:107 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3142:97 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3161:86 Unnecessary non-null assertion (!!) on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3161:102 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3161:127 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3165:221 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3165:260 Unnecessary non-null assertion (!!) on a non-null receiver of type 'TesterReport'.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugGlobalSynthetics
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:testDebugUnitTest
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+
+[Incubating] Problems report is available at: file:///F:/AI/12Tester/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 32s
+49 actionable tasks: 28 executed, 21 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

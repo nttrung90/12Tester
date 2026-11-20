@@ -1,0 +1,12 @@
+{
+  "logName": "review-dialog-generation-repro",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T00:58:31.3816369Z",
+  "finishedUtc": "2026-11-05T00:58:49.6505074Z",
+  "currentRunXmlCount": 1
+}

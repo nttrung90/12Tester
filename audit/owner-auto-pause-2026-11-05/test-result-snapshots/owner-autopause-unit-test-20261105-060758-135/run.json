@@ -1,0 +1,10 @@
+{
+    "logName":  "owner-autopause-unit-test",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-05T06:07:40.1040638Z",
+    "finishedUtc":  "2026-11-05T06:07:58.1422931Z",
+    "currentRunXmlCount":  0
+}

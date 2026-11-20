@@ -1,0 +1,346 @@
+{
+  "at": "2026-11-12T00:38:59.709Z",
+  "database": "immediate_quota_test",
+  "results": [
+    {
+      "name": "Existing owner create 12 -> 24 -> 36, remove -> 24 -> 12",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 12,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "New registration-day owner gets 12 immediately without a nonexistent predecessor",
+      "result": "PASS",
+      "evidence": {
+        "id": "1568807d-15f8-45eb-8533-e8f766fbd712",
+        "status": {
+          "mode": "owner",
+          "active_app_count": 1,
+          "base_required_tests": 12,
+          "required_tests": 12,
+          "effective_required_tests": 12,
+          "completed_tests": 0,
+          "carry_in_tests": 0,
+          "carryover_remaining_tests": 12,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        }
+      }
+    },
+    {
+      "name": "Registration-day owner finalizes quota/debt/penalty and carries it into next day",
+      "result": "PASS",
+      "evidence": {
+        "required_tests": 12,
+        "base_required_tests": 12,
+        "carry_out_tests": 12,
+        "is_exempt": false,
+        "missed_streak": 1,
+        "penalty_credits": 100
+      }
+    },
+    {
+      "name": "Registration-day pure member retains exemption and no debt",
+      "result": "PASS",
+      "evidence": {
+        "required_tests": 0,
+        "carry_out_tests": 0,
+        "is_exempt": true,
+        "missed_streak": 0,
+        "penalty_credits": 0
+      }
+    },
+    {
+      "name": "Create replay counts one app and preserves immutable receipt",
+      "result": "PASS",
+      "evidence": {
+        "replayed": true,
+        "base": 24
+      }
+    },
+    {
+      "name": "Create replay after removal does not resurrect a quota or campaign",
+      "result": "PASS",
+      "evidence": {
+        "replayed": true,
+        "base": 12
+      }
+    },
+    {
+      "name": "Failed creation leaves quota, count and credit balance unchanged",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 12,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Configured q12 is independent of target_testers20",
+      "result": "PASS",
+      "evidence": {
+        "base": 24,
+        "paid": 20
+      }
+    },
+    {
+      "name": "Completed D survives add/remove and over-completion never becomes negative",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 20,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 0,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Deletion alone cannot erase previously sealed debt, including last app",
+      "result": "PASS",
+      "evidence": {
+        "mode": "member",
+        "active_app_count": 0,
+        "base_required_tests": 0,
+        "required_tests": 0,
+        "effective_required_tests": 0,
+        "completed_tests": 0,
+        "carry_in_tests": 7,
+        "carryover_remaining_tests": 7,
+        "met": true,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Quota change refreshes todays mutable ledger without finalization or credit penalty",
+      "result": "PASS",
+      "evidence": {
+        "required_tests": 24,
+        "active_app_count": 2,
+        "completed_tests": 12,
+        "met": false,
+        "finalized_at": null
+      }
+    },
+    {
+      "name": "Logical deferred removal reduces once and final physical cleanup preserves quota",
+      "result": "PASS",
+      "evidence": {
+        "initial": "pending_removal",
+        "after": {
+          "mode": "owner",
+          "active_app_count": 1,
+          "base_required_tests": 12,
+          "required_tests": 12,
+          "effective_required_tests": 12,
+          "completed_tests": 0,
+          "carry_in_tests": 0,
+          "carryover_remaining_tests": 12,
+          "met": false,
+          "carryover_ready": true,
+          "history_ready": true
+        }
+      }
+    },
+    {
+      "name": "Admin removal applies base quota to actual owner without changing another users base",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 12,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Inactive-owner paused apps stay counted while removed apps do not",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 2,
+        "base_required_tests": 24,
+        "required_tests": 24,
+        "effective_required_tests": 24,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 24,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Source scarcity preserves base24 separately from effective20",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 2,
+        "base_required_tests": 24,
+        "required_tests": 24,
+        "effective_required_tests": 20,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 20,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Future activation preserves old current-day counting until effective day",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 0,
+        "carry_in_tests": 0,
+        "carryover_remaining_tests": 12,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Historical reconstruction uses old-before-cutover and immediate-after-cutover rules",
+      "result": "PASS",
+      "evidence": {
+        "old": {
+          "mode": "owner",
+          "active_app_count": 1,
+          "base_required_tests": 12,
+          "required_tests": 12,
+          "effective_required_tests": 12,
+          "completed_tests": 0,
+          "carry_in_tests": 0,
+          "carryover_remaining_tests": 0,
+          "met": false,
+          "carryover_ready": false,
+          "history_ready": true
+        },
+        "active": {
+          "mode": "owner",
+          "active_app_count": 3,
+          "base_required_tests": 36,
+          "required_tests": 36,
+          "effective_required_tests": 30,
+          "completed_tests": 0,
+          "carry_in_tests": 0,
+          "carryover_remaining_tests": 0,
+          "met": false,
+          "carryover_ready": false,
+          "history_ready": true
+        }
+      }
+    },
+    {
+      "name": "Frozen prior-day status is immutable after todays create and delete",
+      "result": "PASS",
+      "evidence": {
+        "preserved": true
+      }
+    },
+    {
+      "name": "Carryover disabled preserves debt while todays base changes",
+      "result": "PASS",
+      "evidence": {
+        "mode": "owner",
+        "active_app_count": 1,
+        "base_required_tests": 12,
+        "required_tests": 12,
+        "effective_required_tests": 12,
+        "completed_tests": 0,
+        "carry_in_tests": 7,
+        "carryover_remaining_tests": 7,
+        "met": false,
+        "carryover_ready": true,
+        "history_ready": true
+      }
+    },
+    {
+      "name": "Configured future q15 applies per date rather than hardcoded12",
+      "result": "PASS",
+      "evidence": {
+        "today": 24,
+        "tomorrow": 30
+      }
+    },
+    {
+      "name": "Exact one-date trusted finalizer entry point remains callable",
+      "result": "PASS",
+      "evidence": {
+        "compatible": true
+      }
+    },
+    {
+      "name": "Unidentified authenticated client cannot schedule a global quota policy",
+      "result": "PASS",
+      "evidence": {
+        "denied": true
+      }
+    },
+    {
+      "name": "Admin cannot insert a new retroactive/current policy: -4",
+      "result": "PASS",
+      "evidence": {
+        "denied": true
+      }
+    },
+    {
+      "name": "Admin cannot insert a new retroactive/current policy: +0",
+      "result": "PASS",
+      "evidence": {
+        "denied": true
+      }
+    },
+    {
+      "name": "Policy audit records actual administrator identity",
+      "result": "PASS",
+      "evidence": {
+        "actor": "e2000000-0000-0000-0000-000000000001"
+      }
+    },
+    {
+      "name": "Locked administrator cannot read private quota-policy audit",
+      "result": "PASS",
+      "evidence": {
+        "private": true
+      }
+    }
+  ]
+}

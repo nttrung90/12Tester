@@ -1,0 +1,78 @@
+[
+  {
+    "label": "create versus owner removal",
+    "blockers": [
+      3240
+    ],
+    "a": {
+      "ok": true,
+      "result": {
+        "success": true,
+        "replayed": false,
+        "receipt_id": "2fd27698-31d1-4f6a-ae7e-689f02eb46a0",
+        "campaign_id": "05a399da-b058-420a-94ba-32229eceee45",
+        "slot_1_cost": 0,
+        "slot_number": 2,
+        "target_cost": 0,
+        "balance_after": 10000,
+        "target_testers": 12,
+        "charged_credits": 0,
+        "client_request_id": "d4235046-f17b-49f9-bebe-54d03621093a",
+        "min_credits_required": 10
+      }
+    },
+    "b": {
+      "ok": true,
+      "result": {
+        "reason": "Gỡ bỏ bởi Chủ sở hữu",
+        "status": "removed",
+        "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+        "success": true,
+        "app_name": "Old owner app",
+        "owner_id": "e1000000-0000-0000-0000-000000000001",
+        "campaign_id": "c7ee9886-d99d-4387-b731-90b764369531"
+      }
+    },
+    "base": 12,
+    "carry": 24,
+    "pass": true
+  },
+  {
+    "label": "create versus admin removal",
+    "blockers": [
+      6648
+    ],
+    "a": {
+      "ok": true,
+      "result": {
+        "success": true,
+        "replayed": false,
+        "receipt_id": "ec979f3b-c66c-44f6-8e27-89d02cbd21fa",
+        "campaign_id": "9a283440-9b67-4c69-9730-e0a3fa480100",
+        "slot_1_cost": 0,
+        "slot_number": 2,
+        "target_cost": 0,
+        "balance_after": 10000,
+        "target_testers": 12,
+        "charged_credits": 0,
+        "client_request_id": "4d1ada5f-f32c-46e7-9a9c-82da623509ea",
+        "min_credits_required": 10
+      }
+    },
+    "b": {
+      "ok": true,
+      "result": {
+        "reason": "Gỡ bỏ bởi Admin",
+        "status": "deleted",
+        "message": "Chiến dịch đã được xóa hoàn toàn",
+        "success": true,
+        "app_name": "Old owner app",
+        "owner_id": "e1000000-0000-0000-0000-000000000001",
+        "campaign_id": "76faa22c-ccaa-428b-9691-9bc07333d1fd"
+      }
+    },
+    "base": 12,
+    "carry": 24,
+    "pass": true
+  }
+]

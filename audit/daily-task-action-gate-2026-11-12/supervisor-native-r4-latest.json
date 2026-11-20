@@ -1,0 +1,707 @@
+{
+  "output": "F:\\AI\\12Tester\\audit\\daily-task-action-gate-2026-11-12\\supervisor-runs\\native-r4-2026-11-13T19-01-31-648Z",
+  "at": "2026-11-13T19:01:31.649Z",
+  "pass": true,
+  "sourceBefore": [
+    {
+      "path": "supabase/migrations/062_consolidated_baseline.sql",
+      "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+    },
+    {
+      "path": "supabase/migrations/063_report_crypto_search_path.sql",
+      "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+    },
+    {
+      "path": "supabase/migrations/064_explicit_report_context.sql",
+      "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+    },
+    {
+      "path": "supabase/migrations/065_remove_dhash_hardblock.sql",
+      "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+    },
+    {
+      "path": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+    },
+    {
+      "path": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+    },
+    {
+      "path": "supabase/migrations/068_owner_tester_reports_count.sql",
+      "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+    },
+    {
+      "path": "supabase/migrations/069_admin_audit_hardening.sql",
+      "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+    },
+    {
+      "path": "supabase/migrations/070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "path": "supabase/migrations/071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "path": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "path": "supabase/migrations/073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "path": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+    },
+    {
+      "path": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+    },
+    {
+      "path": "supabase/migrations/076_mission_for_finalized_campaigns.sql",
+      "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+    },
+    {
+      "path": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+    },
+    {
+      "path": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+    },
+    {
+      "path": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+    },
+    {
+      "path": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+    },
+    {
+      "path": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+    },
+    {
+      "path": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+    },
+    {
+      "path": "supabase/migrations/083_fix_app_configs_encoding_and_version.sql",
+      "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+    },
+    {
+      "path": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+    },
+    {
+      "path": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+    },
+    {
+      "path": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+      "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+    },
+    {
+      "path": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+    },
+    {
+      "path": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "path": "supabase/migrations/089_fix_production_bonus_lifecycle.sql",
+      "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+    },
+    {
+      "path": "supabase/migrations/090_daily_task_action_gate.sql",
+      "sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e"
+    },
+    {
+      "path": "audit/daily-task-action-gate-2026-11-12/supervisor-native-r4-probes.mjs",
+      "sha256": "4d006693e9a59b85cf5089cb50e7eb70d98f0a21ff9ddb56037f9c2d89a642d5"
+    },
+    {
+      "path": "audit/daily-task-action-gate-2026-11-12/supervisor-native-r4-runner.mjs",
+      "sha256": "475b0d5d4daf898f8b8915b2284398bf998d6d65ee2a9eaa65a4003ae9188ba2"
+    },
+    {
+      "path": "supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs",
+      "sha256": "2601429b3fef99d08358154505d37ca5aa9df4a3ee7fadc6911029e39ddfb245"
+    },
+    {
+      "path": "supabase/tests/campaign-tester-bonus-concurrency-fixture.mjs",
+      "sha256": "ffa6eebccb234cb4951854e49db60a083a07a56f9f4c9139c09b3efda7a1db52"
+    }
+  ],
+  "nativeReview": {
+    "at": "2026-11-13T19:01:34.407Z",
+    "dataDirectory": "f:/ai/12tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+    "database": "action_gate_native_test_r4_1794596493264",
+    "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+    "pids": {
+      "root": 24320,
+      "a": 22524,
+      "b": 1808
+    },
+    "cases": [
+      {
+        "name": "direct-pause-before-slot-versus-resume",
+        "pass": true,
+        "initial": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 12,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "atBarrier": {
+          "pid": 22524,
+          "wait_event_type": "Lock",
+          "wait_event": "advisory",
+          "blockers": [
+            24320
+          ]
+        },
+        "competingWait": {
+          "pid": 1808,
+          "wait_event_type": "Lock",
+          "wait_event": "transactionid",
+          "blockers": [
+            22524
+          ]
+        },
+        "action": {
+          "ok": true,
+          "rows": [
+            {
+              "id": "0d420f9e-3d61-479f-b412-db7fc130d642"
+            }
+          ]
+        },
+        "resume": {
+          "ok": true,
+          "rows": [
+            {
+              "r": {
+                "status": "open",
+                "message": "Chiến dịch đã được kích hoạt lại",
+                "success": true,
+                "app_name": "Native reviewer app",
+                "campaign_id": "0d420f9e-3d61-479f-b412-db7fc130d642"
+              }
+            }
+          ]
+        },
+        "after": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 12,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        }
+      },
+      {
+        "name": "delete-gate-before-physical-delete-versus-create-v2",
+        "pass": true,
+        "initial": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 26,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "atBarrier": {
+          "pid": 22524,
+          "wait_event_type": "Lock",
+          "wait_event": "advisory",
+          "blockers": [
+            24320
+          ]
+        },
+        "competingWait": {
+          "pid": 1808,
+          "wait_event_type": "Lock",
+          "wait_event": "advisory",
+          "blockers": [
+            22524
+          ]
+        },
+        "remove": {
+          "reason": "Gỡ bỏ bởi Chủ sở hữu",
+          "status": "removed",
+          "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+          "success": true,
+          "app_name": "Native reviewer app",
+          "owner_id": "65c9905c-76c2-4df0-aa42-5be53ae4ff0f",
+          "campaign_id": "2500001e-aa5a-4200-87da-cffb8841fbcf"
+        },
+        "create": {
+          "success": true,
+          "replayed": false,
+          "receipt_id": "b5b71388-be5a-4304-bfd9-fa6f741a893b",
+          "campaign_id": "f4aad5bb-6012-4096-aeaa-f06d2c166ae3",
+          "slot_1_cost": 0,
+          "slot_number": 3,
+          "target_cost": 0,
+          "balance_after": 10000,
+          "target_testers": 12,
+          "charged_credits": 0,
+          "client_request_id": "c8b7c824-afd0-48e2-9245-48cfb366d9f0",
+          "min_credits_required": 10
+        },
+        "walletBefore": 10000,
+        "walletAfter": 10000,
+        "refund": false,
+        "after": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 26,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "retry": {
+          "reason": "Admin or system direct deletion",
+          "status": "removed",
+          "message": "Ứng dụng đã được gỡ bỏ hoàn toàn",
+          "success": true,
+          "app_name": "Native reviewer app",
+          "owner_id": "65c9905c-76c2-4df0-aa42-5be53ae4ff0f",
+          "replayed": true,
+          "campaign_id": "2500001e-aa5a-4200-87da-cffb8841fbcf"
+        }
+      },
+      {
+        "name": "delete-refund-before-slot-versus-create-v2",
+        "pass": true,
+        "initial": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 40,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "atBarrier": {
+          "pid": 22524,
+          "wait_event_type": "Lock",
+          "wait_event": "advisory",
+          "blockers": [
+            24320
+          ]
+        },
+        "competingWait": {
+          "pid": 1808,
+          "wait_event_type": "Lock",
+          "wait_event": "advisory",
+          "blockers": [
+            22524
+          ]
+        },
+        "remove": {
+          "reason": "Gỡ bỏ bởi Chủ sở hữu",
+          "status": "pending_removal",
+          "message": "Chiến dịch đã được đóng để giải quyết các báo cáo tester đang chờ trước khi hoàn tất gỡ bỏ",
+          "success": true,
+          "app_name": "Native reviewer app",
+          "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+          "campaign_id": "010b14a7-0ba4-4343-8079-fcfbe2498521"
+        },
+        "create": {
+          "success": true,
+          "replayed": false,
+          "receipt_id": "9098e1bf-7278-48d5-a346-0fa28aab00c9",
+          "campaign_id": "243a91ba-755e-4c89-91ae-b7657fc6d5ed",
+          "slot_1_cost": 0,
+          "slot_number": 3,
+          "target_cost": 0,
+          "balance_after": 10000,
+          "target_testers": 12,
+          "charged_credits": 0,
+          "client_request_id": "b947347e-5437-4c02-8c82-8f3e15244270",
+          "min_credits_required": 10
+        },
+        "walletBefore": 9500,
+        "walletAfter": 10000,
+        "refund": true,
+        "after": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 40,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "retry": {
+          "reason": "Gỡ bỏ bởi Chủ sở hữu",
+          "status": "pending_removal",
+          "message": "Chiến dịch đã được đóng để giải quyết các báo cáo tester đang chờ trước khi hoàn tất gỡ bỏ",
+          "success": true,
+          "app_name": "Native reviewer app",
+          "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+          "replayed": true,
+          "campaign_id": "010b14a7-0ba4-4343-8079-fcfbe2498521"
+        }
+      },
+      {
+        "name": "accepted-removal-worker-after-new-today-obligation",
+        "pass": true,
+        "before": {
+          "met": false,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 40,
+          "carry_in_tests": 0,
+          "required_tests": 9,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 3,
+          "is_penalty_exempt": false,
+          "base_required_tests": 9,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 9,
+          "carryover_remaining_tests": 3
+        },
+        "worker": {
+          "ok": true,
+          "rows": [
+            {
+              "r": 0
+            }
+          ]
+        },
+        "receipt": {
+          "owner_id": "cb0330e4-33c8-4b0d-aa46-d7897f75deee",
+          "status": "removed"
+        },
+        "after": {
+          "met": false,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 40,
+          "carry_in_tests": 0,
+          "required_tests": 9,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 3,
+          "is_penalty_exempt": false,
+          "base_required_tests": 9,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 9,
+          "carryover_remaining_tests": 3
+        },
+        "wallet": 10000,
+        "refundLogs": {
+          "n": 1,
+          "amount": 500
+        }
+      },
+      {
+        "name": "real-finalizer-profile-lock-versus-owner-resume",
+        "pass": true,
+        "finalized": {
+          "ok": true,
+          "rows": [
+            {
+              "r": ""
+            }
+          ]
+        },
+        "competingWait": {
+          "pid": 1808,
+          "wait_event_type": "Lock",
+          "wait_event": "transactionid",
+          "blockers": [
+            22524
+          ]
+        },
+        "resumed": {
+          "ok": true,
+          "rows": [
+            {
+              "r": {
+                "status": "open",
+                "message": "Chiến dịch đã được kích hoạt lại",
+                "success": true,
+                "app_name": "Native reviewer app",
+                "campaign_id": "f9db4c4b-853b-4c7b-8cdc-ac0030666452"
+              }
+            }
+          ]
+        },
+        "after": {
+          "met": true,
+          "mode": "owner",
+          "status_date": "2026-11-14",
+          "history_ready": true,
+          "missed_streak": 0,
+          "available_apps": 55,
+          "carry_in_tests": 0,
+          "required_tests": 6,
+          "carryover_ready": true,
+          "completed_tests": 6,
+          "logged_in_today": true,
+          "active_app_count": 2,
+          "is_penalty_exempt": false,
+          "base_required_tests": 6,
+          "next_penalty_percent": 1,
+          "carryover_effective_from": "2026-10-30",
+          "effective_required_tests": 6,
+          "carryover_remaining_tests": 0
+        },
+        "walletBefore": 10000
+      }
+    ],
+    "pass": true
+  },
+  "bonus": {
+    "code": 0,
+    "signal": null,
+    "pass": true,
+    "log": "F:\\AI\\12Tester\\audit\\daily-task-action-gate-2026-11-12\\supervisor-runs\\native-r4-2026-11-13T19-01-31-648Z\\bonus-concurrency.log",
+    "scenarioPassLines": [
+      "PASS: SCENARIO 1: Two apps of same owner reserving wallet concurrently",
+      "PASS: SCENARIO 2: Last slot race (1 slot, 2 concurrent approvals)",
+      "PASS: SCENARIO 3: Manual approve vs 8h auto-accept race on same report",
+      "PASS: SCENARIO 4: Actual pending report approval vs close round race",
+      "PASS: SCENARIO 5: Report submission vs Close round race (gated actual submit vs close)",
+      "PASS: SCENARIO 6: Batch closing worker vs Campaign lifecycle close race",
+      "PASS: SCENARIO 7: Resubmit rejected report under active round preserves snapshot"
+    ]
+  },
+  "error": null,
+  "cleanup": {
+    "gracefulStop": true,
+    "exit": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "server": {
+    "directory": "F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/pg-data",
+    "pid": 24168,
+    "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+    "ownedProcessPid": 2160
+  },
+  "database": "action_gate_native_test_r4_1794596493264",
+  "sourceAfter": [
+    {
+      "path": "supabase/migrations/062_consolidated_baseline.sql",
+      "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+    },
+    {
+      "path": "supabase/migrations/063_report_crypto_search_path.sql",
+      "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+    },
+    {
+      "path": "supabase/migrations/064_explicit_report_context.sql",
+      "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+    },
+    {
+      "path": "supabase/migrations/065_remove_dhash_hardblock.sql",
+      "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+    },
+    {
+      "path": "supabase/migrations/066_push_and_carryover_hardening.sql",
+      "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+    },
+    {
+      "path": "supabase/migrations/067_admin_direct_notification_popup.sql",
+      "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+    },
+    {
+      "path": "supabase/migrations/068_owner_tester_reports_count.sql",
+      "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+    },
+    {
+      "path": "supabase/migrations/069_admin_audit_hardening.sql",
+      "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+    },
+    {
+      "path": "supabase/migrations/070_admin_management.sql",
+      "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+    },
+    {
+      "path": "supabase/migrations/071_business_policies.sql",
+      "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+    },
+    {
+      "path": "supabase/migrations/072_admin_notification_campaigns.sql",
+      "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+    },
+    {
+      "path": "supabase/migrations/073_admin_action_audit.sql",
+      "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+    },
+    {
+      "path": "supabase/migrations/074_app_mission_window_and_multi_attachments.sql",
+      "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+    },
+    {
+      "path": "supabase/migrations/075_owner_auto_pause_config.sql",
+      "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+    },
+    {
+      "path": "supabase/migrations/076_mission_for_finalized_campaigns.sql",
+      "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+    },
+    {
+      "path": "supabase/migrations/077_mission_reward_modes_and_management.sql",
+      "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+    },
+    {
+      "path": "supabase/migrations/078_admin_pause_reason_popup.sql",
+      "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+    },
+    {
+      "path": "supabase/migrations/079_owner_auto_pause_debt_and_timestamp_guard.sql",
+      "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+    },
+    {
+      "path": "supabase/migrations/080_report_context_carryover_and_gap_recovery.sql",
+      "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+    },
+    {
+      "path": "supabase/migrations/081_admin_flow_audit_fixes.sql",
+      "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+    },
+    {
+      "path": "supabase/migrations/082_carryover_flow_audit_fixes.sql",
+      "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+    },
+    {
+      "path": "supabase/migrations/083_fix_app_configs_encoding_and_version.sql",
+      "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+    },
+    {
+      "path": "supabase/migrations/084_campaign_posting_business_policies.sql",
+      "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+    },
+    {
+      "path": "supabase/migrations/085_egress_optimization_sync_v2.sql",
+      "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+    },
+    {
+      "path": "supabase/migrations/086_next_campaign_candidate_daily_target_priority.sql",
+      "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+    },
+    {
+      "path": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+    },
+    {
+      "path": "supabase/migrations/088_immediate_daily_quota_on_campaign_changes.sql",
+      "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+    },
+    {
+      "path": "supabase/migrations/089_fix_production_bonus_lifecycle.sql",
+      "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+    },
+    {
+      "path": "supabase/migrations/090_daily_task_action_gate.sql",
+      "sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e"
+    },
+    {
+      "path": "audit/daily-task-action-gate-2026-11-12/supervisor-native-r4-probes.mjs",
+      "sha256": "4d006693e9a59b85cf5089cb50e7eb70d98f0a21ff9ddb56037f9c2d89a642d5"
+    },
+    {
+      "path": "audit/daily-task-action-gate-2026-11-12/supervisor-native-r4-runner.mjs",
+      "sha256": "475b0d5d4daf898f8b8915b2284398bf998d6d65ee2a9eaa65a4003ae9188ba2"
+    },
+    {
+      "path": "supabase/tests/run-campaign-tester-bonus-concurrency-test.mjs",
+      "sha256": "2601429b3fef99d08358154505d37ca5aa9df4a3ee7fadc6911029e39ddfb245"
+    },
+    {
+      "path": "supabase/tests/campaign-tester-bonus-concurrency-fixture.mjs",
+      "sha256": "ffa6eebccb234cb4951854e49db60a083a07a56f9f4c9139c09b3efda7a1db52"
+    }
+  ]
+}

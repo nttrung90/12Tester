@@ -21,6 +21,7 @@ import com.ntt.crosstest.data.SupabaseHolder
 import com.ntt.crosstest.util.InstalledAppCache
 import com.ntt.crosstest.util.ImageHashHelper
 import com.ntt.crosstest.util.ImageInstrumentation
+import com.ntt.crosstest.util.NetworkHttpFactory.applyResilient5GConfig
 import com.ntt.crosstest.util.ScreenshotCoilInterceptor
 import com.ntt.crosstest.util.PrivateScreenshotDiskCache
 import com.ntt.crosstest.util.ScreenshotManager
@@ -50,8 +51,26 @@ class TestCheoApp : Application(), ImageLoaderFactory {
         private set
     lateinit var appConfigRepository: AppConfigRepository
         private set
+    lateinit var adminManagementRepository: com.ntt.crosstest.data.AdminManagementRepository
+        private set
     lateinit var reportSubmitManager: ReportSubmitManager
         private set
+    lateinit var notificationPendingAckStore: com.ntt.crosstest.data.NotificationPendingAckStore
+        private set
+
+    val telegramChatRepository: com.ntt.crosstest.data.telegram.TelegramChatRepository by lazy {
+        com.ntt.crosstest.data.telegram.TelegramChatRepository(
+            context = applicationContext,
+            apiId = BuildConfig.TELEGRAM_API_ID,
+            apiHash = BuildConfig.TELEGRAM_API_HASH,
+        )
+    }
+
+    val telegramMirrorRepository: com.ntt.crosstest.data.telegram.TelegramMirrorRepository by lazy {
+        com.ntt.crosstest.data.telegram.TelegramMirrorRepository(
+            localizer = Localizer(applicationContext),
+        )
+    }
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
@@ -60,6 +79,12 @@ class TestCheoApp : Application(), ImageLoaderFactory {
             }
             .okHttpClient {
                 OkHttpClient.Builder()
+                    .applyResilient5GConfig(
+                        connectTimeoutSeconds = 8L,
+                        readTimeoutSeconds = 20L,
+                        writeTimeoutSeconds = 20L,
+                        pingIntervalSeconds = 15L,
+                    )
                     .addInterceptor(ImageInstrumentation.createTrackingInterceptor())
                     .build()
             }
@@ -82,10 +107,13 @@ class TestCheoApp : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
 
         InstalledAppCache.init(this)
         CoinSoundPlayer.preload(this)
-        // LÃ m nÃ³ng snapshot session trÃªn IO Ä‘á»ƒ loadSync trong constructor
+        com.ntt.crosstest.util.AppForegroundTracker.init(this)
+        notificationPendingAckStore = com.ntt.crosstest.data.NotificationPendingAckStore(this)
+        // Làm nóng snapshot session trên IO để loadSync trong constructor
         // ViewModel (main thread) gáº§n nhÆ° chá»‰ Ä‘á»c báº£n trong RAM.
         SessionCacheManager.preload(this)
 
@@ -98,7 +126,18 @@ class TestCheoApp : Application(), ImageLoaderFactory {
             authRepository = AuthRepository(client, this)
             campaignRepository = CampaignRepository(client, Localizer(this))
             appConfigRepository = AppConfigRepository(client, this)
+            adminManagementRepository = com.ntt.crosstest.data.AdminManagementRepository(client)
             reportSubmitManager = ReportSubmitManager(this)
+            appScope.launch {
+                authRepository.sessionStatus.collect { status ->
+                    if (status is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
+                        val userId = status.session.user?.id ?: authRepository.currentUserId()
+                        if (userId != null) {
+                            reportSubmitManager.restorePendingReports(userId)
+                        }
+                    }
+                }
+            }
 
             // R2-02 & E04: Đăng ký SupabaseMediaAccessGrantProvider thật cho ScreenshotCachePolicy
             com.ntt.crosstest.util.ScreenshotCachePolicy.mediaAccessGrantProvider =
@@ -209,6 +248,11 @@ class TestCheoApp : Application(), ImageLoaderFactory {
     }
 
     companion object {
+        @Volatile
+        private var instance: TestCheoApp? = null
+
+        fun get(): TestCheoApp? = instance
+
         const val REMINDER_WORK_NAME = "daily_checkin_reminder"
         const val REMINDER_TAG = "checkin_reminder"
         const val UPDATE_CHECK_WORK_NAME = "app_update_check"

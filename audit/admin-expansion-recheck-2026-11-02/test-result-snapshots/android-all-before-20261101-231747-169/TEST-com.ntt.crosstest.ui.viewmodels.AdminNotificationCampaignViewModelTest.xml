@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-01T23:17:35.203Z" hostname="PC-5700X3D" time="0.226">
+  <properties/>
+  <testcase name="testScheduleAndCancelExactConfirmedReasonPersistedBeforeServerReply" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.043"/>
+  <testcase name="testDateTimeConversionToUtcAndPastScheduleRejectionWithClock" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.018"/>
+  <testcase name="testStaleDialogAbortOnOwnerSwitchAndStaleGeneration" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.032"/>
+  <testcase name="testCasConflictPreservesUserDraftAndExplainsConflict" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.022"/>
+  <testcase name="testExactConfirmedReasonIsPersistedBeforeServerReply" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.023"/>
+  <testcase name="testDraftSaveRecreationPreservesSelectedAudienceAndUserIds" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.018"/>
+  <testcase name="testLoadHistoryRefreshResetsPaginationFlags" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.018"/>
+  <testcase name="testEditingDraftWhileSaveInFlightDoesNotEraseNewUserEdits" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.016"/>
+  <testcase name="testLiveAuthValidationOnEveryCompletion" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.017"/>
+  <testcase name="testCloseDetailInvalidatesPendingDetailAndDoesNotReopenDialog" classname="com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

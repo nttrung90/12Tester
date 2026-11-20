@@ -1,0 +1,14 @@
+FAIL independent media grant: primary issued grant verifies through both published legacy and attachment-capable paths ERR_ASSERTION new six-argument verifier must accept newly issued primary grant
+
+false !== true
+
+PASS independent media grant: selected secondary grant binds image and cannot be replayed as primary, another image or another viewer
+PASS independent media grant: owner can receive and use an exact third-image grant
+FAIL independent media grant: RPC JSON matches actual Android MediaAccessGrantResult fields ERR_ASSERTION Android decodes screenshot_url
++ actual - expected
+
++ 'undefined'
+- 'string'
+
+PASS independent media grant: unrelated authenticated tester cannot request report media
+PASS independent media grant: expired report denies issuance and revokes already issued secondary grant

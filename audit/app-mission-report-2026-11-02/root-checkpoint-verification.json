@@ -1,0 +1,18 @@
+{
+  "implementationComplete": false,
+  "blocker": "Gemini provider quota95%, all3accounts",
+  "model": "google/antigravity-gemini-3.8-flash",
+  "variant": "medium",
+  "androidTests": 535.0,
+  "androidSuites": 74,
+  "androidFailures": 0.0,
+  "backendFullExit": 0,
+  "sqlProbeScriptFailures": 0,
+  "sqlSourceStable": true,
+  "independentTestManifestMismatches": 0,
+  "modified": 32,
+  "new": 6,
+  "missing": 0,
+  "historicalMigrationChanges": 0,
+  "finishedUtc": "2026-11-02T06:07:09.9949564Z"
+}

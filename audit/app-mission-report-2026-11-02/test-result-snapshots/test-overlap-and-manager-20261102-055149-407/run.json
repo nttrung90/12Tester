@@ -1,0 +1,16 @@
+{
+    "logName":  "test-overlap-and-manager",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.ReportOverlapTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T05:51:16.0422488Z",
+    "finishedUtc":  "2026-11-02T05:51:49.4204382Z",
+    "currentRunXmlCount":  2
+}

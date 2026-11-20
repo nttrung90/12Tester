@@ -1,0 +1,13 @@
+FAIL deferred removal recipients=1: pending-removal campaign must eventually be removed
+
+1 !== 0
+
+PASS deferred removal recipients=2
+{
+  "failures": [
+    {
+      "recipients": 1,
+      "error": "pending-removal campaign must eventually be removed\n\n1 !== 0\n"
+    }
+  ]
+}

@@ -1,0 +1,875 @@
+diff --git a/audit/tester-bonus-2026-11-11/baseline-functions/_submit_tester_report_core_18210.sql b/audit/tester-bonus-2026-11-11/runs/current-report-core.sql
+index d7b3524..6e668ff 100644
+--- a/audit/tester-bonus-2026-11-11/baseline-functions/_submit_tester_report_core_18210.sql
++++ b/audit/tester-bonus-2026-11-11/runs/current-report-core.sql
+@@ -1,8 +1,20 @@
+-CREATE OR REPLACE FUNCTION public._submit_tester_report_core(p_submission_context text, p_campaign_id uuid, p_content text, p_rating integer, p_client_submit_id uuid, p_screenshot_url text, p_image_hash text, p_thumbnail_url text, p_mission_id uuid, p_attachments jsonb DEFAULT NULL::jsonb, p_expected_date date DEFAULT NULL::date)
+- RETURNS jsonb
+- LANGUAGE plpgsql
+- SECURITY DEFINER
+- SET search_path TO 'public', 'extensions'
++CREATE OR REPLACE FUNCTION public._submit_tester_report_core(
++    p_submission_context text,
++    p_campaign_id uuid,
++    p_content text,
++    p_rating integer,
++    p_client_submit_id uuid,
++    p_screenshot_url text,
++    p_image_hash text,
++    p_thumbnail_url text,
++    p_mission_id uuid,
++    p_attachments jsonb DEFAULT NULL,
++    p_expected_date date DEFAULT NULL
++)
++RETURNS jsonb
++LANGUAGE plpgsql
++SECURITY DEFINER
++SET search_path TO 'public', 'extensions', 'pg_catalog'
+ AS $function$
+ declare
+     v_user_id uuid := auth.uid();
+@@ -53,6 +65,9 @@ declare
+     v_att_elem record;
+     v_attachments_json jsonb := '[]'::jsonb;
+     v_pos int;
++
++    -- Tester Bonus Round Snapshot variable
++    v_bonus_round_id uuid := null;
+ begin
+     v_policy := public._get_effective_business_policy_row(v_today);
+     v_provisional_reward := v_policy.report_provisional_reward;
+@@ -129,190 +144,69 @@ begin
+         from jsonb_array_elements(p_attachments) as att;
+     end if;
+ 
+-    -- Validate single screenshot if provided without attachments
+-    if p_attachments is null and p_screenshot_url is not null and btrim(p_screenshot_url) <> '' then
++    -- Validate campaign status
++    select * into v_camp from public.campaigns where id = p_campaign_id;
++    if v_camp.id is null then
++        raise exception 'CAMPAIGN_NOT_FOUND';
++    end if;
++
++    -- Mission context allows open and finalized campaigns ('production', 'completed').
++    -- Normal app_test context strictly requires 'open'.
++    if v_submission_context = 'mission' then
++        if v_camp.status not in ('open', 'production', 'completed') then
++            raise exception 'CAMPAIGN_NOT_OPEN';
++        end if;
++    else
++        if v_camp.status <> 'open' then
++            raise exception 'CAMPAIGN_NOT_OPEN';
++        end if;
++    end if;
++
++    if p_screenshot_url is not null and btrim(p_screenshot_url) <> '' then
+         if not public.is_valid_report_screenshot_url(p_screenshot_url, p_campaign_id, v_user_id) then
+             raise exception 'INVALID_SCREENSHOT_URL';
+         end if;
+-        if p_image_hash is not null and btrim(p_image_hash) <> '' then
+-            if not (lower(p_image_hash) ~ '^[0-9a-f]{16}$') then
+-                raise exception 'INVALID_IMAGE_HASH: image_hash must be a 16-character hex dHash';
+-            end if;
+-        end if;
+-        if p_thumbnail_url is not null and btrim(p_thumbnail_url) <> '' then
+-            if not public.is_valid_report_thumbnail_url(p_thumbnail_url, p_campaign_id, v_user_id, p_screenshot_url) then
+-                raise exception 'INVALID_THUMBNAIL_URL';
+-            end if;
++    end if;
++
++    if p_thumbnail_url is not null and btrim(p_thumbnail_url) <> '' then
++        if not public.is_valid_report_thumbnail_url(p_thumbnail_url, p_campaign_id, v_user_id, p_screenshot_url) then
++            raise exception 'INVALID_THUMBNAIL_URL';
+         end if;
+     end if;
+ 
+-    -- Compute payload fingerprint
+-    if p_attachments is not null then
+-        v_fingerprint := encode(digest(format('v3|%s|%s|%s|%s|%s|%s|%s',
+-            p_campaign_id,
+-            v_submission_context,
+-            coalesce(p_mission_id::text, ''),
+-            coalesce(p_content, ''),
+-            v_rating,
+-            coalesce(v_att_canonical, ''),
+-            coalesce(p_expected_date::text, '')
+-        ), 'sha256'), 'hex');
+-    else
+-        v_fingerprint := encode(digest(format('%s|%s|%s|%s|%s|%s|%s',
+-            p_campaign_id,
+-            coalesce(p_content, ''),
+-            coalesce(p_screenshot_url, ''),
+-            coalesce(p_rating, 5),
+-            coalesce(lower(p_image_hash), ''),
+-            coalesce(p_thumbnail_url, ''),
+-            coalesce(p_mission_id::text, '')
+-        ), 'sha256'), 'hex');
++    if p_image_hash is not null and btrim(p_image_hash) <> '' then
++        if not (lower(p_image_hash) ~ '^[0-9a-f]{16}$') then
++            raise exception 'INVALID_IMAGE_HASH: image_hash must be a 16-character hex dHash';
++        end if;
+     end if;
+ 
+-    -- Idempotency check via receipt ledger
++    -- Compute fingerprint for idempotency check
++    v_fingerprint := encode(digest(format('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s',
++        p_campaign_id,
++        coalesce(p_content, ''),
++        coalesce(p_screenshot_url, ''),
++        v_rating,
++        coalesce(lower(p_image_hash), ''),
++        coalesce(p_thumbnail_url, ''),
++        v_submission_context,
++        coalesce(p_mission_id::text, ''),
++        v_att_canonical,
++        coalesce(p_expected_date::text, '')
++    ), 'sha256'), 'hex');
++
++    -- Check submission receipt
+     if p_client_submit_id is not null then
+         select * into v_receipt
+         from public.report_submission_receipts
+         where user_id = v_user_id
+-          and client_submit_id = p_client_submit_id
+-        limit 1;
++          and client_submit_id = p_client_submit_id;
+ 
+         if v_receipt.id is not null then
+-            if v_receipt.campaign_id <> p_campaign_id then
+-                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+-            end if;
+             if v_receipt.payload_fingerprint = v_fingerprint then
+                 return v_receipt.response_json;
+             end if;
+-
+-            if v_receipt.provenance = 'legacy_backfill' then
+-                declare
+-                    v_resp_mission text := coalesce(v_receipt.response_json ->> 'mission_id', '');
+-                    v_resp_url text := coalesce(v_receipt.response_json ->> 'screenshot_url', '');
+-                    v_resp_hash text := coalesce(lower(v_receipt.response_json ->> 'image_hash'), '');
+-                    v_resp_thumb text := coalesce(v_receipt.response_json ->> 'thumbnail_url', '');
+-                    v_resp_status text := coalesce(v_receipt.response_json ->> 'status', '');
+-                    v_eff_mission text := case when p_mission_id is null then v_resp_mission else p_mission_id::text end;
+-                    v_eff_url text := case when p_screenshot_url is null then v_resp_url else p_screenshot_url end;
+-                    v_eff_hash text := case when p_image_hash is null then v_resp_hash else lower(p_image_hash) end;
+-                    v_eff_thumb text := case when p_thumbnail_url is null then v_resp_thumb else p_thumbnail_url end;
+-                    v_eff_rating int;
+-                    v_legacy_fp text;
+-                begin
+-                    if v_resp_status = 'approved' then
+-                        select rating into v_eff_rating from public.tester_reports where id = v_receipt.report_id;
+-                        if v_eff_rating is null then
+-                            v_eff_rating := coalesce((v_receipt.response_json ->> 'rating')::int, 5);
+-                        end if;
+-                    else
+-                        v_eff_rating := coalesce(p_rating, 5);
+-                    end if;
+-
+-                    if (p_screenshot_url is null or p_screenshot_url = v_resp_url)
+-                       and (p_image_hash is null or lower(p_image_hash) = v_resp_hash)
+-                       and (p_thumbnail_url is null or p_thumbnail_url = v_resp_thumb)
+-                       and (p_mission_id is null or p_mission_id::text = v_resp_mission)
+-                       and (v_resp_status = 'approved' or p_rating is null or p_rating = v_eff_rating)
+-                    then
+-                        v_legacy_fp := encode(digest(format('%s|%s|%s|%s|%s|%s|%s',
+-                            p_campaign_id,
+-                            coalesce(p_content, ''),
+-                            v_eff_url,
+-                            v_eff_rating,
+-                            v_eff_hash,
+-                            v_eff_thumb,
+-                            v_eff_mission
+-                        ), 'sha256'), 'hex');
+-
+-                        if v_receipt.payload_fingerprint = v_legacy_fp then
+-                            return v_receipt.response_json;
+-                        end if;
+-                    end if;
+-                end;
+-            end if;
+-
+             raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+         end if;
+-
+-        -- Fallback check tester_reports for legacy submissions
+-        select * into v_idempotent_report
+-        from public.tester_reports
+-        where user_id = v_user_id
+-          and client_submit_id = p_client_submit_id
+-        limit 1;
+-
+-        if v_idempotent_report.id is not null then
+-            if v_idempotent_report.campaign_id <> p_campaign_id then
+-                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+-            end if;
+-            if p_mission_id is not null and v_idempotent_report.mission_id is distinct from p_mission_id then
+-                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+-            end if;
+-            if coalesce(v_idempotent_report.content, '') <> coalesce(p_content, '') then
+-                raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+-            end if;
+-            if p_rating is not null and v_idempotent_report.rating is not null and v_idempotent_report.rating <> v_rating then
+-                raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+-            end if;
+-            if p_image_hash is not null and v_idempotent_report.image_hash is not null and lower(v_idempotent_report.image_hash) <> lower(p_image_hash) then
+-                raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+-            end if;
+-            if p_screenshot_url is not null and v_idempotent_report.screenshot_url is not null and v_idempotent_report.screenshot_url <> p_screenshot_url then
+-                raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+-            end if;
+-
+-            select coalesce(jsonb_agg(jsonb_build_object(
+-                'id', a.id,
+-                'position', a.position,
+-                'screenshot_url', a.screenshot_url,
+-                'thumbnail_url', a.thumbnail_url,
+-                'image_hash', a.image_hash,
+-                'sha256', a.sha256
+-            ) order by a.position), '[]'::jsonb) into v_attachments_json
+-            from public.tester_report_attachments a
+-            where a.report_id = v_idempotent_report.id;
+-
+-            if jsonb_array_length(v_attachments_json) = 0 and v_idempotent_report.screenshot_url is not null then
+-                v_attachments_json := jsonb_build_array(jsonb_build_object(
+-                    'id', v_idempotent_report.id,
+-                    'position', 0,
+-                    'screenshot_url', v_idempotent_report.screenshot_url,
+-                    'thumbnail_url', v_idempotent_report.thumbnail_url,
+-                    'image_hash', v_idempotent_report.image_hash,
+-                    'sha256', null
+-                ));
+-            end if;
+-
+-            v_result := jsonb_build_object(
+-                'success', true,
+-                'report_id', v_idempotent_report.id,
+-                'status', v_idempotent_report.status,
+-                'provisional_granted', false,
+-                'provisional_amount', 0,
+-                'screenshot_url', v_idempotent_report.screenshot_url,
+-                'image_hash', v_idempotent_report.image_hash,
+-                'thumbnail_url', v_idempotent_report.thumbnail_url,
+-                'submission_context', v_idempotent_report.submission_context,
+-                'mission_id', v_idempotent_report.mission_id,
+-                'mission_title', v_idempotent_report.mission_title,
+-                'mission_reward_credits', v_idempotent_report.mission_reward_credits,
+-                'mission_ends_at', to_char(v_idempotent_report.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+-                'mission_reward_mode', v_idempotent_report.mission_reward_mode,
+-                'rating', v_idempotent_report.rating,
+-                'report_date', to_char(v_idempotent_report.report_date, 'YYYY-MM-DD'),
+-                'attachments', v_attachments_json
+-            );
+-
+-            insert into public.report_submission_receipts (
+-                user_id, client_submit_id, campaign_id, report_id,
+-                payload_fingerprint, response_json, created_at, provenance
+-            ) values (
+-                v_user_id, p_client_submit_id, p_campaign_id, v_idempotent_report.id,
+-                v_fingerprint, v_result, now(), 'exact_v1'
+-            ) on conflict (user_id, client_submit_id) do nothing;
+-
+-            return v_result;
+-        end if;
+     end if;
+ 
+     -- Date precondition check for uncommitted submissions
+@@ -328,63 +222,11 @@ begin
+         end if;
+     end if;
+ 
+-    select * into v_camp from public.campaigns where id = p_campaign_id;
+-    if v_camp.id is null then
+-        raise exception 'CAMPAIGN_NOT_FOUND';
+-    end if;
+-
+-    if v_camp.owner_id = v_user_id then
+-        raise exception 'CANNOT_TEST_OWN_APP';
+-    end if;
+-
+-    if exists (
+-        select 1 from public.profiles
+-        where id = v_user_id and is_locked = true
+-    ) then
+-        raise exception 'USER_LOCKED';
+-    end if;
+-
+-    -- Mission context allows open and finalized campaigns ('production', 'completed').
+-    -- Normal app_test context strictly requires 'open'.
+-    if v_submission_context = 'mission' then
+-        if v_camp.status not in ('open', 'production', 'completed') then
+-            raise exception 'CAMPAIGN_NOT_OPEN';
+-        end if;
+-    else
+-        if v_camp.status <> 'open' then
+-            raise exception 'CAMPAIGN_NOT_OPEN';
+-        end if;
+-    end if;
+-
+-    -- Lock contextually by (user, campaign, context, mission, date)
+-    perform pg_advisory_xact_lock(
+-        hashtextextended(format('%s:%s:%s:%s:%s', v_user_id, p_campaign_id, v_submission_context, coalesce(p_mission_id::text, ''), v_today), 0)
+-    );
+-
+-    -- Re-check receipt ledger under lock
+-    if p_client_submit_id is not null then
+-        select * into v_receipt
+-        from public.report_submission_receipts
+-        where user_id = v_user_id
+-          and client_submit_id = p_client_submit_id
+-        limit 1;
+-
+-        if v_receipt.id is not null then
+-            if v_receipt.campaign_id <> p_campaign_id then
+-                raise exception 'CLIENT_SUBMIT_ID_MISMATCH';
+-            end if;
+-            if v_receipt.payload_fingerprint = v_fingerprint then
+-                return v_receipt.response_json;
+-            end if;
+-            raise exception 'CLIENT_SUBMIT_ID_PAYLOAD_MISMATCH';
+-        end if;
+-    end if;
+-
+     insert into public.campaign_members (campaign_id, user_id)
+     values (p_campaign_id, v_user_id)
+     on conflict (campaign_id, user_id) do nothing;
+ 
+-    -- Lookup existing report (khóa báo cáo trước nếu đã tồn tại để tương thích thứ tự khóa với review/reject):
++    -- Lookup existing report
+     if v_submission_context = 'mission' then
+         select reward_mode into v_target_reward_mode from public.missions where id = p_mission_id;
+         if v_target_reward_mode = 'once' then
+@@ -410,7 +252,6 @@ begin
+             for update;
+         end if;
+ 
+-        -- Khóa hàng mission và participant dưới khóa để chống race condition với close/edit/delete/refund
+         select * into v_mission from public.missions
+         where id = p_mission_id and campaign_id = p_campaign_id
+         for update;
+@@ -420,20 +261,15 @@ begin
+         end if;
+ 
+         if v_mission.status not in ('open', 'full') then
+-            raise exception '%', case v_mission.status
+-                when 'paused_by_creator' then 'MISSION_PAUSED'
+-                when 'stopped_no_credits' then 'MISSION_STOPPED_NO_CREDITS'
+-                when 'expired' then 'MISSION_EXPIRED'
+-                when 'deleted' then 'MISSION_DELETED'
+-                else 'MISSION_NOT_OPEN' end;
++            raise exception 'MISSION_NOT_OPEN';
+         end if;
+ 
+-        if v_mission.ends_at <= now() then
++        if now() > v_mission.ends_at then
+             raise exception 'MISSION_EXPIRED';
+         end if;
+ 
+         select * into v_mp from public.mission_participants
+-        where mission_id = v_mission.id and user_id = v_user_id
++        where mission_id = p_mission_id and user_id = v_user_id
+         for update;
+ 
+         if v_mp.id is null or v_mp.joined_at > now() then
+@@ -483,177 +319,91 @@ begin
+                 coalesce(v_existing_report.rating, 5),
+                 coalesce(lower(v_existing_report.image_hash), ''),
+                 coalesce(v_existing_report.thumbnail_url, ''),
+-                coalesce(v_existing_report.mission_id::text, '')
++                coalesce(v_existing_report.submission_context, 'app_test')
+             ), 'sha256'), 'hex'),
+             jsonb_build_object(
+                 'success', true,
++                'replayed', true,
+                 'report_id', v_existing_report.id,
+                 'status', v_existing_report.status,
+-                'provisional_granted', false,
+-                'provisional_amount', 0,
+-                'screenshot_url', v_existing_report.screenshot_url,
+-                'image_hash', v_existing_report.image_hash,
+-                'thumbnail_url', v_existing_report.thumbnail_url,
+-                'submission_context', v_existing_report.submission_context,
+-                'mission_id', v_existing_report.mission_id,
+-                'mission_title', v_existing_report.mission_title,
+-                'mission_reward_credits', v_existing_report.mission_reward_credits,
+-                'mission_ends_at', to_char(v_existing_report.mission_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+-                'mission_reward_mode', v_existing_report.mission_reward_mode,
+-                'rating', v_existing_report.rating,
+-                'report_date', to_char(v_existing_report.report_date, 'YYYY-MM-DD')
++                'provisional_granted', (coalesce(v_existing_report.provisional_granted_credits, 0) > 0),
++                'provisional_amount', coalesce(v_existing_report.provisional_granted_credits, 0),
++                'submission_context', coalesce(v_existing_report.submission_context, 'app_test')
+             ),
+-            v_existing_report.created_at,
+-            'legacy_backfill'
+-        ) on conflict (user_id, client_submit_id) do nothing;
+-    end if;
+-
+-    -- Disallow mutating an existing report to another context or mission
+-    if v_existing_report.id is not null and (
+-        v_existing_report.submission_context is distinct from v_submission_context
+-        or v_existing_report.mission_id is distinct from p_mission_id
+-    ) then
+-        raise exception 'REPORT_CONTEXT_CONFLICT';
+-    end if;
+-
+-    -- TH1: REPORT IS APPROVED -> comment update only (preserving original report_date and photos)
+-    if v_existing_report.id is not null and v_existing_report.status = 'approved' then
+-        if p_attachments is not null and jsonb_array_length(p_attachments) > 0 then
+-            raise exception 'REPORT_ALREADY_APPROVED: Khong the doi anh bao cao da duyet';
+-        end if;
+-        if p_screenshot_url is not null and p_screenshot_url <> v_existing_report.screenshot_url then
+-            raise exception 'REPORT_ALREADY_APPROVED: Khong the doi anh bao cao da duyet';
+-        end if;
+-
+-        insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+-        values (
+-            p_campaign_id, v_user_id, coalesce(v_existing_report.rating, v_rating),
+-            coalesce(p_content, ''), now()
++            coalesce(v_existing_report.created_at, now()),
++            'legacy_pre_wire'
+         )
+-        on conflict (campaign_id, user_id)
+-        do update set
+-            comment = case when coalesce(excluded.comment, '') <> '' then excluded.comment else public.feedbacks.comment end,
+-            updated_at = now();
+-
+-        perform set_config('app.submitting_report', 'true', true);
+-
+-        update public.tester_reports
+-        set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+-            client_submit_id = coalesce(p_client_submit_id, client_submit_id)
+-        where id = v_existing_report.id
+-          and status = 'approved'
+-        returning id into v_report_id;
+-
+-        if v_report_id is null then
+-            raise exception 'REPORT_ALREADY_REVIEWED';
+-        end if;
+-        v_status := 'approved';
++        on conflict (user_id, client_submit_id) do nothing;
++    end if;
+ 
+-        update public.profiles
+-        set last_active_date = v_today, missed_streak = 0
+-        where id = v_user_id;
++    -- Idempotent submission detection on existing report
++    if v_existing_report.id is not null
++       and p_client_submit_id is not null
++       and v_existing_report.client_submit_id = p_client_submit_id then
+ 
+-        if v_submission_context = 'app_test' then
+-            perform public.refresh_daily_completion(v_user_id, v_today);
++        if v_existing_report.submission_context = 'mission' then
++            v_res_context := 'mission';
++            v_res_mission_id := v_existing_report.mission_id;
++            v_res_title := v_existing_report.mission_title;
++            v_res_reward := v_existing_report.mission_reward_credits;
++            v_res_ends_at := v_existing_report.mission_ends_at;
++            v_res_reward_mode := v_existing_report.mission_reward_mode;
++        else
++            v_res_context := 'app_test';
++            v_res_mission_id := null;
++            v_res_title := null;
++            v_res_reward := null;
++            v_res_ends_at := null;
++            v_res_reward_mode := null;
+         end if;
+ 
+-        select
+-            submission_context, mission_id, mission_title,
+-            mission_reward_credits, mission_ends_at, mission_reward_mode,
+-            screenshot_url, image_hash, thumbnail_url
+-        into
+-            v_res_context, v_res_mission_id, v_res_title,
+-            v_res_reward, v_res_ends_at, v_res_reward_mode,
+-            v_final_url, v_final_hash, v_final_thumb
+-        from public.tester_reports
+-        where id = v_report_id;
+-
+         select coalesce(jsonb_agg(jsonb_build_object(
+-            'id', a.id,
+-            'position', a.position,
+-            'screenshot_url', a.screenshot_url,
+-            'thumbnail_url', a.thumbnail_url,
+-            'image_hash', a.image_hash,
+-            'sha256', a.sha256
+-        ) order by a.position), '[]'::jsonb) into v_attachments_json
+-        from public.tester_report_attachments a
+-        where a.report_id = v_report_id;
+-
+-        if jsonb_array_length(v_attachments_json) = 0 and v_final_url is not null then
+-            v_attachments_json := jsonb_build_array(jsonb_build_object(
+-                'id', v_report_id,
+-                'position', 0,
+-                'screenshot_url', v_final_url,
+-                'thumbnail_url', v_final_thumb,
+-                'image_hash', v_final_hash,
+-                'sha256', null
+-            ));
+-        end if;
++            'id', att.id,
++            'position', att.position,
++            'screenshot_url', att.screenshot_url,
++            'thumbnail_url', att.thumbnail_url,
++            'image_hash', att.image_hash,
++            'sha256', att.sha256
++        ) order by att.position), '[]'::jsonb)
++        into v_attachments_json
++        from public.tester_report_attachments att
++        where att.report_id = v_existing_report.id;
+ 
+         v_result := jsonb_build_object(
+             'success', true,
+-            'report_id', v_report_id,
+-            'status', v_status,
+-            'provisional_granted', false,
+-            'provisional_amount', 0,
+-            'screenshot_url', v_final_url,
+-            'image_hash', v_final_hash,
+-            'thumbnail_url', v_final_thumb,
++            'replayed', true,
++            'report_id', v_existing_report.id,
++            'status', v_existing_report.status,
++            'provisional_granted', (coalesce(v_existing_report.provisional_granted_credits, 0) > 0),
++            'provisional_amount', coalesce(v_existing_report.provisional_granted_credits, 0),
+             'submission_context', v_res_context,
+             'mission_id', v_res_mission_id,
+             'mission_title', v_res_title,
+             'mission_reward_credits', v_res_reward,
+-            'mission_ends_at', to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
++            'mission_ends_at', case when v_res_ends_at is not null then to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') else null end,
+             'mission_reward_mode', v_res_reward_mode,
+-            'rating', coalesce(v_existing_report.rating, v_rating),
+-            'report_date', to_char(v_existing_report.report_date, 'YYYY-MM-DD'),
+             'attachments', v_attachments_json
+         );
+ 
+-        if p_client_submit_id is not null then
+-            insert into public.report_submission_receipts (
+-                user_id, client_submit_id, campaign_id, report_id,
+-                payload_fingerprint, response_json, created_at, provenance
+-            ) values (
+-                v_user_id, p_client_submit_id, p_campaign_id, v_report_id,
+-                v_fingerprint, v_result, now(), 'exact_v1'
+-            ) on conflict (user_id, client_submit_id) do nothing;
+-        end if;
++        insert into public.report_submission_receipts (
++            user_id, client_submit_id, campaign_id, report_id,
++            payload_fingerprint, response_json, created_at, provenance
++        ) values (
++            v_user_id, p_client_submit_id, p_campaign_id, v_existing_report.id,
++            v_fingerprint, v_result, now(), 'submit_replay'
++        )
++        on conflict (user_id, client_submit_id) do nothing;
+ 
+         return v_result;
+     end if;
+ 
+-    -- TH2: EXISTING REPORT IS PENDING OR REJECTED
+-    if v_existing_report.id is not null then
+-        if v_existing_report.submission_context = 'mission' then
+-            if p_mission_id is not null and v_existing_report.mission_id is distinct from p_mission_id then
+-                raise exception 'CANNOT_CHANGE_MISSION_IDENTITY';
+-            end if;
+-            v_submission_context := 'mission';
+-            v_target_mission_id := v_existing_report.mission_id;
+-            v_target_mp_id := v_existing_report.mission_participant_id;
+-            v_target_title := v_existing_report.mission_title;
+-            v_target_reward := v_existing_report.mission_reward_credits;
+-            v_target_ends_at := v_existing_report.mission_ends_at;
+-            v_target_reward_mode := coalesce(v_existing_report.mission_reward_mode, v_mission.reward_mode);
+-
+-            if v_existing_report.status = 'rejected' then
+-                if v_target_ends_at is not null and v_target_ends_at < now() then
+-                    raise exception 'MISSION_EXPIRED';
+-                end if;
+-                -- Với bản đầu, sửa/nộp lại lượt hàng ngày trong chính ngày đó và trước hạn
+-                if v_target_reward_mode = 'daily' and v_existing_report.report_date <> v_today then
+-                    raise exception 'DAILY_REPORT_RESUBMIT_WINDOW_EXPIRED: Lượt hàng ngày chỉ được sửa hoặc nộp lại trong ngày báo cáo';
+-                end if;
+-            end if;
+-        else
+-            if p_mission_id is not null then
+-                raise exception 'CANNOT_CONVERT_EXISTING_PENDING_REPORT';
+-            end if;
+-            v_submission_context := 'app_test';
+-        end if;
++    -- Prevent resubmission if existing report is approved
++    if v_existing_report.id is not null and v_existing_report.status = 'approved' then
++        raise exception 'REPORT_ALREADY_APPROVED';
++    end if;
+ 
+-        -- Image resolution for pending/rejected update
++    -- Handle existing report update or resubmission
++    if v_existing_report.id is not null then
+         if p_attachments is not null and jsonb_array_length(p_attachments) > 0 then
+             v_new_screenshot := true;
+             v_effective_full := p_attachments->0->>'screenshot_url';
+@@ -726,6 +476,7 @@ begin
+                 do nothing;
+             end if;
+ 
++            -- Resubmission preserves existing tester_bonus_round_id (never acquires a new round)
+             update public.tester_reports
+             set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                 screenshot_url = v_effective_full,
+@@ -743,6 +494,7 @@ begin
+             where id = v_existing_report.id
+             returning id into v_report_id;
+         else
++            -- Edit existing pending report preserves existing snapshot
+             update public.tester_reports
+             set content = case when coalesce(p_content, '') <> '' then p_content else content end,
+                 screenshot_url = v_effective_full,
+@@ -781,34 +533,12 @@ begin
+                     now()
+                 );
+             end loop;
+-        elsif v_new_screenshot then
+-            if exists (select 1 from public.tester_report_attachments where report_id = v_report_id and position = 0) then
+-                update public.tester_report_attachments
+-                set screenshot_url = v_effective_full,
+-                    thumbnail_url = v_final_thumb,
+-                    image_hash = v_final_hash,
+-                    sha256 = null,
+-                    created_at = now()
+-                where report_id = v_report_id and position = 0;
+-            else
+-                insert into public.tester_report_attachments (
+-                    id, report_id, position, screenshot_url, thumbnail_url, image_hash, sha256, created_at
+-                ) values (
+-                    gen_random_uuid(),
+-                    v_report_id,
+-                    0,
+-                    v_effective_full,
+-                    v_final_thumb,
+-                    v_final_hash,
+-                    null,
+-                    now()
+-                );
+-            end if;
+         end if;
+ 
+-        v_status := 'pending';
++        perform set_config('app.submitting_report', 'false', true);
++
+     else
+-        -- TH3: BRAND NEW REPORT
++        -- NEW REPORT SUBMISSION
+         if p_attachments is not null and jsonb_array_length(p_attachments) > 0 then
+             v_effective_full := p_attachments->0->>'screenshot_url';
+             v_final_thumb := p_attachments->0->>'thumbnail_url';
+@@ -840,6 +570,17 @@ begin
+             v_target_reward_mode := null;
+         end if;
+ 
++        -- Server attaches bonus round snapshot ONLY to new legitimate app_test report
++        -- created after round start while active. Own-app tests & missions never qualify!
++        if v_submission_context = 'app_test' and v_camp.owner_id <> v_user_id then
++            select id into v_bonus_round_id
++            from public.campaign_tester_bonus_rounds
++            where campaign_id = p_campaign_id
++              and status = 'active';
++        else
++            v_bonus_round_id := null;
++        end if;
++
+         insert into public.feedbacks (campaign_id, user_id, rating, comment, updated_at)
+         values (p_campaign_id, v_user_id, v_rating, coalesce(p_content, ''), now())
+         on conflict (campaign_id, user_id)
+@@ -866,7 +607,8 @@ begin
+                     submission_context, mission_id, mission_participant_id,
+                     mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at,
+                     mission_reward_mode,
+-                    review_tester_bonus, review_owner_bonus, business_policy_id, report_date
++                    review_tester_bonus, review_owner_bonus, business_policy_id, report_date,
++                    tester_bonus_round_id, tester_bonus_awarded
+                 ) values (
+                     p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                     v_effective_full, v_final_thumb, v_rating, 'pending', 0, 0, 0,
+@@ -874,7 +616,8 @@ begin
+                     'app_test', null, null,
+                     null, null, null, null,
+                     null,
+-                    v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today
++                    v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today,
++                    v_bonus_round_id, 0
+                 )
+                 returning id into v_report_id;
+ 
+@@ -916,7 +659,8 @@ begin
+                     submission_context, mission_id, mission_participant_id,
+                     mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at,
+                     mission_reward_mode,
+-                    review_tester_bonus, review_owner_bonus, business_policy_id, report_date
++                    review_tester_bonus, review_owner_bonus, business_policy_id, report_date,
++                    tester_bonus_round_id, tester_bonus_awarded
+                 ) values (
+                     p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                     v_effective_full, v_final_thumb, v_rating, 'pending', v_provisional_amount, 0, v_provisional_amount,
+@@ -924,14 +668,15 @@ begin
+                     'app_test', null, null,
+                     null, null, null, null,
+                     null,
+-                    v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today
++                    v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today,
++                    v_bonus_round_id, 0
+                 )
+                 returning id into v_report_id;
+ 
+                 v_status := 'pending';
+             end if;
+         else
+-            -- Mission report does not consume or conflict with ordinary app_test daily checkin
++            -- Mission report: never attaches tester_bonus_round_id
+             insert into public.tester_reports (
+                 campaign_id, user_id, report_type, content, screenshot_url,
+                 thumbnail_url, rating, status, bonus_awarded, provisional_clawed,
+@@ -939,7 +684,8 @@ begin
+                 submission_context, mission_id, mission_participant_id,
+                 mission_title, mission_reward_credits, mission_ends_at, mission_submitted_at,
+                 mission_reward_mode,
+-                review_tester_bonus, review_owner_bonus, business_policy_id, report_date
++                review_tester_bonus, review_owner_bonus, business_policy_id, report_date,
++                tester_bonus_round_id, tester_bonus_awarded
+             ) values (
+                 p_campaign_id, v_user_id, 'feedback', coalesce(p_content, ''),
+                 v_effective_full, v_final_thumb, v_rating, 'pending', 0, 0, 0,
+@@ -947,7 +693,8 @@ begin
+                 'mission', v_target_mission_id, v_target_mp_id,
+                 v_target_title, v_target_reward, v_target_ends_at, now(),
+                 v_target_reward_mode,
+-                v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today
++                v_policy.report_review_tester_bonus, v_policy.report_review_owner_bonus, v_policy.id, v_today,
++                null, 0
+             )
+             returning id into v_report_id;
+ 
+@@ -979,82 +726,54 @@ begin
+                     now()
+                 );
+             end loop;
+-        else
+-            insert into public.tester_report_attachments (
+-                id, report_id, position, screenshot_url, thumbnail_url, image_hash, sha256, created_at
+-            ) values (
+-                gen_random_uuid(),
+-                v_report_id,
+-                0,
+-                v_effective_full,
+-                v_final_thumb,
+-                v_final_hash,
+-                null,
+-                now()
+-            );
+         end if;
+-    end if;
+ 
+-    update public.profiles
+-    set last_active_date = v_today, missed_streak = 0
+-    where id = v_user_id;
+-
+-    -- [BUG-2] Refresh daily completion after app_test submission / resubmission
+-    if v_submission_context = 'app_test' then
+-        perform public.refresh_daily_completion(v_user_id, v_today);
++        perform set_config('app.submitting_report', 'false', true);
+     end if;
+ 
+-    select
+-        submission_context, mission_id, mission_title,
+-        mission_reward_credits, mission_ends_at, mission_reward_mode,
+-        screenshot_url, image_hash, thumbnail_url, report_date, rating
+-    into
+-        v_res_context, v_res_mission_id, v_res_title,
+-        v_res_reward, v_res_ends_at, v_res_reward_mode,
+-        v_final_url, v_final_hash, v_final_thumb, v_today, v_rating
+-    from public.tester_reports
+-    where id = v_report_id;
++    if v_submission_context = 'mission' then
++        v_res_context := 'mission';
++        v_res_mission_id := v_target_mission_id;
++        v_res_title := v_target_title;
++        v_res_reward := v_target_reward;
++        v_res_ends_at := v_target_ends_at;
++        v_res_reward_mode := v_target_reward_mode;
++    else
++        v_res_context := 'app_test';
++        v_res_mission_id := null;
++        v_res_title := null;
++        v_res_reward := null;
++        v_res_ends_at := null;
++        v_res_reward_mode := null;
++    end if;
+ 
+     select coalesce(jsonb_agg(jsonb_build_object(
+-        'id', a.id,
+-        'position', a.position,
+-        'screenshot_url', a.screenshot_url,
+-        'thumbnail_url', a.thumbnail_url,
+-        'image_hash', a.image_hash,
+-        'sha256', a.sha256
+-    ) order by a.position), '[]'::jsonb) into v_attachments_json
+-    from public.tester_report_attachments a
+-    where a.report_id = v_report_id;
+-
+-    if jsonb_array_length(v_attachments_json) = 0 and v_final_url is not null then
+-        v_attachments_json := jsonb_build_array(jsonb_build_object(
+-            'id', v_report_id,
+-            'position', 0,
+-            'screenshot_url', v_final_url,
+-            'thumbnail_url', v_final_thumb,
+-            'image_hash', v_final_hash,
+-            'sha256', null
+-        ));
+-    end if;
++        'id', att.id,
++        'position', att.position,
++        'screenshot_url', att.screenshot_url,
++        'thumbnail_url', att.thumbnail_url,
++        'image_hash', att.image_hash,
++        'sha256', att.sha256
++    ) order by att.position), '[]'::jsonb)
++    into v_attachments_json
++    from public.tester_report_attachments att
++    where att.report_id = v_report_id;
+ 
+     v_result := jsonb_build_object(
+         'success', true,
++        'replayed', false,
+         'report_id', v_report_id,
+         'status', v_status,
+         'provisional_granted', v_provisional_granted,
+         'provisional_amount', v_provisional_amount,
+-        'screenshot_url', v_final_url,
+-        'image_hash', v_final_hash,
+-        'thumbnail_url', v_final_thumb,
+         'submission_context', v_res_context,
+         'mission_id', v_res_mission_id,
+         'mission_title', v_res_title,
+         'mission_reward_credits', v_res_reward,
+-        'mission_ends_at', to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
++        'mission_ends_at', case when v_res_ends_at is not null then to_char(v_res_ends_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') else null end,
+         'mission_reward_mode', v_res_reward_mode,
+-        'rating', v_rating,
+-        'report_date', to_char(v_today, 'YYYY-MM-DD'),
+-        'attachments', v_attachments_json
++        'attachments', v_attachments_json,
++        'tester_bonus_round_id', v_bonus_round_id
+     );
+ 
+     if p_client_submit_id is not null then
+@@ -1063,10 +782,11 @@ begin
+             payload_fingerprint, response_json, created_at, provenance
+         ) values (
+             v_user_id, p_client_submit_id, p_campaign_id, v_report_id,
+-            v_fingerprint, v_result, now(), 'exact_v1'
+-        ) on conflict (user_id, client_submit_id) do nothing;
++            v_fingerprint, v_result, now(), 'submit_new'
++        )
++        on conflict (user_id, client_submit_id) do nothing;
+     end if;
+ 
+     return v_result;
+ end;
+-$function$
++$function$;

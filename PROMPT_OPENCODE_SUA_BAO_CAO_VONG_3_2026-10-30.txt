@@ -1,0 +1,21 @@
+Làm việc trong F:\AI\12Tester. Đọc và sửa theo báo cáo kiểm tra độc lập mới nhất:
+F:\AI\12Tester\RECHECK_VONG_3_VA_KE_HOACH_SUA_BAO_CAO_CHO_OPENCODE_2026-10-30.md
+
+Snapshot đầu lượt qua 296/296 unit test và npm test, gồm 9 ca ledger. Tuy nhiên còn ba finding mới; mã giao diện cũng thay đổi trong lúc audit và lượt compile cuối bị lỗi import. Không báo source hiện tại xanh dựa trên baseline cũ.
+
+Ưu tiên:
+1. C00: Đồng bộ import model trong NotificationBottomSheet.kt (NotificationItem không tồn tại; file dùng UserNotification). Bảo toàn thay đổi giao diện của công việc khác, không tạo model trùng để né lỗi.
+2. C01: Admission đang là con của caller, nên cancelAllPendingWork hoàn tất rồi vẫn có late Accepted/ENQUEUED. Đưa admission vào lifecycle manager, thêm session/cancellation barrier, drain job trước khi clear; giữ IO ngoài Main và Accepted sau persist/enqueue. Không để cancellation phát state của phiên cũ lên phiên mới.
+3. C02: Migration 059 đang đổi cả receipt exact_v1 đã biết thành legacy_backfill. Giữ provenance chính xác, không nới kiểm tra raw payload của exact receipt. Xử lý dữ liệu không rõ provenance và dữ liệu đã nâng cấp bằng kế hoạch có bằng chứng, không xóa ledger.
+4. C03: Replay comment legacy của approved report 3 sao vẫn mismatch vì fingerprint dùng default rating 5 thay cho semantics rating đã khóa. Sửa canonical legacy ở cả trước/sau khóa; giữ nguyên ảnh/rating/context và không phát sinh thưởng.
+
+Evidence/probe:
+F:\AI\12Tester\.tmp\report-overlap-recheck-round3-2026-10-30\
+
+Chuyển các probe C01/P01/P02 thành regression, giữ bất biến. Ca cache cleanup/lease là thăm dò bị loại khỏi finding hiện tại; không mở rộng phạm vi chỉ vì assertion đó đỏ. Cho phép kết quả CancellationException khi admission thực sự bị hủy, nhưng vẫn assert không có late work/state.
+
+Chạy compile/unit test, probe, toàn bộ unit test Android và npm test trên snapshot ổn định. Test migration 059 thật và nâng cấp/rerun; không chỉ chạy bootstrap full schema hoặc 057. Nếu cần migration mới, repo hiện đến 060: kiểm tra số tiếp theo, đồng bộ full schema. Giữ các sửa và thay đổi chưa commit khác.
+
+Giữ versionName=1.0.2, versionCode=22. Không build APK/AAB hoặc chạy assemble/bundle nếu chưa có chỉ dẫn mới. Không deploy production, commit hoặc push.
+
+Kết thúc bằng báo cáo file thay đổi, nguyên nhân, kết quả thực chạy, hash source và phần chưa kiểm chứng. Không tuyên bố hết kẹt trên điện thoại khi chưa thử APK mới trên thiết bị.

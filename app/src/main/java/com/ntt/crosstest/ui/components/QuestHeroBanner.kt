@@ -114,7 +114,7 @@ fun QuestHeroBanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(horizontal = 18.dp, vertical = 14.dp),
         ) {
             // Header: Trophy badge + Title + Subtitle
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -158,7 +158,7 @@ fun QuestHeroBanner(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Stat chips: [Số dư] | [Hôm nay] | [Tuần này]
             Row(

@@ -1,0 +1,2 @@
+{"probe":"unrelated-tester-financial-round-read","expected":"no rows or permission denied","actualRows":0,"denied":"42501"}
+{"probe":"lifecycle-versus-round-close","lifecycle":{"ok":true},"other":{"ok":false,"code":"40P01","message":"deadlock detected"}}

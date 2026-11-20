@@ -6,11 +6,15 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import android.util.LruCache
 import com.ntt.crosstest.BuildConfig
+import com.ntt.crosstest.data.MediaExpiryPolicy
 import com.ntt.crosstest.data.TesterReport
+import com.ntt.crosstest.util.NetworkHttpFactory.applyResilient5GConfig
 import kotlinx.coroutines.*
 import okhttp3.Call
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okio.Buffer
 import okio.BufferedSource
 import java.io.IOException
@@ -32,6 +36,9 @@ data class ScreenshotDescriptor(
     val variant: ScreenshotVariant = ScreenshotVariant.FULL,
     val fallbackUrl: String? = null,
     val reportId: String? = null,
+    val attachmentId: String? = null,
+    val provider: String? = null,
+    val viewExpiresAt: String? = null,
 )
 
 class ScreenshotExpiredException(val sanitizedUrl: String) :
@@ -168,7 +175,14 @@ object ScreenshotManager {
 
     private val defaultHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .applyResilient5GConfig(
+                connectTimeoutSeconds = 8L,
+                readTimeoutSeconds = 20L,
+                writeTimeoutSeconds = 20L,
+                pingIntervalSeconds = 15L,
+            )
             .addInterceptor(ImageInstrumentation.createTrackingInterceptor())
+            .addNetworkInterceptor(StripAuthOnCrossOriginRedirectInterceptor())
             .build()
     }
 
@@ -178,62 +192,89 @@ object ScreenshotManager {
     fun isReportScreenshotUrl(url: String?): Boolean {
         if (url.isNullOrBlank()) return false
         return url.contains("/reports%2F") || url.contains("/reports/") || url.contains("reports%2F")
+            || url.contains("/report-screenshots/") || url.contains("report-screenshots%2F")
     }
 
     fun registerReportMetadata(report: TesterReport?) {
         if (report == null || report.screenshotUrl.isNullOrBlank()) return
-        registerReportMetadata(report.screenshotUrl, report.createdAt, report.mediaExpired)
+        registerReportMetadata(
+            url = report.screenshotUrl,
+            createdAt = report.createdAt,
+            mediaExpired = report.mediaExpired ?: report.isScreenshotExpired,
+            provider = report.storageProvider,
+            viewExpiresAt = report.viewExpiresAt,
+        )
     }
 
-    fun registerReportMetadata(url: String, createdAt: String?, mediaExpired: Boolean?) {
+    fun registerReportMetadata(
+        url: String,
+        createdAt: String?,
+        mediaExpired: Boolean?,
+        provider: String? = null,
+        viewExpiresAt: String? = null,
+    ) {
         if (url.isBlank()) return
         synchronized(stateLock) {
-            descriptorCache.put(url, ScreenshotDescriptor(url, createdAt, mediaExpired))
+            descriptorCache.put(
+                url,
+                ScreenshotDescriptor(
+                    url = url,
+                    createdAt = createdAt,
+                    mediaExpired = mediaExpired,
+                    provider = provider,
+                    viewExpiresAt = viewExpiresAt,
+                )
+            )
         }
     }
 
     fun isExpired(descriptor: ScreenshotDescriptor?): Boolean {
         if (descriptor == null) return false
-        return isExpired(descriptor.url, descriptor.createdAt, descriptor.mediaExpired)
+        return isExpired(
+            url = descriptor.url,
+            createdAt = descriptor.createdAt,
+            mediaExpired = descriptor.mediaExpired,
+            provider = descriptor.provider,
+            viewExpiresAt = descriptor.viewExpiresAt,
+        )
     }
 
-    fun isExpired(url: String?, createdAt: String? = null, mediaExpired: Boolean? = null): Boolean {
+    fun isExpired(
+        url: String?,
+        createdAt: String? = null,
+        mediaExpired: Boolean? = null,
+        provider: String? = null,
+        viewExpiresAt: String? = null,
+    ): Boolean {
         if (url.isNullOrBlank()) return true
 
         synchronized(stateLock) {
-            if (mediaExpired == true) return true
-
             val cachedDesc = descriptorCache.get(url)
-            if (cachedDesc?.mediaExpired == true) return true
-            if (!cachedDesc?.createdAt.isNullOrBlank()) {
-                try {
-                    val created = Instant.parse(cachedDesc.createdAt)
-                    val cutoff = Instant.now().minus(Duration.ofDays(30))
-                    if (created.isBefore(cutoff)) return true
-                } catch (_: Exception) {}
-            }
+            val effMediaExpired = mediaExpired ?: cachedDesc?.mediaExpired
+            val effViewExpiresAt = viewExpiresAt ?: cachedDesc?.viewExpiresAt
+            val effProvider = provider ?: cachedDesc?.provider
+            val effCreatedAt = createdAt ?: cachedDesc?.createdAt
 
-            val effectiveCreatedAt = createdAt ?: cachedDesc?.createdAt
-            val effectiveMediaExpired = mediaExpired ?: cachedDesc?.mediaExpired
-
-            if (effectiveMediaExpired == true) return true
-
-            if (!effectiveCreatedAt.isNullOrBlank()) {
-                try {
-                    val created = Instant.parse(effectiveCreatedAt)
-                    val cutoff = Instant.now().minus(Duration.ofDays(30))
-                    if (created.isBefore(cutoff)) return true
-                } catch (_: Exception) {}
-            }
+            return MediaExpiryPolicy.isExpired(
+                url = url,
+                createdAt = effCreatedAt,
+                mediaExpired = effMediaExpired,
+                provider = effProvider,
+                viewExpiresAt = effViewExpiresAt,
+            )
         }
-
-        return false
     }
 
     fun isExpired(report: TesterReport?): Boolean {
         if (report == null) return false
         if (report.isScreenshotExpired) return true
-        return isExpired(report.screenshotUrl, report.createdAt, report.mediaExpired)
+        return isExpired(
+            url = report.screenshotUrl,
+            createdAt = report.createdAt,
+            mediaExpired = report.mediaExpired,
+            provider = report.storageProvider,
+            viewExpiresAt = report.viewExpiresAt,
+        )
     }
 
     fun is404Tombstoned(url: String?): Boolean {
@@ -300,14 +341,16 @@ object ScreenshotManager {
             ScreenshotRequestFactory.createDescriptor(url, report, variant = descriptor?.variant ?: ScreenshotVariant.FULL)
         } else null
 
-        val effCreatedAt = report?.createdAt ?: effectiveDescriptor?.createdAt
-        val effMediaExpired = report?.mediaExpired ?: effectiveDescriptor?.mediaExpired
+        val effCreatedAt = effectiveDescriptor?.createdAt
+        val effMediaExpired = effectiveDescriptor?.mediaExpired
+        val effProvider = effectiveDescriptor?.provider
+        val effViewExpiresAt = effectiveDescriptor?.viewExpiresAt
 
-        if (effCreatedAt != null || effMediaExpired != null) {
-            registerReportMetadata(url, effCreatedAt, effMediaExpired)
+        if (effCreatedAt != null || effMediaExpired != null || effProvider != null || effViewExpiresAt != null) {
+            registerReportMetadata(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt)
         }
 
-        if (report?.isScreenshotExpired == true || isExpired(url, effCreatedAt, effMediaExpired) || is404Tombstoned(url)) {
+        if (isExpired(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt) || is404Tombstoned(url)) {
             return null
         }
 
@@ -324,7 +367,7 @@ object ScreenshotManager {
         synchronized(stateLock) {
             if (sessionGeneration.get() == genAtStart && currentAccountId == accountIdAtStart) {
                 sessionCache.get(url)?.let { cached ->
-                    if (!cached.isRecycled && !isExpired(url, effCreatedAt, effMediaExpired)) {
+                    if (!cached.isRecycled && !isExpired(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt)) {
                         ImageInstrumentation.recordMemoryHit()
                         return cached
                     }
@@ -342,6 +385,8 @@ object ScreenshotManager {
                 url = url,
                 currentReportCreatedAt = effCreatedAt,
                 currentMediaExpired = effMediaExpired,
+                currentProvider = effProvider,
+                currentViewExpiresAt = effViewExpiresAt,
             )
             if (diskCached != null) {
                 synchronized(stateLock) {
@@ -363,7 +408,7 @@ object ScreenshotManager {
         val inFlightTask = synchronized(stateLock) {
             if (sessionGeneration.get() != genAtStart || currentAccountId != accountIdAtStart) return null
             sessionCache.get(url)?.let { cached ->
-                if (!cached.isRecycled && !isExpired(url, effCreatedAt, effMediaExpired)) {
+                if (!cached.isRecycled && !isExpired(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt)) {
                     ImageInstrumentation.recordMemoryHit()
                     return cached
                 }
@@ -378,11 +423,23 @@ object ScreenshotManager {
                     .url(effectiveUrl)
                     .header("X-Image-Purpose", purpose)
 
-                val grantProvider = ScreenshotCachePolicy.mediaAccessGrantProvider
-                if (ScreenshotCachePolicy.isMediaGatewayEnabled && grantProvider != null) {
-                    val authToken = grantProvider.getCurrentAuthToken()
+                val targetOrigin = extractCanonicalOrigin(effectiveUrl)
+                val supabaseOrigin = extractCanonicalOrigin(BuildConfig.SUPABASE_URL)
+                val gatewayOrigin = extractCanonicalOrigin(ScreenshotCachePolicy.mediaGatewayBaseUrl)
+
+                val isSupabaseOrigin = targetOrigin != null && supabaseOrigin != null && targetOrigin == supabaseOrigin
+                val isGatewayOrigin = targetOrigin != null && gatewayOrigin != null && targetOrigin == gatewayOrigin
+
+                // Security: Gửi Bearer token và apikey CHỈ tới exact origin tin cậy (scheme + host + effectivePort)
+                // Yêu cầu https (ngoại trừ localhost test), từ chối userinfo, không gửi sang origin khác
+                if (isSupabaseOrigin || isGatewayOrigin) {
+                    val grantProvider = ScreenshotCachePolicy.mediaAccessGrantProvider
+                    val authToken = grantProvider?.getCurrentAuthToken() ?: SupabaseStorageHelper.resolveAuthToken()
                     if (!authToken.isNullOrBlank()) {
                         requestBuilder.header("Authorization", "Bearer $authToken")
+                    }
+                    if (isSupabaseOrigin && BuildConfig.SUPABASE_ANON_KEY.isNotBlank()) {
+                        requestBuilder.header("apikey", BuildConfig.SUPABASE_ANON_KEY)
                     }
                 }
                 val request = requestBuilder.build()
@@ -440,7 +497,7 @@ object ScreenshotManager {
                             val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
 
                             // Kiểm tra lại expiry trước khi publish/return sau network (Issue C)
-                            if (isExpired(url, effCreatedAt, effMediaExpired) || isExpired(url)) {
+                            if (isExpired(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt) || isExpired(url)) {
                                 return@use null
                             }
 
@@ -473,6 +530,8 @@ object ScreenshotManager {
                                         mediaExpired = effMediaExpired,
                                         serverDateHeaderEpochMs = serverDateMs,
                                         ageHeader = ageHeader,
+                                        provider = effProvider,
+                                        viewExpiresAt = effViewExpiresAt,
                                         isSessionValid = {
                                             synchronized(stateLock) {
                                                 sessionGeneration.get() == genAtStart && currentAccountId == accountIdAtStart
@@ -521,7 +580,7 @@ object ScreenshotManager {
             // Kiểm tra lại generation, accountId và expiry trước khi trả kết quả cho caller (Issue C)
             synchronized(stateLock) {
                 if (genAtStart == sessionGeneration.get() && currentAccountId == accountIdAtStart && result != null && !result.isRecycled) {
-                    if (isExpired(url, effCreatedAt, effMediaExpired) || isExpired(url)) {
+                    if (isExpired(url, effCreatedAt, effMediaExpired, effProvider, effViewExpiresAt) || isExpired(url)) {
                         return null
                     }
                     return result
@@ -572,9 +631,15 @@ object ScreenshotManager {
             ?: extractReportIdFromUrl(rawUrl)
             ?: return rawUrl
         val variant = if (descriptor?.variant == ScreenshotVariant.THUMBNAIL) "thumb" else "full"
+        val attachmentId = descriptor?.attachmentId
         val provider = ScreenshotCachePolicy.mediaAccessGrantProvider
         if (provider != null) {
-            val grant = provider.getMediaAccessGrant(reportId)
+            val grant = try {
+                provider.getMediaAccessGrant(reportId, attachmentId)
+            } catch (e: ScreenshotExpiredException) {
+                mark404Unavailable(rawUrl, sessionGeneration.get())
+                throw e
+            }
             if (grant != null && grant.success) {
                 val signedUrl = if (variant == "thumb") {
                     grant.thumbnailUrl ?: grant.screenshotUrl
@@ -585,7 +650,8 @@ object ScreenshotManager {
             }
         }
         val base = ScreenshotCachePolicy.mediaGatewayBaseUrl.trimEnd('/')
-        return "$base?report_id=$reportId&variant=$variant"
+        val attParam = if (!attachmentId.isNullOrBlank()) "&attachment_id=$attachmentId" else ""
+        return "$base?report_id=$reportId$attParam&variant=$variant"
     }
 
     fun resolveEffectiveUrl(rawUrl: String, descriptor: ScreenshotDescriptor? = null): String {
@@ -599,13 +665,21 @@ object ScreenshotManager {
             ?: extractReportIdFromUrl(rawUrl)
             ?: return rawUrl
         val variant = if (descriptor?.variant == ScreenshotVariant.THUMBNAIL) "thumb" else "full"
+        val attachmentId = descriptor?.attachmentId
         val base = ScreenshotCachePolicy.mediaGatewayBaseUrl.trimEnd('/')
-        return "$base?report_id=$reportId&variant=$variant"
+        val attParam = if (!attachmentId.isNullOrBlank()) "&attachment_id=$attachmentId" else ""
+        return "$base?report_id=$reportId$attParam&variant=$variant"
     }
 
     private fun extractReportIdFromUrl(url: String): String? {
         return try {
             val clean = url.substringBefore('?').substringBefore('#')
+            val segments = clean.split("/", "%2F").filter { it.isNotEmpty() }
+            val reportScreenshotsIdx = segments.indexOfLast { it == "report-screenshots" }
+            if (reportScreenshotsIdx != -1 && segments.size > reportScreenshotsIdx + 2) {
+                val candidate = segments[reportScreenshotsIdx + 2]
+                if (candidate.length >= 8) return candidate
+            }
             val filename = clean.substringAfterLast('/').substringAfterLast("%2F")
             val baseName = filename.substringBeforeLast('.')
             val id = if (baseName.startsWith("thumb_")) baseName.removePrefix("thumb_") else baseName
@@ -619,5 +693,79 @@ object ScreenshotManager {
         if (report == null) return null
         if (isFull) return report.screenshotUrl
         return report.thumbnailUrl ?: report.screenshotUrl
+    }
+
+    /**
+     * Chuẩn hóa và trích xuất exact origin: scheme://host[:effectivePort]
+     * - Bắt buộc scheme là https (ngoại lệ duy nhất cho phép http là localhost/127.0.0.1/10.0.2.2 trong test/dev)
+     * - Từ chối nếu chứa userInfo (tránh bypass hoặc credential confusion)
+     * - Cổng chuẩn (443 cho https, 80 cho http) được chuẩn hóa bỏ qua để so khớp nhất quán
+     */
+    fun extractCanonicalOrigin(urlString: String?): String? {
+        if (urlString.isNullOrBlank()) return null
+        return try {
+            val uri = java.net.URI(urlString)
+            val scheme = uri.scheme?.lowercase() ?: return null
+            val host = uri.host?.lowercase() ?: return null
+
+            // Từ chối userinfo
+            if (!uri.rawUserInfo.isNullOrBlank()) return null
+
+            val isLocalhost = host == "localhost" || host == "127.0.0.1" || host == "10.0.2.2"
+            if (scheme != "https" && !(scheme == "http" && isLocalhost)) {
+                return null
+            }
+
+            val rawPort = uri.port
+            val defaultPort = if (scheme == "https") 443 else 80
+            val effectivePort = if (rawPort != -1) rawPort else defaultPort
+
+            if (effectivePort == defaultPort) {
+                "$scheme://$host"
+            } else {
+                "$scheme://$host:$effectivePort"
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Kiểm tra xem targetUrl có khớp chính xác exact origin (scheme + host + effectivePort)
+     * với BuildConfig.SUPABASE_URL hoặc Media Gateway được cấu hình hay không.
+     */
+    fun isTrustedAuthOrigin(targetUrl: String?): Boolean {
+        val targetOrigin = extractCanonicalOrigin(targetUrl) ?: return false
+
+        val trustedSupabaseOrigin = extractCanonicalOrigin(BuildConfig.SUPABASE_URL)
+        val trustedGatewayOrigin = extractCanonicalOrigin(ScreenshotCachePolicy.mediaGatewayBaseUrl)
+
+        return (trustedSupabaseOrigin != null && targetOrigin == trustedSupabaseOrigin) ||
+               (trustedGatewayOrigin != null && targetOrigin == trustedGatewayOrigin)
+    }
+
+    /**
+     * Hàm đối soát nguồn tin cậy tuân thủ exact origin, tương thích ngược caller cũ.
+     */
+    fun isTrustedAuthHost(url: String): Boolean = isTrustedAuthOrigin(url)
+}
+
+/**
+ * Network interceptor đảm bảo tuyệt đối không forward Authorization hay apikey khi redirect sang origin khác.
+ */
+class StripAuthOnCrossOriginRedirectInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val url = request.url.toString()
+        if (!ScreenshotManager.isTrustedAuthOrigin(url)) {
+            if (request.header("Authorization") != null || request.header("apikey") != null) {
+                val safeRequest = request.newBuilder()
+                    .removeHeader("Authorization")
+                    .removeHeader("apikey")
+                    .build()
+                return chain.proceed(safeRequest)
+            }
+        }
+        return chain.proceed(request)
     }
 }

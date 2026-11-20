@@ -1,0 +1,14 @@
+{
+  "logName": "root-round5-resubmit-review",
+  "arguments": [
+    "-I",
+    "audit/app-mission-report-2026-11-02/independent.init.gradle",
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest.newlyPreparedPrimaryIsAllowedWhenOnlyPerceptualHashMatchesRejectedPhoto"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-02T10:53:25.4485787Z",
+  "finishedUtc": "2026-11-02T10:53:50.1428221Z",
+  "currentRunXmlCount": 1
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "supabase/migrations/070_admin_management.sql",
+    "sha256": "30F1C530906832AEFB946F090DAB79C7A923A63070726C33758BB2756BF63190",
+    "bytes": 113528
+  },
+  {
+    "path": "supabase/migrations/071_business_policies.sql",
+    "sha256": "54BEE66AC2094032D355579E0B1B615EFC5311648BCE8BD4C0710321F3FCA515",
+    "bytes": 204247
+  },
+  {
+    "path": "supabase/migrations/072_admin_notification_campaigns.sql",
+    "sha256": "9BA67555147BE73D6944F3ED927CC166FA7BD107933AAA1044B23A38ACDCF622",
+    "bytes": 77854
+  },
+  {
+    "path": "supabase/migrations/073_admin_action_audit.sql",
+    "sha256": "5FAD33D13A36772ED52EC93919F82502816A57016E71559560F47B0C1321D592",
+    "bytes": 42728
+  }
+]

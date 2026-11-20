@@ -21,13 +21,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +43,7 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -86,11 +89,14 @@ import com.ntt.crosstest.ui.components.CreditRewardOverlay
 import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.TesterImageComparisonDialog
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ReportComparisonSelector
 import com.ntt.crosstest.util.ScreenshotManager
 import com.ntt.crosstest.data.TesterReport
+import com.ntt.crosstest.data.EgressTriggerSource
 import com.ntt.crosstest.util.ScreenshotRequestFactory
 import com.ntt.crosstest.util.formatIsoUtcToLocal
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -103,6 +109,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -128,6 +135,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
 import com.ntt.crosstest.util.ScreenshotVariant
+import com.ntt.crosstest.util.WarningRenderer
+import com.ntt.crosstest.util.RejectionReasonRenderer
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.Campaign
@@ -135,23 +144,27 @@ import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.ReportSubmitManager
 import com.ntt.crosstest.data.SettingsRepository
 import com.ntt.crosstest.ui.theme.AmberStar
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.ui.viewmodels.CampaignDetailUiState
 import com.ntt.crosstest.ui.viewmodels.CampaignDetailViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampaignDetailScreen(
     campaignId: String,
     initialMissionId: String? = null,
+    autoLaunchNextTest: Boolean = false,
     onBack: () -> Unit,
     onOwnerManageClick: ((String) -> Unit)? = null,
-    onNavigateToCampaign: ((String) -> Unit)? = null,
+    onNavigateToCampaign: ((String, Boolean) -> Unit)? = null,
     onAccountLocked: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val app = context.applicationContext as TestCheoApp
     val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val localizer = remember(context) { Localizer(context) }
     val viewModel: CampaignDetailViewModel = viewModel(
         key = if (initialMissionId != null) "$campaignId:$initialMissionId" else campaignId,
         factory = viewModelFactory {
@@ -169,7 +182,15 @@ fun CampaignDetailScreen(
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val adminPauseDialogState by viewModel.adminPauseDialogState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val testMode by app.settingsRepository.testMode.collectAsStateWithLifecycle(
+        initialValue = SettingsRepository.getSavedTestModeSync(context)
+    )
+    val isTurboMode = testMode == SettingsRepository.TEST_MODE_TURBO
+    var autoLaunchConsumed by rememberSaveable(campaignId) { mutableStateOf(false) }
+    var autoAdvanceAttempts by remember(uiState.showNextAppPrompt) { mutableStateOf(0) }
 
     var showReportDialog by rememberSaveable { mutableStateOf(false) }
     var showHistoryDialog by rememberSaveable { mutableStateOf(false) }
@@ -177,12 +198,21 @@ fun CampaignDetailScreen(
     var showHowToInstallDialog by rememberSaveable { mutableStateOf(false) }
     var showCannotDownloadDialog by rememberSaveable { mutableStateOf(false) }
     var showAdminDeleteDialog by rememberSaveable { mutableStateOf(false) }
-    var showAdminPauseDialog by rememberSaveable { mutableStateOf(false) }
+    var showAdminDeleteMissionDialog by rememberSaveable { mutableStateOf(false) }
+    var pinnedMissionIdForDelete by rememberSaveable { mutableStateOf<String?>(null) }
+    var adminDeleteMissionReason by rememberSaveable { mutableStateOf("") }
     var showAdminResumeDialog by rememberSaveable { mutableStateOf(false) }
-    var adminPauseReason by rememberSaveable { mutableStateOf("") }
     var previewImageUrl by rememberSaveable { mutableStateOf<String?>(null) }
     var previewImageExpired by rememberSaveable { mutableStateOf(false) }
     var previewReport by remember { mutableStateOf<TesterReport?>(null) }
+
+    LaunchedEffect(uiState.currentUserId, uiState.sessionGeneration, uiState.isAdmin) {
+        viewModel.adminPauseDialogController.syncIdentity(
+            userId = uiState.currentUserId,
+            generation = uiState.sessionGeneration,
+            isAdmin = uiState.isAdmin,
+        )
+    }
 
     var isInstalledLocally by remember { mutableStateOf(false) }
 
@@ -200,7 +230,7 @@ fun CampaignDetailScreen(
             } catch (_: Exception) { false }
             viewModel.checkInstalledAppVersion(context)
         }
-        viewModel.refresh()
+        viewModel.refresh(forceRefresh = false, triggerSource = EgressTriggerSource.RESUME)
         onPauseOrDispose { }
     }
 
@@ -225,7 +255,9 @@ fun CampaignDetailScreen(
     }
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
-            snackbarHostState.showSnackbar(it)
+            if (!adminPauseDialogState.isOpen) {
+                snackbarHostState.showSnackbar(it)
+            }
             viewModel.clearMessage()
         }
     }
@@ -234,6 +266,63 @@ fun CampaignDetailScreen(
         if (uiState.isUserLocked) {
             onAccountLocked()
         }
+    }
+
+    val autoLaunchTodayReport = uiState.myTodayReport
+    val autoLaunchApprovedToday = (uiState.checkedInToday || autoLaunchTodayReport?.isApproved == true) &&
+        autoLaunchTodayReport?.isPending != true && autoLaunchTodayReport?.isRejected != true
+    val autoLaunchPendingToday = autoLaunchTodayReport?.isPending == true
+
+    // Test siêu tốc: tự chọn & chuyển sang app test tiếp theo ngay khi có kết quả gợi ý.
+    LaunchedEffect(
+        isTurboMode,
+        uiState.showNextAppPrompt,
+        uiState.nextSuggestionLoading,
+        uiState.nextCampaignToTest?.id,
+        uiState.nextSuggestionFailed,
+        autoAdvanceAttempts,
+    ) {
+        if (!isTurboMode || !uiState.showNextAppPrompt || uiState.nextSuggestionLoading) return@LaunchedEffect
+        if (uiState.nextCampaignToTest == null || uiState.nextSuggestionFailed) return@LaunchedEffect
+        if (autoAdvanceAttempts >= 2 || onNavigateToCampaign == null) return@LaunchedEffect
+
+        val nextId = viewModel.validateAndConsumeNextCampaign()
+        if (!nextId.isNullOrBlank()) {
+            viewModel.dismissNextAppPrompt()
+            onNavigateToCampaign(nextId, true)
+        } else {
+            autoAdvanceAttempts += 1
+        }
+    }
+
+    // Test siêu tốc: khi vừa chuyển sang app tiếp theo, tự mở app (hoặc tải & cài đặt nếu chưa cài).
+    LaunchedEffect(
+        autoLaunchNextTest,
+        autoLaunchConsumed,
+        uiState.campaign?.id,
+        uiState.campaign?.status,
+        uiState.isLoading,
+        uiState.isBackgroundSyncing,
+        uiState.isOwner,
+        uiState.unreadWarning,
+        autoLaunchApprovedToday,
+        autoLaunchPendingToday,
+    ) {
+        if (!autoLaunchNextTest || autoLaunchConsumed) return@LaunchedEffect
+        val targetCampaign = uiState.campaign ?: return@LaunchedEffect
+        if (uiState.isLoading || uiState.isBackgroundSyncing) return@LaunchedEffect
+        if (uiState.unreadWarning != null) return@LaunchedEffect
+
+        autoLaunchConsumed = true
+        if (!targetCampaign.isOpen || uiState.isOwner || autoLaunchApprovedToday || autoLaunchPendingToday) {
+            return@LaunchedEffect
+        }
+        launchOrInstallCampaignApp(
+            context = context,
+            campaign = targetCampaign,
+            isOwner = uiState.isOwner,
+            viewModel = viewModel,
+        )
     }
 
     // Warning Dialog for tester
@@ -245,7 +334,7 @@ fun CampaignDetailScreen(
                 Icon(
                     imageVector = Icons.Filled.Warning,
                     contentDescription = null,
-                    tint = Color(0xFFF57F17),
+                    tint = MaterialTheme.statusColors.warning,
                     modifier = Modifier.size(36.dp)
                 )
             },
@@ -253,25 +342,25 @@ fun CampaignDetailScreen(
                 Text(
                     text = stringResource(R.string.warning_dialog_title),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = activeWarning.message,
+                        text = WarningRenderer.render(activeWarning, Localizer(context)),
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp,
                     )
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                         shape = RoundedCornerShape(8.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.warning_quota_format, uiState.weeklyWarningsCount),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFC62828),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(10.dp)
                         )
                     }
@@ -282,7 +371,10 @@ fun CampaignDetailScreen(
                     onClick = {
                         activeWarning.id?.let { viewModel.dismissWarning(it) }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    )
                 ) {
                     Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
@@ -298,19 +390,60 @@ fun CampaignDetailScreen(
     if (uiState.showNextAppPrompt) {
         val nextCamp = uiState.nextCampaignToTest
         val findingNext = uiState.nextSuggestionLoading && nextCamp == null
+        val waitingTurboAutoAdvance = isTurboMode &&
+            !uiState.nextSuggestionFailed &&
+            (uiState.nextSuggestionLoading || (nextCamp != null && autoAdvanceAttempts < 2 && onNavigateToCampaign != null))
+        if (waitingTurboAutoAdvance) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissNextAppPrompt() },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.RocketLaunch,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.campaign_turbo_next_loading_title),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Text(
+                            text = stringResource(R.string.campaign_turbo_next_loading_msg),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissNextAppPrompt() }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+            )
+        } else {
         AlertDialog(
             onDismissRequest = { viewModel.dismissNextAppPrompt() },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.RocketLaunch,
                     contentDescription = null,
-                    tint = Color(0xFF1E88E5),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
                 )
             },
             title = {
                 Text(
-                    text = stringResource(if (findingNext || nextCamp != null) R.string.campaign_next_dialog_title else R.string.campaign_done_dialog_title),
+                    text = stringResource(if (findingNext || nextCamp != null || uiState.nextSuggestionFailed) R.string.campaign_next_dialog_title else R.string.campaign_done_dialog_title),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
@@ -335,11 +468,11 @@ fun CampaignDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFFE65100))
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.statusColors.warning)
                             Text(
                                 text = stringResource(R.string.campaign_submit_retrying_format, uiState.submitAttempt),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFE65100),
+                                color = MaterialTheme.statusColors.warning,
                             )
                         }
                         ReportSubmitManager.Stage.DONE -> Row(
@@ -349,7 +482,7 @@ fun CampaignDetailScreen(
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
                                 contentDescription = null,
-                                tint = Color(0xFF2E7D32),
+                                tint = MaterialTheme.statusColors.success,
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
@@ -359,10 +492,15 @@ fun CampaignDetailScreen(
                                     stringResource(R.string.campaign_submit_sent_ok)
                                 },
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF2E7D32),
+                                color = MaterialTheme.statusColors.success,
                             )
                         }
                         ReportSubmitManager.Stage.FAILED -> Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = stringResource(R.string.campaign_report_not_sent_yet),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -457,6 +595,24 @@ fun CampaignDetailScreen(
                                 )
                             }
                         }
+                        uiState.nextSuggestionFailed -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.campaign_next_load_failed),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
                         else -> {
                             Text(
                                 text = stringResource(R.string.campaign_all_done_msg),
@@ -471,13 +627,18 @@ fun CampaignDetailScreen(
                     nextCamp != null -> {
                         Button(
                             onClick = {
-                                val nextId = nextCamp.id.orEmpty()
-                                viewModel.dismissNextAppPrompt()
-                                if (nextId.isNotBlank() && onNavigateToCampaign != null) {
-                                    onNavigateToCampaign(nextId)
+                                val nextId = viewModel.validateAndConsumeNextCampaign()
+                                if (!nextId.isNullOrBlank()) {
+                                    viewModel.dismissNextAppPrompt()
+                                    if (onNavigateToCampaign != null) {
+                                        onNavigateToCampaign(nextId, false)
+                                    }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
                         ) {
                             Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
@@ -488,15 +649,34 @@ fun CampaignDetailScreen(
                         Button(
                             onClick = {},
                             enabled = false,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
                         ) {
                             Text(stringResource(R.string.campaign_finding_next_btn))
+                        }
+                    }
+                    uiState.nextSuggestionFailed -> {
+                        Button(
+                            onClick = { viewModel.retryPrefetchNextCampaign() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        ) {
+                            Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.campaign_next_retry_btn))
                         }
                     }
                     else -> {
                         Button(
                             onClick = { viewModel.dismissNextAppPrompt() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
                         ) {
                             Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
@@ -506,7 +686,7 @@ fun CampaignDetailScreen(
                 }
             },
             dismissButton = {
-                if (nextCamp != null) {
+                if (nextCamp != null || uiState.nextSuggestionFailed) {
                     TextButton(onClick = { viewModel.dismissNextAppPrompt() }) {
                         Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
@@ -521,6 +701,7 @@ fun CampaignDetailScreen(
                 }
             }
         )
+        }
     }
 
     // Dialog: Chưa cài ứng dụng
@@ -674,57 +855,59 @@ fun CampaignDetailScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.campaign_history_date_format, rep.createdAt?.take(10) ?: stringResource(R.string.today)),
-                                                    fontWeight = FontWeight.Bold,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                )
-                                                if (rep.isMissionReport) {
-                                                    Surface(
-                                                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                                                        shape = RoundedCornerShape(4.dp),
-                                                    ) {
-                                                        Text(
-                                                            text = stringResource(R.string.mission_report_badge),
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            Text(
+                                                text = stringResource(R.string.campaign_history_date_format, rep.createdAt?.take(10) ?: stringResource(R.string.today)),
+                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                            )
                                             val badgeText = when {
                                                 rep.isApproved -> stringResource(R.string.campaign_history_status_approved_format, rep.approvedReward)
                                                 rep.isPending -> stringResource(R.string.campaign_history_status_pending_format, rep.remainingHoursUntilAutoAccept())
                                                 else -> stringResource(R.string.campaign_history_status_rejected)
                                             }
                                             val badgeColor = when {
-                                                rep.isApproved -> Color(0xFF2E7D32)
-                                                rep.isPending -> Color(0xFFE65100)
+                                                rep.isApproved -> MaterialTheme.statusColors.success
+                                                rep.isPending -> MaterialTheme.statusColors.warning
                                                 else -> MaterialTheme.colorScheme.error
                                             }
                                             Text(text = badgeText, color = badgeColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
                                         }
-                                        if (rep.isMissionReport && !rep.missionTitle.isNullOrBlank()) {
-                                            Text(
-                                                text = rep.missionTitle,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        if (rep.isMissionReport) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Surface(
+                                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    shape = RoundedCornerShape(4.dp),
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.mission_report_badge),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                    )
+                                                }
+                                                if (!rep.missionTitle.isNullOrBlank()) {
+                                                    Text(
+                                                        text = rep.missionTitle,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        modifier = Modifier.weight(1f, fill = false),
+                                                    )
+                                                }
+                                            }
                                         }
                                         if (rep.content.isNotBlank()) {
                                             Text(text = rep.content, style = MaterialTheme.typography.bodySmall)
                                         }
                                         if (rep.isRejected && !rep.rejectionReason.isNullOrBlank()) {
-                                            Text(text = stringResource(R.string.campaign_history_reason_format, rep.rejectionReason), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                                            val renderedReason = RejectionReasonRenderer.render(rep.rejectionReason, rep.reasonCode, localizer)
+                                            Text(text = stringResource(R.string.campaign_history_reason_format, renderedReason), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                                         }
                                         if (rep.isScreenshotExpired) {
                                             Row(
@@ -798,7 +981,7 @@ fun CampaignDetailScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(stringResource(R.string.campaign_history_test_day_format, date), fontWeight = FontWeight.SemiBold)
-                                        Text(stringResource(R.string.campaign_history_reward_format, 2), color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.campaign_history_reward_format, 2), color = MaterialTheme.statusColors.success, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -831,53 +1014,169 @@ fun CampaignDetailScreen(
             onRatingChange = viewModel::onRatingChange,
             onCommentChange = viewModel::onCommentChange,
             onSubmit = {
-                viewModel.startSubmit()
-                showReportDialog = false
+                coroutineScope.launch {
+                    val accepted = viewModel.startSubmit()
+                    if (accepted) {
+                        showReportDialog = false
+                    }
+                }
             },
             onPreviewImage = { url: String, expired: Boolean, rep: TesterReport? -> previewImageUrl = url; previewImageExpired = expired; previewReport = rep },
         )
     }
 
-    if (showAdminPauseDialog) {
+    if (adminPauseDialogState.isOpen) {
         val appName = uiState.campaign?.appName ?: stringResource(R.string.campaign_this_app)
         val ownerName = uiState.ownerProfile?.displayName?.ifBlank { null }
             ?: uiState.ownerProfile?.email?.substringBefore("@")
             ?: stringResource(R.string.campaign_owner_fallback)
 
+        val options = listOf(
+            com.ntt.crosstest.data.AdminPauseReason.MISSING_GOOGLE_GROUP.code to stringResource(R.string.campaign_admin_pause_opt_missing_google_group),
+            com.ntt.crosstest.data.AdminPauseReason.POLICY_VIOLATION.code to stringResource(R.string.campaign_admin_pause_opt_policy_violation),
+            com.ntt.crosstest.data.AdminPauseReason.CUSTOM.code to stringResource(R.string.campaign_admin_pause_opt_custom),
+        )
+
         AlertDialog(
-            onDismissRequest = { if (!uiState.isActionLoading) showAdminPauseDialog = false },
+            onDismissRequest = { if (!uiState.isActionLoading) viewModel.dismissAdminPauseDialog() },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.PauseCircle,
                     contentDescription = null,
-                    tint = Color(0xFFB26A00),
+                    tint = MaterialTheme.statusColors.warning,
                     modifier = Modifier.size(36.dp)
                 )
             },
             title = { Text(stringResource(R.string.campaign_admin_pause_dialog_title)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (!adminPauseDialogState.error.isNullOrBlank()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                                Text(
+                                    text = adminPauseDialogState.error.orEmpty(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                        }
+                    }
+
                     Text(
                         text = stringResource(R.string.campaign_admin_pause_dialog_desc, appName, ownerName),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    OutlinedTextField(
-                        value = adminPauseReason,
-                        onValueChange = { if (it.length <= 200) adminPauseReason = it },
-                        label = { Text(stringResource(R.string.campaign_admin_pause_reason_label)) },
-                        placeholder = { Text(stringResource(R.string.campaign_admin_pause_reason_hint)) },
-                        minLines = 2,
-                        maxLines = 4,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+
+                    options.forEach { (code, label) ->
+                        val isSelected = adminPauseDialogState.reasonCode == code
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = isSelected,
+                                    enabled = !uiState.isActionLoading,
+                                    onClick = { viewModel.setAdminPauseReasonCode(code) },
+                                    role = androidx.compose.ui.semantics.Role.RadioButton,
+                                )
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = null,
+                                enabled = !uiState.isActionLoading,
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+
+                    when (adminPauseDialogState.reasonCode) {
+                        com.ntt.crosstest.data.AdminPauseReason.MISSING_GOOGLE_GROUP.code -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                                shape = RoundedCornerShape(8.dp),
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.campaign_admin_pause_preview_title),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.campaign_admin_pause_preview_missing_google_group, appName),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        }
+                        com.ntt.crosstest.data.AdminPauseReason.POLICY_VIOLATION.code -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                                shape = RoundedCornerShape(8.dp),
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.campaign_admin_pause_preview_title),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.campaign_admin_pause_preview_policy_violation),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        }
+                        else -> {
+                            OutlinedTextField(
+                                value = adminPauseDialogState.customReason,
+                                onValueChange = { if (it.length <= 200) viewModel.setAdminPauseCustomReason(it) },
+                                label = { Text(stringResource(R.string.campaign_admin_pause_reason_label)) },
+                                placeholder = { Text(stringResource(R.string.campaign_admin_pause_reason_hint)) },
+                                minLines = 2,
+                                maxLines = 4,
+                                enabled = !uiState.isActionLoading,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.adminPauseCampaign(adminPauseReason.ifBlank { null })
-                        showAdminPauseDialog = false
-                        adminPauseReason = ""
+                        viewModel.adminPauseCampaignWithReason(
+                            reasonCode = adminPauseDialogState.reasonCode,
+                            customReason = adminPauseDialogState.customReason.ifBlank { null },
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB26A00)),
                     enabled = !uiState.isActionLoading,
@@ -898,7 +1197,7 @@ fun CampaignDetailScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showAdminPauseDialog = false },
+                    onClick = { viewModel.dismissAdminPauseDialog() },
                     enabled = !uiState.isActionLoading,
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -969,6 +1268,7 @@ fun CampaignDetailScreen(
             ?: uiState.ownerProfile?.email?.substringBefore("@")
             ?: stringResource(R.string.campaign_owner_fallback)
 
+        val adminRemovedReason = stringResource(R.string.admin_removed_campaign_reason)
         AlertDialog(
             onDismissRequest = { if (!uiState.isActionLoading) showAdminDeleteDialog = false },
             icon = {
@@ -990,7 +1290,18 @@ fun CampaignDetailScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.adminDeleteCampaign(reason = "Gỡ bỏ bởi Admin", onDeleted = onBack)
+                        viewModel.adminDeleteCampaign(
+                            reason = adminRemovedReason,
+                            onDeleted = onBack,
+                            onPendingRemoval = {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.campaign_pending_removal_msg),
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                                onBack()
+                            },
+                        )
                         showAdminDeleteDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
@@ -1017,6 +1328,67 @@ fun CampaignDetailScreen(
                 ) {
                     Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showAdminDeleteMissionDialog && pinnedMissionIdForDelete != null) {
+        val targetMissionId = pinnedMissionIdForDelete!!
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isActionLoading) showAdminDeleteMissionDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = {
+                Text(stringResource(R.string.mission_admin_delete_title))
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.mission_admin_delete_confirm_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedTextField(
+                        value = adminDeleteMissionReason,
+                        onValueChange = { adminDeleteMissionReason = it },
+                        label = { Text(stringResource(R.string.mission_admin_delete_prompt)) },
+                        placeholder = { Text(stringResource(R.string.mission_admin_delete_reason_placeholder)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.adminDeleteMission(missionId = targetMissionId, reason = adminDeleteMissionReason) {
+                            showAdminDeleteMissionDialog = false
+                            adminDeleteMissionReason = ""
+                            pinnedMissionIdForDelete = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    enabled = !uiState.isActionLoading && adminDeleteMissionReason.trim().isNotBlank(),
+                ) {
+                    Text(stringResource(R.string.mission_admin_delete_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showAdminDeleteMissionDialog = false
+                        adminDeleteMissionReason = ""
+                        pinnedMissionIdForDelete = null
+                    },
+                    enabled = !uiState.isActionLoading,
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -1052,7 +1424,7 @@ fun CampaignDetailScreen(
                             )
                         }
                     }
-                    IconButton(onClick = { viewModel.refresh() }) {
+                    IconButton(onClick = { viewModel.refresh(triggerSource = EgressTriggerSource.MANUAL) }) {
                         Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.campaign_refresh_cd))
                     }
                 }
@@ -1096,7 +1468,7 @@ fun CampaignDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
             // Owner banner if viewed by app owner
             if (uiState.isOwner) {
@@ -1198,9 +1570,9 @@ fun CampaignDetailScreen(
                 // Info banner for testers when target is reached
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.successContainer),
                     shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Color(0xFFA5D6A7)),
+                    border = BorderStroke(1.dp, MaterialTheme.statusColors.success.copy(alpha = 0.5f)),
                 ) {
                     Row(
                         modifier = Modifier
@@ -1211,14 +1583,14 @@ fun CampaignDetailScreen(
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = null,
-                            tint = Color(0xFF2E7D32),
+                            tint = MaterialTheme.statusColors.success,
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.campaign_target_reached_msg_format, campaign.dailyTarget),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF1B5E20),
+                            color = MaterialTheme.statusColors.onSuccessContainer,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.weight(1f)
                         )
@@ -1273,6 +1645,41 @@ fun CampaignDetailScreen(
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
+
+                        Spacer(Modifier.width(10.dp))
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.campaign_owner_tested_stat_format,
+                                        uiState.ownerStats?.testedCount ?: 0,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.campaign_owner_installed_stat_format,
+                                        uiState.ownerStats?.installedCount ?: 0,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
                     }
 
                     Spacer(Modifier.height(14.dp))
@@ -1310,14 +1717,159 @@ fun CampaignDetailScreen(
             }
 
             // -------------------------------------------------------------
+            // Đợt thưởng thêm cho tester (nếu có đợt active/closing)
+            // -------------------------------------------------------------
+            val bonusInfo = uiState.testerBonusInfo
+            val myAwarded = bonusInfo?.myAwarded == true
+            val myPending = bonusInfo?.myPendingEligible == true
+            val isRoundActive = (bonusInfo?.status == "active" || (bonusInfo == null && campaign.hasActiveTesterBonus))
+            val hasActiveBonusRound = (bonusInfo?.hasRound == true && bonusInfo.status == "active" && bonusInfo.remainingSlots > 0) || campaign.hasActiveTesterBonus
+            val hasTerminalRound = bonusInfo != null && (bonusInfo.status == "closed" || bonusInfo.status == "exhausted")
+            val showBonusCard = hasActiveBonusRound || myAwarded || myPending || hasTerminalRound
+
+            if (showBonusCard) {
+                val rewardCredits = bonusInfo?.rewardCredits?.takeIf { it > 0 } ?: (campaign.testerBonusCredits ?: 0)
+                val remainingSlots = bonusInfo?.remainingSlots ?: (campaign.testerBonusRemainingSlots ?: 0)
+                val totalSlots = bonusInfo?.maxRecipients?.takeIf { it > 0 } ?: ((campaign.testerBonusRemainingSlots ?: 0) + (campaign.testerBonusPaidCount ?: 0))
+                val myAwardAmount = bonusInfo?.myAwardAmount?.takeIf { it > 0 } ?: rewardCredits
+
+                val surface = MaterialTheme.colorScheme.surface
+                val isDark = (0.299f * surface.red + 0.587f * surface.green + 0.114f * surface.blue) < 0.5f
+                val orangeAccent = if (isDark) Color(0xFFFFB74D) else Color(0xFFB54700)
+                val badgeBg = if (myAwarded) MaterialTheme.statusColors.successContainer else if (isDark) Color(0xFF422100) else Color(0xFFFFECE0)
+                val badgeFg = if (myAwarded) MaterialTheme.statusColors.onSuccessContainer else orangeAccent
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, orangeAccent.copy(alpha = 0.4f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.CardGiftcard,
+                                    contentDescription = null,
+                                    tint = orangeAccent,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.campaign_detail_bonus_title),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = badgeBg,
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (myAwarded) MaterialTheme.statusColors.success.copy(alpha = 0.4f) else orangeAccent.copy(alpha = 0.5f),
+                                ),
+                            ) {
+                                Text(
+                                    text = when {
+                                        myAwarded -> stringResource(R.string.campaign_detail_bonus_awarded, myAwardAmount)
+                                        isRoundActive && remainingSlots > 0 -> "+$rewardCredits Credit"
+                                        bonusInfo?.status == "closed" -> stringResource(R.string.tester_bonus_status_closed)
+                                        bonusInfo?.status == "exhausted" -> stringResource(R.string.tester_bonus_status_exhausted)
+                                        else -> "+$rewardCredits Credit"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = badgeFg,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                )
+                            }
+                        }
+
+                        when {
+                            myAwarded -> {
+                                Text(
+                                    text = stringResource(R.string.campaign_detail_bonus_awarded, myAwardAmount),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.statusColors.success,
+                                )
+                            }
+                            myPending -> {
+                                Text(
+                                    text = stringResource(R.string.campaign_detail_bonus_pending),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.statusColors.warning,
+                                )
+                            }
+                            bonusInfo?.status == "closed" -> {
+                                Text(
+                                    text = stringResource(R.string.tester_bonus_status_closed),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            remainingSlots <= 0 || bonusInfo?.status == "exhausted" -> {
+                                Text(
+                                    text = stringResource(R.string.campaign_detail_bonus_exhausted),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            isRoundActive && remainingSlots > 0 -> {
+                                Text(
+                                    text = stringResource(
+                                        R.string.campaign_detail_bonus_slots_format,
+                                        remainingSlots,
+                                        totalSlots,
+                                        rewardCredits,
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = stringResource(R.string.tester_bonus_status_closed),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+
+                        if ((isRoundActive && remainingSlots > 0) || myPending) {
+                            Text(
+                                text = stringResource(R.string.campaign_detail_bonus_condition),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+
+            // -------------------------------------------------------------
             // CARD 2: Cài app vào máy (Kiểm tra trạng thái cài đặt)
             // -------------------------------------------------------------
             if (!isInstalledLocally) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
-                    border = BorderStroke(1.dp, Color(0xFFFED7AA)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.warningContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.statusColors.warning.copy(alpha = 0.4f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
                     Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1330,7 +1882,7 @@ fun CampaignDetailScreen(
                                 Icon(
                                     imageVector = Icons.Filled.FileDownload,
                                     contentDescription = null,
-                                    tint = Color(0xFFC2410C),
+                                    tint = MaterialTheme.statusColors.warning,
                                     modifier = Modifier.size(20.dp),
                                 )
                                 Spacer(Modifier.width(8.dp))
@@ -1338,21 +1890,21 @@ fun CampaignDetailScreen(
                                     text = stringResource(R.string.campaign_step1_install_title),
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFF9A3412),
+                                    color = MaterialTheme.statusColors.onWarningContainer,
                                 )
                             }
 
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFFFEDD5))
+                                    .background(MaterialTheme.statusColors.warning.copy(alpha = 0.15f))
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
                                     text = stringResource(R.string.campaign_badge_not_installed),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp,
-                                    color = Color(0xFFC2410C),
+                                    color = MaterialTheme.statusColors.onWarningContainer,
                                 )
                             }
                         }
@@ -1360,7 +1912,7 @@ fun CampaignDetailScreen(
                         Text(
                             text = stringResource(R.string.campaign_install_hint),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF7C2D12),
+                            color = MaterialTheme.statusColors.onWarningContainer.copy(alpha = 0.85f),
                         )
 
                         Button(
@@ -1373,7 +1925,10 @@ fun CampaignDetailScreen(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEA580C)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.FileDownload,
@@ -1394,8 +1949,8 @@ fun CampaignDetailScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
-                    border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.successContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.statusColors.success.copy(alpha = 0.4f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
                     Row(
@@ -1412,7 +1967,7 @@ fun CampaignDetailScreen(
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
                                 contentDescription = null,
-                                tint = Color(0xFF16A34A),
+                                tint = MaterialTheme.statusColors.success,
                                 modifier = Modifier.size(18.dp),
                             )
                             Spacer(Modifier.width(8.dp))
@@ -1421,12 +1976,12 @@ fun CampaignDetailScreen(
                                     text = stringResource(R.string.campaign_badge_installed),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF14532D),
+                                    color = MaterialTheme.statusColors.onSuccessContainer,
                                 )
                                 Text(
                                     text = stringResource(R.string.campaign_installed_ready_desc),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF166534),
+                                    color = MaterialTheme.statusColors.onSuccessContainer.copy(alpha = 0.85f),
                                 )
                             }
                         }
@@ -1442,14 +1997,14 @@ fun CampaignDetailScreen(
                                 text = stringResource(R.string.campaign_view_test_link),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF15803D),
+                                color = MaterialTheme.statusColors.success,
                             )
                             Spacer(Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = Color(0xFF15803D),
+                                tint = MaterialTheme.statusColors.success,
                             )
                         }
                     }
@@ -1461,14 +2016,14 @@ fun CampaignDetailScreen(
             // -------------------------------------------------------------
             if (!campaign.isOpen) {
                 val bannerBg = when {
-                    campaign.isProduction -> Color(0xFFE8F5E9)
-                    campaign.isCompleted -> Color(0xFFE3F2FD)
-                    else -> Color(0xFFFFF8E1)
+                    campaign.isProduction -> MaterialTheme.statusColors.successContainer
+                    campaign.isCompleted -> MaterialTheme.statusColors.infoContainer
+                    else -> MaterialTheme.statusColors.warningContainer
                 }
                 val bannerFg = when {
-                    campaign.isProduction -> Color(0xFF2E7D32)
-                    campaign.isCompleted -> Color(0xFF1565C0)
-                    else -> Color(0xFFB26A00)
+                    campaign.isProduction -> MaterialTheme.statusColors.onSuccessContainer
+                    campaign.isCompleted -> MaterialTheme.statusColors.onInfoContainer
+                    else -> MaterialTheme.statusColors.onWarningContainer
                 }
                 val bannerTitle = when {
                     campaign.isProduction -> stringResource(R.string.campaign_badge_production)
@@ -1477,10 +2032,20 @@ fun CampaignDetailScreen(
                 }
                 val adminNoteSuffix = if (
                     campaign.isAdminPaused &&
-                    (uiState.isOwner || uiState.isAdmin) &&
-                    !campaign.adminNote.isNullOrBlank()
+                    (uiState.isOwner || uiState.isAdmin)
                 ) {
-                    "\n" + stringResource(R.string.oad_paused_admin_note_format, campaign.adminNote.orEmpty())
+                    val noteText = when (campaign.adminPauseReasonCode) {
+                        com.ntt.crosstest.data.AdminPauseReason.MISSING_GOOGLE_GROUP.code ->
+                            stringResource(R.string.campaign_admin_pause_reason_missing_google_group)
+                        com.ntt.crosstest.data.AdminPauseReason.POLICY_VIOLATION.code ->
+                            stringResource(R.string.campaign_admin_pause_reason_policy_violation)
+                        else -> campaign.adminNote?.takeIf { it.isNotBlank() }
+                    }
+                    if (!noteText.isNullOrBlank()) {
+                        "\n" + stringResource(R.string.oad_paused_admin_note_format, noteText)
+                    } else {
+                        ""
+                    }
                 } else {
                     ""
                 }
@@ -1727,38 +2292,12 @@ fun CampaignDetailScreen(
                     // Blue pill button: Test app
                     Button(
                         onClick = {
-                            if (!uiState.isOwner) {
-                                viewModel.ensureJoined()
-                            }
-                            val pkg = campaign.packageName
-                            viewModel.recordTestStart()
-
-                            // 1. Phương pháp 1: Mở app trực tiếp (nhờ queries launcher, tìm thấy và mở ngay app đã cài)
-                            val launchIntent = try {
-                                context.packageManager.getLaunchIntentForPackage(pkg)
-                            } catch (_: Exception) { null }
-
-                            if (launchIntent != null) {
-                                try {
-                                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    context.startActivity(launchIntent)
-                                    return@Button
-                                } catch (_: Exception) {}
-                            }
-
-                            // 2. Phương pháp 2: Nếu Phương pháp 1 không mở được -> Mở thẳng app Google Play Store
-                            try {
-                                val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg")).apply {
-                                    setPackage("com.android.vending")
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(marketIntent)
-                                return@Button
-                            } catch (_: Exception) {}
-
-                            // 3. Dự phòng: Dẫn thẳng link Closed Test / Testing track để Opt-in & tải
-                            val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
-                            openUrlSafely(context, targetUrl, pkg)
+                            launchOrInstallCampaignApp(
+                                context = context,
+                                campaign = campaign,
+                                isOwner = uiState.isOwner,
+                                viewModel = viewModel,
+                            )
                         },
                         enabled = campaign.isOpen,
                         modifier = Modifier.fillMaxWidth(),
@@ -1854,11 +2393,11 @@ fun CampaignDetailScreen(
                             else MaterialTheme.colorScheme.onSurfaceVariant
 
                         val statusText = if (isApprovedToday) {
-                            stringResource(R.string.campaign_today_approved_format, todayReport?.approvedReward ?: 2)
+                            stringResource(R.string.campaign_today_approved_format, todayReport?.approvedReward ?: 2L)
                         } else if (isPendingToday) {
                             stringResource(R.string.campaign_today_pending_format, todayReport?.remainingHoursUntilAutoAccept() ?: 8)
                         } else if (isRejectedToday) {
-                            val reason = todayReport?.rejectionReason?.ifBlank { null }
+                            val reason = todayReport?.let { RejectionReasonRenderer.render(it.rejectionReason, it.reasonCode, localizer) }?.ifBlank { null }
                             if (reason != null) stringResource(R.string.campaign_today_rejected_reason_format, reason)
                             else stringResource(R.string.campaign_today_rejected)
                         } else {
@@ -2074,15 +2613,13 @@ fun CampaignDetailScreen(
                             fontWeight = FontWeight.Bold,
                         )
 
-                        IconButton(onClick = {
-                            val textToCopy = listOfNotNull(
-                                campaign.description.takeIf { it.isNotBlank() },
-                                campaign.testingUrl.takeIf { it.isNotBlank() },
-                                campaign.playUrl.takeIf { it.isNotBlank() },
-                            ).joinToString("\n")
-                            clipboard.setPrimaryClip(ClipData.newPlainText("App note", textToCopy))
-                            Toast.makeText(context, resources.getString(R.string.campaign_note_copied_toast), Toast.LENGTH_SHORT).show()
-                        }) {
+                        IconButton(
+                            enabled = campaign.description.isNotBlank(),
+                            onClick = {
+                                clipboard.setPrimaryClip(ClipData.newPlainText("App note", campaign.description))
+                                Toast.makeText(context, resources.getString(R.string.campaign_note_copied_toast), Toast.LENGTH_SHORT).show()
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.ContentCopy,
                                 contentDescription = stringResource(R.string.campaign_copy_note_cd),
@@ -2093,31 +2630,34 @@ fun CampaignDetailScreen(
                     }
 
                     if (campaign.description.isNotBlank()) {
-                        Text(
-                            text = campaign.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = campaign.description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
 
-                    val downloadLink = campaign.testingUrl.ifBlank { campaign.playUrl }
-                    if (downloadLink.isNotBlank()) {
-                        Text(
-                            text = stringResource(R.string.campaign_note_download_link_format, downloadLink),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            lineHeight = 18.sp,
-                        )
-                    }
-
-                    if (campaign.safeTestUsername.isNotBlank() || campaign.safeTestPassword.isNotBlank()) {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.campaign_test_account_format, campaign.safeTestUsername, campaign.safeTestPassword),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                    listOf(
+                        R.string.label_test_username to campaign.safeTestUsername,
+                        R.string.label_test_password to campaign.safeTestPassword,
+                    ).forEach { (labelRes, value) ->
+                        if (value.isNotBlank()) {
+                            val label = stringResource(labelRes)
+                            CopyableTestCredential(
+                                label = label,
+                                value = value,
+                                onCopy = {
+                                    clipboard.setPrimaryClip(ClipData.newPlainText(label, value))
+                                    Toast.makeText(
+                                        context,
+                                        resources.getString(R.string.campaign_field_copied_format, label),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -2152,7 +2692,7 @@ fun CampaignDetailScreen(
                         )
                         if (campaign.isOpen) {
                             Button(
-                                onClick = { showAdminPauseDialog = true },
+                                onClick = { viewModel.openAdminPauseDialog() },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color(0xFFB26A00),
                                     contentColor = Color.White
@@ -2181,6 +2721,26 @@ fun CampaignDetailScreen(
                                 Text(stringResource(R.string.campaign_admin_resume_btn), fontWeight = FontWeight.Bold)
                             }
                         }
+                        val adminMission = uiState.adminManageableMission ?: uiState.activeMission
+                        if (adminMission != null) {
+                            Button(
+                                onClick = {
+                                    pinnedMissionIdForDelete = adminMission.id
+                                    showAdminDeleteMissionDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = !uiState.isActionLoading,
+                            ) {
+                                Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.mission_admin_delete_btn), fontWeight = FontWeight.Bold)
+                            }
+                        }
                         Button(
                             onClick = { showAdminDeleteDialog = true },
                             colors = ButtonDefaults.buttonColors(
@@ -2188,7 +2748,8 @@ fun CampaignDetailScreen(
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(10.dp),
+                            enabled = !uiState.isActionLoading,
                         ) {
                             Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
@@ -2255,6 +2816,46 @@ private fun StatColumn(
     }
 }
 
+internal fun launchOrInstallCampaignApp(
+    context: Context,
+    campaign: Campaign,
+    isOwner: Boolean,
+    viewModel: CampaignDetailViewModel,
+) {
+    if (!isOwner) {
+        viewModel.ensureJoined()
+    }
+    val pkg = campaign.packageName
+    viewModel.recordTestStart()
+
+    // 1. Phương pháp 1: Mở app trực tiếp (nhờ queries launcher, tìm thấy và mở ngay app đã cài)
+    val launchIntent = try {
+        context.packageManager.getLaunchIntentForPackage(pkg)
+    } catch (_: Exception) { null }
+
+    if (launchIntent != null) {
+        try {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(launchIntent)
+            return
+        } catch (_: Exception) {}
+    }
+
+    // 2. Phương pháp 2: Nếu Phương pháp 1 không mở được -> Mở thẳng app Google Play Store
+    try {
+        val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg")).apply {
+            setPackage("com.android.vending")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(marketIntent)
+        return
+    } catch (_: Exception) {}
+
+    // 3. Dự phòng: Dẫn thẳng link Closed Test / Testing track để Opt-in & tải
+    val targetUrl = campaign.testingUrl.ifBlank { campaign.playUrl }
+    openUrlSafely(context, targetUrl, pkg)
+}
+
 private fun openUrlSafely(context: Context, rawUrl: String, packageName: String? = null) {
     val cleanUrl = rawUrl.trim()
     val finalUrl = when {
@@ -2303,14 +2904,20 @@ private fun SubmitReportBottomSheet(
     val alreadyRewarded = (uiState.checkedInToday || todayReport?.isApproved == true) && !isRejectedToday
 
     // Khi báo cáo hôm nay bị từ chối, ảnh bị từ chối chính là mốc so sánh bắt buộc.
-    val previousReport = remember(uiState.myReports, uiState.myTodayReport) {
-        val rejectedToday = uiState.myTodayReport?.takeIf {
-            it.isRejected && !it.screenshotUrl.isNullOrBlank()
-        }
-        rejectedToday ?: uiState.myReports.firstOrNull {
-            it.id != uiState.myTodayReport?.id && !it.screenshotUrl.isNullOrBlank()
+    val selectorResult = remember(uiState.myReports, uiState.myTodayReport) {
+        val today = uiState.myTodayReport
+        if (today != null) {
+            ReportComparisonSelector.selectComparisonTarget(
+                currentReport = today,
+                availableReports = uiState.myReports,
+                isHistoryPartial = false,
+                rejectedReportOverride = today.takeIf { it.isRejected && !it.screenshotUrl.isNullOrBlank() }
+            )
+        } else {
+            null
         }
     }
+    val previousReport = selectorResult?.targetReport
 
     var isCheckingDuplicate by remember { mutableStateOf(false) }
     var comparisonResult by remember { mutableStateOf<ImageHashHelper.ComparisonResult?>(null) }
@@ -2379,15 +2986,14 @@ private fun SubmitReportBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        contentWindowInsets = { WindowInsets.safeDrawing },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .imePadding()
                 .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header
             Row(
@@ -2464,9 +3070,14 @@ private fun SubmitReportBottomSheet(
 
             // Reward Info Banner
             Card(
-                colors = CardDefaults.cardColors(containerColor = if (alreadyRewarded) Color(0xFFE8F5E9) else Color(0xFFF0FDF4)),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (alreadyRewarded) MaterialTheme.statusColors.infoContainer else MaterialTheme.statusColors.successContainer
+                ),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, if (alreadyRewarded) Color(0xFFA5D6A7) else Color(0xFF86EFAC))
+                border = BorderStroke(
+                    1.dp,
+                    if (alreadyRewarded) MaterialTheme.statusColors.info.copy(alpha = 0.4f) else MaterialTheme.statusColors.success.copy(alpha = 0.4f)
+                )
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
@@ -2487,7 +3098,7 @@ private fun SubmitReportBottomSheet(
                                 stringResource(R.string.campaign_sheet_note_submit)
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (alreadyRewarded) Color(0xFF1B5E20) else Color(0xFF166534),
+                        color = if (alreadyRewarded) MaterialTheme.statusColors.onInfoContainer else MaterialTheme.statusColors.onSuccessContainer,
                     )
                 }
             }
@@ -2531,19 +3142,24 @@ private fun SubmitReportBottomSheet(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                ComparisonPhotoCard(
-                                    model = uiState.selectedScreenshotUri,
-                                    label = stringResource(R.string.campaign_photo_new_label),
-                                    modifier = Modifier.weight(1f),
-                                    onClick = { onPreviewImage(uiState.selectedScreenshotUri.toString(), false, null) },
-                                )
-                                ComparisonPhotoCard(
-                                    model = previousImageUrl,
-                                    label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
-                                    modifier = Modifier.weight(1f),
-                                    report = previousReport,
-                                    onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
-                                )
+                                 ComparisonPhotoCard(
+                                     model = uiState.selectedScreenshotUri,
+                                     label = stringResource(R.string.campaign_photo_new_label),
+                                     modifier = Modifier.weight(1f),
+                                     onClick = { onPreviewImage(uiState.selectedScreenshotUri.toString(), false, null) },
+                                 )
+                                 val prevCardLabel = if (selectorResult?.relation == ReportComparisonSelector.TargetRelation.REJECTED_SAME_DAY) {
+                                     stringResource(R.string.report_selector_rejected_same_day)
+                                 } else {
+                                     stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.let { ReportComparisonSelector.formatIsoUtcToVnDate(it) }.orEmpty())
+                                 }
+                                 ComparisonPhotoCard(
+                                     model = previousImageUrl,
+                                     label = prevCardLabel,
+                                     modifier = Modifier.weight(1f),
+                                     report = previousReport,
+                                     onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
+                                 )
                             }
                         } else {
                             Box(
@@ -2589,14 +3205,14 @@ private fun SubmitReportBottomSheet(
                             }
                         } else if (duplicateWarning != null) {
                             Card(
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.warningContainer),
                                 shape = RoundedCornerShape(8.dp),
-                                border = BorderStroke(1.dp, Color(0xFFFFB74D))
+                                border = BorderStroke(1.dp, MaterialTheme.statusColors.warning.copy(alpha = 0.5f))
                             ) {
                                 Text(
                                     text = duplicateWarning!!,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFE65100),
+                                    color = MaterialTheme.statusColors.onWarningContainer,
                                     modifier = Modifier.padding(10.dp)
                                 )
                             }
@@ -2668,13 +3284,18 @@ private fun SubmitReportBottomSheet(
                                     report = uiState.myTodayReport,
                                     onClick = { todayImageUrl?.let { onPreviewImage(it, uiState.myTodayReport?.isScreenshotExpired ?: false, uiState.myTodayReport) } },
                                 )
-                                ComparisonPhotoCard(
-                                    model = previousImageUrl,
-                                    label = stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.take(10).orEmpty()),
-                                    modifier = Modifier.weight(1f),
-                                    report = previousReport,
-                                    onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
-                                )
+                                 val prevCardLabel = if (selectorResult?.relation == ReportComparisonSelector.TargetRelation.REJECTED_SAME_DAY) {
+                                     stringResource(R.string.report_selector_rejected_same_day)
+                                 } else {
+                                     stringResource(R.string.campaign_photo_previous_label, previousReport?.createdAt?.let { ReportComparisonSelector.formatIsoUtcToVnDate(it) }.orEmpty())
+                                 }
+                                 ComparisonPhotoCard(
+                                     model = previousImageUrl,
+                                     label = prevCardLabel,
+                                     modifier = Modifier.weight(1f),
+                                     report = previousReport,
+                                     onClick = { onPreviewImage(previousImageUrl, previousReport?.isScreenshotExpired ?: false, previousReport) },
+                                 )
                             }
                             OutlinedButton(
                                 onClick = { showComparisonDialog = true },
@@ -2844,17 +3465,33 @@ private fun SubmitReportBottomSheet(
             }
 
             // Submit Button
+            val isSending = uiState.submitStage == ReportSubmitManager.Stage.SENDING ||
+                uiState.submitStage == ReportSubmitManager.Stage.RETRYING
             val missingNewScreenshot = isRejectedToday && uiState.preparedScreenshot == null
-            val rejectedImageDuplicate = isRejectedToday && comparisonResult?.isBlockingDuplicate == true
             val canSubmit = !uiState.isActionLoading &&
                 !uiState.isPreparingScreenshot &&
                 !isCheckingDuplicate &&
                 !missingNewScreenshot &&
-                !rejectedImageDuplicate && (
+                !isSending && (
                 uiState.myComment.isNotBlank() ||
                 uiState.selectedScreenshotUri != null ||
                 !uiState.myTodayReport?.screenshotUrl.isNullOrBlank()
             )
+
+            if (!uiState.submitError.isNullOrBlank()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                ) {
+                    Text(
+                        text = uiState.submitError,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
+                }
+            }
 
             Button(
                 onClick = onSubmit,
@@ -2865,7 +3502,7 @@ private fun SubmitReportBottomSheet(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
             ) {
-                if (uiState.isActionLoading) {
+                if (uiState.isActionLoading || isSending) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
@@ -2893,18 +3530,61 @@ private fun SubmitReportBottomSheet(
     }
 
     if (showComparisonDialog) {
+        val prevDialogLabel = if (selectorResult?.relation == ReportComparisonSelector.TargetRelation.REJECTED_SAME_DAY) {
+            stringResource(R.string.report_selector_rejected_same_day)
+        } else {
+            stringResource(R.string.img_previous_day)
+        }
         TesterImageComparisonDialog(
-            currentImage = uiState.selectedScreenshotUri ?: uiState.myTodayReport?.screenshotUrl,
+            currentImage = uiState.preparedScreenshot?.file?.let { Uri.fromFile(it) }
+                ?: uiState.selectedScreenshotUri ?: uiState.myTodayReport?.screenshotUrl,
             previousImage = previousReport?.screenshotUrl,
             currentDate = if (uiState.selectedScreenshotUri != null) null
                 else uiState.myTodayReport?.createdAt?.let { formatIsoUtcToLocal(it) },
             previousDate = previousReport?.createdAt?.let { formatIsoUtcToLocal(it) },
+            previousLabel = prevDialogLabel,
             comparisonResult = comparisonResult,
             isCalculatingHash = isCheckingDuplicate,
             currentReport = uiState.myTodayReport,
             previousReport = previousReport,
             onDismiss = { showComparisonDialog = false },
         )
+    }
+}
+
+@Composable
+private fun CopyableTestCredential(
+    label: String,
+    value: String,
+    onCopy: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            SelectionContainer {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+        IconButton(onClick = onCopy) {
+            Icon(
+                imageVector = Icons.Filled.ContentCopy,
+                contentDescription = stringResource(R.string.campaign_copy_field_format, label),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }
 

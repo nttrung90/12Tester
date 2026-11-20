@@ -1,0 +1,20 @@
+Làm việc trong F:\AI\12Tester. Hãy sửa theo báo cáo kiểm tra độc lập mới nhất:
+F:\AI\12Tester\RECHECK_VONG_2_VA_KE_HOACH_SUA_BAO_CAO_CHO_OPENCODE_2026-10-29.md
+
+Đọc toàn bộ báo cáo và mã hiện tại. Bộ test hiện có qua 280/280; npm test và 7 ca ledger qua, nhưng 2 probe Android và 2 probe DB bổ sung vẫn thất bại.
+
+Ưu tiên ba nhóm:
+1. V2-01: Admission hiện copy/hash/fsync và chờ enqueue đồng bộ trên UI. Đưa việc này sang IO thuộc manager, dùng admission bất đồng bộ; chỉ Accepted sau lưu/enqueue, giữ form khi bị chặn. Không quay lại trả Accepted trước persist.
+2. V2-02: Nháp mới giữ comment nhưng mất ảnh dùng lại từ request cũ. Sửa ownership/revision toàn bộ draft và mọi đường cleanup; worker chỉ dọn file thuộc request, không xóa file prepared mà draft còn dùng.
+3. V2-03: Backfill fingerprint từ report không tương đương payload request. Replay legacy không truyền mission_id do auto-classify, hoặc comment approved không truyền ảnh/hash, đang bị PAYLOAD_MISMATCH sai. Thiết kế receipt legacy/provenance rõ, không nới lỏng receipt thật và không cho replay ghi đè cập nhật mới.
+
+Evidence/probe:
+F:\AI\12Tester\.tmp\report-overlap-recheck-round2-2026-10-29\
+
+Giữ ý nghĩa assertions; bổ sung regression chính thức. Chạy probe mới, regression hai vòng trước, toàn bộ unit test Android và npm test. Kiểm tra nâng cấp và full-schema mirror. Không đổi expected để chấp nhận lỗi, không tăng retry che lỗi. Bảo toàn các sửa đã qua và thay đổi chưa commit khác.
+
+Nếu 057 đã được áp dụng ở môi trường nào, dùng migration tiếp theo và xử lý receipt backfill sai; không xóa ledger hoặc giả tạo fingerprint của request đã mất thông tin.
+
+Giữ versionName=1.0.2, versionCode=22. Không build APK/AAB hoặc chạy assemble/bundle nếu chưa có chỉ dẫn mới. Không deploy production, commit hoặc push.
+
+Kết thúc bằng báo cáo file thay đổi, kết quả test thực chạy và giới hạn kiểm chứng. Không tuyên bố hết kẹt trên thiết bị khi chưa thử APK mới trên điện thoại.

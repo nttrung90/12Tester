@@ -1,0 +1,2 @@
+REPRODUCED before fix: one pending tester report; pending_reports_count missing; reports_count=0.
+VERIFIED after fix: pending_reports_count=1; tester_reports_count=1; feedback reports_count remains 0.

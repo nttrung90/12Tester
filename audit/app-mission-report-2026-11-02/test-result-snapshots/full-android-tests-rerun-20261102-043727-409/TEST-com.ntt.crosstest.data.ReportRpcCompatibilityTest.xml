@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ReportRpcCompatibilityTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-02T04:37:13.692Z" hostname="PC-5700X3D" time="0.039">
+  <properties/>
+  <testcase name="businessFailureMustNotRetryWithoutThumbnail" classname="com.ntt.crosstest.data.ReportRpcCompatibilityTest" time="0.009"/>
+  <testcase name="schemaCacheOutageMustPreserveServerFailureWithoutChangingSignature" classname="com.ntt.crosstest.data.ReportRpcCompatibilityTest" time="0.007"/>
+  <testcase name="absentIdempotentSignatureMustNotFallBackToUnsafeFiveArguments" classname="com.ntt.crosstest.data.ReportRpcCompatibilityTest" time="0.006"/>
+  <testcase name="missingV2MustFailWithoutDroppingContext" classname="com.ntt.crosstest.data.ReportRpcCompatibilityTest" time="0.006"/>
+  <testcase name="schemaCachePermissionFailureMustNotTryAnotherSignature" classname="com.ntt.crosstest.data.ReportRpcCompatibilityTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

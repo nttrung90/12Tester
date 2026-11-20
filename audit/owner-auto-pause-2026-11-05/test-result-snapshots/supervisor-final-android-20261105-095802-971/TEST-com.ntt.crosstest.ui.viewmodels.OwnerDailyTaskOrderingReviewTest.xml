@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-05T09:57:56.134Z" hostname="PC-5700X3D" time="0.015">
+  <properties/>
+  <testcase name="olderFullTaskResponseCannotOverwriteNewerPartialResult" classname="com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,47 @@
+[
+  {
+    "name": "quote revision changes when scheduled policy activates without DB edit",
+    "slotBefore": {
+      "cost": 50,
+      "revision": "a2be491af438b79e147a76d05a9ac8de",
+      "policy_id": 1,
+      "quote_type": "slot",
+      "quote_token": "a2be491af438b79e147a76d05a9ac8de",
+      "slot_number": 2,
+      "renewal_days": 30,
+      "effective_from": null
+    },
+    "slotAfter": {
+      "cost": 50,
+      "revision": "4e97a445fe823d51c98714978a9b4e4e",
+      "policy_id": 2,
+      "quote_type": "slot",
+      "quote_token": "4e97a445fe823d51c98714978a9b4e4e",
+      "slot_number": 2,
+      "renewal_days": 1,
+      "effective_from": "2026-11-02"
+    },
+    "slotRevisionChanged": true,
+    "updateBefore": {
+      "revision": "c338954fe58bed80285c68fa156cafa5",
+      "policy_id": 1,
+      "max_claims": 20,
+      "quote_type": "app_update",
+      "quote_token": "c338954fe58bed80285c68fa156cafa5",
+      "effective_from": null,
+      "reserved_budget": 120,
+      "reward_per_claim": 6
+    },
+    "updateAfter": {
+      "revision": "450f7ca1c68d2c6a1d4aef4adb0a8e12",
+      "policy_id": 2,
+      "max_claims": 30,
+      "quote_type": "app_update",
+      "quote_token": "450f7ca1c68d2c6a1d4aef4adb0a8e12",
+      "effective_from": "2026-11-02",
+      "reserved_budget": 120,
+      "reward_per_claim": 4
+    },
+    "updateRevisionChanged": true
+  }
+]

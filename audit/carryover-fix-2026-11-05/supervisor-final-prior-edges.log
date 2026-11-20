@@ -1,0 +1,10 @@
+Loaded 062_consolidated_baseline.sql through 080_report_context_carryover_and_gap_recovery.sql; actual SQL functions, no function stubs.
+PASS: private ledger diagnostics deny ordinary members
+PASS: private ledger diagnostics deny authenticated sessions without an identity
+PASS: client cannot authorize timestamp mutation through custom settings
+PASS: disabled carryover cannot treat unknown yesterday as debt-free ready history
+PASS: locked owner cannot resume through SECURITY DEFINER RPC
+PASS: new account creation-day exemption does not require nonexistent yesterday history
+PASS: backfilling an older gap cannot overwrite profile with an older-day streak
+PASS: daily penalty credit log action retains its existing contract
+Supervisor edge defects: 0

@@ -1,0 +1,24 @@
+{
+    "logName":  "indep-all-6-classes-round7-test3",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowPersistenceIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.work.MissionWindowWorkerIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowManagerIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowDraftIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowMediaIndependentTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.MissionWindowDayRolloverIndependentTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T11:41:58.9224391Z",
+    "finishedUtc":  "2026-11-02T11:42:31.0652540Z",
+    "currentRunXmlCount":  6
+}

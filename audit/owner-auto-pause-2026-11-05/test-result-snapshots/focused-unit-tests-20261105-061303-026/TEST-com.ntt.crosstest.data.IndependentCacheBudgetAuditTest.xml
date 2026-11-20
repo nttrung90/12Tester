@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.IndependentCacheBudgetAuditTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:12:49.785Z" hostname="PC-5700X3D" time="0.022">
+  <properties/>
+  <testcase name="profileBatchLargerThanTwoHundredEntryBudgetMustEvictRetainedEntries" classname="com.ntt.crosstest.data.IndependentCacheBudgetAuditTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

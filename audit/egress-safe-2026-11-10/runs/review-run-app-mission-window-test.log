@@ -1,0 +1,11 @@
+=== RUNNING APP MISSION WINDOW & MULTI-ATTACHMENT TESTS (MIGRATION 074) ===
+PASS: 1. submit_tester_report_v3 successfully submits 3 attachments
+PASS: 2. >3 attachments is rejected with TOO_MANY_ATTACHMENTS
+PASS: 3. Idempotent replay returns identical response with 3 attachments
+PASS: 4. Ordinary app_test succeeds independently on same day after mission report
+PASS: 5. 2 distinct reports coexist in database for same user, same campaign, same day
+PASS: 6. Owner approved day 1 mission report
+PASS: 7. Day 2 mission report succeeds independently after day 1 approval
+PASS: 8. get_campaign_detail returns attachments list with all 3 items
+PASS: 9. get_campaign_reports_for_owner includes mission metadata and 3 attachments
+=== ALL APP MISSION WINDOW & MULTI-ATTACHMENT TESTS PASSED 100% ===

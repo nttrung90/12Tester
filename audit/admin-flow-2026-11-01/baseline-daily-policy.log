@@ -1,0 +1,13 @@
+=== KHỞI TẠO PGLITE VÀ NẠP SCHEMA CHO TEST ADMIN DAILY TASK POLICY ===
+PASS: Khởi tạo database và seed dữ liệu thành công.
+PASS 1: Admin đọc cấu hình ban đầu thành công.
+PASS 2: Các tài khoản không đủ quyền đều bị chặn gọi RPC.
+PASS 3: Quyền ghi bảng trực tiếp và gọi hàm nội bộ bị từ chối đúng thiết kế.
+PASS 4: Validation các tham số đầu vào hoạt động chính xác.
+PASS 5: Admin 1 lên lịch tỷ lệ 6 cho ngày mai thành công.
+PASS 6: Chống xung đột revision hoạt động chính xác.
+PASS 7: Cập nhật lại lịch cùng ngày thành công.
+PASS 8: Thêm lịch ngày khác không xóa hoặc ảnh hưởng lịch đã có.
+PASS 9: Hủy đúng ngày đã chọn, giữ nguyên lịch các ngày khác.
+PASS 10: Audit log ghi nhận chính xác actor_id từ auth.uid() và profile tương ứng.
+=== TOÀN BỘ CÁC BƯỚC TEST BACKEND CHO MIGRATION 058 ĐÃ THÀNH CÔNG ===

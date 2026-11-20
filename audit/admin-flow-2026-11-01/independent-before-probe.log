@@ -1,0 +1,8 @@
+BEFORE: overdraft ledger and actual change [{"result":{"amount":-50,"success":true,"user_id":"22222222-2222-2222-2222-222222222222","new_credits":0,"previous_credits":5}}]
+BEFORE: overdraft ledger and actual change [{"amount":-50,"balance":0}]
+BEFORE: lock absent target [{"result":{"success":true,"user_id":"99999999-9999-9999-9999-999999999999","is_locked":true}}]
+BEFORE: locked admin can adjust credits [{"result":{"amount":1,"success":true,"user_id":"22222222-2222-2222-2222-222222222222","new_credits":6,"previous_credits":5}}]
+BEFORE: locked admin can list contact reports [{"result":[]}]
+BEFORE: locked admin can bypass RPC with direct config update [{"id":"android_client","latest_version_name":"locked-admin-wrote-this"}]
+BEFORE: anon database role has TRUNCATE capability beyond RLS []
+BEFORE: anon database role has TRUNCATE capability beyond RLS [{"configs_remaining":0}]

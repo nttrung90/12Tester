@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.IndependentCacheMutationAuditTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:31:06.540Z" hostname="PC-5700X3D" time="0.017">
+  <properties/>
+  <testcase name="ordinaryAndForceSameVersionMustShareFreshInFlightRead" classname="com.ntt.crosstest.data.IndependentCacheMutationAuditTest" time="0.008"/>
+  <testcase name="oldNotificationsMustNotReviveAfterReadMutationAndNetworkFailure" classname="com.ntt.crosstest.data.IndependentCacheMutationAuditTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+Continue the SAME R12 session/model, finish tests and handover. Parent stopped only your CLI between tools to supply precise diagnosis; keep existing HomeViewModel fix and unrelated files unchanged.
+
+The XML failure says pollCount expected5 actual0, but system-out shows the MockEngine request and pollCount1 AFTER the assertion. This is an asynchronous IO-vs-virtual-time TEST FIXTURE problem, not a reason to weaken production identity guards or timing assertions.
+
+Fix the test harness decisively:
+1. MockEngine currently uses a real IO dispatcher. Inject the SAME TestCoroutineScheduler dispatcher into MockEngineConfig/engine dispatcher (inspect local Ktor API if needed; e.g. MockEngine(MockEngineConfig().apply { dispatcher=UnconfinedTestDispatcher(scheduler); addHandler(handler) }) so HTTP and Main continuations are driven by the same virtual clock. Remove artificial real-time delays/println debug that hide the race. Do not use Thread.sleep or merely increase timeout.
+2. HomeViewModel observes Auth and performs initial refresh. Settle initial session/refresh before starting/advancing the retry test; return valid baseline JSON for get_my_dashboard/get_home_feed as existing cache tests do, rather than [] for every RPC. Initial auth synchronization must not cancel the manually started retry unexpectedly. Reset polling counters only after genuine initial setup has settled, not to hide production attempts.
+3. runBlocking + explicitly advanced scheduler is fine if all relevant dispatchers use it; runTest also fine if scopes and background Auth/VM jobs are properly canceled. Cancel each actual vm.viewModelScope and close clients in finally/teardown. Do not leave a ViewModelStore that never owns the created VM.
+4. Keep the meaningful assertions: pending through120s automatically becomes ready at125s without refresh, maximum13 attempts stays bounded, A->B->A generation stale response ignored, next-day stale response ignored, obsolete owner canceled so new owner can poll, stop/onCleared cancellation.
+5. Run one focused method first with --offline --console=plain and sufficient tool timeout, then the full NEW class and relevant HomeViewModel/cache tests. Do not modify production Repository/OwnerAppDetail/SQL files. Do not replace tests with a copied array/AtomicBoolean test.
+
+Stop broad rediscovery. Implement harness synchronization, get real tests green, write audit/push-carryover-review-2026-10-30/pending-retry-handover.md with exact results. No production operations, no new model/session/subagents.

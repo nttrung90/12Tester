@@ -1,0 +1,20 @@
+{"case":"admin_inactive_resume_holds_open","actor":{"current_user":"authenticated","session_user":"supervisor_admin_authenticator","uid":"fa000000-0000-0000-0000-000000000011"},"reply":{"status":"open","message":"Chiến dịch đã được kích hoạt lại bởi Admin","success":true,"app_name":"Admin resume probe","campaign_id":"fb000000-0000-0000-0000-000000000010"},"campaign":{"status":"open","paused_reason":null,"admin_resumed":false,"admin_note":null,"admin_pause_reason_code":null,"completed_at":null},"audits":0,"notifications":[],"pass":false,"failure":"Expected values to be strictly equal:\n\nfalse !== true\n"}
+{"case":"admin_resume_clears_pause_metadata","actor":{"current_user":"authenticated","session_user":"supervisor_admin_authenticator","uid":"fa000000-0000-0000-0000-000000000011"},"reply":{"status":"open","message":"Chiến dịch đã được kích hoạt lại bởi Admin","success":true,"app_name":"Admin resume probe","campaign_id":"fb000000-0000-0000-0000-000000000010"},"campaign":{"status":"open","paused_reason":null,"admin_resumed":false,"admin_note":null,"admin_pause_reason_code":null,"completed_at":null},"audits":0,"notifications":[],"pass":true}
+{"case":"admin_resume_keeps_audit_and_notification","actor":{"current_user":"authenticated","session_user":"supervisor_admin_authenticator","uid":"fa000000-0000-0000-0000-000000000011"},"reply":{"status":"open","message":"Chiến dịch đã được kích hoạt lại bởi Admin","success":true,"app_name":"Admin resume probe","campaign_id":"fb000000-0000-0000-0000-000000000010"},"campaign":{"status":"open","paused_reason":null,"admin_resumed":false,"admin_note":null,"admin_pause_reason_code":null,"completed_at":null},"audits":0,"notifications":[],"pass":false,"failure":"Expected values to be strictly equal:\n\n0 !== 1\n"}
+{"case":"locked_admin_cannot_resume","actor":{"current_user":"authenticated","session_user":"supervisor_admin_authenticator","uid":"fa000000-0000-0000-0000-000000000011"},"reply":{"status":"open","message":"Chiến dịch đã được kích hoạt lại bởi Admin","success":true,"app_name":"Admin resume probe","campaign_id":"fb000000-0000-0000-0000-000000000010"},"campaign":{"status":"open","paused_reason":null,"admin_resumed":false,"admin_note":null,"admin_pause_reason_code":null,"completed_at":null},"audits":0,"notifications":[],"pass":false,"failure":"The input did not match the regular expression /PERMISSION_DENIED|NOT_ADMIN|ACCOUNT_LOCKED|ADMIN_LOCKED/. Input:\n\n''\n"}
+{"case":"admin_expired_resume_preserves_completion_contract","actor":{"current_user":"authenticated","session_user":"supervisor_admin_authenticator","uid":"fa000000-0000-0000-0000-000000000011"},"reply":{"status":"completed","message":"Chiến dịch đã kết thúc kỳ kiểm thử 30 ngày","success":true,"app_name":"Admin resume probe","campaign_id":"fb000000-0000-0000-0000-000000000010"},"campaign":{"status":"completed","paused_reason":"window_expired","admin_resumed":false,"admin_note":"Previous admin note","admin_pause_reason_code":"policy_violation","completed_at":"2026-11-13T12:36:11.891Z"},"audits":0,"notifications":[],"pass":false,"failure":"Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Previous admin note'\n- null\n"}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: admin resume regression
+    at file:///F:/AI/12Tester/audit/daily-task-action-gate-2026-11-12/supervisor-admin-resume090-test.mjs:46:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

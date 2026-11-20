@@ -1,0 +1,45 @@
+{
+  "recordedUtc": "2026-11-02T12:04:46.2764851Z",
+  "androidRun": {
+    "logName": "full-android-exact-retry-final",
+    "arguments": [
+      "-I",
+      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+      ":app:testDebugUnitTest"
+    ],
+    "exitCode": 0,
+    "startedUtc": "2026-11-02T11:59:20.7455831Z",
+    "finishedUtc": "2026-11-02T12:00:57.5560013Z",
+    "currentRunXmlCount": 75
+  },
+  "androidTotals": {
+    "skipped": 0,
+    "errors": 0,
+    "failures": 0,
+    "tests": 542,
+    "suites": 75
+  },
+  "independentRootTests": 24.0,
+  "apk": {
+    "path": "F:\\AI\\12Tester\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+    "bytes": 35472001,
+    "sha256": "D8E3F369F2BD2513E2911F5FBBB33032FBAAEA0B2E37A373220BAAFA32F4EE15",
+    "versionName": "1.0.9",
+    "versionCode": 29
+  },
+  "migrationSha256": "ED7E17603DA72F6A2C7CAE9DE5B26B6E3A69C99CB6ABE6ED7E157126EE00B97A",
+  "sourceChanges": [
+    {
+      "status": "modified",
+      "count": 34
+    },
+    {
+      "status": "new",
+      "count": 6
+    }
+  ],
+  "comparedKnownSourceFiles": 369,
+  "productionDeployed": false,
+  "physicalDeviceTested": false,
+  "postgresMultiConnectionTested": false
+}

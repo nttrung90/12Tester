@@ -22,18 +22,22 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -51,6 +55,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -69,14 +74,25 @@ import com.ntt.crosstest.ui.viewmodels.MissionCreateViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MissionCreateScreen(
+    sourceMissionId: String? = null,
+    sourceCampaignId: String? = null,
     onBack: () -> Unit,
     onCreated: () -> Unit,
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as TestCheoApp
     val viewModel: MissionCreateViewModel = viewModel(
+        key = "mission_create_${sourceMissionId.orEmpty()}_${sourceCampaignId.orEmpty()}",
         factory = viewModelFactory {
-            initializer { MissionCreateViewModel(app.campaignRepository, Localizer(app)) }
+            initializer {
+                MissionCreateViewModel(
+                    repository = app.campaignRepository,
+                    localizer = Localizer(app),
+                    sourceMissionId = sourceMissionId,
+                    sourceCampaignId = sourceCampaignId,
+                    savedStateHandle = createSavedStateHandle(),
+                )
+            }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -90,7 +106,9 @@ fun MissionCreateScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.mission_create_title),
+                        text = stringResource(
+                            if (uiState.isCopyMode) R.string.mission_copy_title else R.string.mission_create_title
+                        ),
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -117,17 +135,62 @@ fun MissionCreateScreen(
             return@Scaffold
         }
 
+        if (uiState.isCopyMode && uiState.initialLoadError != null && uiState.lockedCampaign == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            text = uiState.initialLoadError ?: stringResource(R.string.mission_load_error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = onBack) {
+                                Text(stringResource(R.string.back))
+                            }
+                            Button(onClick = viewModel::retry) {
+                                Text(stringResource(R.string.mission_load_error_retry))
+                            }
+                        }
+                    }
+                }
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // 1. App picker — chỉ các app đang đăng (open) của mình
+            // 1. App picker — chỉ các app đang đăng (open) của mình, hoặc cố định khi sao chép
             Text(
-                text = stringResource(R.string.mission_create_app_label),
+                text = if (uiState.isCopyMode) {
+                    stringResource(R.string.mission_copy_locked_app_note)
+                } else {
+                    stringResource(R.string.mission_create_app_label)
+                },
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
@@ -193,7 +256,13 @@ fun MissionCreateScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { campaign.id?.let(viewModel::selectCampaign) },
+                            .then(
+                                if (!uiState.isCopyMode) {
+                                    Modifier.clickable { campaign.id?.let(viewModel::selectCampaign) }
+                                } else {
+                                    Modifier
+                                }
+                            ),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (isSelected) {
@@ -222,13 +291,43 @@ fun MissionCreateScreen(
                             )
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = campaign.appName,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(
+                                        text = campaign.appName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false),
+                                    )
+                                    val statusLabel = if (campaign.isFinalized) {
+                                        stringResource(R.string.home_tab_completed)
+                                    } else {
+                                        stringResource(R.string.home_tab_need_test)
+                                    }
+                                    Surface(
+                                        color = if (campaign.isFinalized) {
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        } else {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                        },
+                                        shape = RoundedCornerShape(4.dp),
+                                    ) {
+                                        Text(
+                                            text = statusLabel,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (campaign.isFinalized) {
+                                                MaterialTheme.colorScheme.onSecondaryContainer
+                                            } else {
+                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                            },
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        )
+                                    }
+                                }
                                 Text(
                                     text = campaign.packageName,
                                     style = MaterialTheme.typography.bodySmall,
@@ -239,7 +338,7 @@ fun MissionCreateScreen(
                             }
                             if (isSelected) {
                                 Icon(
-                                    imageVector = Icons.Filled.CheckCircle,
+                                    imageVector = if (uiState.isCopyMode) Icons.Filled.Lock else Icons.Filled.CheckCircle,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(22.dp),
@@ -250,7 +349,40 @@ fun MissionCreateScreen(
                 }
             }
 
-            // 2. Tên nhiệm vụ
+            // 2. Chế độ thưởng
+            Text(
+                text = stringResource(R.string.mission_mode_label),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterChip(
+                    selected = uiState.rewardMode == "once",
+                    onClick = { viewModel.selectRewardMode("once") },
+                    label = { Text(stringResource(R.string.mission_mode_once)) },
+                    modifier = Modifier.weight(1f),
+                )
+                FilterChip(
+                    selected = uiState.rewardMode == "daily",
+                    onClick = { viewModel.selectRewardMode("daily") },
+                    label = { Text(stringResource(R.string.mission_mode_daily)) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Text(
+                text = if (uiState.rewardMode == "daily") {
+                    stringResource(R.string.mission_mode_daily_desc)
+                } else {
+                    stringResource(R.string.mission_mode_once_desc)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            // 3. Tên nhiệm vụ
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = viewModel::updateTitle,
@@ -259,7 +391,7 @@ fun MissionCreateScreen(
                 singleLine = true,
             )
 
-            // 3. Mô tả nhiệm vụ
+            // 4. Mô tả nhiệm vụ
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = viewModel::updateDescription,
@@ -268,7 +400,7 @@ fun MissionCreateScreen(
                 minLines = 3,
             )
 
-            // 4. Số người tham gia (1–50)
+            // 5. Số người tham gia (1–50)
             StepperField(
                 label = stringResource(R.string.mission_participants_label),
                 value = uiState.participants,
@@ -277,7 +409,7 @@ fun MissionCreateScreen(
                 onIncrease = { viewModel.adjustParticipants(1) },
             )
 
-            // 5. Số ngày nhận nhiệm vụ (1–7)
+            // 6. Số ngày nhận nhiệm vụ (1–7)
             StepperField(
                 label = stringResource(R.string.mission_days_label),
                 value = uiState.days,
@@ -286,18 +418,62 @@ fun MissionCreateScreen(
                 onIncrease = { viewModel.adjustDays(1) },
             )
 
-            // 6. Credit trả cho người tham gia (≥ 10)
+            // 7. Credit trả cho người tham gia (≥ 10)
+            val unitStr = if (uiState.rewardMode == "daily") {
+                stringResource(R.string.mission_reward_unit_day)
+            } else {
+                stringResource(R.string.mission_reward_unit_turn)
+            }
             OutlinedTextField(
                 value = uiState.rewardCredits,
                 onValueChange = viewModel::updateReward,
-                label = { Text(stringResource(R.string.mission_reward_label)) },
+                label = { Text("${stringResource(R.string.mission_reward_label)} ($unitStr)") },
                 supportingText = { Text(stringResource(R.string.mission_reward_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
 
-            // 7. Tổng kết phí & số dư
+            // 7.5. Công tắc chỉ dành cho bản sao nhiệm vụ
+            if (uiState.isCopyMode) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mission_copy_block_previous_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                text = stringResource(R.string.mission_copy_block_previous_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Switch(
+                            checked = uiState.blockPreviousParticipants,
+                            onCheckedChange = viewModel::toggleBlockPreviousParticipants,
+                        )
+                    }
+                }
+            }
+
+            // 8. Tổng kết phí, quỹ thưởng & số dư
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -311,18 +487,36 @@ fun MissionCreateScreen(
                         .padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
+                    Text(
+                        text = stringResource(
+                            R.string.mission_fee_summary_format,
+                            uiState.days,
+                            uiState.feeCredits,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.mission_escrow_summary_format,
+                            uiState.escrowCredits,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.mission_total_cost_format,
+                            uiState.totalCostCredits,
+                            uiState.feeCredits,
+                            uiState.escrowCredits,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    if (uiState.estimatedEndsAtText.isNotBlank()) {
                         Text(
-                            text = stringResource(
-                                R.string.mission_fee_summary_format,
-                                uiState.days,
-                                uiState.feeCredits,
-                            ),
+                            text = stringResource(R.string.mission_end_time_format, uiState.estimatedEndsAtText),
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Text(
@@ -366,7 +560,7 @@ fun MissionCreateScreen(
             ) {
                 if (uiState.isSaving) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
                     )

@@ -1,0 +1,12 @@
+{
+    "logName":  "full-android-round6-all",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T11:21:48.3801925Z",
+    "finishedUtc":  "2026-11-02T11:22:34.2549986Z",
+    "currentRunXmlCount":  74
+}

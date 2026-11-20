@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.DualStorageUploadRegressionTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-11-16T09:24:19.458Z" hostname="PC-5700X3D" time="6.188">
+  <properties/>
+  <testcase name="testExactCutoffComparisonIsGreaterThanOrEqual" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="1.5"/>
+  <testcase name="testScreenshotManagerRecognizesSupabasePathsAndExpiry" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.038"/>
+  <testcase name="testPendingReportStorePinningAcrossProcessDeath" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.061"/>
+  <testcase name="testTrustedHostAuthTokenIsolation" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.149"/>
+  <testcase name="testGoogleOverflowBeyond30MinutesUploadsNormally" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.114"/>
+  <testcase name="testLiveGcsChildAttachmentWithParentSupabaseExpired" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.022"/>
+  <testcase name="testHasThumbnailContractPreservedWhenLocalThumbnailMissing" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.036"/>
+  <testcase name="testExplicitFutureViewExpiresAtWithOldReportNotExpired" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.02"/>
+  <testcase name="testReportUploadWorkerRetriesOnVerificationIOExceptionWithoutPostingOrSwitching" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.051"/>
+  <testcase name="testIndependentPerAttachmentExpiry" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.021"/>
+  <testcase name="testParentExpiredLiveChildAttachmentNotBlocked" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.018"/>
+  <testcase name="testReportUploadWorkerDispatchesToSupabaseWhenReserved" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.04"/>
+  <testcase name="testUploadExpiredTrueWithRemoteMissingFailsTerminalWithoutSwitchingProvider" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.032"/>
+  <testcase name="testExpiredPinnedReservationReRequestedFromServer" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.03"/>
+  <testcase name="testParentLiveExpiredChildAttachmentBlocked" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.017"/>
+  <testcase name="testSupabaseStorageHelper409ConflictVerification" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="3.678"/>
+  <testcase name="testUploadExpiredTrueMultiAttachmentV3SubmitsWithoutNewPost" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.031"/>
+  <testcase name="testScreenshotRequestFactoryPopulatesProviderAndViewExpiresAt" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.014"/>
+  <testcase name="testReportUploadWorkerFailsFastOnNonRetryableReservationError" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.021"/>
+  <testcase name="testVerifyRemoteObjectSha256TransientErrorsThrowAndTerminalReturnFalse" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.029"/>
+  <testcase name="testUploadExpiredTrueWithRemoteVerifiedSubmitsWithoutNewPost" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.031"/>
+  <testcase name="testGoogleFilenameContainingSupabaseDoesNotExpireAt216Hours" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.014"/>
+  <testcase name="testSupabaseVsGoogleRetentionCutoffCalculation" classname="com.ntt.crosstest.data.DualStorageUploadRegressionTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

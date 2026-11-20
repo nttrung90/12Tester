@@ -1,0 +1,84 @@
+{
+  "scope": "PGlite + injected fake Storage; no production",
+  "results": [
+    {
+      "id": "URL-HOST",
+      "title": "Reject foreign host despite matching bucket/path",
+      "status": "PASS"
+    },
+    {
+      "id": "CONTROL-GOOGLE",
+      "title": "Existing Google screenshot URL remains accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "SUBMIT-PROVENANCE",
+      "title": "Reject Supabase screenshot without reservation or object",
+      "status": "PASS"
+    },
+    {
+      "id": "OBJECT-CLOCK",
+      "title": "Keep expiry based on actual Storage creation time",
+      "status": "FAIL",
+      "evidence": "column reference \"provider\" is ambiguous"
+    },
+    {
+      "id": "QUOTA-FINALIZE",
+      "title": "Retain uploaded bytes in U+R before next reconciliation",
+      "status": "FAIL",
+      "evidence": "column reference \"provider\" is ambiguous"
+    },
+    {
+      "id": "RLS-EXPIRY",
+      "title": "Deny direct Storage read after expiry even for uploader",
+      "status": "PASS"
+    },
+    {
+      "id": "CLEANUP-RETRY",
+      "title": "Reclaim cleanup job after failed worker/expired lease",
+      "status": "FAIL",
+      "evidence": "Job stuck forever in deleting after failed deletion\n\n0 !== 1\n"
+    },
+    {
+      "id": "CLEANUP-DRY-RUN",
+      "title": "Dry run leaves cleanup state unchanged",
+      "status": "FAIL",
+      "evidence": "Dry run mutated job to deleting\n+ actual - expected\n\n+ 'deleting'\n- 'finalized'\n"
+    },
+    {
+      "id": "ORPHAN-EXPIRED",
+      "title": "Cleanup discovers reservation marked expired by allocator",
+      "status": "FAIL",
+      "evidence": "column reference \"provider\" is ambiguous"
+    },
+    {
+      "id": "CLEANUP-PROVIDER",
+      "title": "Supabase cleanup must not claim GCS orphan",
+      "status": "PASS"
+    },
+    {
+      "id": "DELETE-IDEMPOTENT",
+      "title": "Retry acknowledgement does not decrement quota twice",
+      "status": "FAIL",
+      "evidence": "column \"updated_at\" of relation \"tester_reports\" does not exist"
+    },
+    {
+      "id": "METRICS-VALIDATION",
+      "title": "Invalid project byte count fails safe",
+      "status": "FAIL",
+      "evidence": "RECONCILE_RPC_REJECTED"
+    },
+    {
+      "id": "DELETE-PARTIAL",
+      "title": "Partial deletion response must not finalize whole pair",
+      "status": "PASS"
+    },
+    {
+      "id": "DELETE-PATH",
+      "title": "Reject deletion candidate outside allowed prefix",
+      "status": "PASS"
+    }
+  ],
+  "passed": 7,
+  "failed": 7
+}

@@ -1,0 +1,30 @@
+Fenced fresh native regression bonus immediate_quota_native_bonus_1794442063210
+
+--- SCENARIO 1: Two apps of same owner reserving wallet concurrently ---
+PASS: SCENARIO 1: Two apps of same owner reserving wallet concurrently
+
+--- SCENARIO 2: Last slot race (1 slot, 2 concurrent approvals) ---
+PASS: SCENARIO 2: Last slot race (1 slot, 2 concurrent approvals)
+
+--- SCENARIO 3: Manual approve vs 8h auto-accept race on same report ---
+PASS: SCENARIO 3: Manual approve vs 8h auto-accept race on same report
+
+--- SCENARIO 4: Actual pending report approval vs close round race ---
+PASS: SCENARIO 4: Actual pending report approval vs close round race
+
+--- SCENARIO 5: Report submission vs Close round race (gated actual submit vs close) ---
+PASS: SCENARIO 5: Report submission vs Close round race (gated actual submit vs close)
+
+--- SCENARIO 6: Batch closing worker vs Campaign lifecycle close race ---
+PASS: SCENARIO 6: Batch closing worker vs Campaign lifecycle close race
+
+--- SCENARIO 7: Resubmit rejected report under active round preserves snapshot ---
+PASS: SCENARIO 7: Resubmit rejected report under active round preserves snapshot
+
+======================================================
+ALL REAL POSTGRESQL CONCURRENCY SCENARIOS PASSED!
+======================================================
+
+Fenced fresh native regression resume immediate_quota_native_resume_1794442064927
+PASS: Duplicate requests produced one open and one CAMPAIGN_NOT_PAUSED.
+PASS: Distinct requests both opened, with unchanged test count, debt and credits.

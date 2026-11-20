@@ -52,7 +52,7 @@ try {
     grant execute on function auth.uid() to anon, authenticated, service_role;
   `);
 
-  await db.exec(read('supabase/full_schema_singapore.sql'));
+  await db.exec(read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql'));
 
   await db.exec(`
     insert into auth.users(id, email) values ('${owner}','owner@test.local'),('${other}','other@test.local');

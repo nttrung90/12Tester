@@ -79,6 +79,7 @@ class MissionReportRecheckProbeTest {
                 respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             }
         }
+        client.auth.awaitInitialization()
         client.auth.importSession(Json { ignoreUnknownKeys = true }.decodeFromString<UserSession>(
             """{"access_token":"fixture-access","refresh_token":"fixture-refresh","expires_in":3600,"token_type":"bearer","user":{"id":"tester","aud":"authenticated"}}"""
         ))
@@ -162,9 +163,10 @@ class MissionReportRecheckProbeTest {
                 else -> "[]" to HttpStatusCode.OK
             }
         }
+        var vm: HomeViewModel? = null
         try {
             val repo = CampaignRepository(client, Localizer(context), monotonicClock = { scheduler.currentTime })
-            val vm = HomeViewModel(repo, localizer = Localizer(context))
+            vm = HomeViewModel(repo, localizer = Localizer(context))
             store.put("timer", vm)
             vm.refreshMissions(forceRefresh = true)
             withTimeout(10_000) {
@@ -178,6 +180,6 @@ class MissionReportRecheckProbeTest {
             scheduler.advanceTimeBy(1_000)
             scheduler.runCurrent()
             assertTrue("The second deadline must also be pruned without another network refresh", vm.uiState.value.missions.isEmpty())
-        } finally { store.clear(); client.close() }
+        } finally { vm?.stopMissionDeadlineScheduler(); store.clear(); client.close(); Dispatchers.resetMain() }
     }
 }

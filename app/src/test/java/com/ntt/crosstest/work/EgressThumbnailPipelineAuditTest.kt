@@ -69,7 +69,6 @@ class EgressThumbnailPipelineAuditTest {
                 assertArrayEquals(thumbBytes, thumbnailFile.readBytes())
                 return thumbUrl
             }
-            override suspend fun join(campaignId: String) = Unit
             override suspend fun submit(request: PendingReport, url: String?, hash: String?): SubmitTesterReportResult =
                 error("Thumbnail must reach the thumbnail-aware RPC path")
             override suspend fun submit(request: PendingReport, url: String?, hash: String?, thumbnailUrl: String?): SubmitTesterReportResult {

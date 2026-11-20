@@ -1,0 +1,2 @@
+PASS independent daily coexistence: app_test -> mission
+PASS independent daily coexistence: mission -> app_test

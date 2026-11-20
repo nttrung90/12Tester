@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:58.406Z" hostname="PC-5700X3D" time="0.196">
+  <properties/>
+  <testcase name="create_metadataChangeAfterNetworkError_generatesNewClientRequestId" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.044"/>
+  <testcase name="create_failClosedWhenQuoteUnavailable" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.015"/>
+  <testcase name="creditLogRenderer_rendersTargetUpgradeActionAndLegacyPostAppUpgradeNote" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.007"/>
+  <testcase name="dynamicPostingQuote_computesSlot1AndTargetCostsAndStandardizedGteThreshold" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.012"/>
+  <testcase name="getMySlotsInfo_doesNotCacheWhenQuoteFails" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.008"/>
+  <testcase name="create_priceMismatch_clearsIntentAndReloadsFreshQuote" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.031"/>
+  <testcase name="baselineExact10Credits_isAllowedWhile9CreditsIsBlocked" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.031"/>
+  <testcase name="create_networkLossRetry_reusesExactClientRequestIdAndClearsOnSuccess" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.034"/>
+  <testcase name="accountSwitch_createCampaignIntentIsolation" classname="com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

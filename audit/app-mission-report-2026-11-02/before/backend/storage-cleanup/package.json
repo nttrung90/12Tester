@@ -1,0 +1,15 @@
+{
+  "name": "crosstest-storage-cleanup",
+  "version": "1.0.0",
+  "description": "Worker dọn dẹp screenshot báo cáo quá hạn 30 ngày trên Google Cloud Storage / Firebase Storage",
+  "private": true,
+  "type": "module",
+  "main": "cleanup-reports-storage.mjs",
+  "scripts": {
+    "start": "node cleanup-reports-storage.mjs",
+    "test": "node --test cleanup-reports-storage.test.mjs"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.15.0"
+  }
+}

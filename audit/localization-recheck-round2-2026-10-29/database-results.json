@@ -1,0 +1,149 @@
+[
+  {
+    "stage": "before_055",
+    "kind": "approve",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "22222222-2222-2222-2222-222222222222",
+        "type": "report",
+        "title": "Báo cáo kiểm thử được phê duyệt! 🎉",
+        "message": "Báo cáo của bạn cho ứng dụng \"DemoApp\" đã được duyệt thành công! Bạn nhận thêm 2 Credit cho lượt test này. Cảm ơn bạn!",
+        "data": {
+          "status": "approved",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  {
+    "stage": "before_055",
+    "kind": "reject",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "22222222-2222-2222-2222-222222222222",
+        "type": "report",
+        "title": "Báo cáo kiểm thử bị từ chối ⚠️",
+        "message": "Báo cáo của bạn cho ứng dụng \"DemoApp\" đã bị từ chối. Lý do: \"Ảnh không rõ ràng / không phải app này\". 10 Credit tạm nhận đã bị thu hồi. Vui lòng kiểm tra và chụp ảnh khác để nộp lại.",
+        "data": {
+          "reason": "Ảnh không rõ ràng / không phải app này",
+          "status": "rejected",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "credits_clawed": 10
+        }
+      }
+    ]
+  },
+  {
+    "stage": "before_055",
+    "kind": "edit",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "type": "report",
+        "title": "Tester cập nhật báo cáo ✏️",
+        "message": "Tester vừa cập nhật báo cáo kiểm thử cho ứng dụng \"DemoApp\". Vui lòng xem lại ảnh/nội dung mới trước khi duyệt.",
+        "data": {
+          "status": "pending",
+          "is_edited": true,
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  {
+    "stage": "after_055",
+    "kind": "approve",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "22222222-2222-2222-2222-222222222222",
+        "type": "report",
+        "title": "Báo cáo kiểm thử được phê duyệt! 🎉",
+        "message": "Báo cáo của bạn cho ứng dụng \"DemoApp\" đã được duyệt thành công! Bạn nhận thêm 2 Credit cho lượt test này. Cảm ơn bạn!",
+        "data": {
+          "bonus": 2,
+          "status": "approved",
+          "app_name": "DemoApp",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "event_code": "report_approved",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  {
+    "stage": "after_055",
+    "kind": "reject",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "22222222-2222-2222-2222-222222222222",
+        "type": "report",
+        "title": "Báo cáo kiểm thử bị từ chối ⚠️",
+        "message": "Báo cáo của bạn cho ứng dụng \"DemoApp\" đã bị từ chối. Lý do: \"Ảnh không rõ ràng / không phải app này\". 10 Credit tạm nhận đã bị thu hồi. Vui lòng kiểm tra và chụp ảnh khác để nộp lại.",
+        "data": {
+          "reason": "Ảnh không rõ ràng / không phải app này",
+          "status": "rejected",
+          "app_name": "DemoApp",
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "event_code": "report_rejected",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "reason_code": null,
+          "credits_clawed": 10
+        }
+      }
+    ]
+  },
+  {
+    "stage": "after_055",
+    "kind": "edit",
+    "count": 1,
+    "rows": [
+      {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "type": "report",
+        "title": "Tester cập nhật báo cáo ✏️",
+        "message": "Tester vừa cập nhật báo cáo kiểm thử cho ứng dụng \"DemoApp\". Vui lòng xem lại ảnh/nội dung mới trước khi duyệt.",
+        "data": {
+          "status": "pending",
+          "app_name": "DemoApp",
+          "is_edited": true,
+          "report_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "event_code": "report_edited",
+          "campaign_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  {
+    "kind": "legacy_english_backfill",
+    "title": "Security update required",
+    "title_vi": "Đã có bản cập nhật mới",
+    "title_en": "Security update required",
+    "message": "Install the security update",
+    "message_vi": "Phiên bản mới với nhiều tính năng nâng cấp và sửa lỗi đã sẵn sàng. Vui lòng cập nhật để tiếp tục sử dụng ứng dụng mượt mà nhất.",
+    "message_en": "Install the security update"
+  },
+  {
+    "kind": "clear_translation_with_ui_null_payload",
+    "title_vi": null,
+    "title_en": null,
+    "message_vi": null,
+    "message_en": null
+  },
+  {
+    "kind": "legacy_client_update_after_bilingual_values",
+    "title": "Legacy changed",
+    "title_vi": null,
+    "title_en": null,
+    "message": "Legacy changed content",
+    "message_vi": null,
+    "message_en": null
+  }
+]

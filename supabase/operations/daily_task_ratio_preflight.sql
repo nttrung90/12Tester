@@ -1,4 +1,5 @@
--- READ ONLY. Run in the intended Supabase project before applying 042.
+-- HISTORICAL READ ONLY probe for 036/042, not a current deployment preflight.
+-- Current baseline: migrations/062_consolidated_baseline.sql, which has its own checks.
 -- Confirm the Dashboard project is com.ntt.crosstest before running migration.
 -- Save result grids privately for rollback / comparison; no tokens are needed.
 select current_database() as database_name, current_user as database_role,

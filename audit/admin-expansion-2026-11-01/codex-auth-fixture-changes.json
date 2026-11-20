@@ -1,0 +1,152 @@
+[
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/audit/ReportOverlapTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/audit/ReportV2WirePayloadProbeTest.kt",
+    "callbackBlocks": 1,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/AdminDailyTaskHardeningRegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/AppUpdateRegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/CacheRegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheBudgetAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheClockAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheCompositeAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheFinalAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheMutationAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCachePublicationAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotIntegrityAuditTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/MissionRegressionTest.kt",
+    "callbackBlocks": 1,
+    "sessionImports": 0
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/OwnerReportCountBehavioralTest.kt",
+    "callbackBlocks": 1,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/PushAndCarryoverHardeningTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/ReportRpcCompatibilityTest.kt",
+    "callbackBlocks": 1,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt",
+    "callbackBlocks": 2,
+    "sessionImports": 2
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignActionRaceTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminFlowSessionRaceTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminManagementCoreTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModelBehavioralTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupReviewRegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupRound3RegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/NotificationPopupViewModelTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/PendingCarryoverRetryRegressionTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "app/src/test/java/com/ntt/crosstest/ui/viewmodels/SlotAndPushDurabilityBehavioralTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 1
+  },
+  {
+    "path": "audit/admin-expansion-2026-11-01/independent-tests/com/ntt/crosstest/audit/CarryoverStreamsIndependentTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 2
+  },
+  {
+    "path": "audit/admin-expansion-2026-11-01/independent-tests/com/ntt/crosstest/audit/MemberDetailPaginationIndependentTest.kt",
+    "callbackBlocks": 0,
+    "sessionImports": 2
+  }
+]

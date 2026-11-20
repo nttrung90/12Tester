@@ -1,0 +1,1 @@
+PASS: upgrade from defective 091 repairs existing object clock/expiry/deadline and invalidates guessed quota, without deleting provider metadata.

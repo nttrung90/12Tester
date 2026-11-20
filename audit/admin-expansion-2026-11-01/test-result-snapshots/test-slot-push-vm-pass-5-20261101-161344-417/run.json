@@ -1,0 +1,12 @@
+{
+    "logName":  "test-slot-push-vm-pass-5",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T16:13:27.8678438Z",
+    "finishedUtc":  "2026-11-01T16:13:44.4271948Z",
+    "currentRunXmlCount":  1
+}

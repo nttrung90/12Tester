@@ -1,0 +1,12 @@
+{
+    "logName":  "test-appupdate-reward",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.AppUpdateRewardTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T16:13:57.2628703Z",
+    "finishedUtc":  "2026-11-01T16:14:10.8882414Z",
+    "currentRunXmlCount":  1
+}

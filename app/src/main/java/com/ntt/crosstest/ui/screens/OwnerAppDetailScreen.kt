@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.ntt.crosstest.data.CampaignPushStore
+import com.ntt.crosstest.data.DailyTaskAction
+import com.ntt.crosstest.data.DailyTaskActionGateResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -39,6 +42,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
@@ -61,7 +65,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -77,6 +84,7 @@ import com.ntt.crosstest.ui.components.FullscreenImageViewer
 import com.ntt.crosstest.ui.components.ImageComparisonDialog
 import com.ntt.crosstest.ui.theme.AmberStar
 import com.ntt.crosstest.util.ImageHashHelper
+import com.ntt.crosstest.util.ReportComparisonSelector
 import com.ntt.crosstest.util.ScreenshotManager
 import com.ntt.crosstest.util.ScreenshotRequestFactory
 import androidx.compose.material3.RadioButton
@@ -89,6 +97,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -111,10 +120,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.ntt.crosstest.util.RejectionReasonRenderer
 import com.ntt.crosstest.util.ScreenshotVariant
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
@@ -123,6 +136,7 @@ import com.ntt.crosstest.data.CampaignOwnerStats
 import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.TesterItem
 import com.ntt.crosstest.data.TesterReport
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.ui.viewmodels.OwnerAppDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,8 +145,12 @@ fun OwnerAppDetailScreen(
     campaignId: String,
     onBack: () -> Unit,
     openReports: Boolean = false,
+    missionCreatedRefresh: Boolean = false,
+    onMissionCreatedRefreshHandled: () -> Unit = {},
     onAccountLocked: () -> Unit = {},
     onNavigateToAppUpdate: (String) -> Unit = {},
+    onNavigateToTesterBonus: (String) -> Unit = {},
+    onNavigateToCopyMission: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     viewModel: OwnerAppDetailViewModel = run {
         val app = LocalContext.current.applicationContext as TestCheoApp
@@ -154,6 +172,15 @@ fun OwnerAppDetailScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshDailyTaskState()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     LaunchedEffect(uiState.isOwnerLocked) {
         if (uiState.isOwnerLocked) {
             onAccountLocked()
@@ -173,11 +200,13 @@ fun OwnerAppDetailScreen(
     var showReportsDialog by rememberSaveable { mutableStateOf(openReports) }
     var showPauseConfirmDialog by rememberSaveable { mutableStateOf(false) }
     var showPushConfirmDialog by rememberSaveable { mutableStateOf(false) }
+    var showPushRetryPurchaseDialog by rememberSaveable { mutableStateOf(false) }
     var showTipDialog by rememberSaveable { mutableStateOf(false) }
     var showProductionDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteConfirmDialog by rememberSaveable { mutableStateOf(false) }
     var showRenewSlotDialog by rememberSaveable { mutableStateOf(false) }
     var showMissionManageDialog by rememberSaveable { mutableStateOf(false) }
+    var showMissionEditDialog by rememberSaveable { mutableStateOf(false) }
     var showMissionPauseConfirm by rememberSaveable { mutableStateOf(false) }
     var showMissionDeleteConfirm by rememberSaveable { mutableStateOf(false) }
 
@@ -185,12 +214,21 @@ fun OwnerAppDetailScreen(
     LaunchedEffect(uiState.mission) {
         if (uiState.mission == null) {
             showMissionManageDialog = false
+            showMissionEditDialog = false
             showMissionPauseConfirm = false
             showMissionDeleteConfirm = false
         }
     }
 
+    LaunchedEffect(missionCreatedRefresh) {
+        if (missionCreatedRefresh) {
+            viewModel.refreshAfterMissionCreated()
+            onMissionCreatedRefreshHandled()
+        }
+    }
+
     val campaign = uiState.campaign
+    val hasPendingPush = uiState.hasPendingPush
 
     // Mở dialog báo cáo: tải lại danh sách để không bị dữ liệu cũ (báo cáo đã duyệt/từ chối).
     LaunchedEffect(showReportsDialog) {
@@ -204,7 +242,7 @@ fun OwnerAppDetailScreen(
                 Icon(
                     imageVector = Icons.Filled.Warning,
                     contentDescription = null,
-                    tint = Color(0xFFD32F2F),
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(36.dp)
                 )
             },
@@ -212,7 +250,7 @@ fun OwnerAppDetailScreen(
                 Text(
                     text = stringResource(R.string.oad_warning_dialog_title),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
             },
@@ -231,7 +269,10 @@ fun OwnerAppDetailScreen(
                             onAccountLocked()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    )
                 ) {
                     Text(stringResource(R.string.oad_understood))
                 }
@@ -315,7 +356,7 @@ fun OwnerAppDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
             // Error banner if any action or state failed
             uiState.error?.let { err ->
@@ -365,7 +406,7 @@ fun OwnerAppDetailScreen(
                 val isProduction = campaign.isProduction
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.successContainer),
                     shape = RoundedCornerShape(12.dp),
                 ) {
                     Row(
@@ -377,7 +418,7 @@ fun OwnerAppDetailScreen(
                         Icon(
                             imageVector = if (isProduction) Icons.Filled.RocketLaunch else Icons.Filled.Check,
                             contentDescription = null,
-                            tint = Color(0xFF2E7D32),
+                            tint = MaterialTheme.statusColors.success,
                             modifier = Modifier.size(24.dp),
                         )
                         Spacer(Modifier.width(10.dp))
@@ -386,7 +427,7 @@ fun OwnerAppDetailScreen(
                                 text = if (isProduction) stringResource(R.string.oad_production_title) else stringResource(R.string.oad_completed_title),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF2E7D32),
+                                color = MaterialTheme.statusColors.onSuccessContainer,
                             )
                             Text(
                                 text = if (isProduction) {
@@ -401,7 +442,13 @@ fun OwnerAppDetailScreen(
                     }
                 }
             } else if (campaign.isPaused) {
-                val adminNote = campaign.adminNote?.takeIf { it.isNotBlank() }
+                val adminNote = when (campaign.adminPauseReasonCode) {
+                    com.ntt.crosstest.data.AdminPauseReason.MISSING_GOOGLE_GROUP.code ->
+                        stringResource(R.string.campaign_admin_pause_reason_missing_google_group)
+                    com.ntt.crosstest.data.AdminPauseReason.POLICY_VIOLATION.code ->
+                        stringResource(R.string.campaign_admin_pause_reason_policy_violation)
+                    else -> campaign.adminNote?.takeIf { it.isNotBlank() }
+                }
                 val adminNoteSuffix = adminNote?.let {
                     "\n" + stringResource(R.string.oad_paused_admin_note_format, it)
                 }.orEmpty()
@@ -413,7 +460,7 @@ fun OwnerAppDetailScreen(
                 }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.warningContainer),
                     shape = RoundedCornerShape(12.dp),
                 ) {
                     Row(
@@ -425,7 +472,7 @@ fun OwnerAppDetailScreen(
                         Icon(
                             imageVector = Icons.Filled.PauseCircle,
                             contentDescription = null,
-                            tint = Color(0xFFB26A00),
+                            tint = MaterialTheme.statusColors.warning,
                             modifier = Modifier.size(24.dp),
                         )
                         Spacer(Modifier.width(10.dp))
@@ -438,7 +485,7 @@ fun OwnerAppDetailScreen(
                                 },
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFB26A00),
+                                color = MaterialTheme.statusColors.onWarningContainer,
                             )
                             Text(
                                 text = pausedDescription,
@@ -502,10 +549,11 @@ fun OwnerAppDetailScreen(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-                    if (!campaign.isFinalized) {
+                    if (!campaign.isFinalized || hasPendingPush) {
                         // Mục Đẩy app (ngay phía trên "Tạm dừng nhận Tester", chỉ dành cho chủ app thật)
                         if (uiState.isActualOwner) {
                             val isPushedToday = campaign.isPushActive()
+                            val pushPausedWarning = stringResource(R.string.oad_push_paused_warning)
                             OwnerActionItem(
                                 icon = Icons.Filled.RocketLaunch,
                                 title = stringResource(R.string.oad_push_title),
@@ -519,10 +567,10 @@ fun OwnerAppDetailScreen(
                                 iconTint = MaterialTheme.colorScheme.primary,
                                 isLoading = uiState.isPushLoading,
                                 onClick = {
-                                    if (campaign.isPaused) {
+                                    if (campaign.isPaused && !hasPendingPush) {
                                         Toast.makeText(
                                             context,
-                                            context.getString(R.string.oad_push_paused_warning),
+                                            pushPausedWarning,
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
@@ -534,74 +582,154 @@ fun OwnerAppDetailScreen(
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         }
 
+                        // Mục Thưởng thêm cho tester (nằm trực tiếp dưới Đẩy app và trên Tạm dừng/Tiếp tục)
+                        if (uiState.isActualOwner) {
+                            val hasBonusRound = !campaign.testerBonusRoundId.isNullOrBlank() ||
+                                campaign.testerBonusStatus in listOf("active", "closing", "exhausted")
+                            val isEligibleToViewOrCreate = !campaign.isFinalized || hasBonusRound
+                            if (isEligibleToViewOrCreate) {
+                                val bonusSubtitle = if (hasBonusRound && (campaign.testerBonusCredits ?: 0) > 0) {
+                                    stringResource(
+                                        R.string.oad_tester_bonus_active_format,
+                                        campaign.testerBonusCredits ?: 0,
+                                        campaign.testerBonusPaidCount ?: 0,
+                                        (campaign.testerBonusPaidCount ?: 0) + (campaign.testerBonusRemainingSlots ?: 0),
+                                    )
+                                } else {
+                                    stringResource(R.string.oad_tester_bonus_default_subtitle)
+                                }
+                                val bonusBadge = if (hasBonusRound && campaign.testerBonusStatus == "active") {
+                                    stringResource(R.string.oad_tester_bonus_badge, campaign.testerBonusCredits ?: 0)
+                                } else null
+
+                                OwnerActionItem(
+                                    icon = Icons.Filled.CardGiftcard,
+                                    title = stringResource(R.string.oad_tester_bonus_title),
+                                    subtitle = bonusSubtitle,
+                                    badgeText = bonusBadge,
+                                    iconTint = Color(0xFFFF9800),
+                                    onClick = {
+                                        onNavigateToTesterBonus(campaign.id ?: campaignId)
+                                    },
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            }
+                        }
+
                         // Item 3: Tạm dừng / Tiếp tục nhận tester.
                         // App bị Admin tạm dừng: chủ app không được tự mở lại (chỉ Admin thấy nút).
                         if (!campaign.isAdminPaused || uiState.isAdmin) {
+                            val pauseResumeSubtitle = when {
+                                campaign.isPaused && campaign.isAdminPaused -> stringResource(R.string.oad_resume_sub_admin)
+                                campaign.isPaused && !uiState.isAdmin && uiState.resumeGateResult is DailyTaskActionGateResult.Blocked -> {
+                                    val blocked = uiState.resumeGateResult as DailyTaskActionGateResult.Blocked
+                                    if (blocked.formatArg != null) stringResource(blocked.subtitleRes, blocked.formatArg)
+                                    else stringResource(blocked.subtitleRes)
+                                }
+                                !campaign.isPaused && !uiState.isAdmin && uiState.pauseGateResult is DailyTaskActionGateResult.Blocked -> {
+                                    val blocked = uiState.pauseGateResult as DailyTaskActionGateResult.Blocked
+                                    if (blocked.formatArg != null) stringResource(blocked.subtitleRes, blocked.formatArg)
+                                    else stringResource(blocked.subtitleRes)
+                                }
+                                campaign.isPaused && campaign.isSlotExpiredPause -> stringResource(R.string.oad_resume_sub_slot_format, campaign.slotNumber)
+                                campaign.isPaused -> stringResource(R.string.oad_resume_sub_manual)
+                                campaign.testingDaysRemaining != null -> stringResource(R.string.oad_pause_sub_days_format, campaign.testingDaysRemaining ?: 0)
+                                else -> stringResource(R.string.oad_pause_sub_plain)
+                            }
                             OwnerActionItem(
                                 icon = if (campaign.isPaused) Icons.Filled.PlayCircle else Icons.Filled.PauseCircle,
                                 title = if (campaign.isPaused) stringResource(R.string.oad_resume_title) else stringResource(R.string.oad_pause_title),
-                                subtitle = when {
-                                    campaign.isPaused && campaign.isAutoPaused -> stringResource(R.string.oad_resume_sub_auto)
-                                    campaign.isPaused && campaign.isSlotExpiredPause -> stringResource(R.string.oad_resume_sub_slot_format, campaign.slotNumber)
-                                    campaign.isPaused && campaign.isAdminPaused -> stringResource(R.string.oad_resume_sub_admin)
-                                    campaign.isPaused -> stringResource(R.string.oad_resume_sub_manual)
-                                    campaign.testingDaysRemaining != null -> stringResource(R.string.oad_pause_sub_days_format, campaign.testingDaysRemaining ?: 0)
-                                    else -> stringResource(R.string.oad_pause_sub_plain)
+                                subtitle = pauseResumeSubtitle,
+                                onClick = {
+                                    if (campaign.isPaused && !uiState.isAdmin && uiState.resumeGateResult is DailyTaskActionGateResult.Blocked) {
+                                        viewModel.inspectGate(DailyTaskAction.RESUME)
+                                    } else if (!campaign.isPaused && !uiState.isAdmin && uiState.pauseGateResult is DailyTaskActionGateResult.Blocked) {
+                                        viewModel.inspectGate(DailyTaskAction.MANUAL_PAUSE)
+                                    } else {
+                                        showPauseConfirmDialog = true
+                                    }
                                 },
-                                onClick = { showPauseConfirmDialog = true },
                             )
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         }
-
-                        // Item 3.5: Quản lý nhiệm vụ (chỉ CHỦ app có nhiệm vụ chưa xóa; Admin xem app
-                        // người khác không thấy vì RPC chỉ cho phép chủ nhiệm vụ thao tác).
-                        if (uiState.mission != null && uiState.isActualOwner) {
-                            OwnerActionItem(
-                                icon = Icons.Filled.EmojiEvents,
-                                title = stringResource(R.string.mission_manage_title),
-                                subtitle = stringResource(
-                                    R.string.mission_manage_sub_format,
-                                    uiState.mission?.title.orEmpty(),
-                                ),
-                                onClick = { showMissionManageDialog = true },
-                            )
-
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        } else if (uiState.missionError != null && uiState.isActualOwner) {
-                            OwnerActionItem(
-                                icon = Icons.Filled.EmojiEvents,
-                                iconTint = MaterialTheme.colorScheme.error,
-                                title = stringResource(R.string.mission_manage_title),
-                                titleColor = MaterialTheme.colorScheme.error,
-                                subtitle = stringResource(R.string.mission_owner_load_error),
-                                onClick = { viewModel.retryLoadMission() },
-                            )
-
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        }
-
-                        // Item 4: Boa cho người test - tạm ẩn chưa dùng đến theo yêu cầu
 
                         // Item 5: App đã lên production
+                        val productionSubtitle = when {
+                            !uiState.isAdmin && uiState.productionGateResult is DailyTaskActionGateResult.Blocked -> {
+                                val blocked = uiState.productionGateResult as DailyTaskActionGateResult.Blocked
+                                if (blocked.formatArg != null) stringResource(blocked.subtitleRes, blocked.formatArg)
+                                else stringResource(blocked.subtitleRes)
+                            }
+                            else -> stringResource(R.string.oad_production_item_sub)
+                        }
                         OwnerActionItem(
                             icon = Icons.Filled.RocketLaunch,
                             title = stringResource(R.string.oad_production_item_title),
-                            subtitle = stringResource(R.string.oad_production_item_sub),
-                            onClick = { showProductionDialog = true },
+                            subtitle = productionSubtitle,
+                            onClick = {
+                                if (!uiState.isAdmin && uiState.productionGateResult is DailyTaskActionGateResult.Blocked) {
+                                    viewModel.inspectGate(DailyTaskAction.PRODUCTION)
+                                } else {
+                                    showProductionDialog = true
+                                }
+                            },
+                        )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    }
+
+                    // Item 3.5: Quản lý nhiệm vụ (chỉ CHỦ app có nhiệm vụ chưa xóa; Admin xem app
+                    // người khác không thấy vì RPC chỉ cho phép chủ nhiệm vụ thao tác).
+                    // Hiển thị cho cả app đang mở và app đã hoàn thành (finalized).
+                    if (uiState.mission != null && uiState.isActualOwner) {
+                        OwnerActionItem(
+                            icon = Icons.Filled.EmojiEvents,
+                            title = stringResource(R.string.mission_manage_title),
+                            subtitle = stringResource(
+                                R.string.mission_manage_sub_format,
+                                uiState.mission?.title.orEmpty(),
+                            ),
+                            onClick = { showMissionManageDialog = true },
+                        )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    } else if (uiState.missionError != null && uiState.isActualOwner) {
+                        OwnerActionItem(
+                            icon = Icons.Filled.EmojiEvents,
+                            iconTint = MaterialTheme.colorScheme.error,
+                            title = stringResource(R.string.mission_manage_title),
+                            titleColor = MaterialTheme.colorScheme.error,
+                            subtitle = stringResource(R.string.mission_owner_load_error),
+                            onClick = { viewModel.retryLoadMission() },
                         )
 
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     }
 
                     // Item 6: Xóa app
+                    val deleteSubtitle = when {
+                        !uiState.isAdmin && uiState.deleteGateResult is DailyTaskActionGateResult.Blocked -> {
+                            val blocked = uiState.deleteGateResult as DailyTaskActionGateResult.Blocked
+                            if (blocked.formatArg != null) stringResource(blocked.subtitleRes, blocked.formatArg)
+                            else stringResource(blocked.subtitleRes)
+                        }
+                        else -> stringResource(R.string.oad_delete_sub)
+                    }
                     OwnerActionItem(
                         icon = Icons.Filled.Delete,
                         iconTint = MaterialTheme.colorScheme.error,
                         title = stringResource(R.string.oad_delete_title),
                         titleColor = MaterialTheme.colorScheme.error,
-                        subtitle = stringResource(R.string.oad_delete_sub),
-                        onClick = { showDeleteConfirmDialog = true },
+                        subtitle = deleteSubtitle,
+                        onClick = {
+                            if (!uiState.isAdmin && uiState.deleteGateResult is DailyTaskActionGateResult.Blocked) {
+                                viewModel.inspectGate(DailyTaskAction.DELETE)
+                            } else {
+                                showDeleteConfirmDialog = true
+                            }
+                        },
                     )
                 }
             }
@@ -700,10 +828,15 @@ fun OwnerAppDetailScreen(
             text = {
                 Text(
                     if (isPaused) {
-                        if (campaign.isAutoPaused) {
-                            stringResource(R.string.oad_resume_dialog_auto)
-                        } else {
-                            stringResource(R.string.oad_resume_dialog_manual)
+                        when {
+                            !uiState.isAdmin && uiState.isResumeBlockedByPending ->
+                                stringResource(R.string.oad_resume_dialog_pending)
+                            !uiState.isAdmin && uiState.dailyTask?.met == true && uiState.dailyTask?.hasRemainingCarryover == true ->
+                                stringResource(R.string.oad_resume_dialog_carryover_debt_format, uiState.dailyTask?.carryoverRemainingTests ?: 0)
+                            campaign.isAutoPaused || (!uiState.isAdmin && uiState.isResumeBlockedByUnmetDailyTask) ->
+                                stringResource(R.string.oad_resume_dialog_auto)
+                            else ->
+                                stringResource(R.string.oad_resume_dialog_manual)
                         }
                     } else stringResource(R.string.oad_pause_dialog_desc)
                 )
@@ -726,10 +859,12 @@ fun OwnerAppDetailScreen(
         )
     }
 
-    if (showPushConfirmDialog && campaign != null) {
+    if (showPushConfirmDialog && (campaign != null || hasPendingPush)) {
         val ownerCredits = uiState.ownerProfile?.credits ?: 0
-        val expectedBalance = (ownerCredits - 100).coerceAtLeast(0)
-        val isSufficient = ownerCredits >= 100
+        val pushCost = uiState.pushCost
+        val expectedBalance = (ownerCredits - pushCost).coerceAtLeast(0)
+        val isSufficient = ownerCredits >= pushCost
+        val appName = campaign?.appName ?: stringResource(R.string.app_name)
 
         AlertDialog(
             onDismissRequest = {
@@ -740,17 +875,147 @@ fun OwnerAppDetailScreen(
             },
             title = {
                 Text(
-                    text = stringResource(R.string.oad_push_dialog_title),
+                    text = stringResource(
+                        if (hasPendingPush) R.string.oad_push_verify_pending_title
+                        else R.string.oad_push_dialog_title
+                    ),
                     fontWeight = FontWeight.Bold,
                 )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = stringResource(R.string.oad_push_dialog_content),
+                        text = stringResource(
+                            if (hasPendingPush) R.string.oad_push_verify_pending_content
+                            else R.string.oad_push_dialog_content
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
 
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.oad_push_dialog_app_format, appName),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                text = stringResource(R.string.oad_push_dialog_current_balance_format, ownerCredits),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            if (!hasPendingPush) {
+                                Text(
+                                    text = stringResource(R.string.oad_push_dialog_expected_balance_format, expectedBalance),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSufficient) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+                    }
+
+                    if (!isSufficient && !hasPendingPush) {
+                        Text(
+                            text = stringResource(R.string.oad_push_insufficient_credits),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+
+                    uiState.pushError?.let { err ->
+                        Text(
+                            text = err,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+
+                    if (uiState.isPushPendingNotFound && campaign != null) {
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedButton(
+                            onClick = {
+                                showPushConfirmDialog = false
+                                showPushRetryPurchaseDialog = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(stringResource(R.string.oad_push_retry_purchase_btn))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.pushApp(context, expectedCost = pushCost, expectedRevision = uiState.pushRevision) {
+                            showPushConfirmDialog = false
+                        }
+                    },
+                    enabled = !uiState.isPushLoading && ((isSufficient && uiState.hasValidPushQuote) || hasPendingPush),
+                ) {
+                    if (uiState.isPushLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Text(
+                        stringResource(
+                            if (hasPendingPush) R.string.oad_push_verify_pending_confirm
+                            else R.string.oad_push_dialog_confirm
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        showPushConfirmDialog = false
+                        viewModel.clearPushError()
+                    },
+                    enabled = !uiState.isPushLoading,
+                ) {
+                    Text(stringResource(R.string.oad_push_dialog_cancel))
+                }
+            }
+        )
+    }
+
+    if (showPushRetryPurchaseDialog && campaign != null) {
+        val ownerCredits = uiState.ownerProfile?.credits ?: 0
+        val pushCost = uiState.pushCost
+        val isSufficient = ownerCredits >= pushCost
+        val expectedBalance = (ownerCredits - pushCost).coerceAtLeast(0)
+
+        AlertDialog(
+            onDismissRequest = {
+                if (!uiState.isPushLoading) {
+                    showPushRetryPurchaseDialog = false
+                    viewModel.clearPushError()
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.oad_push_retry_purchase_title),
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = stringResource(R.string.oad_push_retry_purchase_content),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -777,7 +1042,6 @@ fun OwnerAppDetailScreen(
                             )
                         }
                     }
-
                     if (!isSufficient) {
                         Text(
                             text = stringResource(R.string.oad_push_insufficient_credits),
@@ -786,7 +1050,14 @@ fun OwnerAppDetailScreen(
                             fontWeight = FontWeight.Medium,
                         )
                     }
-
+                    if (campaign.isPaused) {
+                        Text(
+                            text = stringResource(R.string.oad_push_paused_warning),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
                     uiState.pushError?.let { err ->
                         Text(
                             text = err,
@@ -799,11 +1070,11 @@ fun OwnerAppDetailScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.pushApp(context) {
-                            showPushConfirmDialog = false
+                        viewModel.retryOriginalPurchase(context, expectedCost = pushCost, expectedRevision = uiState.pushRevision) {
+                            showPushRetryPurchaseDialog = false
                         }
                     },
-                    enabled = !uiState.isPushLoading && isSufficient,
+                    enabled = !uiState.isPushLoading && isSufficient && uiState.hasValidPushQuote && !campaign.isPaused,
                 ) {
                     if (uiState.isPushLoading) {
                         CircularProgressIndicator(
@@ -813,13 +1084,13 @@ fun OwnerAppDetailScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                     }
-                    Text(stringResource(R.string.oad_push_dialog_confirm))
+                    Text(stringResource(R.string.oad_push_retry_purchase_confirm))
                 }
             },
             dismissButton = {
                 OutlinedButton(
                     onClick = {
-                        showPushConfirmDialog = false
+                        showPushRetryPurchaseDialog = false
                         viewModel.clearPushError()
                     },
                     enabled = !uiState.isPushLoading,
@@ -866,7 +1137,17 @@ fun OwnerAppDetailScreen(
                 Button(
                     onClick = {
                         showDeleteConfirmDialog = false
-                        viewModel.deleteCampaign(onDeleted = onBack)
+                        viewModel.deleteCampaign(
+                            onDeleted = onBack,
+                            onPendingRemoval = {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.campaign_pending_removal_msg),
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                                onBack()
+                            },
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -881,13 +1162,21 @@ fun OwnerAppDetailScreen(
         )
     }
 
-    // Quản lý nhiệm vụ: thông tin + Dừng/Tiếp tục + Xóa (chỉ chủ nhiệm vụ thấy item mở dialog này).
+    // Quản lý nhiệm vụ: thông tin + Dừng/Tiếp tục + Sao chép (khi hết hạn) + Xóa (chỉ chủ nhiệm vụ thấy item mở dialog này).
     if (showMissionManageDialog && uiState.mission != null && uiState.isActualOwner) {
         val mission = uiState.mission!!
+        val nowEpochMs = remember(mission.id, mission.status, mission.endsAt) { viewModel.estimatedServerEpochMs() }
+        val isExpiredEffective = mission.isExpiredEffective(nowEpochMs)
+        val isPausedEffective = mission.isPaused && !isExpiredEffective
+        val isActiveEffective = mission.isActive && !isExpiredEffective
+        val canCopyMission = uiState.isActualOwner &&
+            campaign?.isMissionEligible == true &&
+            mission.isCopyEligible(nowEpochMs)
         val statusLabel = when {
-            mission.isActive -> stringResource(R.string.mission_manage_status_active)
-            mission.isPaused -> stringResource(R.string.mission_status_paused)
+            isExpiredEffective -> stringResource(R.string.mission_status_expired)
             mission.isFull -> stringResource(R.string.mission_status_full)
+            isActiveEffective -> stringResource(R.string.mission_manage_status_active)
+            isPausedEffective -> stringResource(R.string.mission_status_paused)
             mission.isStopped -> stringResource(R.string.mission_status_stopped)
             else -> stringResource(R.string.mission_status_expired)
         }
@@ -916,9 +1205,31 @@ fun OwnerAppDetailScreen(
                         )
                     }
                     Text(
-                        text = stringResource(R.string.mission_manage_reward_format, mission.rewardCredits),
+                        text = "${stringResource(R.string.mission_mode_label)}: " + if (mission.isDailyMode) stringResource(R.string.mission_mode_daily) else stringResource(R.string.mission_mode_once),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = if (mission.isDailyMode) {
+                            stringResource(R.string.mission_manage_reward_format, mission.rewardCredits) + " (" + stringResource(R.string.mission_reward_unit_day) + ")"
+                        } else {
+                            stringResource(R.string.mission_manage_reward_format, mission.rewardCredits)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    if (mission.escrowRemainingCredits > 0) {
+                        Text(
+                            text = "Quỹ thưởng còn lại: ${mission.escrowRemainingCredits}/${mission.escrowTotalCredits} Credit",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    if (mission.testerAnnouncement.isNotBlank()) {
+                        Text(
+                            text = "${stringResource(R.string.mission_announcement_label)}: ${mission.testerAnnouncement}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     Text(
                         text = stringResource(
                             R.string.mission_manage_joined_format,
@@ -939,11 +1250,25 @@ fun OwnerAppDetailScreen(
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
                     )
+                    if (isActiveEffective || isPausedEffective) {
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedButton(
+                            onClick = {
+                                showMissionManageDialog = false
+                                showMissionEditDialog = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.mission_edit_btn))
+                        }
+                    }
                 }
             },
             confirmButton = {
-                if (mission.isActive || mission.isPaused) {
-                    if (mission.isPaused) {
+                if (isActiveEffective || isPausedEffective) {
+                    if (isPausedEffective) {
                         // Tiếp tục: không cần xác nhận, thực hiện ngay.
                         Button(
                             onClick = {
@@ -963,6 +1288,18 @@ fun OwnerAppDetailScreen(
                             Text(stringResource(R.string.mission_manage_pause_btn))
                         }
                     }
+                } else if (canCopyMission) {
+                    Button(
+                        onClick = {
+                            showMissionManageDialog = false
+                            onNavigateToCopyMission(campaignId, mission.id)
+                        },
+                        enabled = !uiState.isMissionActionLoading,
+                    ) {
+                        Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.mission_copy_btn))
+                    }
                 } else {
                     TextButton(onClick = { showMissionManageDialog = false }) {
                         Text(stringResource(R.string.close))
@@ -970,16 +1307,216 @@ fun OwnerAppDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showMissionDeleteConfirm = true },
-                    enabled = !uiState.isMissionActionLoading,
-                ) {
-                    Text(
-                        text = stringResource(R.string.mission_manage_delete_btn),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(
+                        onClick = { showMissionDeleteConfirm = true },
+                        enabled = !uiState.isMissionActionLoading,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.mission_manage_delete_btn),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    if (canCopyMission) {
+                        TextButton(onClick = { showMissionManageDialog = false }) {
+                            Text(stringResource(R.string.close))
+                        }
+                    }
                 }
             },
+        )
+    }
+
+    if (showMissionEditDialog && uiState.mission != null && uiState.isActualOwner) {
+        val mission = uiState.mission!!
+        var editTitle by rememberSaveable(mission.id) { mutableStateOf(mission.title) }
+        var editDesc by rememberSaveable(mission.id) { mutableStateOf(mission.description) }
+        var editAnnouncement by rememberSaveable(mission.id) { mutableStateOf(mission.testerAnnouncement) }
+        var editMode by rememberSaveable(mission.id) { mutableStateOf(if (mission.isDailyMode) "daily" else "once") }
+        var editParticipants by rememberSaveable(mission.id) { mutableIntStateOf(if (mission.maxParticipants in 1..50) mission.maxParticipants else 5) }
+        var editDays by rememberSaveable(mission.id) { mutableIntStateOf(if (mission.durationDays in 1..7) mission.durationDays else 3) }
+        var editReward by rememberSaveable(mission.id) { mutableStateOf(mission.rewardCredits.toString()) }
+
+        val canEditTerms = mission.participantCount == 0 && !mission.isLegacyMode
+
+        val rewardInt = editReward.toIntOrNull() ?: 0
+        val highestDays = maxOf(mission.durationDays, 0)
+        val feeDiff = if (canEditTerms && editDays > highestDays) 50 * (editDays - highestDays) else 0
+        val newEscrow = if (canEditTerms) {
+            if (editMode == "daily") editParticipants * editDays * rewardInt else editParticipants * rewardInt
+        } else mission.escrowRemainingCredits
+        val escrowDiff = if (canEditTerms) newEscrow - mission.escrowRemainingCredits else 0
+        val totalDiff = feeDiff + escrowDiff
+
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isMissionActionLoading) showMissionEditDialog = false },
+            title = { Text(stringResource(R.string.mission_edit_title), fontWeight = FontWeight.Bold) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (!canEditTerms) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mission_edit_terms_locked_notice),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = editTitle,
+                        onValueChange = { editTitle = it.take(80) },
+                        label = { Text(stringResource(R.string.mission_title_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+
+                    OutlinedTextField(
+                        value = editDesc,
+                        onValueChange = { editDesc = it.take(500) },
+                        label = { Text(stringResource(R.string.mission_desc_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                    )
+
+                    if (canEditTerms) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilterChip(
+                                selected = editMode == "once",
+                                onClick = { editMode = "once" },
+                                label = { Text(stringResource(R.string.mission_mode_once)) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = editMode == "daily",
+                                onClick = { editMode = "daily" },
+                                label = { Text(stringResource(R.string.mission_mode_daily)) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "${stringResource(R.string.mission_participants_label)}: $editParticipants",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { editParticipants = (editParticipants - 1).coerceAtLeast(1) },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("-1") }
+                                OutlinedButton(
+                                    onClick = { editParticipants = (editParticipants + 1).coerceAtMost(50) },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("+1") }
+                            }
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "${stringResource(R.string.mission_days_label)}: $editDays",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { editDays = (editDays - 1).coerceAtLeast(1) },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("-1 ngày") }
+                                OutlinedButton(
+                                    onClick = { editDays = (editDays + 1).coerceAtMost(7) },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("+1 ngày") }
+                            }
+                        }
+
+                        OutlinedTextField(
+                            value = editReward,
+                            onValueChange = { editReward = it.filter(Char::isDigit).take(6) },
+                            label = {
+                                Text(
+                                    stringResource(R.string.mission_reward_label) + if (editMode == "daily") " (" + stringResource(R.string.mission_reward_unit_day) + ")" else " (" + stringResource(R.string.mission_reward_unit_turn) + ")"
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f))
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = stringResource(R.string.mission_cost_diff_format, totalDiff),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = "Phí: ${if (feeDiff > 0) "+$feeDiff" else "0"} • Quỹ thưởng: ${if (escrowDiff > 0) "+$escrowDiff" else "$escrowDiff"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        OutlinedTextField(
+                            value = editAnnouncement,
+                            onValueChange = { editAnnouncement = it.take(300) },
+                            label = { Text(stringResource(R.string.mission_announcement_label)) },
+                            placeholder = { Text(stringResource(R.string.mission_announcement_placeholder)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.editMission(
+                            title = editTitle,
+                            description = editDesc,
+                            rewardMode = if (canEditTerms) editMode else null,
+                            participants = if (canEditTerms) editParticipants else null,
+                            days = if (canEditTerms) editDays else null,
+                            rewardCredits = if (canEditTerms) rewardInt else null,
+                            announcement = editAnnouncement,
+                            expectedVersion = mission.version,
+                            expectedCostDiff = if (canEditTerms) totalDiff else null,
+                            onSuccess = { showMissionEditDialog = false }
+                        )
+                    },
+                    enabled = !uiState.isMissionActionLoading && editTitle.isNotBlank() && (!canEditTerms || rewardInt >= 10),
+                ) {
+                    Text(stringResource(R.string.mission_edit_save_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showMissionEditDialog = false },
+                    enabled = !uiState.isMissionActionLoading,
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 
@@ -1096,19 +1633,35 @@ fun OwnerAppDetailScreen(
     }
 
     if (showRenewSlotDialog && campaign != null) {
-        val cost = com.ntt.crosstest.data.SlotInfo.costForSlot(campaign.slotNumber)
+        val slotInfo = uiState.slotInfo
+        val cost = slotInfo?.cost ?: com.ntt.crosstest.data.SlotInfo.costForSlot(campaign.slotNumber)
+        val renewalDays = slotInfo?.renewalDays ?: 30
+        val hasQuote = slotInfo?.policyRevision != null
         AlertDialog(
             onDismissRequest = { if (!uiState.isActionLoading) showRenewSlotDialog = false },
             title = { Text(stringResource(R.string.oad_renew_dialog_title_format, campaign.slotNumber)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.oad_renew_dialog_desc_format, 16, campaign.slotNumber, cost))
+                    Text(stringResource(R.string.oad_renew_dialog_desc_format, renewalDays, campaign.slotNumber, cost))
                     Text(
                         text = stringResource(R.string.oad_renew_dialog_balance_format, uiState.ownerProfile?.credits ?: 0),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                     )
+                    if (!hasQuote) {
+                        Text(
+                            text = stringResource(R.string.admin_policy_quote_unavailable),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    } else if (!uiState.error.isNullOrBlank()) {
+                        Text(
+                            text = uiState.error.orEmpty(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             },
             confirmButton = {
@@ -1117,7 +1670,7 @@ fun OwnerAppDetailScreen(
                         showRenewSlotDialog = false
                         viewModel.renewCurrentSlot()
                     },
-                    enabled = !uiState.isActionLoading && (uiState.ownerProfile?.credits ?: 0) >= cost
+                    enabled = !uiState.isActionLoading && hasQuote && (uiState.ownerProfile?.credits ?: 0) >= cost
                 ) {
                     Text(stringResource(R.string.oad_renew_btn_format, cost))
                 }
@@ -2068,17 +2621,16 @@ private fun TesterReportsDialog(
                             .fillMaxSize()
                             .padding(horizontal = 16.dp),
                         contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         itemsIndexed(displayedReports, key = { index, r -> "rep_${r.id}_$index" }) { _, report ->
-                            // Find previous report from the same tester
+                            // Find previous day report from the same tester in the same context
                             val previousReport = remember(reports, report) {
-                                reports.filter {
-                                    it.userId == report.userId &&
-                                    it.id != report.id &&
-                                    !it.screenshotUrl.isNullOrBlank() &&
-                                    (it.createdAt.orEmpty() < report.createdAt.orEmpty())
-                                }.maxByOrNull { it.createdAt.orEmpty() }
+                                ReportComparisonSelector.selectComparisonTarget(
+                                    currentReport = report,
+                                    availableReports = reports,
+                                    isHistoryPartial = false,
+                                ).targetReport
                             }
 
                             ReportReviewCard(
@@ -2132,14 +2684,18 @@ private fun ReportReviewCard(
         val u2 = previousReport?.screenshotUrl
         if (!u1.isNullOrBlank() && !u2.isNullOrBlank()) {
             isCheckingHash = true
-            // Ưu tiên image_hash đã lưu trong DB — chỉ tải + decode ảnh khi hash trống và chưa hết hạn 30 ngày.
-            val h1 = report.imageHash?.takeIf { it.isNotBlank() }
+            comparison = null
+            // Ưu tiên image_hash đã lưu trong DB (nếu hợp lệ) — chỉ tải + decode ảnh khi hash trống và chưa hết hạn 30 ngày.
+            val h1 = report.imageHash?.takeIf { ImageHashHelper.isValidDHash(it) }
                 ?: if (!report.isScreenshotExpired) ImageHashHelper.computeDHashFromUrl(context, u1, report) else null
-            val h2 = previousReport?.imageHash?.takeIf { it.isNotBlank() }
+            val h2 = previousReport?.imageHash?.takeIf { ImageHashHelper.isValidDHash(it) }
                 ?: if (previousReport?.isScreenshotExpired != true) ImageHashHelper.computeDHashFromUrl(context, u2, previousReport) else null
             if (h1 != null && h2 != null) {
                 comparison = ImageHashHelper.compare(h1, h2, context)
             }
+            isCheckingHash = false
+        } else {
+            comparison = null
             isCheckingHash = false
         }
     }
@@ -2150,7 +2706,7 @@ private fun ReportReviewCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)),
         border = BorderStroke(
             width = if (comparison?.isSuspectDuplicate == true) 1.5.dp else 1.dp,
-            color = if (comparison?.isSuspectDuplicate == true) Color(0xFFEF5350) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            color = if (comparison?.isSuspectDuplicate == true) MaterialTheme.statusColors.warning else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
     ) {
         Column(
@@ -2199,46 +2755,19 @@ private fun ReportReviewCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        if (report.isMissionReport) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.padding(top = 2.dp)
-                            ) {
-                                Surface(
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                                    shape = RoundedCornerShape(4.dp),
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.mission_report_badge),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                    )
-                                }
-                                if (!report.missionTitle.isNullOrBlank()) {
-                                    Text(
-                                        text = report.missionTitle,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
+
+                Spacer(Modifier.width(8.dp))
 
                 // Status Chip — dùng helper của model; status lạ (server thêm mới)
                 // hiển thị nhãn trung tính thay vì bị gán nhầm "Đã từ chối".
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = when {
-                        report.isPending -> Color(0xFFFFF3E0)
-                        report.isApproved -> Color(0xFFE8F5E9)
-                        report.isRejected -> Color(0xFFFFEBEE)
+                        report.isPending -> MaterialTheme.statusColors.warningContainer
+                        report.isApproved -> MaterialTheme.statusColors.successContainer
+                        report.isRejected -> MaterialTheme.colorScheme.errorContainer
                         else -> MaterialTheme.colorScheme.surfaceVariant
                     }
                 ) {
@@ -2252,13 +2781,66 @@ private fun ReportReviewCard(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = when {
-                            report.isPending -> Color(0xFFE65100)
-                            report.isApproved -> Color(0xFF2E7D32)
-                            report.isRejected -> Color(0xFFC62828)
+                            report.isPending -> MaterialTheme.statusColors.onWarningContainer
+                            report.isApproved -> MaterialTheme.statusColors.onSuccessContainer
+                            report.isRejected -> MaterialTheme.colorScheme.onErrorContainer
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
+                }
+            }
+
+            if (report.isMissionReport) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(4.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.mission_report_badge),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                )
+                            }
+                            if (!report.reportDate.isNullOrBlank()) {
+                                Text(
+                                    text = stringResource(R.string.mission_report_date_badge_format, report.reportDate),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                        if (!report.missionTitle.isNullOrBlank()) {
+                            Text(
+                                text = report.missionTitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -2274,14 +2856,31 @@ private fun ReportReviewCard(
                 }
             } else if (comparison != null) {
                 val comp = comparison!!
-                val isDup = comp.isSuspectDuplicate
+                val isSuspect = comp.isSuspectDuplicate
+                val containerColor = when (comp.level) {
+                    ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.warningContainer
+                    ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.successContainer
+                    ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.infoContainer
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                }
+                val borderColor = when (comp.level) {
+                    ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.warning.copy(alpha = 0.5f)
+                    ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.success.copy(alpha = 0.5f)
+                    ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.info.copy(alpha = 0.5f)
+                    else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                }
+                val onContainerColor = when (comp.level) {
+                    ImageHashHelper.SimilarityLevel.SIMILAR_LAYOUT -> MaterialTheme.statusColors.onWarningContainer
+                    ImageHashHelper.SimilarityLevel.MODERATE -> MaterialTheme.statusColors.onSuccessContainer
+                    ImageHashHelper.SimilarityLevel.DIFFERENT -> MaterialTheme.statusColors.onInfoContainer
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isDup) Color(0xFFFFEBEE) else Color(0xFFE8F5E9)
-                    ),
-                    border = BorderStroke(1.dp, if (isDup) Color(0xFFEF9A9A) else Color(0xFFA5D6A7))
+                    colors = CardDefaults.cardColors(containerColor = containerColor),
+                    border = BorderStroke(1.dp, borderColor)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2295,16 +2894,20 @@ private fun ReportReviewCard(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(text = if (isDup) "🔴" else "🟢", fontSize = 14.sp)
+                            Text(text = if (isSuspect) "⚠️" else "🟢", fontSize = 14.sp)
                             Column {
                                 Text(
-                                    text = if (isDup) stringResource(R.string.oad_dup_warning_format, comp.similarity) else stringResource(R.string.oad_new_feature_format, 100 - comp.similarity),
+                                    text = comp.label,
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isDup) Color(0xFFC62828) else Color(0xFF2E7D32)
+                                    color = onContainerColor
                                 )
                                 Text(
-                                    text = if (isDup) stringResource(R.string.oad_similar_to_format, previousReport?.createdAt?.take(10).orEmpty()) else stringResource(R.string.oad_differs_from_format, previousReport?.createdAt?.take(10).orEmpty()),
+                                    text = if (isSuspect) {
+                                        stringResource(R.string.oad_similar_to_format, previousReport?.createdAt?.let { ReportComparisonSelector.formatIsoUtcToVnDate(it) }.orEmpty())
+                                    } else {
+                                        stringResource(R.string.oad_differs_from_format, previousReport?.createdAt?.let { ReportComparisonSelector.formatIsoUtcToVnDate(it) }.orEmpty())
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2329,7 +2932,7 @@ private fun ReportReviewCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.oad_has_photo_format, previousReport.createdAt?.take(10).orEmpty()),
+                        text = stringResource(R.string.oad_has_photo_format, previousReport.createdAt?.let { ReportComparisonSelector.formatIsoUtcToVnDate(it) }.orEmpty()),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -2344,9 +2947,16 @@ private fun ReportReviewCard(
                 }
             }
 
+            val allAttachments = report.allAttachments
+            val allExpired = if (allAttachments.isNotEmpty()) {
+                allAttachments.all { it.isExpired }
+            } else {
+                report.isScreenshotExpired
+            }
+
             // Spacious Screenshot Preview Card (height 200dp, no cropping!)
-            if (report.isScreenshotExpired || !report.screenshotUrl.isNullOrBlank()) {
-                if (report.isScreenshotExpired) {
+            if (allExpired || !report.screenshotUrl.isNullOrBlank() || allAttachments.isNotEmpty()) {
+                if (allExpired) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2378,6 +2988,58 @@ private fun ReportReviewCard(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                        }
+                    }
+                } else if (allAttachments.size > 1) {
+                    // Multi-attachment Gallery (up to 3 photos)
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(140.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            allAttachments.forEachIndexed { idx, att ->
+                                Card(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable { onPreviewImage(att.screenshotUrl, att.isExpired, report) },
+                                    colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.06f)),
+                                ) {
+                                    Box(Modifier.fillMaxSize()) {
+                                        AsyncImage(
+                                            model = remember(context, att, report.id) {
+                                                ScreenshotRequestFactory.createRequest(
+                                                    context = context,
+                                                    model = att.thumbnailUrl ?: att.screenshotUrl,
+                                                    report = report,
+                                                    variant = ScreenshotVariant.THUMBNAIL,
+                                                    attachmentId = att.id,
+                                                )
+                                            } ?: (att.thumbnailUrl ?: att.screenshotUrl),
+                                            contentDescription = "Attachment ${idx + 1}",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit,
+                                        )
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .align(Alignment.BottomCenter),
+                                            color = Color(0xB3000000),
+                                        ) {
+                                            Text(
+                                                text = "${idx + 1}/${report.allAttachments.size}",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                                modifier = Modifier.padding(vertical = 2.dp),
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -2483,11 +3145,17 @@ private fun ReportReviewCard(
             if (report.isRejected && !report.rejectionReason.isNullOrBlank()) {
                 Card(
                     shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    val localizer = Localizer(context)
+                    val renderedReason = RejectionReasonRenderer.render(
+                        rawReason = report.rejectionReason,
+                        reasonCode = report.reasonCode,
+                        localizer = localizer,
+                    )
                     Text(
-                        text = stringResource(R.string.oad_reject_reason_format, report.rejectionReason.orEmpty()),
+                        text = stringResource(R.string.oad_reject_reason_format, renderedReason),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(10.dp)
@@ -2518,7 +3186,10 @@ private fun ReportReviewCard(
                         enabled = !isActionLoading,
                         modifier = Modifier.weight(1.3f),
                         shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
                         Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
@@ -2563,13 +3234,13 @@ private fun RejectConfirmDialog(
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     shape = RoundedCornerShape(8.dp),
                 ) {
                     Text(
                         text = stringResource(R.string.oad_reject_dialog_note),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFC62828),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -2605,10 +3276,11 @@ private fun RejectConfirmDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val finalReason = if (selectedReasonIndex == predefinedReasons.lastIndex) {
-                        customReason.trim().ifBlank { resources.getString(R.string.oad_reject_fallback_reason) }
+                    val code = RejectionReasonRenderer.getPredefinedReasonCode(selectedReasonIndex)
+                    val finalReason = if (code != null) {
+                        RejectionReasonRenderer.formatForSubmission(code, null)
                     } else {
-                        predefinedReasons[selectedReasonIndex]
+                        customReason.trim().ifBlank { resources.getString(R.string.oad_reject_fallback_reason) }
                     }
                     onConfirm(report, finalReason)
                 },

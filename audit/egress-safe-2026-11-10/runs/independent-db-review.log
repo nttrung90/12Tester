@@ -1,0 +1,9 @@
+PASS: 205 reports preserve legacy window=200, old pending aggregate, 3 attachments, credentials and all fields
+MEASURE: large detail decoded JSON bytes legacy=197901, unchanged=2241, reduction=98.87%; not production wire egress
+PASS: Tester full response matches legacy and report visibility remains scoped
+PASS: Reusing another user token cannot retain owner privileges or report list
+PASS: Remote profile change updates profiles without retransmitting report body
+MEASURE: dashboard JSON decoded bytes full=6770, unchanged=1699; not production wire egress
+PASS: Candidate universe >10 remains complete with legacy order and fields
+PASS: Anonymous caller cannot execute authenticated dashboard/detail
+ALL INDEPENDENT EDGE CASE CHECKS PASSED

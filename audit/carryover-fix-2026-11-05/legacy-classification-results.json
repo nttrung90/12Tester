@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Missing legacy report source remains unresolved and cannot authorize resume",
+    "result": "PASS",
+    "evidence": {
+      "met": false,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": false,
+      "missed_streak": 0,
+      "available_apps": 5,
+      "carry_in_tests": 2,
+      "required_tests": 3,
+      "carryover_ready": false,
+      "completed_tests": 0,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": false,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-11-05",
+      "effective_required_tests": 3,
+      "carryover_remaining_tests": 0
+    }
+  },
+  {
+    "name": "Known pre-upgrade mission source is excluded",
+    "result": "PASS",
+    "evidence": {
+      "met": false,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": true,
+      "missed_streak": 0,
+      "available_apps": 5,
+      "carry_in_tests": 2,
+      "required_tests": 5,
+      "carryover_ready": true,
+      "completed_tests": 0,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": false,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-11-05",
+      "effective_required_tests": 5,
+      "carryover_remaining_tests": 5
+    }
+  },
+  {
+    "name": "Known pre-upgrade ordinary source still counts",
+    "result": "PASS",
+    "evidence": {
+      "met": false,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": true,
+      "missed_streak": 0,
+      "available_apps": 5,
+      "carry_in_tests": 2,
+      "required_tests": 5,
+      "carryover_ready": true,
+      "completed_tests": 1,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": false,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-11-05",
+      "effective_required_tests": 5,
+      "carryover_remaining_tests": 4
+    }
+  },
+  {
+    "name": "Pre-upgrade report with unknown context cannot be inferred as ordinary",
+    "result": "PASS",
+    "evidence": {
+      "met": false,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": false,
+      "missed_streak": 0,
+      "available_apps": 5,
+      "carry_in_tests": 2,
+      "required_tests": 3,
+      "carryover_ready": false,
+      "completed_tests": 0,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": false,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-11-05",
+      "effective_required_tests": 3,
+      "carryover_remaining_tests": 0
+    }
+  },
+  {
+    "name": "Ordinary legacy checkin remains valid when its freeform note mentions mission",
+    "result": "PASS",
+    "evidence": {
+      "legacy": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-05",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 5,
+        "carry_in_tests": 2,
+        "required_tests": 5,
+        "carryover_ready": true,
+        "completed_tests": 1,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-11-05",
+        "effective_required_tests": 5,
+        "carryover_remaining_tests": 4
+      },
+      "postUpgrade": {
+        "met": false,
+        "mode": "owner",
+        "status_date": "2026-11-05",
+        "history_ready": true,
+        "missed_streak": 0,
+        "available_apps": 5,
+        "carry_in_tests": 2,
+        "required_tests": 5,
+        "carryover_ready": true,
+        "completed_tests": 2,
+        "logged_in_today": true,
+        "active_app_count": 1,
+        "is_penalty_exempt": false,
+        "base_required_tests": 3,
+        "next_penalty_percent": 1,
+        "carryover_effective_from": "2026-11-05",
+        "effective_required_tests": 5,
+        "carryover_remaining_tests": 3
+      }
+    }
+  },
+  {
+    "name": "Upgrade leaves finalized historical row unchanged",
+    "result": "PASS",
+    "evidence": {
+      "preserved": true
+    }
+  },
+  {
+    "name": "Reapplying the upgrade leaves source qualification and frozen history stable",
+    "result": "PASS",
+    "evidence": {
+      "stable": true
+    }
+  },
+  {
+    "name": "Known ordinary event survives campaign cascade deletion and upgrade rerun",
+    "result": "PASS",
+    "evidence": {
+      "met": false,
+      "mode": "owner",
+      "status_date": "2026-11-05",
+      "history_ready": true,
+      "missed_streak": 0,
+      "available_apps": 4,
+      "carry_in_tests": 2,
+      "required_tests": 5,
+      "carryover_ready": true,
+      "completed_tests": 1,
+      "logged_in_today": true,
+      "active_app_count": 1,
+      "is_penalty_exempt": false,
+      "base_required_tests": 3,
+      "next_penalty_percent": 1,
+      "carryover_effective_from": "2026-11-05",
+      "effective_required_tests": 4,
+      "carryover_remaining_tests": 3
+    }
+  }
+]

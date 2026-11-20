@@ -1,0 +1,12 @@
+{
+    "logName":  "test-cache-regression",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.data.CacheRegressionTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-01T16:14:52.7811669Z",
+    "finishedUtc":  "2026-11-01T16:15:07.4782433Z",
+    "currentRunXmlCount":  1
+}

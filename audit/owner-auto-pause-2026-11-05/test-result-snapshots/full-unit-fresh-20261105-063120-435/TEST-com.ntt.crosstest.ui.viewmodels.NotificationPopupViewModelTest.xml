@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:31:13.901Z" hostname="PC-5700X3D" time="0.16">
+  <properties/>
+  <testcase name="lifecycle_rotation_and_recomposition_preserves_session_and_does_not_double_count" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.013"/>
+  <testcase name="held_popup_transitions_to_showing_when_blocker_cleared" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.011"/>
+  <testcase name="mark_as_read_persists_pending_store_before_dismiss_and_syncs_server" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.016"/>
+  <testcase name="pending_ack_offline_restart_prevents_redisplay" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.016"/>
+  <testcase name="multiple_blockers_and_app_loading_prevents_claim_until_all_cleared" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.012"/>
+  <testcase name="account_switch_cancels_jobs_and_closes_popup" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <testcase name="popup_showing_persists_across_background_and_resume_without_reclaiming" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.011"/>
+  <testcase name="carried_popup_dismissed_by_external_delete_consumes_resumed_session" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <testcase name="manual_test_mode_autoStartPolling_false_does_not_start_polling_on_auth_change" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <testcase name="dismiss_later_or_back_stops_for_session_and_prompts_in_next_session" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.009"/>
+  <testcase name="fetch_stale_response_cannot_restore_acknowledged_notification_as_unread" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <testcase name="external_notification_read_or_delete_dismisses_popup" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <testcase name="local_save_failure_keeps_popup_open_for_retry" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.009"/>
+  <testcase name="blocker_coordinator_prevents_claim_until_unblocked" classname="com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,66 @@
+{
+  "at": "2026-11-16T12:40:35.196Z",
+  "scope": "Independent isolated PGlite metadata/event-order checks, not actual provider or concurrent sessions",
+  "results": [
+    {
+      "name": "contentLength cap",
+      "status": "FAIL",
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+    },
+    {
+      "name": "size cap",
+      "status": "PASS"
+    },
+    {
+      "name": "zero length",
+      "status": "PASS"
+    },
+    {
+      "name": "negative length",
+      "status": "PASS"
+    },
+    {
+      "name": "fractional length",
+      "status": "PASS"
+    },
+    {
+      "name": "boolean length",
+      "status": "PASS"
+    },
+    {
+      "name": "null length",
+      "status": "PASS"
+    },
+    {
+      "name": "empty length",
+      "status": "PASS"
+    },
+    {
+      "name": "oversize length",
+      "status": "PASS"
+    },
+    {
+      "name": "huge length",
+      "status": "PASS"
+    },
+    {
+      "name": "unknown length",
+      "status": "PASS"
+    },
+    {
+      "name": "contentLength reaches authenticated RLS INSERT",
+      "status": "FAIL",
+      "error": "new row violates row-level security policy for table \"objects\""
+    },
+    {
+      "name": "finalized missing thumbnail remains covered after repeated reconciliation and expiry",
+      "status": "FAIL",
+      "error": "U+R undercounts live bytes: {\"u\":\"100\",\"r\":\"0\",\"actual\":\"150\"}"
+    },
+    {
+      "name": "cleanup absence ACK cannot erase capacity for an already authorized delayed write",
+      "status": "FAIL",
+      "error": "U+R undercounts live bytes: {\"u\":\"0\",\"r\":\"0\",\"actual\":\"50\"}"
+    }
+  ]
+}

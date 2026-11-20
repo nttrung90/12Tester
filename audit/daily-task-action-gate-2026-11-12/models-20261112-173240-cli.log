@@ -1,0 +1,73 @@
+I1112 17:32:40.216305      25 server.go:2353] Starting language server process with pid 20028
+I1112 17:32:40.217343      25 workflow_python.go:21] run_workflow Python: interpreter "", embedded true
+I1112 17:32:40.218400      25 server.go:2412] Language server version: 1.5.6
+I1112 17:32:40.218400      25 server.go:1103] Language server will attempt to listen on host localhost
+I1112 17:32:40.226277      25 server.go:1118] Language server listening on random port at 63496 for HTTPS (gRPC)
+I1112 17:32:40.226277      25 server.go:1126] Language server listening on random port at 63497 for HTTP
+I1112 17:32:40.229463      67 model_configs.go:201] Auth mode is unspecified, skipping fetchAvailableModels and returning empty response
+W1112 17:32:40.229463      82 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+W1112 17:32:40.229463      82 cache.go:157] Cache(userInfo): Singleflight refresh failed: failed to get load code assist response: error getting token source: You are not logged into Antigravity.
+E1112 17:32:40.229993      67 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1112 17:32:40.238882      73 store_client.go:714] summary store: starting background reconciliation (trigger=startup)
+I1112 17:32:40.240999      73 store_client.go:764] summary store: reconciliation complete, synced 17 records
+W1112 17:32:40.249656     122 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:32:40.249656     122 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1112 17:32:40.249656      25 defaults.go:725] failed to get cs path: cs path /usr/bin/cs invalid
+I1112 17:32:40.249656      25 manager.go:140] Creating trajectory store manager with proto store and SQLite store
+I1112 17:32:40.255482     180 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1112 17:32:40.257593     180 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.257593     180 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1112 17:32:40.259688     180 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.259688     180 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1112 17:32:40.261285     180 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.261285     180 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1112 17:32:40.261285     180 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1112 17:32:40.261285     180 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1112 17:32:40.261285     180 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1112 17:32:40.286814      25 server.go:3698] initialized server successfully in 69.7967ms
+I1112 17:32:40.286814      45 server.go:4405] Auth succeeded, refreshing features and managers
+W1112 17:32:40.286814      54 cache.go:157] Cache(peopleInfo): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:32:40.287338      54 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1112 17:32:40.287338      55 cache.go:157] Cache(loadCodeAssistResponse): Singleflight refresh failed: error getting token source: You are not logged into Antigravity.
+E1112 17:32:40.287338      55 errorreport.go:273] error getting token source: You are not logged into Antigravity.
+W1112 17:32:40.287338      54 rpcs_plugin_auth.go:109] Not reloading plugin MCP servers: cannot get the signed-in user: error getting token source: You are not logged into Antigravity.
+E1112 17:32:40.287338      45 errorreport.go:273] Failed to poll ListExperiments: error getting token source: You are not logged into Antigravity.
+I1112 17:32:40.287338      45 server.go:4424] State refresh took 0ms
+I1112 17:32:40.287338      45 server.go:4439] [RemoteControl] Subscription callback triggered.
+I1112 17:32:40.288922      45 server.go:4442] [RemoteControl] RemoteControlEnabled value: false
+I1112 17:32:40.288922      45 server.go:5551] [RemoteControl] Session toggle is off, staying disconnected
+I1112 17:32:40.288922      45 server.go:5237] [RemoteControl] Resolved proxyServerURL: ""
+I1112 17:32:40.288922      65 manager.go:98] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] is enabled
+I1112 17:32:40.288922      45 profiler.go:231] Continuous pprof profiling is disabled.
+I1112 17:32:40.288922      61 reconcile_summaries.go:94] [Summaries] reconcile checked 17 conversations, restored 0, cached 17, skipped 0, dropped 0, cancelled false in 0ms (resident: 0 -> 0)
+I1112 17:32:40.289972      65 manager.go:107] Migration [MIGRATION_ID_SANITY_CHECK_PROJECT_URIS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.289972      65 manager.go:98] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] is enabled
+I1112 17:32:40.292537      65 manager.go:107] Migration [MIGRATION_ID_PLUGIN_ENABLEMENT] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.292537      65 manager.go:98] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] is enabled
+I1112 17:32:40.294542      65 manager.go:107] Migration [MIGRATION_ID_BUILTIN_SIDECARS_TO_PLUGINS] already has status MIGRATION_STATUS_COMPLETED, skipping
+I1112 17:32:40.294542      65 manager.go:95] Migration [MIGRATION_ID_LIN_BUILTIN_TO_MARKETPLACE] is disabled, skipping entirely
+I1112 17:32:40.294542      65 manager.go:95] Migration [MIGRATION_ID_ADOPT_BWG_INSTALLS] is disabled, skipping entirely
+I1112 17:32:40.294542      65 manager.go:95] Migration [MIGRATION_ID_GDRIVE_BUILTIN_PLUGIN] is disabled, skipping entirely
+I1112 17:32:40.294542      65 manager.go:95] Migration [MIGRATION_ID_SPLIT_SCIENCE_PLUGIN] is disabled, skipping entirely
+I1112 17:32:40.295542       1 auto_updater.go:334] Spawned background update process with PID 23524
+I1112 17:32:40.295542       1 common.go:191] Launching CLI mode
+E1112 17:32:40.295542       1 launchsteps.go:95] Failed to resolve GeminiDir ".gemini": .gemini must be an absolute path: path is not absolute, falling back to default
+I1112 17:32:40.295542       1 common.go:212] CLI app data directory: C:\Users\nguye\.gemini\antigravity-cli
+I1112 17:32:40.295542       1 server.go:313] Creating CLI server backend: product=antigravity workspaceDirs=[F:\AI\12Tester] appDataDir=C:\Users\nguye\.gemini\antigravity-cli languageServer=true codeAssist=true
+I1112 17:32:40.295542       1 auth_provider.go:984] [AuthProvider] SetEnableBusinessLogin called with enable: true
+I1112 17:32:40.303160       1 server.go:2258] Backend project ID updated dynamically to: default-cli-project
+I1112 17:32:40.303160       1 manager.go:553] Initializing CLI store manager for workspace F:\AI\12Tester
+I1112 17:32:40.306155       1 cli_setting_manager.go:160] applyUserSettings: stored shared config permissions: allow=685 deny=0 ask=0 from C:\Users\nguye\.gemini\config\config.json
+I1112 17:32:40.329869       1 cli_setting_manager.go:97] CLI settings initialized: permissions=<nil>, toolPermission=request-review
+I1112 17:32:40.345544       1 hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
+I1112 17:32:40.345544       1 manager.go:727] CLI store manager initialized successfully
+I1112 17:32:40.345544     225 quota_manager.go:36] doRefreshQuota: skipped (not logged in)
+I1112 17:32:40.345544       1 common.go:346] CLI store manager created successfully
+I1112 17:32:40.345544       1 cli_setting_manager.go:227] ApplyProjectPermissionGrants: no grants for project "CLI Project", cleared project permissions
+I1112 17:32:40.346604     138 keyring.go:64] keyringAuth: loaded token, expiry=2026-11-12 18:02:03.8465159 +0700 +07 expired=false
+I1112 17:32:40.347134       1 auth.go:157] ChainedAuth: authenticated via keyring (effective: keyring)
+I1112 17:32:40.347134       1 server_oauth.go:221] applyAuthResult: email=tienle9881@gmail.com, authMethod=consumer, quotaProject=
+I1112 17:32:40.347134       1 server_oauth.go:226] OAuth: authenticated successfully as tienle9881@gmail.com
+I1112 17:32:40.347134       1 server_oauth.go:235] b.codeAssistClient.AuthProvider (0x681b04d5c20) is same as b.cliAuth (0x681b04d5c20)
+W1112 17:32:40.347664     145 cache.go:189] Failed to refresh cache in background: admin controls not applicable
+W1112 17:32:40.347664     268 cache.go:189] Failed to refresh cache in background: admin controls not applicable

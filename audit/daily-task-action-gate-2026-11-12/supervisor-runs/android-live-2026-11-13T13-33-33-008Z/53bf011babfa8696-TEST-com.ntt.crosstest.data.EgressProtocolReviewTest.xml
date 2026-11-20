@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.EgressProtocolReviewTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:50:43.802Z" hostname="PC-5700X3D" time="0.022">
+  <properties/>
+  <testcase name="protocolDiagnosticsMustNotEchoSensitivePayloadValues" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.014"/>
+  <testcase name="nullableDetailValueStillRequiresTheBlockToBePresent" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.004"/>
+  <testcase name="unchangedBlockMustMatchTheTokenOfTheExactBaseValue" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.001"/>
+  <testcase name="decodedJsonLengthMustNotBeReportedAsWireBytes" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.001"/>
+  <testcase name="nonNullableDashboardCountCannotSilentlyBecomeZeroFromJsonNull" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.001"/>
+  <testcase name="protocolHeaderDiagnosticsMustNotEchoMalformedHeaderValues" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.0"/>
+  <testcase name="stringTrueIsNotAJsonBoolean" classname="com.ntt.crosstest.data.EgressProtocolReviewTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

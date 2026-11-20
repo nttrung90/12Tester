@@ -1,0 +1,42 @@
+=== RUNNING OWNER AUTO-PAUSE CONFIG & ENFORCEMENT TESTS (MIGRATION 075) ===
+
+--- Test 1: Config RPCs, Validations, and Permissions ---
+PASS: Default config reads 7 missed_days with revision
+PASS: Non-admin users cannot call admin_get_owner_auto_pause_config
+PASS: Direct table writes denied to authenticated client
+PASS: Input validation correctly rejects invalid threshold & revision
+PASS: Stale revision rejected with CONCURRENCY_CONFLICT
+PASS: Admin successfully updated threshold to 3
+PASS: Audit event logged with correct actor, old_state, and new_state
+
+--- Test 2: Path 1 (owner_inactive) and Threshold Checks ---
+PASS: Streak 6 < threshold 7 does not pause
+PASS: Notification saved with threshold_days = 7 and formatted message
+PASS: Idempotent sync produces no duplicate notifications
+PASS: Configurable threshold 3 pauses streak 3 and stores threshold_days = 3
+PASS: Exact threshold 1 applies and a second admin cannot overwrite a stale revision
+
+--- Test 3: Path 2 (slot_expired) ---
+PASS: Expired slot pauses correctly; missing slot record is skipped
+
+--- Test 4: Path 3 (owner_manual) & Path 4 (admin_manual) ---
+PASS: Owner manual pause succeeds
+PASS: Admin pauses and overrides paused_reason to admin_manual with note
+
+--- Test 5: Resume Paths & Constraints ---
+PASS: Owner rejected with PAUSED_BY_ADMIN on admin_manual
+PASS: Admin resume succeeds
+PASS: Admin resuming owner_inactive sets admin_resumed = true
+PASS: Owner resume blocked when slot is expired
+PASS: Owner resume succeeds after renewing slot
+PASS: Campaign >= 30 days transitions to completed upon resume
+
+--- Test 6: Direct UPDATE Bypass Hardening Enforcement ---
+PASS: Direct UPDATE paused-to-open blocked with DIRECT_RESUME_NOT_ALLOWED
+PASS: Disguising system pause reason blocked with CANNOT_CHANGE_PAUSED_REASON
+PASS: Direct fake system pause reason blocked with PERMISSION_DENIED
+PASS: Legitimate app metadata update while paused succeeds
+PASS: Legitimate mark production flow succeeds
+PASS: Client cannot reopen through closed or Production intermediate states
+
+=== ALL MIGRATION 075 TESTS PASSED SUCCESSFULLY ===

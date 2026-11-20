@@ -1,0 +1,12 @@
+{
+    "logName":  "full-android-exact-retry-final",
+    "arguments":  [
+                      "-I",
+                      "audit/app-mission-report-2026-11-02/independent.init.gradle",
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T11:59:20.7455831Z",
+    "finishedUtc":  "2026-11-02T12:00:57.5560013Z",
+    "currentRunXmlCount":  75
+}

@@ -1,0 +1,4 @@
+2026-11-14 00:42:05.490 +07 [8876] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-11-14 00:42:05.491 +07 [8876] LOG:  listening on IPv4 address "127.0.0.1", port 55442
+2026-11-14 00:42:05.521 +07 [24104] LOG:  database system was shut down at 2026-11-14 00:41:19 +07
+2026-11-14 00:42:05.536 +07 [8876] LOG:  database system is ready to accept connections

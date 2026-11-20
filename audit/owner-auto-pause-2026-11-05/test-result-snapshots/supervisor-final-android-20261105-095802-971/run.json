@@ -1,0 +1,11 @@
+{
+  "logName": "supervisor-final-android",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T09:57:05.4410185Z",
+  "finishedUtc": "2026-11-05T09:58:03.1136093Z",
+  "currentRunXmlCount": 75
+}

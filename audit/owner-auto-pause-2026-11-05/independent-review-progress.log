@@ -1,0 +1,36 @@
+Loaded 062_consolidated_baseline.sql through 079_owner_auto_pause_debt_and_timestamp_guard.sql; actual SQL functions, no function stubs.
+PASS: threshold 1: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 2: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 3: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 4: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 5: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 6: real finalization N-1 / N, both apps, repeated sync
+PASS: threshold 7: real finalization N-1 / N, both apps, repeated sync
+PASS: admin applies 7 -> 3 to existing streak; next sync, persisted setting, audit and notification
+PASS: raising 3 -> 7 preserves already-paused apps and historical threshold 3
+PASS: raising 3 -> 7 before sync spares an open app with streak 3
+Independent debt gate verified: {"met":true,"remaining":2}
+PASS: independent: debt blocks all owner resume reasons at threshold 3
+PASS: 24-hour boundary and grace period
+PASS: today already met is spared
+PASS: independent: client cannot alter timestamps to bypass owner debt
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: An unfinalized predecessor remains pending even when carryover is disabled
+
+true !== false
+
+    at file:///F:/AI/12Tester/audit/owner-auto-pause-2026-11-05/independent-acceptance-generated.mjs:212:12
+    at async scenario (file:///F:/AI/12Tester/audit/owner-auto-pause-2026-11-05/independent-acceptance-generated.mjs:39:9)
+    at async file:///F:/AI/12Tester/audit/owner-auto-pause-2026-11-05/independent-acceptance-generated.mjs:199:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

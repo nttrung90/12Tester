@@ -1,0 +1,843 @@
+{
+  "generatedAt": "2026-11-15T12:01:51.470Z",
+  "scope": "local source and disposable PGlite only; no production access",
+  "active": {
+    "count": 29,
+    "bytes": 2254835,
+    "first": "062_consolidated_baseline.sql",
+    "last": "090_daily_task_action_gate.sql",
+    "files": [
+      {
+        "name": "062_consolidated_baseline.sql",
+        "bytes": 616983,
+        "sha256": "c4814564d27fa43406c7d79a8982c3167c7bc8f20f8bc65a7160b505e4fc45f2"
+      },
+      {
+        "name": "063_report_crypto_search_path.sql",
+        "bytes": 498,
+        "sha256": "a14fdd0d9805b1fc48f83cb6b0c87a73eb076612fc21dd21cf58a4610d4d0a41"
+      },
+      {
+        "name": "064_explicit_report_context.sql",
+        "bytes": 38742,
+        "sha256": "047dba110f2aaec70b0ca8d8c4a31d432ebe7b57d60beb84522cdc1fcb670341"
+      },
+      {
+        "name": "065_remove_dhash_hardblock.sql",
+        "bytes": 34106,
+        "sha256": "53ce688f80cf96532c3c3895046edadcc30cd3c4499afefc81b92ed38bdb76a9"
+      },
+      {
+        "name": "066_push_and_carryover_hardening.sql",
+        "bytes": 59874,
+        "sha256": "ebf02559a79a23aeb99c9953087f2a895c3b3e4a10f7b72bfddcc40ecc5499a6"
+      },
+      {
+        "name": "067_admin_direct_notification_popup.sql",
+        "bytes": 14928,
+        "sha256": "42f377b82fb865bdf663a32975a0b864fcc012a43024037072845c471c1f94df"
+      },
+      {
+        "name": "068_owner_tester_reports_count.sql",
+        "bytes": 13088,
+        "sha256": "b0c61249b41a8e2fba4a1c07d1a6bc103b3cd8c59340d10e91b53610d7da3c22"
+      },
+      {
+        "name": "069_admin_audit_hardening.sql",
+        "bytes": 62517,
+        "sha256": "1ed9e26c18b4454368267e826728ff00c44b2f726b2b387703d5c7af20293e7b"
+      },
+      {
+        "name": "070_admin_management.sql",
+        "bytes": 113528,
+        "sha256": "30f1c530906832aefb946f090dab79c7a923a63070726c33758bb2756bf63190"
+      },
+      {
+        "name": "071_business_policies.sql",
+        "bytes": 204247,
+        "sha256": "54bee66ac2094032d355579e0b1b615efc5311648bce8bd4c0710321f3fca515"
+      },
+      {
+        "name": "072_admin_notification_campaigns.sql",
+        "bytes": 77854,
+        "sha256": "9ba67555147be73d6944f3ed927cc166fa7bd107933aaa1044b23a38acdcf622"
+      },
+      {
+        "name": "073_admin_action_audit.sql",
+        "bytes": 42728,
+        "sha256": "5fad33d13a36772ed52ec93919f82502816a57016e71559560f47b0c1321d592"
+      },
+      {
+        "name": "074_app_mission_window_and_multi_attachments.sql",
+        "bytes": 108082,
+        "sha256": "ed7e17603da72f6a2c7cae9de5b26b6e3a69c99cb6abe6ed7e157126ee00b97a"
+      },
+      {
+        "name": "075_owner_auto_pause_config.sql",
+        "bytes": 12449,
+        "sha256": "b7d6c2cbe17b19df1a02bbdc44c4784140f9169a931cf93876ae43c47ee274f8"
+      },
+      {
+        "name": "076_mission_for_finalized_campaigns.sql",
+        "bytes": 58280,
+        "sha256": "dc8922f13b25eccecc3b9d5fe6c14ff640fd2769a97a43f1a9ab75678b4eaec2"
+      },
+      {
+        "name": "077_mission_reward_modes_and_management.sql",
+        "bytes": 132986,
+        "sha256": "44a9d69467c3b190b860e367ad8f041b739eedab34a1b8e7d3a0bf1b328fe7f0"
+      },
+      {
+        "name": "078_admin_pause_reason_popup.sql",
+        "bytes": 25219,
+        "sha256": "b10d9d55366e11799f4dce0881ebed3f6207ab0668beb872396c7b939e71c912"
+      },
+      {
+        "name": "079_owner_auto_pause_debt_and_timestamp_guard.sql",
+        "bytes": 45289,
+        "sha256": "688827b28eb6b18903e9c49cb6fdc872b8c6479404f7cef326d9b2ac8bfbeef8"
+      },
+      {
+        "name": "080_report_context_carryover_and_gap_recovery.sql",
+        "bytes": 53931,
+        "sha256": "f3bbf9ed3e841462bdd67d247aa2480fe507e67443d162340d3ad7ea93b51106"
+      },
+      {
+        "name": "081_admin_flow_audit_fixes.sql",
+        "bytes": 53402,
+        "sha256": "376bdca0628efe047080da0317f22e97ed8c37d72d61c57af4904dbefe08b1da"
+      },
+      {
+        "name": "082_carryover_flow_audit_fixes.sql",
+        "bytes": 120413,
+        "sha256": "d188c8ee8482b452dbe8febb0603a4e9fc3f52df0b19b3748d88de002c598bd3"
+      },
+      {
+        "name": "083_fix_app_configs_encoding_and_version.sql",
+        "bytes": 869,
+        "sha256": "41315b7826610e3e64738a8e05e26b2a9503e1d3b094b8e367868ba6b4b1b55a"
+      },
+      {
+        "name": "084_campaign_posting_business_policies.sql",
+        "bytes": 63270,
+        "sha256": "c9805915527faed53aaecf74577c6466378fdf12fd0f033d19ce6fe9544d155e"
+      },
+      {
+        "name": "085_egress_optimization_sync_v2.sql",
+        "bytes": 10234,
+        "sha256": "d6b0500c75db6551a0b9421bd5be5b5d93d6ac44e9696bcb10169eca8fb323e6"
+      },
+      {
+        "name": "086_next_campaign_candidate_daily_target_priority.sql",
+        "bytes": 3401,
+        "sha256": "f8327114ff97bf3e61b9c314c57adea2aba713600b26a04679446ec2c9c3e21d"
+      },
+      {
+        "name": "087_campaign_tester_bonus_rounds.sql",
+        "bytes": 158907,
+        "sha256": "bf61272a3e3d2cfda482c4e6f44722468b14bc2599fc011e0cbffd8566c95fc6"
+      },
+      {
+        "name": "088_immediate_daily_quota_on_campaign_changes.sql",
+        "bytes": 79827,
+        "sha256": "494beab9f961724b4a87b00a0531092b9e3f5245aaebc32c6be38e7ef036f2a5"
+      },
+      {
+        "name": "089_fix_production_bonus_lifecycle.sql",
+        "bytes": 1629,
+        "sha256": "54b6a1a32df2d545c04746c0212e82887ffe67fbc260879582853b5d30eb6a97"
+      },
+      {
+        "name": "090_daily_task_action_gate.sql",
+        "bytes": 47554,
+        "sha256": "d239233de6c67d413c2a5a4668871a5357dcc9822a591eeeb7d917cfb1b1544e"
+      }
+    ]
+  },
+  "archive": {
+    "path": "supabase/migrations_archive/pre_baseline_062/",
+    "numberedMigrations": 65,
+    "containsOldFullSchema": true
+  },
+  "references": [
+    {
+      "path": "supabase/tests/audit-owner-auto-pause-flow.mjs",
+      "line": 60,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x)).sort();"
+    },
+    {
+      "path": "supabase/tests/probe-daily-mission-overlap.mjs",
+      "line": 7,
+      "text": "await db.exec(read('supabase/migrations/062_consolidated_baseline.sql'));"
+    },
+    {
+      "path": "supabase/tests/probe-daily-mission-overlap.mjs",
+      "line": 8,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-admin-action-audit-test.mjs",
+      "line": 58,
+      "text": "const staged073Sql = read('supabase/migrations/073_admin_action_audit.sql');"
+    },
+    {
+      "path": "supabase/tests/run-admin-daily-task-policy-test.mjs",
+      "line": 64,
+      "text": "await db.exec(read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-admin-expansion-integration-test.mjs",
+      "line": 20,
+      "text": ".filter(f => /^\\d{3}_.*\\.sql$/.test(f) && +f.slice(0, 3) >= 62).sort();"
+    },
+    {
+      "path": "supabase/tests/run-admin-notification-campaigns-test.mjs",
+      "line": 90,
+      "text": "const staged072Sql = read('supabase/migrations/072_admin_notification_campaigns.sql');"
+    },
+    {
+      "path": "supabase/tests/run-admin-notification-campaigns-test.mjs",
+      "line": 995,
+      "text": "await db.exec(read('supabase/migrations/070_admin_management.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-admin-pause-reason-popup-test.mjs",
+      "line": 47,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n) && Number(n.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-admin-pause-resume-compatibility-test.mjs",
+      "line": 47,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n) && Number(n.slice(0, 3)) >= 62 && Number(n.slice(0, 3)) <= 78)"
+    },
+    {
+      "path": "supabase/tests/run-app-mission-window-test.mjs",
+      "line": 12,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x) && Number(x.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 14,
+      "text": "const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 15,
+      "text": "const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 16,
+      "text": "const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 17,
+      "text": "const migration050 = read('supabase/migrations_archive/pre_baseline_062/050_app_update_reward.sql');"
+    },
+    {
+      "path": "supabase/tests/run-app-update-reward-test.mjs",
+      "line": 18,
+      "text": "const migration051 = read('supabase/migrations_archive/pre_baseline_062/051_app_update_reward_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-backend-cleanup-hardening.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');"
+    },
+    {
+      "path": "supabase/tests/run-business-policies-test.mjs",
+      "line": 46,
+      "text": "await db.exec(read('supabase/migrations/071_business_policies.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-campaign-posting-policies-test.mjs",
+      "line": 38,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n) && Number(n.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 14,
+      "text": "const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 15,
+      "text": "const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 16,
+      "text": "const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 17,
+      "text": "const migration050 = read('supabase/migrations_archive/pre_baseline_062/050_app_update_reward.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 18,
+      "text": "const migration051 = read('supabase/migrations_archive/pre_baseline_062/051_app_update_reward_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-push-test.mjs",
+      "line": 19,
+      "text": "const migration052 = read('supabase/migrations_archive/pre_baseline_062/052_campaign_push_priority.sql');"
+    },
+    {
+      "path": "supabase/tests/run-campaign-tester-bonus-concurrency-fixture-test.mjs",
+      "line": 17,
+      "text": "for (const name of readdirSync(new URL('../migrations/', import.meta.url)).filter(n => /^\\d{3}_.*\\.sql$/.test(n)).sort()) {"
+    },
+    {
+      "path": "supabase/tests/run-campaign-tester-bonus-test.mjs",
+      "line": 78,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-carryover-fix-acceptance-test.mjs",
+      "line": 57,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-consolidated-baseline-test.mjs",
+      "line": 6,
+      "text": "const baseline = read('supabase/migrations/062_consolidated_baseline.sql');"
+    },
+    {
+      "path": "supabase/tests/run-consolidated-baseline-test.mjs",
+      "line": 121,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 14,
+      "text": "const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 15,
+      "text": "const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 16,
+      "text": "const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 17,
+      "text": "const migration050 = read('supabase/migrations_archive/pre_baseline_062/050_app_update_reward.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 18,
+      "text": "const migration051 = read('supabase/migrations_archive/pre_baseline_062/051_app_update_reward_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 19,
+      "text": "const migration052 = read('supabase/migrations_archive/pre_baseline_062/052_campaign_push_priority.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-carryover.mjs",
+      "line": 20,
+      "text": "const migration053 = read('supabase/migrations_archive/pre_baseline_062/053_daily_task_carryover.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-ratio.mjs",
+      "line": 10,
+      "text": "const migration = read('supabase/migrations_archive/pre_baseline_062/042_configurable_daily_task_ratio.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-ratio.mjs",
+      "line": 11,
+      "text": "const full = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-ratio.mjs",
+      "line": 29,
+      "text": "const migration043 = read('supabase/migrations_archive/pre_baseline_062/043_backend_cleanup_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-daily-task-ratio.mjs",
+      "line": 34,
+      "text": "const migration044 = read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-egress-flags-v2-test.mjs",
+      "line": 10,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-egress-flags-v2-test.mjs",
+      "line": 74,
+      "text": "await db.exec(read('supabase/migrations/085_egress_optimization_sync_v2.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-egress-sync-v2-test.mjs",
+      "line": 32,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-explicit-report-context-test.mjs",
+      "line": 8,
+      "text": "await db.exec(read('supabase/migrations/062_consolidated_baseline.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-explicit-report-context-test.mjs",
+      "line": 9,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-explicit-report-context-test.mjs",
+      "line": 10,
+      "text": "await db.exec(read('supabase/migrations/064_explicit_report_context.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-explicit-report-context-test.mjs",
+      "line": 11,
+      "text": "await db.exec(read('supabase/migrations/065_remove_dhash_hardblock.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-home-stats-cycle-test.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-home-stats-cycle-test.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-home-stats-cycle-test.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-home-stats-cycle-test.mjs",
+      "line": 14,
+      "text": "const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');"
+    },
+    {
+      "path": "supabase/tests/run-immediate-daily-quota-acceptance-test.mjs",
+      "line": 68,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-media-gateway-test.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');"
+    },
+    {
+      "path": "supabase/tests/run-media-gateway-test.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-media-gateway-test.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-finalized-campaigns-test.mjs",
+      "line": 12,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x) && Number(x.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-mission-flow-hardening.mjs",
+      "line": 34,
+      "text": "const fullSql = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-flow-hardening.mjs",
+      "line": 78,
+      "text": "await db.exec(read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-mission-flow-hardening.mjs",
+      "line": 95,
+      "text": "await db.exec(read('supabase/migrations_archive/pre_baseline_062/044_mission_flow_hardening.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 13,
+      "text": "const migration046 = read('supabase/migrations_archive/pre_baseline_062/046_media_access_gateway.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 14,
+      "text": "const migration047 = read('supabase/migrations_archive/pre_baseline_062/047_home_stats_cycle.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 15,
+      "text": "const migration048 = read('supabase/migrations_archive/pre_baseline_062/048_mission_report_and_expiration.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-report-and-expiration-test.mjs",
+      "line": 16,
+      "text": "const migration049 = read('supabase/migrations_archive/pre_baseline_062/049_mission_report_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-mission-reward-modes-test.mjs",
+      "line": 12,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x) && Number(x.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-owner-auto-pause-concurrency-fixture-test.mjs",
+      "line": 9,
+      "text": "for (const name of readdirSync(new URL('../migrations/', import.meta.url)).filter(n => /^\\d{3}_.*\\.sql$/.test(n)).sort()) {"
+    },
+    {
+      "path": "supabase/tests/run-owner-auto-pause-hardening-test.mjs",
+      "line": 11,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x) && Number(x.slice(0, 3)) >= 62)"
+    },
+    {
+      "path": "supabase/tests/run-owner-auto-pause-test.mjs",
+      "line": 12,
+      "text": ".filter(x => /^\\d{3}_.*\\.sql$/.test(x) && Number(x.slice(0, 3)) >= 62 && Number(x.slice(0, 3)) <= 75)"
+    },
+    {
+      "path": "supabase/tests/run-owner-tester-bonus-removal-test.mjs",
+      "line": 56,
+      "text": ".filter(n => /^\\d{3}_.*\\.sql$/.test(n))"
+    },
+    {
+      "path": "supabase/tests/run-production-lifecycle-test.mjs",
+      "line": 8,
+      "text": "const migration = 'supabase/migrations/089_fix_production_bonus_lifecycle.sql';"
+    },
+    {
+      "path": "supabase/tests/run-production-lifecycle-test.mjs",
+      "line": 71,
+      "text": ".filter(name => /^\\d{3}_.*\\.sql$/.test(name) && Number(name.slice(0, 3)) <= 88).sort();"
+    },
+    {
+      "path": "supabase/tests/run-push-and-carryover-baseline062-regression-test.mjs",
+      "line": 34,
+      "text": "await isoDb.exec(read('supabase/migrations/062_consolidated_baseline.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-push-and-carryover-baseline062-regression-test.mjs",
+      "line": 35,
+      "text": "await isoDb.exec(read('supabase/migrations/066_push_and_carryover_hardening.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-push-and-carryover-baseline062-regression-test.mjs",
+      "line": 40,
+      "text": "await isoDb.exec(read('supabase/migrations/066_push_and_carryover_hardening.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-push-and-carryover-hardening-test.mjs",
+      "line": 55,
+      "text": "await db.exec(read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-push-campaign-role-hardening-test.mjs",
+      "line": 60,
+      "text": "await db.exec(read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-push-campaign-role-hardening-test.mjs",
+      "line": 138,
+      "text": "const migration056 = read('supabase/migrations_archive/pre_baseline_062/056_push_campaign_role_hardening.sql');"
+    },
+    {
+      "path": "supabase/tests/run-remove-dhash-hardblock-test.mjs",
+      "line": 21,
+      "text": "await db.exec(read('supabase/migrations/062_consolidated_baseline.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-remove-dhash-hardblock-test.mjs",
+      "line": 22,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-remove-dhash-hardblock-test.mjs",
+      "line": 23,
+      "text": "await db.exec(read('supabase/migrations/064_explicit_report_context.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-remove-dhash-hardblock-test.mjs",
+      "line": 24,
+      "text": "await db.exec(read('supabase/migrations/065_remove_dhash_hardblock.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-remove-dhash-hardblock-test.mjs",
+      "line": 162,
+      "text": "await db.exec(read('supabase/migrations/065_remove_dhash_hardblock.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-report-extension-schema-test.mjs",
+      "line": 14,
+      "text": "await db.exec(read('supabase/migrations/062_consolidated_baseline.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-report-extension-schema-test.mjs",
+      "line": 41,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-report-extension-schema-test.mjs",
+      "line": 43,
+      "text": "await db.exec(read('supabase/migrations/063_report_crypto_search_path.sql'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 63,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/full_schema_singapore.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 150,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/049_mission_report_hardening.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 152,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 161,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/049_mission_report_hardening.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 163,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 179,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/049_mission_report_hardening.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 183,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 190,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/049_mission_report_hardening.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-ledger-test.mjs",
+      "line": 199,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 30,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/full_schema_singapore.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 81,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 88,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/059_report_idempotency_legacy_provenance.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 89,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/061_report_idempotency_provenance_and_canonical_fix.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 118,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/049_mission_report_hardening.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 133,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 134,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/059_report_idempotency_legacy_provenance.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 135,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/061_report_idempotency_provenance_and_canonical_fix.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 158,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/057_report_idempotency_ledger_and_context.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-report-idempotency-provenance-and-rating-test.mjs",
+      "line": 175,
+      "text": "await db.exec(readFileSync(new URL('../migrations_archive/pre_baseline_062/061_report_idempotency_provenance_and_canonical_fix.sql', import.meta.url), 'utf8'));"
+    },
+    {
+      "path": "supabase/tests/run-thumbnail-migration.mjs",
+      "line": 11,
+      "text": "const fullSchema = read('supabase/migrations_archive/pre_baseline_062/full_schema_singapore.sql').split('-- ===== 045_thumbnail_support.sql =====')[0];"
+    },
+    {
+      "path": "supabase/tests/run-thumbnail-migration.mjs",
+      "line": 12,
+      "text": "const migration045 = read('supabase/migrations_archive/pre_baseline_062/045_thumbnail_support.sql');"
+    },
+    {
+      "path": "supabase/tools/append-dashboard-to-070.mjs",
+      "line": 3,
+      "text": "const path062 = new URL('../migrations/062_consolidated_baseline.sql', import.meta.url);"
+    },
+    {
+      "path": "supabase/tools/append-dashboard-to-070.mjs",
+      "line": 4,
+      "text": "const path070 = new URL('../migrations/070_admin_management.sql', import.meta.url);"
+    },
+    {
+      "path": "supabase/tools/baseline-lib.mjs",
+      "line": 7,
+      "text": "export const archive = 'supabase/migrations_archive/pre_baseline_062/';"
+    },
+    {
+      "path": "supabase/tools/build-baseline.mjs",
+      "line": 254,
+      "text": "const output = new URL('supabase/migrations/062_consolidated_baseline.sql', root);"
+    },
+    {
+      "path": "supabase/tools/build-report-context-migration.mjs",
+      "line": 2,
+      "text": "const baseline=readFileSync(new URL('../migrations/062_consolidated_baseline.sql',import.meta.url),'utf8');"
+    },
+    {
+      "path": "supabase/tools/build-report-context-migration.mjs",
+      "line": 84,
+      "text": "writeFileSync(new URL('../migrations/064_explicit_report_context.sql',import.meta.url),sql);"
+    },
+    {
+      "path": "supabase/operations/daily_task_ratio_preflight.sql",
+      "line": 2,
+      "text": "-- Current baseline: migrations/062_consolidated_baseline.sql, which has its own checks."
+    },
+    {
+      "path": "supabase/operations/HUONG_DAN_BASELINE_062.md",
+      "line": 5,
+      "text": "`supabase/migrations/062_consolidated_baseline.sql` là nguồn SQL triển khai baseline duy nhất."
+    },
+    {
+      "path": "supabase/operations/HUONG_DAN_BASELINE_062.md",
+      "line": 41,
+      "text": "Tạo `supabase/migrations/063_ten_thay_doi.sql`, rồi `064_...sql`, theo số tăng dần. Mỗi file chỉ chứa thay đổi mới, không chép lại toàn bộ baseline và không sửa 062 đã triển khai."
+    },
+    {
+      "path": "supabase/operations/HUONG_DAN_BASELINE_062.md",
+      "line": 74,
+      "text": "`supabase/migrations_archive/pre_baseline_062/` chứa nguyên 65 migration 001–061 và `full_schema_singapore.sql` cũ. Chúng chỉ dùng để tra cứu, tái lập lịch sử và chạy test nâng cấp. Các test hồi quy cũ đã được đổi đường dẫn tới kho này; tes"
+    },
+    {
+      "path": "supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md",
+      "line": 24,
+      "text": "- Baseline hiện hành là `supabase/migrations/062_consolidated_baseline.sql`, đã chứa các chức năng của 042, 053, 054, 058 và 060."
+    },
+    {
+      "path": "supabase/operations/HUONG_DAN_DOI_TY_LE_TEST.md",
+      "line": 27,
+      "text": "- Các file 001–061 và schema gộp cũ đã ở `supabase/migrations_archive/pre_baseline_062/`, không chạy lại lên database đang dùng."
+    }
+  ],
+  "checks": [
+    {
+      "name": "fresh_replay_062_through_090",
+      "passed": true,
+      "files": 29,
+      "catalogCounts": {
+        "tables": 65,
+        "columns": 678,
+        "constraints": 330,
+        "indexes": 115,
+        "sequences": 14,
+        "functions": 249,
+        "triggers": 49,
+        "policies": 56,
+        "relationGrants": 696,
+        "columnGrants": 14,
+        "functionGrants": 493
+      }
+    },
+    {
+      "name": "baseline_062_rerun_after_090_preserves_catalog_and_rows",
+      "passed": true
+    },
+    {
+      "name": "recent_085_through_090_without_baseline",
+      "outcome": "expected_failure",
+      "code": "42P01",
+      "message": "relation \"public.app_configs\" does not exist"
+    },
+    {
+      "name": "migration_source_bytes_unchanged_during_inspection",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.AppUpdateRegressionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T12:01:06.779Z" hostname="PC-5700X3D" time="0.132">
+  <properties/>
+  <testcase name="receiptReplayMustRefreshStaleProfileBalance" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.021"/>
+  <testcase name="ineligibleTesterMustNotSeeRewardOffer" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.009"/>
+  <testcase name="publishOperationIdentityMustSurviveRefreshWhileRetryIsPossible" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.034"/>
+  <testcase name="oldClaimResponseMustNotMarkNewReleaseAsClaimed" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.026"/>
+  <testcase name="pausedCampaignMustHideUpdateAction" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.009"/>
+  <testcase name="closeReleaseMustInvalidateOwnerDetailCache" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.017"/>
+  <testcase name="twentiethClaimMustNotReloadCachedNineteenClaimSnapshot" classname="com.ntt.crosstest.data.AppUpdateRegressionTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

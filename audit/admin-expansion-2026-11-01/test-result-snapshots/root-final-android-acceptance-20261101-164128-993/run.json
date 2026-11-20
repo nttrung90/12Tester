@@ -1,0 +1,13 @@
+{
+  "logName": "root-final-android-acceptance",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-01T16:40:42.7258078Z",
+  "finishedUtc": "2026-11-01T16:41:29.1484055Z",
+  "currentRunXmlCount": 67
+}

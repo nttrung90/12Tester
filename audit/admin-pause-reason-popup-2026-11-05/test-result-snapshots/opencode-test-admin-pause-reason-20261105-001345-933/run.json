@@ -1,0 +1,10 @@
+{
+    "logName":  "opencode-test-admin-pause-reason",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-05T00:13:09.2547873Z",
+    "finishedUtc":  "2026-11-05T00:13:45.9422032Z",
+    "currentRunXmlCount":  0
+}

@@ -1,0 +1,61 @@
+=== RUNNING MISSION REWARD MODES & MANAGEMENT TESTS (MIGRATION 077) ===
+Loading 32 migrations from 062 to 077...
+
+--- Test 1: Insufficient Credits & Balance Guards ---
+PASS: Mission creation rejected when total cost exceeds balance
+
+--- Test 2: Once Mode Across Multiple Days ---
+PASS: Owner created once-mode mission; 150 fee + 100 escrow held upfront atomically
+PASS: Tester 1 joined once-mode mission
+PASS: Tester 1 submitted once-mode report on Day 1
+PASS: Exact idempotent replay on once-mode returns committed receipt
+PASS: Day 2 once-mode submission safely updated pending report on same record across days
+PASS: Verified strictly 1 report in DB for once-mode participant across multiple days
+PASS: Ordinary app_test report submitted on same day coexists independently without collision
+PASS: Once-mode reward paid from escrow; owner balance unaffected; participant completed
+
+--- Test 3: Daily Mode for 3 Days Flow ---
+PASS: Daily mission created for production campaign; 150 fee + 90 escrow held
+PASS: Tester 1 joined daily mission
+PASS: Tester 1 submitted Day 1 daily report
+PASS: Server rejects retroactive submission for missed Day 2
+PASS: Tester 1 submitted Day 3 daily report
+PASS: Day 3 approved FIRST
+PASS: Day 1 approved SECOND (out-of-order review succeeded)
+PASS: Daily mode out-of-order approval paid both days independently from escrow
+
+--- Test 4: Rejection and Resubmission Flow ---
+PASS: Owner rejected report with reason
+PASS: Server blocked resubmission with duplicate old photo
+PASS: Resubmission with new photo succeeded on same report record
+
+--- Test 5: Edit Mission Flow ---
+PASS: preview_edit_mission accurately calculated fee and escrow differences
+PASS: edit_mission rejected stale preview cost
+PASS: edit_mission rejected concurrent version mismatch
+PASS: edit_mission updated terms, deducted 650 credits, and bumped version
+PASS: edit_mission locked reward terms after first participant joined
+PASS: Owner edited title, description and announcement after join
+PASS: Tester received notification of updated mission announcement
+
+--- Test 6: Admin Delete Mission Flow ---
+PASS: Moderator rejected with PERMISSION_DENIED
+PASS: Locked Admin rejected with PERMISSION_DENIED
+PASS: Empty deletion reason rejected
+PASS: Admin deleted mission successfully with audit event
+PASS: Repeated admin_delete_mission returned idempotent replay
+PASS: Admin action audit logged with actor, reason, and target details
+PASS: Notifications sent to owner and joined tester
+PASS: Escrow held safely while pending report remains to be reviewed
+PASS: Report submitted before deletion was successfully approved and rewarded
+PASS: Unused escrow of 585 credits refunded to owner atomically after final settlement
+
+--- Test 7: Approval After Expiration & sync_expired_missions Sweep ---
+PASS: sync_expired_missions executed (updated: 1)
+PASS: Report submitted in time was approved and rewarded AFTER mission expiration
+PASS: Expired mission unused escrow refunded to owner after last report settled
+
+--- Test 8: Discovery & Metadata Verification ---
+PASS: get_open_missions and get_campaign_mission return all required metadata
+
+=== ALL 15 MISSION REWARD MODES & MANAGEMENT TEST CASES PASSED 100% ===

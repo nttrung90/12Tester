@@ -1,0 +1,37 @@
+=== APPLYING ALL DEPLOYABLE MIGRATIONS (062..latest) ===
+Applied 062_consolidated_baseline.sql
+Applied 063_report_crypto_search_path.sql
+Applied 064_explicit_report_context.sql
+Applied 065_remove_dhash_hardblock.sql
+Applied 066_push_and_carryover_hardening.sql
+Applied 067_admin_direct_notification_popup.sql
+Applied 068_owner_tester_reports_count.sql
+Applied 069_admin_audit_hardening.sql
+Applied 070_admin_management.sql
+Applied 071_business_policies.sql
+Applied 072_admin_notification_campaigns.sql
+Applied 073_admin_action_audit.sql
+Applied 074_app_mission_window_and_multi_attachments.sql
+Applied 075_owner_auto_pause_config.sql
+Applied 076_mission_for_finalized_campaigns.sql
+Applied 077_mission_reward_modes_and_management.sql
+Applied 078_admin_pause_reason_popup.sql
+Applied 079_owner_auto_pause_debt_and_timestamp_guard.sql
+Applied 080_report_context_carryover_and_gap_recovery.sql
+Applied 081_admin_flow_audit_fixes.sql
+Applied 082_carryover_flow_audit_fixes.sql
+Applied 083_fix_app_configs_encoding_and_version.sql
+Applied 084_campaign_posting_business_policies.sql
+Applied 085_egress_optimization_sync_v2.sql
+Applied 086_next_campaign_candidate_daily_target_priority.sql
+Applied 087_campaign_tester_bonus_rounds.sql
+Applied 088_immediate_daily_quota_on_campaign_changes.sql
+PASS: 1. Single PostgREST signature & least-privilege grants
+PASS: 2. Baseline policy & quote shapes include posting threshold, slot_1, and target_fees
+PASS: 3. Standardized >= minimum threshold on baseline (9 fails, 10 succeeds on 12 Test)
+PASS: 4. Admin validation, role checks, and future scheduling of new posting parameters
+PASS: 5. Active custom policy enforcement: Slot 1 fee, Target fees, CAS mismatch, Legacy fail-closed, Slot 1 permanence
+PASS: 6. Adversarial direct-client UPDATE/INSERT guards, bypass GUC immunity, package regex, and metadata replay hash
+PASS: 7. Promotional 0-Credit policy, revision-only BUSINESS_POLICY_CONFLICT, and accurate promo target_fee_paid accounting
+PASS: 8. Public/Admin read RPCs & trimmed operator_note revision consistency
+ALL CAMPAIGN POSTING BUSINESS POLICY TESTS PASSED

@@ -1,27 +1,47 @@
-# Đổi tỷ lệ test bằng Supabase
+# Đổi tỷ lệ test bằng Supabase & Ứng dụng Android
 
-Áp dụng cho project `com.ntt.crosstest`, sau khi cài migration 042. Không cần sửa hay phát hành APK/AAB khi đổi chỉ tiêu. Migration giữ mức hiện tại **3 app test / 1 app đang hoạt động / ngày**; chưa tự chọn tỷ lệ mới thay bạn.
+Áp dụng cho project `com.ntt.crosstest`. Từ migration 058 trở đi, Quản trị viên có thể đổi tỷ lệ trực tiếp ngay trong **Bảng Quản Trị Viên** trên app Android hoặc qua Supabase SQL Editor (đường vận hành dự phòng). Không cần sửa hay phát hành lại APK khi thay đổi chỉ tiêu.
 
-## Cài đặt một lần
+## Cách 1: Thao tác trong ứng dụng Android (Khuyến nghị)
+
+1. Đăng nhập tài khoản có quyền `admin`.
+2. Mở **Bảng Quản Trị Viên** (Admin Panel).
+3. Tại đầu màn hình, chọn thẻ **Nhiệm vụ ngày**:
+   - Hệ thống hiển thị tỷ lệ đang có hiệu lực từ server (ví dụ: `6 app test / 1 app được tính nhiệm vụ / ngày`).
+   - Nhập cơ số mới N trong khoảng **1 đến 30** app test / 1 app / ngày.
+   - Chọn ngày bắt đầu áp dụng (mặc định 00:00 ngày mai theo giờ Việt Nam, hoặc chọn ngày tương lai qua lịch).
+   - Nhập lý do thay đổi (bắt buộc, 1–1000 ký tự).
+   - Bấm **Lưu lịch áp dụng** (hoặc **Cập nhật lịch** nếu đang sửa lịch cùng ngày).
+4. Xem, sửa hoặc hủy lịch tương lai trong mục **Lịch sắp áp dụng**:
+   - Bấm **Sửa**: dữ liệu lịch được điền lên form để chỉnh sửa và cập nhật.
+   - Bấm **Hủy**: nhập lý do hủy và xác nhận. Chỉ hủy đúng lịch ngày đã chọn, giữ nguyên các lịch khác.
+5. Xem lịch sử trong mục **Lịch sử thay đổi**: thể hiện thời điểm, tài khoản admin thực hiện (hoặc thao tác hệ thống/SQL), mức trước/sau và ghi chú.
+
+## Cách 2: Vận hành dự phòng qua Supabase SQL Editor
 
 1. Mở đúng project trên Supabase Dashboard → SQL Editor.
-2. Chạy `supabase/operations/daily_task_ratio_preflight.sql`. Lưu kết quả định nghĩa function/quyền để phục hồi. Hai dòng kiểm tra phải là `BASELINE_036_OK` hoặc `ALREADY_042_OK`. Nếu `STOP_*`, xem định nghĩa live và xử lý khác biệt trước; không bỏ kiểm tra drift để chạy ép migration.
-3. Chạy **toàn bộ** `supabase/migrations/042_configurable_daily_task_ratio.sql` trong một lần, bằng database owner (thường `postgres`). File có transaction; gặp lỗi thì dừng và rollback, không chạy từng đoạn để lách lỗi. Nếu SQL Editor giữ transaction lỗi, chạy `rollback;` trước thao tác tiếp theo.
-4. Kiểm tra tỷ lệ hôm nay:
+2. **Quy trình triển khai nâng cấp backend:**
+   - Baseline hiện hành là `supabase/migrations/062_consolidated_baseline.sql`, đã chứa các chức năng của 042, 053, 054, 058 và 060.
+   - Database đã áp dụng đến 061 (cho phép thiếu 046): chạy toàn bộ 062 một lần để ghi nhận baseline và bổ sung phần thiếu. Cấu hình tỷ lệ, lịch tương lai và audit được giữ nguyên.
+   - Database mới: chỉ chạy 062; các migration mới từ 063 trở đi chạy tiếp theo thứ tự.
+   - Các file 001–061 và schema gộp cũ đã ở `supabase/migrations_archive/pre_baseline_062/`, không chạy lại lên database đang dùng.
+   - Preflight cũ của 042 (`daily_task_ratio_preflight.sql`) chỉ phục vụ lịch sử 036/042; không dùng để đánh giá database hiện hành. Xem `HUONG_DAN_BASELINE_062.md`.
+3. Kiểm tra cấu hình và tỷ lệ hôm nay:
 
 ```sql
 select * from public.get_daily_task_policy(
     (clock_timestamp() at time zone 'Asia/Ho_Chi_Minh')::date
 );
+
+-- Hoặc kiểm tra qua RPC admin:
+select public.admin_get_daily_task_config();
 ```
 
-Lần cài đầu kết quả là 3. Lần chạy lại giữ nguyên chính sách đang áp dụng, lịch tương lai và audit; không tự trả về 3 nếu trước đó đã đổi tỷ lệ.
+Lần cài đầu kết quả là 3 (hoặc 6 nếu đã lên lịch). Lần chạy lại giữ nguyên chính sách đang áp dụng, lịch tương lai và audit; không tự trả về 3 nếu trước đó đã đổi tỷ lệ.
 
-5. Dùng APK hiện có và tài khoản thử kiểm tra Trang chủ sau làm mới. Đối chiếu `get_my_daily_task_status()` bằng phiên authenticated của chính tài khoản đó; SQL Editor không có `auth.uid()` nên không gọi RPC cá nhân để giả làm người dùng thật. Không dùng SQL test fixture trên production.
+4. Dùng APK đã cập nhật (có màn hình Quản trị viên) và tài khoản admin thử kiểm tra Trang chủ và Sheet Nhiệm vụ ngày. Đối chiếu `get_my_daily_task_status()` bằng phiên authenticated của chính tài khoản đó; SQL Editor không có `auth.uid()` nên không gọi RPC cá nhân để giả làm người dùng thật. Không dùng SQL test fixture trên production.
 
-Chỉ cần chạy migration **042** khi backend đã có các migration nền hiện hành. Không chạy lại 036: nó có backfill reset streak và miễn phạt. Không dùng toàn bộ schema gộp để nâng cấp database production.
-
-## Mỗi lần đổi tỷ lệ
+## Mỗi lần đổi tỷ lệ qua SQL Editor (Dự phòng)
 
 Ví dụ đổi sang **2 app test / 1 app đang hoạt động**, áp dụng từ ngày mai theo giờ Việt Nam:
 
@@ -33,11 +53,11 @@ select public.schedule_daily_task_policy(
 );
 ```
 
-Tỷ lệ là số nguyên. Có thể thay ngày mai bằng ngày tương lai cụ thể, ví dụ `date '2026-11-01'` khi ngày đó chưa tới. Không sửa lịch đã có hiệu lực, không áp dụng hồi tố hoặc giữa ngày. Thời điểm bắt đầu là 00:00 ngày đã chọn theo `Asia/Ho_Chi_Minh`.
+Tỷ lệ là số nguyên từ 1 đến 30. Có thể thay ngày mai bằng ngày tương lai cụ thể, ví dụ `date '2026-11-01'` khi ngày đó chưa tới. Không sửa lịch đã có hiệu lực, không áp dụng hồi tố hoặc giữa ngày. Thời điểm bắt đầu là 00:00 ngày đã chọn theo `Asia/Ho_Chi_Minh`.
 
 Nếu lịch ngày đó chưa áp dụng, gọi lại cùng ngày để điều chỉnh tỷ lệ; hệ thống giữ audit trước/sau. Sau mốc bắt đầu, muốn đổi tiếp thì tạo lịch cho ngày tương lai.
 
-Chỉ tiêu thực tế = **min(tỷ lệ × số app của chủ thuộc diện tính nhiệm vụ, số app khác khả dụng)**. Quy tắc app đang hoạt động, cửa sổ 30 ngày, app mới tính từ hôm sau và cách đếm report không đổi. Đây là quota test hằng ngày, không phải phí hay điều kiện mở khóa nút đăng app.
+Chỉ tiêu thực tế = **min(tỷ lệ × số app của chủ thuộc diện tính nhiệm vụ + số app thiếu bảo lưu chuyển sang (carryover), số app khác khả dụng)**. Quy tắc app đang hoạt động, cửa sổ 30 ngày, app mới tính từ hôm sau, cơ chế cộng dồn ngày chưa hoàn thành (053/054) và cách đếm report không đổi. Đây là quota test hằng ngày, không phải phí hay điều kiện mở khóa nút đăng app.
 
 ## Xem lịch và lịch sử
 

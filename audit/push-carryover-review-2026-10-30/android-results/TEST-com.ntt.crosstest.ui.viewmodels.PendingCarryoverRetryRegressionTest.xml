@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-30T11:52:10.600Z" hostname="PC-5700X3D" time="0.077">
+  <properties/>
+  <testcase name="testCrossMidnightCancellation_mustNotPublishIntoNewDay" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.014"/>
+  <testcase name="testPendingThrough120sThenReadyTransitionsAutomaticallyWithoutManualRefresh" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.014"/>
+  <testcase name="testStopPendingCarryoverRetrySafelyCancelsJob" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.009"/>
+  <testcase name="testStaleGenerationCancellation_ABAUserMustNotPublishIntoNewSession" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.009"/>
+  <testcase name="testActiveRetryOwnedByPriorIdentityDoesNotSuppressStartingRetryForCurrentIdentity" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.012"/>
+  <testcase name="testBoundedMaxAttemptsDoesNotLoopInfinitely" classname="com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

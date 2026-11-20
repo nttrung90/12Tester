@@ -31,3 +31,6 @@
 -dontwarn okhttp3.**
 -dontwarn okio.**
 -dontwarn javax.annotation.**
+
+# --- TDLib JNI bridge: native code accesses TdApi classes & fields by name ---
+-keep class org.drinkless.tdlib.** { *; }

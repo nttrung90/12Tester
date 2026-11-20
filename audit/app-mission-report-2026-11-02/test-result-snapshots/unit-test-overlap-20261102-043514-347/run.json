@@ -1,0 +1,12 @@
+{
+    "logName":  "unit-test-overlap",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.audit.ReportOverlapTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T04:34:41.9597896Z",
+    "finishedUtc":  "2026-11-02T04:35:14.3476946Z",
+    "currentRunXmlCount":  1
+}

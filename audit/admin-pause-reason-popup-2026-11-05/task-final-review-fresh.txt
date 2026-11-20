@@ -1,0 +1,37 @@
+You are a FRESH, tightly scoped OpenCode review/fix pass in F:/AI/12Tester. User explicitly requires google/antigravity-gemini-3.8-flash variant high. Most implementation is COMPLETE and verified: migration 078, two admin pause reasons, one notification shared with popup, Android UI/DTO/repository, VI/EN strings, new SQL suites, 540 Android tests / 71 suites / zero failures/errors/skips, and debug APK. Do NOT repeat the initial research. Do NOT read old CLI logs/session exports or large old audit trees; they are irrelevant and very large. Work directly on the current source and concrete remaining findings below.
+
+Preserve ALL existing user work. No old migration edits (062-077), no edits to 078 (backend fixes are already accepted), no dependency/version/signing changes, secrets/config/account/quota changes, other models/agents, commit/push/reset, production deployment or real user messaging. Existing currentUserId auth fixes and missing-RPC/permission feedback have passing independent tests; preserve them. Do not weaken or edit independent AdminPauseSessionIdentityReviewTest assertions.
+
+1. FIX ACTUAL DIALOG SESSION ISOLATION. Current CampaignDetailScreen has LaunchedEffect(currentUserId,isAdmin) but resets only when !isAdmin or UID==null. Admin A -> Admin B does not reset the open dialog, selected preset or custom draft because both admins have non-null UID and isAdmin=true. currentUserId in CampaignDetailViewModel now follows live auth, but UI has no generation scoping. Use a SMALL testable dialog state/controller keyed by live UID + SessionCacheManager.currentGeneration(). Ensure observable identity updates on auth changes. Reset the dialog/draft/error for a new identity, including same UID with a new session generation. Preserve normal recomposition, rotation and same-session network-error draft. Prevent old action callbacks from closing a newer dialog, including rotation while a request is running. Preserve existing ViewModel action token / UID / generation concurrency checks. Avoid unnecessary architecture or unrelated refactors. Add substantive behavioral tests for actual dialog state transitions, not source-text assertions or tests that just reassign an unchanged local string.
+
+2. SHOW ERRORS INSIDE THE MODAL. Failed admin pause now keeps the dialog open, but its error appears only in the underlying Scaffold snackbar. Show the relevant action error inside the dialog, scoped to the same dialog/request/session; preserve the selection and note for retry. Missing-new-RPC must explain updating backend, without legacy fallback; permission failures must remain permission errors. Current adminCampaignActionError was already repaired to satisfy these tests:
+AdminPauseSessionIdentityReviewTest (4 cases: live UID, logout, PGRST202/404 missing RPC, 403/42501 permission).
+Keep all four assertions and run them after your changes. Add any needed localized strings in values, values-vi and values-en. Use exact existing notification templates. Do not modify popup host/polling/claim/ack or broadcast behavior.
+
+3. COMPLETE THE REAL-PG CONCURRENCY RUNNER. supabase/tests/run-admin-pause-reason-concurrency-test.mjs currently:
+- Sets JWT with set_config(...,false) + session SET ROLE authenticated on two pooled connections and releases without resetting. checkClient can reuse a poisoned authenticated connection and see wrong RLS-filtered counts / permission denied. Use transaction-local JWT/role and robust rollback/reset before release.
+- Header promises parallel fifth popup claim but only Test A duplicate-pause race exists. Add Test B competing for fifth claim on the notification created through the NEW pause RPC, preserving the existing 5-claim limit.
+- Does not clean up seeded UUID-scoped users/campaign/notifications/receipts/audit. Add reliable test-data cleanup on both success and failure. Keep TEST_DATABASE_URL as the ONLY accepted DB target; never fallback to production DATABASE_URL. No real PostgreSQL is available here, so run node --check and record real DB test as UNRUN/SKIPPED, never passed. Do not provision external services.
+
+4. WIRE DEFAULT BACKEND TESTS. Both new PGlite suites exist and pass:
+supabase/tests/run-admin-pause-reason-popup-test.mjs (13 cases)
+supabase/tests/run-admin-pause-resume-compatibility-test.mjs (4 cases)
+package.json currently only adds a standalone test:admin-pause-reason-popup. Add both to the DEFAULT npm test chain, e.g. test:admin-expansion. Keep every existing test command. Run npm test once, save log and exact status. Do not rewrite the passing SQL tests or backend migration.
+
+5. OLD BACKEND COMPATIBILITY: CampaignRepository CAMPAIGN_COLUMNS now includes admin_pause_reason_code, although it is optional presentation metadata and old admin_note already works. Avoid making normal campaign reads fail against pre-078 backend if this can be done simply (e.g. keep optional code out of legacy shared column projection; full new DTOs/RPC can still expose it). Do not silently route preset pauses to the legacy pause RPC. Backend-first deployment remains required for the new action.
+
+FILES TO START WITH (read only relevant ranges):
+app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt
+app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt
+app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt (projection and admin RPC functions only)
+supabase/tests/run-admin-pause-reason-concurrency-test.mjs
+supabase/tests/package.json
+app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminCampaignPauseReasonTest.kt
+app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminPauseSessionIdentityReviewTest.kt
+
+VALIDATION / TOOLS:
+Java is C:/Users/nguye/.gradle/jdks/eclipse_adoptium-25-amd64-windows.2; npm deps already installed in supabase/tests.
+Use audit/admin-pause-reason-popup-2026-11-05/run-gradle-logged.ps1 for ALL Gradle runs; named mutex serializes shared builds. Invoke it from PowerShell with an ACTUAL array, not -File ... -GradleArguments @(...), which silently bound only the first element in earlier CLI runs. Correct pattern from a PowerShell command: & './audit/admin-pause-reason-popup-2026-11-05/run-gradle-logged.ps1' -LogName fresh-review-targeted -GradleArguments @(':app:testDebugUnitTest','--tests','com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest'). If invoking via another shell, use powershell -Command with proper quoting, or write a short .ps1 wrapper. Do not use a claimed target filter unless run.json actually contains it.
+After meaningful source changes run targeted dialog/identity/admin-action tests, then full :app:testDebugUnitTest (fresh XML), then :app:assembleDebug serially. Fresh XML evidence is required; UP-TO-DATE with currentRunXmlCount=0 is not a new run. Do not repeatedly rerun passing tests if source has not changed. Save logs in the task audit dir. Run npm test and concurrency node --check; real PG concurrency remains unavailable.
+
+Finish all fixes, tests, and APK. Update audit/admin-pause-reason-popup-2026-11-05/opencode-handover.md to reflect FINAL implementation/results, not abandoned history. Codex will independently inspect the final diff and evidence. Do not modify CLI event logs. Do not claim completion while a relevant test fails.

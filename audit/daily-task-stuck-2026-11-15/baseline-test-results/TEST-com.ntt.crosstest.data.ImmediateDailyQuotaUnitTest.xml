@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-15T10:55:04.632Z" hostname="PC-5700X3D" time="2.484">
+  <properties/>
+  <testcase name="deleteCampaign_bumpsDailyTaskMutationAndEmitsUpdatedQuota" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="2.064"/>
+  <testcase name="postCommitRefreshError_emitsStalePendingWithoutFailingFinancialAction" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.058"/>
+  <testcase name="createCampaignV2_bumpsDailyTaskMutationAndRefreshesQuota" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.025"/>
+  <testcase name="homeViewModel_updatesUiState_uponDailyTaskChangeEvent" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.116"/>
+  <testcase name="fourWayFencing_dropsStaleOrMismatchedEvents" classname="com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

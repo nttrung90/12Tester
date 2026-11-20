@@ -1,0 +1,10 @@
+{
+    "logName":  "baseline-test",
+    "arguments":  [
+                      ":app:testDebugUnitTest"
+                  ],
+    "exitCode":  0,
+    "startedUtc":  "2026-11-02T03:15:38.7625084Z",
+    "finishedUtc":  "2026-11-02T03:15:49.3787980Z",
+    "currentRunXmlCount":  0
+}

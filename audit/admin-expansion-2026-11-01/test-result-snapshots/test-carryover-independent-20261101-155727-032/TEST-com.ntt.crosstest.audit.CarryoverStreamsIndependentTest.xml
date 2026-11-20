@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.CarryoverStreamsIndependentTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-01T15:57:24.097Z" hostname="PC-5700X3D" time="2.315">
+  <properties/>
+  <testcase name="auditHistoryRequestCannotInvalidatePolicyRefreshOrStrandSpinner" classname="com.ntt.crosstest.audit.CarryoverStreamsIndependentTest" time="1.823"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

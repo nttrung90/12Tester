@@ -1,0 +1,26 @@
+[
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowDraftIndependentTest.kt",
+    "sha256": "BFCCE442194FD142D05B3A48BF76E23A9BEE0D567C0CC478EDF80A96D754D009"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowManagerIndependentTest.kt",
+    "sha256": "8BE685CF1B5346B551535186AA63CDAEFDA7A7626FD002455DDAD308F6B29228"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowMediaIndependentTest.kt",
+    "sha256": "1797D658528B7E2F4E93C7DC10973605543C1CAFDE03EA9975D341DE1964C87B"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowPersistenceIndependentTest.kt",
+    "sha256": "2E720174362333807DCD56C844058CB1124D4EC82424DFD5BB6CBBF2ACDA20C6"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent-tests\\MissionWindowWorkerIndependentTest.kt",
+    "sha256": "04AE393D413B4A482A01568538519C0FFA9262B66A88DB18A284CDE315DFE114"
+  },
+  {
+    "path": "F:\\AI\\12Tester\\audit\\app-mission-report-2026-11-02\\independent.init.gradle",
+    "sha256": "3777B4A3A47942694FC6EC8D0C61DCF7A051488987B95066ACB20436727D468B"
+  }
+]

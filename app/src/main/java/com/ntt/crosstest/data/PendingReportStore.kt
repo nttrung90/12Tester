@@ -1,6 +1,7 @@
 package com.ntt.crosstest.data
 
 import android.content.Context
+import com.ntt.crosstest.util.PreparedScreenshotCache
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -13,10 +14,44 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.security.MessageDigest
 import java.util.UUID
 
+@Serializable
+data class PendingAttachment(
+    val id: String,
+    val position: Int,
+    val screenshotPath: String,
+    val preparedPath: String? = null,
+    val preparedThumbnailPath: String? = null,
+    val thumbnailPath: String? = null,
+    val imageHash: String,
+    val sha256: String? = null,
+    val uploadedUrl: String? = null,
+    val uploadedThumbnailUrl: String? = null,
+    val uploadedHash: String? = null,
+    val targetProvider: String? = null,
+    val bucket: String? = null,
+    val storagePath: String? = null,
+    val thumbnailStoragePath: String? = null,
+    val reservationId: String? = null,
+)
+
 /**
  * Request nộp báo cáo được lưu xuống đĩa để WorkManager có thể retry
  * kể cả khi process bị kill.
  */
+@Serializable
+data class PendingReportFailure(
+    val message: String,
+    val code: String = "report_submit_failed",
+    val stage: String = "unknown",
+    val attempt: Int = 1,
+    val originalCode: String? = null,
+    val httpStatus: Int? = null,
+) {
+    fun asException(requestId: String) = ReportSubmissionFailure(
+        code, stage, requestId, message, originalCode, httpStatus,
+    )
+}
+
 @Serializable
 data class PendingReport(
     val id: String,
@@ -45,13 +80,73 @@ data class PendingReport(
     val completedResult: SubmitTesterReportResult? = null,
     val missionId: String? = null,
     val missionTitle: String? = null,
+    val submissionContext: String? = null, // null identifies an old, ambiguous queued request
+    val expectedDate: String? = null,
+    val isOnceMode: Boolean = false,
+    val scopedKey: String? = null,
+    val attachments: List<PendingAttachment> = emptyList(),
+    val terminalFailure: PendingReportFailure? = null,
+    val failureNotificationConsumed: Boolean = false,
+    val targetProvider: String? = null,
+    val bucket: String? = null,
+    val storagePath: String? = null,
+    val thumbnailStoragePath: String? = null,
+    val reservationId: String? = null,
 ) {
+    val allAttachments: List<PendingAttachment>
+        get() {
+            if (attachments.isNotEmpty()) return attachments
+            val path = screenshotPath ?: return emptyList()
+            val hash = imageHash ?: return emptyList()
+            return listOf(
+                PendingAttachment(
+                    id = id,
+                    position = 0,
+                    screenshotPath = path,
+                    preparedPath = preparedPath,
+                    preparedThumbnailPath = preparedThumbnailPath,
+                    thumbnailPath = thumbnailPath,
+                    imageHash = hash,
+                    sha256 = screenshotSha256,
+                    uploadedUrl = uploadedUrl,
+                    uploadedThumbnailUrl = uploadedThumbnailUrl,
+                    uploadedHash = uploadedHash,
+                    targetProvider = targetProvider,
+                    bucket = bucket,
+                    storagePath = storagePath,
+                    thumbnailStoragePath = thumbnailStoragePath,
+                    reservationId = reservationId,
+                )
+            )
+        }
+
     companion object {
         fun newId(): String = UUID.randomUUID().toString()
     }
 }
 
 object PendingReportStore {
+
+    @Synchronized
+    fun markTerminalFailure(context: Context, id: String, failure: PendingReportFailure) {
+        val report = read(context, id) ?: return
+        if (report.completedResult == null) write(context, report.copy(terminalFailure = failure))
+    }
+
+    /** Claim once before emitting UI feedback; survives process death and auth restoration. */
+    @Synchronized
+    fun claimFailureNotification(context: Context, id: String, failure: PendingReportFailure): Boolean {
+        val report = read(context, id) ?: return true
+        if (report.completedResult != null || report.failureNotificationConsumed) return false
+        write(context, report.copy(terminalFailure = failure, failureNotificationConsumed = true))
+        return true
+    }
+
+    @Synchronized
+    fun prepareExplicitRetry(context: Context, id: String): PendingReport? {
+        val report = read(context, id) ?: return null
+        return report.copy(terminalFailure = null, failureNotificationConsumed = false).also { write(context, it) }
+    }
 
     private const val DIRECTORY = "pending_report_uploads"
     private const val MAX_AGE_MS = 48L * 60L * 60L * 1000L
@@ -63,6 +158,10 @@ object PendingReportStore {
         encodeDefaults = true
     }
 
+    fun serializedBytes(report: PendingReport): Long {
+        return json.encodeToString(report).toByteArray(Charsets.UTF_8).size.toLong()
+    }
+
     fun directory(context: Context): File =
         File(context.noBackupFilesDir, DIRECTORY).apply { mkdirs() }
 
@@ -71,6 +170,12 @@ object PendingReportStore {
 
     fun newThumbnailFile(context: Context, id: String, extension: String = "jpg"): File =
         File(directory(context), "${id}_thumb.$extension")
+
+    fun newAttachmentScreenshotFile(context: Context, id: String, attachmentId: String, extension: String = "jpg"): File =
+        File(directory(context), "${id}_${attachmentId}.$extension")
+
+    fun newAttachmentThumbnailFile(context: Context, id: String, attachmentId: String, extension: String = "jpg"): File =
+        File(directory(context), "${id}_${attachmentId}_thumb.$extension")
 
     @Synchronized
     fun write(context: Context, report: PendingReport) {
@@ -115,17 +220,138 @@ object PendingReportStore {
     }
 
     @Synchronized
+    fun markAttachmentUploaded(
+        context: Context,
+        id: String,
+        attachmentId: String,
+        url: String,
+        hash: String?,
+        thumbnailUrl: String? = null
+    ) {
+        val current = read(context, id) ?: throw IOException("pending_request_not_found")
+        val updatedAttachments = if (current.attachments.isNotEmpty()) {
+            current.attachments.map { att ->
+                if (att.id == attachmentId) {
+                    att.copy(
+                        uploadedUrl = url,
+                        uploadedHash = hash ?: att.uploadedHash,
+                        uploadedThumbnailUrl = thumbnailUrl ?: att.uploadedThumbnailUrl
+                    )
+                } else att
+            }
+        } else {
+            emptyList()
+        }
+        val isFirst = if (current.attachments.isNotEmpty()) {
+            current.attachments.first().id == attachmentId
+        } else {
+            true
+        }
+        write(context, current.copy(
+            attachments = updatedAttachments,
+            uploadedUrl = if (isFirst) url else current.uploadedUrl,
+            uploadedHash = if (isFirst) (hash ?: current.uploadedHash) else current.uploadedHash,
+            uploadedThumbnailUrl = if (isFirst) (thumbnailUrl ?: current.uploadedThumbnailUrl) else current.uploadedThumbnailUrl
+        ))
+    }
+
+    @Synchronized
+    fun markAttachmentReservation(
+        context: Context,
+        id: String,
+        attachmentId: String,
+        provider: String,
+        bucket: String,
+        storagePath: String,
+        thumbnailStoragePath: String? = null,
+        reservationId: String? = null,
+    ) {
+        val current = read(context, id) ?: return
+        val updatedAttachments = if (current.attachments.isNotEmpty()) {
+            current.attachments.map { att ->
+                if (att.id == attachmentId) {
+                    att.copy(
+                        targetProvider = provider,
+                        bucket = bucket,
+                        storagePath = storagePath,
+                        thumbnailStoragePath = thumbnailStoragePath,
+                        reservationId = reservationId,
+                    )
+                } else att
+            }
+        } else {
+            emptyList()
+        }
+        val isFirst = if (current.attachments.isNotEmpty()) {
+            current.attachments.first().id == attachmentId
+        } else {
+            true
+        }
+        write(context, current.copy(
+            attachments = updatedAttachments,
+            targetProvider = if (isFirst) provider else current.targetProvider,
+            bucket = if (isFirst) bucket else current.bucket,
+            storagePath = if (isFirst) storagePath else current.storagePath,
+            thumbnailStoragePath = if (isFirst) thumbnailStoragePath else current.thumbnailStoragePath,
+            reservationId = if (isFirst) reservationId else current.reservationId,
+        ))
+    }
+
+    @Synchronized
+    fun markReportReservation(
+        context: Context,
+        id: String,
+        provider: String,
+        bucket: String,
+        storagePath: String,
+        thumbnailStoragePath: String? = null,
+        reservationId: String? = null,
+    ) {
+        val current = read(context, id) ?: return
+        write(context, current.copy(
+            targetProvider = provider,
+            bucket = bucket,
+            storagePath = storagePath,
+            thumbnailStoragePath = thumbnailStoragePath,
+            reservationId = reservationId,
+        ))
+    }
+
+    @Synchronized
     fun markCompleted(context: Context, id: String, result: SubmitTesterReportResult) {
         require(result.success && result.reportId.isNotBlank()) { "invalid_report_result" }
         val current = read(context, id) ?: throw IOException("pending_request_not_found")
         write(context, current.copy(completedResult = result))
-        // The receipt is sufficient for replay, so large image files can now be removed.
+        val draftReferenced = MissionReportDraftStore.allReferencedFilePaths(context)
+        fun shouldDeletePrepared(path: String?): Boolean {
+            if (path.isNullOrBlank()) return false
+            val abs = File(path).absolutePath
+            return !PreparedScreenshotCache.isLeased(abs) && abs !in draftReferenced
+        }
+
+        // The receipt is sufficient for replay, so pending request copy image files can now be removed.
         deleteInsideAppStorage(context, current.screenshotPath)
-        deleteInsideAppStorage(context, current.preparedPath)
         deleteInsideAppStorage(context, current.thumbnailPath)
-        deleteInsideAppStorage(context, current.preparedThumbnailPath)
+        if (shouldDeletePrepared(current.preparedPath)) {
+            deleteInsideAppStorage(context, current.preparedPath)
+        }
+        if (shouldDeletePrepared(current.preparedThumbnailPath)) {
+            deleteInsideAppStorage(context, current.preparedThumbnailPath)
+        }
+        for (att in current.attachments) {
+            deleteInsideAppStorage(context, att.screenshotPath)
+            deleteInsideAppStorage(context, att.thumbnailPath)
+            if (shouldDeletePrepared(att.preparedPath)) {
+                deleteInsideAppStorage(context, att.preparedPath)
+            }
+            if (shouldDeletePrepared(att.preparedThumbnailPath)) {
+                deleteInsideAppStorage(context, att.preparedThumbnailPath)
+            }
+        }
         val orphanThumb = File(context.noBackupFilesDir, "prepared_report_images/thumb_${id}.jpg")
-        if (orphanThumb.isFile) orphanThumb.delete()
+        if (orphanThumb.isFile && shouldDeletePrepared(orphanThumb.absolutePath)) {
+            orphanThumb.delete()
+        }
     }
 
     @Synchronized
@@ -152,12 +378,35 @@ object PendingReportStore {
     fun delete(context: Context, id: String) {
         val report = read(context, id)
         if (report != null) {
+            val draftReferenced = MissionReportDraftStore.allReferencedFilePaths(context)
+            fun shouldDeletePrepared(path: String?): Boolean {
+                if (path.isNullOrBlank()) return false
+                val abs = File(path).absolutePath
+                return !PreparedScreenshotCache.isLeased(abs) && abs !in draftReferenced
+            }
+
             deleteInsideAppStorage(context, report.screenshotPath)
-            deleteInsideAppStorage(context, report.preparedPath)
             deleteInsideAppStorage(context, report.thumbnailPath)
-            deleteInsideAppStorage(context, report.preparedThumbnailPath)
+            if (shouldDeletePrepared(report.preparedPath)) {
+                deleteInsideAppStorage(context, report.preparedPath)
+            }
+            if (shouldDeletePrepared(report.preparedThumbnailPath)) {
+                deleteInsideAppStorage(context, report.preparedThumbnailPath)
+            }
+            for (att in report.attachments) {
+                deleteInsideAppStorage(context, att.screenshotPath)
+                deleteInsideAppStorage(context, att.thumbnailPath)
+                if (shouldDeletePrepared(att.preparedPath)) {
+                    deleteInsideAppStorage(context, att.preparedPath)
+                }
+                if (shouldDeletePrepared(att.preparedThumbnailPath)) {
+                    deleteInsideAppStorage(context, att.preparedThumbnailPath)
+                }
+            }
             val orphanThumb = File(context.noBackupFilesDir, "prepared_report_images/thumb_${id}.jpg")
-            if (orphanThumb.isFile) orphanThumb.delete()
+            if (orphanThumb.isFile && shouldDeletePrepared(orphanThumb.absolutePath)) {
+                orphanThumb.delete()
+            }
         }
         val target = jsonFile(context, id)
         listOf(target, File(target.path + ".tmp"), File(target.path + ".new"), File(target.path + ".bak"))
@@ -173,6 +422,16 @@ object PendingReportStore {
         val referenced = mutableSetOf<String>()
         val entries = mutableListOf<Triple<File, PendingReport, Long>>()
 
+        fun isWorkUnresolved(id: String): Boolean {
+            return try {
+                val wm = androidx.work.WorkManager.getInstance(context)
+                val infos = wm.getWorkInfosForUniqueWork("report_submit_$id").get()
+                infos.any { !it.state.isFinished }
+            } catch (_: Exception) {
+                false
+            }
+        }
+
         dir.listFiles { file -> file.isFile && file.name.endsWith(".json") }?.forEach { file ->
             val report = try {
                 read(context, file.name.removeSuffix(".json"))
@@ -186,34 +445,43 @@ object PendingReportStore {
             // WorkManager may still need this receipt after a crash. Its reconciler
             // removes completed records only after SUCCEEDED (or work pruning).
             if (report.completedResult != null) return@forEach
-            if (report.createdAt < cutoff) {
+
+            val paths = mutableSetOf<String>()
+            report.screenshotPath?.let { paths += File(it).absolutePath }
+            report.thumbnailPath?.let { paths += File(it).absolutePath }
+            for (att in report.attachments) {
+                paths += File(att.screenshotPath).absolutePath
+                att.thumbnailPath?.let { paths += File(it).absolutePath }
+            }
+            referenced.addAll(paths)
+
+            val unresolved = isWorkUnresolved(report.id)
+            if (report.createdAt < cutoff && !unresolved) {
                 deleteInsideAppStorage(context, report.screenshotPath)
-                deleteInsideAppStorage(context, report.preparedPath)
                 deleteInsideAppStorage(context, report.thumbnailPath)
-                deleteInsideAppStorage(context, report.preparedThumbnailPath)
+                for (att in report.attachments) {
+                    deleteInsideAppStorage(context, att.screenshotPath)
+                    deleteInsideAppStorage(context, att.thumbnailPath)
+                }
                 file.delete()
             } else {
-                report.screenshotPath?.let { referenced += File(it).absolutePath }
-                report.preparedPath?.let { referenced += File(it).absolutePath }
-                report.thumbnailPath?.let { referenced += File(it).absolutePath }
-                report.preparedThumbnailPath?.let { referenced += File(it).absolutePath }
-                val bytes = file.length() +
-                    (report.screenshotPath?.let { File(it).length() } ?: 0L) +
-                    (report.thumbnailPath?.let { File(it).length() } ?: 0L) +
-                    (report.preparedThumbnailPath?.let { File(it).length() } ?: 0L)
+                val bytes = file.length() + paths.sumOf { File(it).length() }
                 entries += Triple(file, report, bytes)
             }
         }
 
-        // Giới hạn tổng dung lượng/số request: xoá request cũ nhất trước.
+        // Giới hạn tổng dung lượng/số request: xoá request cũ nhất trước, nhưng giữ work chưa giải quyết
         var totalBytes = entries.sumOf { it.third }
         var remaining = entries.size
         entries.sortedBy { it.second.createdAt }.forEach { (file, report, bytes) ->
             if (remaining <= MAX_FILES && totalBytes <= MAX_TOTAL_BYTES) return@forEach
+            if (isWorkUnresolved(report.id)) return@forEach
             deleteInsideAppStorage(context, report.screenshotPath)
-            deleteInsideAppStorage(context, report.preparedPath)
             deleteInsideAppStorage(context, report.thumbnailPath)
-            deleteInsideAppStorage(context, report.preparedThumbnailPath)
+            for (att in report.attachments) {
+                deleteInsideAppStorage(context, att.screenshotPath)
+                deleteInsideAppStorage(context, att.thumbnailPath)
+            }
             file.delete()
             remaining -= 1
             totalBytes -= bytes
@@ -228,18 +496,38 @@ object PendingReportStore {
     }
 
     /**
-     * Campaign id của các báo cáo đang chờ upload (chưa lên server).
-     * Dùng để không gợi ý lại app vừa test trong lúc báo cáo còn trong hàng đợi.
+     * Kiểm tra budget bộ nhớ trước khi tiếp nhận request mới.
+     * Ngăn chặn tình trạng vượt trần 20MB/20 request dẫn đến việc tự ý evict các công việc đang chạy.
      */
     @Synchronized
-    fun pendingCampaignIds(context: Context): Set<String> {
+    fun canAdmit(context: Context, estimatedBytes: Long, newRequestsCount: Int = 1): Boolean {
+        cleanup(context)
+        val dir = directory(context)
+        val currentBytes = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+        val currentRequests = list(context).count { it.completedResult == null }
+        if (currentRequests + newRequestsCount > MAX_FILES) return false
+        if (currentBytes + estimatedBytes > MAX_TOTAL_BYTES) return false
+        return true
+    }
+
+    /**
+     * Campaign id của các báo cáo đang chờ upload (chưa lên server).
+     * Dùng để không gợi ý lại app vừa test trong lúc báo cáo còn trong hàng đợi.
+     * Hỗ trợ contextFilter để nhiệm vụ không làm mất lượt của app_test thường.
+     */
+    @Synchronized
+    fun pendingCampaignIds(context: Context, contextFilter: String? = null): Set<String> {
         val files = directory(context).listFiles { file ->
             file.isFile && file.name.endsWith(".json")
         } ?: return emptySet()
         return files.mapNotNull { file ->
             try {
                 val report = read(context, file.name.removeSuffix(".json"))
-                report?.takeIf { it.completedResult == null }?.campaignId
+                if (report != null && report.completedResult == null) {
+                    if (contextFilter == null || report.submissionContext == contextFilter) {
+                        report.campaignId
+                    } else null
+                } else null
             } catch (_: Exception) {
                 null
             }

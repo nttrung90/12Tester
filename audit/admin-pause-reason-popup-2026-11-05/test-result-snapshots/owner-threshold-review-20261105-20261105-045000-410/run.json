@@ -1,0 +1,15 @@
+{
+  "logName": "owner-threshold-review-20261105",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.ntt.crosstest.data.AdminOwnerAutoPauseTest",
+    "--tests",
+    "com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest",
+    "--rerun"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-05T04:50:00.1618359Z",
+  "finishedUtc": "2026-11-05T04:50:00.4188115Z",
+  "currentRunXmlCount": 0
+}

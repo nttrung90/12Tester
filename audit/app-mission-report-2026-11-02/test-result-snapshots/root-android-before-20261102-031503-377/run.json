@@ -1,0 +1,11 @@
+{
+  "logName": "root-android-before",
+  "arguments": [
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 0,
+  "startedUtc": "2026-11-02T03:14:18.3992666Z",
+  "finishedUtc": "2026-11-02T03:15:03.5045128Z",
+  "currentRunXmlCount": 64
+}

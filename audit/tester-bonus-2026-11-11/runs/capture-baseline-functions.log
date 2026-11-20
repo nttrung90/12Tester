@@ -1,0 +1,70 @@
+[
+  {
+    "name": "_campaign_json",
+    "arguments": "c campaigns"
+  },
+  {
+    "name": "_grant_report_tip",
+    "arguments": "p_campaign_id uuid, p_tester_id uuid"
+  },
+  {
+    "name": "_impl_admin_delete_campaign",
+    "arguments": "p_campaign_id uuid, p_reason text"
+  },
+  {
+    "name": "_impl_approve_tester_report",
+    "arguments": "p_report_id uuid, p_bonus integer"
+  },
+  {
+    "name": "_impl_reject_tester_report",
+    "arguments": "p_report_id uuid, p_reason text, p_reason_code text"
+  },
+  {
+    "name": "_submit_tester_report_core",
+    "arguments": "p_submission_context text, p_campaign_id uuid, p_content text, p_rating integer, p_client_submit_id uuid, p_screenshot_url text, p_image_hash text, p_thumbnail_url text, p_mission_id uuid, p_attachments jsonb, p_expected_date date"
+  },
+  {
+    "name": "auto_accept_expired_reports",
+    "arguments": ""
+  },
+  {
+    "name": "sync_campaign_lifecycle",
+    "arguments": ""
+  },
+  {
+    "name": "trg_campaigns_guard_financial_snapshots",
+    "arguments": ""
+  }
+]
+[
+  {
+    "name": "campaigns_owner_id_fkey",
+    "relation": "campaigns",
+    "definition": "FOREIGN KEY (owner_id) REFERENCES profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "campaigns_status_check",
+    "relation": "campaigns",
+    "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'closed'::text, 'paused'::text, 'production'::text, 'completed'::text])))"
+  },
+  {
+    "name": "profiles_id_fkey",
+    "relation": "profiles",
+    "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "tester_reports_campaign_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE"
+  },
+  {
+    "name": "tester_reports_status_check",
+    "relation": "tester_reports",
+    "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])))"
+  },
+  {
+    "name": "tester_reports_user_id_fkey",
+    "relation": "tester_reports",
+    "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+  }
+]

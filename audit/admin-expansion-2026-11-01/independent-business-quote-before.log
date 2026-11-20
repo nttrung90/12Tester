@@ -1,0 +1,35 @@
+[
+  {
+    "name": "quote revision changes when scheduled policy activates without DB edit",
+    "slotBefore": {
+      "cost": 50,
+      "revision": "9fffff17bc2d3050df9ba7a24c3f1f46",
+      "quote_type": "slot",
+      "slot_number": 2,
+      "renewal_days": 30
+    },
+    "slotAfter": {
+      "cost": 50,
+      "revision": "9fffff17bc2d3050df9ba7a24c3f1f46",
+      "quote_type": "slot",
+      "slot_number": 2,
+      "renewal_days": 1
+    },
+    "slotRevisionChanged": false,
+    "updateBefore": {
+      "revision": "9fffff17bc2d3050df9ba7a24c3f1f46",
+      "max_claims": 20,
+      "quote_type": "app_update",
+      "reserved_budget": 120,
+      "reward_per_claim": 6
+    },
+    "updateAfter": {
+      "revision": "9fffff17bc2d3050df9ba7a24c3f1f46",
+      "max_claims": 30,
+      "quote_type": "app_update",
+      "reserved_budget": 120,
+      "reward_per_claim": 4
+    },
+    "updateRevisionChanged": false
+  }
+]

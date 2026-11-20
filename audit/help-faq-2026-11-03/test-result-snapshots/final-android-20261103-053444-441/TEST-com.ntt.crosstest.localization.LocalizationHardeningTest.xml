@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.localization.LocalizationHardeningTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-03T05:34:34.093Z" hostname="PC-5700X3D" time="0.188">
+  <properties/>
+  <testcase name="testCreditLogRenderer_standardActions" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.024"/>
+  <testcase name="testRejectionReasonRenderer_legacyVietnameseMapping" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.01"/>
+  <testcase name="testUiText_resolution" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.01"/>
+  <testcase name="testCreditLogRenderer_legacyVietnameseNotes" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.011"/>
+  <testcase name="testSettingsRepository_localeResolution" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.007"/>
+  <testcase name="testRejectionReasonRenderer_customTextPreserved" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.011"/>
+  <testcase name="testFriendlyError_mapping" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.028"/>
+  <testcase name="testNotificationRenderer_eventCodes" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.014"/>
+  <testcase name="testWarningRenderer_types" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.014"/>
+  <testcase name="testRejectionReasonRenderer_predefinedCodes" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.015"/>
+  <testcase name="testAppConfig_bilingualResolution" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.005"/>
+  <testcase name="testXmlResourceParityAndFormatIntegrity" classname="com.ntt.crosstest.localization.LocalizationHardeningTest" time="0.037"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

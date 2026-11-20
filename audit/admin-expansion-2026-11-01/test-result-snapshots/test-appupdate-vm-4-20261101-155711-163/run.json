@@ -1,0 +1,12 @@
+{
+    "logName":  "test-appupdate-vm-4",
+    "arguments":  [
+                      ":app:testDebugUnitTest",
+                      "--tests",
+                      "com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest"
+                  ],
+    "exitCode":  1,
+    "startedUtc":  "2026-11-01T15:56:53.5754772Z",
+    "finishedUtc":  "2026-11-01T15:57:11.1747154Z",
+    "currentRunXmlCount":  1
+}

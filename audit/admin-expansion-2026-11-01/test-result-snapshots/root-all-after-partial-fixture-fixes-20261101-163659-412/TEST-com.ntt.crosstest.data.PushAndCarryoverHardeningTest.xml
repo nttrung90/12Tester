@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" tests="16" skipped="0" failures="1" errors="0" timestamp="2026-11-01T16:36:42.289Z" hostname="PC-5700X3D" time="5.233">
+  <properties/>
+  <testcase name="automaticStartupLookupRunsBeforeEarlyPausedOrMissingCampaignPath" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.016"/>
+  <testcase name="savedPendingReconcileNotFoundDoesNotChargeAndExplicitRetryPurchasesUsingOriginalId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="5.023">
+    <failure message="kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms" type="kotlinx.coroutines.TimeoutCancellationException">kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at kotlinx.coroutines.flow.StateFlowImpl.collect(StateFlow.kt:406)
+	at kotlinx.coroutines.flow.FlowKt__ReduceKt.first(Reduce.kt:179)
+	at com.ntt.crosstest.data.PushAndCarryoverHardeningTest$savedPendingReconcileNotFoundDoesNotChargeAndExplicitRetryPurchasesUsingOriginalId$1$1.invokeSuspend(PushAndCarryoverHardeningTest.kt:743)
+	at com.ntt.crosstest.data.PushAndCarryoverHardeningTest$savedPendingReconcileNotFoundDoesNotChargeAndExplicitRetryPurchasesUsingOriginalId$1.invokeSuspend(PushAndCarryoverHardeningTest.kt:743)
+Caused by: kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:281)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:243)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:498)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:105)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+</failure>
+  </testcase>
+  <testcase name="pushCampaignTimeoutPreservesPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.024"/>
+  <testcase name="dialogButtonConditionDistinguishesPendingFromNewPurchase" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.007"/>
+  <testcase name="pushCampaignServerRejectionClearsPendingRequestId" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.018"/>
+  <testcase name="oldPurchaseResponseDoesNotOverwriteNewAccountSnapshot" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.013"/>
+  <testcase name="accountSwitchDuringReconcileCannotSendPurchaseUnderNewSession" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.018"/>
+  <testcase name="failedLookupNotFoundDoesNotCharge" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.018"/>
+  <testcase name="pushActiveRejectsMissingOrExpiredExpiry" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.006"/>
+  <testcase name="pushErrorSanitizerRedactsSensitiveTokensAndUrls" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.007"/>
+  <testcase name="testCarryoverStringFormattingArguments" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.005"/>
+  <testcase name="automaticSuccessfulLookupUpdatesObservablePendingFalseAndPausedStaysReadOnly" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.013"/>
+  <testcase name="pendingPushResolvesWhenCampaignIsPausedOrDeleted" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.018"/>
+  <testcase name="staleResponseIgnoredOnAccountSwitchSameUidChangedGeneration" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.015"/>
+  <testcase name="pendingReceiptResolvesWhenBalanceBelow100" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.017"/>
+  <testcase name="vmStartupAutomaticallyReconcilesPendingPushReceiptWithoutCharging" classname="com.ntt.crosstest.data.PushAndCarryoverHardeningTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

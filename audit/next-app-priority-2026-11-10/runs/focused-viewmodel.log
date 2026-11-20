@@ -1,0 +1,151 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/nguye/.gradle/wrapper/dists/gradle-9.3.1-bin/23ovyewtku6u96viwx3xl3oks/gradle-9.3.1/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResources
+> Task :app:processDebugGoogleServices
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:mergeDebugResources
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:generateDebugHelpAssets
+> Task :app:mergeDebugAssets
+> Task :app:processDebugUnitTestManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:compileDebugKotlin
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt:637:37 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt:2330:35 Cast is redundant.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/AdminDailyTaskPolicySheet.kt:354:56 Unnecessary safe call on a non-null receiver of type 'DailyTaskPolicyItem'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:81:61 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:84:31 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:88:36 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:385:52 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:436:50 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:437:38 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:455:51 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:457:53 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:457:87 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:458:57 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:458:91 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:463:46 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:465:46 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:473:46 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:474:46 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:482:50 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:487:42 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:498:54 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:499:57 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/DailyTaskCard.kt:500:54 Unnecessary safe call on a non-null receiver of type 'DailyTaskStatus'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/ImageViewerComponents.kt:427:39 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/ImageViewerComponents.kt:428:38 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/ImageViewerComponents.kt:938:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/components/QuestSection.kt:181:21 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/AdminNotificationCampaignScreen.kt:182:13 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/AdminNotificationCampaignScreen.kt:786:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/AppUpdateReleaseScreen.kt:677:55 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2123:95 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2125:53 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2658:34 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2835:72 Unnecessary safe call on a non-null receiver of type 'ReportComparisonSelector.SelectionResult'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2838:107 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2845:97 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2897:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2958:66 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2969:62 Unnecessary safe call on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2969:110 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2971:72 Unnecessary safe call on a non-null receiver of type 'ReportComparisonSelector.SelectionResult'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2974:107 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:2981:97 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3000:86 Unnecessary non-null assertion (!!) on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3000:102 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3000:127 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3004:221 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CampaignDetailScreen.kt:3004:260 Unnecessary non-null assertion (!!) on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/CreateCampaignScreen.kt:111:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/HomeScreen.kt:911:25 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/HomeScreen.kt:1327:13 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/MemberDetailScreen.kt:163:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt:2352:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt:2564:36 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/OwnerAppDetailScreen.kt:2565:38 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/PostAppGuideScreen.kt:65:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/QuestsScreen.kt:145:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/screens/UpdateScreens.kt:163:48 'val Icons.Filled.ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModel.kt:1042:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:667:56 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:701:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1632:41 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1640:40 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt:285:94 Unnecessary safe call on a non-null receiver of type 'CampaignOwnerStats'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt:566:42 Unnecessary safe call on a non-null receiver of type 'SlotInfo'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/util/UiStateMessageResolver.kt:196:36 Condition is always 'true'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/util/UiStateMessageResolver.kt:216:36 Condition is always 'true'.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/audit/ReportOverlapTest.kt:106:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/AppUpdateRegressionTest.kt:60:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:153:46 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:154:45 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:155:45 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:156:46 Unnecessary non-null assertion (!!) on a non-null receiver of type 'BusinessPolicy'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:404:39 Unnecessary non-null assertion (!!) on a non-null receiver of type 'AppUpdateRelease'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/BusinessPolicyRepositoryTest.kt:405:40 Unnecessary non-null assertion (!!) on a non-null receiver of type 'AppUpdateRelease'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCachePublicationAuditTest.kt:187:115 Unnecessary safe call on a non-null receiver of type 'CampaignOwnerStats'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:95:22 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:118:26 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/IndependentCacheSnapshotClearAuditTest.kt:139:26 Java type mismatch: inferred type is 'Any?', but 'Any' was expected.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRegressionTest.kt:287:37 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionReportRecheckProbeTest.kt:83:35 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:48:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:48:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:63:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/MissionRewardModesUnitTest.kt:351:37 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcCompatibilityTest.kt:53:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt:54:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/data/ReportRpcFallbackAuditTest.kt:140:36 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/AdminNotificationCampaignViewModelTest.kt:662:89 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/AppUpdateReleaseViewModelBehavioralTest.kt:309:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerDailyRefreshRaceReviewTest.kt:86:39 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/ui/viewmodels/OwnerDailyTaskOrderingReviewTest.kt:91:39 Redundant creation of Json format. Creating instances for each use can be slow.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/util/FirebaseEgressOptimizationTest.kt:124:48 'enum entry WEBP: Bitmap.CompressFormat' is deprecated. Deprecated in Java.
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/util/FirebaseEgressOptimizationTest.kt:452:58 This declaration needs opt-in. Its usage should be marked with '@coil.annotation.ExperimentalCoilApi' or '@OptIn(coil.annotation.ExperimentalCoilApi::class)'
+w: file:///F:/AI/12Tester/app/src/test/java/com/ntt/crosstest/work/EgressThumbnailPipelineAuditTest.kt:97:47 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///F:/AI/12Tester/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1m 10s
+32 actionable tasks: 32 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

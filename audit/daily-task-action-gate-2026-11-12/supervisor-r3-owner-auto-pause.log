@@ -1,0 +1,57 @@
+=== RUNNING COMPREHENSIVE OWNER AUTO-PAUSE & CARRYOVER DEBT HARDENING TESTS (MIGRATION 079) ===
+Loaded 29 migrations (from 062_consolidated_baseline.sql to 090_daily_task_action_gate.sql).
+
+--- Test 1: Configurable Thresholds 1 to 7 via Authenticated Admin RPC ---
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /OWNER_INACTIVE/. Input:
+
+'error: OWNER_CARRYOVER_INCOMPLETE:6'
+
+    at async file:///F:/AI/12Tester/supabase/tests/run-owner-auto-pause-hardening-test.mjs:137:7
+    at async scenario (file:///F:/AI/12Tester/supabase/tests/run-owner-auto-pause-hardening-test.mjs:107:7)
+    at async file:///F:/AI/12Tester/supabase/tests/run-owner-auto-pause-hardening-test.mjs:119:5 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: error: OWNER_CARRYOVER_INCOMPLETE:6
+      at pe.Oe (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:18162)
+      at pe.tt (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:15548)
+      at pe.parse (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/chunk-3OMHRXTA.js:1:14222)
+      at D.Ne (file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1763)
+      at file:///F:/AI/12Tester/supabase/tests/node_modules/@electric-sql/pglite/dist/index.js:5:1155
+      at wasm://wasm/0269dffe:wasm-function[10979]:0x5ad04f
+      at wasm://wasm/0269dffe:wasm-function[3598]:0x281dd2
+      at wasm://wasm/0269dffe:wasm-function[3640]:0x289ccf
+      at wasm://wasm/0269dffe:wasm-function[3650]:0x289f2b
+      at wasm://wasm/0269dffe:wasm-function[9956]:0x55697c {
+    length: 322,
+    severity: 'ERROR',
+    code: 'P0001',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: 'PL/pgSQL function _assert_owner_daily_task_action_allowed(uuid,date) line 74 at RAISE\n' +
+      'SQL statement "SELECT public._assert_owner_daily_task_action_allowed(v_uid, v_today)"\n' +
+      'PL/pgSQL function resume_campaign(uuid) line 99 at PERFORM',
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'pl_exec.c',
+    line: '3923',
+    routine: 'exec_stmt_raise',
+    query: "select public.resume_campaign('d1000000-0000-0000-0000-000000000001')",
+    params: [],
+    queryOptions: undefined
+  },
+  expected: /OWNER_INACTIVE/,
+  operator: 'rejects',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

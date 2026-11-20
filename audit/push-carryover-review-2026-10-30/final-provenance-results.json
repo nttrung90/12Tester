@@ -1,0 +1,30 @@
+[
+  {
+    "name": "current_open_state_cannot_prove_pre_migration_history",
+    "passed": true
+  },
+  {
+    "name": "rerun_does_not_reset_provenance_coverage",
+    "passed": true
+  },
+  {
+    "name": "promotion_today_cannot_exempt_unproven_yesterday",
+    "passed": true
+  },
+  {
+    "name": "removing_same_day_direct_checkin_removes_its_credit_toward_goal",
+    "passed": true
+  },
+  {
+    "name": "any_qualifying_report_still_counts_after_campaign_delete",
+    "passed": true
+  },
+  {
+    "name": "trusted_legacy_checkpoint_can_be_written_and_audited_without_debit",
+    "passed": true
+  },
+  {
+    "name": "legacy_checkpoint_requires_explicit_values_and_audit_note",
+    "passed": true
+  }
+]

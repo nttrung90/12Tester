@@ -1,7 +1,23 @@
 package com.ntt.crosstest.data
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import com.ntt.crosstest.util.VnTime
 
 /**
@@ -78,16 +94,28 @@ data class Campaign(
     @SerialName("slot_number") val slotNumber: Int = 1,
     @SerialName("paused_reason") val pausedReason: String? = null,
     @SerialName("admin_note") val adminNote: String? = null,
+    @SerialName("admin_pause_reason_code") val adminPauseReasonCode: String? = null,
     @SerialName("completed_at") val completedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("push_business_date") val pushBusinessDate: String? = null,
     @SerialName("push_expires_at") val pushExpiresAt: String? = null,
     @SerialName("push_order") val pushOrder: Long? = null,
+    @SerialName("tester_bonus_round_id") val testerBonusRoundId: String? = null,
+    @SerialName("tester_bonus_credits") val testerBonusCredits: Int? = null,
+    @SerialName("tester_bonus_remaining_slots") val testerBonusRemainingSlots: Int? = null,
+    @SerialName("tester_bonus_paid_count") val testerBonusPaidCount: Int? = null,
+    @SerialName("tester_bonus_status") val testerBonusStatus: String? = null,
 ) {
     val isOpen: Boolean get() = status == "open"
     val isPaused: Boolean get() = status == "paused"
     val isProduction: Boolean get() = status == "production"
     val isCompleted: Boolean get() = status == "completed"
+
+    val hasActiveTesterBonus: Boolean
+        get() = isOpen && testerBonusStatus == "active" && (testerBonusCredits ?: 0) > 0 && (testerBonusRemainingSlots ?: 0) > 0
+
+    val hasActiveTesterBonusBadge: Boolean
+        get() = hasActiveTesterBonus
 
     /** Kiểm tra xem app có lượt đẩy còn hiệu lực trong ngày kinh doanh chỉ định hay không. */
     fun isPushActive(
@@ -119,7 +147,10 @@ data class Campaign(
     /** App đã ở tab "Đã hoàn thành Kiểm thử" (lên production hoặc hết 30 ngày hiển thị). */
     val isFinalized: Boolean get() = isProduction || isCompleted
 
-    /** App bị hệ thống tự tạm dừng vì chủ app thiếu nhiệm vụ ngày 7 ngày liên tục. */
+    /** App đủ điều kiện mở nhiệm vụ: đang mở kiểm thử thường hoặc đã hoàn thành (production/completed). */
+    val isMissionEligible: Boolean get() = isOpen || isFinalized
+
+    /** App bị hệ thống tự tạm dừng khi chủ app chạm ngưỡng thiếu nhiệm vụ ngày. */
     val isAutoPaused: Boolean get() = isPaused && pausedReason == "owner_inactive"
 
     /** App bị tạm dừng do Slot đã hết hạn. */
@@ -258,6 +289,7 @@ data class TesterReport(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("reviewed_at") val reviewedAt: String? = null,
     @SerialName("rejection_reason") val rejectionReason: String? = null,
+    @SerialName("reason_code") val reasonCode: String? = null,
     @SerialName("image_hash") val imageHash: String? = null,
     @SerialName("client_submit_id") val clientSubmitId: String? = null,
     @SerialName("tester_name") val testerName: String? = null,
@@ -271,41 +303,77 @@ data class TesterReport(
     @SerialName("mission_reward_credits") val missionRewardCredits: Int? = null,
     @SerialName("mission_ends_at") val missionEndsAt: String? = null,
     @SerialName("mission_submitted_at") val missionSubmittedAt: String? = null,
+    @SerialName("mission_reward_mode") val missionRewardMode: String? = null,
+    @SerialName("report_date") val reportDate: String? = null,
+    @SerialName("attachments") val attachments: List<ReportAttachment> = emptyList(),
+    @SerialName("review_tester_bonus") val reviewTesterBonus: Int? = null,
+    @SerialName("review_owner_bonus") val reviewOwnerBonus: Int? = null,
+    @SerialName("policy_id") val policyId: Long? = null,
+    @SerialName("tester_bonus_awarded") val testerBonusAwarded: Int = 0,
+    @SerialName("tester_bonus_round_id") val testerBonusRoundId: String? = null,
+    @SerialName("storage_provider") val storageProvider: String? = null,
+    @SerialName("view_expires_at") val viewExpiresAt: String? = null,
     @kotlinx.serialization.Transient val testerProfile: Profile? = null,
 ) {
     val isPending: Boolean get() = status == "pending"
     val isApproved: Boolean get() = status == "approved"
     val isRejected: Boolean get() = status == "rejected"
     val isMissionReport: Boolean get() = submissionContext == "mission" || !missionId.isNullOrBlank()
+    val isOnceMission: Boolean get() = isMissionReport && missionRewardMode == "once"
+    val isDailyMission: Boolean get() = isMissionReport && missionRewardMode == "daily"
+    val effectiveTesterBonus: Int get() = reviewTesterBonus ?: 2
+    val effectiveOwnerBonus: Int get() = reviewOwnerBonus ?: 2
+    val effectiveProvisionalReward: Int get() = if (provisionalGrantedCredits > 0) provisionalGrantedCredits else 10
+
+    val allAttachments: List<ReportAttachment>
+        get() {
+            if (attachments.isNotEmpty()) return attachments
+            val url = screenshotUrl ?: return emptyList()
+            return listOf(
+                ReportAttachment(
+                    id = id,
+                    position = 0,
+                    screenshotUrl = url,
+                    thumbnailUrl = thumbnailUrl,
+                    imageHash = imageHash,
+                    sha256 = null,
+                    storageProvider = storageProvider,
+                    viewExpiresAt = viewExpiresAt,
+                    createdAt = createdAt,
+                    mediaExpired = mediaExpired,
+                )
+            )
+        }
 
     /**
-     * Screenshot hết hạn sau 30 ngày (GCS lifecycle / worker cleanup) hoặc đã đánh dấu media_expired.
+     * Screenshot hết hạn sau 216 giờ UTC (9 ngày) đối với Supabase, hoặc 30 ngày đối với Google Cloud,
+     * hoặc đã đánh dấu media_expired / view_expires_at.
      */
     val isScreenshotExpired: Boolean
-        get() {
-            if (mediaExpired == true) return true
-            if (createdAt.isNullOrBlank()) return false
-            return try {
-                val created = java.time.Instant.parse(createdAt)
-                val cutoff = java.time.Instant.now().minus(java.time.Duration.ofDays(30))
-                created.isBefore(cutoff)
-            } catch (_: Exception) {
-                false
-            }
-        }
+        get() = MediaExpiryPolicy.isExpired(
+            url = screenshotUrl,
+            createdAt = createdAt,
+            mediaExpired = mediaExpired,
+            provider = storageProvider,
+            viewExpiresAt = viewExpiresAt,
+        )
 
     /**
-     * Số Credit hiển thị cho báo cáo đã duyệt.
-     * - Báo cáo mới: bonus_awarded (10/12/... + tip).
-     * - Báo cáo cũ chưa có bonus_awarded: provisional_granted_credits (mặc định 2).
-     * - Báo cáo mới bị clawback toàn bộ rồi regrant 0: 0 (không còn fallback 2 sai).
+     * Số Credit hiển thị cho báo cáo đã duyệt (sử dụng phép tính Long để tránh tràn số).
+     * - Báo cáo mới: bonus_awarded (10/12/... + tip) + tester_bonus_awarded.
+     * - Báo cáo cũ chưa có bonus_awarded: provisional_granted_credits + tester_bonus_awarded.
+     * - Báo cáo mới bị clawback toàn bộ rồi regrant 0: tester_bonus_awarded (nếu có) hoặc 0.
      */
-    val approvedReward: Int
+    val approvedReward: Long
         get() = when {
-            bonusAwarded > 0 -> bonusAwarded
-            provisionalGrantedCredits > 0 -> provisionalGrantedCredits
-            else -> 0
+            bonusAwarded > 0 -> bonusAwarded.toLong() + testerBonusAwarded.toLong()
+            provisionalGrantedCredits > 0 -> provisionalGrantedCredits.toLong() + testerBonusAwarded.toLong()
+            testerBonusAwarded > 0 -> testerBonusAwarded.toLong()
+            else -> 0L
         }
+
+    val totalEarned: Long
+        get() = bonusAwarded.toLong() + testerBonusAwarded.toLong()
 
     val resolvedTesterName: String
         get() = testerProfile?.displayName ?: testerName?.ifBlank { null } ?: "Tester"
@@ -410,6 +478,9 @@ data class UnlockSlotResult(
     @SerialName("cost") val cost: Int = 0,
     @SerialName("balance") val balance: Int = 0,
     @SerialName("expires_at") val expiresAt: String? = null,
+    @SerialName("replayed") val replayed: Boolean = false,
+    @SerialName("client_request_id") val clientRequestId: String? = null,
+    @SerialName("renewal_days") val renewalDays: Int = 30,
 )
 
 data class SlotInfo(
@@ -421,6 +492,8 @@ data class SlotInfo(
     val expiresAt: String? = null,
     val remainingDays: Int = 0,
     val currentCampaign: Campaign? = null,
+    val renewalDays: Int = 30,
+    val policyRevision: String? = null,
 ) {
     val isOccupied: Boolean get() = currentCampaign != null
     val isAvailable: Boolean get() = (isPermanent || (isUnlocked && !isExpired)) && !isOccupied
@@ -502,21 +575,26 @@ data class RejectReportParams(
     @SerialName("p_reason") val reason: String? = null,
 )
 
+@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 @Serializable
 data class RejectReportResult(
     @SerialName("success") val success: Boolean = false,
     @SerialName("report_id") val reportId: String = "",
     @SerialName("tester_id") val testerId: String = "",
     @SerialName("status") val status: String = "",
+    @kotlinx.serialization.json.JsonNames("clawed_credits", "credits_deducted")
     @SerialName("credits_deducted") val creditsDeducted: Int = 0,
+    @kotlinx.serialization.json.JsonNames("new_balance", "tester_balance")
     @SerialName("tester_balance") val testerBalance: Int = 0,
     @SerialName("tester_today_rejections") val testerTodayRejections: Int = 0,
     @SerialName("tester_warned") val testerWarned: Boolean = false,
     @SerialName("tester_warning_msg") val testerWarningMsg: String? = null,
+    @kotlinx.serialization.json.JsonNames("tester_locked", "is_tester_locked")
     @SerialName("is_tester_locked") val isTesterLocked: Boolean = false,
     @SerialName("owner_today_rejections") val ownerTodayRejections: Int = 0,
     @SerialName("owner_warned") val ownerWarned: Boolean = false,
     @SerialName("owner_warning_msg") val ownerWarningMsg: String? = null,
+    @kotlinx.serialization.json.JsonNames("owner_locked", "is_owner_locked")
     @SerialName("is_owner_locked") val isOwnerLocked: Boolean = false,
 )
 
@@ -551,6 +629,22 @@ data class PushCampaignResult(
     @SerialName("campaign_id") val campaignId: String? = null,
     @SerialName("charged_credits") val chargedCredits: Int = 100,
     @SerialName("balance_after") val balanceAfter: Int = 0,
+    @SerialName("business_date") val businessDate: String? = null,
+    @SerialName("expires_at") val expiresAt: String? = null,
+    @SerialName("push_order") val pushOrder: Long? = null,
+    @SerialName("replayed") val replayed: Boolean = false,
+)
+
+@Serializable
+data class ReconcilePushReceiptResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("found") val found: Boolean = false,
+    @SerialName("receipt_id") val receiptId: String? = null,
+    @SerialName("client_request_id") val clientRequestId: String? = null,
+    @SerialName("campaign_id") val campaignId: String? = null,
+    @SerialName("charged_credits") val chargedCredits: Int = 100,
+    @SerialName("balance_after") val balanceAfter: Int = 0,
+    @SerialName("current_credits") val currentCredits: Int = 0,
     @SerialName("business_date") val businessDate: String? = null,
     @SerialName("expires_at") val expiresAt: String? = null,
     @SerialName("push_order") val pushOrder: Long? = null,
@@ -623,7 +717,7 @@ data class UserNotification(
     @SerialName("is_read") val isRead: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null,
 ) {
-    val isCredit: Boolean get() = type == "credit"
+    val isCredit: Boolean get() = type == "credit" || type == "penalty"
     val isReport: Boolean get() = type == "report"
     val isWarning: Boolean get() = type == "warning"
     val isAccount: Boolean get() = type == "account"
@@ -650,6 +744,37 @@ data class AdminSendNotificationResult(
     @SerialName("sent_count") val sentCount: Int = 0,
     @SerialName("target") val target: String = "",
 )
+
+@Serializable
+data class NotificationPopupClaimResult(
+    @SerialName("status") val status: String = "none",
+    @SerialName("notification") val notification: UserNotification? = null,
+    @SerialName("display_count") val displayCount: Int? = null,
+    @SerialName("foreground_session_id") val foregroundSessionId: String? = null,
+    @SerialName("reason") val reason: String? = null,
+)
+
+@Serializable
+data class NotificationAckResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("status") val status: String = "",
+    @SerialName("notification_id") val notificationId: String? = null,
+)
+
+@Serializable
+data class NotificationStatusResult(
+    @SerialName("exists") val exists: Boolean = false,
+    @SerialName("is_read") val isRead: Boolean = false,
+)
+
+sealed interface NotificationEvent {
+    val ownerId: String
+    val generation: Long
+
+    data class MarkedRead(val id: String, override val ownerId: String, override val generation: Long = 0L) : NotificationEvent
+    data class MarkedAllRead(override val ownerId: String, override val generation: Long = 0L) : NotificationEvent
+    data class Deleted(val id: String, override val ownerId: String, override val generation: Long = 0L) : NotificationEvent
+}
 
 @Serializable
 data class QuestMilestone(
@@ -709,6 +834,11 @@ data class ClaimQuestResult(
 )
 
 @Serializable
+data class DeleteOwnedCampaignParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+)
+
+@Serializable
 data class AdminDeleteCampaignParams(
     @SerialName("p_campaign_id") val campaignId: String,
     @SerialName("p_reason") val reason: String? = null,
@@ -717,17 +847,47 @@ data class AdminDeleteCampaignParams(
 @Serializable
 data class AdminDeleteCampaignResult(
     @SerialName("success") val success: Boolean = false,
+    @SerialName("status") val status: String? = null,
     @SerialName("campaign_id") val campaignId: String = "",
     @SerialName("app_name") val appName: String = "",
     @SerialName("owner_id") val ownerId: String = "",
     @SerialName("reason") val reason: String = "",
-)
+    @SerialName("message") val message: String? = null,
+) {
+    val isPendingRemoval: Boolean
+        get() = success && status == "pending_removal"
+
+    val isRemoved: Boolean
+        get() = success && (status == "removed" || status == "deleted" || status == null)
+}
+
+typealias DeleteCampaignResult = AdminDeleteCampaignResult
 
 @Serializable
 data class AdminPauseCampaignParams(
     @SerialName("p_campaign_id") val campaignId: String,
     @SerialName("p_reason") val reason: String? = null,
 )
+
+@Serializable
+data class AdminPauseCampaignWithReasonParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_reason_code") val reasonCode: String,
+)
+
+enum class AdminPauseReason(val code: String) {
+    MISSING_GOOGLE_GROUP("missing_google_group"),
+    POLICY_VIOLATION("policy_violation"),
+    CUSTOM("custom");
+
+    companion object {
+        fun fromCode(code: String?): AdminPauseReason = when (code) {
+            MISSING_GOOGLE_GROUP.code -> MISSING_GOOGLE_GROUP
+            POLICY_VIOLATION.code -> POLICY_VIOLATION
+            else -> CUSTOM
+        }
+    }
+}
 
 @Serializable
 data class AdminCampaignControlResult(
@@ -739,11 +899,15 @@ data class AdminCampaignControlResult(
     @SerialName("app_name") val appName: String = "",
     @SerialName("owner_id") val ownerId: String = "",
     @SerialName("admin_note") val adminNote: String? = null,
+    @SerialName("admin_pause_reason_code") val adminPauseReasonCode: String? = null,
     @SerialName("admin_resumed") val adminResumed: Boolean = false,
+    @SerialName("changed") val changed: Boolean = true,
+    @SerialName("notification_id") val notificationId: String? = null,
 )
 
 @Serializable
 data class SubmitTesterReportParams(
+    @SerialName("p_submission_context") val submissionContext: String,
     @SerialName("p_campaign_id") val campaignId: String,
     // null = không sửa nội dung (server giữ nguyên comment cũ khi chỉ đổi ảnh)
     @SerialName("p_content") val content: String? = null,
@@ -777,6 +941,75 @@ data class SubmitTesterReportLegacyParams(
 )
 
 @Serializable
+data class ReportAttachment(
+    @SerialName("id") val id: String? = null,
+    @SerialName("position") val position: Int = 0,
+    @SerialName("screenshot_url") val screenshotUrl: String = "",
+    @SerialName("thumbnail_url") val thumbnailUrl: String? = null,
+    @SerialName("image_hash") val imageHash: String? = null,
+    @SerialName("sha256") val sha256: String? = null,
+    @SerialName("provider") val provider: String? = null,
+    @SerialName("storage_provider") val storageProvider: String? = null,
+    @SerialName("view_expires_at") val viewExpiresAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("media_expired") val mediaExpired: Boolean? = null,
+) {
+    val isExpired: Boolean
+        get() = MediaExpiryPolicy.isExpired(
+            url = screenshotUrl,
+            createdAt = createdAt,
+            mediaExpired = mediaExpired,
+            provider = storageProvider ?: provider,
+            viewExpiresAt = viewExpiresAt,
+        )
+}
+
+@Serializable
+data class RequestReportMediaReservationParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_upload_id") val uploadId: String,
+    @SerialName("p_estimated_size") val estimatedSize: Long,
+    @SerialName("p_has_thumbnail") val hasThumbnail: Boolean = true,
+    @SerialName("p_attachment_id") val attachmentId: String? = null,
+)
+
+@Serializable
+data class MediaReservationResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("provider") val provider: String = "gcs", // "supabase" or "gcs"
+    @SerialName("upload_id") val uploadId: String = "",
+    @SerialName("bucket") val bucket: String = "",
+    @SerialName("object_path") val objectPath: String = "",
+    @SerialName("thumbnail_object_path") val thumbnailObjectPath: String? = null,
+    @SerialName("reservation_id") val reservationId: String? = null,
+    @SerialName("pinned") val pinned: Boolean = false,
+    @SerialName("dispatch_mode") val dispatchMode: String? = null,
+    @SerialName("upload_expired") val uploadExpired: Boolean = false,
+)
+
+@Serializable
+data class ReportAttachmentInput(
+    @SerialName("id") val id: String,
+    @SerialName("position") val position: Int,
+    @SerialName("screenshot_url") val screenshotUrl: String,
+    @SerialName("thumbnail_url") val thumbnailUrl: String? = null,
+    @SerialName("image_hash") val imageHash: String,
+    @SerialName("sha256") val sha256: String? = null,
+)
+
+@Serializable
+data class SubmitTesterReportV3Params(
+    @SerialName("p_submission_context") val submissionContext: String,
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_content") val content: String? = null,
+    @SerialName("p_rating") val rating: Int = 5,
+    @SerialName("p_client_submit_id") val clientSubmitId: String? = null,
+    @SerialName("p_attachments") val attachments: kotlinx.serialization.json.JsonElement? = null,
+    @SerialName("p_mission_id") val missionId: String? = null,
+    @SerialName("p_expected_date") val expectedDate: String? = null,
+)
+
+@Serializable
 data class SubmitTesterReportResult(
     @SerialName("success") val success: Boolean = false,
     @SerialName("report_id") val reportId: String = "",
@@ -792,8 +1025,26 @@ data class SubmitTesterReportResult(
     @SerialName("mission_title") val missionTitle: String? = null,
     @SerialName("mission_reward_credits") val missionRewardCredits: Int? = null,
     @SerialName("mission_ends_at") val missionEndsAt: String? = null,
+    @SerialName("report_date") val reportDate: String? = null,
+    @SerialName("attachments") val attachments: List<ReportAttachment> = emptyList(),
 ) {
     val isMissionReport: Boolean get() = submissionContext == "mission" || !missionId.isNullOrBlank()
+
+    val allAttachments: List<ReportAttachment>
+        get() {
+            if (attachments.isNotEmpty()) return attachments
+            val url = screenshotUrl ?: return emptyList()
+            return listOf(
+                ReportAttachment(
+                    id = reportId,
+                    position = 0,
+                    screenshotUrl = url,
+                    thumbnailUrl = thumbnailUrl,
+                    imageHash = imageHash,
+                    sha256 = null,
+                )
+            )
+        }
 }
 
 /**
@@ -825,6 +1076,19 @@ data class GetOwnerReportsParams(
 /**
  * Remote app configuration from Supabase for version & update management.
  */
+private val VIETNAMESE_CHARS_REGEX = Regex("[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]", RegexOption.IGNORE_CASE)
+private val MOJIBAKE_WORD_REGEX = Regex("""\p{L}+\?\p{L}+""")
+
+private fun isVietnameseText(text: String?): Boolean {
+    if (text.isNullOrBlank()) return false
+    return VIETNAMESE_CHARS_REGEX.containsMatchIn(text)
+}
+
+private fun isCorruptedMojibake(text: String?): Boolean {
+    if (text.isNullOrBlank()) return false
+    return text.contains('\uFFFD') || MOJIBAKE_WORD_REGEX.containsMatchIn(text)
+}
+
 @Serializable
 data class AppConfig(
     @SerialName("id") val id: String = "android_client",
@@ -834,8 +1098,58 @@ data class AppConfig(
     @SerialName("force_update") val forceUpdate: Boolean = false,
     @SerialName("title") val title: String? = null,
     @SerialName("message") val message: String? = null,
+    @SerialName("title_vi") val titleVi: String? = null,
+    @SerialName("title_en") val titleEn: String? = null,
+    @SerialName("message_vi") val messageVi: String? = null,
+    @SerialName("message_en") val messageEn: String? = null,
     @SerialName("store_url") val storeUrl: String? = null,
+    @SerialName("egress_sync_home_feed_v2_enabled") val egressSyncHomeFeedV2Enabled: Boolean = false,
+    @SerialName("egress_sync_dashboard_v2_enabled") val egressSyncDashboardV2Enabled: Boolean = false,
+    @SerialName("egress_sync_campaign_detail_v2_enabled") val egressSyncCampaignDetailV2Enabled: Boolean = false,
+    @SerialName("egress_candidates_v2_enabled") val egressCandidatesV2Enabled: Boolean = false,
 ) {
+    fun localizedTitle(isVietnamese: Boolean): String? {
+        val specific = (if (isVietnamese) titleVi else titleEn)?.trim()
+        if (!specific.isNullOrBlank() && !isCorruptedMojibake(specific)) {
+            return specific
+        }
+        val raw = title?.trim()
+        if (raw.isNullOrBlank() ||
+            isCorruptedMojibake(raw) ||
+            raw.equals("Đã có bản cập nhật mới", ignoreCase = true) ||
+            raw.equals("New update available", ignoreCase = true)
+        ) {
+            return null
+        }
+        val isVi = isVietnameseText(raw)
+        return if (isVietnamese) {
+            if (isVi) raw else null
+        } else {
+            if (!isVi) raw else null
+        }
+    }
+
+    fun localizedMessage(isVietnamese: Boolean): String? {
+        val specific = (if (isVietnamese) messageVi else messageEn)?.trim()
+        if (!specific.isNullOrBlank() && !isCorruptedMojibake(specific)) {
+            return specific
+        }
+        val raw = message?.trim()
+        if (raw.isNullOrBlank() ||
+            isCorruptedMojibake(raw) ||
+            raw.contains("Phiên bản mới với nhiều tính năng nâng cấp", ignoreCase = true) ||
+            raw.contains("A new update with improvements", ignoreCase = true)
+        ) {
+            return null
+        }
+        val isVi = isVietnameseText(raw)
+        return if (isVietnamese) {
+            if (isVi) raw else null
+        } else {
+            if (!isVi) raw else null
+        }
+    }
+
     fun checkUpdateStatus(currentVersionCode: Int): UpdateStatus {
         return when {
             currentVersionCode < minVersionCode || (forceUpdate && currentVersionCode < latestVersionCode) -> {
@@ -862,6 +1176,21 @@ enum class UpdateStatus {
  */
 @Serializable
 data class AdminUpdateAppConfigParams(
+    @SerialName("p_min_version_code") val minVersionCode: Int,
+    @SerialName("p_latest_version_code") val latestVersionCode: Int,
+    @SerialName("p_latest_version_name") val latestVersionName: String,
+    @SerialName("p_force_update") val forceUpdate: Boolean,
+    @SerialName("p_title") val title: String? = null,
+    @SerialName("p_message") val message: String? = null,
+    @SerialName("p_store_url") val storeUrl: String? = null,
+    @SerialName("p_title_vi") val titleVi: String? = null,
+    @SerialName("p_title_en") val titleEn: String? = null,
+    @SerialName("p_message_vi") val messageVi: String? = null,
+    @SerialName("p_message_en") val messageEn: String? = null,
+)
+
+@Serializable
+data class AdminUpdateAppConfigLegacyParams(
     @SerialName("p_min_version_code") val minVersionCode: Int,
     @SerialName("p_latest_version_code") val latestVersionCode: Int,
     @SerialName("p_latest_version_name") val latestVersionName: String,
@@ -911,6 +1240,129 @@ data class AdminSetHomeStatsCycleParams(
     @SerialName("p_expected_revision") val expectedRevision: String? = null,
 )
 
+/** Cấu hình số ngày tự tạm dừng app do thiếu nhiệm vụ (migration 075). */
+@Serializable
+data class OwnerAutoPauseConfig(
+    @SerialName("missed_days") val missedDays: Int,
+    @SerialName("revision") val revision: String,
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+/** Tham số RPC admin_set_owner_auto_pause_config. */
+@Serializable
+data class SetOwnerAutoPauseConfigParams(
+    @SerialName("p_missed_days") val missedDays: Int,
+    @SerialName("p_expected_revision") val expectedRevision: String,
+)
+
+/** Kết quả RPC admin_set_owner_auto_pause_config. */
+@Serializable
+data class SetOwnerAutoPauseConfigResult(
+    @SerialName("success") val success: Boolean,
+    @SerialName("missed_days") val missedDays: Int,
+    @SerialName("revision") val revision: String,
+    @SerialName("previous_missed_days") val previousMissedDays: Int,
+)
+
+/** Chính sách tỷ lệ nhiệm vụ ngày (migration 042 & 058). */
+@Serializable
+data class DailyTaskPolicyItem(
+    @SerialName("id") val id: Long = 0,
+    @SerialName("tests_per_active_app") val testsPerActiveApp: Int = 3,
+    @SerialName("effective_from") val effectiveFrom: String? = null,
+    @SerialName("is_baseline") val isBaseline: Boolean = false,
+    @SerialName("operator_note") val operatorNote: String = "",
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+/** Cấu hình nhiệm vụ ngày quản trị viên (migration 058 & 060). */
+@Serializable
+data class AdminDailyTaskConfig(
+    @SerialName("today") val today: String = "",
+    @SerialName("timezone") val timezone: String = "Asia/Ho_Chi_Minh",
+    @SerialName("revision") val revision: String = "",
+    @SerialName("active_policy") val activePolicy: DailyTaskPolicyItem? = null,
+    @SerialName("future_policies") val futurePolicies: List<DailyTaskPolicyItem> = emptyList(),
+    @SerialName("has_more") val hasMore: Boolean = false,
+    @SerialName("next_cursor_date") val nextCursorDate: String? = null,
+    @SerialName("next_cursor_id") val nextCursorId: Long? = null,
+    @SerialName("total_future_policies") val totalFuturePolicies: Int? = null,
+)
+
+/** Bản ghi lịch sử thay đổi chính sách nhiệm vụ ngày (migration 058). */
+@Serializable
+data class AdminDailyTaskPolicyHistoryItem(
+    @SerialName("id") val id: Long = 0,
+    @SerialName("policy_id") val policyId: Long = 0,
+    @SerialName("operation") val operation: String = "",
+    @SerialName("old_row") val oldRow: kotlinx.serialization.json.JsonObject? = null,
+    @SerialName("new_row") val newRow: kotlinx.serialization.json.JsonObject? = null,
+    @SerialName("operator_note") val operatorNote: String = "",
+    @SerialName("session_role") val sessionRole: String? = null,
+    @SerialName("invoked_role") val invokedRole: String? = null,
+    @SerialName("actor_id") val actorId: String? = null,
+    @SerialName("actor_name") val actorName: String? = null,
+    @SerialName("actor_email") val actorEmail: String? = null,
+    @SerialName("changed_at") val changedAt: String = "",
+)
+
+/** Kết quả phân trang lịch sử chính sách nhiệm vụ ngày. */
+@Serializable
+data class AdminDailyTaskPolicyHistoryResult(
+    @SerialName("items") val items: List<AdminDailyTaskPolicyHistoryItem> = emptyList(),
+    @SerialName("has_more") val hasMore: Boolean = false,
+    @SerialName("next_cursor_id") val nextCursorId: Long? = null,
+)
+
+/** Kết quả phân trang danh sách lịch tương lai. */
+@Serializable
+data class AdminDailyTaskListResult(
+    @SerialName("items") val items: List<DailyTaskPolicyItem> = emptyList(),
+    @SerialName("has_more") val hasMore: Boolean = false,
+    @SerialName("next_cursor_date") val nextCursorDate: String? = null,
+    @SerialName("next_cursor_id") val nextCursorId: Long? = null,
+)
+
+/** Tham số RPC admin_schedule_daily_task_policy. */
+@Serializable
+data class AdminScheduleDailyTaskPolicyParams(
+    @SerialName("p_tests_per_active_app") val testsPerActiveApp: Int,
+    @SerialName("p_effective_from") val effectiveFrom: String,
+    @SerialName("p_operator_note") val operatorNote: String,
+    @SerialName("p_expected_revision") val expectedRevision: String,
+)
+
+/** Tham số RPC admin_cancel_daily_task_policy. */
+@Serializable
+data class AdminCancelDailyTaskPolicyParams(
+    @SerialName("p_effective_from") val effectiveFrom: String,
+    @SerialName("p_operator_note") val operatorNote: String,
+    @SerialName("p_expected_revision") val expectedRevision: String,
+)
+
+/** Tham số RPC admin_list_daily_task_policies. */
+@Serializable
+data class AdminListDailyTaskPoliciesParams(
+    @SerialName("p_limit") val limit: Int = 50,
+    @SerialName("p_cursor_date") val cursorDate: String? = null,
+    @SerialName("p_cursor_id") val cursorId: Long? = null,
+)
+
+/** Tham số RPC admin_get_daily_task_policy_history. */
+@Serializable
+data class AdminGetDailyTaskPolicyHistoryParams(
+    @SerialName("p_limit") val limit: Int = 20,
+    @SerialName("p_cursor_id") val cursorId: Long? = null,
+)
+
+/** Kết quả RPC mutation tỷ lệ nhiệm vụ ngày (schedule/cancel). */
+@Serializable
+data class AdminDailyTaskMutationResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("config") val config: AdminDailyTaskConfig? = null,
+    @SerialName("revision") val revision: String? = null,
+)
+
 /** Kết quả RPC `get_home_feed` — danh sách campaign 3 tab + tên chủ app + stats. */
 @Serializable
 data class HomeFeedResult(
@@ -921,12 +1373,102 @@ data class HomeFeedResult(
     @SerialName("stats") val stats: Map<String, CampaignStats> = emptyMap(),
 )
 
+object DailyTaskStatusSerializer : KSerializer<DailyTaskStatus> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("DailyTaskStatus")
+
+    override fun deserialize(decoder: Decoder): DailyTaskStatus {
+        val input = decoder as? JsonDecoder ?: throw SerializationException("This serializer can only be used with Json")
+        val element = input.decodeJsonElement()
+        val obj = element as? JsonObject ?: throw SerializationException("Expected JsonObject")
+
+        val hasStatusDate = obj.containsKey("status_date") && obj["status_date"] !is JsonNull
+        val hasMet = obj.containsKey("met") && obj["met"] !is JsonNull
+        val hasHistoryReady = obj.containsKey("history_ready") && obj["history_ready"] !is JsonNull
+        val hasCarryoverReady = obj.containsKey("carryover_ready") && obj["carryover_ready"] !is JsonNull
+        val hasCarryoverRemaining = obj.containsKey("carryover_remaining_tests") && obj["carryover_remaining_tests"] !is JsonNull
+
+        val statusDate = obj["status_date"]?.jsonPrimitive?.contentOrNull
+        val mode = obj["mode"]?.jsonPrimitive?.contentOrNull ?: "member"
+        val activeAppCount = obj["active_app_count"]?.jsonPrimitive?.intOrNull ?: 0
+        val requiredTests = obj["required_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val availableApps = obj["available_apps"]?.jsonPrimitive?.intOrNull ?: 0
+        val effectiveRequiredTests = obj["effective_required_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val completedTests = obj["completed_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val loggedInToday = obj["logged_in_today"]?.jsonPrimitive?.booleanOrNull ?: false
+        val isPenaltyExempt = obj["is_penalty_exempt"]?.jsonPrimitive?.booleanOrNull ?: false
+        val missedStreak = obj["missed_streak"]?.jsonPrimitive?.intOrNull ?: 0
+        val nextPenaltyPercent = obj["next_penalty_percent"]?.jsonPrimitive?.intOrNull ?: 1
+        val met = obj["met"]?.jsonPrimitive?.booleanOrNull ?: false
+        val baseRequiredTests = obj["base_required_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val carryInTests = obj["carry_in_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val carryoverRemainingTests = obj["carryover_remaining_tests"]?.jsonPrimitive?.intOrNull ?: 0
+        val carryoverReady = obj["carryover_ready"]?.jsonPrimitive?.booleanOrNull ?: true
+        val historyReady = obj["history_ready"]?.jsonPrimitive?.booleanOrNull ?: true
+        val carryoverEffectiveFrom = obj["carryover_effective_from"]?.jsonPrimitive?.contentOrNull
+
+        val rawMet = if (hasMet) obj["met"]?.jsonPrimitive?.booleanOrNull else null
+        val rawCarryoverRemainingTests = if (hasCarryoverRemaining) obj["carryover_remaining_tests"]?.jsonPrimitive?.intOrNull else null
+        val rawCarryoverReady = if (hasCarryoverReady) obj["carryover_ready"]?.jsonPrimitive?.booleanOrNull else null
+        val rawHistoryReady = if (hasHistoryReady) obj["history_ready"]?.jsonPrimitive?.booleanOrNull else null
+
+        return DailyTaskStatus(
+            statusDate = statusDate,
+            mode = mode,
+            activeAppCount = activeAppCount,
+            requiredTests = requiredTests,
+            availableApps = availableApps,
+            effectiveRequiredTests = effectiveRequiredTests,
+            completedTests = completedTests,
+            loggedInToday = loggedInToday,
+            isPenaltyExempt = isPenaltyExempt,
+            missedStreak = missedStreak,
+            nextPenaltyPercent = nextPenaltyPercent,
+            met = met,
+            baseRequiredTests = baseRequiredTests,
+            carryInTests = carryInTests,
+            carryoverRemainingTests = carryoverRemainingTests,
+            carryoverReady = carryoverReady,
+            historyReady = historyReady,
+            carryoverEffectiveFrom = carryoverEffectiveFrom,
+            rawMet = rawMet,
+            rawCarryoverRemainingTests = rawCarryoverRemainingTests,
+            rawCarryoverReady = rawCarryoverReady,
+            rawHistoryReady = rawHistoryReady,
+        )
+    }
+
+    override fun serialize(encoder: Encoder, value: DailyTaskStatus) {
+        val output = encoder as? JsonEncoder ?: throw SerializationException("This serializer can only be used with Json")
+        val jsonMap = buildJsonObject {
+            value.statusDate?.let { put("status_date", it) }
+            put("mode", value.mode)
+            put("active_app_count", value.activeAppCount)
+            put("required_tests", value.requiredTests)
+            put("available_apps", value.availableApps)
+            put("effective_required_tests", value.effectiveRequiredTests)
+            put("completed_tests", value.completedTests)
+            put("logged_in_today", value.loggedInToday)
+            put("is_penalty_exempt", value.isPenaltyExempt)
+            put("missed_streak", value.missedStreak)
+            put("next_penalty_percent", value.nextPenaltyPercent)
+            value.rawMet?.let { put("met", it) }
+            put("base_required_tests", value.baseRequiredTests)
+            put("carry_in_tests", value.carryInTests)
+            value.rawCarryoverRemainingTests?.let { put("carryover_remaining_tests", it) }
+            value.rawCarryoverReady?.let { put("carryover_ready", it) }
+            value.rawHistoryReady?.let { put("history_ready", it) }
+            value.carryoverEffectiveFrom?.let { put("carryover_effective_from", it) }
+        }
+        output.encodeJsonElement(jsonMap)
+    }
+}
+
 /**
  * Trạng thái nhiệm vụ ngày mới (migration 036).
  * `mode`: owner = có app đang hoạt động, member = chỉ cần đăng nhập.
  * Với owner, `effective_required_tests` đã được giới hạn theo số app open khả dụng.
  */
-@Serializable
+@Serializable(with = DailyTaskStatusSerializer::class)
 data class DailyTaskStatus(
     @SerialName("status_date") val statusDate: String? = null,
     @SerialName("mode") val mode: String = "member",
@@ -944,20 +1486,37 @@ data class DailyTaskStatus(
     @SerialName("carry_in_tests") val carryInTests: Int = 0,
     @SerialName("carryover_remaining_tests") val carryoverRemainingTests: Int = 0,
     @SerialName("carryover_ready") val carryoverReady: Boolean = true,
+    @SerialName("history_ready") val historyReady: Boolean = true,
     @SerialName("carryover_effective_from") val carryoverEffectiveFrom: String? = null,
+    val rawMet: Boolean? = met,
+    val rawCarryoverRemainingTests: Int? = carryoverRemainingTests,
+    val rawCarryoverReady: Boolean? = carryoverReady,
+    val rawHistoryReady: Boolean? = historyReady,
 ) {
     val isOwner: Boolean get() = mode == "owner"
     val isMember: Boolean get() = mode == "member"
+    val isMet: Boolean get() = met
 
-    /** Owner đang chờ chốt nhiệm vụ từ hôm qua (khoảng 00:00 - 00:05 hoặc cron trễ). */
-    val isPendingCarryover: Boolean get() = isOwner && !carryoverReady
+    /** Owner đang chờ chốt nhiệm vụ từ hôm qua (khoảng 00:00 - 00:05 hoặc cron trễ, hoặc chưa đủ lịch sử). */
+    val isPendingCarryover: Boolean get() = isOwner && (!carryoverReady || !historyReady)
+
+    /** Lịch sử nợ bảo lưu đang chờ chốt từ hôm qua (áp dụng kiểm tra tính sẵn sàng nợ bất kể mode). */
+    val isCarryoverHistoryPending: Boolean get() = (!carryoverReady || !historyReady)
 
     /** Owner không có app open nào để test -> chỉ tiêu ngày được miễn. */
-    val isWaived: Boolean get() = isOwner && carryoverReady && effectiveRequiredTests <= 0
+    val isWaived: Boolean get() = isOwner && carryoverReady && historyReady && effectiveRequiredTests <= 0
 
     val hasCarryIn: Boolean get() = carryInTests > 0
-    val hasRemainingCarryover: Boolean get() = carryoverRemainingTests > 0
+    val hasRemainingCarryover: Boolean get() = carryoverReady && historyReady && carryoverRemainingTests > 0
 }
+
+@Serializable
+data class ConfirmProductionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("status") val status: String = "",
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("message") val message: String? = null,
+)
 
 /** Kết quả RPC `get_my_dashboard` — toàn bộ dữ liệu cá nhân của Trang chủ trong 1 query. */
 @Serializable
@@ -997,6 +1556,12 @@ data class CampaignDetailTester(
     @SerialName("last_checkin_date") val lastCheckinDate: String? = null,
 )
 
+@Serializable
+data class OwnerActivityStats(
+    @SerialName("tested_count") val testedCount: Int = 0,
+    @SerialName("installed_count") val installedCount: Int = 0,
+)
+
 /** Kết quả RPC `get_campaign_detail` — toàn bộ dữ liệu màn chi tiết trong 1 query. */
 @Serializable
 data class CampaignDetailResult(
@@ -1012,19 +1577,135 @@ data class CampaignDetailResult(
     @SerialName("reports") val reports: List<TesterReport> = emptyList(),
     @SerialName("profiles") val profiles: Map<String, Profile> = emptyMap(),
     @SerialName("today_tested_count") val todayTestedCount: Int = 0,
+    /** Số lượng feedbacks / đánh giá (giữ nguyên ngữ nghĩa feedback count cho UI tester). */
     @SerialName("reports_count") val reportsCount: Int = 0,
-    @SerialName("pending_reports_count") val pendingReportsCount: Int = 0,
+    /** Giá trị server aggregate là tối hậu; khi backend legacy thiếu khóa, suy ra từ mảng reports (tối đa 200). */
+    @SerialName("pending_reports_count") val pendingReportsCount: Int = reports.count { it.status.equals("pending", ignoreCase = true) },
+    /** Giá trị server aggregate là tối hậu; khi backend legacy thiếu khóa, suy ra từ reports.size (tối đa 200). */
+    @SerialName("tester_reports_count") val testerReportsCount: Int = reports.size,
     @SerialName("avg_rating") val avgRating: Float? = null,
     @SerialName("my_checkin_dates") val myCheckinDates: List<String> = emptyList(),
     @SerialName("my_profile") val myProfile: Profile? = null,
     @SerialName("unread_warnings") val unreadWarnings: List<UserWarning> = emptyList(),
     @SerialName("weekly_warnings_count") val weeklyWarningsCount: Int = 0,
     @SerialName("app_update") val appUpdate: AppUpdateRelease? = null,
+    @SerialName("owner_stats") val ownerStats: OwnerActivityStats? = null,
+)
+
+// ============================================================================
+// Sync V2 Conditional Protocol Models (Migration 085)
+// ============================================================================
+
+/**
+ * Khối dữ liệu đồng bộ có điều kiện.
+ * Nếu [changed] == false, server không truyền [value], client tái sử dụng dữ liệu trong cache.
+ * Nếu [changed] == true, [value] chứa dữ liệu mới nhất (hoặc danh sách rỗng []).
+ */
+@Serializable
+data class SyncBlock<T>(
+    @SerialName("token") val token: String,
+    @SerialName("changed") val changed: Boolean = true,
+    @SerialName("value") val value: T? = null,
+)
+
+@Serializable
+data class HomeFeedSyncBlocks(
+    @SerialName("open") val open: SyncBlock<List<Campaign>>,
+    @SerialName("paused") val paused: SyncBlock<List<Campaign>>,
+    @SerialName("completed") val completed: SyncBlock<List<Campaign>>,
+    @SerialName("owner_names") val ownerNames: SyncBlock<Map<String, String>>,
+    @SerialName("stats") val stats: SyncBlock<Map<String, CampaignStats>>,
+)
+
+@Serializable
+data class HomeFeedSyncResult(
+    @SerialName("schema_version") val schemaVersion: Int = 2,
+    @SerialName("business_date") val businessDate: String = "",
+    @SerialName("blocks") val blocks: HomeFeedSyncBlocks,
+)
+
+@Serializable
+data class MyDashboardSyncBlocks(
+    @SerialName("profile") val profile: SyncBlock<Profile?>? = null,
+    @SerialName("my_campaigns") val myCampaigns: SyncBlock<List<Campaign>>? = null,
+    @SerialName("joined_campaigns") val joinedCampaigns: SyncBlock<List<Campaign>>? = null,
+    @SerialName("leaderboard") val leaderboard: SyncBlock<List<LeaderboardUser>>? = null,
+    @SerialName("today_checkin_count") val todayCheckinCount: SyncBlock<Int>? = null,
+    @SerialName("pending_reports_count") val pendingReportsCount: SyncBlock<Int>? = null,
+    @SerialName("unread_warnings") val unreadWarnings: SyncBlock<List<UserWarning>>? = null,
+    @SerialName("weekly_warnings_count") val weeklyWarningsCount: SyncBlock<Int>? = null,
+    @SerialName("credit_logs") val creditLogs: SyncBlock<List<CreditLog>>? = null,
+    @SerialName("topup_packages") val topupPackages: SyncBlock<List<TopupPackage>>? = null,
+    @SerialName("notifications") val notifications: SyncBlock<List<UserNotification>>? = null,
+    @SerialName("owner_stats") val ownerStats: SyncBlock<Map<String, CampaignOwnerStats>>? = null,
+    @SerialName("slots") val slots: SyncBlock<List<UserSlot>?>? = null,
+    @SerialName("quest_summary") val questSummary: SyncBlock<QuestSummary?>? = null,
+    @SerialName("daily_task") val dailyTask: SyncBlock<DailyTaskStatus?>? = null,
+)
+
+@Serializable
+data class MyDashboardSyncResult(
+    @SerialName("schema_version") val schemaVersion: Int = 2,
+    @SerialName("business_date") val businessDate: String = "",
+    @SerialName("blocks") val blocks: MyDashboardSyncBlocks,
+)
+
+@Serializable
+data class CampaignDetailSyncBlocks(
+    @SerialName("campaign") val campaign: SyncBlock<Campaign>? = null,
+    @SerialName("is_member") val isMember: SyncBlock<Boolean>? = null,
+    @SerialName("is_owner") val isOwner: SyncBlock<Boolean>? = null,
+    @SerialName("is_actual_owner") val isActualOwner: SyncBlock<Boolean>? = null,
+    @SerialName("can_manage") val canManage: SyncBlock<Boolean>? = null,
+    @SerialName("checked_in_confirmed_today") val checkedInConfirmedToday: SyncBlock<Boolean>? = null,
+    @SerialName("testers") val testers: SyncBlock<List<CampaignDetailTester>>? = null,
+    @SerialName("feedbacks") val feedbacks: SyncBlock<List<Feedback>>? = null,
+    @SerialName("reports") val reports: SyncBlock<List<TesterReport>>? = null,
+    @SerialName("profiles") val profiles: SyncBlock<Map<String, Profile>>? = null,
+    @SerialName("today_tested_count") val todayTestedCount: SyncBlock<Int>? = null,
+    @SerialName("reports_count") val reportsCount: SyncBlock<Int>? = null,
+    @SerialName("pending_reports_count") val pendingReportsCount: SyncBlock<Int>? = null,
+    @SerialName("tester_reports_count") val testerReportsCount: SyncBlock<Int>? = null,
+    @SerialName("avg_rating") val avgRating: SyncBlock<Float?>? = null,
+    @SerialName("my_checkin_dates") val myCheckinDates: SyncBlock<List<String>>? = null,
+    @SerialName("my_profile") val myProfile: SyncBlock<Profile?>? = null,
+    @SerialName("unread_warnings") val unreadWarnings: SyncBlock<List<UserWarning>>? = null,
+    @SerialName("weekly_warnings_count") val weeklyWarningsCount: SyncBlock<Int>? = null,
+    @SerialName("app_update") val appUpdate: SyncBlock<AppUpdateRelease?>? = null,
+    @SerialName("owner_stats") val ownerStats: SyncBlock<OwnerActivityStats?>? = null,
+)
+
+@Serializable
+data class CampaignDetailSyncResult(
+    @SerialName("schema_version") val schemaVersion: Int = 2,
+    @SerialName("business_date") val businessDate: String = "",
+    @SerialName("blocks") val blocks: CampaignDetailSyncBlocks,
+)
+
+/**
+ * Một app đủ điều kiện để gợi ý làm bài test kế tiếp (get_next_campaign_candidates_v2).
+ *
+ * `todayTestedCount` và `statsDate` được thiết kế nullable để phân biệt rõ ràng
+ * giữa phản hồi từ máy chủ mới (đầy đủ số liệu hôm nay) và máy chủ cũ (chưa có 2 trường này).
+ * Không mặc định thiếu số lượt thành 0 để tránh đẩy nhầm app đã đủ chỉ tiêu lên đầu.
+ */
+@Serializable
+data class NextCampaignCandidate(
+    @SerialName("campaign") val campaign: Campaign,
+    @SerialName("installed_count") val installedCount: Int = 0,
+    @SerialName("today_tested_count") val todayTestedCount: Int? = null,
+    @SerialName("stats_date") val statsDate: String? = null,
 )
 
 @Serializable
 data class CampaignIdParams(
     @SerialName("p_campaign_id") val campaignId: String,
+)
+
+@Serializable
+data class CampaignMissionParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_mission_id") val missionId: String? = null,
 )
 
 @Serializable
@@ -1125,6 +1806,20 @@ data class Mission(
     @SerialName("is_mine") val isMine: Boolean = false,
     @SerialName("has_joined") val hasJoined: Boolean = false,
     @SerialName("has_completed") val hasCompleted: Boolean = false,
+    @SerialName("reward_mode") val rewardMode: String = "legacy",
+    @SerialName("duration_days") val durationDays: Int = 0,
+    @SerialName("fee_credits") val feeCredits: Int = 0,
+    @SerialName("escrow_total_credits") val escrowTotalCredits: Int = 0,
+    @SerialName("escrow_remaining_credits") val escrowRemainingCredits: Int = 0,
+    @SerialName("tester_announcement") val testerAnnouncement: String = "",
+    @SerialName("version") val version: Int = 1,
+    @SerialName("submitted_days_count") val submittedDaysCount: Int = 0,
+    @SerialName("today_submitted") val todaySubmitted: Boolean = false,
+    @SerialName("today_report_status") val todayReportStatus: String? = null,
+    @SerialName("report_status") val reportStatus: String? = null,
+    @SerialName("source_mission_id") val sourceMissionId: String? = null,
+    @SerialName("block_previous_participants") val blockPreviousParticipants: Boolean = false,
+    @SerialName("is_blocked_previous_participant") val isBlockedPreviousParticipant: Boolean = false,
 ) {
     val isActive: Boolean get() = status == "open" || status == "full"
     val isFull: Boolean get() = status == "full"
@@ -1132,7 +1827,26 @@ data class Mission(
     val isDeleted: Boolean get() = status == "deleted"
     val isStopped: Boolean get() = status == "stopped_no_credits"
     val isExpired: Boolean get() = status == "expired"
+    val isOnceMode: Boolean get() = rewardMode == "once"
+    val isDailyMode: Boolean get() = rewardMode == "daily"
+    val isLegacyMode: Boolean get() = rewardMode == "legacy" || rewardMode.isBlank()
     val slotsRemaining: Int get() = (maxParticipants - participantCount).coerceAtLeast(0)
+
+    fun isExpiredEffective(nowEpochMs: Long = System.currentTimeMillis()): Boolean {
+        if (status == "expired") return true
+        if (status != "open" && status != "full" && status != "paused_by_creator") return false
+        val raw = endsAt ?: return false
+        return try {
+            nowEpochMs >= java.time.Instant.parse(raw).toEpochMilli()
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun isCopyEligible(nowEpochMs: Long = System.currentTimeMillis()): Boolean {
+        if (isDeleted || isStopped) return false
+        return isExpiredEffective(nowEpochMs)
+    }
 
     /** Số ngày nhận nhiệm vụ còn lại (làm tròn lên); null khi không parse được. */
     val daysRemaining: Int?
@@ -1171,6 +1885,92 @@ data class CreateMissionResult(
 )
 
 @Serializable
+data class CreateMissionV2Params(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_title") val title: String,
+    @SerialName("p_description") val description: String = "",
+    @SerialName("p_max_participants") val maxParticipants: Int = 10,
+    @SerialName("p_duration_days") val durationDays: Int = 3,
+    @SerialName("p_reward_credits") val rewardCredits: Int = 10,
+    @SerialName("p_reward_mode") val rewardMode: String = "once",
+)
+
+@Serializable
+data class CreateMissionV2Result(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("fee") val fee: Int = 0,
+    @SerialName("escrow") val escrow: Int = 0,
+    @SerialName("total_cost") val totalCost: Int = 0,
+    @SerialName("balance") val balance: Int = 0,
+    @SerialName("ends_at") val endsAt: String? = null,
+    @SerialName("reward_mode") val rewardMode: String = "once",
+)
+
+@Serializable
+data class PreviewEditMissionParams(
+    @SerialName("p_mission_id") val missionId: String,
+    @SerialName("p_reward_mode") val rewardMode: String? = null,
+    @SerialName("p_max_participants") val maxParticipants: Int? = null,
+    @SerialName("p_duration_days") val durationDays: Int? = null,
+    @SerialName("p_reward_credits") val rewardCredits: Int? = null,
+)
+
+@Serializable
+data class PreviewEditMissionResult(
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("can_edit_terms") val canEditTerms: Boolean = false,
+    @SerialName("fee_diff") val feeDiff: Int = 0,
+    @SerialName("escrow_diff") val escrowDiff: Int = 0,
+    @SerialName("total_diff") val totalDiff: Int = 0,
+    @SerialName("new_ends_at") val newEndsAt: String? = null,
+    @SerialName("current_balance") val currentBalance: Int = 0,
+    @SerialName("version") val version: Int = 1,
+)
+
+@Serializable
+data class EditMissionParams(
+    @SerialName("p_mission_id") val missionId: String,
+    @SerialName("p_title") val title: String,
+    @SerialName("p_description") val description: String = "",
+    @SerialName("p_reward_mode") val rewardMode: String? = null,
+    @SerialName("p_max_participants") val maxParticipants: Int? = null,
+    @SerialName("p_duration_days") val durationDays: Int? = null,
+    @SerialName("p_reward_credits") val rewardCredits: Int? = null,
+    @SerialName("p_tester_announcement") val testerAnnouncement: String? = null,
+    @SerialName("p_expected_version") val expectedVersion: Int? = null,
+    @SerialName("p_expected_cost_diff") val expectedCostDiff: Int? = null,
+)
+
+@Serializable
+data class EditMissionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("terms_modified") val termsModified: Boolean = false,
+    @SerialName("fee_diff") val feeDiff: Int = 0,
+    @SerialName("escrow_diff") val escrowDiff: Int = 0,
+    @SerialName("total_diff") val totalDiff: Int = 0,
+    @SerialName("new_ends_at") val newEndsAt: String? = null,
+    @SerialName("balance") val balance: Int? = null,
+    @SerialName("version") val version: Int = 1,
+)
+
+@Serializable
+data class AdminDeleteMissionParams(
+    @SerialName("p_mission_id") val missionId: String,
+    @SerialName("p_reason") val reason: String,
+)
+
+@Serializable
+data class AdminDeleteMissionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("status") val status: String = "",
+    @SerialName("reason") val reason: String? = null,
+    @SerialName("is_replay") val isReplay: Boolean = false,
+)
+
+@Serializable
 data class JoinMissionParams(
     @SerialName("p_mission_id") val missionId: String,
 )
@@ -1193,6 +1993,62 @@ data class OpenMissionsResult(
 @Serializable
 data class CampaignMissionResult(
     @SerialName("mission") val mission: Mission? = null,
+    @SerialName("server_now") val serverNow: String? = null,
+)
+
+@Serializable
+data class GetMissionCopyDraftParams(
+    @SerialName("p_source_mission_id") val sourceMissionId: String,
+    @SerialName("p_campaign_id") val campaignId: String? = null,
+)
+
+@Serializable
+data class MissionCopyDraft(
+    @SerialName("source_mission_id") val sourceMissionId: String = "",
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("app_name") val appName: String = "",
+    @SerialName("package_name") val packageName: String = "",
+    @SerialName("icon_url") val iconUrl: String? = null,
+    @SerialName("campaign_status") val campaignStatus: String = "open",
+    @SerialName("title") val title: String = "",
+    @SerialName("description") val description: String = "",
+    @SerialName("reward_mode") val rewardMode: String = "once",
+    @SerialName("max_participants") val maxParticipants: Int = 5,
+    @SerialName("duration_days") val durationDays: Int = 3,
+    @SerialName("reward_credits") val rewardCredits: Int = 10,
+    @SerialName("block_previous_participants") val blockPreviousParticipants: Boolean = false,
+    @SerialName("user_credits") val userCredits: Int = 0,
+    @SerialName("source_status") val sourceStatus: String = "expired",
+    @SerialName("source_reward_mode") val sourceRewardMode: String = "once",
+)
+
+@Serializable
+data class CreateMissionFromSourceParams(
+    @SerialName("p_source_mission_id") val sourceMissionId: String,
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_title") val title: String,
+    @SerialName("p_description") val description: String = "",
+    @SerialName("p_max_participants") val maxParticipants: Int = 10,
+    @SerialName("p_duration_days") val durationDays: Int = 3,
+    @SerialName("p_reward_credits") val rewardCredits: Int = 10,
+    @SerialName("p_reward_mode") val rewardMode: String = "once",
+    @SerialName("p_block_previous_participants") val blockPreviousParticipants: Boolean = false,
+    @SerialName("p_client_operation_id") val clientOperationId: String? = null,
+)
+
+@Serializable
+data class CreateMissionFromSourceResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("mission_id") val missionId: String = "",
+    @SerialName("fee") val fee: Int = 0,
+    @SerialName("escrow") val escrow: Int = 0,
+    @SerialName("total_cost") val totalCost: Int = 0,
+    @SerialName("balance") val balance: Int = 0,
+    @SerialName("ends_at") val endsAt: String? = null,
+    @SerialName("reward_mode") val rewardMode: String = "once",
+    @SerialName("source_mission_id") val sourceMissionId: String? = null,
+    @SerialName("block_previous_participants") val blockPreviousParticipants: Boolean = false,
+    @SerialName("is_replay") val isReplay: Boolean = false,
 )
 
 @Serializable
@@ -1310,6 +2166,213 @@ data class CloseAppUpdateReleaseResult(
     @SerialName("owner_credits") val ownerCredits: Int = 0,
     @SerialName("release_status") val releaseStatus: String = "",
 )
+
+@Serializable
+data class CreateTesterBonusParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_reward_credits") val rewardCredits: Int,
+    @SerialName("p_max_recipients") val maxRecipients: Int,
+    @SerialName("p_client_request_id") val clientRequestId: String,
+)
+
+/**
+ * Bộ kiểm tra biên lai nghiêm ngặt cho đợt thưởng tester bonus:
+ * - reward/max > 0 và reward * max <= Int.MAX_VALUE
+ * - reserved == reward * max
+ * - paidCount in 0..max, remainingSlots == max - paidCount
+ * - spent == reward * paid
+ * - remaining/spent/refunded >= 0 và <= Int.MAX_VALUE
+ * - reserved == remaining + spent + refunded
+ * - recognized status (active, closing, exhausted, closed)
+ * - closed: remaining == 0
+ * - exhausted: paid == max và refunded == 0
+ * - active/closing: not refunded (refunded == 0)
+ * - ownerBalance PRESENT in 0..Int.MAX_VALUE (không clamp hoặc bịa đặt số dư)
+ */
+fun validateTesterBonusReceipt(
+    rewardCredits: Int,
+    maxRecipients: Int,
+    paidCount: Int,
+    remainingSlots: Int,
+    reservedCredits: Long,
+    remainingCredits: Long,
+    spentCredits: Long,
+    refundedCredits: Long,
+    ownerBalance: Long?,
+    status: String?,
+): Boolean {
+    if (rewardCredits <= 0 || maxRecipients <= 0) return false
+
+    val product = rewardCredits.toLong() * maxRecipients.toLong()
+    if (product > Int.MAX_VALUE.toLong()) return false
+    if (reservedCredits != product) return false
+
+    if (paidCount !in 0..maxRecipients) return false
+    if (remainingSlots != maxRecipients - paidCount) return false
+
+    val expectedSpent = rewardCredits.toLong() * paidCount.toLong()
+    if (spentCredits != expectedSpent) return false
+
+    val maxIntLong = Int.MAX_VALUE.toLong()
+    if (remainingCredits !in 0L..maxIntLong) return false
+    if (spentCredits !in 0L..maxIntLong) return false
+    if (refundedCredits !in 0L..maxIntLong) return false
+
+    if (reservedCredits != remainingCredits + spentCredits + refundedCredits) return false
+
+    val recognizedStatuses = setOf("active", "closing", "exhausted", "closed")
+    if (status == null || status !in recognizedStatuses) return false
+
+    if (status == "closed" && remainingCredits != 0L) return false
+    if (status == "exhausted" && (paidCount != maxRecipients || refundedCredits != 0L)) return false
+    if (status in setOf("active", "closing") && refundedCredits != 0L) return false
+
+    if (ownerBalance == null || ownerBalance !in 0L..maxIntLong) return false
+
+    return true
+}
+
+@Serializable
+data class CreateTesterBonusResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("replayed") val replayed: Boolean = false,
+    @SerialName("round_id") val roundId: String? = null,
+    @SerialName("client_request_id") val clientRequestId: String? = null,
+    @SerialName("campaign_id") val campaignId: String? = null,
+    @SerialName("reward_credits") val rewardCredits: Int = 0,
+    @SerialName("max_recipients") val maxRecipients: Int = 0,
+    @SerialName("paid_count") val paidCount: Int = 0,
+    @SerialName("remaining_slots") val remainingSlots: Int = 0,
+    @SerialName("reserved_credits") val reservedCredits: Long = 0L,
+    @SerialName("remaining_credits") val remainingCredits: Long = 0L,
+    @SerialName("spent_credits") val spentCredits: Long = 0L,
+    @SerialName("refunded_credits") val refundedCredits: Long = 0L,
+    @SerialName("owner_balance") val ownerBalance: Long? = null,
+    @SerialName("status") val status: String = "",
+) {
+    fun isValidEvidenceFor(
+        expectedClientRequestId: String,
+        expectedCampaignId: String,
+        expectedRewardCredits: Int,
+        expectedMaxRecipients: Int,
+    ): Boolean {
+        if (!success) return false
+        if (clientRequestId != expectedClientRequestId) return false
+        if (campaignId != expectedCampaignId) return false
+        if (roundId.isNullOrBlank()) return false
+        if (rewardCredits != expectedRewardCredits) return false
+        if (maxRecipients != expectedMaxRecipients) return false
+        return validateTesterBonusReceipt(
+            rewardCredits = rewardCredits,
+            maxRecipients = maxRecipients,
+            paidCount = paidCount,
+            remainingSlots = remainingSlots,
+            reservedCredits = reservedCredits,
+            remainingCredits = remainingCredits,
+            spentCredits = spentCredits,
+            refundedCredits = refundedCredits,
+            ownerBalance = ownerBalance,
+            status = status,
+        )
+    }
+
+    val safeOwnerBalanceInt: Int?
+        get() = ownerBalance?.takeIf { it in 0L..Int.MAX_VALUE.toLong() }?.toInt()
+}
+
+@Serializable
+data class ReconcileTesterBonusParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_client_request_id") val clientRequestId: String,
+)
+
+@Serializable
+data class ReconcileTesterBonusResult(
+    @SerialName("found") val found: Boolean = false,
+    @SerialName("replayed") val replayed: Boolean = false,
+    @SerialName("round_id") val roundId: String? = null,
+    @SerialName("client_request_id") val clientRequestId: String? = null,
+    @SerialName("campaign_id") val campaignId: String? = null,
+    @SerialName("reward_credits") val rewardCredits: Int = 0,
+    @SerialName("max_recipients") val maxRecipients: Int = 0,
+    @SerialName("paid_count") val paidCount: Int = 0,
+    @SerialName("remaining_slots") val remainingSlots: Int = 0,
+    @SerialName("reserved_credits") val reservedCredits: Long = 0L,
+    @SerialName("remaining_credits") val remainingCredits: Long = 0L,
+    @SerialName("spent_credits") val spentCredits: Long = 0L,
+    @SerialName("refunded_credits") val refundedCredits: Long = 0L,
+    @SerialName("owner_balance") val ownerBalance: Long? = null,
+    @SerialName("status") val status: String? = null,
+) {
+    fun isValidEvidenceFor(
+        expectedClientRequestId: String,
+        expectedCampaignId: String,
+        expectedRewardCredits: Int,
+        expectedMaxRecipients: Int,
+    ): Boolean {
+        if (!found) return false
+        if (clientRequestId != expectedClientRequestId) return false
+        if (campaignId != expectedCampaignId) return false
+        if (roundId.isNullOrBlank()) return false
+        if (rewardCredits != expectedRewardCredits) return false
+        if (maxRecipients != expectedMaxRecipients) return false
+        return validateTesterBonusReceipt(
+            rewardCredits = rewardCredits,
+            maxRecipients = maxRecipients,
+            paidCount = paidCount,
+            remainingSlots = remainingSlots,
+            reservedCredits = reservedCredits,
+            remainingCredits = remainingCredits,
+            spentCredits = spentCredits,
+            refundedCredits = refundedCredits,
+            ownerBalance = ownerBalance,
+            status = status,
+        )
+    }
+
+    val safeOwnerBalanceInt: Int?
+        get() = ownerBalance?.takeIf { it in 0L..Int.MAX_VALUE.toLong() }?.toInt()
+}
+
+@Serializable
+data class GetTesterBonusParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+)
+
+@Serializable
+data class GetTesterBonusResult(
+    @SerialName("has_round") val hasRound: Boolean = false,
+    @SerialName("is_owner") val isOwner: Boolean = false,
+    @SerialName("round_id") val roundId: String? = null,
+    @SerialName("campaign_id") val campaignId: String? = null,
+    @SerialName("reward_credits") val rewardCredits: Int = 0,
+    @SerialName("max_recipients") val maxRecipients: Int = 0,
+    @SerialName("paid_count") val paidCount: Int = 0,
+    @SerialName("remaining_slots") val remainingSlots: Int = 0,
+    @SerialName("status") val status: String = "none",
+    @SerialName("reserved_credits") val reservedCredits: Long = 0L,
+    @SerialName("remaining_credits") val remainingCredits: Long = 0L,
+    @SerialName("spent_credits") val spentCredits: Long = 0L,
+    @SerialName("refunded_credits") val refundedCredits: Long = 0L,
+    @SerialName("started_at") val startedAt: String? = null,
+    @SerialName("stopped_at") val stoppedAt: String? = null,
+    @SerialName("closed_at") val closedAt: String? = null,
+    @SerialName("my_awarded") val myAwarded: Boolean = false,
+    @SerialName("my_award_amount") val myAwardAmount: Int = 0,
+    @SerialName("my_awarded_at") val myAwardedAt: String? = null,
+    @SerialName("my_pending_eligible") val myPendingEligible: Boolean = false,
+    @SerialName("error") val error: String? = null,
+    @SerialName("code") val code: String? = null,
+) {
+    val isUnsettled: Boolean
+        get() = status in listOf("active", "closing")
+
+    val isTerminal: Boolean
+        get() = status in listOf("closed", "exhausted")
+
+    val hasError: Boolean
+        get() = !error.isNullOrBlank() || !code.isNullOrBlank()
+}
 
 
 

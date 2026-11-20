@@ -1,0 +1,44 @@
+[
+  {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "cc6c8ce4a0fa76cb8bd90fd664fd3b86f3d4e1e54cdb2f05f5cbcac504884704",
+    "bytes": 36594496,
+    "mtime": "2026-11-12T10:08:16.074Z"
+  },
+  {
+    "path": "app/build/outputs/apk/release/app-release.apk",
+    "sha256": "541640eb5ba94aec2a7575cbcaaba0e7e6c13d89bb3422e14447298d0c19c552",
+    "bytes": 6571177,
+    "mtime": "2026-11-05T10:23:31.354Z"
+  },
+  {
+    "path": "app/build/outputs/bundle/release/app-release.aab",
+    "sha256": "05ec0ba9dea2c28fb6b1a1d5d6883395a40107e4c1983dd0804bdf9708150b47",
+    "bytes": 12877860,
+    "mtime": "2026-11-03T23:38:23.217Z"
+  },
+  {
+    "path": "app/release/app-release.aab",
+    "sha256": "c39b2f40c7eeaa55ebb6cb6236cf8c8b606397c1c4a99564475a17dc7ab83da7",
+    "bytes": 13261645,
+    "mtime": "2026-11-11T15:58:51.367Z"
+  },
+  {
+    "path": ".tmp/release/12Tester-1.0.5-25-rpc-v2-fixed.apk",
+    "sha256": "7c1419dac56a97845a1666fb4b0581c868af5668ecfb8575054783e11130ba2f",
+    "bytes": 5874507,
+    "mtime": "2026-10-30T06:17:44.421Z"
+  },
+  {
+    "path": ".tmp/release/12Tester-1.1.5-35-no-repeat-report-error.apk",
+    "sha256": "541640eb5ba94aec2a7575cbcaaba0e7e6c13d89bb3422e14447298d0c19c552",
+    "bytes": 6571177,
+    "mtime": "2026-11-05T10:23:31.354Z"
+  },
+  {
+    "path": "app/build/intermediates/intermediary_bundle/release/packageReleaseBundle/intermediary-bundle.aab",
+    "sha256": "eac98744aa6d4af7e4b37cc240389e5aa5bca742319a29f6696b7980287f50a1",
+    "bytes": 127320790,
+    "mtime": "2026-11-11T15:58:49.211Z"
+  }
+]

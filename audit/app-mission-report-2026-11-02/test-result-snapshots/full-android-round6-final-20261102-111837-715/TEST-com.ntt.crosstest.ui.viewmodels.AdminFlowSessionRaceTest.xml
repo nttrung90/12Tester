@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-02T11:18:30.001Z" hostname="PC-5700X3D" time="0.236">
+  <properties/>
+  <testcase name="home_stats_reload_during_save_keeps_mutation_as_the_only_request_owner" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.028"/>
+  <testcase name="generation_change_for_same_uid_rejects_stale_response" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.019"/>
+  <testcase name="refresh_initiated_before_lock_mutation_does_not_overwrite_mutation_result" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.031"/>
+  <testcase name="delayed_stale_refresh_does_not_overwrite_newer_refresh_in_admin_reports" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.013"/>
+  <testcase name="stale_home_stats_response_does_not_clear_current_config_or_flags" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.023"/>
+  <testcase name="account_switch_during_in_flight_request_and_action_drops_old_response_and_clears_sensitive_state" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.021"/>
+  <testcase name="forced_refresh_error_with_existing_data_is_surfaced_to_ui_state" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.015"/>
+  <testcase name="refresh_initiated_before_report_reply_mutation_does_not_overwrite_replied_status" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.029"/>
+  <testcase name="double_action_submission_with_standard_test_dispatcher_admits_only_first_call" classname="com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest" time="0.055"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+PASS independent three-image contract: create three ordered attachments and immutable exact replay
+PASS independent three-image contract: four images rejected server-side
+PASS independent three-image contract: client cannot move report_date to regain the daily slot
+PASS independent three-image contract: v3 rejects missing client request identity
+PASS independent three-image contract: v3 rejects null context instead of inferring intent from mission ID
+PASS independent three-image contract: explicit v2 also rejects null context
+PASS independent three-image contract: foreign secondary image URL rejected
+PASS independent three-image contract: secondary hash format validated
+PASS independent three-image contract: secondary thumbnail bound to its own full image
+PASS independent three-image contract: empty array cannot silently mean keep attachments
+PASS independent three-image contract: changed order under same request ID rejected
+FAIL independent three-image contract: v2 cover update either rejected or retains coherent entire set ERR_ASSERTION legacy cover update must retain every secondary attachment
+
+1 !== 3
+
+PASS independent three-image contract: distinct valid URL fields cannot collide in a delimiter-based fingerprint

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.NotificationPendingAckStoreTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-05T10:03:37.551Z" hostname="PC-5700X3D" time="0.02">
+  <properties/>
+  <testcase name="records_and_retrieves_pending_ack_durable_across_store_instances" classname="com.ntt.crosstest.data.NotificationPendingAckStoreTest" time="0.01"/>
+  <testcase name="isolates_pending_acks_between_different_users" classname="com.ntt.crosstest.data.NotificationPendingAckStoreTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

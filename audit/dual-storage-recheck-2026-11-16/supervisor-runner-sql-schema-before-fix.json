@@ -1,0 +1,196 @@
+{
+  "at": "2026-11-16T14:19:06.218Z",
+  "scope": "PGlite EXPLAIN only, static SQL literals; dynamic SQL, actual PG, concurrency and provider execution NOT RUN",
+  "results": [
+    {
+      "sql": "select set_config('request.jwt.claim.sub', $1, true)",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.request_report_media_reservation($1, $2, $3, $4) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "select (select count(*) from public.profiles)::int users,(select count(*) from storage.objects)::int objects,(select count(*) from public.report_media_uploads)::int media",
+      "status": "PASS"
+    },
+    {
+      "sql": "select column_name from information_schema.columns where table_schema='public' and table_name='report_media_uploads' and column_name in ('main_committed','thumbnail_committed')",
+      "status": "PASS"
+    },
+    {
+      "sql": "select * from public.storage_organization_usage where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select host from public.storage_trusted_hosts",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into auth.users(id,email) values($1,'owner@concurrency.invalid'),($2,'tester@concurrency.invalid')",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into public.campaigns(id,owner_id,app_name,package_name,status) values($1,$2,'Concurrency','test.concurrency','open')",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into public.campaign_members(campaign_id,user_id) values($1,$2)",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into public.storage_trusted_hosts(host) values('test.invalid') on conflict do nothing",
+      "status": "PASS"
+    },
+    {
+      "sql": "update public.storage_organization_usage set local_project_ref='aaaaaaaaaaaaaaaaaaaa',total_capacity_bytes=1000,used_storage_bytes=800,active_reserved_bytes=0,is_org_metric_valid=true,last_reconciled_at=now(),dispatch_mode='supabase_preferred' where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select active_reserved_bytes n from public.storage_organization_usage",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.report_media_uploads where campaign_id=$1 and client_submit_id='same'",
+      "status": "FAIL",
+      "code": "42703",
+      "error": "column \"client_submit_id\" does not exist"
+    },
+    {
+      "sql": "update public.storage_organization_usage set active_reserved_bytes=0 where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select id, object_path from public.report_media_uploads where provider='supabase' and status<>'deleted'",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into storage.objects(bucket_id,name,owner,metadata) values('report-screenshots',$1,$2,'{\"size\":100}')",
+      "status": "PASS"
+    },
+    {
+      "sql": "update public.report_media_uploads set status='expired' where id=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.get_expired_report_media_for_cleanup(1,300,false) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from storage.objects where bucket_id='report-screenshots' and name=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.record_report_media_deleted($1::uuid,$2::uuid,$3::text[]) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "select used_storage_bytes::int u,active_reserved_bytes::int r from public.storage_organization_usage",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.report_media_uploads where campaign_id=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "update public.storage_organization_usage set total_capacity_bytes=500000,used_storage_bytes=800,active_reserved_bytes=0 where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select set_config('request.jwt.claim.sub',$1,true)",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public._can_insert_report_object('report-screenshots',$1,'{\"contentLength\":50,\"mimetype\":\"image/jpeg\"}') ok",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public._prepare_report_media($1,null,$2,$3,null) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public._finalize_report_media($1::jsonb,null,null)",
+      "status": "PASS"
+    },
+    {
+      "sql": "update public.storage_organization_usage set active_reserved_bytes=(select coalesce(sum(reserved_bytes),0) from public.report_media_uploads where provider='supabase' and reserved_bytes>0), updated_at=now() where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.reconcile_storage_organization_usage(500000,100,$1::jsonb,true) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "select used_storage_bytes::int u,active_reserved_bytes::int r from public.storage_organization_usage where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into storage.objects(bucket_id,name,owner,metadata) values('report-screenshots',$1,$2,'{\"size\":50}')",
+      "status": "PASS"
+    },
+    {
+      "sql": "select used_storage_bytes::int u,active_reserved_bytes::int r,(select sum((metadata->>'size')::int) from storage.objects where name in ($1,$2))::int actual from public.storage_organization_usage where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.reconcile_storage_organization_usage(500000,150,$1::jsonb,true) r",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from storage.objects where bucket_id='report-screenshots' and name in ($1,$2)",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.report_media_uploads where id=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public.reconcile_storage_organization_usage(500000,0,$1::jsonb,true)",
+      "status": "PASS"
+    },
+    {
+      "sql": "update public.storage_organization_usage set used_storage_bytes=800,active_reserved_bytes=0 where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select public._can_insert_report_object('report-screenshots',$1,'{\"contentLength\":100,\"mimetype\":\"image/jpeg\"}') ok",
+      "status": "PASS"
+    },
+    {
+      "sql": "select reserved_bytes from public.report_media_uploads where id=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "select used_storage_bytes::int u,active_reserved_bytes::int r,(select sum((metadata->>'size')::int) from storage.objects where name=$1)::int actual from public.storage_organization_usage where id=1",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from storage.objects where bucket_id='report-screenshots' and name like $1",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.campaigns where id=$1",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.profiles where id=any($1::uuid[])",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from auth.users where id=any($1::uuid[])",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.user_role_journal where user_id=any($1::uuid[])",
+      "status": "PASS"
+    },
+    {
+      "sql": "delete from public.storage_trusted_hosts",
+      "status": "PASS"
+    },
+    {
+      "sql": "insert into public.storage_trusted_hosts(host) values($1)",
+      "status": "PASS"
+    }
+  ]
+}

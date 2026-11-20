@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.data.MissionRewardModesUnitTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-03T13:04:32.537Z" hostname="PC-5700X3D" time="0.036">
+  <properties/>
+  <testcase name="testModelSerialization" classname="com.ntt.crosstest.data.MissionRewardModesUnitTest" time="0.007"/>
+  <testcase name="testDraftStoreOnceModeDurableDate" classname="com.ntt.crosstest.data.MissionRewardModesUnitTest" time="0.014"/>
+  <testcase name="testTesterReportRewardModeProperties" classname="com.ntt.crosstest.data.MissionRewardModesUnitTest" time="0.004"/>
+  <testcase name="testMissionRewardModeProperties" classname="com.ntt.crosstest.data.MissionRewardModesUnitTest" time="0.005"/>
+  <testcase name="testMissionCreateUiStateBudgetCalculations" classname="com.ntt.crosstest.data.MissionRewardModesUnitTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

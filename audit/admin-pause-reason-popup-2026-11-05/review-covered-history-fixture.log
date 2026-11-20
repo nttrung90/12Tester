@@ -1,0 +1,8 @@
+=== LOADING ACTIVE MIGRATIONS (062 THROUGH 066) ===
+PASS: Unproven legacy day safely defers with history_ready = false (R02)
+PASS: Fully covered day operates for ABSENT users without app-open requirement (R02/Absent)
+PASS: Disabled policy preserves debt=8 on a proven covered day (R04)
+PASS: D events preserve deleted campaign tests and handle same-day/late rejects (R02/D)
+PASS: Role journal protects historical boundary from retroactive exemption (R02/Role)
+PASS: Policy past-row moving and retroactive scheduling rejected (R04)
+=== ALL BASELINE 062+ REGRESSION TESTS PASSED ===

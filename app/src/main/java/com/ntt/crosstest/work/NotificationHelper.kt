@@ -7,12 +7,37 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.work.ForegroundInfo
 import com.ntt.crosstest.MainActivity
 import com.ntt.crosstest.R
 import com.ntt.crosstest.data.DailyTaskStatus
 import com.ntt.crosstest.data.SettingsRepository
 
 object NotificationHelper {
+
+    internal fun reportUploadForegroundInfo(context: Context, workId: java.util.UUID): ForegroundInfo {
+        val localized = SettingsRepository.wrap(context)
+        val channelId = "report_upload"
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(NotificationChannel(
+            channelId, localized.getString(R.string.notif_report_upload_channel), NotificationManager.IMPORTANCE_LOW,
+        ))
+        val pendingIntent = PendingIntent.getActivity(context, 3,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val notification = NotificationCompat.Builder(localized, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(localized.getString(R.string.notif_report_upload_title))
+            .setContentText(localized.getString(R.string.notif_report_upload_text))
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setProgress(0, 0, true)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .build()
+        return ForegroundInfo(10_000 + (workId.hashCode() and 0x3fffffff), notification)
+    }
 
     private const val CHANNEL_ID = "checkin_reminder"
     private const val NOTIFICATION_ID = 1001
@@ -171,6 +196,24 @@ object NotificationHelper {
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
+        }
+    }
+
+    /**
+     * Refreshes user-facing names and descriptions for all channels in the current app locale.
+     */
+    fun updateChannelsLocale(context: Context) {
+        val localized = SettingsRepository.wrap(context)
+        ensureChannel(localized, CHANNEL_ID, R.string.notif_channel_name, R.string.notif_channel_desc)
+        ensureChannel(localized, DAILY_TASK_CHANNEL_ID, R.string.notif_daily_task_channel_name, R.string.notif_daily_task_channel_desc)
+        ensureChannel(localized, UPDATE_CHANNEL_ID, R.string.notif_update_channel_name, R.string.notif_update_channel_desc)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = localized.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(NotificationChannel(
+                "report_upload",
+                localized.getString(R.string.notif_report_upload_channel),
+                NotificationManager.IMPORTANCE_LOW,
+            ))
         }
     }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.audit.CarryoverStreamsIndependentTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-02T06:02:57.097Z" hostname="PC-5700X3D" time="0.046">
+  <properties/>
+  <testcase name="futurePageFailureMustExposeErrorAndRecoverOnExplicitRefresh" classname="com.ntt.crosstest.audit.CarryoverStreamsIndependentTest" time="0.029"/>
+  <testcase name="auditHistoryRequestCannotInvalidatePolicyRefreshOrStrandSpinner" classname="com.ntt.crosstest.audit.CarryoverStreamsIndependentTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

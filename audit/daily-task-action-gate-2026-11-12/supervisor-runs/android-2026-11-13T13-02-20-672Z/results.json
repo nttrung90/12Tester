@@ -1,0 +1,111 @@
+{
+  "at": "2026-11-13T13:02:20.678Z",
+  "note": "Existing JUnit files only. Full-suite claim additionally requires a matching completed Gradle log and current source; old/filtered files alone are insufficient.",
+  "totals": {
+    "suites": 1,
+    "tests": 6,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "requiredEvidence": [
+    {
+      "name": "SupervisorOwnerActionGateReviewTest",
+      "suite": {
+        "file": "TEST-com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest.xml",
+        "name": "com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest",
+        "tests": 6,
+        "failures": 4,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-11-12T17:24:51.117Z",
+        "mtime": "2026-11-12T17:24:57.621Z",
+        "sha256": "6c2b1a4b1cc2f9e719897c20aa100c30f9619fc1960b671ae62603f26316cb31",
+        "failureCases": [
+          {
+            "name": "inspectingBlockedActionPreservesOtherOperationLoading",
+            "message": "java.lang.AssertionError: viewing a blocked action must not clear another operation's loading"
+          },
+          {
+            "name": "olderConfirmationReadCannotOverwriteNewerTaskRefresh",
+            "message": "java.lang.AssertionError: a superseded confirmation response must not authorize mutation expected:&lt;0&gt; but was:&lt;1&gt;"
+          },
+          {
+            "name": "oldAccountProductionResponseDoesNotRefreshNewAccountPage",
+            "message": "java.lang.AssertionError: unmet message must include the known remaining task count"
+          },
+          {
+            "name": "actualFreshReadDeadlineShowsPendingInsteadOfSilentCancellation",
+            "message": "java.lang.AssertionError: a known failed fresh read must not leave cached eligibility enabled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SupervisorDailyTaskStatusCacheReviewTest",
+      "suite": null
+    },
+    {
+      "name": "OwnerAppDetailActionGateBehavioralTest",
+      "suite": null
+    }
+  ],
+  "sources": [
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/ui/viewmodels/OwnerAppDetailViewModel.kt",
+      "sha256": "d0267578f60322c42f5feefe247c31ea849b8553d5f07ea0ebd1489ea49f5cbc",
+      "mtime": "2026-11-12T17:21:52.200Z"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/DailyTaskActionGate.kt",
+      "sha256": "4a60c8af45f388c7ee761b60fdc50399ea7c83f046e3b181c36622f7b3d3cb36",
+      "mtime": "2026-11-12T15:49:46.841Z"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/Models.kt",
+      "sha256": "21db43e651f5d1bfbf65f9ccba3bd1ac2406000bb6361f5d9f021cd14f1f4c8b",
+      "mtime": "2026-11-12T15:49:29.344Z"
+    },
+    {
+      "path": "app/src/main/java/com/ntt/crosstest/data/CampaignRepository.kt",
+      "sha256": "4569f495239907d492ccac60a2e25c50b9d65ee96c9324360e8743713c8b6548",
+      "mtime": "2026-11-12T15:51:48.074Z"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "sha256": "3e1f3b52fe842c9cbaf15627c2230dc977727557a470cf889d19a39ac7b09e2a",
+      "mtime": "2026-11-12T14:27:20.793Z"
+    }
+  ],
+  "suites": [
+    {
+      "file": "TEST-com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest.xml",
+      "name": "com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest",
+      "tests": 6,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-12T17:24:51.117Z",
+      "mtime": "2026-11-12T17:24:57.621Z",
+      "sha256": "6c2b1a4b1cc2f9e719897c20aa100c30f9619fc1960b671ae62603f26316cb31",
+      "failureCases": [
+        {
+          "name": "inspectingBlockedActionPreservesOtherOperationLoading",
+          "message": "java.lang.AssertionError: viewing a blocked action must not clear another operation's loading"
+        },
+        {
+          "name": "olderConfirmationReadCannotOverwriteNewerTaskRefresh",
+          "message": "java.lang.AssertionError: a superseded confirmation response must not authorize mutation expected:&lt;0&gt; but was:&lt;1&gt;"
+        },
+        {
+          "name": "oldAccountProductionResponseDoesNotRefreshNewAccountPage",
+          "message": "java.lang.AssertionError: unmet message must include the known remaining task count"
+        },
+        {
+          "name": "actualFreshReadDeadlineShowsPendingInsteadOfSilentCancellation",
+          "message": "java.lang.AssertionError: a known failed fresh read must not leave cached eligibility enabled"
+        }
+      ]
+    }
+  ]
+}

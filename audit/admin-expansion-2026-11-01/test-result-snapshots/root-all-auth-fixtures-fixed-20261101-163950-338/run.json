@@ -1,0 +1,13 @@
+{
+  "logName": "root-all-auth-fixtures-fixed",
+  "arguments": [
+    "-I",
+    "audit/admin-expansion-2026-11-01/layout-review.init.gradle",
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug"
+  ],
+  "exitCode": 1,
+  "startedUtc": "2026-11-01T16:39:00.0924061Z",
+  "finishedUtc": "2026-11-01T16:39:50.4975478Z",
+  "currentRunXmlCount": 67
+}

@@ -1,0 +1,26 @@
+[notification-worker] Previous iteration still in progress, skipping tick.
+[
+  {
+    "attempt": 1,
+    "error": "DATABASE_URL or SUPABASE_DB_URL environment variable is required."
+  },
+  {
+    "attempt": 2,
+    "result": null
+  }
+]
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: A failed connection setup must release inFlight so the next tick can retry
+    at file:///F:/AI/12Tester/audit/admin-expansion-2026-11-01/independent-worker-probe.mjs:12:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

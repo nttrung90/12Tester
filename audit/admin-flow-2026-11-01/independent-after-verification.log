@@ -1,0 +1,104 @@
+PASS: effective delta, return amount, and ledger match
+PASS: absent lock target does not report success
+PASS: campaign detail preserves current DTO keys and report counts
+PASS: reject zero provisional grant preserves tester credit and reason contract
+PASS: reject clawback clamps to actual low balance and records ledger metadata
+PASS: unlocked admin can approve reports without owner reward
+PASS: unlocked admin can reject reports
+PASS: unlocked moderator can approve reports without owner reward
+PASS: unlocked moderator can reject reports
+PASS: member denied: adjust credits
+PASS: member denied: lock user
+PASS: member denied: contact list
+PASS: member denied: contact reply
+PASS: member denied: contact status
+PASS: member denied: notification
+PASS: member denied: app configuration
+PASS: member denied: home stats read
+PASS: member denied: home stats write
+PASS: member denied: daily task configuration
+PASS: member denied: daily task list
+PASS: member denied: daily task history
+PASS: member denied: daily task schedule
+PASS: member denied: daily task cancellation
+PASS: member denied: campaign pause
+PASS: member denied: campaign resume
+PASS: member denied: campaign delete
+PASS: moderator denied: adjust credits
+PASS: moderator denied: lock user
+PASS: moderator denied: contact list
+PASS: moderator denied: contact reply
+PASS: moderator denied: contact status
+PASS: moderator denied: notification
+PASS: moderator denied: app configuration
+PASS: moderator denied: home stats read
+PASS: moderator denied: home stats write
+PASS: moderator denied: daily task configuration
+PASS: moderator denied: daily task list
+PASS: moderator denied: daily task history
+PASS: moderator denied: daily task schedule
+PASS: moderator denied: daily task cancellation
+PASS: moderator denied: campaign pause
+PASS: moderator denied: campaign resume
+PASS: moderator denied: campaign delete
+PASS: missing-profile denied: adjust credits
+PASS: missing-profile denied: lock user
+PASS: missing-profile denied: contact list
+PASS: missing-profile denied: contact reply
+PASS: missing-profile denied: contact status
+PASS: missing-profile denied: notification
+PASS: missing-profile denied: app configuration
+PASS: missing-profile denied: home stats read
+PASS: missing-profile denied: home stats write
+PASS: missing-profile denied: daily task configuration
+PASS: missing-profile denied: daily task list
+PASS: missing-profile denied: daily task history
+PASS: missing-profile denied: daily task schedule
+PASS: missing-profile denied: daily task cancellation
+PASS: missing-profile denied: campaign pause
+PASS: missing-profile denied: campaign resume
+PASS: missing-profile denied: campaign delete
+PASS: anonymous denied: adjust credits
+PASS: anonymous denied: lock user
+PASS: anonymous denied: contact list
+PASS: anonymous denied: contact reply
+PASS: anonymous denied: contact status
+PASS: anonymous denied: notification
+PASS: anonymous denied: app configuration
+PASS: anonymous denied: home stats read
+PASS: anonymous denied: home stats write
+PASS: anonymous denied: daily task configuration
+PASS: anonymous denied: daily task list
+PASS: anonymous denied: daily task history
+PASS: anonymous denied: daily task schedule
+PASS: anonymous denied: daily task cancellation
+PASS: anonymous denied: campaign pause
+PASS: anonymous denied: campaign resume
+PASS: anonymous denied: campaign delete
+PASS: locked admin denied: adjust credits
+PASS: locked admin denied: lock user
+PASS: locked admin denied: contact list
+PASS: locked admin denied: contact reply
+PASS: locked admin denied: contact status
+PASS: locked admin denied: notification
+PASS: locked admin denied: app configuration
+PASS: locked admin denied: home stats read
+PASS: locked admin denied: home stats write
+PASS: locked admin denied: daily task configuration
+PASS: locked admin denied: daily task list
+PASS: locked admin denied: daily task history
+PASS: locked admin denied: daily task schedule
+PASS: locked admin denied: daily task cancellation
+PASS: locked admin denied: campaign pause
+PASS: locked admin denied: campaign resume
+PASS: locked admin denied: campaign delete
+PASS: locked admin cannot approve reports
+PASS: locked admin cannot reject reports
+PASS: locked moderator cannot approve reports
+PASS: locked moderator cannot reject reports
+PASS: locked admin cannot update configuration directly
+PASS: anon has no TRUNCATE capability on public tables
+PASS: anon has no TRIGGER capability on public tables
+PASS: authenticated has no TRUNCATE capability on public tables
+PASS: authenticated has no TRIGGER capability on public tables
+ALL 103 INDEPENDENT CHECKS PASSED

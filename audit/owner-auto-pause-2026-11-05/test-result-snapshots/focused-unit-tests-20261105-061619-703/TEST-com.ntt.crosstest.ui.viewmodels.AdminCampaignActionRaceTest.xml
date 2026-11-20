@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-05T06:16:11.353Z" hostname="PC-5700X3D" time="0.331">
+  <properties/>
+  <testcase name="cancellationHandling_andOwnedFlagCleanup" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.031"/>
+  <testcase name="constructor_withUnconfinedTestDispatcherAndAuthenticatedClient_doesNotCrash" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.011"/>
+  <testcase name="delayedAdminPauseResponse_afterSameUidGenerationChange_doesNotPublishOrRefresh" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.025"/>
+  <testcase name="delayedAdminDeleteResponse_afterAccountChange_neverExecutesOnDeletedOrPublishesState" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.025"/>
+  <testcase name="inFlightRefresh_doesNotOverrideNewMutationState" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.037"/>
+  <testcase name="pendingBAction_refreshDoesNotReleaseBGate_duplicateBActionRejected" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.026"/>
+  <testcase name="preNetworkGuard_unauthenticatedAdmin_rejectsImmediately" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.017"/>
+  <testcase name="delayedA_switchB_startB_finishA_whileBPending_preservesLoading_noACallbacks_thenBCompletesNormally" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.031"/>
+  <testcase name="duplicateSubmissions_withQueuedStandardTestDispatcher_admitsOnlyFirstCall" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.03"/>
+  <testcase name="synchronousAdmission_setsIsActionLoadingImmediately" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.025"/>
+  <testcase name="sameUidGenerationChange_allowsNewAdminActionBeforeOldCompletes_andOldFinallyDoesNotClearNewLoading" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.032"/>
+  <testcase name="validAdminActionSuccess_andDeleteCallbackExactlyOnce" classname="com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest" time="0.038"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

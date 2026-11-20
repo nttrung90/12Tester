@@ -84,14 +84,39 @@ fun AdminReportsScreen(
     val viewModel: AdminReportsViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                AdminReportsViewModel(app.campaignRepository, Localizer(app))
+                AdminReportsViewModel(app.campaignRepository, Localizer(app), app.authRepository)
             }
         }
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var reportToReply by rememberSaveable { mutableStateOf<ContactReport?>(null) }
+    var targetReportReplyId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val reportToReply = remember(targetReportReplyId, uiState.allReports) {
+        targetReportReplyId?.let { id -> uiState.allReports.find { it.id == id } }
+    }
+
+    LaunchedEffect(uiState.isLoading, uiState.allReports) {
+        if (!uiState.isLoading && uiState.allReports.isNotEmpty()) {
+            if (targetReportReplyId != null && reportToReply == null) targetReportReplyId = null
+        }
+    }
+
+    var savedSessionUid by rememberSaveable { mutableStateOf(uiState.currentAdminId) }
+    var savedSessionGen by rememberSaveable { mutableStateOf(uiState.sessionGeneration) }
+
+    LaunchedEffect(uiState.currentAdminId, uiState.sessionGeneration) {
+        if (uiState.currentAdminId == null) {
+            targetReportReplyId = null
+            savedSessionUid = null
+            savedSessionGen = 0L
+        } else if (savedSessionUid != uiState.currentAdminId || savedSessionGen != uiState.sessionGeneration) {
+            targetReportReplyId = null
+            savedSessionUid = uiState.currentAdminId
+            savedSessionGen = uiState.sessionGeneration
+        }
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -110,11 +135,13 @@ fun AdminReportsScreen(
     reportToReply?.let { report ->
         AdminReplyDialog(
             report = report,
+            currentAdminId = uiState.currentAdminId,
+            sessionGeneration = uiState.sessionGeneration,
             isLoading = uiState.isActionLoading,
-            onDismiss = { reportToReply = null },
+            onDismiss = { targetReportReplyId = null },
             onSend = { message ->
                 viewModel.replyTo(report.id, message)
-                reportToReply = null
+                targetReportReplyId = null
             },
         )
     }
@@ -193,13 +220,13 @@ fun AdminReportsScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(uiState.filteredReports, key = { it.id }) { report ->
                             AdminReportCard(
                                 report = report,
                                 isActionLoading = uiState.isActionLoading,
-                                onReply = { reportToReply = report },
+                                onReply = { targetReportReplyId = report.id },
                                 onToggleResolved = { viewModel.setResolved(report.id, !report.isResolved) },
                             )
                         }
@@ -232,7 +259,7 @@ private fun AdminReportCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Header: avatar, name/email, status badge
             Row(
@@ -439,11 +466,13 @@ private fun ReportStatusBadge(report: ContactReport) {
 @Composable
 private fun AdminReplyDialog(
     report: ContactReport,
+    currentAdminId: String?,
+    sessionGeneration: Long,
     isLoading: Boolean,
     onDismiss: () -> Unit,
     onSend: (String) -> Unit,
 ) {
-    var message by rememberSaveable { mutableStateOf("") }
+    var message by rememberSaveable(report.id, currentAdminId, sessionGeneration) { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },

@@ -1,0 +1,12 @@
+[
+  {
+    "attempt": 1,
+    "error": "DATABASE_URL or SUPABASE_DB_URL environment variable is required."
+  },
+  {
+    "attempt": 2,
+    "error": "DATABASE_URL or SUPABASE_DB_URL environment variable is required."
+  }
+]
+[notification-worker] Iteration error: DATABASE_URL or SUPABASE_DB_URL environment variable is required.
+[notification-worker] Iteration error: DATABASE_URL or SUPABASE_DB_URL environment variable is required.

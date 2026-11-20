@@ -1,0 +1,22 @@
+
+> crosstest-storage-cleanup@1.0.0 test
+> node --test cleanup-reports-storage.test.mjs
+
+▶ Storage Cleanup Worker Tests
+  ✔ R01: Chỉ dọn file >= 29 ngày, giữ file < 29 ngày, cảnh báo SLA khi >= 30 ngày (3.4155ms)
+  ✔ R01: Bảo vệ an toàn - icon app_icons/ tuyệt đối không bị quét hay xóa (0.2365ms)
+  ✔ R01: Cờ --dry-run tính toán chính xác nhưng không thực hiện lệnh xóa (0.2647ms)
+  ✔ R01: Xử lý idempotent khi file trả về 404 (đã bị xóa trước đó) (0.2808ms)
+  ✔ R01: Xử lý an toàn khi xảy ra Precondition Failed 412 (generation mismatch) (0.2981ms)
+  ✔ R01: Bảo mật - Ngăn chặn chạy trên bucket lạ không thuộc allowlist (0.513ms)
+  ✔ R01: Bảo mật - Ngăn chặn prefix rỗng hoặc không bắt đầu bằng reports/ (0.231ms)
+  ✔ R02: E02 Thumbnail tạo muộn kế thừa expiry của parent qua parent_time_created, bị xóa cùng parent (0.342ms)
+✔ Storage Cleanup Worker Tests (6.6189ms)
+ℹ tests 8
+ℹ suites 1
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79.7602

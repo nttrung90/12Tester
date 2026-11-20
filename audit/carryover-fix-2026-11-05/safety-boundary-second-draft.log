@@ -1,0 +1,21 @@
+ACTIVE MIGRATIONS: 062_consolidated_baseline.sql, 063_report_crypto_search_path.sql, 064_explicit_report_context.sql, 065_remove_dhash_hardblock.sql, 066_push_and_carryover_hardening.sql, 067_admin_direct_notification_popup.sql, 068_owner_tester_reports_count.sql, 069_admin_audit_hardening.sql, 070_admin_management.sql, 071_business_policies.sql, 072_admin_notification_campaigns.sql, 073_admin_action_audit.sql, 074_app_mission_window_and_multi_attachments.sql, 075_owner_auto_pause_config.sql, 076_mission_for_finalized_campaigns.sql, 077_mission_reward_modes_and_management.sql, 078_admin_pause_reason_popup.sql, 079_owner_auto_pause_debt_and_timestamp_guard.sql, 080_report_context_carryover_and_gap_recovery.sql
+PASS: Ordinary members cannot execute privileged finalization: select public.apply_daily_inactivity_penalty() {"denied":true}
+PASS: Ordinary members cannot execute privileged finalization: select public.finalize_daily_tasks_for_date((now() at time zone 'Asia/Ho_Chi_Minh')::date-1) {"denied":true}
+PASS: Unlocked administrator can inspect private diagnostic: diagnose_daily_task_stuck_users {"authorized":true,"rows":0}
+PASS: Trusted service can inspect private diagnostic: diagnose_daily_task_stuck_users {"authorized":true,"rows":0}
+PASS: Unidentified client cannot inspect all users: diagnose_daily_task_stuck_users {"denied":true}
+PASS: Locked administrator cannot use private diagnostic: diagnose_daily_task_stuck_users {"denied":true}
+PASS: Unlocked administrator can inspect private diagnostic: audit_carryover_journal_reconciliation {"authorized":true,"rows":0}
+PASS: Trusted service can inspect private diagnostic: audit_carryover_journal_reconciliation {"authorized":true,"rows":0}
+PASS: Unidentified client cannot inspect all users: audit_carryover_journal_reconciliation {"denied":true}
+PASS: Locked administrator cannot use private diagnostic: audit_carryover_journal_reconciliation {"denied":true}
+PASS: Trusted service retains access to scheduled and explicit finalization {"authorized":true}
+PASS: An unresolved old user cannot starve healthy users awaiting recent finalization {"met":true,"mode":"owner","status_date":"2026-11-05","history_ready":true,"missed_streak":0,"available_apps":21,"carry_in_tests":0,"required_tests":3,"carryover_ready":true,"completed_tests":0,"logged_in_today":true,"active_app_count":1,"is_penalty_exempt":true,"base_required_tests":3,"next_penalty_percent":1,"carryover_effective_from":"2026-10-30","effective_required_tests":3,"carryover_remaining_tests":0}
+FAIL: Unprovable coverage boundary cannot starve healthy users: partial=false A legacy account lacking reliable boundary history must not block healthy accounts
+
+false !== true
+
+FAIL: Unprovable coverage boundary cannot starve healthy users: partial=true A legacy account lacking reliable boundary history must not block healthy accounts
+
+false !== true
+

@@ -1,0 +1,58 @@
+{
+  "ownerKeys": [
+    "status",
+    "is_owner",
+    "round_id",
+    "closed_at",
+    "has_round",
+    "paid_count",
+    "started_at",
+    "stopped_at",
+    "campaign_id",
+    "spent_credits",
+    "max_recipients",
+    "reward_credits",
+    "remaining_slots",
+    "refunded_credits",
+    "reserved_credits",
+    "remaining_credits"
+  ],
+  "reconcileKeys": [
+    "found",
+    "status",
+    "replayed",
+    "round_id",
+    "paid_count",
+    "campaign_id",
+    "owner_balance",
+    "spent_credits",
+    "max_recipients",
+    "reward_credits",
+    "remaining_slots",
+    "refunded_credits",
+    "reserved_credits",
+    "client_request_id",
+    "remaining_credits"
+  ],
+  "testerKeys": [
+    "status",
+    "is_owner",
+    "round_id",
+    "has_round",
+    "my_awarded",
+    "paid_count",
+    "campaign_id",
+    "my_awarded_at",
+    "max_recipients",
+    "reward_credits",
+    "my_award_amount",
+    "remaining_slots",
+    "my_pending_eligible"
+  ],
+  "reportBonus": [
+    {
+      "id": "850c86b3-649c-4cad-a9b1-5a33cb927096",
+      "bonus_awarded": 12
+    }
+  ]
+}

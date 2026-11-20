@@ -62,7 +62,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
+import com.ntt.crosstest.data.Localizer
 import com.ntt.crosstest.data.Profile
+import com.ntt.crosstest.ui.theme.statusColors
+import com.ntt.crosstest.ui.viewmodels.friendlyError
 import kotlinx.coroutines.launch
 
 private const val ADMIN_EMAIL = "firstntt90@gmail.com"
@@ -94,7 +97,7 @@ fun AccountLockedScreen(
                     onUnlocked()
                 }
             } catch (e: Exception) {
-                snackbarHostState.showSnackbar(e.localizedMessage ?: resources.getString(R.string.account_locked_load_failed))
+                snackbarHostState.showSnackbar(friendlyError(e, Localizer(context)).ifBlank { resources.getString(R.string.account_locked_load_failed) })
             } finally {
                 isLoading = false
             }
@@ -151,9 +154,9 @@ fun AccountLockedScreen(
                                     snackbarHostState.showSnackbar(resources.getString(R.string.locked_unlock_failed))
                                 }
                             } catch (e: Exception) {
-                                val msg = e.localizedMessage ?: resources.getString(R.string.locked_unlock_error)
+                                val msg = friendlyError(e, Localizer(context)).ifBlank { resources.getString(R.string.locked_unlock_error) }
                                 snackbarHostState.showSnackbar(
-                                    if ("INSUFFICIENT" in msg.uppercase()) resources.getString(R.string.locked_insufficient_credits) else msg
+                                    msg
                                 )
                             } finally {
                                 isUnlocking = false
@@ -232,20 +235,20 @@ fun AccountLockedScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // Lock Hero Icon
             Box(
                 modifier = Modifier
                     .size(90.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFFEBEE)),
+                    .background(MaterialTheme.colorScheme.errorContainer),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Lock,
-                    contentDescription = "Locked",
-                    tint = Color(0xFFD32F2F),
+                    contentDescription = stringResource(R.string.cd_account_locked),
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(48.dp),
                 )
             }
@@ -256,7 +259,7 @@ fun AccountLockedScreen(
                     text = stringResource(R.string.locked_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -307,7 +310,7 @@ fun AccountLockedScreen(
                             text = "$credits Credit",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (canUnlockWithCredits) Color(0xFF2E7D32) else Color(0xFFD32F2F),
+                            color = if (canUnlockWithCredits) MaterialTheme.statusColors.success else MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -317,7 +320,7 @@ fun AccountLockedScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.statusColors.warningContainer),
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
@@ -327,13 +330,13 @@ fun AccountLockedScreen(
                     Icon(
                         imageVector = Icons.Filled.Warning,
                         contentDescription = null,
-                        tint = Color(0xFFF57F17),
+                        tint = MaterialTheme.statusColors.warning,
                         modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = stringResource(R.string.locked_instruction),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF5D4037),
+                        color = MaterialTheme.statusColors.onWarningContainer,
                     )
                 }
             }
@@ -375,7 +378,8 @@ fun AccountLockedScreen(
                         modifier = Modifier.fillMaxWidth(),
                         enabled = canUnlockWithCredits && !isUnlocking,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2C4A73),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                         shape = RoundedCornerShape(10.dp),
                     ) {
@@ -388,7 +392,7 @@ fun AccountLockedScreen(
                         Text(
                             text = stringResource(R.string.locked_insufficient_hint),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFD32F2F),
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -409,7 +413,7 @@ fun AccountLockedScreen(
                         Icon(
                             imageVector = Icons.Filled.Email,
                             contentDescription = null,
-                            tint = Color(0xFF1E88E5),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp),
                         )
                         Spacer(Modifier.width(8.dp))

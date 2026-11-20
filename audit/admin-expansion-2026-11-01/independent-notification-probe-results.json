@@ -1,0 +1,26 @@
+[
+  {
+    "name": "different delimiter-containing payload must reject replay",
+    "payloadMismatchRejected": true,
+    "error": "REQUEST_ID_CONFLICT: Request ID already used with different payload"
+  },
+  {
+    "name": "empty scheduled role audience must not grow when worker starts",
+    "initialCount": 0,
+    "afterCount": 0,
+    "worker": {
+      "details": [
+        {
+          "completed": true,
+          "campaign_id": "1ff30888-c5a1-4738-bf4c-827050522dd4",
+          "sent_in_batch": 0,
+          "pending_remaining": 0
+        }
+      ],
+      "success": true,
+      "notifications_sent": 0,
+      "campaigns_processed": 1
+    },
+    "scheduledCount": 0
+  }
+]

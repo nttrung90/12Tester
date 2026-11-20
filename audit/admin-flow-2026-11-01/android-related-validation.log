@@ -1,0 +1,98 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/nguye/.gradle/wrapper/dists/gradle-9.3.1-bin/23ovyewtku6u96viwx3xl3oks/gradle-9.3.1/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:562:56 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:596:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1199:41 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1207:40 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:562:56 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:596:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1199:41 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+w: file:///F:/AI/12Tester/app/src/main/java/com/ntt/crosstest/ui/viewmodels/CampaignDetailViewModel.kt:1207:40 Unnecessary safe call on a non-null receiver of type 'TesterReport'.
+
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/C:/Users/nguye/.gradle/caches/modules-2/files-2.1/org.conscrypt/conscrypt-openjdk-uber/2.6.2/65c5977595ee9cc12e6017b9d43b1d2e3d1bab63/conscrypt-openjdk-uber-2.6.2.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+
+> Task :app:testDebugUnitTest
+
+AdminCampaignActionRaceTest > delayedAdminPauseResponse_afterSameUidGenerationChange_doesNotPublishOrRefresh FAILED
+    java.lang.AssertionError at Assert.java:87
+        Caused by: java.lang.AssertionError at AdminCampaignActionRaceTest.kt:418
+
+AdminCampaignActionRaceTest > inFlightRefresh_doesNotOverrideNewMutationState FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at AdminCampaignActionRaceTest.kt:608
+
+AdminCampaignActionRaceTest > pendingBAction_refreshDoesNotReleaseBGate_duplicateBActionRejected FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at AdminCampaignActionRaceTest.kt:353
+
+AdminCampaignActionRaceTest > delayedA_switchB_startB_finishA_whileBPending_preservesLoading_noACallbacks_thenBCompletesNormally FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at AdminCampaignActionRaceTest.kt:207
+
+AdminCampaignActionRaceTest > sameUidGenerationChange_allowsNewAdminActionBeforeOldCompletes_andOldFinallyDoesNotClearNewLoading FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at AdminCampaignActionRaceTest.kt:283
+
+AdminCampaignActionRaceTest > validAdminActionSuccess_andDeleteCallbackExactlyOnce FAILED
+    org.junit.ComparisonFailure at AdminCampaignActionRaceTest.kt:677
+
+21 tests completed, 6 failed
+
+> Task :app:testDebugUnitTest FAILED
+
+[Incubating] Problems report is available at: file:///F:/AI/12Tester/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///F:/AI/12Tester/app/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 15s
+31 actionable tasks: 5 executed, 26 up-to-date

@@ -1,0 +1,114 @@
+{
+  "at": "2026-11-16T14:16:23.494Z",
+  "scope": "Injected RPC only, no network",
+  "results": [
+    {
+      "name": "valid ACK",
+      "status": "PASS",
+      "observed": {
+        "valid": true,
+        "failSafe": false,
+        "calls": 1
+      }
+    },
+    {
+      "name": "SQL rejects metric",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "missing ACK flag",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "null ACK flag",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "string false ACK",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "string true ACK",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "numeric zero ACK",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "numeric one ACK",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "array ACK flag",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "object ACK flag",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "collector invalid cannot become valid",
+      "status": "PASS",
+      "observed": {
+        "valid": false,
+        "failSafe": true,
+        "calls": 1
+      }
+    },
+    {
+      "name": "dry run remains read only",
+      "status": "PASS",
+      "observed": {
+        "valid": true,
+        "failSafe": false,
+        "calls": 0
+      }
+    }
+  ]
+}

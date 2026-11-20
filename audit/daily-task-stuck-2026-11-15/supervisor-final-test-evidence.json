@@ -1,0 +1,798 @@
+{
+  "At": "2026-11-15T18:42:23.0466933+07:00",
+  "Summary": {
+    "Suites": 98,
+    "Tests": 762.0,
+    "Failures": 0.0,
+    "Errors": 0.0,
+    "Skipped": 0.0,
+    "Earliest": "2026-11-15T11:40:31.780Z",
+    "Latest": "2026-11-15T11:41:09.308Z"
+  },
+  "Suites": [
+    {
+      "Name": "com.ntt.crosstest.audit.BusinessPolicyRecheckIndependentTest",
+      "Tests": 12,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:31.780Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.audit.ImageHashCollisionAuditTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:34.258Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.audit.ReportOverlapTest",
+      "Tests": 17,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:37.063Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.audit.ReportV2WirePayloadProbeTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:42.838Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AdminDailyTaskHardeningRegressionTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:42.935Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AdminDailyTaskPolicyTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.294Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AdminNotificationCampaignRepositoryTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.322Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AdminOwnerAutoPauseTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.442Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AdminRelatedRepositoryRaceTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.447Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AppUpdateRegressionTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.668Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.AppUpdateRewardTest",
+      "Tests": 10,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.796Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.BusinessPolicyRepositoryTest",
+      "Tests": 10,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:43.883Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.CacheRegressionTest",
+      "Tests": 36,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.014Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.CampaignPushUnitTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.679Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.CampaignTesterBonusStoreTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.685Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.DailyTaskActionGateUnitTest",
+      "Tests": 13,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.786Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.DailyTaskCarryoverUnitTest",
+      "Tests": 11,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.795Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.EgressFinalClientReviewTest",
+      "Tests": 12,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.820Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.EgressProtocolReviewTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:44.993Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.EgressReviewContractTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.019Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.FinancialConsumerV2BehavioralTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.066Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.FinancialIntentStoreTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.117Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.help.HelpDocumentParserTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:53.530Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.HomeStatsCycleTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.195Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ImmediateDailyQuotaUnitTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.200Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheBudgetAuditTest",
+      "Tests": 1,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.350Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheClockAuditTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.372Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheCompositeAuditTest",
+      "Tests": 2,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.430Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheFinalAuditTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.457Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheMutationAuditTest",
+      "Tests": 2,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.543Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCachePublicationAuditTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.566Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheSnapshotClearAuditTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.644Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.IndependentCacheSnapshotIntegrityAuditTest",
+      "Tests": 2,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.698Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.MissionRegressionTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:45.756Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.MissionReportAndExpirationTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.487Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.MissionReportMultiAttachmentTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.623Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.MissionReportRecheckProbeTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.678Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.MissionRewardModesUnitTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.765Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.NotificationPendingAckStoreTest",
+      "Tests": 2,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.951Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.OwnerRemovalLifecycleTest",
+      "Tests": 11,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:46.984Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.OwnerReportCountBehavioralTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.292Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.PendingReportStoreTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.406Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.PushAndCarryoverHardeningTest",
+      "Tests": 16,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.482Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportRpcCompatibilityTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.794Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportRpcFallbackAuditTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.832Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportSubmissionFailureTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.875Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportSubmitManagerIntegrationTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:47.917Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportSubmitPolicyTest",
+      "Tests": 10,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:52.313Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.ReportWorkStateTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:52.421Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.SupervisorDailyTaskRecoveryReviewTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:52.423Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.SupervisorDailyTaskStatusCacheReviewTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:52.453Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.SupervisorImmediateQuotaRaceTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:52.465Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.data.TesterBonusRepositoryTest",
+      "Tests": 12,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:53.425Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.localization.ComposeLocaleRegressionTest",
+      "Tests": 2,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:53.542Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.localization.LocalizationHardeningTest",
+      "Tests": 13,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:54.441Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.DailyTaskCompletionDisplayTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:54.660Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.TesterBonusVisualQATest",
+      "Tests": 8,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:54.667Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminBusinessPolicyViewModelTest",
+      "Tests": 17,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:57.377Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminCampaignActionRaceTest",
+      "Tests": 12,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:57.575Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminCampaignPauseReasonTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:58.013Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminFlowSessionRaceTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:58.196Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminManagementCoreTest",
+      "Tests": 13,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:58.475Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminNotificationCampaignViewModelTest",
+      "Tests": 11,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:58.957Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminOwnerAutoPauseViewModelTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:59.058Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminPauseDialogControllerTest",
+      "Tests": 10,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:59.182Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AdminPauseSessionIdentityReviewTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:59.191Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.AppUpdateReleaseViewModelBehavioralTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:59.370Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.CampaignDetailNextAppPriorityTest",
+      "Tests": 13,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:40:59.488Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.CampaignDetailTesterBonusTest",
+      "Tests": 1,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.305Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.CampaignPostingPolicyViewModelTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.389Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.DailyHomeOrderTest",
+      "Tests": 20,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.594Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.NotificationPopupReviewRegressionTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.603Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.NotificationPopupRound3RegressionTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.780Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.NotificationPopupViewModelTest",
+      "Tests": 14,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:00.853Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.OwnerAppDetailActionGateBehavioralTest",
+      "Tests": 8,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:01.046Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.OwnerAutoPauseResumeHardeningTest",
+      "Tests": 9,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.292Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.OwnerDailyRefreshRaceReviewTest",
+      "Tests": 1,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.411Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.OwnerDailyTaskOrderingReviewTest",
+      "Tests": 1,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.429Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.PendingCarryoverRetryRegressionTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.446Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.SlotAndPushDurabilityBehavioralTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.516Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.SupervisorDailyTaskHomeRecoveryReviewTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.627Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.SupervisorOwnerActionGateReviewTest",
+      "Tests": 8,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:02.669Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.ui.viewmodels.TesterBonusViewModelTest",
+      "Tests": 19,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:04.387Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.ComparisonStateCoordinatorTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:05.124Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.DetailedImageComparatorTest",
+      "Tests": 7,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:05.449Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.EgressAuditProbeTest",
+      "Tests": 8,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:05.567Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.EgressFinalPolicyAuditTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:06.061Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.EgressGatewayClientAuditTest",
+      "Tests": 5,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:06.090Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.EgressRound2OptInTest",
+      "Tests": 8,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:06.157Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.FirebaseEgressOptimizationTest",
+      "Tests": 30,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:06.355Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.NetworkRecoveryTest",
+      "Tests": 4,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:07.894Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.NextCampaignSelectorTest",
+      "Tests": 15,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:07.941Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.ReportComparisonSelectorTest",
+      "Tests": 11,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:07.944Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.util.ReportUrlRetryTest",
+      "Tests": 12,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:07.948Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.work.EgressThumbnailPipelineAuditTest",
+      "Tests": 1,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:07.996Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.work.ReportBackgroundSubmissionTest",
+      "Tests": 6,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:08.045Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.work.ReportSubmissionLatencyTest",
+      "Tests": 3,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:09.253Z"
+    },
+    {
+      "Name": "com.ntt.crosstest.work.ReportUploadWorkerTest",
+      "Tests": 13,
+      "Failures": 0,
+      "Errors": 0,
+      "Skipped": 0,
+      "Timestamp": "2026-11-15T11:41:09.308Z"
+    }
+  ]
+}
