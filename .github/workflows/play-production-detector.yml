@@ -1,0 +1,16 @@
+name: Play Production Detector
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Edge Function
+        run: |
+          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/play-production-detector" \
+            -H "Content-Type: application/json" \
+            -H "X-Cron-Secret: ${{ secrets.PLAY_DETECTOR_CRON_SECRET }}" \
+            -d '{"limit": 25}'
