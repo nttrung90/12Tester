@@ -10,8 +10,15 @@ jobs:
     steps:
       - name: Trigger Edge Function
         run: |
-          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/play-production-detector" \
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/play-production-detector" \
             -H "Content-Type: application/json" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "X-Cron-Secret: ${{ secrets.PLAY_DETECTOR_CRON_SECRET }}" \
-            -d '{"limit": 25}'
+            -d '{"limit": 25}')
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+          echo "HTTP_STATUS=$STATUS"
+          echo "BODY=$BODY"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+            exit 1
+          fi
