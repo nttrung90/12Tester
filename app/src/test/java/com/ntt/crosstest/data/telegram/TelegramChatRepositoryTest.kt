@@ -177,11 +177,12 @@ class TelegramChatRepositoryTest {
                 is TdApi.CheckAuthenticationPassword -> TdApi.Ok()
                 is TdApi.SetOption -> TdApi.Ok()
                 is TdApi.GetMe -> TdApi.User().apply { id = 100L; firstName = "Tester"; lastName = "One" }
-                is TdApi.CheckChatInviteLink -> TdApi.ChatInviteLinkInfo().apply {
-                    chatId = 0L // Not yet joined -> triggers JoinChatByInviteLink
+                is TdApi.SearchPublicChat -> TdApi.Chat().apply {
+                    id = 777L
                     title = "12 Cross Testers"
+                    type = TdApi.ChatTypeSupergroup(555L, false)
                 }
-                is TdApi.JoinChatByInviteLink -> TdApi.ChatJoinResultSuccess(777L)
+                is TdApi.JoinChat -> TdApi.ChatJoinResultSuccess(query.chatId)
                 is TdApi.GetChat -> TdApi.Chat().apply {
                     id = query.chatId
                     title = "12 Cross Testers"
@@ -192,6 +193,7 @@ class TelegramChatRepositoryTest {
                     id = 555L
                     memberCount = 42
                     isForum = false
+                    status = TdApi.ChatMemberStatusLeft()
                 }
                 is TdApi.GetChatPinnedMessage -> TdApi.Error(404, "Not found")
                 is TdApi.GetChatHistory -> {
@@ -281,13 +283,13 @@ class TelegramChatRepositoryTest {
         repo.submitPassword("my_secret")
         assertTrue(gateway.sentQueries.any { it is TdApi.CheckAuthenticationPassword && it.password == "my_secret" })
 
-        // 5. Ready -> CheckChatInviteLink -> JoinChatByInviteLink -> OpenChat -> GetChatHistory backfill
+        // 5. Ready -> SearchPublicChat("Crosstesters") -> JoinChat -> OpenChat -> GetChatHistory backfill
         gateway.emitUpdate(TdApi.UpdateAuthorizationState(TdApi.AuthorizationStateReady()))
 
         assertTrue(repo.uiState.value.authState is TelegramAuthUiState.Ready)
         assertEquals(777L, cache.cachedId)
-        assertTrue(gateway.sentQueries.any { it is TdApi.CheckChatInviteLink && it.inviteLink == CommunityLinks.TELEGRAM_GROUP_URL })
-        assertTrue(gateway.sentQueries.any { it is TdApi.JoinChatByInviteLink && it.inviteLink == CommunityLinks.TELEGRAM_GROUP_URL })
+        assertTrue(gateway.sentQueries.any { it is TdApi.SearchPublicChat && it.username == "Crosstesters" })
+        assertTrue(gateway.sentQueries.any { it is TdApi.JoinChat && it.chatId == 777L })
         assertTrue(gateway.sentQueries.any { it is TdApi.OpenChat && it.chatId == 777L })
         assertEquals(42, repo.uiState.value.chatInfo?.memberCount)
 
@@ -356,6 +358,7 @@ class TelegramChatRepositoryTest {
             apiHash = "test_hash",
             gateway = gateway,
             chatIdCacheStore = InMemoryChatIdStore(),
+            groupInviteUrl = "https://t.me/+PrivateInviteHash",
             ioDispatcher = UnconfinedTestDispatcher(testScheduler),
             suggestedDisplayNameProvider = { "Nguyen An" },
             observeForeground = false,
@@ -514,6 +517,7 @@ class TelegramChatRepositoryTest {
             apiHash = "test_hash",
             gateway = gateway,
             chatIdCacheStore = InMemoryChatIdStore(0L),
+            groupInviteUrl = "https://t.me/+PrivateInviteHash",
             ioDispatcher = UnconfinedTestDispatcher(testScheduler),
             observeForeground = false,
         )
@@ -741,6 +745,80 @@ class TelegramChatRepositoryTest {
         assertEquals(0, repo.unreadCount.value)
         assertFalse(cache.loggedIn)
         repo.dispose()
+    }
+
+    @Test
+    fun extractPublicUsernameDistinguishesPublicAndPrivateLinks() {
+        assertEquals("Crosstesters", TelegramChatRepository.extractPublicUsername("https://t.me/Crosstesters"))
+        assertEquals("Crosstesters", TelegramChatRepository.extractPublicUsername("https://t.me/Crosstesters/"))
+        assertEquals("Crosstesters", TelegramChatRepository.extractPublicUsername("@Crosstesters"))
+        assertNull(TelegramChatRepository.extractPublicUsername("https://t.me/+KcJBT02zr1ZiOGNl"))
+        assertNull(TelegramChatRepository.extractPublicUsername("https://t.me/joinchat/KcJBT02zr1ZiOGNl"))
+        assertNull(TelegramChatRepository.extractPublicUsername("https://t.me/s/Crosstesters"))
+    }
+
+    @Test
+    fun publicGroupSkipsJoinChatWhenAlreadyMemberAndPrivateInviteStillWorks() = runTest {
+        val app = RuntimeEnvironment.getApplication()
+        val gateway = FakeTdLibGateway()
+        val cache = InMemoryChatIdStore(0L, loggedIn = true)
+
+        gateway.handler = { query ->
+            when (query) {
+                is TdApi.SearchPublicChat -> TdApi.Chat().apply {
+                    id = 808L
+                    title = "Crosstesters Public"
+                    unreadCount = 4
+                    type = TdApi.ChatTypeSupergroup(909L, false)
+                }
+                is TdApi.GetSupergroup -> TdApi.Supergroup().apply {
+                    id = 909L
+                    status = TdApi.ChatMemberStatusMember()
+                }
+                is TdApi.GetChat -> TdApi.Chat().apply {
+                    id = 808L
+                    title = "Crosstesters Public"
+                    unreadCount = 4
+                    type = TdApi.ChatTypeSupergroup(909L, false)
+                }
+                is TdApi.GetChatPinnedMessage -> TdApi.Error(404, "None")
+                is TdApi.GetChatHistory -> TdApi.Messages(0, emptyArray())
+                else -> TdApi.Ok()
+            }
+        }
+
+        val repo = TelegramChatRepository(
+            context = app,
+            apiId = 12345,
+            apiHash = "test_hash",
+            gateway = gateway,
+            chatIdCacheStore = cache,
+            ioDispatcher = UnconfinedTestDispatcher(testScheduler),
+            observeForeground = false,
+        )
+        repo.startUnreadWatcherIfLoggedIn()
+        gateway.emitUpdate(TdApi.UpdateAuthorizationState(TdApi.AuthorizationStateReady()))
+
+        assertEquals(4, repo.unreadCount.value)
+        assertEquals(808L, cache.cachedId)
+        assertTrue(gateway.sentQueries.any { it is TdApi.SearchPublicChat && it.username == "Crosstesters" })
+        assertFalse(gateway.sentQueries.any { it is TdApi.JoinChat })
+        repo.dispose()
+    }
+
+    @Test
+    fun dataStoreCacheInvalidatesOldChatIdWhenGroupUrlChanges() = runTest {
+        val app = RuntimeEnvironment.getApplication()
+        val store = DataStoreTelegramChatIdCacheStore(app)
+        store.clear()
+
+        store.setCachedChatId(111L, "https://t.me/+KcJBT02zr1ZiOGNl")
+        assertEquals(111L, store.getCachedChatId("https://t.me/+KcJBT02zr1ZiOGNl"))
+        assertEquals(0L, store.getCachedChatId("https://t.me/Crosstesters"))
+
+        store.setCachedChatId(222L, "https://t.me/Crosstesters")
+        assertEquals(222L, store.getCachedChatId("https://t.me/Crosstesters"))
+        store.clear()
     }
 
     @Test

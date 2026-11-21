@@ -1749,4 +1749,15 @@
     <string name="telegram_back_to_preview_btn">Quay lại xem tin nhắn</string>
     <string name="telegram_refresh_cd">Làm mới tin nhắn</string>
     <string name="telegram_mirror_load_error">Không thể tải tin nhắn. Vui lòng thử lại.</string>
+
+    <!-- Phát hiện App đã lên Production trên Google Play -->
+    <string name="play_production_badge_cd">Đã phát hành công khai trên Google Play</string>
+    <string name="create_play_production_hint_title">Ứng dụng có thể đã phát hành (Production) trên Google Play</string>
+    <string name="create_play_production_hint_desc">Bạn vẫn có thể đăng app này. Nếu hệ thống xác nhận app đã lên Google Play công khai, icon sẽ gắn dấu v và được xếp ưu tiên gợi ý test tiếp theo ở mức thấp nhất.</string>
+    <string name="create_play_production_hint_desc_with_date">Ngày phát hành: %1$s. Bạn vẫn có thể đăng app này; nếu hệ thống xác nhận app đã lên Google Play công khai, icon sẽ gắn dấu v và được xếp ưu tiên gợi ý test tiếp theo ở mức thấp nhất.</string>
+    <string name="campaign_play_production_detected_note">Đã phát hiện phát hành trên Google Play — ưu tiên gợi ý test thấp</string>
+    <string name="campaign_play_production_detected_with_date">Đã phát hiện phát hành trên Google Play (Ngày phát hành: %1$s) — ưu tiên gợi ý test thấp</string>
+    <string name="oad_play_production_detected_title">Đã phát hiện phát hành trên Google Play</string>
+    <string name="oad_play_production_detected_desc">Ứng dụng có dấu hiệu đã lên Production trên Google Play. Bạn có thể bấm xác nhận Production ở bên dưới khi sẵn sàng hoàn tất chiến dịch.</string>
+    <string name="oad_play_production_detected_desc_with_date">Ứng dụng có dấu hiệu đã lên Production trên Google Play (Ngày phát hành: %1$s). Bạn có thể bấm xác nhận Production ở bên dưới khi sẵn sàng hoàn tất chiến dịch.</string>
 </resources>

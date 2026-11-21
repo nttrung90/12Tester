@@ -198,6 +198,23 @@ open class AdminManagementRepository(
         ).decodeAs<AdminSearchCampaignsEnvelope>()
     }
 
+    open suspend fun overrideCampaignPlayProduction(
+        campaignId: String,
+        isProduction: Boolean,
+        lock: Boolean = true,
+        note: String? = null,
+    ): AdminOverrideCampaignPlayProductionResult {
+        return supabase.postgrest.rpc(
+            "admin_override_campaign_play_production",
+            AdminOverrideCampaignPlayProductionParams(
+                campaignId = campaignId,
+                isProduction = isProduction,
+                lock = lock,
+                note = note?.trim()?.ifBlank { null },
+            )
+        ).decodeAs<AdminOverrideCampaignPlayProductionResult>()
+    }
+
     open suspend fun getTesterReportsQueue(
         status: String? = "pending",
         campaignId: String? = null,

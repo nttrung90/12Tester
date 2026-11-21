@@ -33,8 +33,8 @@ android {
         applicationId = "com.ntt.crosstest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 56
-        versionName = "1.5.6"
+        versionCode = 58
+        versionName = "1.5.8"
 
         buildConfigField("String", "SUPABASE_URL", "\"${appSecret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${appSecret("SUPABASE_ANON_KEY")}\"")

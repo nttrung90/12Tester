@@ -17,6 +17,8 @@ class NextCampaignSelectorTest {
         targetTesters: Int = 12,
         todayTestedCount: Int = 0,
         installedCount: Int = 10,
+        playStoreState: String = "unknown",
+        playProductionDetected: Boolean = false,
     ): NextCampaignCandidate {
         return NextCampaignCandidate(
             campaign = Campaign(
@@ -26,6 +28,8 @@ class NextCampaignSelectorTest {
                 packageName = pkg,
                 targetTesters = targetTesters,
                 status = "open",
+                playStoreState = playStoreState,
+                playProductionDetected = playProductionDetected,
             ),
             installedCount = installedCount,
             todayTestedCount = todayTestedCount,
@@ -310,5 +314,157 @@ class NextCampaignSelectorTest {
             if (chosen?.id == "2") c2Selected = true
         }
         assertTrue("Regular tester must randomly select from entire group without installedCount filter", c1Selected && c2Selected)
+    }
+
+    // ========================================================================
+    // 6. PLAY PRODUCTION DETECTION (6-GROUP STRICT PRIORITY)
+    // ========================================================================
+
+    @Test
+    fun groupClassification_allSixGroupsDistinct() {
+        val installedPackages = setOf(
+            "pkg.g1",
+            "pkg.g3",
+            "pkg.g5",
+        )
+
+        val g1 = makeCandidate("1", "pkg.g1", 12, 3, playProductionDetected = false)
+        val g2 = makeCandidate("2", "pkg.g2", 12, 3, playProductionDetected = false)
+        val g3 = makeCandidate("3", "pkg.g3", 12, 12, playProductionDetected = false)
+        val g4 = makeCandidate("4", "pkg.g4", 12, 12, playProductionDetected = false)
+        val g5 = makeCandidate("5", "pkg.g5", 12, 0, playStoreState = "production", playProductionDetected = true)
+        val g6 = makeCandidate("6", "pkg.g6", 12, 0, playStoreState = "production", playProductionDetected = true)
+
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_1_UNDER_TARGET_INSTALLED, NextCampaignSelector.classifyGroup(g1, installedPackages))
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_2_UNDER_TARGET_NOT_INSTALLED, NextCampaignSelector.classifyGroup(g2, installedPackages))
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_3_REACHED_TARGET_INSTALLED, NextCampaignSelector.classifyGroup(g3, installedPackages))
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_4_REACHED_TARGET_NOT_INSTALLED, NextCampaignSelector.classifyGroup(g4, installedPackages))
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_5_PRODUCTION_DETECTED_INSTALLED, NextCampaignSelector.classifyGroup(g5, installedPackages))
+        assertEquals(NextCampaignSelector.PriorityGroup.GROUP_6_PRODUCTION_DETECTED_NOT_INSTALLED, NextCampaignSelector.classifyGroup(g6, installedPackages))
+    }
+
+    @Test
+    fun strictOrdering_productionZeroOfTwelveInstalled_losesToClosedTestingFullNotInstalled() {
+        val installedPackages = setOf("pkg.prod")
+        val prodInstalledZero = makeCandidate(
+            id = "prod-0-12",
+            pkg = "pkg.prod",
+            targetTesters = 12,
+            todayTestedCount = 0,
+            installedCount = 1,
+            playStoreState = "production",
+            playProductionDetected = true,
+        )
+        val closedFullNotInstalled = makeCandidate(
+            id = "closed-12-12",
+            pkg = "pkg.closed",
+            targetTesters = 12,
+            todayTestedCount = 12,
+            installedCount = 500,
+            playStoreState = "not_public",
+            playProductionDetected = false,
+        )
+
+        val selectedRegular = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(prodInstalledZero, closedFullNotInstalled),
+            installedPackages = installedPackages,
+            isFirstTest = false,
+        )
+        assertEquals("Group 4 (closed 12/12 not installed) must beat Group 5 (prod 0/12 installed)", "closed-12-12", selectedRegular?.id)
+
+        val selectedFirstTest = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(prodInstalledZero, closedFullNotInstalled),
+            installedPackages = installedPackages,
+            isFirstTest = true,
+        )
+        assertEquals("isFirstTest must not cross from Group 4 into Group 5", "closed-12-12", selectedFirstTest?.id)
+    }
+
+    @Test
+    fun strictOrdering_groups1To4Empty_group5BeatsGroup6_andGroup6FallbackWorks() {
+        val installedPackages = setOf("pkg.prod.installed")
+        val g5 = makeCandidate("prod-inst", "pkg.prod.installed", 12, 12, installedCount = 50, playProductionDetected = true)
+        val g6 = makeCandidate("prod-uninst", "pkg.prod.uninstalled", 12, 0, installedCount = 2, playProductionDetected = true)
+
+        val selected = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(g6, g5),
+            installedPackages = installedPackages,
+            isFirstTest = false,
+        )
+        assertEquals("Group 5 (prod installed) must beat Group 6 (prod not installed)", "prod-inst", selected?.id)
+
+        val fallback = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(g6),
+            installedPackages = installedPackages,
+            isFirstTest = false,
+        )
+        assertEquals("Group 6 must be selected when Groups 1..5 are empty", "prod-uninst", fallback?.id)
+    }
+
+    @Test
+    fun firstTimeTester_lowestInstalledCountPreservedInsideGroup5AndGroup6() {
+        val installedPackages = setOf("pkg.p1", "pkg.p2")
+        val p1 = makeCandidate("p1", "pkg.p1", 12, 5, installedCount = 30, playProductionDetected = true)
+        val p2 = makeCandidate("p2", "pkg.p2", 12, 10, installedCount = 4, playProductionDetected = true)
+        val p3 = makeCandidate("p3", "pkg.p3", 12, 0, installedCount = 1, playProductionDetected = true) // Group 6
+
+        val selectedG5 = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(p1, p2, p3),
+            installedPackages = installedPackages,
+            isFirstTest = true,
+        )
+        assertEquals("p2", selectedG5?.id)
+
+        val u1 = makeCandidate("u1", "pkg.u1", 12, 0, installedCount = 25, playProductionDetected = true)
+        val u2 = makeCandidate("u2", "pkg.u2", 12, 12, installedCount = 3, playProductionDetected = true)
+        val selectedG6 = NextCampaignSelector.selectNextCampaign(
+            candidates = listOf(u1, u2),
+            installedPackages = emptySet(),
+            isFirstTest = true,
+        )
+        assertEquals("u2", selectedG6?.id)
+    }
+
+    @Test
+    fun playProductionDetectedFlag_hysteresisRespected_andInvalidCountStillRejected() {
+        // playStoreState == "production" with playProductionDetected == false (awaiting 2nd confirmation or admin override)
+        // must remain in Closed-Testing groups (Group 1..4), NOT Group 5..6.
+        val unconfirmedProd = makeCandidate(
+            id = "unconfirmed",
+            pkg = "pkg.unconfirmed",
+            targetTesters = 12,
+            todayTestedCount = 2,
+            playStoreState = "production",
+            playProductionDetected = false,
+        )
+        assertEquals(
+            NextCampaignSelector.PriorityGroup.GROUP_1_UNDER_TARGET_INSTALLED,
+            NextCampaignSelector.classifyGroup(unconfirmedProd, setOf("pkg.unconfirmed")),
+        )
+
+        val invalidProd = NextCampaignCandidate(
+            campaign = Campaign(
+                id = "invalid-prod",
+                appName = "Invalid",
+                packageName = "pkg.invalid",
+                status = "open",
+                playStoreState = "production",
+                playProductionDetected = true,
+            ),
+            installedCount = 5,
+            todayTestedCount = null,
+            statsDate = null,
+        )
+        assertEquals(
+            NextCampaignSelector.PriorityGroup.INVALID_OR_UNKNOWN,
+            NextCampaignSelector.classifyGroup(invalidProd, setOf("pkg.invalid")),
+        )
+        assertNull(
+            NextCampaignSelector.selectNextCampaign(
+                candidates = listOf(invalidProd),
+                installedPackages = setOf("pkg.invalid"),
+                isFirstTest = false,
+            )
+        )
     }
 }

@@ -4,11 +4,13 @@ import com.ntt.crosstest.data.Campaign
 import com.ntt.crosstest.data.NextCampaignCandidate
 
 /**
- * Bộ chọn thuần túy phân nhóm và gợi ý app tiếp theo theo thứ tự ưu tiên 4 nhóm nghiêm ngặt:
- * 1. Chưa đủ chỉ tiêu hôm nay + Đã cài trên máy
- * 2. Chưa đủ chỉ tiêu hôm nay + Chưa cài trên máy
- * 3. Đã đủ/vượt chỉ tiêu hôm nay + Đã cài trên máy
- * 4. Đã đủ/vượt chỉ tiêu hôm nay + Chưa cài trên máy
+ * Bộ chọn thuần túy phân nhóm và gợi ý app tiếp theo theo thứ tự ưu tiên 6 nhóm nghiêm ngặt:
+ * 1. Chưa phát hiện Production + Chưa đủ chỉ tiêu hôm nay + Đã cài trên máy
+ * 2. Chưa phát hiện Production + Chưa đủ chỉ tiêu hôm nay + Chưa cài trên máy
+ * 3. Chưa phát hiện Production + Đã đủ/vượt chỉ tiêu hôm nay + Đã cài trên máy
+ * 4. Chưa phát hiện Production + Đã đủ/vượt chỉ tiêu hôm nay + Chưa cài trên máy
+ * 5. Đã phát hiện Production trên Google Play + Đã cài trên máy
+ * 6. Đã phát hiện Production trên Google Play + Chưa cài trên máy
  *
  * Chỉ chọn nhóm tiếp theo khi tất cả các nhóm trên nó rỗng.
  * Với tài khoản test lần đầu, tiêu chí lượt cài thấp nhất chỉ xét bên trong nhóm đã thắng cuộc.
@@ -22,6 +24,8 @@ object NextCampaignSelector {
         GROUP_2_UNDER_TARGET_NOT_INSTALLED,
         GROUP_3_REACHED_TARGET_INSTALLED,
         GROUP_4_REACHED_TARGET_NOT_INSTALLED,
+        GROUP_5_PRODUCTION_DETECTED_INSTALLED,
+        GROUP_6_PRODUCTION_DETECTED_NOT_INSTALLED,
         INVALID_OR_UNKNOWN,
     }
 
@@ -38,9 +42,9 @@ object NextCampaignSelector {
     }
 
     /**
-     * Phân nhóm ưu tiên của một ứng viên dựa trên trạng thái chỉ tiêu và cài đặt trên máy.
+     * Phân nhóm ưu tiên của một ứng viên dựa trên trạng thái phát hiện Production, chỉ tiêu và cài đặt trên máy.
      * Ứng viên có số liệu thiếu hoặc âm bị xếp vào [PriorityGroup.INVALID_OR_UNKNOWN]
-     * và không bao giờ được xếp vào nhóm 1 hoặc 2.
+     * và không bao giờ được xếp vào nhóm 1..6.
      */
     fun classifyGroup(
         candidate: NextCampaignCandidate,
@@ -49,7 +53,10 @@ object NextCampaignSelector {
         val met = isTargetMet(candidate) ?: return PriorityGroup.INVALID_OR_UNKNOWN
         val isInstalled = candidate.campaign.packageName.isNotBlank() &&
                 candidate.campaign.packageName in installedPackages
+        val isProd = candidate.campaign.isPlayProductionDetected
         return when {
+            isProd && isInstalled -> PriorityGroup.GROUP_5_PRODUCTION_DETECTED_INSTALLED
+            isProd && !isInstalled -> PriorityGroup.GROUP_6_PRODUCTION_DETECTED_NOT_INSTALLED
             !met && isInstalled -> PriorityGroup.GROUP_1_UNDER_TARGET_INSTALLED
             !met && !isInstalled -> PriorityGroup.GROUP_2_UNDER_TARGET_NOT_INSTALLED
             met && isInstalled -> PriorityGroup.GROUP_3_REACHED_TARGET_INSTALLED
@@ -79,6 +86,8 @@ object NextCampaignSelector {
             ?: grouped[PriorityGroup.GROUP_2_UNDER_TARGET_NOT_INSTALLED]?.takeIf { it.isNotEmpty() }
             ?: grouped[PriorityGroup.GROUP_3_REACHED_TARGET_INSTALLED]?.takeIf { it.isNotEmpty() }
             ?: grouped[PriorityGroup.GROUP_4_REACHED_TARGET_NOT_INSTALLED]?.takeIf { it.isNotEmpty() }
+            ?: grouped[PriorityGroup.GROUP_5_PRODUCTION_DETECTED_INSTALLED]?.takeIf { it.isNotEmpty() }
+            ?: grouped[PriorityGroup.GROUP_6_PRODUCTION_DETECTED_NOT_INSTALLED]?.takeIf { it.isNotEmpty() }
             ?: return null
 
         val shortlist = if (isFirstTest) {

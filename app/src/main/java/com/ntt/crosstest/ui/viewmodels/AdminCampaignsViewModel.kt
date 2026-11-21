@@ -2,6 +2,7 @@ package com.ntt.crosstest.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ntt.crosstest.R
 import com.ntt.crosstest.data.AdminCampaignItem
 import com.ntt.crosstest.data.AdminDateTimeCursor
 import com.ntt.crosstest.data.AdminManagementRepository
@@ -28,6 +29,8 @@ data class AdminCampaignsUiState(
     val hasMore: Boolean = false,
     val nextCursor: AdminDateTimeCursor? = null,
     val error: String? = null,
+    val actionMessage: String? = null,
+    val overridingCampaignIds: Set<String> = emptySet(),
     val currentAdminId: String? = null,
     val sessionGeneration: Long = 0L,
 )
@@ -121,6 +124,75 @@ class AdminCampaignsViewModel(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun clearActionMessage() {
+        _uiState.update { it.copy(actionMessage = null) }
+    }
+
+    fun overridePlayProduction(
+        campaignId: String,
+        isProduction: Boolean,
+        lock: Boolean = true,
+        note: String? = null,
+    ) {
+        val (curUid, curGen) = reconcileSession()
+        if (campaignId in _uiState.value.overridingCampaignIds) return
+
+        _uiState.update {
+            it.copy(
+                overridingCampaignIds = it.overridingCampaignIds + campaignId,
+                error = null,
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val res = adminManagementRepository.overrideCampaignPlayProduction(
+                    campaignId = campaignId,
+                    isProduction = isProduction,
+                    lock = lock,
+                    note = note,
+                )
+                if (isStale(curUid, curGen)) return@launch
+                _uiState.update { s ->
+                    s.copy(
+                        overridingCampaignIds = s.overridingCampaignIds - campaignId,
+                        campaigns = s.campaigns.map { item ->
+                            if (item.id == campaignId) {
+                                item.copy(
+                                    playProductionDetected = res.playProductionDetected,
+                                    playStoreState = res.playStoreState,
+                                    playClassificationLocked = res.playClassificationLocked,
+                                )
+                            } else {
+                                item
+                            }
+                        },
+                        actionMessage = localizer.get(
+                            if (res.playProductionDetected) {
+                                R.string.admin_play_override_marked_success
+                            } else {
+                                R.string.admin_play_override_cleared_success
+                            }
+                        ),
+                    )
+                }
+            } catch (e: CancellationException) {
+                if (!isStale(curUid, curGen)) {
+                    _uiState.update { it.copy(overridingCampaignIds = it.overridingCampaignIds - campaignId) }
+                }
+                throw e
+            } catch (e: Exception) {
+                if (isStale(curUid, curGen)) return@launch
+                _uiState.update {
+                    it.copy(
+                        overridingCampaignIds = it.overridingCampaignIds - campaignId,
+                        error = friendlyError(e, localizer),
+                    )
+                }
+            }
+        }
     }
 
     fun setQuery(q: String) {

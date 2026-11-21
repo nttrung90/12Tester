@@ -69,12 +69,17 @@ fun MyAppCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val showPlayProdBadge = campaign.isOpen && campaign.isPlayProductionDetected
                 AppIcon(
                     iconUrl = campaign.safeIconUrl,
                     packageName = campaign.packageName,
                     appName = campaign.appName,
                     size = 44.dp,
                     shapeRadius = 10.dp,
+                    showProductionBadge = showPlayProdBadge,
+                    productionBadgeContentDescription = if (showPlayProdBadge) {
+                        stringResource(R.string.play_production_badge_cd)
+                    } else null,
                 )
 
                 Spacer(Modifier.width(10.dp))

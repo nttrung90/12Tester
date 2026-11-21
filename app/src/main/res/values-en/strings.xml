@@ -1750,4 +1750,15 @@
     <string name="telegram_back_to_preview_btn">Back to message preview</string>
     <string name="telegram_refresh_cd">Refresh messages</string>
     <string name="telegram_mirror_load_error">Unable to load messages. Please try again.</string>
+
+    <!-- Play Production Detection -->
+    <string name="play_production_badge_cd">Live on Google Play Production</string>
+    <string name="create_play_production_hint_title">App appears to be live on Google Play</string>
+    <string name="create_play_production_hint_desc">You can still post this app. Once verified live on Google Play, it will show a checkmark badge (v) and receive lowest priority in next-app test suggestions.</string>
+    <string name="create_play_production_hint_desc_with_date">Released on %1$s. You can still post this app; if verified live on Google Play, it will show a checkmark badge (v) and receive lowest priority in next-app test suggestions.</string>
+    <string name="campaign_play_production_detected_note">Detected live on Google Play — lower next-app test suggestion priority</string>
+    <string name="campaign_play_production_detected_with_date">Detected live on Google Play (Released: %1$s) — lower next-app test suggestion priority</string>
+    <string name="oad_play_production_detected_title">Detected Live on Google Play</string>
+    <string name="oad_play_production_detected_desc">This app appears to be published on Google Play Production. You can confirm Production below when ready to complete your testing campaign.</string>
+    <string name="oad_play_production_detected_desc_with_date">Detected as published on Google Play (Released: %1$s). You can confirm Production below when ready to complete your testing campaign.</string>
 </resources>

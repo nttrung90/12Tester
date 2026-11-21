@@ -218,4 +218,20 @@
     <string name="admin_audit_filter_adjust_credits">Adjust Credits</string>
     <string name="admin_audit_filter_pause_campaign">Pause Campaign</string>
     <string name="admin_audit_filter_delete_campaign">Delete Campaign</string>
+
+    <!-- Play Production Detection Override -->
+    <string name="admin_play_state_production">Play: Production</string>
+    <string name="admin_play_state_production_with_date">Play: Production (%1$s)</string>
+    <string name="admin_play_state_format">Play: %1$s</string>
+    <string name="admin_play_classification_locked_badge">Locked</string>
+    <string name="admin_play_override_mark_btn">Mark Production</string>
+    <string name="admin_play_override_clear_btn">Clear Production</string>
+    <string name="admin_play_override_mark_title">Mark as Production?</string>
+    <string name="admin_play_override_clear_title">Clear Production Badge?</string>
+    <string name="admin_play_override_mark_desc">Mark \"%1$s\" as live on Google Play Production? It will show the checkmark badge (v) and move to lowest suggestion priority.</string>
+    <string name="admin_play_override_clear_desc">Remove the Production badge (v) from \"%1$s\" (e.g. for Open Testing exceptions)?</string>
+    <string name="admin_play_override_lock_label">Lock classification (prevent auto-scanner from changing)</string>
+    <string name="admin_play_override_note_label">Audit note (optional)</string>
+    <string name="admin_play_override_marked_success">Marked campaign as Play Production.</string>
+    <string name="admin_play_override_cleared_success">Cleared Play Production badge.</string>
 </resources>

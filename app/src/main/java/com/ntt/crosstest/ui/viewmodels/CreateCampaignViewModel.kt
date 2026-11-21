@@ -16,6 +16,7 @@ import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.data.TargetFees
 import com.ntt.crosstest.util.FirebaseStorageHelper
 import com.ntt.crosstest.util.PlayStoreHelper
+import com.ntt.crosstest.util.PlayStoreReleaseState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,6 +60,8 @@ data class CreateCampaignUiState(
     val isLoadingCredits: Boolean = true,
     val installedApps: List<PlayStoreHelper.InstalledAppItem> = emptyList(),
     val isLoadingInstalledApps: Boolean = false,
+    val playStoreReleaseState: PlayStoreReleaseState = PlayStoreReleaseState.UNKNOWN,
+    val playStoreReleasedDate: String? = null,
 ) {
     val slotPostCost: Int
         get() = if (selectedSlotNumber == 1) slot1PostFee else 0
@@ -329,7 +332,15 @@ class CreateCampaignViewModel(
             }
             fetchMetadata(extractedPackage, context)
         } else {
-            _uiState.update { it.copy(playUrl = trimmedUrl, error = null) }
+            metadataJob?.cancel()
+            _uiState.update {
+                it.copy(
+                    playUrl = trimmedUrl,
+                    playStoreReleaseState = PlayStoreReleaseState.UNKNOWN,
+                    playStoreReleasedDate = null,
+                    error = null,
+                )
+            }
         }
     }
 
@@ -365,6 +376,14 @@ class CreateCampaignViewModel(
 
         if (isFormatValid) {
             fetchMetadata(cleanPkg, context)
+        } else {
+            metadataJob?.cancel()
+            _uiState.update {
+                it.copy(
+                    playStoreReleaseState = PlayStoreReleaseState.UNKNOWN,
+                    playStoreReleasedDate = null,
+                )
+            }
         }
     }
 
@@ -385,28 +404,44 @@ class CreateCampaignViewModel(
 
     fun selectInstalledApp(app: PlayStoreHelper.InstalledAppItem) {
         val pkg = app.packageName
+        metadataJob?.cancel()
         _uiState.update {
             it.copy(
                 packageName = pkg,
                 appName = it.appName.ifBlank { app.appName.take(60) },
                 testingUrl = "https://play.google.com/apps/testing/$pkg",
                 playUrl = "https://play.google.com/store/apps/details?id=$pkg",
+                playStoreReleaseState = PlayStoreReleaseState.UNKNOWN,
+                playStoreReleasedDate = null,
                 error = null,
             )
         }
-        if (app.iconDrawable != null) {
-            viewModelScope.launch {
-                _uiState.update { it.copy(isLoadingMetadata = true) }
-                try {
-                    val bitmap = PlayStoreHelper.drawableToBitmap(app.iconDrawable)
-                    val firebaseUrl = FirebaseStorageHelper.uploadAppIconBitmap(bitmap, app.packageName)
-                    _uiState.update { it.copy(iconUrl = firebaseUrl) }
-                } catch (_: Exception) {
-                    val base64 = PlayStoreHelper.drawableToBase64(app.iconDrawable).orEmpty()
-                    _uiState.update { it.copy(iconUrl = base64) }
-                } finally {
-                    _uiState.update { it.copy(isLoadingMetadata = false) }
+        metadataJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingMetadata = true) }
+            try {
+                if (app.iconDrawable != null) {
+                    try {
+                        val bitmap = PlayStoreHelper.drawableToBitmap(app.iconDrawable)
+                        val firebaseUrl = FirebaseStorageHelper.uploadAppIconBitmap(bitmap, app.packageName)
+                        _uiState.update { it.copy(iconUrl = firebaseUrl) }
+                    } catch (_: Exception) {
+                        val base64 = PlayStoreHelper.drawableToBase64(app.iconDrawable).orEmpty()
+                        _uiState.update { it.copy(iconUrl = base64) }
+                    }
                 }
+                val webMeta = PlayStoreHelper.fetchPlayStoreMetadata(pkg)
+                if (webMeta != null) {
+                    _uiState.update { current ->
+                        current.copy(
+                            playStoreReleaseState = webMeta.releaseState,
+                            playStoreReleasedDate = webMeta.releasedDate,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+            } finally {
+                _uiState.update { it.copy(isLoadingMetadata = false) }
             }
         }
     }
@@ -414,7 +449,14 @@ class CreateCampaignViewModel(
     fun fetchMetadata(packageName: String, context: Context? = null) {
         metadataJob?.cancel()
         metadataJob = viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingMetadata = true) }
+            _uiState.update {
+                it.copy(
+                    isLoadingMetadata = true,
+                    playStoreReleaseState = PlayStoreReleaseState.UNKNOWN,
+                    playStoreReleasedDate = null,
+                )
+            }
+            var hasLocalIcon = false
             try {
                 // 1. Instant check: inspect locally installed app on device first
                 if (context != null) {
@@ -429,31 +471,33 @@ class CreateCampaignViewModel(
                             }
                         } catch (_: Exception) {}
 
-                        // Upload local icon to Firebase Storage
+                        // Upload local icon to Firebase Storage without blocking Play Store release state check
                         try {
                             val bitmap = PlayStoreHelper.drawableToBitmap(localDrawable)
                             val firebaseUrl = FirebaseStorageHelper.uploadAppIconBitmap(bitmap, packageName)
+                            hasLocalIcon = firebaseUrl.isNotBlank()
                             _uiState.update { current ->
                                 current.copy(iconUrl = firebaseUrl)
                             }
-                            return@launch
                         } catch (_: Exception) {
                             val base64 = PlayStoreHelper.drawableToBase64(localDrawable).orEmpty()
+                            hasLocalIcon = base64.isNotBlank()
                             _uiState.update { current ->
                                 current.copy(iconUrl = current.iconUrl.ifBlank { base64 })
                             }
-                            return@launch
                         }
                     }
                 }
 
-                // 2. Network check: try public Play Store metadata (provides high-res web icon)
+                // 2. Network check: try public Play Store metadata & release state hint
                 val webMeta = PlayStoreHelper.fetchPlayStoreMetadata(packageName)
                 if (webMeta != null) {
                     _uiState.update { current ->
                         current.copy(
                             appName = current.appName.ifBlank { webMeta.appName.take(60) },
-                            iconUrl = if (webMeta.iconUrl.isNotBlank()) webMeta.iconUrl else current.iconUrl,
+                            iconUrl = if (!hasLocalIcon && webMeta.iconUrl.isNotBlank()) webMeta.iconUrl else current.iconUrl,
+                            playStoreReleaseState = webMeta.releaseState,
+                            playStoreReleasedDate = webMeta.releasedDate,
                         )
                     }
                 }

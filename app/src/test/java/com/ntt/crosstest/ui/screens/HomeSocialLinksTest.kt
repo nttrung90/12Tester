@@ -49,7 +49,7 @@ class HomeSocialLinksTest {
         assertEquals(2, englishActions.size)
         assertEquals(R.drawable.ic_telegram, englishActions[0].iconRes)
         assertEquals(R.string.social_link_telegram, englishActions[0].labelRes)
-        assertEquals("https://t.me/+KcJBT02zr1ZiOGNl", englishActions[0].url)
+        assertEquals("https://t.me/Crosstesters", englishActions[0].url)
         assertEquals(R.drawable.ic_whatsapp, englishActions[1].iconRes)
         assertEquals(R.string.social_link_whatsapp, englishActions[1].labelRes)
         assertEquals(
@@ -61,7 +61,7 @@ class HomeSocialLinksTest {
         assertEquals(2, vietnameseActions.size)
         assertEquals(R.drawable.ic_telegram, vietnameseActions[0].iconRes)
         assertEquals(R.string.social_link_telegram, vietnameseActions[0].labelRes)
-        assertEquals("https://t.me/+KcJBT02zr1ZiOGNl", vietnameseActions[0].url)
+        assertEquals("https://t.me/Crosstesters", vietnameseActions[0].url)
         assertEquals(R.drawable.ic_zalo, vietnameseActions[1].iconRes)
         assertEquals(R.string.social_link_zalo, vietnameseActions[1].labelRes)
         assertEquals("https://zalo.me/g/cc0vbi7igt77w10yikch", vietnameseActions[1].url)

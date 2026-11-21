@@ -113,12 +113,17 @@ fun CampaignCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = if (shouldShowBonus) Alignment.Top else Alignment.CenterVertically,
             ) {
+                val showPlayProdBadge = campaign.isOpen && campaign.isPlayProductionDetected
                 AppIcon(
                     iconUrl = campaign.safeIconUrl,
                     packageName = campaign.packageName,
                     appName = campaign.appName,
                     size = 44.dp,
                     shapeRadius = 10.dp,
+                    showProductionBadge = showPlayProdBadge,
+                    productionBadgeContentDescription = if (showPlayProdBadge) {
+                        stringResource(R.string.play_production_badge_cd)
+                    } else null,
                 )
                 Spacer(Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {

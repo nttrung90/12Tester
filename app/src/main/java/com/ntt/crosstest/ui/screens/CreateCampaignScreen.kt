@@ -59,6 +59,7 @@ import com.ntt.crosstest.data.SlotInfo
 import com.ntt.crosstest.ui.components.AppIcon
 import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.util.PlayStoreHelper
+import com.ntt.crosstest.util.PlayStoreReleaseState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -737,6 +738,57 @@ fun CreateCampaignScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp),
                     )
+                    if (uiState.playStoreReleaseState == PlayStoreReleaseState.PRODUCTION) {
+                        Spacer(Modifier.height(6.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.statusColors.infoContainer,
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.statusColors.info.copy(alpha = 0.4f)),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.statusColors.info,
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .size(20.dp),
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.create_play_production_hint_title),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.statusColors.onInfoContainer,
+                                    )
+                                    Text(
+                                        text = if (!uiState.playStoreReleasedDate.isNullOrBlank()) {
+                                            stringResource(
+                                                R.string.create_play_production_hint_desc_with_date,
+                                                uiState.playStoreReleasedDate!!,
+                                            )
+                                        } else {
+                                            stringResource(R.string.create_play_production_hint_desc)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.statusColors.onInfoContainer,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // 3.1 Closed Testing Opt-in Link

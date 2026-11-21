@@ -103,22 +103,24 @@ class CampaignRepository(
          * Lưu ý: admin_pause_reason_code là trường presentation mới từ 078, không đưa vào projection mặc định
          * để tránh lỗi schema cache với backend pre-078; các RPC mới (AdminCampaignControlResult) vẫn decode đầy đủ.
          */
-        val LEGACY_CAMPAIGN_COLUMNS = Columns.list(
+        private val BASE_CAMPAIGN_COLUMN_NAMES = arrayOf(
             "id", "owner_id", "app_name", "package_name", "play_url", "testing_url",
             "description", "target_testers", "target_days", "start_date", "status",
             "icon_url", "test_username", "test_password", "tip_credits", "is_boosted",
             "slot_number", "paused_reason", "admin_note", "completed_at", "created_at",
             "push_business_date", "push_expires_at", "push_order",
         )
-        val FULL_CAMPAIGN_COLUMNS = Columns.list(
-            "id", "owner_id", "app_name", "package_name", "play_url", "testing_url",
-            "description", "target_testers", "target_days", "start_date", "status",
-            "icon_url", "test_username", "test_password", "tip_credits", "is_boosted",
-            "slot_number", "paused_reason", "admin_note", "completed_at", "created_at",
-            "push_business_date", "push_expires_at", "push_order",
+        private val BONUS_CAMPAIGN_COLUMN_NAMES = BASE_CAMPAIGN_COLUMN_NAMES + arrayOf(
             "tester_bonus_round_id", "tester_bonus_credits", "tester_bonus_remaining_slots",
             "tester_bonus_paid_count", "tester_bonus_status",
         )
+        private val FULL_CAMPAIGN_COLUMN_NAMES = BONUS_CAMPAIGN_COLUMN_NAMES + arrayOf(
+            "play_store_state", "play_production_detected", "play_released_date",
+            "play_checked_at", "play_classification_locked",
+        )
+        val LEGACY_CAMPAIGN_COLUMNS = Columns.list(*BASE_CAMPAIGN_COLUMN_NAMES)
+        val BONUS_CAMPAIGN_COLUMNS = Columns.list(*BONUS_CAMPAIGN_COLUMN_NAMES)
+        val FULL_CAMPAIGN_COLUMNS = Columns.list(*FULL_CAMPAIGN_COLUMN_NAMES)
         val CAMPAIGN_COLUMNS = FULL_CAMPAIGN_COLUMNS
         private const val BONUS_COLUMNS_RECHECK_INTERVAL_MS = 5 * 60 * 1000L
     }
@@ -127,32 +129,53 @@ class CampaignRepository(
     var bonusColumnsSupported: Boolean = true
     @Volatile
     var bonusColumnsCheckedAtMs: Long = 0L
+    @Volatile
+    var playColumnsSupported: Boolean = true
+    @Volatile
+    var playColumnsCheckedAtMs: Long = 0L
 
-    fun isMissingBonusColumn(error: Exception): Boolean {
+    private fun isMissingCampaignColumn(error: Exception, columnPrefix: String): Boolean {
         if (error is CancellationException) return false
         val msg = error.message.orEmpty()
         val code = (error as? PostgrestRestException)?.code.orEmpty()
         val isMissingColumnCode = code.equals("42703", ignoreCase = true) ||
             code.equals("PGRST204", ignoreCase = true) ||
-            msg.contains("42703")
+            msg.contains("42703") ||
+            msg.contains("PGRST204", ignoreCase = true)
 
+        val escaped = Regex.escape(columnPrefix)
         val missingColumnRegexes = listOf(
-            Regex("""column\s+([^\s]+\.)?["']?(tester_bonus_[^\s"']+)["']?\s+does\s+not\s+exist""", RegexOption.IGNORE_CASE),
-            Regex("""Could\s+not\s+find\s+the\s+'(tester_bonus_[^']+)'\s+column""", RegexOption.IGNORE_CASE),
+            Regex("""column\s+([^\s]+\.)?["']?($escaped[^\s"']+)["']?\s+does\s+not\s+exist""", RegexOption.IGNORE_CASE),
+            Regex("""Could\s+not\s+find\s+the\s+'($escaped[^']+)'\s+column""", RegexOption.IGNORE_CASE),
         )
         return isMissingColumnCode && missingColumnRegexes.any { it.containsMatchIn(msg) }
     }
 
+    fun isMissingBonusColumn(error: Exception): Boolean =
+        isMissingCampaignColumn(error, "tester_bonus_")
+
+    fun isMissingPlayColumn(error: Exception): Boolean =
+        isMissingCampaignColumn(error, "play_")
+
     suspend fun <T> queryCampaignsSafe(block: suspend (Columns) -> T): T {
         val now = monotonicNow()
-        val shouldTryFull = bonusColumnsSupported || (now - bonusColumnsCheckedAtMs >= BONUS_COLUMNS_RECHECK_INTERVAL_MS)
-        if (shouldTryFull) {
+        val shouldTryBonus = bonusColumnsSupported || (now - bonusColumnsCheckedAtMs >= BONUS_COLUMNS_RECHECK_INTERVAL_MS)
+        val shouldTryPlay = playColumnsSupported || (now - playColumnsCheckedAtMs >= BONUS_COLUMNS_RECHECK_INTERVAL_MS)
+
+        if (shouldTryBonus && shouldTryPlay) {
             try {
                 val result = block(FULL_CAMPAIGN_COLUMNS)
                 bonusColumnsSupported = true
+                playColumnsSupported = true
                 return result
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
+                if (isMissingPlayColumn(e)) {
+                    playColumnsSupported = false
+                    playColumnsCheckedAtMs = monotonicNow()
+                    Log.w(TAG, "Backend schema missing play_* columns; falling back to bonus campaign columns: ${e.message}")
+                    return queryWithBonusOrLegacy(block)
+                }
                 if (isMissingBonusColumn(e)) {
                     bonusColumnsSupported = false
                     bonusColumnsCheckedAtMs = monotonicNow()
@@ -161,8 +184,27 @@ class CampaignRepository(
                 }
                 throw e
             }
+        } else if (shouldTryBonus) {
+            return queryWithBonusOrLegacy(block)
         } else {
             return block(LEGACY_CAMPAIGN_COLUMNS)
+        }
+    }
+
+    private suspend fun <T> queryWithBonusOrLegacy(block: suspend (Columns) -> T): T {
+        return try {
+            val result = block(BONUS_CAMPAIGN_COLUMNS)
+            bonusColumnsSupported = true
+            result
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            if (isMissingBonusColumn(e)) {
+                bonusColumnsSupported = false
+                bonusColumnsCheckedAtMs = monotonicNow()
+                Log.w(TAG, "Backend schema missing tester bonus columns; falling back to legacy campaign columns: ${e.message}")
+                return block(LEGACY_CAMPAIGN_COLUMNS)
+            }
+            throw e
         }
     }
 

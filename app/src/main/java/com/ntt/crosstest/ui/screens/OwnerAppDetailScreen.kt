@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -491,6 +492,50 @@ fun OwnerAppDetailScreen(
                                 text = pausedDescription,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            } else if (campaign.isOpen && campaign.isPlayProductionDetected) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.statusColors.infoContainer,
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.statusColors.info.copy(alpha = 0.4f)),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.statusColors.info,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = stringResource(R.string.oad_play_production_detected_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.statusColors.onInfoContainer,
+                            )
+                            Text(
+                                text = if (!campaign.playReleasedDate.isNullOrBlank()) {
+                                    stringResource(
+                                        R.string.oad_play_production_detected_desc_with_date,
+                                        campaign.playReleasedDate,
+                                    )
+                                } else {
+                                    stringResource(R.string.oad_play_production_detected_desc)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.statusColors.onInfoContainer,
                             )
                         }
                     }
@@ -1708,12 +1753,17 @@ private fun OwnerSummaryCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val showPlayProdBadge = campaign.isOpen && campaign.isPlayProductionDetected
                 AppIcon(
                     iconUrl = campaign.safeIconUrl,
                     packageName = campaign.packageName,
                     appName = campaign.appName,
                     size = 56.dp,
                     shapeRadius = 12.dp,
+                    showProductionBadge = showPlayProdBadge,
+                    productionBadgeContentDescription = if (showPlayProdBadge) {
+                        stringResource(R.string.play_production_badge_cd)
+                    } else null,
                 )
 
                 Spacer(Modifier.width(14.dp))

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.ntt.crosstest.BuildConfig
 import com.ntt.crosstest.R
@@ -37,6 +38,8 @@ private val Context.telegramPrefsDataStore by preferencesDataStore(name = "teleg
 interface TelegramChatIdCacheStore {
     suspend fun getCachedChatId(): Long
     suspend fun setCachedChatId(chatId: Long)
+    suspend fun getCachedChatId(groupUrl: String): Long = getCachedChatId()
+    suspend fun setCachedChatId(chatId: Long, groupUrl: String) = setCachedChatId(chatId)
     suspend fun isTelegramLoggedIn(): Boolean = false
     suspend fun setTelegramLoggedIn(loggedIn: Boolean) {}
     suspend fun clear()
@@ -46,6 +49,7 @@ class DataStoreTelegramChatIdCacheStore(
     private val context: Context,
 ) : TelegramChatIdCacheStore {
     private val cachedChatIdKey = longPreferencesKey("cached_telegram_chat_id")
+    private val cachedGroupUrlKey = stringPreferencesKey("cached_telegram_group_url")
     private val hasLoggedInKey = booleanPreferencesKey("telegram_has_logged_in")
 
     override suspend fun getCachedChatId(): Long =
@@ -54,6 +58,19 @@ class DataStoreTelegramChatIdCacheStore(
     override suspend fun setCachedChatId(chatId: Long) {
         context.telegramPrefsDataStore.edit { prefs ->
             prefs[cachedChatIdKey] = chatId
+        }
+    }
+
+    override suspend fun getCachedChatId(groupUrl: String): Long =
+        context.telegramPrefsDataStore.data.map { prefs ->
+            val storedUrl = prefs[cachedGroupUrlKey]
+            if (storedUrl == groupUrl) prefs[cachedChatIdKey] ?: 0L else 0L
+        }.first()
+
+    override suspend fun setCachedChatId(chatId: Long, groupUrl: String) {
+        context.telegramPrefsDataStore.edit { prefs ->
+            prefs[cachedChatIdKey] = chatId
+            prefs[cachedGroupUrlKey] = groupUrl
         }
     }
 
@@ -69,6 +86,7 @@ class DataStoreTelegramChatIdCacheStore(
     override suspend fun clear() {
         context.telegramPrefsDataStore.edit { prefs ->
             prefs.remove(cachedChatIdKey)
+            prefs.remove(cachedGroupUrlKey)
             prefs[hasLoggedInKey] = false
         }
     }
@@ -162,7 +180,7 @@ class TelegramChatRepository(
             if (alreadyStarted) {
                 val targetId = activeChatId.takeIf { it != 0L }
                     ?: watchedChatId.takeIf { it != 0L }
-                    ?: runCatching { chatIdCacheStore.getCachedChatId() }.getOrDefault(0L)
+                    ?: runCatching { chatIdCacheStore.getCachedChatId(groupInviteUrl) }.getOrDefault(0L)
                 if (targetId != 0L && _uiState.value.authState is TelegramAuthUiState.Ready) {
                     runCatching { gateway.send(TdApi.GetChat(targetId)) }.onSuccess { chat ->
                         watchedChatId = chat.id
@@ -1171,17 +1189,43 @@ class TelegramChatRepository(
         }
     }
 
+    private suspend fun fetchMemberStatus(chat: TdApi.Chat): TdApi.ChatMemberStatus? = when (val type = chat.type) {
+        is TdApi.ChatTypeSupergroup -> runCatching { gateway.send(TdApi.GetSupergroup(type.supergroupId)) }.getOrNull()?.status
+        is TdApi.ChatTypeBasicGroup -> runCatching { gateway.send(TdApi.GetBasicGroup(type.basicGroupId)) }.getOrNull()?.status
+        else -> null
+    }
+
+    private fun isActiveMemberStatus(status: TdApi.ChatMemberStatus?): Boolean = when (status) {
+        is TdApi.ChatMemberStatusCreator,
+        is TdApi.ChatMemberStatusAdministrator,
+        is TdApi.ChatMemberStatusMember -> true
+        is TdApi.ChatMemberStatusRestricted -> status.isMember
+        else -> false
+    }
+
     private suspend fun resolveWatchedChatUnreadCount() {
-        val cachedId = runCatching { chatIdCacheStore.getCachedChatId() }.getOrDefault(0L)
+        val cachedId = runCatching { chatIdCacheStore.getCachedChatId(groupInviteUrl) }.getOrDefault(0L)
         var targetChat: TdApi.Chat? = null
         if (cachedId != 0L) {
             targetChat = runCatching { gateway.send(TdApi.GetChat(cachedId)) }.getOrNull()
         }
         if (targetChat == null) {
-            val info = runCatching { gateway.send(TdApi.CheckChatInviteLink(groupInviteUrl)) }.getOrNull()
-            if (info != null && info.chatId != 0L) {
-                runCatching { chatIdCacheStore.setCachedChatId(info.chatId) }
-                targetChat = runCatching { gateway.send(TdApi.GetChat(info.chatId)) }.getOrNull()
+            val publicUsername = extractPublicUsername(groupInviteUrl)
+            if (publicUsername != null) {
+                val publicChat = runCatching { gateway.send(TdApi.SearchPublicChat(publicUsername)) }.getOrNull()
+                if (publicChat != null) {
+                    val status = fetchMemberStatus(publicChat)
+                    if (isActiveMemberStatus(status)) {
+                        runCatching { chatIdCacheStore.setCachedChatId(publicChat.id, groupInviteUrl) }
+                        targetChat = publicChat
+                    }
+                }
+            } else {
+                val info = runCatching { gateway.send(TdApi.CheckChatInviteLink(groupInviteUrl)) }.getOrNull()
+                if (info != null && info.chatId != 0L) {
+                    runCatching { chatIdCacheStore.setCachedChatId(info.chatId, groupInviteUrl) }
+                    targetChat = runCatching { gateway.send(TdApi.GetChat(info.chatId)) }.getOrNull()
+                }
             }
         }
         if (targetChat != null) {
@@ -1195,6 +1239,52 @@ class TelegramChatRepository(
         }
     }
 
+    private suspend fun handleJoinResult(
+        joinQuery: TdApi.Function<TdApi.ChatJoinResult>,
+        fallbackChatId: Long = 0L,
+    ): Long? {
+        val joinResult = runCatching {
+            gateway.send(joinQuery)
+        }.getOrElse { err ->
+            if (err is TdLibException && err.tdMessage.contains("INVITE_REQUEST_SENT", ignoreCase = true)) {
+                _uiState.update { it.copy(authState = TelegramAuthUiState.JoinRequestSent) }
+            } else {
+                _uiState.update {
+                    it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
+                }
+            }
+            return null
+        }
+        return when (joinResult) {
+            is TdApi.ChatJoinResultSuccess -> joinResult.chatId.takeIf { it != 0L } ?: fallbackChatId
+            is TdApi.ChatJoinResultRequestSent,
+            is TdApi.ChatJoinResultGuardBotApprovalRequired -> {
+                _uiState.update { it.copy(authState = TelegramAuthUiState.JoinRequestSent) }
+                null
+            }
+            is TdApi.ChatJoinResultDeclined -> {
+                _uiState.update {
+                    it.copy(
+                        authState = TelegramAuthUiState.Error(
+                            localizer.get(R.string.telegram_err_invite_invalid)
+                        )
+                    )
+                }
+                null
+            }
+            else -> {
+                _uiState.update {
+                    it.copy(
+                        authState = TelegramAuthUiState.Error(
+                            localizer.get(R.string.telegram_err_invite_invalid)
+                        )
+                    )
+                }
+                null
+            }
+        }
+    }
+
     private suspend fun resolveAndOpenGroupChat() {
         _uiState.update {
             it.copy(
@@ -1204,84 +1294,93 @@ class TelegramChatRepository(
             )
         }
 
-        val cachedId = runCatching { chatIdCacheStore.getCachedChatId() }.getOrDefault(0L)
+        val cachedId = runCatching { chatIdCacheStore.getCachedChatId(groupInviteUrl) }.getOrDefault(0L)
         var resolvedChat: TdApi.Chat? = null
         if (cachedId != 0L) {
             resolvedChat = runCatching { gateway.send(TdApi.GetChat(cachedId)) }.getOrNull()
             if (resolvedChat == null) {
-                runCatching { chatIdCacheStore.setCachedChatId(0L) }
+                runCatching { chatIdCacheStore.setCachedChatId(0L, groupInviteUrl) }
+            } else {
+                val cachedStatus = fetchMemberStatus(resolvedChat)
+                if (cachedStatus is TdApi.ChatMemberStatusLeft ||
+                    (cachedStatus is TdApi.ChatMemberStatusRestricted && !cachedStatus.isMember)
+                ) {
+                    val joinedChatId = handleJoinResult(
+                        joinQuery = TdApi.JoinChat(resolvedChat.id),
+                        fallbackChatId = resolvedChat.id,
+                    ) ?: return
+                    resolvedChat = runCatching { gateway.send(TdApi.GetChat(joinedChatId)) }
+                        .getOrDefault(resolvedChat)
+                }
             }
         }
 
         if (resolvedChat == null) {
-            val inviteResult = runCatching {
-                gateway.send(TdApi.CheckChatInviteLink(groupInviteUrl))
-            }
-            val info = inviteResult.getOrElse { err ->
-                _uiState.update {
-                    it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
-                }
-                return
-            }
-
-            if (info.chatId != 0L) {
-                runCatching { chatIdCacheStore.setCachedChatId(info.chatId) }
-                resolvedChat = runCatching { gateway.send(TdApi.GetChat(info.chatId)) }
-                    .getOrElse { err ->
-                        _uiState.update {
-                            it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
-                        }
-                        return
-                    }
-            } else {
-                val joinResult = runCatching {
-                    gateway.send(TdApi.JoinChatByInviteLink(groupInviteUrl))
+            val publicUsername = extractPublicUsername(groupInviteUrl)
+            if (publicUsername != null) {
+                val publicChat = runCatching {
+                    gateway.send(TdApi.SearchPublicChat(publicUsername))
                 }.getOrElse { err ->
-                    if (err is TdLibException && err.tdMessage.contains("INVITE_REQUEST_SENT", ignoreCase = true)) {
-                        _uiState.update { it.copy(authState = TelegramAuthUiState.JoinRequestSent) }
-                    } else {
-                        _uiState.update {
-                            it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
-                        }
+                    _uiState.update {
+                        it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
                     }
                     return
                 }
-                val joinedChatId = when (joinResult) {
-                    is TdApi.ChatJoinResultSuccess -> joinResult.chatId
-                    is TdApi.ChatJoinResultRequestSent,
-                    is TdApi.ChatJoinResultGuardBotApprovalRequired -> {
-                        _uiState.update { it.copy(authState = TelegramAuthUiState.JoinRequestSent) }
-                        return
-                    }
-                    is TdApi.ChatJoinResultDeclined -> {
-                        _uiState.update {
-                            it.copy(
-                                authState = TelegramAuthUiState.Error(
-                                    localizer.get(R.string.telegram_err_invite_invalid)
-                                )
+                val status = fetchMemberStatus(publicChat)
+                if (status is TdApi.ChatMemberStatusBanned) {
+                    _uiState.update {
+                        it.copy(
+                            authState = TelegramAuthUiState.Error(
+                                localizer.get(R.string.telegram_err_invite_invalid)
                             )
-                        }
-                        return
+                        )
                     }
-                    else -> {
-                        _uiState.update {
-                            it.copy(
-                                authState = TelegramAuthUiState.Error(
-                                    localizer.get(R.string.telegram_err_invite_invalid)
-                                )
-                            )
-                        }
-                        return
-                    }
+                    return
                 }
-                runCatching { chatIdCacheStore.setCachedChatId(joinedChatId) }
-                resolvedChat = runCatching { gateway.send(TdApi.GetChat(joinedChatId)) }
-                    .getOrElse { err ->
-                        _uiState.update {
-                            it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
-                        }
-                        return
+                val targetChatId = if (isActiveMemberStatus(status)) {
+                    publicChat.id
+                } else {
+                    handleJoinResult(
+                        joinQuery = TdApi.JoinChat(publicChat.id),
+                        fallbackChatId = publicChat.id,
+                    ) ?: return
+                }
+                runCatching { chatIdCacheStore.setCachedChatId(targetChatId, groupInviteUrl) }
+                resolvedChat = runCatching { gateway.send(TdApi.GetChat(targetChatId)) }
+                    .getOrDefault(publicChat)
+            } else {
+                val inviteResult = runCatching {
+                    gateway.send(TdApi.CheckChatInviteLink(groupInviteUrl))
+                }
+                val info = inviteResult.getOrElse { err ->
+                    _uiState.update {
+                        it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
                     }
+                    return
+                }
+
+                if (info.chatId != 0L) {
+                    runCatching { chatIdCacheStore.setCachedChatId(info.chatId, groupInviteUrl) }
+                    resolvedChat = runCatching { gateway.send(TdApi.GetChat(info.chatId)) }
+                        .getOrElse { err ->
+                            _uiState.update {
+                                it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
+                            }
+                            return
+                        }
+                } else {
+                    val joinedChatId = handleJoinResult(
+                        joinQuery = TdApi.JoinChatByInviteLink(groupInviteUrl),
+                    ) ?: return
+                    runCatching { chatIdCacheStore.setCachedChatId(joinedChatId, groupInviteUrl) }
+                    resolvedChat = runCatching { gateway.send(TdApi.GetChat(joinedChatId)) }
+                        .getOrElse { err ->
+                            _uiState.update {
+                                it.copy(authState = TelegramAuthUiState.Error(translateError(err)))
+                            }
+                            return
+                        }
+                }
             }
         }
 
@@ -1783,6 +1882,33 @@ class TelegramChatRepository(
 
     companion object {
         private val FLOOD_WAIT_REGEX = Regex("FLOOD_WAIT_(\\d+)", RegexOption.IGNORE_CASE)
+        private val PUBLIC_USERNAME_REGEX = Regex("^[A-Za-z][A-Za-z0-9_]{2,63}$")
+        private val RESERVED_TME_PATHS = setOf(
+            "s", "c", "addstickers", "addemoji", "addtheme", "proxy", "socks",
+            "share", "iv", "login", "setlanguage", "bg", "contact", "giftcode", "boost",
+        )
+
+        fun extractPublicUsername(rawUrl: String): String? {
+            val trimmed = rawUrl.trim()
+            if (trimmed.isEmpty()) return null
+            if (trimmed.startsWith("@")) {
+                val handle = trimmed.drop(1).substringBefore('/').substringBefore('?').trim()
+                return handle.takeIf { PUBLIC_USERNAME_REGEX.matches(it) }
+            }
+            val uri = runCatching { java.net.URI(trimmed) }.getOrNull() ?: return null
+            val host = uri.host?.lowercase(Locale.US)?.removePrefix("www.") ?: return null
+            if (host != "t.me" && host != "telegram.me" && host != "telegram.dog") return null
+            val firstSegment = uri.path.orEmpty()
+                .trim('/')
+                .split('/')
+                .firstOrNull { it.isNotBlank() }
+                ?: return null
+            if (firstSegment.startsWith("+") || firstSegment.equals("joinchat", ignoreCase = true)) {
+                return null
+            }
+            if (firstSegment.lowercase(Locale.US) in RESERVED_TME_PATHS) return null
+            return firstSegment.takeIf { PUBLIC_USERNAME_REGEX.matches(it) }
+        }
 
         fun normalizePhoneNumber(countryCode: String, rawInput: String): String? {
             val trimmed = rawInput.trim().replace(Regex("[\\s\\-().]"), "")

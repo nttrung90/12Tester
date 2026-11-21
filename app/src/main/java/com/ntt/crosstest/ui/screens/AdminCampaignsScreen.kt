@@ -21,11 +21,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -38,12 +42,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +67,7 @@ import com.ntt.crosstest.R
 import com.ntt.crosstest.TestCheoApp
 import com.ntt.crosstest.data.AdminCampaignItem
 import com.ntt.crosstest.data.Localizer
+import com.ntt.crosstest.ui.theme.statusColors
 import com.ntt.crosstest.ui.viewmodels.AdminCampaignsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,12 +91,96 @@ fun AdminCampaignsScreen(
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var overrideTarget by remember { mutableStateOf<AdminCampaignItem?>(null) }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
+    }
+
+    LaunchedEffect(uiState.actionMessage) {
+        uiState.actionMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearActionMessage()
+        }
+    }
+
+    overrideTarget?.let { targetItem ->
+        var lockClassification by remember(targetItem.id) { mutableStateOf(true) }
+        var noteText by remember(targetItem.id) { mutableStateOf("") }
+        val nextIsProduction = !targetItem.playProductionDetected
+
+        AlertDialog(
+            onDismissRequest = { overrideTarget = null },
+            title = {
+                Text(
+                    text = stringResource(
+                        if (nextIsProduction) R.string.admin_play_override_mark_title
+                        else R.string.admin_play_override_clear_title
+                    ),
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = stringResource(
+                            if (nextIsProduction) R.string.admin_play_override_mark_desc
+                            else R.string.admin_play_override_clear_desc,
+                            targetItem.appName,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = lockClassification,
+                            onCheckedChange = { lockClassification = it },
+                        )
+                        Text(
+                            text = stringResource(R.string.admin_play_override_lock_label),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    OutlinedTextField(
+                        value = noteText,
+                        onValueChange = { noteText = it },
+                        label = { Text(stringResource(R.string.admin_play_override_note_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.overridePlayProduction(
+                            campaignId = targetItem.id,
+                            isProduction = nextIsProduction,
+                            lock = lockClassification,
+                            note = noteText,
+                        )
+                        overrideTarget = null
+                    },
+                ) {
+                    Text(
+                        stringResource(
+                            if (nextIsProduction) R.string.admin_play_override_mark_btn
+                            else R.string.admin_play_override_clear_btn
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { overrideTarget = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
     }
 
     Scaffold(
@@ -177,7 +269,9 @@ fun AdminCampaignsScreen(
                         items(uiState.campaigns, key = { it.id }) { item ->
                             AdminCampaignCard(
                                 item = item,
+                                isOverriding = item.id in uiState.overridingCampaignIds,
                                 onOpen = { onOpenCampaignDetail(item.id) },
+                                onTogglePlayProduction = { overrideTarget = item },
                             )
                         }
 
@@ -209,8 +303,11 @@ fun AdminCampaignsScreen(
 @Composable
 private fun AdminCampaignCard(
     item: AdminCampaignItem,
+    isOverriding: Boolean = false,
     onOpen: () -> Unit,
+    onTogglePlayProduction: () -> Unit,
 ) {
+    val statusColors = MaterialTheme.statusColors
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -295,13 +392,99 @@ private fun AdminCampaignCard(
                         )
                     }
                 }
+                if (item.playProductionDetected) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(statusColors.successContainer)
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = statusColors.onSuccessContainer,
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Text(
+                            text = if (!item.playReleasedDate.isNullOrBlank()) {
+                                stringResource(R.string.admin_play_state_production_with_date, item.playReleasedDate)
+                            } else {
+                                stringResource(R.string.admin_play_state_production)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColors.onSuccessContainer,
+                        )
+                    }
+                } else if (item.playStoreState != "unknown") {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.admin_play_state_format, item.playStoreState),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (item.playClassificationLocked) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(statusColors.warningContainer)
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Lock,
+                            contentDescription = null,
+                            tint = statusColors.onWarningContainer,
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.admin_play_classification_locked_badge),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = statusColors.onWarningContainer,
+                        )
+                    }
+                }
             }
 
-            Button(
-                onClick = onOpen,
-                modifier = Modifier.align(Alignment.End),
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(stringResource(R.string.admin_campaign_open_detail))
+                if (item.status == "open") {
+                    OutlinedButton(
+                        onClick = onTogglePlayProduction,
+                        enabled = !isOverriding,
+                    ) {
+                        if (isOverriding) {
+                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(6.dp))
+                        }
+                        Text(
+                            text = stringResource(
+                                if (item.playProductionDetected) {
+                                    R.string.admin_play_override_clear_btn
+                                } else {
+                                    R.string.admin_play_override_mark_btn
+                                }
+                            )
+                        )
+                    }
+                }
+                Button(onClick = onOpen) {
+                    Text(stringResource(R.string.admin_campaign_open_detail))
+                }
             }
         }
     }

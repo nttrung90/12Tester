@@ -161,6 +161,10 @@
     {
       "path": "supabase/migrations/101_telegram_group_mirror.sql",
       "sha256": "915ee480806e5d583a8ff35f57d0e6eebcb9fa7599420dc05db3fa26a2f9670d"
+    },
+    {
+      "path": "supabase/migrations/102_play_production_detection.sql",
+      "sha256": "4b333a93ef34b38361df2ea19dd532fd048989d0156ae24cdb5e79657977b9c0"
     }
   ],
   "supportSources": [
@@ -233,11 +237,11 @@
       "signature": "public._campaign_json(campaigns)",
       "identityArguments": "c campaigns",
       "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
-      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
       "lineHints": [
-        384
+        187
       ],
-      "definitionSha256": "80151887789ac7aae363e2266c38f0bfbeef0104c896dc5d43760dde9cfaab81"
+      "definitionSha256": "d3b2d1e77007651bbb53617c4e03800ee0a8fac8acc6f98d54aead9e1d83b6c1"
     },
     {
       "signature": "public._can_caller_insert_campaign()",
@@ -1081,6 +1085,16 @@
       "definitionSha256": "8a3a0618d9c1c50a9ee93bbf3935c693bff7d4aadfb8c88b94ae4ea1ddc35191"
     },
     {
+      "signature": "public.admin_override_campaign_play_production(uuid, boolean, boolean, text)",
+      "identityArguments": "p_campaign_id uuid, p_is_production boolean, p_lock boolean, p_note text",
+      "firstSeen": "supabase/migrations/102_play_production_detection.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
+      "lineHints": [
+        614
+      ],
+      "definitionSha256": "71754addb1331601e041f74e64b38221cdff2b3e54ab62b544f522239bab87f6"
+    },
+    {
       "signature": "public.admin_pause_campaign(uuid, text)",
       "identityArguments": "p_campaign_id uuid, p_reason text",
       "firstSeen": "supabase/migrations/062_consolidated_baseline.sql",
@@ -1206,11 +1220,11 @@
       "signature": "public.admin_search_campaigns(text, text, uuid, integer, timestamp with time zone, uuid)",
       "identityArguments": "p_query text, p_status text, p_owner_id uuid, p_limit integer, p_cursor_created_at timestamp with time zone, p_cursor_id uuid",
       "firstSeen": "supabase/migrations/070_admin_management.sql",
-      "lastDefinitionChange": "supabase/migrations/070_admin_management.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
       "lineHints": [
-        1213
+        238
       ],
-      "definitionSha256": "e27d1340cba46c146fdbebc326a436513bc6e79d1fee8ad3f05522c063096dc1"
+      "definitionSha256": "9f12876cbca275c88b150d4ac94700c31a63479f63061c9b87cd708b43e95085"
     },
     {
       "signature": "public.admin_search_members(text, text, boolean, integer, timestamp with time zone, uuid)",
@@ -2580,6 +2594,26 @@
       "definitionSha256": "38c6f0eedd91a90e3aa26cb31d3407699df59923fa32343c15ccd601af61ec07"
     },
     {
+      "signature": "public.system_list_campaigns_for_play_check(integer, integer, integer)",
+      "identityArguments": "p_limit integer, p_recheck_hours integer, p_reverify_prod_hours integer",
+      "firstSeen": "supabase/migrations/102_play_production_detection.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
+      "lineHints": [
+        344
+      ],
+      "definitionSha256": "5bd5d0c5063fa9c9411c6986ad44c85f4a8d5e9f080d83eebc6fd78003cf4492"
+    },
+    {
+      "signature": "public.system_record_play_store_check(uuid, text, text, jsonb, integer, integer)",
+      "identityArguments": "p_campaign_id uuid, p_detected_state text, p_released_date text, p_evidence jsonb, p_min_confirm_gap_minutes integer, p_required_streak integer",
+      "firstSeen": "supabase/migrations/102_play_production_detection.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
+      "lineHints": [
+        435
+      ],
+      "definitionSha256": "7aef3e8301b72bb7f614fbe5b0e4ed5925ffc1befe7243caf169ff745471039c"
+    },
+    {
       "signature": "public.trg_campaign_status_journal()",
       "identityArguments": "",
       "firstSeen": "supabase/migrations/066_push_and_carryover_hardening.sql",
@@ -2633,11 +2667,11 @@
       "signature": "public.trg_campaigns_guard_financial_snapshots()",
       "identityArguments": "",
       "firstSeen": "supabase/migrations/084_campaign_posting_business_policies.sql",
-      "lastDefinitionChange": "supabase/migrations/087_campaign_tester_bonus_rounds.sql",
+      "lastDefinitionChange": "supabase/migrations/102_play_production_detection.sql",
       "lineHints": [
-        249
+        70
       ],
-      "definitionSha256": "1219b73e0f6ee4154f1c570dd0e1a2a3a562c1328d1c9383edb6f6dc90690e4e"
+      "definitionSha256": "b4f982b3263e1ef771318513191d413ef42d8699e6fdc11d60c6fd37b8567024"
     },
     {
       "signature": "public.trg_campaigns_guard_mission_escrow_before_delete()",

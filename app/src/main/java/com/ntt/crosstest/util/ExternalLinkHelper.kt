@@ -9,7 +9,7 @@ import com.ntt.crosstest.R
 /** Các liên kết nhóm cộng đồng dùng chung giữa Trang chủ và Hồ sơ. */
 object CommunityLinks {
     const val ZALO_GROUP_URL = "https://zalo.me/g/cc0vbi7igt77w10yikch"
-    const val TELEGRAM_GROUP_URL = "https://t.me/+KcJBT02zr1ZiOGNl"
+    const val TELEGRAM_GROUP_URL = "https://t.me/Crosstesters"
     const val WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/DaEC045t8t38A7iBUX5tOZ?s=sh&p=a&mlu=4&ilr=4"
 }
 

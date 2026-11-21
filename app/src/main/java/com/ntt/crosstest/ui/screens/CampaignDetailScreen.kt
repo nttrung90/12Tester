@@ -82,6 +82,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import com.ntt.crosstest.ui.components.AppIcon
@@ -549,12 +550,17 @@ fun CampaignDetailScreen(
                                         .padding(10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
+                                    val showNextPlayProdBadge = nextCamp.isOpen && nextCamp.isPlayProductionDetected
                                     AppIcon(
                                         iconUrl = nextCamp.safeIconUrl,
                                         packageName = nextCamp.packageName,
                                         appName = nextCamp.appName,
                                         size = 46.dp,
                                         shapeRadius = 10.dp,
+                                        showProductionBadge = showNextPlayProdBadge,
+                                        productionBadgeContentDescription = if (showNextPlayProdBadge) {
+                                            stringResource(R.string.play_production_badge_cd)
+                                        } else null,
                                     )
                                     Spacer(Modifier.width(10.dp))
                                     Column(modifier = Modifier.weight(1f)) {
@@ -1610,6 +1616,7 @@ fun CampaignDetailScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     // Header row: Icon + Name + Owner
+                    val showPlayProdBadge = campaign.isOpen && campaign.isPlayProductionDetected
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppIcon(
                             iconUrl = campaign.safeIconUrl,
@@ -1617,6 +1624,10 @@ fun CampaignDetailScreen(
                             appName = campaign.appName,
                             size = 58.dp,
                             shapeRadius = 14.dp,
+                            showProductionBadge = showPlayProdBadge,
+                            productionBadgeContentDescription = if (showPlayProdBadge) {
+                                stringResource(R.string.play_production_badge_cd)
+                            } else null,
                         )
 
                         Spacer(Modifier.width(14.dp))
@@ -1677,6 +1688,41 @@ fun CampaignDetailScreen(
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
+                                )
+                            }
+                        }
+                    }
+
+                    if (showPlayProdBadge) {
+                        Spacer(Modifier.height(10.dp))
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.statusColors.successContainer.copy(alpha = 0.7f),
+                            border = BorderStroke(0.5.dp, MaterialTheme.statusColors.success.copy(alpha = 0.35f)),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.statusColors.success,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                                Text(
+                                    text = if (!campaign.playReleasedDate.isNullOrBlank()) {
+                                        stringResource(
+                                            R.string.campaign_play_production_detected_with_date,
+                                            campaign.playReleasedDate,
+                                        )
+                                    } else {
+                                        stringResource(R.string.campaign_play_production_detected_note)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.statusColors.onSuccessContainer,
                                 )
                             }
                         }
@@ -2330,6 +2376,10 @@ fun CampaignDetailScreen(
                         )
                     }
 
+                    val primaryActionColors = reportPrimaryActionButtonColors(
+                        isDark = isDarkSurface(MaterialTheme.colorScheme.surface)
+                    )
+
                     if (uiState.isOwner) {
                         Text(
                             text = stringResource(R.string.campaign_owner_self_test_note),
@@ -2342,7 +2392,10 @@ fun CampaignDetailScreen(
                                 onClick = { onOwnerManageClick(campaign.id.orEmpty()) },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73)),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = primaryActionColors.containerColor,
+                                    contentColor = primaryActionColors.contentColor,
+                                ),
                             ) {
                                 Icon(Icons.Filled.Apps, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
@@ -2547,7 +2600,8 @@ fun CampaignDetailScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRejectedToday) MaterialTheme.colorScheme.error else Color(0xFF2C4A73)
+                                containerColor = if (isRejectedToday) MaterialTheme.colorScheme.error else primaryActionColors.containerColor,
+                                contentColor = if (isRejectedToday) MaterialTheme.colorScheme.onError else primaryActionColors.contentColor,
                             ),
                         ) {
                             Icon(actionIcon, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -3493,6 +3547,9 @@ private fun SubmitReportBottomSheet(
                 }
             }
 
+            val submitActionColors = reportPrimaryActionButtonColors(
+                isDark = isDarkSurface(MaterialTheme.colorScheme.surface)
+            )
             Button(
                 onClick = onSubmit,
                 enabled = canSubmit,
@@ -3500,13 +3557,16 @@ private fun SubmitReportBottomSheet(
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C4A73))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = submitActionColors.containerColor,
+                    contentColor = submitActionColors.contentColor,
+                )
             ) {
                 if (uiState.isActionLoading || isSending) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
-                        color = Color.White
+                        color = LocalContentColor.current
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.campaign_submitting), fontSize = 15.sp)
@@ -3645,3 +3705,24 @@ private fun ComparisonPhotoCard(
         }
     }
 }
+
+internal data class ReportActionButtonColors(
+    val containerColor: Color,
+    val contentColor: Color,
+)
+
+internal fun isDarkSurface(surface: Color): Boolean =
+    (0.299f * surface.red + 0.587f * surface.green + 0.114f * surface.blue) < 0.5f
+
+internal fun reportPrimaryActionButtonColors(isDark: Boolean): ReportActionButtonColors =
+    if (isDark) {
+        ReportActionButtonColors(
+            containerColor = Color(0xFF9CC8F4),
+            contentColor = Color(0xFF0C2644),
+        )
+    } else {
+        ReportActionButtonColors(
+            containerColor = Color(0xFF2C4A73),
+            contentColor = Color.White,
+        )
+    }

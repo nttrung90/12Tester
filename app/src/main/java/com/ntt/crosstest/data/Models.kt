@@ -105,11 +105,17 @@ data class Campaign(
     @SerialName("tester_bonus_remaining_slots") val testerBonusRemainingSlots: Int? = null,
     @SerialName("tester_bonus_paid_count") val testerBonusPaidCount: Int? = null,
     @SerialName("tester_bonus_status") val testerBonusStatus: String? = null,
+    @SerialName("play_store_state") val playStoreState: String = "unknown",
+    @SerialName("play_production_detected") val playProductionDetected: Boolean = false,
+    @SerialName("play_released_date") val playReleasedDate: String? = null,
+    @SerialName("play_checked_at") val playCheckedAt: String? = null,
+    @SerialName("play_classification_locked") val playClassificationLocked: Boolean = false,
 ) {
     val isOpen: Boolean get() = status == "open"
     val isPaused: Boolean get() = status == "paused"
     val isProduction: Boolean get() = status == "production"
     val isCompleted: Boolean get() = status == "completed"
+    val isPlayProductionDetected: Boolean get() = playProductionDetected
 
     val hasActiveTesterBonus: Boolean
         get() = isOpen && testerBonusStatus == "active" && (testerBonusCredits ?: 0) > 0 && (testerBonusRemainingSlots ?: 0) > 0

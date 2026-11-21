@@ -340,6 +340,27 @@ data class AdminCampaignItem(
     @SerialName("paused_reason") val pausedReason: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("pending_reports_count") val pendingReportsCount: Int = 0,
+    @SerialName("play_store_state") val playStoreState: String = "unknown",
+    @SerialName("play_production_detected") val playProductionDetected: Boolean = false,
+    @SerialName("play_released_date") val playReleasedDate: String? = null,
+    @SerialName("play_classification_locked") val playClassificationLocked: Boolean = false,
+)
+
+@Serializable
+data class AdminOverrideCampaignPlayProductionParams(
+    @SerialName("p_campaign_id") val campaignId: String,
+    @SerialName("p_is_production") val isProduction: Boolean,
+    @SerialName("p_lock") val lock: Boolean = true,
+    @SerialName("p_note") val note: String? = null,
+)
+
+@Serializable
+data class AdminOverrideCampaignPlayProductionResult(
+    @SerialName("success") val success: Boolean = false,
+    @SerialName("campaign_id") val campaignId: String = "",
+    @SerialName("play_production_detected") val playProductionDetected: Boolean = false,
+    @SerialName("play_store_state") val playStoreState: String = "unknown",
+    @SerialName("play_classification_locked") val playClassificationLocked: Boolean = false,
 )
 
 @Serializable

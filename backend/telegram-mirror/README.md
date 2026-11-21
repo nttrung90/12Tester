@@ -10,7 +10,7 @@ Cầu nối đồng bộ tin nhắn nhóm cộng đồng Telegram vào Supabase 
 2. **Tắt Group Privacy Mode** (bắt buộc để Bot đọc được tin nhắn thường trong nhóm):
    - Trong `@BotFather`, gõ `/setprivacy`.
    - Chọn bot vừa tạo → chọn **`Disable`**.
-3. Thêm bot vào nhóm cộng đồng (`https://t.me/+KcJBT02zr1ZiOGNl`).
+3. Thêm bot vào nhóm cộng đồng (`https://t.me/Crosstesters`).
    - Để lấy `TELEGRAM_ALLOWED_CHAT_ID`: gửi 1 tin nhắn trong nhóm, gọi `https://api.telegram.org/bot<TOKEN>/getUpdates` và lấy `message.chat.id` (dạng số âm `-100xxxxxxxxxx`).
    - Khuyến nghị: không cần cấp quyền gửi tin cho bot nếu chỉ mirror; bot chỉ đọc tin nhắn và kiểm tra quyền Admin qua `getChatMember` khi có lệnh `/hide_preview`.
 
