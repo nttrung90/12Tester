@@ -12,5 +12,6 @@ jobs:
         run: |
           curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/play-production-detector" \
             -H "Content-Type: application/json" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "X-Cron-Secret: ${{ secrets.PLAY_DETECTOR_CRON_SECRET }}" \
             -d '{"limit": 25}'
